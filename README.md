@@ -581,7 +581,7 @@ LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.Binary=${BINARY}"
 $ go build ${LDFLAGS} -o ${BINARY}
 ```
 
-**TODO**: Update the `Makefile` to add a `release` target that conditionally pulls these env. variable values and only uses the hardcoded values as defaults when not found in the runtime environment.
+**TODO**: Update the `Makefile's` `release` target to conditionally pulls the release version from environment variable values and only uses the hardcoded values as defaults when not found in the runtime build environment.
 
 ### Running from source
 
@@ -678,7 +678,7 @@ last := strings.LastIndex(wd, "/")
 os.Chdir(wd[:last])
 ```
 
-The "cmd" package already has a ready-made method named `initTestInfra()` in the `test.go` module that can be called during test module initialize to assure the proper working directory is setup to read any path-relative input files used by `go test` methods:
+The "cmd" package already has a ready-made method named `initTestInfrastructure()` in the `test.go` module that can be called during test module initialize to assure the proper working directory is setup to read any path-relative input files used by `go test` methods:
 
 ```go
 func init() {
@@ -763,5 +763,5 @@ $ go test github.com/scs/sbom-utility/cmd -v --args --quiet
 
 ### Software-Bill-of-Materials (SBOM)
 
-- [Software Bill Of Materials: Formats, Use Cases, and Tools](https://fossa.com/blog/software-bill-of-materials-formats-use-cases-tools/)
+- [FOSSA - Software Bill Of Materials: Formats, Use Cases, and Tools](https://fossa.com/blog/software-bill-of-materials-formats-use-cases-tools/)
 - [NTIA - SBOM Minimum Requirements](https://www.ntia.doc.gov/blog/2021/ntia-releases-minimum-elements-software-bill-materials)
