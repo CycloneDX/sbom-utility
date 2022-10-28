@@ -581,7 +581,7 @@ LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.Binary=${BINARY}"
 $ go build ${LDFLAGS} -o ${BINARY}
 ```
 
-**TODO**: Update the `Makefile's` `release` target to conditionally pulls the release version from environment variable values and only uses the hardcoded values as defaults when not found in the runtime build environment.
+**TODO**: Update the `Makefile's` `release` target to conditionally pull the release version from environment variable values and only uses the hardcoded values as defaults when not found in the runtime build environment.
 
 ### Running from source
 
