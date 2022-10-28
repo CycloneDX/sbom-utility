@@ -588,7 +588,7 @@ $ go build ${LDFLAGS} -o ${BINARY}
 Developers can run using the current source code in their local branch using `go run main.go`. For example:
 
 ```bash
-$ go run main.go validate -i examples/cyclonedx/package/npm/async/nst-sbom.json
+$ go run main.go validate -i test/cyclonedx/cdx-1-4-mature-example-1.json
 ```
 
 ### Supporting new SBOM formats and schema versions
