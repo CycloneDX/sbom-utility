@@ -353,7 +353,7 @@ needs-review,name,AGPL,Library J,pkg:lib/libraryJ@1.0.0,components
 
 #### `policy` subcommand
 
-To view a report listing the contents of the current policy file (i.e., `license.json`) which contains en encoding of known software and data licenses by SPDX ID and license family along with a configurable usage policy (i.e., "allow", "deny" or "needs-review") use:
+To view a report listing the contents of the current policy file (i.e., `license.json`) which contains an encoding of known software and data licenses by SPDX ID and license family along with a configurable usage policy (i.e., "allow", "deny" or "needs-review") use:
 
 ```bash
 $ ./sbom-utility license policy
