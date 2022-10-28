@@ -1,0 +1,43 @@
+{
+      "validation": {
+            "metadata": {
+                  "_selector": "metadata.properties",
+                  "properties": [
+                        {
+                              "name":  "urn:ibm:names:identifier:deliverable:",
+                              "value": ".*\\S.*",
+                              "_validate_description": "non-empty, no whitespace"
+                        },
+                        {
+                              "name":  "urn:ibm:names:identifier:product:",
+                              "value": ".*\\S.*",
+                              "_validate_description": "non-empty, no whitespace"
+                        },
+                        {
+                              "name":  "urn:ibm:legal:disclaimer",
+                              "value": "^(This SBOM is IBM Confidential Information.)",
+                              "_validate_description": "startswith(<string>)"
+                        },
+                        {
+                              "name":  "urn:ibm:legal:coverage",
+                              "value": "^(This SBOM is current as of the date it was generated and is subject to change.)",
+                              "_validate_description": "startswith(<string>)"
+                        }
+                  ],
+                  "tools": [
+                        {
+                              "name": "IBM Cloud Continuous Delivery - Code Risk Analyzer",
+                              "vendor": "IBM",
+                              "version": "0.1.17",
+                              "_validate_regex": "name"
+                        },
+                        {
+                              "name": "IBM PTC Scanning Tool",
+                              "vendor": "IBM",
+                              "version": "1.4.9",
+                              "_validate_regex": "version"
+                        }
+                  ]
+            }
+      }
+}

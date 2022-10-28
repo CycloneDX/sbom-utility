@@ -1,0 +1,106 @@
+SPDXVersion: SPDX-2.2
+DataLicense: CC0-1.0
+SPDXID: SPDXRef-DOCUMENT
+DocumentName: hello-go-bin
+DocumentNamespace: https://swinslow.net/spdx-examples/example6/hello-go-bin-v2
+ExternalDocumentRef:DocumentRef-hello-go-src https://swinslow.net/spdx-examples/example6/hello-go-src-v2 SHA1: b3018ddb18802a56b60ad839c98d279687b60bd6
+ExternalDocumentRef:DocumentRef-go-lib https://swinslow.net/spdx-examples/example6/go-lib-v2 SHA1: 58e4a6d5745f032b9788142e49edee1b508c7ac5
+Creator: Person: Steve Winslow (steve@swinslow.net)
+Creator: Tool: github.com/spdx/tools-golang/builder
+Creator: Tool: github.com/spdx/tools-golang/idsearcher
+Created: 2021-08-26T01:56:00Z
+
+##### Package: hello-go-bin
+
+PackageName: hello-go-bin
+SPDXID: SPDXRef-Package-hello-go-bin
+PackageDownloadLocation: git+https://github.com/swinslow/spdx-examples.git#example6/content/build
+FilesAnalyzed: true
+PackageVerificationCode: 41acac4b846ee388cb6c1234f04489ccd5daa5a5
+PackageLicenseConcluded: GPL-3.0-or-later AND LicenseRef-Golang-BSD-plus-Patents
+PackageLicenseInfoFromFiles: NOASSERTION
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-Package-hello-go-bin
+
+FileName: /hello
+SPDXID: SPDXRef-hello-go-binary
+FileChecksum: SHA1: 78ed46e8e6f86f19d3a6782979029be5f918235f
+FileChecksum: SHA256: 3d51cb6c9a38d437e8ee20a1902a15875ea1d3771a215622e14739532be14949
+FileChecksum: MD5: 9ec63d68bdceb2922548e3faa377e7d0
+LicenseConcluded: GPL-3.0-or-later AND LicenseRef-Golang-BSD-plus-Patents
+LicenseInfoInFile: NOASSERTION
+FileCopyrightText: NOASSERTION
+
+##### Relationships
+
+Relationship: SPDXRef-hello-go-binary GENERATED_FROM DocumentRef-hello-go-src:SPDXRef-hello-go-src
+Relationship: SPDXRef-hello-go-binary GENERATED_FROM DocumentRef-hello-go-src:SPDXRef-Makefile
+
+Relationship: DocumentRef-go-lib:SPDXRef-Package-go-compiler BUILD_TOOL_OF SPDXRef-Package-hello-go-bin
+
+Relationship: DocumentRef-go-lib:SPDXRef-Package-go.fmt RUNTIME_DEPENDENCY_OF SPDXRef-Package-hello-go-bin
+Relationship: DocumentRef-go-lib:SPDXRef-Package-go.fmt STATIC_LINK SPDXRef-Package-hello-go-bin
+
+Relationship: DocumentRef-go-lib:SPDXRef-Package-go.reflect STATIC_LINK SPDXRef-Package-hello-go-bin
+Relationship: DocumentRef-go-lib:SPDXRef-Package-go.strconv STATIC_LINK SPDXRef-Package-hello-go-bin
+
+##### Non-standard license
+
+LicenseID: LicenseRef-Golang-BSD-plus-Patents
+ExtractedText: <text>
+Copyright (c) 2009 The Go Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Additional IP Rights Grant (Patents)
+
+"This implementation" means the copyrightable works distributed by
+Google as part of the Go project.
+
+Google hereby grants to You a perpetual, worldwide, non-exclusive,
+no-charge, royalty-free, irrevocable (except as stated in this section)
+patent license to make, have made, use, offer to sell, sell, import,
+transfer and otherwise run, modify and propagate the contents of this
+implementation of Go, where such license applies only to those patent
+claims, both currently owned or controlled by Google and acquired in
+the future, licensable by Google that are necessarily infringed by this
+implementation of Go.  This grant does not include claims that would be
+infringed only as a consequence of further modification of this
+implementation.  If you or your agent or exclusive licensee institute or
+order or agree to the institution of patent litigation against any
+entity (including a cross-claim or counterclaim in a lawsuit) alleging
+that this implementation of Go or any code incorporated within this
+implementation of Go constitutes direct or contributory patent
+infringement, or inducement of patent infringement, then any patent
+rights granted to you under this License for this implementation of Go
+shall terminate as of the date such litigation is filed.</text>
+LicenseName: Golang BSD-plus-PATENTS
+LicenseCrossReference: https://github.com/golang/go/blob/master/LICENSE
+LicenseCrossReference: https://github.com/golang/go/blob/master/PATENTS
+LicenseComment: The Golang license text is split across two files, with the BSD-3-Clause content in LICENSE and the Additional IP Rights Grant in PATENTS.

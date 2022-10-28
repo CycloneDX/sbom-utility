@@ -1,0 +1,35 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "serialNumber": "urn:uuid:93816a88-307e-495f-8a65-f3422590523b",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2022-07-07T21:29:32Z",
+    "tools": [
+      {
+        "vendor": "IBM",
+        "name": "IBM Cloud Continuous Delivery - Code Risk Analyzer",
+        "version": "0.1.21"
+      }
+    ],
+    "component": {
+      "type": "application",
+      "name": ""
+    }
+  },
+  "components": [
+    {
+      "bom-ref": "file:package-lock.json",
+      "type": "file",
+      "name": "package-lock.json",
+      "version": "185e280a6a913a082ce8f448433d59527c77caf3149873fc8775851a1685a691",
+      "purl": "package-lock.json",
+      "properties": [
+        {
+          "name": "ecosystem",
+          "value": "npm"
+        }
+      ]
+    }
+  ]
+}

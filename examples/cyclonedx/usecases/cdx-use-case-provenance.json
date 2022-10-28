@@ -1,0 +1,45 @@
+{
+    "bomFormat":"CycloneDX",
+    "specVersion":"1.4",
+    "serialNumber":"urn:uuid:3e671687-395b-41f5-a30f-a58921a69b79",
+    "version":1,
+    "components":[
+        {
+            "type":"library",
+            "supplier":{
+                "name":"Example, Inc.",
+                "url":[
+                    "https://example.com",
+                    "https://example.net"
+                ],
+                "contact":[
+                    {
+                        "name":"Example Support AMER Distribution",
+                        "email":"support@example.com",
+                        "phone":"800-555-1212"
+                    },
+                    {
+                        "name":"Example Support APAC",
+                        "email":"support@apac.example.com"
+                    }
+                ]
+            },
+            "author":"Example Development Labs - Alpha Team",
+            "publisher":"Example Development Labs",
+            "group":"com.example",
+            "name":"crypto-library",
+            "version":"3.0.0",
+            "swid":{
+                "tagId":"swidgen-5dcb79af-a1d2-61b3-34fd-536c53b08810_3.0.0",
+                "name":"Crypto Library",
+                "version":"3.0.0",
+                "text":{
+                    "contentType":"text/xml",
+                    "encoding":"base64",
+                    "content":"PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiID8+CjxTb2Z0d2FyZUlkZW50aXR5IHhtbDpsYW5nPSJFTiIgbmFtZT0iQ3J5cHRvIExpYnJhcnkiIHZlcnNpb249IjMuMC4wIiAKIHZlcnNpb25TY2hlbWU9Im11bHRpcGFydG51bWVyaWMiIAogdGFnSWQ9InN3aWRnZW4tNWRjYjc5YWYtYTFkMi02MWIzLTM0ZmQtNTM2YzUzYjA4ODEwXzMuMC4wIiAKIHhtbG5zPSJodHRwOi8vc3RhbmRhcmRzLmlzby5vcmcvaXNvLzE5NzcwLy0yLzIwMTUvc2NoZW1hLnhzZCI+IAogeG1sbnM6eHNpPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxL1hNTFNjaGVtYS1pbnN0YW5jZSIgCiB4c2k6c2NoZW1hTG9jYXRpb249Imh0dHA6Ly9zdGFuZGFyZHMuaXNvLm9yZy9pc28vMTk3NzAvLTIvMjAxNS1jdXJyZW50L3NjaGVtYS54c2Qgc2NoZW1hLnhzZCIgPgogIDxNZXRhIGdlbmVyYXRvcj0iU1dJRCBUYWcgT25saW5lIEdlbmVyYXRvciB2MC4xIiAvPiAKICA8RW50aXR5IG5hbWU9IkV4YW1wbGUsIEluYy4iIHJlZ2lkPSJleGFtcGxlLmNvbSIgcm9sZT0idGFnQ3JlYXRvciIgLz4gCjwvU29mdHdhcmVJZGVudGl0eT4="
+                }
+            },
+            "purl":"pkg:maven/com.example/crypto-library@3.0.0?repository_url=repo.example.com"
+        }
+    ]
+}

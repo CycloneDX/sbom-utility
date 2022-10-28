@@ -1,0 +1,7 @@
+{
+	"SPDXID" : "SPDXRef-DOCUMENT",
+	"name" : "spdx-min-required-missing-creationinfo",
+	"spdxVersion" : "SPDX-2.2",
+	"dataLicense" : "CC0-1.0",
+	"documentNamespace" : "https://sbom-utility.org/test/spdx/"
+}

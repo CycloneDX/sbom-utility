@@ -1,0 +1,1505 @@
+{
+      "policies": [
+            {
+                  "id": "0BSD",
+                  "name": "BSD Zero Clause License",
+                  "family": "0BSD",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/0BSD"]
+            },
+            {
+                  "id": "",
+                  "name": "Access Grid Toolkit Public License",
+                  "family": "Access-Grid-Toolkit-Public-License",
+                  "annotationRefs": ["APPROVED", "NO-SPDX"],
+                  "usagePolicy": "allow",
+                  "notes": [""],
+                  "urls": ["https://www.mcs.anl.gov/research/projects/accessgrid/about/license.html"]
+            },
+            {
+                  "id": "Adobe-2006",
+                  "name": "Adobe Systems Incorporated Source Code License Agreement",
+                  "family": "Adobe",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/Adobe-2006.html"]
+            },
+            {
+                  "id": "AFL-1.1",
+                  "name": "Academic Free License v1.1",
+                  "family": "AFL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "AFL-1.2",
+                  "name": "Academic Free License v1.2",
+                  "family": "AFL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "AFL-2.0",
+                  "name": "Academic Free License v2.0",
+                  "family": "AFL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "AFL-2.1",
+                  "name": "Academic Free License v2.1",
+                  "family": "AFL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "AFL-3.0",
+                  "name": "Academic Free License v3.0",
+                  "family": "AFL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "AGPL-1.0",
+                  "name": "Affero General Public License v1.0",
+                  "family": "AGPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "AGPL-WARNING", "DEPRECATED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/AGPL-1.0.html"]
+            },
+            {
+                  "id": "AGPL-1.0-only",
+                  "name": "Affero General Public License v1.0 only",
+                  "family": "AGPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "AGPL-WARNING"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/AGPL-1.0-only.html"]
+            },
+            {
+                  "id": "AGPL-1.0-or-later",
+                  "name": "Affero General Public License v1.0 or later",
+                  "family": "AGPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "AGPL-WARNING"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/AGPL-1.0-or-later.html"]
+            },
+            {
+                  "id": "AGPL-3.0",
+                  "name": "GNU Affero General Public License v3.0",
+                  "family": "AGPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "AGPL-WARNING", "DEPRECATED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/AGPL-3.0.html"]
+            },
+            {
+                  "id": "AGPL-3.0-only",
+                  "name": "GNU Affero General Public License v3.0 only",
+                  "family": "AGPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "AGPL-WARNING"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/AGPL-3.0-only.html"]
+            },
+            {
+                  "id": "AGPL-3.0-or-later",
+                  "name": "Affero General Public License v3.0 or later",
+                  "family": "AGPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "AGPL-WARNING"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/AGPL-3.0-or-later.html"]
+            },
+            {
+                  "id": "Apache-1.0",
+                  "name": "Apache v1.0",
+                  "family": "Apache",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "Apache-1.1",
+                  "name": "Apache v1.1",
+                  "family": "Apache",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": ["This license has been superseded by Apache License 2.0"],
+                  "urls": ["https://spdx.org/licenses/Apache-1.1"]
+            },
+            {
+                  "id": "Apache-2.0",
+                  "name": "Apache License 2.0",
+                  "family": "Apache",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/Apache-2.0"]
+            },
+            {
+                  "id": "",
+                  "name": "Apple Public Source License",
+                  "family": "APSL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL"],
+                  "notes": [""],
+                  "children": [
+                        "APSL-1.0",
+                        "APSL-1.1",
+                        "APSL-1.2",
+                        "APSL-2.0"
+                  ],
+                  "urls": [
+                        "https://spdx.org/licenses/APSL-1.0.html",
+                        "https://spdx.org/licenses/APSL-1.1.html",
+                        "https://spdx.org/licenses/APSL-1.2.html",
+                        "https://spdx.org/licenses/APSL-2.0.html"
+                  ]
+            },
+            {
+                  "id": "",
+                  "name": "Aptogo",
+                  "family": "Aptogo",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED", "NO-SPDX"],
+                  "notes": ["For Open Source Computer Vision Library"],
+                  "urls": ["https://github.com/aptogo/FaceTracker/blob/master/OpenCV.framework/Headers/opencv/cv.hpp"]
+            },
+            {
+                  "id": "Artistic-1.0",
+                  "name": "Artistic License 1.0",
+                  "family": "Artistic",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "Artistic-1.0-cl8",
+                  "family": "Artistic",
+                  "name": "Artistic License 1.0 w/clause 8",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "Artistic-1.0-Perl",
+                  "name": "Artistic License 1.0 (Perl)",
+                  "family": "Artistic",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "Artistic-2.0",
+                  "name": "Artistic License 2.0",
+                  "family": "Artistic",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "Beerware",
+                  "name": "Beerware License",
+                  "family": "Beerware",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "BSD-1-Clause",
+                  "name": "BSD 1-Clause License",
+                  "family": "BSD",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "BSD-2-Clause",
+                  "name": "BSD 2-Clause \"Simplified\" License",
+                  "family": "BSD",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "BSD-2-Clause-FreeBSD",
+                  "name": "BSD 2-Clause FreeBSD License",
+                  "family": "BSD",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED", "DEPRECATED"],
+                  "notes": [""],
+                  "urls":["https://spdx.org/licenses/BSD-2-Clause-FreeBSD.html"]
+            },
+            {
+                  "id": "BSD-2-Clause-NetBSD",
+                  "name": "BSD 2-Clause NetBSD License",
+                  "family": "BSD",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED", "DEPRECATED"],
+                  "notes": [""],
+                  "urls":["https://spdx.org/licenses/BSD-2-Clause-NetBSD.html"]
+            },
+            {
+                  "id": "BSD-2-Clause-Patent",
+                  "name": "BSD-2-Clause Plus Patent License",
+                  "family": "BSD-2-Clause-Plus-Patent-License",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["NEEDS-APPROVAL", "NEEDS-IP-LEGAL-REVIEW"],
+                  "notes": [""]
+            },
+            {
+                  "id": "BSD-2-Clause-Views",
+                  "name": "BSD 2-Clause with views sentence",
+                  "family": "BSD-2-Clause-with-views-sentence",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "NEEDS-IP-LEGAL-REVIEW"],
+                  "notes": [""]
+            },
+            {
+                  "id": "BSD-3-Clause",
+                  "name": "BSD 3-Clause \"New\" or \"Revised\" License",
+                  "family": "BSD",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "BSD-3-Clause-Attribution",
+                  "name": "BSD with attribution",
+                  "family": "BSD",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "BSD-3-Clause-Clear",
+                  "name": "BSD 3-Clause Clear License",
+                  "family": "BSD",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "BSD-3-Clause-No-Military-License",
+                  "name": "BSD 3-Clause No Military License",
+                  "family": "BSD-3-Clause-No-Military-License",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "NEEDS-IP-LEGAL-REVIEW"],
+                  "notes": [""]
+            },
+            {
+                  "id": "BSD-3-Clause-No-Nuclear-License",
+                  "name": "BSD 3-Clause No Nuclear",
+                  "family": "BSD-3-Clause-No-Nuclear",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL"],
+                  "notes": [""]
+            },
+            {
+                  "id": "BSD-3-Clause-No-Nuclear-License-2014",
+                  "name": "BSD 3-Clause No Nuclear License 2014",
+                  "family": "BSD-3-Clause-No-Nuclear",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL"],
+                  "notes": [""]
+            },
+            {
+                  "id": "BSD-3-Clause-No-Nuclear-Warranty",
+                  "name": "BSD 3-Clause No Nuclear Warranty",
+                  "family": "BSD-3-Clause-No-Nuclear",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL"],
+                  "notes": [""]
+            },
+            {
+                  "id": "BSD-3-Clause-Open-MPI",
+                  "name": "BSD 3-Clause Open MPI variant",
+                  "family": "BSD-3-Clause-Open-MPI-variant",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "NEEDS-IP-LEGAL-REVIEW"],
+                  "notes": [""]
+            },
+            {
+                  "id": "BSD-4-Clause",
+                  "name": "BSD 4-Clause \"Original\" or \"Old\" License",
+                  "family": "BSD",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "BSD-4-Clause-Shortened",
+                  "name": "BSD 4 Clause Shortened",
+                  "family": "BSD-4-Clause-Shortened",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "NEEDS-IP-LEGAL-REVIEW"],
+                  "notes": [""]
+            },
+            {
+                  "id": "BSD-4-Clause-UC",
+                  "name": "BSD-4-Clause (University of California-Specific)",
+                  "family": "BSD-4-Clause-University-of-California-Specific",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "NEEDS-IP-LEGAL-REVIEW"],
+                  "notes": [""]
+            },
+            {
+                  "id": "BSD-Protection",
+                  "name": "BSD Protection License",
+                  "family": "BSD",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "BSD-Source-Code",
+                  "name": "BSD Source Code Attribution",
+                  "family": "BSD",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "",
+                  "name": "BSD-equivalent",
+                  "family": "BSD-equivalent",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED", "NO-SPDX"],
+                  "notes": [
+                        "No SPDX IDs for 18 \"BSD-equivalent\" variants listed here:",
+                        "BSD Facebook",
+                        "BSD Google Patents File",
+                        "BSD Antlr",
+                        "BSD Bootstrap",
+                        "BSD Bzip2",
+                        "BSD DOM4J",
+                        "BSD Eclipse Distribution License (EDL)",
+                        "BSD HSQLDB",
+                        "BSD Infozip",
+                        "BSD Jaxen",
+                        "BSD JSch",
+                        "BSD NetSNMP",
+                        "BSD OpenLayers",
+                        "BSD Openssl",
+                        "BSD Rene Nyffenegger license",
+                        "BSD Sqlite3-ruby",
+                        "BSD XStream",
+                        "BSD YUI"
+                  ]
+            },
+            {
+                  "id": "BSL-1.0",
+                  "family": "BSL",
+                  "name": "Boost Software License 1.0",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": ["boost C++ libraries"],
+                  "urls": [
+                        "https://spdx.org/licenses/BSL-1.0.html",
+                        "https://www.boost.org/users/license.html"
+                  ]
+            },
+            {
+                  "id": "bzip2-1.0.6",
+                  "name": "bzip2 and libbzip2 License v1.0.6",
+                  "family": "bzip2",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/bzip2-1.0.6.html"]
+            },
+            {
+                  "id": "CC0-1.0",
+                  "name": "Creative Commons Zero v1.0 Universal",
+                  "family": "CC0",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "",
+                  "name": "Creative Commons Attribution",
+                  "family": "CC-BY",
+                  "usagePolicy": "allow",
+                  "annotationRefs": [ "APPROVED", "CC-BY-SAAS", "CC-BY-ON-PREM"],
+                  "notes": [""],
+                  "children": [
+                        "CC-BY-1.0",
+                        "CC-BY-2.0",
+                        "CC-BY-2.5",
+                        "CC-BY-2.5-AU",
+                        "CC-BY-3.0",
+                        "CC-BY-3.0-AT",
+                        "CC-BY-3.0-DE",
+                        "CC-BY-3.0-NL",
+                        "CC-BY-3.0-US",
+                        "CC-BY-4.0"
+                  ]
+            },
+            {
+                  "id": "",
+                  "name": "Creative Commons Attribution Non Commercial",
+                  "family": "CC-BY-NC",
+                  "usagePolicy": "deny",
+                  "annotationRefs": ["PROHIBITED"],
+                  "notes": ["Needs IP legal determination for language-specific variants"],
+                  "children": [
+                        "CC-BY-NC-1.0",
+                        "CC-BY-NC-2.0",
+                        "CC-BY-NC-2.5",
+                        "CC-BY-NC-3.0",
+                        "CC-BY-NC-3.0-DE",
+                        "CC-BY-NC-4.0"
+                  ]
+            },
+            {
+                  "id": "",
+                  "name": "Creative Commons Attribution Non Commercial",
+                  "family": "CC-BY-NC-ND",
+                  "usagePolicy": "deny",
+                  "annotationRefs": ["PROHIBITED"],
+                  "notes": ["Needs IP legal determination for language-specific variants"],
+                  "children": [
+                        "CC-BY-NC-ND-1.0",
+                        "CC-BY-NC-ND-2.0",
+                        "CC-BY-NC-ND-2.5",
+                        "CC-BY-NC-ND-3.0",
+                        "CC-BY-NC-ND-3.0-DE",
+                        "CC-BY-NC-ND-3.0-IGO",
+                        "CC-BY-NC-ND-4.0"
+                  ]
+            },
+            {
+                  "id": "",
+                  "name": "Creative Commons Attribution Non Commercial",
+                  "family": "CC-BY-NC-SA",
+                  "usagePolicy": "deny",
+                  "annotationRefs": ["PROHIBITED"],
+                  "notes": ["Needs IP legal determination for language-specific variants"],
+                  "children": [
+                        "CC-BY-NC-SA-1.0",
+                        "CC-BY-NC-SA-2.0",
+                        "CC-BY-NC-SA-2.0-FR",
+                        "CC-BY-NC-SA-2.0-UK",
+                        "CC-BY-NC-SA-2.5",
+                        "CC-BY-NC-SA-3.0",
+                        "CC-BY-NC-SA-3.0-DE",
+                        "CC-BY-NC-SA-3.0-IGO",
+                        "CC-BY-NC-SA-4.0"
+                  ]
+            },
+            {
+                  "id": "",
+                  "name": "Creative Commons Attribution No Derivatives",
+                  "family": "CC-BY-ND",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL"],
+                  "notes": ["Needs IP legal determination for language-specific variants"],
+                  "children": [
+                        "CC-BY-ND-1.0",
+                        "CC-BY-ND-2.0",
+                        "CC-BY-ND-2.5",
+                        "CC-BY-ND-3.0",
+                        "CC-BY-ND-3.0-DE",
+                        "CC-BY-ND-4.0"
+                  ]
+            },
+            {
+                  "id": "",
+                  "name": "Creative Commons Attribution Share Alike",
+                  "family": "CC-BY-SA",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL"],
+                  "notes": [
+                        "Needs IP legal determination for language-specific variants",
+                        "This license requires separately licensed code and also includes copyleft terms."
+                  ],
+                  "children": [
+                        "CC-BY-SA-1.0",
+                        "CC-BY-SA-2.0",
+                        "CC-BY-SA-2.0-UK",
+                        "CC-BY-SA-2.1-JP",
+                        "CC-BY-SA-2.5",
+                        "CC-BY-SA-3.0",
+                        "CC-BY-SA-3.0-AT",
+                        "CC-BY-SA-3.0-DE",
+                        "CC-BY-SA-4.0"
+                  ]
+            },
+            {
+                  "id": "CC-PDDC",
+                  "family": "CC-PDDC",
+                  "name": "Creative Commons Public Domain Dedication and Certification",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL"],
+                  "notes": ["The \"CC-PDDC\" family assures this license is not confused with other \"CC-\" licenses"]
+            },
+            {
+                  "id": "CDLA-Permissive-1.0",
+                  "name": "Community Data License Agreement Permissive 1.0",
+                  "family": "CDLA",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": [
+                        "NEEDS-APPROVAL",
+                        "CDLA-PERMISSIVE",
+                        "NEEDS-LEGAL-REVIEW-PII"
+                  ],
+                  "notes": [""]
+            },
+            {
+                  "id": "CDLA-Permissive-2.0",
+                  "name": "Community Data License Agreement Permissive 2.0",
+                  "family": "CDLA",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": [
+                        "NEEDS-APPROVAL",
+                        "CDLA-PERMISSIVE",
+                        "NEEDS-LEGAL-REVIEW-PII"
+                  ],
+                  "notes": [""]
+            },
+            {
+                  "id": "CDLA-Sharing-1.0",
+                  "name": "Community Data License Agreement Sharing 1.0",
+                  "family": "CDLA",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": [
+                        "NEEDS-APPROVAL",
+                        "CDLA-SHARING",
+                        "NEEDS-LEGAL-REVIEW-PII"
+                  ],
+                  "notes": [""]
+            },
+            {
+                  "id": "CDDL-1.0",
+                  "name": "Common Development and Distribution License 1.0",
+                  "family": "CDDL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "CDDL-1.1",
+                  "name": "Common Development and Distribution License 1.1",
+                  "family": "CDDL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "ClArtistic",
+                  "name": "Clarified Artistic License",
+                  "family": "ClArtistic",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "",
+                  "name": "Commons-Clause",
+                  "family": "Commons-Clause",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED", "NO-SPDX"],
+                  "notes": ["SPDX decided NOT to grant it a license ID"],
+                  "urls": ["https://github.com/spdx/license-list-XML/issues/902"]
+            },
+            {
+                  "id": "CPL-1.0",
+                  "name": "Common Public License 1.0",
+                  "family": "CPL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "CPOL-1.02",
+                  "name": "Code Project Open License 1.02",
+                  "family": "CPOL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/CPOL-1.02.html"]
+            },
+            {
+                  "id": "curl",
+                  "name": "curl License",
+                  "family": "curl",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "Python-2.0",
+                  "name": "Python License 2.0",
+                  "family": "Python-2.0",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [
+                        "Confirm this license that was approved by IP legal as linked"],
+                  "urls": ["https://spdx.org/licenses/Python-2.0.html"]
+            },
+            {
+                  "id": "",
+                  "name": "CWI license",
+                  "family": "CWI",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED", "NO-SPDX"],
+                  "notes": [
+                        "The CWI license is the license applied to early releases of Hack",
+                        "Confirm this license that was approved by IP legal as linked"],
+                  "urls": ["https://nethackwiki.com/wiki/CWI_license"]
+            },
+            {
+                  "id": "ECL-1.0",
+                  "name": "Educational Community License v1.0",
+                  "family": "ECL-1.0",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/ECL-1.0"]
+            },
+            {
+                  "id": "ECL-2.0",
+                  "name": "Educational Community License v2.0",
+                  "family": "ECL-2.0",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/ECL-2.0"]
+            },
+            {
+                  "id": "eGenix",
+                  "name": "eGenix.com Public License 1.1.0",
+                  "family": "eGenix",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "",
+                  "name": "Elastic License 2.0 (ELv2)",
+                  "family": "Elastic",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "NO-SPDX"],
+                  "urls": ["https://www.elastic.co/licensing/elastic-license"]
+            },
+            {
+                  "id": "EPL-1.0",
+                  "name": "Eclipse Public License 1.0",
+                  "family": "EPL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/EPL-1.0.html"]
+            },
+            {
+                  "id": "",
+                  "name": "Eclipse Public License 1.1",
+                  "family": "EPL-1.1",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED", "NO-SPDX"],
+                  "notes": ["An SPDX exists for EPL-1.0; however, custom scans identified a v1.1 variant not in SPDX"]
+            },
+            {
+                  "id": "EPL-2.0",
+                  "name": "Eclipse Public License 2.0",
+                  "family": "EPL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/EPL-2.0.html"]
+            },
+            {
+                  "id": "ErlPL-1.1",
+                  "name": "Erlang Public License v1.1",
+                  "family": "ErlPL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""],
+                  "urls":["https://spdx.org/licenses/ErlPL-1.1.html"]
+            },
+            {
+                  "id": "EUPL-1.0",
+                  "name": "European Union Public License 1.0",
+                  "family": "EUPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/EUPL-1.0"]
+            },
+            {
+                  "id": "EUPL-1.1",
+                  "name": "European Union Public License 1.1",
+                  "family": "EUPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/EUPL-1.1"]
+            },
+            {
+                  "id": "EUPL-1.2",
+                  "name": "European Union Public License 1.2",
+                  "family": "EUPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/EUPL-1.2"]
+            },
+            {
+                  "id": "FTL",
+                  "name": "Freetype Project License",
+                  "family": "FTL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/FTL"]
+            },
+            {
+                  "id": "FSFAP",
+                  "name": "FSF All Permissive License",
+                  "family": "FSFAP",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/FSFAP"]
+            },
+            {
+                  "id": "GFDL-1.1",
+                  "name": "GNU Free Documentation License v1.1",
+                  "family": "GFDL-1.1",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "DEPRECATED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/GFDL-1.1.html"],
+                  "children": [
+                        "GFDL-1.1-invariants-only",
+                        "GFDL-1.1-invariants-or-later",
+                        "GFDL-1.1-no-invariants-only",
+                        "GFDL-1.1-no-invariants-or-later",
+                        "GFDL-1.1-only",
+                        "GFDL-1.1-or-later"
+                  ]
+            },
+            {
+                  "id": "GFDL-1.2",
+                  "name": "GNU Free Documentation License v1.2",
+                  "family": "GFDL-1.2",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "DEPRECATED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/GFDL-1.2.html"],
+                  "children": [
+                        "GFDL-1.2-invariants-only",
+                        "GFDL-1.2-invariants-or-later",
+                        "GFDL-1.2-no-invariants-only",
+                        "GFDL-1.2-no-invariants-or-later",
+                        "GFDL-1.2-only",
+                        "GFDL-1.2-or-later"
+                  ]
+            },
+            {
+                  "id": "GFDL-1.3",
+                  "name": "GNU Free Documentation License v1.3",
+                  "family": "GFDL-1.3",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "DEPRECATED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/GFDL-1.3.html"],
+                  "children": [
+                        "GFDL-1.3-invariants-only",
+                        "GFDL-1.3-invariants-or-later",
+                        "GFDL-1.3-no-invariants-only",
+                        "GFDL-1.3-no-invariants-or-later",
+                        "GFDL-1.3-only",
+                        "GFDL-1.3-or-later"
+                  ]
+            },
+            {
+                  "id": "",
+                  "name": "Google Patents File",
+                  "family": "Google-Patents-File",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED", "NO-SPDX"],
+                  "notes": ["Recognizes additions to the Google BSD license"]
+            },
+            {
+                  "id": "GPL-1.0",
+                  "name": "GNU General Public License v1.0 only",
+                  "family": "GPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "GPL-LINK-WARNING", "NEEDS-GPL-LEGAL-REVIEW", "DEPRECATED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/GPL-1.0"]
+            },
+            {
+                  "id": "GPL-1.0-only",
+                  "name": "GNU General Public License v1.0 only",
+                  "family": "GPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "GPL-LINK-WARNING", "NEEDS-GPL-LEGAL-REVIEW"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/GPL-1.0-only.html"]
+            },
+            {
+                  "id": "GPL-1.0-or-later",
+                  "name": "GNU General Public License v1.0 or later",
+                  "family": "GPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "GPL-LINK-WARNING", "NEEDS-GPL-LEGAL-REVIEW"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/GPL-1.0-or-later.html"]
+            },
+            {
+                  "id": "GPL-2.0",
+                  "name": "GNU General Public License v2.0 only",
+                  "family": "GPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "GPL-LINK-WARNING", "NEEDS-GPL-LEGAL-REVIEW", "DEPRECATED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/GPL-2.0"]
+            },
+            {
+                  "id": "GPL-2.0-only",
+                  "name": "GNU General Public License v2.0 only",
+                  "family": "GPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "GPL-LINK-WARNING", "NEEDS-GPL-LEGAL-REVIEW"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/GPL-2.0-only.html"]
+            },
+            {
+                  "id": "GPL-2.0-or-later",
+                  "name": "GNU General Public License v2.0 or later",
+                  "family": "GPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "GPL-LINK-WARNING", "NEEDS-GPL-LEGAL-REVIEW"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/GPL-2.0-or-later.html"]
+            },
+            {
+                  "id": "GPL-3.0",
+                  "name": "GNU General Public License v3.0 only",
+                  "family": "GPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "GPL-LINK-WARNING", "NEEDS-GPL-LEGAL-REVIEW", "DEPRECATED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/GPL-3.0"]
+            },
+            {
+                  "id": "GPL-3.0-only",
+                  "name": "GNU General Public License v3.0 only",
+                  "family": "GPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "GPL-LINK-WARNING", "NEEDS-GPL-LEGAL-REVIEW"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/GPL-3.0-only.html"]
+            },
+            {
+                  "id": "GPL-3.0-or-later",
+                  "name": "GNU General Public License v3.0 or later",
+                  "family": "GPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "GPL-LINK-WARNING", "NEEDS-GPL-LEGAL-REVIEW"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/GPL-3.0-or-later.html"]
+            },
+            {
+                  "id": "GPL-3.0-with-GCC-exception",
+                  "family": "GPL",
+                  "name": "GNU General Public License (GPL) w/GCC Runtime Library exception",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "GPL-LINK-WARNING", "NEEDS-GPL-LEGAL-REVIEW", "DEPRECATED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/GPL-3.0-with-GCC-exception.html"]
+            },
+            {
+                  "id": "",
+                  "name": "GTPL (Globus Toolkit)",
+                  "family": "GTPL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED","NO-SPDX"],
+                  "notes": ["Claims to be equiv. to Apache-2.0 license"],
+                  "urls": ["https://www.globus.org/legal/toolkit-license"]
+            },
+            {
+                  "id": "",
+                  "name": "Spencer License",
+                  "family": "Spencer",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": ["Sometimes identified by the invalid SPDX ID \"Harry-Spencer\""],
+                  "children": [
+                        "Spencer-94",
+                        "Spencer-99"
+                  ],
+                  "urls": [
+                        "https://spdx.org/licenses/Spencer-94.html",
+                        "https://spdx.org/licenses/Spencer-99.html"
+                  ]
+            },
+            {
+                  "id": "Hippocratic-2.1",
+                  "name": "Hippocratic License 2.1",
+                  "family": "Hippocratic",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/Hippocratic-2.1.html"]
+            },
+            {
+                  "id": "",
+                  "name": "IBM/Sun OO Agreement",
+                  "family": "IBM-Sun-OO-Agreement",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED", "NO-SPDX"],
+                  "notes": ["IBM/Sun legal agreement text; not a public license"]
+            },
+            {
+                  "id": "IJG",
+                  "name": "Independent JPEG Group License",
+                  "family": "IJG",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/IJG.html"]
+            },
+            {
+                  "id": "ISC",
+                  "name": "ISC License",
+                  "family": "ISC",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/ISC.html"]
+            },
+            {
+                  "id": "",
+                  "name": "JDBM LICENSE v1.00",
+                  "family": "JDMB",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED","NO-SPDX"],
+                  "notes": ["JDBM is a transactional persistence engine for Java"],
+                  "urls": [
+                        "http://jdbm.sourceforge.net/",
+                        "https://scancode-licensedb.aboutcode.org/jdbm-1.00.html",
+                        "https://github.com/joval/jdbm/blob/master/LICENSE.txt"
+                  ]
+            },
+            {
+                  "id": "",
+                  "name": "JDOM license",
+                  "family": "JDOM",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED","NO-SPDX"],
+                  "notes": [""],
+                  "urls": ["https://scancode-licensedb.aboutcode.org/jdom.html"]
+            },
+            {
+                  "id": "JSON",
+                  "name": "JSON License",
+                  "family": "JSON",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/JSON.html"]
+            },
+            {
+                  "id": "LGPL-2.0",
+                  "name": "GNU Library General Public License v2 only",
+                  "family": "LGPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "LGPL-LINK-WARNING", "DEPRECATED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/LGPL-2.0.html"]
+            },
+            {
+                  "id": "LGPL-2.0-only",
+                  "name": "GNU Library General Public License v2 only",
+                  "family": "LGPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "LGPL-LINK-WARNING"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/LGPL-2.0-only.html"]
+            },
+            {
+                  "id": "LGPL-2.0-or-later",
+                  "name": "GNU Library General Public License v2 or later",
+                  "family": "LGPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "LGPL-LINK-WARNING"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/LGPL-2.0-or-later.html"]
+            },
+            {
+                  "id": "LGPL-2.1",
+                  "name": "GNU Lesser General Public License v2.1 only",
+                  "family": "LGPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "LGPL-LINK-WARNING", "DEPRECATED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/LGPL-2.1.html"]
+            },
+            {
+                  "id": "LGPL-2.1-only",
+                  "name": "GNU Lesser General Public License v2.1 only",
+                  "family": "LGPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "LGPL-LINK-WARNING"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/LGPL-2.1-only.html"]
+            },
+            {
+                  "id": "LGPL-2.1-or-later",
+                  "name": "GNU Lesser General Public License v2.1 or later",
+                  "family": "LGPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "LGPL-LINK-WARNING"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/LGPL-2.1-or-later.html"]
+            },
+            {
+                  "id": "LGPL-3.0",
+                  "name": "GNU Lesser General Public License v3.0 only",
+                  "family": "LGPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "LGPL-LINK-WARNING", "DEPRECATED" ],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/LGPL-3.0"]
+            },
+            {
+                  "id": "LGPL-3.0-only",
+                  "name": "GNU Lesser General Public License v3.0 only",
+                  "family": "LGPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "LGPL-LINK-WARNING"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/LGPL-3.0-only.html"]
+            },
+            {
+                  "id": "LGPL-3.0-or-later",
+                  "name": "GNU Lesser General Public License v3.0 or later",
+                  "family": "LGPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "LGPL-LINK-WARNING"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/LGPL-3.0-or-later.html"]
+            },
+            {
+                  "id": "MIT",
+                  "name": "MIT License",
+                  "family": "MIT",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""],
+                  "children": [
+                        "MIT-0",
+                        "MIT-CMU",
+                        "MIT-advertising",
+                        "MIT-enna",
+                        "MIT-feh",
+                        "MIT-iOS",
+                        "MIT-1.0",
+                        "MIT-1.1",
+                        "MIT-2.0"
+                  ],
+                  "urls":["https://spdx.org/licenses/MIT.html"]
+            },
+            {
+                  "id": "MPL-1.0",
+                  "name": "Mozilla Public License 1.0",
+                  "family": "MPL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "MPL-1.1",
+                  "name": "Mozilla Public License 1.1",
+                  "family": "MPL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "MPL-2.0",
+                  "name": "Mozilla Public License 2.0",
+                  "family": "MPL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "MPL-2.0-no-copyleft-exception",
+                  "name": "Mozilla Public License 2.0 (no copyleft exception)",
+                  "family": "MPL-2.0-no-copyleft-exception",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": [ "NEEDS-APPROVAL"],
+                  "notes": ["Needs License Review"]
+            },
+            {
+                  "id": "MS-LPL",
+                  "name": "Microsoft Limited Public License",
+                  "family": "MS-LPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL"],
+                  "notes": [""]
+            },
+            {
+                  "id": "MS-PL",
+                  "name": "Microsoft Public License",
+                  "family": "MS-PL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "MS-RL",
+                  "name": "Microsoft Reciprocal License",
+                  "family": "MS-RL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": [ "NEEDS-APPROVAL", "NEEDS-IP-LEGAL-REVIEW"]
+            },
+            {
+                  "id": "NAIST-2003",
+                  "name": "Nara Institute of Science and Technology License (2003)",
+                  "family": "NAIST",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/NAIST-2003.html"]
+            },
+            {
+                  "id": "Net-SNMP",
+                  "name": "Net-SNMP License",
+                  "family": "Net",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "",
+                  "name": "NPM",
+                  "family": "NPM",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "NO-SPDX"],
+                  "notes": [""]
+            },
+            {
+                  "id": "OFL-1.1",
+                  "name": "SIL Open Font License 1.1",
+                  "family": "OFL",
+                  "annotationRefs": ["NEEDS-APPROVAL"],
+                  "usagePolicy": "needs-review",
+                  "notes": [""]
+            },
+            {
+                  "id": "OFL-1.0",
+                  "family": "OFL",
+                  "name": "SIL Open Font License 1.0",
+                  "annotationRefs": ["NEEDS-APPROVAL", "NEEDS-IP-LEGAL-REVIEW"],
+                  "usagePolicy": "needs-review",
+                  "notes": ["Needs IP legal determination for variants"],
+                  "children": [
+                        "OFL-1.0",
+                        "OFL-1.0-no-RFN",
+                        "OFL-1.0-RFN"
+                  ]
+            },
+            {
+                  "id": "OFL-1.1",
+                  "family": "OFL",
+                  "name": "SIL Open Font License 1.1",
+                  "annotationRefs": ["NEEDS-APPROVAL", "NEEDS-IP-LEGAL-REVIEW"],
+                  "usagePolicy": "needs-review",
+                  "notes": ["Needs IP legal determination for variants"],
+                  "children": [
+                        "OFL-1.1-no-RFN",
+                        "OFL-1.1-RFN"
+                  ]
+            },
+            {
+                  "id": "OpenSSL",
+                  "name": "OpenSSL License",
+                  "family": "OpenSSL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "PHP-3.0",
+                  "name": "PHP License v3.0",
+                  "family": "PHP",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "PHP-3.01",
+                  "name": "PHP License v3.01",
+                  "family": "PHP",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "Plexus",
+                  "name": "Plexus_Classworlds",
+                  "family": "Plexus",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "PostgreSQL",
+                  "name": "PostgreSQL License",
+                  "family": "PostgreSQL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "Python-2.0",
+                  "name": "Python License 2.0",
+                  "family": "Python",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "RSA-MD",
+                  "name": "RSA Message-Digest License",
+                  "family": "RSA",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "Ruby",
+                  "name": "Ruby License",
+                  "family": "Ruby",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "SCEA",
+                  "name": "SCEA Shared Source License",
+                  "family": "SCEA",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL"],
+                  "notes": [""]
+            },
+            {
+                  "id": "SISSL",
+                  "name": "Sun Industry Standards Source License v1.1",
+                  "family": "SISSL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/SISSL.html"]
+            },
+            {
+                  "id": "SISSL-1.2",
+                  "name": "Sun Industry Standards Source License v1.2",
+                  "family": "SISSL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "SSPL-1.0",
+                  "name": "Server Side Public License, v 1",
+                  "family": "SSPL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL"],
+                  "notes": [""]
+            },
+            {
+                  "id": "UFL-1.0",
+                  "name": "Ubuntu Font License",
+                  "family": "UFL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "NO-SPDX"],
+                  "notes": ["This license requires separately licensed code."],
+                  "urls": ["https://ubuntu.com/legal/font-licence"]
+            },
+            {
+                  "id": "Unicode-DFS-2015",
+                  "name": "Unicode License Agreement - Data Files and Software (2015)",
+                  "family": "Unicode",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "Unicode-DFS-2016",
+                  "name": "Unicode License Agreement - Data Files and Software (2016)",
+                  "family": "Unicode",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "Unicode-TOU",
+                  "name": "Unicode Terms of Use",
+                  "family": "Unicode",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "",
+                  "name": "Unix-crypt",
+                  "family": "Unix-crypt",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED", "NO-SPDX"],
+                  "notes": ["BSD 3-Clause \"New\" or \"Revised\" License"],
+                  "urls": ["https://github.com/mogest/unix-crypt/blob/master/LICENSE"]
+            },
+            {
+                  "id": "Vim",
+                  "name": "Vim License",
+                  "family": "Vim",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL"],
+                  "notes": [""]
+            },
+            {
+                  "id": "W3C",
+                  "name": "W3C Software Notice and License (2002-12-31)",
+                  "family": "W3C",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "W3C-19980720",
+                  "name": "W3C Software Notice and License (1998-07-20)",
+                  "family": "W3C",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "W3C-20150513",
+                  "name": "W3C Software Notice and Document License (2015-05-13)",
+                  "family": "W3C",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "WTFPL",
+                  "name": "Do What The F*ck You Want To Public License",
+                  "family": "WTFPL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "X11",
+                  "name": "X11 License",
+                  "family": "X11",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/X11"]
+            },
+            {
+                  "id": "X11-distribute-modifications-variant",
+                  "name": "X11 License Distribution Modification Variant",
+                  "family": "X11",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/X11-distribute-modifications-variant.html"]
+            },
+            {
+                  "id": "Xnet",
+                  "name": "X.Net License",
+                  "family": "Xnet",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "Zend-2.0",
+                  "name": "Zend License v2.0",
+                  "family": "Zend",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "Zlib",
+                  "name": "zlib License",
+                  "family": "Zlib",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/Zlib.html"]
+            },
+            {
+                  "id": "zlib-acknowledgement",
+                  "name": "zlib/libpng License with Acknowledgement",
+                  "family": "zlib",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/zlib-acknowledgement.html"]
+            },
+            {
+                  "id": "ZPL-1.1",
+                  "name": "Zope Public License 1.1",
+                  "family": "ZPL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "ZPL-2.0",
+                  "name": "Zope Public License 2.0",
+                  "family": "ZPL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            },
+            {
+                  "id": "ZPL-2.1",
+                  "name": "Zope Public License 2.1",
+                  "family": "ZPL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""]
+            }
+      ],
+      "annotations": {
+            "APPROVED": "Approved for use according to license requirements",
+            "SELF-CERTIFY": "Self certification permitted",
+            "PROHIBITED": "Prohibited",
+            "NEEDS-APPROVAL": "Needs legal approval for product or service usage, ok for internal use.",
+            "NEEDS-IP-LEGAL-REVIEW": "License needs review by IP legal team for usage determination",
+            "NO-SPDX": "No SPDX ID exists for license.",
+            "DEPRECATED": "Deprecated SPDX ID",
+            "AGPL-WARNING": "Can’t be linked in any way (no static or dynamic linking) to IBM code. Any interaction needs to be at arms length through the command line or other system level interaction. This will need your executive’s approval, so be sure to connect with your release manager or squad leader as soon as you identify the need to use this license.",
+            "GPL-LINK-WARNING": "Can’t be linked in any way (no static or dynamic linking) to IBM code. Any interaction needs to be at arms length through the command line or other system level interaction. This will need your executive’s approval, so be sure to connect with your release manager or squad leader as soon as you identify the need to use this license.",
+            "LGPL-LINK-WARNING": "Only dynamic linking is allowed to IBM code. This license needs IBM executive approval.",
+            "CC-BY-SAAS": "SaaS usage of CC-BY 2.0/2.5 /3.0/4.0 license, will no longer require a notice with a URI linking to the full text of the CC-BY license and download location.",
+            "CC-BY-ON-PREM": "For on-premise distribution of CC-BY, the primary requirement of providing notice and SLC still applies.",
+            "CDLA-PERMISSIVE": "The CDLA Sharing license is preferred for data contributions, but the CDLA permissive can also be approved.",
+            "CDLA-SHARING": "This is the preferred license for data contributions, and is also acceptable for use in products and services.",
+            "NEEDS-LEGAL-REVIEW-PII": "The legal review ensures privacy, personal information, and other aspects specific to data are reviewed.",
+            "NEEDS-GPL-LEGAL-REVIEW": "Needs legal review to assure GPL requirements are met."
+      }
+}

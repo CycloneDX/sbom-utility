@@ -1,0 +1,10 @@
+{
+	"SPDXID" : "SPDXRef-DOCUMENT",
+	"name" : "spdx-min-required",
+	"spdxVersion" : "SPDX-2.2",
+	"dataLicense" : "CC0-1.0",
+	"creationInfo" : {
+	  "created" : "2022-01-14T00:00:00Z"
+	},
+	"documentNamespace" : "https://sbom-utility.org/test/spdx/"
+}

@@ -1,0 +1,22 @@
+{
+      "policies": [
+            {
+                  "id": "",
+                  "name": "Some license v1",
+                  "family": "TEST",
+                  "usagePolicy": "allow"
+            },
+            {
+                  "id": "",
+                  "name": "Some license v2",
+                  "family": "TEST",
+                  "usagePolicy": "allow"
+            },
+            {
+                  "id": "",
+                  "name": "Some license v3",
+                  "family": "TEST",
+                  "usagePolicy": "deny"
+            }
+      ]
+}

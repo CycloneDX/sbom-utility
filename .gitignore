@@ -1,0 +1,11 @@
+# make target file types
+sbom-utility*
+/release
+
+# IDEs
+*.code-workspace
+.vscode/*.log
+
+# Misc
+*.gpg
+a.txt

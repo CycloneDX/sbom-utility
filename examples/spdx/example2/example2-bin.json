@@ -1,0 +1,65 @@
+{
+  "SPDXID" : "SPDXRef-DOCUMENT",
+  "spdxVersion" : "SPDX-2.2",
+  "creationInfo" : {
+    "created" : "2021-08-26T01:49:00Z",
+    "creators" : [ "Person: Steve Winslow (steve@swinslow.net)", "Tool: github.com/spdx/tools-golang/builder", "Tool: github.com/spdx/tools-golang/idsearcher" ]
+  },
+  "name" : "hello-bin",
+  "dataLicense" : "CC0-1.0",
+  "externalDocumentRefs" : [ {
+    "externalDocumentId" : "DocumentRef-hello-src",
+    "checksum" : {
+      "algorithm" : "SHA1",
+      "checksumValue" : "bb991e91fc62ce239d7baf30783c678506f9d17b"
+    },
+    "spdxDocument" : "https://swinslow.net/spdx-examples/example2-hello-src-v3"
+  } ],
+  "documentNamespace" : "https://swinslow.net/spdx-examples/example2/hello-bin-v4",
+  "documentDescribes" : [ "SPDXRef-Package-hello-bin" ],
+  "packages" : [ {
+    "SPDXID" : "SPDXRef-Package-hello-bin",
+    "copyrightText" : "NOASSERTION",
+    "downloadLocation" : "git+https://github.com/swinslow/spdx-examples.git#example2/content/build",
+    "filesAnalyzed" : true,
+    "hasFiles" : [ "SPDXRef-hello-binary" ],
+    "licenseConcluded" : "GPL-3.0-or-later",
+    "licenseDeclared" : "NOASSERTION",
+    "licenseInfoFromFiles" : [ "NOASSERTION" ],
+    "name" : "hello-bin",
+    "packageVerificationCode" : {
+      "packageVerificationCodeValue" : "d7aa17dad30d1d1d468a10ea1ec5e100e471c064"
+    }
+  } ],
+  "files" : [ {
+    "SPDXID" : "SPDXRef-hello-binary",
+    "checksums" : [ {
+      "algorithm" : "SHA1",
+      "checksumValue" : "20291a81ef065ff891b537b64d4fdccaf6f5ac02"
+    }, {
+      "algorithm" : "SHA256",
+      "checksumValue" : "83a33ff09648bb5fc5272baca88cf2b59fd81ac4cc6817b86998136af368708e"
+    }, {
+      "algorithm" : "MD5",
+      "checksumValue" : "08a12c966d776864cc1eb41fd03c3c3d"
+    } ],
+    "copyrightText" : "NOASSERTION",
+    "fileName" : "/hello",
+    "fileTypes" : [ "BINARY" ],
+    "licenseConcluded" : "GPL-3.0-or-later",
+    "licenseInfoInFiles" : [ "NOASSERTION" ]
+  } ],
+  "relationships" : [ {
+    "spdxElementId" : "SPDXRef-DOCUMENT",
+    "relatedSpdxElement" : "SPDXRef-Package-hello-bin",
+    "relationshipType" : "DESCRIBES"
+  }, {
+    "spdxElementId" : "SPDXRef-hello-binary",
+    "relatedSpdxElement" : "DocumentRef-hello-src:SPDXRef-hello-src",
+    "relationshipType" : "GENERATED_FROM"
+  }, {
+    "spdxElementId" : "SPDXRef-hello-binary",
+    "relatedSpdxElement" : "DocumentRef-hello-src:SPDXRef-Makefile",
+    "relationshipType" : "GENERATED_FROM"
+  } ]
+}

@@ -1,0 +1,102 @@
+{
+  "SPDXID" : "SPDXRef-DOCUMENT",
+  "spdxVersion" : "SPDX-2.2",
+  "creationInfo" : {
+    "created" : "2021-08-26T01:55:00Z",
+    "creators" : [ "Person: Steve Winslow (steve@swinslow.net)" ]
+  },
+  "name" : "go-lib",
+  "dataLicense" : "CC0-1.0",
+  "hasExtractedLicensingInfos" : [ {
+    "licenseId" : "LicenseRef-Golang-BSD-plus-Patents",
+    "comment" : "The Golang license text is split across two files, with the BSD-3-Clause content in LICENSE and the Additional IP Rights Grant in PATENTS.",
+    "extractedText" : "Copyright (c) 2009 The Go Authors. All rights reserved.\n\nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions are\nmet:\n\n   * Redistributions of source code must retain the above copyright\nnotice, this list of conditions and the following disclaimer.\n   * Redistributions in binary form must reproduce the above\ncopyright notice, this list of conditions and the following disclaimer\nin the documentation and/or other materials provided with the\ndistribution.\n   * Neither the name of Google Inc. nor the names of its\ncontributors may be used to endorse or promote products derived from\nthis software without specific prior written permission.\n\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n\"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\nLIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\nA PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT\nOWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\nSPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT\nLIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\nDATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\nTHEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\nOF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\nAdditional IP Rights Grant (Patents)\n\n\"This implementation\" means the copyrightable works distributed by\nGoogle as part of the Go project.\n\nGoogle hereby grants to You a perpetual, worldwide, non-exclusive,\nno-charge, royalty-free, irrevocable (except as stated in this section)\npatent license to make, have made, use, offer to sell, sell, import,\ntransfer and otherwise run, modify and propagate the contents of this\nimplementation of Go, where such license applies only to those patent\nclaims, both currently owned or controlled by Google and acquired in\nthe future, licensable by Google that are necessarily infringed by this\nimplementation of Go.  This grant does not include claims that would be\ninfringed only as a consequence of further modification of this\nimplementation.  If you or your agent or exclusive licensee institute or\norder or agree to the institution of patent litigation against any\nentity (including a cross-claim or counterclaim in a lawsuit) alleging\nthat this implementation of Go or any code incorporated within this\nimplementation of Go constitutes direct or contributory patent\ninfringement, or inducement of patent infringement, then any patent\nrights granted to you under this License for this implementation of Go\nshall terminate as of the date such litigation is filed.",
+    "name" : "Golang BSD-plus-PATENTS",
+    "seeAlsos" : [ "https://github.com/golang/go/blob/master/LICENSE", "https://github.com/golang/go/blob/master/PATENTS" ]
+  } ],
+  "documentNamespace" : "https://swinslow.net/spdx-examples/example6/go-lib-v2",
+  "documentDescribes" : [ "SPDXRef-Package-godist" ],
+  "packages" : [ {
+    "SPDXID" : "SPDXRef-Package-go.reflect",
+    "copyrightText" : "NOASSERTION",
+    "downloadLocation" : "NOASSERTION",
+    "filesAnalyzed" : false,
+    "licenseConcluded" : "NOASSERTION",
+    "licenseDeclared" : "NOASSERTION",
+    "name" : "go.reflect",
+    "versionInfo" : "1.15.4"
+  }, {
+    "SPDXID" : "SPDXRef-Package-go.fmt",
+    "comment" : "This represents the fmt standard library, not the gofmt command.",
+    "copyrightText" : "NOASSERTION",
+    "downloadLocation" : "NOASSERTION",
+    "filesAnalyzed" : false,
+    "licenseConcluded" : "NOASSERTION",
+    "licenseDeclared" : "NOASSERTION",
+    "name" : "go.fmt",
+    "versionInfo" : "1.15.4"
+  }, {
+    "SPDXID" : "SPDXRef-Package-godist",
+    "checksums" : [ {
+      "algorithm" : "SHA256",
+      "checksumValue" : "0d6e1420facd978e532eae7bd5cb6378b65522c12fa9dcf682129e698c34d1b2"
+    } ],
+    "copyrightText" : "Copyright (c) 2009 The Go Authors. All rights reserved.",
+    "downloadLocation" : "NOASSERTION",
+    "filesAnalyzed" : false,
+    "homepage" : "https://golang.org/",
+    "licenseConcluded" : "NOASSERTION",
+    "licenseDeclared" : "LicenseRef-Golang-BSD-plus-Patents",
+    "name" : "go-1.15",
+    "originator" : "Organization: Google LLC",
+    "packageFileName" : "go_6715.snap",
+    "sourceInfo" : "installed using Ubuntu snap file, see https://snapcraft.io/go",
+    "summary" : "Ubuntu snap distribution of Golang v1.15.4 linux/amd64",
+    "supplier" : "Organization: Canonical Ltd.",
+    "versionInfo" : "1.15.4"
+  }, {
+    "SPDXID" : "SPDXRef-Package-go-compiler",
+    "checksums" : [ {
+      "algorithm" : "SHA256",
+      "checksumValue" : "4448b9e62b3c364a073808e22643985d9f49c4ad44aa11d8e4a17c49600a7c3a"
+    } ],
+    "copyrightText" : "NOASSERTION",
+    "downloadLocation" : "NOASSERTION",
+    "filesAnalyzed" : false,
+    "licenseConcluded" : "NOASSERTION",
+    "licenseDeclared" : "NOASSERTION",
+    "name" : "go",
+    "packageFileName" : "go",
+    "versionInfo" : "1.15.4"
+  }, {
+    "SPDXID" : "SPDXRef-Package-go.strconv",
+    "copyrightText" : "NOASSERTION",
+    "downloadLocation" : "NOASSERTION",
+    "filesAnalyzed" : false,
+    "licenseConcluded" : "NOASSERTION",
+    "licenseDeclared" : "NOASSERTION",
+    "name" : "go.strconv",
+    "versionInfo" : "1.15.4"
+  } ],
+  "relationships" : [ {
+    "spdxElementId" : "SPDXRef-DOCUMENT",
+    "relatedSpdxElement" : "SPDXRef-Package-godist",
+    "relationshipType" : "DESCRIBES"
+  }, {
+    "spdxElementId" : "SPDXRef-Package-godist",
+    "relatedSpdxElement" : "SPDXRef-Package-go-compiler",
+    "relationshipType" : "CONTAINS"
+  }, {
+    "spdxElementId" : "SPDXRef-Package-godist",
+    "relatedSpdxElement" : "SPDXRef-Package-go.fmt",
+    "relationshipType" : "CONTAINS"
+  }, {
+    "spdxElementId" : "SPDXRef-Package-godist",
+    "relatedSpdxElement" : "SPDXRef-Package-go.reflect",
+    "relationshipType" : "CONTAINS"
+  }, {
+    "spdxElementId" : "SPDXRef-Package-godist",
+    "relatedSpdxElement" : "SPDXRef-Package-go.strconv",
+    "relationshipType" : "CONTAINS"
+  } ]
+}

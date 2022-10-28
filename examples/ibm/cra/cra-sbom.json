@@ -1,0 +1,124 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "serialNumber": "urn:uuid:92a44fcf-1108-4b6f-8eb0-83b42d4f224e",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2022-09-07T20:20:56Z",
+    "tools": [
+      {
+        "vendor": "IBM",
+        "name": "IBM Cloud Continuous Delivery - Code Risk Analyzer",
+        "version": "1.0.1"
+      }
+    ],
+    "component": {
+      "type": "application",
+      "name": ""
+    }
+  },
+  "components": [
+    {
+      "bom-ref": "file:go.mod",
+      "type": "file",
+      "name": "go.mod",
+      "version": "e38a8e2bdcf053a962fa71c03648e3e9715a9a4add091f45da6aedff564f601b",
+      "purl": "go.mod",
+      "properties": [
+        {
+          "name": "ecosystem",
+          "value": "golang"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:github.com/cpuguy83/go-md2man/v2@2.0.2",
+      "type": "library",
+      "name": "github.com/cpuguy83/go-md2man/v2",
+      "version": "2.0.2",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "ecosystem",
+          "value": "golang"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:github.com/russross/blackfriday/v2@2.1.0",
+      "type": "library",
+      "name": "github.com/russross/blackfriday/v2",
+      "version": "2.1.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "UNKNOWN"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "ecosystem",
+          "value": "golang"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:github.com/spf13/pflag@1.0.5",
+      "type": "library",
+      "name": "github.com/spf13/pflag",
+      "version": "1.0.5",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "ecosystem",
+          "value": "golang"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:gopkg.in/yaml.v3@3.0.1",
+      "type": "library",
+      "name": "gopkg.in/yaml.v3",
+      "version": "3.0.1",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        },
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "ecosystem",
+          "value": "golang"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "pkg:github.com/cpuguy83/go-md2man/v2@2.0.2",
+      "dependsOn": [
+        "pkg:github.com/russross/blackfriday/v2@2.1.0"
+      ]
+    }
+  ]
+}

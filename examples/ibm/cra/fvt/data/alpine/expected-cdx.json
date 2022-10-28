@@ -1,0 +1,324 @@
+{
+      "bomFormat": "CycloneDX",
+      "specVersion": "1.4",
+      "serialNumber": "urn:uuid:c7212d8f-4ae8-4a36-acd3-d90b5f7f8af9",
+      "version": 1,
+      "metadata": {
+        "timestamp": "2022-02-17T12:35:11-06:00",
+        "tools": [
+          {
+            "vendor": "IBM",
+            "name": "IBM Cloud Continuous Delivery - Code Risk Analyzer",
+            "version": "0.1.12"
+          }
+        ],
+        "component": {
+          "type": "application",
+          "name": ""
+        }
+      },
+      "components": [
+        {
+          "bom-ref": "file:Dockerfile",
+          "type": "file",
+          "name": "Dockerfile",
+          "version": "bf5ecac70985ab636f916705b1175868f22c183d9930e753fce420485a749299",
+          "purl": "Dockerfile",
+          "components": [
+            {
+              "bom-ref": "img:sha256:921892188a8e1016fbecdcb0a704d77bba2ef28ce3a869789a55620fe72bb4f1",
+              "type": "container",
+              "name": "python",
+              "version": "3-alpine3.14",
+              "hashes": [
+                {
+                  "alg": "SHA-256",
+                  "content": "921892188a8e1016fbecdcb0a704d77bba2ef28ce3a869789a55620fe72bb4f1"
+                }
+              ],
+              "components": [
+                {
+                  "bom-ref": "os:alpine@3.14.3",
+                  "type": "operating-system",
+                  "name": "alpine",
+                  "version": "3.14.3"
+                },
+                {
+                  "bom-ref": "pkg:.python-rundeps@20220129.040244",
+                  "type": "library",
+                  "name": ".python-rundeps",
+                  "version": "20220129.040244"
+                },
+                {
+                  "bom-ref": "pkg:alpine-baselayout@3.2.0-r16",
+                  "type": "library",
+                  "name": "alpine-baselayout",
+                  "version": "3.2.0-r16",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:alpine-keys@2.4-r0",
+                  "type": "library",
+                  "name": "alpine-keys",
+                  "version": "2.4-r0",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:apk-tools@2.12.7-r0",
+                  "type": "library",
+                  "name": "apk-tools",
+                  "version": "2.12.7-r0",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:busybox@1.33.1-r6",
+                  "type": "library",
+                  "name": "busybox",
+                  "version": "1.33.1-r6",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:ca-certificates@20191127-r5",
+                  "type": "library",
+                  "name": "ca-certificates",
+                  "version": "20191127-r5",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:ca-certificates-bundle@20191127-r5",
+                  "type": "library",
+                  "name": "ca-certificates-bundle",
+                  "version": "20191127-r5",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:expat@2.4.3-r0",
+                  "type": "library",
+                  "name": "expat",
+                  "version": "2.4.3-r0",
+                  "purl": "http"
+                },
+                {
+                  "bom-ref": "pkg:gdbm@1.19-r0",
+                  "type": "library",
+                  "name": "gdbm",
+                  "version": "1.19-r0",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:keyutils-libs@1.6.3-r0",
+                  "type": "library",
+                  "name": "keyutils-libs",
+                  "version": "1.6.3-r0",
+                  "purl": "http"
+                },
+                {
+                  "bom-ref": "pkg:krb5-conf@1.0-r2",
+                  "type": "library",
+                  "name": "krb5-conf",
+                  "version": "1.0-r2",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:krb5-libs@1.18.4-r0",
+                  "type": "library",
+                  "name": "krb5-libs",
+                  "version": "1.18.4-r0",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:libbz2@1.0.8-r1",
+                  "type": "library",
+                  "name": "libbz2",
+                  "version": "1.0.8-r1",
+                  "purl": "http"
+                },
+                {
+                  "bom-ref": "pkg:libc-utils@0.7.2-r3",
+                  "type": "library",
+                  "name": "libc-utils",
+                  "version": "0.7.2-r3",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:libcom_err@1.46.2-r0",
+                  "type": "library",
+                  "name": "libcom_err",
+                  "version": "1.46.2-r0",
+                  "purl": "http"
+                },
+                {
+                  "bom-ref": "pkg:libcrypto1.1@1.1.1l-r0",
+                  "type": "library",
+                  "name": "libcrypto1.1",
+                  "version": "1.1.1l-r0",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:libffi@3.3-r2",
+                  "type": "library",
+                  "name": "libffi",
+                  "version": "3.3-r2",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:libintl@0.21-r0",
+                  "type": "library",
+                  "name": "libintl",
+                  "version": "0.21-r0",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:libnsl@1.3.0-r0",
+                  "type": "library",
+                  "name": "libnsl",
+                  "version": "1.3.0-r0",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:libretls@3.3.3p1-r2",
+                  "type": "library",
+                  "name": "libretls",
+                  "version": "3.3.3p1-r2",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:libssl1.1@1.1.1l-r0",
+                  "type": "library",
+                  "name": "libssl1.1",
+                  "version": "1.1.1l-r0",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:libtirpc@1.3.2-r0",
+                  "type": "library",
+                  "name": "libtirpc",
+                  "version": "1.3.2-r0",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:libtirpc-conf@1.3.2-r0",
+                  "type": "library",
+                  "name": "libtirpc-conf",
+                  "version": "1.3.2-r0",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:libuuid@2.37.2-r0",
+                  "type": "library",
+                  "name": "libuuid",
+                  "version": "2.37.2-r0",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:libverto@0.3.2-r0",
+                  "type": "library",
+                  "name": "libverto",
+                  "version": "0.3.2-r0",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:musl@1.2.2-r3",
+                  "type": "library",
+                  "name": "musl",
+                  "version": "1.2.2-r3",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:musl-utils@1.2.2-r3",
+                  "type": "library",
+                  "name": "musl-utils",
+                  "version": "1.2.2-r3",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:ncurses-libs@6.2_p20210612-r0",
+                  "type": "library",
+                  "name": "ncurses-libs",
+                  "version": "6.2_p20210612-r0",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:ncurses-terminfo-base@6.2_p20210612-r0",
+                  "type": "library",
+                  "name": "ncurses-terminfo-base",
+                  "version": "6.2_p20210612-r0",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:readline@8.1.0-r0",
+                  "type": "library",
+                  "name": "readline",
+                  "version": "8.1.0-r0",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:scanelf@1.3.2-r0",
+                  "type": "library",
+                  "name": "scanelf",
+                  "version": "1.3.2-r0",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:sqlite-libs@3.35.5-r0",
+                  "type": "library",
+                  "name": "sqlite-libs",
+                  "version": "3.35.5-r0",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:ssl_client@1.33.1-r6",
+                  "type": "library",
+                  "name": "ssl_client",
+                  "version": "1.33.1-r6",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:tzdata@2021e-r0",
+                  "type": "library",
+                  "name": "tzdata",
+                  "version": "2021e-r0",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:xz-libs@5.2.5-r0",
+                  "type": "library",
+                  "name": "xz-libs",
+                  "version": "5.2.5-r0",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:zlib@1.2.11-r3",
+                  "type": "library",
+                  "name": "zlib",
+                  "version": "1.2.11-r3",
+                  "purl": "https"
+                },
+                {
+                  "bom-ref": "pkg:pip@21.2.4",
+                  "type": "library",
+                  "name": "pip",
+                  "version": "21.2.4",
+                  "purl": "https://files.pythonhosted.org/packages/52/e1/06c018197d8151383f66ebf6979d951995cf495629fc54149491f5d157d0/pip-21.2.4.tar.gz"
+                },
+                {
+                  "bom-ref": "pkg:setuptools@58.1.0",
+                  "type": "library",
+                  "name": "setuptools",
+                  "version": "58.1.0",
+                  "purl": "https://files.pythonhosted.org/packages/59/b8/adeb445fa6c636f78c532f0dd6f847f0f90e709afa7d41396181d438be5a/setuptools-58.1.0.tar.gz"
+                },
+                {
+                  "bom-ref": "pkg:wheel@0.37.1",
+                  "type": "library",
+                  "name": "wheel",
+                  "version": "0.37.1",
+                  "purl": "https://files.pythonhosted.org/packages/c0/6c/9f840c2e55b67b90745af06a540964b73589256cb10cc10057c87ac78fc2/wheel-0.37.1.tar.gz"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "dependencies": []
+}

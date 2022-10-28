@@ -1,0 +1,13 @@
+{
+      "policies": [
+            {
+                  "id": "TEST-GOOD-LICENSE",
+                  "name": "Test Good License",
+                  "family": "TEST",
+                  "usagePolicy": "allow",
+                  "annotationRefs": [""],
+                  "notes": [""],
+                  "urls": [""]
+            }
+      ]
+}

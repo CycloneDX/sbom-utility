@@ -1,0 +1,60 @@
+{
+  "bomFormat":"CycloneDX",
+  "specVersion":"1.4",
+  "serialNumber":"urn:uuid:3e671687-395b-41f5-a30f-a58921a69b79",
+  "version":1,
+  "components":[
+      {
+          "type":"application",
+          "name":"Acme Commerce Suite",
+          "version":"2.0.0",
+          "swid":{
+              "tagId":"swidgen-cebab27e-da95-213c-8b73-d1d3afcb806f_2.0.0",
+              "name":"Acme Commerce Suite",
+              "version":"2.0.0"
+          },
+          "components":[
+              {
+                  "type":"application",
+                  "name":"Acme Storefront Server",
+                  "version":"3.7.0",
+                  "swid":{
+                      "tagId":"swidgen-80d7e827-4031-288b-2313-2781923fe86e_3.7.0",
+                      "name":"Acme Storefront Server",
+                      "version":"3.7.0"
+                  }
+              },
+              {
+                  "type":"application",
+                  "name":"Acme Payment Processor",
+                  "version":"3.1.1",
+                  "swid":{
+                      "tagId":"swidgen-ac2f2eec-05c0-907e-3a54-a6782a24885e_3.1.1",
+                      "name":"Acme Payment Processor",
+                      "version":"3.1.1"
+                  }
+              }
+          ]
+      },
+      {
+          "type":"application",
+          "name":"Acme Management App",
+          "version":"2.0.0",
+          "swid":{
+              "tagId":"swidgen-8429d5b6-2dbf-0fde-768b-aaab0e5881c8_2.0.0",
+              "name":"Acme Management App",
+              "version":"2.0.0"
+          }
+      },
+      {
+          "type":"application",
+          "name":"Acme License Utility",
+          "version":"2.0.0",
+          "swid":{
+              "tagId":"swidgen-4332a8dc-13e3-7d44-2f52-0a53f4898995_2.0.0",
+              "name":"Acme License Utility",
+              "version":"2.0.0"
+          }
+      }
+  ]
+}

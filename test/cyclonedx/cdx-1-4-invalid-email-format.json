@@ -1,0 +1,32 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "version": 1,
+  "serialNumber": "urn:uuid:3e671687-395b-41f5-a30f-a58921a69b79",
+  "metadata": {
+    "component": {
+      "type": "application",
+      "bom-ref": "pkg:app/sample@1.0.0",
+      "purl": "pkg:app/sample@1.0.0",
+      "name": "ACME Application",
+      "version": "2.0.0",
+      "description": "ACME sample application"
+    },
+    "supplier": {
+      "name": "ACME",
+      "contact": [
+        {
+          "name": "ACME email (invalid, https prefix)",
+          "email": "https://acme.com"
+        }
+      ]
+    },
+    "licenses": [
+      {
+        "license": {
+          "id": "Apache-2.0"
+        }
+      }
+    ]
+  }
+}
