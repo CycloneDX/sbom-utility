@@ -518,7 +518,8 @@ An ad-hoc list of featured "TODOs" geared at making the tool more accessible, ex
 - **Merge command** Support merge of two (both validated) SBOMs with de-duplication and configurable. Please note that some method of normalization prior to merge will be necessary.
 - **Remote Schema loading** Support using SBOM schema files that are remotely hosted  (network accessible) from known, trusted source locations (e.g., releases of SPDX, CycloneDX specification schemas). Note that the config file has an existing `url` field per entry that can be used for this purpose.
 - **--orderby** Support ordering of query result sets by comparison of values from a specified field key.
-- **license.json** Document license policy configuration policy structure and how to add entries relative to a CycloneDX `LicenseChoice` object for entries with SPDX IDs and those without.
+- **license.json** Document license policy configuration JSON schema structure and how to add entries relative to a CycloneDX `LicenseChoice` object for entries with SPDX IDs and those without.
+- **license.json** Add more widely-recognized licenses (both from SPDX identifier lists as well as those not recognized by the SPDX community).
 
 ### Development
 
