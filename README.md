@@ -429,7 +429,7 @@ Sample output:
   ...
 ```
 
-##### Example: Select fields from JSON object
+#### Example: Select fields from JSON object
 
 In this example, the `--from` clause references the  singleton JSON object `component` found under the top-level `metadata` object. It then reduces the resultant JSON object to only return the `name` and `value` fields and their values as requested on the `--select` clause.
 
