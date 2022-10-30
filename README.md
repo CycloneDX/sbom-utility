@@ -6,13 +6,13 @@ This utility is designed to be an API platform used *primarily to validate Cyclo
 
 More importantly, the utility enables validation of SBOMs against derivative, "customized" schemas that can be used to enforce further data requirements not captured in the "base" schemas (e.g., industry or company-specific schemas).
 
-Specifically, the utility is able to parse standardized SBOM output (produced by your favorite tooling) and validate it using a known schema format (e.g., SPDX, CycloneDX) and version (e.g., "2.2", "1.4", etc.) as declared within the SBOM document itself (i.e., "inferred" or "implicit") or against "customized" JSON schemas you can specify on the command line (i.e., "explicit") or permanently configure as named schema variants.
+Specifically, the utility is able to parse standardized SBOM output (produced by your favorite tooling) and validate it using a known schema format (e.g., SPDX, CycloneDX) and version (e.g., "2.2", "1.4", etc.) as declared within the SBOM document itself (i.e., "inferred" or "implicit") or against "customized" JSON schemas you can specify on the command line (i.e., "explicit").  Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file.
 
 In the future, we envision additional kinds of SBOMs (e.g., Function-as-a-Service (Serverless), Machine Learning (ML), etc.) with each again having different sets of data requirements and levels of maturity which will increase the need for domain-specific validation.
 
 #### Functional priorities
 
-The utility additionally supports commands that helps provide insight into contents of the SBOM.  These commands have been developed to support verification for some of the primary SBOM use cases (see https://cyclonedx.org/use-cases/).  Functional development has been prioritized to support those use cases that support legal, security and compliance analysis which are foundational.
+The utility additionally supports commands that help provide insight into contents of the SBOM.  These commands have been developed to support verification for some of the primary SBOM use cases (see https://cyclonedx.org/use-cases/).  Functional development has been prioritized to support those use cases that support legal, security and compliance analysis which are foundational.
 
 Initially, such functionality is reflected in the `license` and `query` commands which to be able to extract or produce formatted reports from inherent knowledge of the CycloneDX format.
 
