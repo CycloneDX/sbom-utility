@@ -54,19 +54,19 @@ func TestValidateCdx14IbmMinRequiredBasic(t *testing.T) {
 
 // TODO - remove once product id, del. id, legal disclaimer, legal coverage
 // can validate using only "contains" schema
-func TestValidateCustomCdx13MinIBMRequiredBasicCustomProperties(t *testing.T) {
-	innerCustomValidateError(t,
-		TEST_CDX_1_3_IBM_MIN_REQUIRED,
-		SCHEMA_VARIANT_IBM_DEV,
-		nil)
-}
+// func TestValidateCustomCdx13MinIBMRequiredBasicCustomProperties(t *testing.T) {
+// 	innerCustomValidateError(t,
+// 		TEST_CDX_1_3_IBM_MIN_REQUIRED,
+// 		SCHEMA_VARIANT_IBM_DEV,
+// 		nil)
+// }
 
-func TestValidateCustomCdx14MinIBMRequiredBasicCustomProperties(t *testing.T) {
-	innerCustomValidateError(t,
-		TEST_CDX_1_4_IBM_MIN_REQUIRED,
-		SCHEMA_VARIANT_IBM_DEV,
-		nil)
-}
+// func TestValidateCustomCdx14MinIBMRequiredBasicCustomProperties(t *testing.T) {
+// 	innerCustomValidateError(t,
+// 		TEST_CDX_1_4_IBM_MIN_REQUIRED,
+// 		SCHEMA_VARIANT_IBM_DEV,
+// 		nil)
+// }
 
 // -------------------------------------------
 // Schema: root tests

@@ -36,6 +36,7 @@
             "lastname",
             "LDFLAGS",
             "losslessly",
+            "NOASSERTION",
             "NTIA",
             "Nyffenegger",
             "OPENCHAIN",

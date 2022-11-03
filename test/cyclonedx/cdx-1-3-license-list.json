@@ -47,6 +47,14 @@
           }
         }
       ]
+    },
+    {
+      "bom-ref": "service:example.com/myservices/bar",
+      "name": "Bar",
+      "decription": "Bar service",
+      "endpoints": [
+          "https://example.com/myservice/bar"
+      ]
     }
   ],
   "components": [
@@ -211,6 +219,14 @@
           }
         }
       ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:lib/libraryNoLicense@1.0.0",
+      "purl": "pkg:lib/libraryNoLicense@1.0.0",
+      "name": "Library NoLicense",
+      "version": "1.0.0",
+      "description": "Library \"NoLicense\" description."
     }
   ]
 }

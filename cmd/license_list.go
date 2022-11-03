@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
 	"strings"
 	"text/tabwriter"
 
@@ -88,8 +89,17 @@ func processLicenseListResults(err error) {
 	}
 }
 
+// NOTE: parm. licenseKeys is actually a string slice
+func isEmptyLicenseList(licenseKeys []interface{}) (empty bool) {
+	if len(licenseKeys) == 0 ||
+		(len(licenseKeys) == 1 && licenseKeys[0].(string) == LICENSE_NONE) {
+		empty = true
+	}
+	return
+}
+
 // NOTE: The license command ONLY WORKS on CDX format
-// TODO: "list" commands need not validate (only unmarshal)... only report "none found"
+// NOTE: "list" commands need not validate (only unmarshal)... only report "none found"
 // TODO: Perhaps make a --validate flag to allow optional validation prior to listing
 func listCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	getLogger().Enter(args)
@@ -140,7 +150,7 @@ func ListLicenses(output io.Writer, format string, summary bool) (err error) {
 
 	// Hash all licenses within input file
 	getLogger().Infof("Scanning document for licenses...")
-	err = hashDocumentLicenses(document)
+	err = findDocumentLicenses(document)
 
 	if err != nil {
 		return
@@ -234,7 +244,8 @@ func DisplayLicenseListCSV(output io.Writer) {
 
 	// Emit warning (confirmation) message if no licenses found in document
 	licenseKeys := licenseMap.KeySet()
-	if len(licenseKeys) == 0 {
+
+	if isEmptyLicenseList(licenseKeys) {
 		currentRow = append(currentRow, MSG_LICENSE_NO_LICENSES_FOUND)
 		w.Write(currentRow)
 		return
@@ -293,28 +304,27 @@ func DisplayLicenseListSummaryText(output io.Writer) {
 	fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
 	// Display a warning messing in the actual output and return (short-circuit)
-	licenseMapKeys := licenseMap.KeySet()
+	licenseKeys := licenseMap.KeySet()
 
-	if len(licenseMapKeys) == 0 {
+	// Emit no license warning into output
+	if isEmptyLicenseList(licenseKeys) {
 		fmt.Fprintf(w, "%s\n", MSG_LICENSE_NO_LICENSES_FOUND)
 		return
 	}
 
-	for _, licenseName := range licenseMapKeys {
+	sort.Slice(licenseKeys, func(i, j int) bool {
+		return licenseKeys[i].(string) < licenseKeys[j].(string)
+	})
+
+	for _, licenseName := range licenseKeys {
 		arrLicenseInfo, _ := licenseMap.Get(licenseName)
 
 		for _, iInfo := range arrLicenseInfo {
 			licenseInfo = iInfo.(LicenseInfo)
-			policy, err := FindPolicy(licenseInfo)
-
-			if err != nil {
-				getLogger().Errorf("%s", MSG_LICENSE_INVALID_DATA)
-				os.Exit(ERROR_VALIDATION)
-			}
 
 			// Format line and write to output
 			fmt.Fprintf(w, "%s\t%v\t%s\t%s\t%s\t%s\n",
-				policy.UsagePolicy,
+				licenseInfo.Policy.UsagePolicy,
 				LC_TYPE_NAMES[licenseInfo.LicenseChoiceType],
 				licenseName,
 				licenseInfo.EntityName,
@@ -349,15 +359,17 @@ func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
 	}
 
 	// retrieve all hashed licenses (keys) found in the document and verify we have ones to process
-	licenseMapKeys := licenseMap.KeySet()
-	if len(licenseMapKeys) == 0 {
+	licenseKeys := licenseMap.KeySet()
+
+	// Emit no license warning into output
+	if isEmptyLicenseList(licenseKeys) {
 		currentRow = append(currentRow, MSG_LICENSE_NO_LICENSES_FOUND)
 		w.Write(currentRow)
 		return
 	}
 
 	// output the each license entry as a row
-	for _, licenseName := range licenseMapKeys {
+	for _, licenseName := range licenseKeys {
 		arrLicenseInfo, _ := licenseMap.Get(licenseName)
 
 		// An SBOM SHOULD always contain at least 1 (declared) license
@@ -369,12 +381,6 @@ func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
 
 		for _, iInfo := range arrLicenseInfo {
 			licenseInfo = iInfo.(LicenseInfo)
-			policy, errPolicy := FindPolicy(licenseInfo)
-
-			if errPolicy != nil {
-				getLogger().Errorf("%s", MSG_LICENSE_INVALID_DATA)
-				os.Exit(ERROR_VALIDATION)
-			}
 
 			// reset line after each iteration
 			currentRow = nil
@@ -382,7 +388,7 @@ func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
 			// Note: For CSV files each row should be terminated by a newline
 			// which is automatically done by the CSV writer
 			currentRow = append(currentRow,
-				policy.UsagePolicy,
+				licenseInfo.Policy.UsagePolicy,
 				LC_TYPE_NAMES[licenseInfo.LicenseChoiceType],
 				licenseName.(string),
 				licenseInfo.EntityName,
@@ -418,9 +424,10 @@ func DisplayLicenseListSummaryMarkdown(output io.Writer) {
 	fmt.Fprintf(output, "%s\n", alignmentRow)
 
 	// Display a warning messing in the actual output and return (short-circuit)
-	licenseMapKeys := licenseMap.KeySet()
+	licenseKeys := licenseMap.KeySet()
 
-	if len(licenseMapKeys) == 0 {
+	// Emit no license warning into output
+	if isEmptyLicenseList(licenseKeys) {
 		fmt.Fprintf(output, "%s\n", MSG_LICENSE_NO_LICENSES_FOUND)
 		return
 	}
@@ -428,24 +435,19 @@ func DisplayLicenseListSummaryMarkdown(output io.Writer) {
 	var line []string
 	var lineRow string
 
-	for _, licenseName := range licenseMapKeys {
+	for _, licenseName := range licenseKeys {
 		arrLicenseInfo, _ := licenseMap.Get(licenseName)
 
 		for _, iInfo := range arrLicenseInfo {
 			licenseInfo = iInfo.(LicenseInfo)
-			policy, err := FindPolicy(licenseInfo)
-
-			if err != nil {
-				getLogger().Errorf("%s", MSG_LICENSE_INVALID_DATA)
-				os.Exit(ERROR_VALIDATION)
-			}
 
 			// reset loop variables for new assignments
 			line = nil
 			lineRow = ""
 
 			// Format line and write to output
-			line = append(line, policy.UsagePolicy,
+			line = append(line,
+				licenseInfo.Policy.UsagePolicy,
 				LC_TYPE_NAMES[licenseInfo.LicenseChoiceType],
 				licenseName.(string),
 				licenseInfo.EntityName,

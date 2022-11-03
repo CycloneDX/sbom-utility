@@ -65,7 +65,7 @@ test: test_clean
 # Run cmd tests
 test_cmd: test_clean
 	@echo "Testing `cmd` package"
-	go test ./cmd -v
+	go test ./cmd -v --args --quiet
 
 # Run the unit tests
 unit_tests: test_clean

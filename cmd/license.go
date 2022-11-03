@@ -36,6 +36,7 @@ var VALID_SUBCOMMANDS = []string{SUBCOMMAND_LICENSE_LIST, SUBCOMMAND_LICENSE_POL
 // License list default values
 const (
 	LICENSE_LIST_NOT_APPLICABLE = "N/A"
+	LICENSE_NONE                = "NOASSERTION"
 )
 
 // LicenseChoice - Choice type
@@ -68,18 +69,39 @@ var LC_TYPE_NAMES = [...]string{"invalid", "id", "name", "expression"}
 type LicenseInfo struct {
 	LicenseLocation   int
 	LicenseChoiceType int
+	LicenseKey        string
 	LicenseChoice     schema.CDXLicenseChoice
+	Policy            LicensePolicy
 	EntityRef         string
 	EntityName        string
 	Component         schema.CDXComponent
 	Service           schema.CDXService
 }
 
-// License hashmaps
+// License hashmap
+// Holds resources (e.g., components, services) declared license(s)
 var licenseMap = slicemultimap.New()
+var licenseSlice []LicenseInfo
 
-func ClearGlobalLicenseHashMap() {
+func ClearGlobalLicenseData() {
 	licenseMap.Clear()
+	licenseSlice = nil
+}
+
+func AppendLicenseInfo(key string, licenseInfo LicenseInfo) {
+	// Append to slice
+	policy, err := FindPolicy(licenseInfo)
+
+	if err != nil {
+		getLogger().Errorf("%s", MSG_LICENSE_INVALID_DATA)
+		os.Exit(ERROR_VALIDATION)
+	}
+	licenseInfo.Policy = policy
+	licenseInfo.LicenseKey = key
+	licenseSlice = append(licenseSlice, licenseInfo)
+
+	// Hash by license key
+	licenseMap.Put(key, licenseInfo)
 }
 
 func NewCommandLicense() *cobra.Command {
@@ -131,7 +153,7 @@ func licenseCmdImpl(cmd *cobra.Command, args []string) error {
 // 2. (root).metadata.component.licenses[] + all "nested" components
 // 3. (root).components[](.license[]) (each component + all "nested" components)
 // 4. (root).services[](.license[]) (each service + all "nested" services)
-func hashDocumentLicenses(document *schema.Sbom) (err error) {
+func findDocumentLicenses(document *schema.Sbom) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -145,7 +167,7 @@ func hashDocumentLicenses(document *schema.Sbom) (err error) {
 	}
 
 	// Clear out any old (global)hashmap data (NOTE: 'go test' needs this)
-	ClearGlobalLicenseHashMap()
+	ClearGlobalLicenseData()
 
 	// Before looking for license data, fully unmarshal the SBOM
 	// into named structures
@@ -287,12 +309,21 @@ func hashComponentLicense(cdxComponent schema.CDXComponent, location int) (li *L
 	var licenseInfo LicenseInfo
 
 	if len(cdxComponent.Licenses) == 0 {
-		getLogger().Tracef("%s: %s (`%s`, %s, %s)",
+		// hash any component w/o a license using special key name
+		licenseInfo.Component = cdxComponent
+		licenseInfo.LicenseLocation = location
+		licenseInfo.EntityName = cdxComponent.Name
+		licenseInfo.EntityRef = cdxComponent.BomRef
+		AppendLicenseInfo(LICENSE_NONE, licenseInfo)
+
+		getLogger().Warningf("%s: %s (`%s`, %s, %s)",
 			"No license found for component. bomRef",
 			cdxComponent.BomRef,
 			cdxComponent.Name,
 			cdxComponent.Version,
 			cdxComponent.Purl)
+		// No actual licenses to process
+		return
 	}
 
 	for _, licenseChoice := range cdxComponent.Licenses {
@@ -307,6 +338,7 @@ func hashComponentLicense(cdxComponent schema.CDXComponent, location int) (li *L
 		err = hashLicenseInfo(licenseInfo)
 
 		if err != nil {
+			getLogger().Errorf("Unable to hash empty license: %v", licenseInfo)
 			return
 		}
 	}
@@ -331,11 +363,21 @@ func hashServiceLicense(cdxService schema.CDXService, location int) (err error) 
 	var licenseInfo LicenseInfo
 
 	if len(cdxService.Licenses) == 0 {
+		// hash any service w/o a license using special key name
+		licenseInfo.Service = cdxService
+		licenseInfo.LicenseLocation = location
+		licenseInfo.EntityName = cdxService.Name
+		licenseInfo.EntityRef = cdxService.BomRef
+		AppendLicenseInfo(LICENSE_NONE, licenseInfo)
+
 		getLogger().Warningf("%s: %s (`%s`, %s)",
 			"No license found for service. bomRef",
 			cdxService.BomRef,
 			cdxService.Name,
 			cdxService.Version)
+
+		// No actual licenses to process
+		return
 	}
 
 	for _, licenseChoice := range cdxService.Licenses {
@@ -357,6 +399,7 @@ func hashServiceLicense(cdxService schema.CDXService, location int) (err error) 
 	if len(cdxService.Services) > 0 {
 		err = hashServicesLicenses(cdxService.Services, location)
 		if err != nil {
+			getLogger().Errorf("Unable to hash empty license: %v", licenseInfo)
 			return
 		}
 	}
@@ -378,25 +421,23 @@ func hashLicenseInfo(licenseInfo LicenseInfo) (err error) {
 
 	if licenseChoice.License.Id != "" {
 		licenseInfo.LicenseChoiceType = LC_TYPE_ID
-		licenseMap.Put(licenseChoice.License.Id, licenseInfo)
+		AppendLicenseInfo(licenseChoice.License.Id, licenseInfo)
 	} else if licenseChoice.License.Name != "" {
 		licenseInfo.LicenseChoiceType = LC_TYPE_NAME
-		licenseMap.Put(licenseChoice.License.Name, licenseInfo)
+		AppendLicenseInfo(licenseChoice.License.Name, licenseInfo)
+	} else if licenseChoice.Expression != "" {
+		licenseInfo.LicenseChoiceType = LC_TYPE_EXPRESSION
+		AppendLicenseInfo(licenseChoice.Expression, licenseInfo)
 	} else {
-		if licenseChoice.Expression != "" {
-			licenseInfo.LicenseChoiceType = LC_TYPE_EXPRESSION
-			licenseMap.Put(licenseChoice.Expression, licenseInfo)
-		} else {
-			// Note: This code path only executes if hashing is performed
-			// without schema validation (which would find this as an error)
-			// Note: licenseInfo.LicenseChoiceType = 0 // default, invalid
-			baseError := NewSbomLicenseDataError()
-			baseError.AppendMessage(fmt.Sprintf(": for entity: `%s` (%s)",
-				licenseInfo.EntityRef,
-				licenseInfo.EntityName))
-			err = baseError
-		}
-
+		// Note: This code path only executes if hashing is performed
+		// without schema validation (which would find this as an error)
+		// Note: licenseInfo.LicenseChoiceType = 0 // default, invalid
+		baseError := NewSbomLicenseDataError()
+		baseError.AppendMessage(fmt.Sprintf(": for entity: `%s` (%s)",
+			licenseInfo.EntityRef,
+			licenseInfo.EntityName))
+		err = baseError
 	}
+
 	return
 }

@@ -222,18 +222,13 @@ func validateLicenseData(document *schema.Sbom) (err error) {
 
 	// Now we need to validate that the input file contains licenses
 	// the license "hash" function does this validation checking for us...
-	err = hashDocumentLicenses(document)
+	err = findDocumentLicenses(document)
 
 	if err != nil {
 		return
 	}
 
-	// verify that the input file contained valid license data
-	if licenseMap.KeySet() == nil || len(licenseMap.KeySet()) == 0 {
-		// This should be an invalid condition, create an error
-		err = NewSbomLicenseNotFoundError(document)
-		return
-	}
+	// TODO: verify that the input file contained valid license data
 
 	return
 }
