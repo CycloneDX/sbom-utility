@@ -1,0 +1,107 @@
+{
+	"bomFormat": "CycloneDX",
+	"specVersion": "1.3",
+	"version": 1,
+	"serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7e0",
+	"metadata": {
+		"timestamp": "2021-04-14T07:20:00.000Z",
+		"tools": [
+			{
+				"vendor": "IBM",
+				"name": "IBM Cloud Continuous Delivery - Code Risk Analyzer",
+				"version": "0.1.12",
+				"hashes": [
+					{
+						"alg": "SHA-1",
+						"content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+					}
+				]
+			}
+		],
+		"component": {
+			"type": "application",
+			"bom-ref": "pkg:app/sample@2.0.0",
+			"purl": "pkg:app/sample@2.0.0",
+			"name": "sample app",
+			"version": "2.0.0",
+			"description": "Sample application",
+            "components": [
+				{
+					"type": "library",
+					"bom-ref": "pkg:npm/bad-nest@1.0.0",
+					"purl": "pkg:npm/bad-nest@1.0.0",
+					"name": "bad nest",
+					"version": "1.0.0",
+					"description": "Bad nested library"
+				}
+			],
+			"properties": [
+				{
+					"name": "urn:ibm:names:identifier:deliverable:",
+					"value": "71C22290D7DB11EBAA175CFD3E629A2A"
+				}
+			],
+			"licenses": [
+				{
+					"license": {
+						"id": "MIT"
+					}
+				}
+			]
+		},
+		"manufacture": {
+			"name": "Apache Software Foundation (ASF)",
+			"url": [
+				"https://www.apache.org"
+			],
+			"contact": [
+				{
+					"email": "contact@apache.org"
+				}
+			]
+		},
+		"supplier": {
+			"name": "IBM",
+			"url": [
+				"https://www.ibm.com"
+			],
+			"contact": [
+				{
+					"email": "psirt@us.ibm.com"
+				}
+			]
+		},
+		"licenses": [
+			{
+				"license": {
+					"id": "Apache-2.0"
+				}
+			}
+		]
+	},
+	"components": [
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/libraryA@1.0.0",
+			"purl": "pkg:npm/libraryA@1.0.0",
+			"name": "Library A",
+			"version": "1.0.0",
+			"description": "Library A description"
+		},
+		{
+			"type": "library",
+			"bom-ref": "pkg:npm/libraryB@1.0.0",
+			"purl": "pkg:npm/libraryB@1.0.0",
+			"name": "Library B",
+			"version": "1.0.0",
+			"description": "Library B description."
+		}
+	],
+	"externalReferences": [
+		{
+			"url": "https://www.example.com/",
+			"comment": "An example website as a URL",
+			"type": "website"
+		}
+	]
+}

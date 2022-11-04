@@ -1,0 +1,173 @@
+{
+      "bomFormat": "CycloneDX",
+      "specVersion": "1.4",
+      "version": 1,
+      "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
+      "externalReferences": [
+        {
+          "url": "psirt@us.ibm.com",
+          "comment": "Support for questions about SBOM contents",
+          "type": "support"
+        }
+      ],
+      "metadata": {
+        "timestamp": "2021-08-03T03:20:53.771Z",
+        "properties": [
+          {
+            "name": "urn:ibm:legal:disclaimer",
+            "value": "This SBOM is IBM Confidential Information. The person(s) to whom IBM provides this SBOM may only share the SBOM with those within its company who have a need to know. For clarity, this SBOM may not be shared with any other company or other third-party. IBM offers no representations or warranties regarding the SBOM."
+          },
+          {
+            "name": "urn:ibm:legal:coverage",
+            "value": "This SBOM is current as of the date it was generated and is subject to change. This SBOM covers the content of the indicated component, but does not cover the content of any components or dependencies therein (which may be covered by their own SBOMs provided by their respective suppliers)."
+          }
+        ],
+        "component": {
+          "type": "application",
+          "bom-ref": "pkg:oci/www.ibm.com/fixcentral/apiconnect@10.0.4.0",
+          "purl": "pkg:oci/www.ibm.com/fixcentral/apiconnect@10.0.4.0",
+          "name": "IBM API Connect 10.0.4.0",
+          "version": "10.0.4.0",
+          "licenses": [
+            {
+              "license": {
+                "id": "Apache-2.0"
+              }
+            }
+          ],
+          "properties": [
+            {
+              "name": "urn:ibm:names:identifier:deliverable:",
+              "value": "71C22290D7DB11EBAA175CFD3E629A2A"
+            },
+            {
+              "name": "urn:ibm:names:identifier:product:",
+              "value": "5737-I23"
+            },
+            {
+              "name": "urn:ibm:names:ch:requirements:packaging:identifier:deliverable",
+              "value": "1DWYIAMMNLDFLHNQDN49129000"
+            }
+          ],
+          "externalReferences": [
+            {
+              "type": "website",
+              "url": "https://www.ibm.com/products/api-connect"
+            }
+          ],
+          "hashes": [
+            {
+              "alg": "SHA-1",
+              "content": "1111aaaa2222cccc3333dddd4444eeee5555ffff"
+            }
+          ]
+        },
+        "manufacture": {
+          "name": "IBM",
+          "url": [
+            "https://www.ibm.com"
+          ],
+          "contact": [
+            {
+              "email": "psirt@us.ibm.com"
+            }
+          ]
+        },
+        "supplier": {
+          "name": "IBM",
+          "url": [
+            "https://www.ibm.com"
+          ],
+          "contact": [
+            {
+              "email": "psirt@us.ibm.com"
+            }
+          ]
+        },
+        "tools": [
+          {
+            "vendor": "IBM",
+            "name": "PTC Scanning Tool",
+            "version": "1.0.0-beta.1+0099",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+              }
+            ]
+          },
+          {
+            "vendor": "IBM",
+            "name": "IBM Cloud Continuous Delivery - Code Risk Analyzer",
+            "version": "0.1.12",
+            "hashes": [
+              {
+                "alg": "SHA-1",
+                "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+              }
+            ]
+          }
+        ],
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          },
+          {
+            "license": {
+              "id": "MIT"
+            }
+          },
+          {
+            "license": {
+              "id": "BSD-2-Clause"
+            }
+          }
+        ]
+      },
+      "components": [
+        {
+          "type": "library",
+          "bom-ref": "pkg:ibm/sample@2.0.0",
+          "purl": "pkg:ibm/sample@2.0.0",
+          "name": "sample",
+          "version": "2.0.0",
+          "description": "Node.js Sample package",
+          "licenses": [
+            {
+              "license": {
+                "id": "BSD-2-Clause"
+              }
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "pkg:npm/body-parser@1.19.0",
+          "purl": "pkg:npm/body-parser@1.19.0",
+          "name": "body-parser",
+          "version": "1.19.0",
+          "description": "Node.js body parsing middleware",
+          "licenses": [
+            {
+              "license": {
+                "id": "MIT"
+              }
+            }
+          ],
+          "hashes": [
+            {
+              "alg": "SHA-1",
+              "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+            }
+          ],
+          "properties": [
+            {
+              "name": "urn:ibm:names:package:pedigree",
+              "value": "uuid:example.com:1234567"
+            }
+          ]
+        }
+      ]
+    }
