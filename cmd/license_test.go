@@ -309,3 +309,12 @@ func TestLicenseListPolicyCdx14InvalidLicenseName(t *testing.T) {
 			TEST_POLICY, TEST_LICENSE_TYPE, TEST_LICENSE_ID_OR_NAME)
 	}
 }
+
+// Make sure we can List all components in an SBOM, including those in hierarchical compositions
+// TODO: Actually verify one or more of the hierarchical comps. appear in list results
+// func TestValidateCustomCompositionHierarchicalComponentList(t *testing.T) {
+// 	innerCustomValidateError(t,
+// 		TEST_CUSTOM_CDX_1_4_COMPOSITION_HIERARCHICAL_COMPONENTS,
+// 		SCHEMA_VARIANT_NONE,
+// 		nil)
+// }

@@ -28,45 +28,39 @@ const (
 
 // Custom-specific test files
 const (
-
 	// Min. Req. - Test versioned documents meet min. schema (variant) requirements
-	TEST_CDX_1_3_IBM_MIN_REQUIRED = "test/custom/cdx-1-3-ibm-min-required.json"
-	TEST_CDX_1_4_IBM_MIN_REQUIRED = "test/custom/cdx-1-4-ibm-min-required.json"
+	TEST_CDX_1_3_IBM_MIN_REQUIRED = "test/custom/ibm/cdx-1-3-ibm-min-required.json"
+	TEST_CDX_1_4_IBM_MIN_REQUIRED = "test/custom/ibm/cdx-1-4-ibm-min-required.json"
+
+	// Composition
+	TEST_CUSTOM_IBM_CDX_1_3_INVALID_COMPOSITION_METADATA_COMPONENT = "test/custom/ibm/cdx-1-3-ibm-invalid-composition-metadata-component.json"
+	TEST_CUSTOM_IBM_CDX_1_3_INVALID_COMPOSITION_COMPONENTS         = "test/custom/ibm/cdx-1-3-ibm-invalid-composition-components.json"
 
 	// Metadata tests
-	TEST_CDX_1_4_IBM_MISSING_DISCLAIMER = "test/custom/cdx-1-4-test-ibm-invalid-disclaimer-missing.json"
+	// TODO: reference new "ibm-custom.json" file (i.e., not used the default "custom.json")
+	//TEST_CUSTOM_IBM_CDX_1_4_MISSING_DISCLAIMER = "test/custom/ibm/cdx-1-4-test-ibm-invalid-disclaimer-missing.json"
 
 	// Merge tests
-	TEST_CUSTOM_CDX_1_3_IBM_MANUAL_DATA = "test/custom/cdx-1-3-ibm-manual-data-example.json"
+	TEST_CUSTOM_IBM_CDX_1_3_MERGE_PRODUCT_DATA = "test/custom/ibm/cdx-1-3-ibm-manual-data-example.json"
 )
 
 // -----------------------------------------------------------
 // Min. req. tests
 // -----------------------------------------------------------
 
-func TestValidateCdx13IbmMinRequiredBasic(t *testing.T) {
-	innerValidateError(t, TEST_CDX_1_3_IBM_MIN_REQUIRED, SCHEMA_VARIANT_IBM_DEV, nil)
+func TestValidateCustomIBMCdx13MinRequiredBasic(t *testing.T) {
+	innerValidateError(t,
+		TEST_CDX_1_3_IBM_MIN_REQUIRED,
+		SCHEMA_VARIANT_IBM_DEV,
+		nil)
 }
 
-func TestValidateCdx14IbmMinRequiredBasic(t *testing.T) {
-	innerValidateError(t, TEST_CDX_1_4_IBM_MIN_REQUIRED, SCHEMA_VARIANT_IBM_DEV, nil)
+func TestValidateCustomIBMCdx14MinRequiredBasic(t *testing.T) {
+	innerValidateError(t,
+		TEST_CDX_1_4_IBM_MIN_REQUIRED,
+		SCHEMA_VARIANT_IBM_DEV,
+		nil)
 }
-
-// TODO - remove once product id, del. id, legal disclaimer, legal coverage
-// can validate using only "contains" schema
-// func TestValidateCustomCdx13MinIBMRequiredBasicCustomProperties(t *testing.T) {
-// 	innerCustomValidateError(t,
-// 		TEST_CDX_1_3_IBM_MIN_REQUIRED,
-// 		SCHEMA_VARIANT_IBM_DEV,
-// 		nil)
-// }
-
-// func TestValidateCustomCdx14MinIBMRequiredBasicCustomProperties(t *testing.T) {
-// 	innerCustomValidateError(t,
-// 		TEST_CDX_1_4_IBM_MIN_REQUIRED,
-// 		SCHEMA_VARIANT_IBM_DEV,
-// 		nil)
-// }
 
 // -------------------------------------------
 // Schema: root tests
@@ -76,20 +70,39 @@ func TestValidateCdx14IbmMinRequiredBasic(t *testing.T) {
 // Schema: metadata tests
 // -------------------------------------------
 
-// -------------------------------------------
-// Property uniqueness tests
-// -------------------------------------------
+// TODO: test to assure we do not allow version to be > 1
 
 // -------------------------------------------
 // Composition tests
 // -------------------------------------------
 
+// Error if hierarchical components found in top-level "metadata.component" object
+func TestValidateCustomIBMErrorCdx13InvalidCompositionMetadataComponent(t *testing.T) {
+	innerCustomValidateInvalidSBOMInnerError(t,
+		TEST_CUSTOM_IBM_CDX_1_3_INVALID_COMPOSITION_METADATA_COMPONENT,
+		SCHEMA_VARIANT_IBM_DEV,
+		&SBOMCompositionError{})
+}
+
+// Error if hierarchical components in top-level "components" array
+func TestValidateCustomIBMErrorCdx13InvalidCompositionComponents(t *testing.T) {
+	innerCustomValidateInvalidSBOMInnerError(t,
+		TEST_CUSTOM_IBM_CDX_1_3_INVALID_COMPOSITION_METADATA_COMPONENT,
+		SCHEMA_VARIANT_IBM_DEV,
+		&SBOMCompositionError{})
+}
+
 // -----------------------------------------------------------
 // CycloneDX - merge tests
 // ----------------------------------------------------------
 
-func TestValidateCustomCdx13IbmManualData(t *testing.T) {
-	innerValidateError(t, TEST_CUSTOM_CDX_1_3_IBM_MANUAL_DATA,
+// NOTE: the "merge" document SHOULD be a valid CDX SBOM, but with
+// only a subset of fields (i.e., do NOT validate against an IBM schema)
+// TODO": Once "merge" command is completed, also verify not just the merge data,
+// but also the resultant merged SBOM
+func TestValidateCustomIBMCdx13MergeProductData(t *testing.T) {
+	innerValidateError(t,
+		TEST_CUSTOM_IBM_CDX_1_3_MERGE_PRODUCT_DATA,
 		SCHEMA_VARIANT_NONE,
 		nil)
 }

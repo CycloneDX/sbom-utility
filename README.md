@@ -119,9 +119,8 @@ CycloneDX  1.2       strict
 CycloneDX  1.3       (latest)
 CycloneDX  1.3       strict
 CycloneDX  1.4       (latest)
-CycloneDX  1.3       custom-dev
-CycloneDX  1.4       custom-dev
-CycloneDX  1.4       custom-rel
+CycloneDX  1.3       custom
+CycloneDX  1.4       custom
 ```
 
 #### Adding schemas

@@ -403,9 +403,9 @@ func (sbom *Sbom) FindFormatAndSchema() (err error) {
 		}
 	}
 
-	// Did not find the format in our configuration (list)
-	errFindFormat := NewUnknownFormatError(utils.GlobalFlags.InputFile)
-	return errFindFormat
+	// if we reach here, we did not find the format in our configuration (list)
+	err = NewUnknownFormatError(utils.GlobalFlags.InputFile)
+	return
 }
 
 // There are multiple variants possible within a given version

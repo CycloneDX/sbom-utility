@@ -25,27 +25,31 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
+// Custom JSON schema files for testing
+const (
+	SCHEMA_VARIANT_CUSTOM      = "custom"
+	TEST_SCHEMA_CDX_1_3_CUSTOM = "resources/schema/test/bom-1.3-custom.schema.json"
+	TEST_SCHEMA_CDX_1_4_CUSTOM = "resources/schema/test/bom-1.4-custom.schema.json"
+)
+
 // Custom-specific test files
 const (
-
-	// Root-level tests
-	TEST_CUSTOM_CDX_1_3_INVALID_COMPOSITION_METADATA_COMPONENT = "test/custom/cdx-1-3-ibm-invalid-composition-metadata-component.json"
-
 	// Metadata tests
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_INVALID = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_MISSING = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-missing.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE  = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-unique.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_COVERAGE_INVALID   = "test/custom/cdx-1-4-test-custom-metadata-property-coverage-invalid.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_COVERAGE_MISSING   = "test/custom/cdx-1-4-test-custom-metadata-property-coverage-missing.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_COVERAGE_UNIQUE    = "test/custom/cdx-1-4-test-custom-metadata-property-coverage-unique.json"
+	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_INVALID     = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json"
+	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_MISSING     = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-missing.json"
+	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE      = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-unique.json"
+	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_INVALID = "test/custom/cdx-1-4-test-custom-metadata-property-classification-invalid.json"
+	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_MISSING = "test/custom/cdx-1-4-test-custom-metadata-property-classification-missing.json"
+	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_UNIQUE  = "test/custom/cdx-1-4-test-custom-metadata-property-classification-unique.json"
 
 	// License tests
 	// Note: The "invalid" tests below is also used in "list" command tests
 	// which tests for a "none found" warning messages being displayed to stdout
 	TEST_CUSTOM_CDX_1_4_INVALID_LICENSES_NOT_FOUND = "test/custom/cdx-1-4-invalid-licenses-not-found.json"
 
-	// Composition tests
-	TEST_CUSTOM_CDX_1_4_COMPOSITION_HIERARCHICAL_COMPONENTS = "test/custom/cdx-1-4-hierarchical-component-list.json"
+	// Composition
+	TEST_CUSTOM_CDX_1_3_INVALID_COMPOSITION_COMPONENTS         = "test/custom/cdx-1-3-test-custom-invalid-composition-components.json"
+	TEST_CUSTOM_CDX_1_3_INVALID_COMPOSITION_METADATA_COMPONENT = "test/custom/cdx-1-3-test-custom-invalid-composition-metadata-component.json"
 )
 
 // -------------------------------------------
@@ -97,15 +101,15 @@ func TestValidateCustomErrorCdx14NoLicensesFound(t *testing.T) {
 func TestValidateCustomCdx14MetadataPropsMissingDisclaimer(t *testing.T) {
 	document, results, _ := innerValidateError(t,
 		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_MISSING,
-		SCHEMA_VARIANT_IBM_DEV,
+		SCHEMA_VARIANT_CUSTOM,
 		&InvalidSBOMError{})
 	getLogger().Debugf("filename: `%s`, results:\n%v", document.GetFilename(), results)
 }
 
-func TestValidateCustomCdx14MetadataPropsMissingCoverage(t *testing.T) {
+func TestValidateCustomCdx14MetadataPropsMissingClassification(t *testing.T) {
 	document, results, _ := innerValidateError(t,
-		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_COVERAGE_MISSING,
-		SCHEMA_VARIANT_IBM_DEV,
+		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_MISSING,
+		SCHEMA_VARIANT_CUSTOM,
 		&InvalidSBOMError{})
 	getLogger().Debugf("filename: `%s`, results:\n%v", document.GetFilename(), results)
 }
@@ -118,7 +122,7 @@ func TestValidateCustomCdx14MetadataPropsInvalidDisclaimer(t *testing.T) {
 
 	innerTestSchemaErrorAndErrorResults(t,
 		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_INVALID,
-		SCHEMA_VARIANT_IBM_DEV,
+		SCHEMA_VARIANT_CUSTOM,
 		SCHEMA_ERROR_TYPE,
 		SCHEMA_ERROR_FIELD,
 		SCHEMA_ERROR_VALUE)
@@ -129,21 +133,21 @@ func TestValidateCustomCdx14MetadataPropsInvalidDisclaimer(t *testing.T) {
 
 	innerTestSchemaErrorAndErrorResults(t,
 		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_INVALID,
-		SCHEMA_VARIANT_IBM_DEV,
+		SCHEMA_VARIANT_CUSTOM,
 		SCHEMA_ERROR_TYPE,
 		SCHEMA_ERROR_FIELD,
 		SCHEMA_ERROR_VALUE)
 }
 
-func TestValidateCustomCdx14MetadataPropsInvalidCoverage(t *testing.T) {
-	// coverage property
+func TestValidateCustomCdx14MetadataPropsInvalidClassification(t *testing.T) {
+
 	SCHEMA_ERROR_TYPE := "contains"
 	SCHEMA_ERROR_FIELD := "metadata.properties"
 	SCHEMA_ERROR_VALUE := ""
 
 	innerTestSchemaErrorAndErrorResults(t,
-		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_COVERAGE_INVALID,
-		SCHEMA_VARIANT_IBM_DEV,
+		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_INVALID,
+		SCHEMA_VARIANT_CUSTOM,
 		SCHEMA_ERROR_TYPE,
 		SCHEMA_ERROR_FIELD,
 		SCHEMA_ERROR_VALUE)
@@ -153,8 +157,8 @@ func TestValidateCustomCdx14MetadataPropsInvalidCoverage(t *testing.T) {
 	SCHEMA_ERROR_VALUE = ""
 
 	innerTestSchemaErrorAndErrorResults(t,
-		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_COVERAGE_INVALID,
-		SCHEMA_VARIANT_IBM_DEV,
+		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_INVALID,
+		SCHEMA_VARIANT_CUSTOM,
 		SCHEMA_ERROR_TYPE,
 		SCHEMA_ERROR_FIELD,
 		SCHEMA_ERROR_VALUE)
@@ -164,18 +168,19 @@ func TestValidateCustomCdx14MetadataPropsInvalidCoverage(t *testing.T) {
 // Property uniqueness tests
 // -------------------------------------------
 // Note: The "uniqueness" constraint for objects is not supported in JSON schema v7
+
 func TestValidateCustomCdx14MetadataPropertyUniqueDisclaimer(t *testing.T) {
 	document, results, _ := innerCustomValidateInvalidSBOMInnerError(t,
 		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE,
-		SCHEMA_VARIANT_IBM_DEV,
+		SCHEMA_VARIANT_NONE,
 		&SBOMMetadataPropertyError{})
 	getLogger().Debugf("filename: `%s`, results:\n%v", document.GetFilename(), results)
 }
 
-func TestValidateCustomCdx14MetadataPropertyUniqueCoverage(t *testing.T) {
+func TestValidateCustomCdx14MetadataPropertyUniqueClassification(t *testing.T) {
 	document, results, _ := innerCustomValidateInvalidSBOMInnerError(t,
 		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE,
-		SCHEMA_VARIANT_IBM_DEV,
+		SCHEMA_VARIANT_NONE,
 		&SBOMMetadataPropertyError{})
 	getLogger().Debugf("filename: `%s`, results:\n%v", document.GetFilename(), results)
 }
@@ -188,15 +193,14 @@ func TestValidateCustomCdx14MetadataPropertyUniqueCoverage(t *testing.T) {
 func TestValidateCustomErrorCdx13InvalidCompositionMetadataComponent(t *testing.T) {
 	innerCustomValidateInvalidSBOMInnerError(t,
 		TEST_CUSTOM_CDX_1_3_INVALID_COMPOSITION_METADATA_COMPONENT,
-		SCHEMA_VARIANT_IBM_DEV,
+		SCHEMA_VARIANT_NONE,
 		&SBOMCompositionError{})
 }
 
-// Make sure we can List all components in an SBOM, including those in hierarchical compositions
-// TODO: should actually test for component count
-func TestValidateCustomCompositionHierarchicalComponentList(t *testing.T) {
-	innerValidateError(t,
-		TEST_CUSTOM_CDX_1_4_COMPOSITION_HIERARCHICAL_COMPONENTS,
+// Error if hierarchical components in top-level "components" array
+func TestValidateCustomErrorCdx13InvalidCompositionComponents(t *testing.T) {
+	innerCustomValidateInvalidSBOMInnerError(t,
+		TEST_CUSTOM_CDX_1_3_INVALID_COMPOSITION_METADATA_COMPONENT,
 		SCHEMA_VARIANT_NONE,
-		nil)
+		&SBOMCompositionError{})
 }

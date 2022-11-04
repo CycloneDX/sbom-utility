@@ -37,12 +37,6 @@ const (
 	TEST_CDX_1_3_SYNTAX_ERR_2 = "test/cyclonedx/cdx-1-3-syntax-err-2.json"
 )
 
-// Custom JSON schema files for testing
-const (
-	TEST_SCHEMA_CDX_1_3_CUSTOM = "test/resources/schema/bom-1.3-custom.schema.json"
-	TEST_SCHEMA_CDX_1_4_CUSTOM = "test/resources/schema/bom-1.4-custom.schema.json"
-)
-
 // Mature SBOMs used to test various schemas and queries
 const (
 	TEST_CDX_1_3_MATURITY_BASE = "test/cyclonedx/cdx-1-3-mature-example-1.json"
@@ -184,6 +178,8 @@ func TestValidateSyntaxErrorCdx13Test2(t *testing.T) {
 // -----------------------------------------------------------
 // Custom schema tests (i.e., `--force` flag) tests
 // -----------------------------------------------------------
+// NOTE: None of these tests actually test an SBOM against custom schema;
+// those tests are instead run in "validate_custom_test.go"
 
 // Force validation against a "custom" schema with compatible format (CDX) and version (1.3)
 func TestValidateForceCustomSchemaCdx13(t *testing.T) {
