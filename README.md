@@ -60,7 +60,7 @@ Since the utility comes with a default configuration file and input schemas read
 Over time, we hope to be able to create a release process for the binary with just the necessary supporting files, but at this time achieving the validation function is tactically important.
 
 ```bash
-git clone git@github.ibm.com:Supply-Chain-Security/sbom-utility.git
+git clone git@github.com/ibm/Supply-Chain-Security/sbom-utility.git
 ```
 
 ---
