@@ -191,8 +191,8 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 	} else {
 		// Load the matching JSON schema (format, version and variant) from embedded resources
 		// i.e., using the matching schema found in config.json (as SchemaInfo)
-		getLogger().Infof("Loading schema `%s`...", document.SchemaInfo.Name)
-		bSchema, errRead = resources.SBOMSchemaFiles.ReadFile(document.SchemaInfo.Name)
+		getLogger().Infof("Loading schema `%s`...", document.SchemaInfo.File)
+		bSchema, errRead = resources.SBOMSchemaFiles.ReadFile(document.SchemaInfo.File)
 
 		if errRead != nil {
 			// we force result to INVALID as any errors from the library means

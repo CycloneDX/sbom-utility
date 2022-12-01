@@ -83,15 +83,16 @@ func TestValidateCustomFormatUnsupportedSPDX(t *testing.T) {
 }
 
 // -------------------------------------------
-// Schema: root tests
+// Schema: cross-document tests
 // -------------------------------------------
 
 // Error if no licenses found in entirety of SBOM (variant none)
 func TestValidateCustomErrorCdx14NoLicensesFound(t *testing.T) {
-	innerCustomValidateError(t,
+	document, results, _ := innerCustomValidateError(t,
 		TEST_CUSTOM_CDX_1_4_INVALID_LICENSES_NOT_FOUND,
 		SCHEMA_VARIANT_NONE,
 		&InvalidSBOMError{})
+	getLogger().Debugf("filename: `%s`, results:\n%v", document.GetFilename(), results)
 }
 
 // -------------------------------------------

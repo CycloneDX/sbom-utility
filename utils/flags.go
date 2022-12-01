@@ -34,6 +34,11 @@ type CommandFlags struct {
 	WorkingDir string
 	ExecDir    string
 
+	// Configurations
+	ConfigSchemaFile           string
+	ConfigCustomValidationFile string
+	ConfigLicensePolicyFile    string
+
 	// persistent flags (common to all commands)
 	Quiet            bool // suppresses all non-essential (informational) output from a command. Overrides any other log-level commands.
 	Trace            bool // trace logging
@@ -43,7 +48,7 @@ type CommandFlags struct {
 	OutputSbomFormat string
 
 	// License flags
-	LicensePolicyConfigFile string
+	//LicensePolicyConfigFile string
 
 	// Validate (local) flags
 	ForcedJsonSchemaFile    string

@@ -49,18 +49,21 @@ const (
 )
 
 const (
-	FLAG_TRACE                 = "trace"
-	FLAG_TRACE_SHORT           = "t"
-	FLAG_DEBUG                 = "debug"
-	FLAG_DEBUG_SHORT           = "d"
-	FLAG_FILENAME_INPUT        = "input-file"
-	FLAG_FILENAME_INPUT_SHORT  = "i"
-	FLAG_FILENAME_OUTPUT       = "output-file"
-	FLAG_FILENAME_OUTPUT_SHORT = "o"
-	FLAG_QUIET_MODE            = "quiet"
-	FLAG_QUIET_MODE_SHORT      = "q"
-	FLAG_LOG_OUTPUT_INDENT     = "indent"
-	FLAG_FILE_OUTPUT_FORMAT    = "format"
+	FLAG_CONFIG_SCHEMA            = "config-schema"
+	FLAG_CONFIG_LICENSE_POLICY    = "config-license-policy"
+	FLAG_CONFIG_CUSTOM_VALIDATION = "config-custom-validation"
+	FLAG_TRACE                    = "trace"
+	FLAG_TRACE_SHORT              = "t"
+	FLAG_DEBUG                    = "debug"
+	FLAG_DEBUG_SHORT              = "d"
+	FLAG_FILENAME_INPUT           = "input-file"
+	FLAG_FILENAME_INPUT_SHORT     = "i"
+	FLAG_FILENAME_OUTPUT          = "output-file"
+	FLAG_FILENAME_OUTPUT_SHORT    = "o"
+	FLAG_QUIET_MODE               = "quiet"
+	FLAG_QUIET_MODE_SHORT         = "q"
+	FLAG_LOG_OUTPUT_INDENT        = "indent"
+	FLAG_FILE_OUTPUT_FORMAT       = "format"
 )
 
 const (
@@ -124,8 +127,12 @@ func init() {
 	// Tell Cobra what our Cobra "init" call back method is
 	cobra.OnInitialize(initConfigurations)
 
+	// Declare top-level, persistent flags used for configuration of utility
+	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigSchemaFile, FLAG_CONFIG_SCHEMA, "", DEFAULT_SCHEMA_CONFIG, "TODO")
+	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigLicensePolicyFile, FLAG_CONFIG_LICENSE_POLICY, "", DEFAULT_LICENSE_POLICIES, "TODO")
+	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigCustomValidationFile, FLAG_CONFIG_CUSTOM_VALIDATION, "", DEFAULT_CUSTOM_VALIDATION_CONFIG, "TODO")
+
 	// Declare top-level, persistent flags and where to place the post-parse values
-	// TODO: move command help strings to (centralized) constants for better editing/translation across all files
 	rootCmd.PersistentFlags().BoolVarP(&utils.GlobalFlags.Trace, FLAG_TRACE, FLAG_TRACE_SHORT, false, MSG_FLAG_TRACE)
 	rootCmd.PersistentFlags().BoolVarP(&utils.GlobalFlags.Debug, FLAG_DEBUG, FLAG_DEBUG_SHORT, false, MSG_FLAG_DEBUG)
 	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.InputFile, FLAG_FILENAME_INPUT, FLAG_FILENAME_INPUT_SHORT, "", MSG_FLAG_INPUT)
@@ -175,7 +182,7 @@ func initConfigurations() {
 
 	// Load application configuration file (i.e., primarily SBOM supported Formats/Schemas)
 	// TODO: page fault "load" of data only when needed
-	errCfg := schema.LoadFormatBasedSchemas(DEFAULT_SCHEMA_CONFIG)
+	errCfg := schema.LoadFormatBasedSchemas(utils.GlobalFlags.ConfigSchemaFile)
 	if errCfg != nil {
 		getLogger().Error(errCfg.Error())
 		os.Exit(ERROR_APPLICATION)
@@ -183,19 +190,16 @@ func initConfigurations() {
 
 	// Load custom validation file
 	// TODO: page fault "load" of data only when needed (sync.Once)
-	errCfg = schema.LoadCustomValidationConfig(DEFAULT_CUSTOM_VALIDATION_CONFIG)
+	errCfg = schema.LoadCustomValidationConfig(utils.GlobalFlags.ConfigCustomValidationFile)
 	if errCfg != nil {
 		getLogger().Error(errCfg.Error())
 		os.Exit(ERROR_APPLICATION)
 	}
 
-	// i.e., License approval policies
-	if utils.GlobalFlags.LicensePolicyConfigFile == "" {
-		utils.GlobalFlags.LicensePolicyConfigFile = DEFAULT_LICENSE_POLICIES
-	}
-
+	// License information and approval policies (customizable)
+	// TODO: page fault "load" of data only when needed (sync.Once)
 	licensePolicyConfig = new(LicenseComplianceConfig)
-	errPolicies := licensePolicyConfig.LoadLicensePolicies(utils.GlobalFlags.LicensePolicyConfigFile)
+	errPolicies := licensePolicyConfig.LoadLicensePolicies(utils.GlobalFlags.ConfigLicensePolicyFile)
 	if errPolicies != nil {
 		getLogger().Error(errPolicies.Error())
 		os.Exit(ERROR_APPLICATION)

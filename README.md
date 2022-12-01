@@ -107,20 +107,22 @@ By default, the utility outputs informational and processing text as well as any
 You can verify which formats and schemas are available for validation by using the `schema` command:
 
 ```bash
-$ ./sbom-utility schema
+./sbom-utility schema
+```
 
-Format     Schema    Variant
-------     ------    -------
-SPDX       SPDX-2.3  (latest)
-SPDX       SPDX-2.2  2.2.1
-SPDX       SPDX-2.2  (latest)
-CycloneDX  1.2       (latest)
-CycloneDX  1.2       strict
-CycloneDX  1.3       (latest)
-CycloneDX  1.3       strict
-CycloneDX  1.4       (latest)
-CycloneDX  1.3       custom
-CycloneDX  1.4       custom
+Sample output:
+
+```bash
+Format     Version   Variant   File                                                 Source
+------     -------   -------   ----                                                 ------
+SPDX       SPDX-2.3  (latest)  schema/spdx/2.3/spdx-schema.json                     https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3/schemas/spdx-schema.json
+SPDX       SPDX-2.2  2.2.1     schema/spdx/2.2.1/spdx-schema.json                   https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json
+SPDX       SPDX-2.2  (latest)  schema/spdx/2.2.2/spdx-schema.json                   https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.2/schemas/spdx-schema.json
+CycloneDX  1.2       (latest)  schema/cyclonedx/1.2/bom-1.2.schema.json             https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2.schema.json
+CycloneDX  1.2       strict    schema/cyclonedx/1.2/bom-1.2-strict.schema.json      https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2-strict.schema.json
+CycloneDX  1.3       (latest)  schema/cyclonedx/1.3/bom-1.3.schema.json             https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3.schema.json
+CycloneDX  1.3       strict    schema/cyclonedx/1.3/bom-1.3-strict.schema.json      https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3-strict.schema.json
+CycloneDX  1.4       (latest)  schema/cyclonedx/1.4/bom-1.4.schema.json             https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json
 ```
 
 #### Adding schemas
@@ -142,8 +144,12 @@ For details see "[Supporting new SBOM formats and schema versions](#supporting-n
 Validating the "juice shop" SBOM (CycloneDX 1.2) example provided in this repository using a "built" (i.e., `make build`) binary:
 
 ```bash
-$ ./sbom-utility validate -i examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json
+./sbom-utility validate -i examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json
+```
 
+Sample output:
+
+```bash
 [INFO] : Unmarshalling file `examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json`...
 [INFO] : Successfully Opened: `examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json`
 [INFO] : Determining file's sbom format and version...
@@ -165,10 +171,10 @@ $ echo $?
 The validation command will use the declared format and version found within the SBOM JSON file itself to lookup the default (latest) matching schema version (as declared in`config.json`; however, if variants of that same schema (same format and version) are declared, they can be requested via the `--variant` command line flag:
 
 ```bash
-$ ./sbom-utility validate -i test/cyclonedx/cdx-1-4-mature-example-1.json --variant custom-dev
+./sbom-utility validate -i test/cyclonedx/cdx-1-4-mature-example-1.json --variant custom-dev
 ```
 
-If you run the sample command above, you would see several "custom" schema errors resulting in an invalid SBOM determination.
+If you run the sample command above, you would see several "custom" schema errors resulting in an invalid SBOM determination:
 
 ```text
 [INFO] : Unmarshalling file `test/cyclonedx/cdx-1-4-mature-example-1.json`...
@@ -219,8 +225,10 @@ Use the `-o <filename>` (or `--output-file`) flag to send the (formatted) output
 For example, output a license summary for an SBOM to a file named `output.txt`:
 
 ```bash
-$ ./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json -o output.txt --summary
+./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json -o output.txt --summary
+```
 
+```bash
 [INFO] : Creating output file: `output.txt`...
 [INFO] : Unmarshalling file `test/cyclonedx/cdx-1-3-license-list.json`...
 [INFO] : Successfully Opened: `test/cyclonedx/cdx-1-3-license-list.json`
@@ -237,7 +245,7 @@ $ ./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json -o out
 This subcommand will emit a list of all licenses found in and SBOM (defaults to `json` format):
 
 ```bash
-$ ./sbom-utility license list -i examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json
+./sbom-utility license list -i examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json
 ```
 
  The output will be an array of CycloneDX `LicenseChoice` data structures.  For example, you would see licenses identified using SPDX IDs, license expressions (of SPDX IDs) or ones with "names" of licenses that do not necessarily map to a canonical SPDX ID along with the actual base64-encoded license or legal text.
@@ -302,8 +310,12 @@ The values for the `policy` column are derived from the `license.json` policy co
 ###### Text format example (default)
 
 ```bash
-$ ./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary
+./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary
+```
 
+Sample output:
+
+```bash
 Policy        Type        ID/Name/Expression                    Component(s)      BOM ref.                            Document location
 ------        ----        ------------------                    ------------      --------                            -----------------
 needs-review  name        UFL                                   ACME Application  pkg:app/sample@1.0.0                metadata.component
@@ -327,8 +339,12 @@ UNDEFINED     id          ADSL                                  Foo             
 ###### CSV format example
 
 ```bash
-$ ./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --quiet --format csv
+./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --quiet --format csv
+```
 
+Sample output:
+
+```bash
 Policy,Type,ID/Name/Expression,Component(s),BOM ref.,Document location
 allow,expression,Apache-2.0 AND (MIT OR BSD-2-Clause),Library B,pkg:lib/libraryB@1.0.0,components
 needs-review,id,GPL-2.0-only,Library C,pkg:lib/libraryC@1.0.0,components
@@ -355,8 +371,12 @@ needs-review,name,AGPL,Library J,pkg:lib/libraryJ@1.0.0,components
 To view a report listing the contents of the current policy file (i.e., `license.json`) which contains an encoding of known software and data licenses by SPDX ID and license family along with a configurable usage policy (i.e., "allow", "deny" or "needs-review") use:
 
 ```bash
-$ ./sbom-utility license policy
+./sbom-utility license policy
+```
 
+Sample output:
+
+```bash
 Policy        Family           SPDX ID               Name                  Annotations
 ------        ------           -------               ----                  -----------
 allow         0BSD             0BSD                  BSD Zero Clause Lice  APPROVED
@@ -391,12 +411,12 @@ If the result set is an array, the array entries can be reduced by applying the 
 In this example, only the `--from` clause is needed to select an object.  The `--select` clause is omitted which is equivalent to using the "select all" wildcard character `*` which returns all fields and values from the object.
 
 ```bash
-$ ./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from metadata.component
+./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from metadata.component
 ```
 is equivalent to
 
 ```
-$ ./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --select * --from metadata.component
+./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --select * --from metadata.component
 ```
 
 Sample output:
@@ -543,17 +563,23 @@ The will produce a binary named `sbom-utility` with version set to `latest` in t
 If you wish to build binaries for all supported combinations of `GOOS` and `GOARCH` values, use the `release` target (i.e., `make release`) which will produce named binaries of the form `sbom-utility-${GOOS}-${GOARCH}` under the `release` directory (e.g., `sbom-utility-darwin-amd64`).
 
 ```bash
-$ make release
+make release
+```
 
+```bash
 GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.Version=latest -X main.Binary=sbom-utility" -o release/sbom-utility-darwin-amd64
 GOOS=darwin GOARCH=arm64 go build -ldflags "-X main.Version=latest -X main.Binary=sbom-utility" -o release/sbom-utility-darwin-arm64
 GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version=latest -X main.Binary=sbom-utility" -o release/sbom-utility-linux-amd64
 GOOS=linux GOARCH=arm64 go build -ldflags "-X main.Version=latest -X main.Binary=sbom-utility" -o release/sbom-utility-linux-arm64
 GOOS=windows GOARCH=amd64 go build -ldflags "-X main.Version=latest -X main.Binary=sbom-utility" -o release/sbom-utility-windows-amd64
 GOOS=windows GOARCH=arm64 go build -ldflags "-X main.Version=latest -X main.Binary=sbom-utility" -o release/sbom-utility-windows-arm64
+```
 
-$ ls release
+```bash
+ls release
+```
 
+```bash
 total 131680
 drwxr-xr-x   8 User1  staff       256 Oct 27 14:43 .
 drwxr-xr-x  27 User1  staff       864 Oct 27 14:43 ..
@@ -588,7 +614,7 @@ $ go build ${LDFLAGS} -o ${BINARY}
 Developers can run using the current source code in their local branch using `go run main.go`. For example:
 
 ```bash
-$ go run main.go validate -i test/cyclonedx/cdx-1-4-mature-example-1.json
+go run main.go validate -i test/cyclonedx/cdx-1-4-mature-example-1.json
 ```
 
 ### Supporting new SBOM formats and schema versions

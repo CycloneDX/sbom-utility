@@ -21,6 +21,15 @@ import (
 	"testing"
 )
 
+// Custom IBM configuration files
+const (
+	CONFIG_IBM_SCHEMA         = "test/ibm/config/config-ibm.json"
+	CONFIG_IBM_LICENSE_POLICY = "test/ibm/config/license-ibm.json"
+	CONFIG_IBM_VALIDATION     = "test/ibm/config/custom-ibm.json"
+)
+
+// Custom IBM CycloneDX JSON schemas
+// TODO: incorporate into build-specific testing
 const (
 	SCHEMA_VARIANT_IBM_DEV = "ibm-dev"
 	SCHEMA_VARIANT_IBM_REL = "ibm-rel"

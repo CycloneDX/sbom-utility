@@ -20,11 +20,14 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 	"text/tabwriter"
 
 	"github.com/scs/sbom-utility/schema"
 	"github.com/spf13/cobra"
 )
+
+var SCHEMA_LIST_TITLES = []string{"Format", "Version", "Variant", "File", "Source"}
 
 func NewCommandSchema() *cobra.Command {
 	var command = new(cobra.Command)
@@ -58,8 +61,11 @@ func schemaCmdImpl(cmd *cobra.Command, args []string) error {
 
 	if len(schema.SupportedFormatConfig.Formats) > 0 {
 		var formatName = ""
-		fmt.Fprintf(w, "\n%s\t%s\t%s\t", "Format", "Schema", "Variant")
-		fmt.Fprintf(w, "\n%s\t%s\t%s\t", "------", "------", "-------")
+
+		// Create title row and add tabs between column titles for the tabWRiter
+		titles, underlines := createTitleRows(SCHEMA_LIST_TITLES, nil)
+		fmt.Fprintf(w, "%s\n", strings.Join(titles, "\t"))
+		fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
 		for _, format := range (schema.SupportedFormatConfig).Formats {
 			formatName = format.CanonicalName
@@ -71,7 +77,12 @@ func schemaCmdImpl(cmd *cobra.Command, args []string) error {
 					if schema.Variant == "" {
 						variant = "(latest)"
 					}
-					fmt.Fprintf(w, "\n%v\t%s\t%s\t", formatName, schema.Version, variant)
+					fmt.Fprintf(w, "%v\t%s\t%s\t%s\t%s\n",
+						formatName,
+						schema.Version,
+						variant,
+						schema.File,
+						schema.Url)
 				}
 			} else {
 				getLogger().Warningf("No supported schemas for format `%s`.\n", formatName)
