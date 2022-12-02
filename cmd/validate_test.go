@@ -82,6 +82,8 @@ func innerValidateError(t *testing.T, filename string, variant string, expectedE
 
 // Tests *ErrorInvalidSBOM error types and any (lower-level) errors they "wrapped"
 func innerValidateInvalidSBOMInnerError(t *testing.T, filename string, variant string, innerError error) (document *schema.Sbom, schemaErrors []gojsonschema.ResultError, actualError error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
 
 	document, schemaErrors, actualError = innerValidateError(t, filename, variant, &InvalidSBOMError{})
 

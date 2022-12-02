@@ -12,13 +12,13 @@ In the future, we envision additional kinds of SBOMs (e.g., Function-as-a-Servic
 
 #### Functional priorities
 
-The utility additionally supports commands that help provide insight into contents of the SBOM.  These commands have been developed to support verification for some of the primary SBOM use cases (see https://cyclonedx.org/use-cases/).  Functional development has been prioritized to support those use cases that support legal, security and compliance analysis which are foundational.
+The utility additionally supports commands that help provide insight into contents of the SBOM.  These commands have been developed to support verification for some of the primary SBOM use cases (see https://cyclonedx.org/use-cases/).  Functional development has been prioritized to support those use cases that are designed toward legal, security and compliance analysis which are foundational to any SBOM.
 
 Initially, such functionality is reflected in the `license` and `query` commands which to be able to extract or produce formatted reports from inherent knowledge of the CycloneDX format.
 
 The `license` command, for example, has many options and configurations to not only produce raw JSON output of license data, but also produce summarized reports in many human-readable formats (e.g., text, csv, markdown). Furthermore, the license command is able to apply configurable "usage policies" for the licenses identified in the reports.
 
-The `query` command functionality is geared towards a SBOM-format aware SQL-style query that could be used to generate customized reports/views into the SBOM data for any use case.
+The `query` command functionality is geared towards an SBOM-format aware SQL-style query that could be used to generate customized reports/views into the SBOM data for any use case.
 
 Further commands and reports are planned that prioritize use cases that enable greater insight and analysis of the legal, security and compliance data captured in the SBOM such as **copyright** and **vulnerability** (VEX) information.
 

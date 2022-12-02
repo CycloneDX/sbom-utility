@@ -32,8 +32,8 @@ var SCHEMA_LIST_TITLES = []string{"Format", "Version", "Variant", "File", "Sourc
 func NewCommandSchema() *cobra.Command {
 	var command = new(cobra.Command)
 	command.Use = "schema"
-	command.Short = "manage supported schemas."
-	command.Long = fmt.Sprintf("manage schemas supported by the utility. The default command produces a list based upon `%s`", DEFAULT_SCHEMA_CONFIG)
+	command.Short = "view built-in SBOM schemas."
+	command.Long = fmt.Sprintf("view built-in SBOM schemas supported by the utility. The default command produces a list based upon `%s`", DEFAULT_SCHEMA_CONFIG)
 	command.RunE = schemaCmdImpl
 	initCommandSchema(command)
 	return command

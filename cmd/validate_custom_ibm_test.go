@@ -19,6 +19,10 @@ package cmd
 
 import (
 	"testing"
+
+	"github.com/scs/sbom-utility/schema"
+	"github.com/scs/sbom-utility/utils"
+	"github.com/xeipuuv/gojsonschema"
 )
 
 // Custom IBM configuration files
@@ -53,19 +57,50 @@ const (
 	TEST_CUSTOM_IBM_CDX_1_3_MERGE_PRODUCT_DATA = "test/custom/ibm/cdx-1-3-ibm-manual-data-example.json"
 )
 
+func innerValidateErrorWithIBMConfig(t *testing.T, filename string, variant string, expectedError error) (document *schema.Sbom, schemaErrors []gojsonschema.ResultError, actualError error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	utils.GlobalFlags.ConfigSchemaFile = CONFIG_IBM_SCHEMA
+	initConfigurations()
+
+	document, schemaErrors, actualError = innerValidateError(t,
+		filename,
+		variant,
+		expectedError)
+
+	return
+}
+
+func innerCustomValidateInvalidSBOMInnerErrorWithIBMConfigs(t *testing.T, filename string, variant string, innerError error) (document *schema.Sbom, schemaErrors []gojsonschema.ResultError, actualError error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	utils.GlobalFlags.ConfigSchemaFile = CONFIG_IBM_SCHEMA
+	utils.GlobalFlags.ConfigCustomValidationFile = CONFIG_IBM_VALIDATION
+	initConfigurations()
+
+	document, schemaErrors, actualError = innerCustomValidateInvalidSBOMInnerError(t,
+		filename,
+		variant,
+		innerError)
+
+	return
+}
+
 // -----------------------------------------------------------
 // Min. req. tests
 // -----------------------------------------------------------
 
 func TestValidateCustomIBMCdx13MinRequiredBasic(t *testing.T) {
-	innerValidateError(t,
+	innerValidateErrorWithIBMConfig(t,
 		TEST_CDX_1_3_IBM_MIN_REQUIRED,
 		SCHEMA_VARIANT_IBM_DEV,
 		nil)
 }
 
 func TestValidateCustomIBMCdx14MinRequiredBasic(t *testing.T) {
-	innerValidateError(t,
+	innerValidateErrorWithIBMConfig(t,
 		TEST_CDX_1_4_IBM_MIN_REQUIRED,
 		SCHEMA_VARIANT_IBM_DEV,
 		nil)
@@ -87,7 +122,7 @@ func TestValidateCustomIBMCdx14MinRequiredBasic(t *testing.T) {
 
 // Error if hierarchical components found in top-level "metadata.component" object
 func TestValidateCustomIBMErrorCdx13InvalidCompositionMetadataComponent(t *testing.T) {
-	innerCustomValidateInvalidSBOMInnerError(t,
+	innerCustomValidateInvalidSBOMInnerErrorWithIBMConfigs(t,
 		TEST_CUSTOM_IBM_CDX_1_3_INVALID_COMPOSITION_METADATA_COMPONENT,
 		SCHEMA_VARIANT_IBM_DEV,
 		&SBOMCompositionError{})
@@ -95,7 +130,7 @@ func TestValidateCustomIBMErrorCdx13InvalidCompositionMetadataComponent(t *testi
 
 // Error if hierarchical components in top-level "components" array
 func TestValidateCustomIBMErrorCdx13InvalidCompositionComponents(t *testing.T) {
-	innerCustomValidateInvalidSBOMInnerError(t,
+	innerCustomValidateInvalidSBOMInnerErrorWithIBMConfigs(t,
 		TEST_CUSTOM_IBM_CDX_1_3_INVALID_COMPOSITION_METADATA_COMPONENT,
 		SCHEMA_VARIANT_IBM_DEV,
 		&SBOMCompositionError{})
@@ -109,6 +144,7 @@ func TestValidateCustomIBMErrorCdx13InvalidCompositionComponents(t *testing.T) {
 // only a subset of fields (i.e., do NOT validate against an IBM schema)
 // TODO": Once "merge" command is completed, also verify not just the merge data,
 // but also the resultant merged SBOM
+// TODO: use IBM schema variant on merged data
 func TestValidateCustomIBMCdx13MergeProductData(t *testing.T) {
 	innerValidateError(t,
 		TEST_CUSTOM_IBM_CDX_1_3_MERGE_PRODUCT_DATA,
