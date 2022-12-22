@@ -349,16 +349,16 @@ func (log MiniLogger) dumpInterface(lvl Level, tag string, value interface{}, sk
 				// TODO: add logger flag to show full module paths (not just module.function)\
 				function := runtime.FuncForPC(pc)
 				basicModFnName := function.Name()[strings.LastIndex(function.Name(), "/")+1:]
-				sb.WriteString(fmt.Sprintf("%s()", basicModFnName))
+				sb.WriteString(fmt.Sprintf("%s() ", basicModFnName))
 			}
 
 			// Append (optional) value if supplied
-			// Note: callers SHOULD resource to string when possible to avoid empty output from interfaces
+			// Note: callers SHOULD resolve to string when possible to avoid empty output from interfaces
 			if value != nil && value != "" {
-				sb.WriteString(fmt.Sprintf(": %+v", value))
+				sb.WriteString(fmt.Sprintf("%+v", value))
 			}
 
-			// TODO: use a general output writer (set to stdout, stderr, or filestream)
+			// TODO: use a general output writer (set to stdout, stderr, or file stream)
 			fmt.Println(sb.String())
 		} else {
 			os.Stderr.WriteString("Error: Unable to retrieve call stack. Exiting...")

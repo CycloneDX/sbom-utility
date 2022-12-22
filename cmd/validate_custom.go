@@ -22,6 +22,7 @@ import (
 
 	"github.com/jwangsadinata/go-multimap/slicemultimap"
 	"github.com/scs/sbom-utility/schema"
+	"github.com/scs/sbom-utility/utils"
 )
 
 // Validate all custom requirements that cannot be found be schema validation
@@ -32,6 +33,14 @@ import (
 func validateCustomCDXDocument(document *schema.Sbom) (innerError error) {
 	getLogger().Enter()
 	defer getLogger().Exit(innerError)
+
+	// Load custom validation file
+	errCfg := schema.LoadCustomValidationConfig(utils.GlobalFlags.ConfigCustomValidationFile)
+	if errCfg != nil {
+		getLogger().Warningf("custom validation not possible: %s", errCfg.Error())
+		innerError = errCfg
+		return
+	}
 
 	// Validate all custom composition requirements for overall CDX SBOM are met
 	if innerError = validateCustomDocumentComposition(document); innerError != nil {

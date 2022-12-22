@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/fs"
 	"testing"
 
@@ -63,6 +64,13 @@ func innerValidateError(t *testing.T, filename string, variant string, expectedE
 	if !ErrorTypesMatch(actualError, expectedError) {
 		if len(schemaErrors) > 0 {
 			getLogger().Debugf("schemaErrors=`%s`", schemaErrors)
+		}
+
+		switch t := actualError.(type) {
+		default:
+			fmt.Printf("unhandled error type: `%v`\n", t)
+			fmt.Printf(">> value: `%v`\n", t)
+			getLogger().Error(actualError)
 		}
 		t.Errorf("expected error type: `%T`, actual type: `%T`", expectedError, actualError)
 	}

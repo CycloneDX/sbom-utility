@@ -55,6 +55,16 @@ type CompoundExpression struct {
 	CompoundUsagePolicy string
 }
 
+func HasLogicalConjunctionOrPreposition(value string) bool {
+
+	if strings.Contains(value, AND) ||
+		strings.Contains(value, OR) ||
+		strings.Contains(value, WITH) {
+		return true
+	}
+	return false
+}
+
 func NewCompoundExpression() *CompoundExpression {
 	ce := new(CompoundExpression)
 	ce.LeftUsagePolicy = POLICY_UNDEFINED

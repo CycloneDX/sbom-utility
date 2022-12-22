@@ -21,8 +21,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-
-	"github.com/scs/sbom-utility/utils"
 )
 
 // Globals
@@ -32,34 +30,30 @@ var CustomValidationChecks CustomValidationConfig
 // Custom Validation
 // ---------------------------------------------------------------
 
-func LoadCustomValidationConfig(filename string) error {
+func LoadCustomValidationConfig(filename string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	var cfgFilename string
+	cfgFilename, err := FindConfigFile(filename)
 
-	// validate filename
-	if len(filename) == 0 {
-		return fmt.Errorf("config: invalid filename: `%s`", filename)
+	if err != nil {
+		return fmt.Errorf("unable to find custom validation config file: `%s`", filename)
 	}
 
-	// Conditionally append working directory if no abs. path detected
-	if len(filename) > 0 && filename[0] != '/' {
-		cfgFilename = utils.GlobalFlags.WorkingDir + "/" + filename
-	} else {
-		cfgFilename = filename
-	}
-
+	// Note we actively supply informative error messages to help user
+	// understand exactly how the load failed
+	getLogger().Infof("Loading custom validation config file: `%s` ...", cfgFilename)
 	buffer, err := ioutil.ReadFile(cfgFilename)
 	if err != nil {
-		return fmt.Errorf("config: unable to `ReadFile`: `%s`", cfgFilename)
+		return fmt.Errorf("unable to `ReadFile`: `%s`", cfgFilename)
 	}
 
 	err = json.Unmarshal(buffer, &CustomValidationChecks)
 	if err != nil {
-		return fmt.Errorf("config: cannot `Unmarshal`: `%s`", cfgFilename)
+		return fmt.Errorf("cannot `Unmarshal`: `%s`", cfgFilename)
 	}
-	return nil
+
+	return
 }
 
 // TODO: return copies

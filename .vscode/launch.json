@@ -6,6 +6,15 @@
     "configurations": [
         {
             "showGlobalVariables": true,
+            "name": "license: list: BAD license exp.",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "main.go", // "program": "${file}",
+            "args": ["license", "list", "-i", "test/cyclonedx/cdx-1-2-invalid-license-name-has-expression.json", "--summary"]
+        },
+        {
+            "showGlobalVariables": true,
             "name": "license policy",
             "type": "go",
             "request": "launch",

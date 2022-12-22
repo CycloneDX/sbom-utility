@@ -140,6 +140,15 @@ func FindPolicyByFamilyName(name string) (policyValue string, matchedPolicy Lice
 	var key string
 	var arrPolicies []interface{}
 
+	// NOTE: we have found some SBOM authors have placed license expressions
+	// within the "name" field.  This prevents us from assigning policy
+	// return
+	if HasLogicalConjunctionOrPreposition(name) {
+		getLogger().Warningf("policy name contains logical conjunctions or preposition: `%s`", name)
+		policyValue = POLICY_UNDEFINED
+		return
+	}
+
 	familyNameMap, _ := licensePolicyConfig.GetFamilyNameMap()
 
 	// See if any of the policy family keys contain the family name

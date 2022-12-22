@@ -28,7 +28,9 @@ RELEASE_DIR=release
 
 # TODO: automate other flags
 # LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.GitCommit=${BUILD} -X main.BuildDate=${BUILD_DATE} -X main.Build=`git rev-parse HEAD` "
-LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.Binary=${BINARY}"
+# NOTE: The `-s` (sign) flag MUST be used or the binary will will be rejected on MacOS
+# Additionally on MacOS, the binary MUST be moved (i.e., `mv`) not copied (i.e., `cp`)
+LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.Binary=${BINARY} -s"
 
 # Build the project
 build: clean

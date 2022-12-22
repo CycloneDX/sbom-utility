@@ -89,7 +89,7 @@ func initTestInfrastructure() {
 
 		// Assures we are loading relative to the application's executable directory
 		// which may vary if using IDEs or "go test"
-		initWorkingDirectory()
+		initTestApplicationDirectories()
 
 		// Leverage the root command's init function to populate schemas, policies, etc.
 		initConfigurations()
@@ -106,11 +106,11 @@ func initTestInfrastructure() {
 }
 
 // Set the working directory to match where the executable is being called from
-func initWorkingDirectory() {
+func initTestApplicationDirectories() (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	// Only correct the WD base path once
+	// Only set the working directory path once
 	if utils.GlobalFlags.WorkingDir == "" {
 		// Need to change the working directory to the application root instead of
 		// the "cmd" directory where this "_test" file runs so that all test files
@@ -121,10 +121,12 @@ func initWorkingDirectory() {
 		last := strings.LastIndex(wd, "/")
 		os.Chdir(wd[:last])
 
-		// Need workingDir to prepend to relative test files
+		// Need 'workingDir' to prepend to relative test files
 		utils.GlobalFlags.WorkingDir, _ = os.Getwd()
-		getLogger().Tracef("Set `utils.Flags.WorkingDir`: `%s`", utils.GlobalFlags.WorkingDir)
+		getLogger().Infof("Set `utils.GlobalFlags.WorkingDir`: `%s`", utils.GlobalFlags.WorkingDir)
 	}
+
+	return
 }
 
 // Helper functions

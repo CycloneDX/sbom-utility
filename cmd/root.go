@@ -168,6 +168,8 @@ func initConfigurations() {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
+	getLogger().Tracef("Working Directory`: `%s`", utils.GlobalFlags.WorkingDir)
+
 	// Print global flags in debug mode
 	flagInfo, err := getLogger().FormatStructE(utils.GlobalFlags)
 	if err != nil {
@@ -183,14 +185,6 @@ func initConfigurations() {
 	// Load application configuration file (i.e., primarily SBOM supported Formats/Schemas)
 	// TODO: page fault "load" of data only when needed
 	errCfg := schema.LoadFormatBasedSchemas(utils.GlobalFlags.ConfigSchemaFile)
-	if errCfg != nil {
-		getLogger().Error(errCfg.Error())
-		os.Exit(ERROR_APPLICATION)
-	}
-
-	// Load custom validation file
-	// TODO: page fault "load" of data only when needed (sync.Once)
-	errCfg = schema.LoadCustomValidationConfig(utils.GlobalFlags.ConfigCustomValidationFile)
 	if errCfg != nil {
 		getLogger().Error(errCfg.Error())
 		os.Exit(ERROR_APPLICATION)

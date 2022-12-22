@@ -210,12 +210,28 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 	}
 
 	// create a reusable schema object (TODO: validate multiple documents)
-	jsonSbomSchema, errLoad := gojsonschema.NewSchema(schemaLoader)
+	var errLoad error = nil
+	const RETRY int = 3
+	var jsonSbomSchema *gojsonschema.Schema
+
+	// we force result to INVALID as any errors from the library means
+	// we could NOT actually confirm the input documents validity
+	// WARNING: if schemas reference "remote" schemas which are loaded
+	// over http... then there is a chance of 503 errors... attempt
+	// again...
+	for i := 0; i < RETRY; i++ {
+		jsonSbomSchema, errLoad = gojsonschema.NewSchema(schemaLoader)
+
+		if errLoad == nil {
+			break
+		}
+		getLogger().Warningf("unable to load referenced schema over HTTP: \"%v\"\n retrying...", errLoad)
+	}
+
 	if errLoad != nil {
-		// we force result to INVALID as any errors from the library means
-		// we could NOT actually confirm the input documents validity
 		return INVALID, document, schemaErrors, fmt.Errorf("unable to load schema: `%s`", schemaName)
 	}
+
 	getLogger().Infof("Schema `%s` loaded.", schemaName)
 
 	// Validate against the schema and save result determination
@@ -223,7 +239,7 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 	result, errValidate := jsonSbomSchema.Validate(documentLoader)
 
 	// ALWAYS set the valid return parameter
-	getLogger().Infof("Valid: `%t`", result.Valid())
+	getLogger().Infof("SBOM valid against JSON schema: `%t`", result.Valid())
 	valid = result.Valid()
 
 	// Catch general errors from the validation module itself and pass them on'

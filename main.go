@@ -20,6 +20,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 
 	"github.com/scs/sbom-utility/cmd"
@@ -66,9 +67,14 @@ func init() {
 	utils.GlobalFlags.Binary = Binary
 	utils.GlobalFlags.Version = Version
 
-	// Capture environment
+	// Capture working directory
 	utils.GlobalFlags.WorkingDir, _ = os.Getwd()
-	utils.GlobalFlags.ExecDir, _ = os.Executable()
+
+	// Set the executable directory path
+	execNameWithPath, err := os.Executable()
+	if err == nil {
+		utils.GlobalFlags.ExecDir = filepath.Dir(execNameWithPath)
+	}
 }
 
 func printWelcome() {

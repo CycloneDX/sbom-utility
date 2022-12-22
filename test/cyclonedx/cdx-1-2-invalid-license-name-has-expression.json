@@ -1,0 +1,82 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.2",
+  "serialNumber": "urn:uuid:1f860713-54b9-4253-ba5a-9554851904af",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2020-08-03T03:20:53.771Z",
+    "tools": [
+      {
+        "vendor": "CycloneDX",
+        "name": "Node.js module",
+        "version": "2.0.0"
+      }
+    ],
+    "component": {
+      "type": "library",
+      "bom-ref": "pkg:npm/juice-shop@11.1.2",
+      "name": "juice-shop",
+      "version": "11.1.2",
+      "description": "Probably the most modern and sophisticated insecure web application",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/juice-shop@11.1.2",
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://owasp-juice.shop"
+        },
+        {
+          "type": "issue-tracker",
+          "url": "https://github.com/bkimminich/juice-shop/issues"
+        },
+        {
+          "type": "vcs",
+          "url": "git+https://github.com/bkimminich/juice-shop.git"
+        }
+      ]
+    }
+  },
+  "components": [
+  {
+      "type": "library",
+      "bom-ref": "pkg:npm/rc@1.2.8",
+      "name": "rc",
+      "version": "1.2.8",
+      "description": "hardwired configuration loader",
+      "hashes": [
+        {
+          "alg": "SHA-1",
+          "content": "cd924bf5200a075b83c188cd6b9e211b7fc0d3ed"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "(BSD-2-Clause OR MIT OR Apache-2.0)"
+          }
+        }
+      ],
+      "purl": "pkg:npm/rc@1.2.8",
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://github.com/dominictarr/rc#readme"
+        },
+        {
+          "type": "issue-tracker",
+          "url": "https://github.com/dominictarr/rc/issues"
+        },
+        {
+          "type": "vcs",
+          "url": "git+https://github.com/dominictarr/rc.git"
+        }
+      ]
+    }
+  ]
+}

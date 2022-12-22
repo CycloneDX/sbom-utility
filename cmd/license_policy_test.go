@@ -482,3 +482,40 @@ func TestLicensePolicyFamilyUsagePolicyConflict(t *testing.T) {
 	}
 
 }
+
+func TestLicensePolicyMatchByFamilyNameBadExpression(t *testing.T) {
+	// Assure OR appearance results in UNDEFINED
+	NAME := "CC-BY-NC-1.0 OR Apache-2.0"
+	EXPECTED_POLICY := POLICY_UNDEFINED
+
+	value, policy := FindPolicyByFamilyName(NAME)
+	getLogger().Tracef("policy: %v", policy)
+
+	if value != EXPECTED_POLICY {
+		t.Errorf("FindPolicyByFamilyName(): contains expression: %s, returned: %v; expected: %v", NAME, value, EXPECTED_POLICY)
+	} else {
+		getLogger().Tracef("FindPolicyByFamilyName(): contains expression: %s, policy: %s, ", NAME, value)
+	}
+
+	// Assure AND appearance results in UNDEFINED
+	NAME = "CC-BY-NC-1.0 AND Apache-2.0"
+	value, policy = FindPolicyByFamilyName(NAME)
+	getLogger().Tracef("policy: %v", policy)
+
+	if value != EXPECTED_POLICY {
+		t.Errorf("FindPolicyByFamilyName(): contains expression: %s, returned: %v; expected: %v", NAME, value, EXPECTED_POLICY)
+	} else {
+		getLogger().Tracef("FindPolicyByFamilyName(): contains expression: %s, policy: %s, ", NAME, value)
+	}
+
+	// Assure WITH appearance results in UNDEFINED
+	NAME = "CC-BY-NC-1.0 WITH some-clause"
+	value, policy = FindPolicyByFamilyName(NAME)
+	getLogger().Tracef("policy: %v", policy)
+
+	if value != EXPECTED_POLICY {
+		t.Errorf("FindPolicyByFamilyName(): contains expression: %s, returned: %v; expected: %v", NAME, value, EXPECTED_POLICY)
+	} else {
+		getLogger().Tracef("FindPolicyByFamilyName(): contains expression: %s, policy: %s, ", NAME, value)
+	}
+}

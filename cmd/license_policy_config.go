@@ -27,7 +27,7 @@ import (
 	"sync"
 
 	"github.com/jwangsadinata/go-multimap/slicemultimap"
-	"github.com/scs/sbom-utility/utils"
+	"github.com/scs/sbom-utility/schema"
 )
 
 const (
@@ -93,42 +93,38 @@ func (config *LicenseComplianceConfig) GetLicenseIdMap() (hashmap *slicemultimap
 	return config.licenseIdMap, err
 }
 
-func (config *LicenseComplianceConfig) LoadLicensePolicies(filename string) error {
+func (config *LicenseComplianceConfig) LoadLicensePolicies(filename string) (err error) {
 	getLogger().Enter(filename)
 	defer getLogger().Exit()
-	var loadError error
 
 	// Only load the policy config. once
 	config.loadOnce.Do(func() {
-		// validate filename
-		if len(filename) == 0 {
-			loadError = fmt.Errorf("config: invalid filename: `%s`", filename)
+		// locate the license policy file
+		config.policyConfigFile, err = schema.FindConfigFile(filename)
+
+		if err != nil {
+			err = fmt.Errorf("unable to find license policy config file: `%s`", filename)
 			return
 		}
 
-		// Conditionally append working directory if no abs. path detected
-		if len(filename) > 0 && filename[0] != '/' {
-			config.policyConfigFile = utils.GlobalFlags.WorkingDir + "/" + filename
-		} else {
-			config.policyConfigFile = filename
-		}
+		getLogger().Infof("Loading license policy config file: `%s` ...", config.policyConfigFile)
 
 		// attempt to read in contents of the policy config.
 		buffer, errRead := ioutil.ReadFile(config.policyConfigFile)
 		if errRead != nil {
-			loadError = fmt.Errorf("unable to ioutil.ReadFile: `%s`", config.policyConfigFile)
+			err = fmt.Errorf("unable to `ReadFile`: `%s`", config.policyConfigFile)
 			return
 		}
 
 		// NOTE: this cleverly unmarshals into the current config instance this function is associated with
 		errUnmarshal := json.Unmarshal(buffer, config)
 		if errUnmarshal != nil {
-			loadError = fmt.Errorf("cannot json.Unmarshal: `%s`", config.policyConfigFile)
+			err = fmt.Errorf("cannot `Unmarshal`: `%s`", config.policyConfigFile)
 			return
 		}
 	})
 
-	return loadError
+	return
 }
 
 func (config *LicenseComplianceConfig) HashLicensePolicies() error {

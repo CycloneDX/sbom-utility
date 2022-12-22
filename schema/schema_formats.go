@@ -169,37 +169,74 @@ func (err UnsupportedSchemaError) Error() string {
 		err.Variant)
 }
 
-// TODO: Add error messages as constants (for future i18n)
-func LoadFormatBasedSchemas(filename string) error {
+func FindConfigFile(filename string) (fullFilename string, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	var cfgFilename string
-
-	// validate filename
 	if len(filename) == 0 {
-		return fmt.Errorf("config: invalid filename: `%s`", filename)
+		err = fmt.Errorf("invalid filename: `%s`", filename)
+		return
 	}
 
-	// Conditionally append working directory if no abs. path detected
-	if len(filename) > 0 && filename[0] != '/' {
-		cfgFilename = utils.GlobalFlags.WorkingDir + "/" + filename
-	} else {
-		cfgFilename = filename
+	// first, see if the config file is found at the location
+	// that may have been provided via the command line argument
+	if _, err = os.Stat(filename); err == nil {
+		fullFilename = filename
+		getLogger().Tracef("found config file `%s` at location provided.", fullFilename)
+		return
 	}
 
+	// if the filename was not passed as an absolute path, attempt to find it
+	// relative to the executable directory then the current working directory
+	if filename[0] != '/' {
+		// first, attempt to find file relative to the executable
+		tmpFilename := utils.GlobalFlags.ExecDir + "/" + filename
+		getLogger().Tracef("tmpFilename: `%s`", tmpFilename)
+		if _, err = os.Stat(tmpFilename); err == nil {
+			fullFilename = tmpFilename
+			getLogger().Tracef("found config file relative to executable: `%s`", fullFilename)
+			return
+		}
+
+		// Last, attempt to find the config file in the current working directory
+		tmpFilename = utils.GlobalFlags.ExecDir + "/" + filename
+		getLogger().Tracef("tmpFilename: `%s`", tmpFilename)
+		if _, err = os.Stat(tmpFilename); err == nil {
+			fullFilename = tmpFilename
+			getLogger().Tracef("found config file relative to working directory: `%s`", fullFilename)
+			return
+		}
+	}
+
+	getLogger().Tracef("returning fullFilename: `%s`", fullFilename)
+	return
+}
+
+// TODO: Add error messages as constants (for future i18n)
+func LoadFormatBasedSchemas(filename string) (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	cfgFilename, err := FindConfigFile(filename)
+
+	if err != nil {
+		return fmt.Errorf("unable to find schema config file: `%s`", filename)
+	}
+
+	// Note we actively supply informative error messages to help user
+	// understand exactly how the load failed
+	getLogger().Infof("Loading schema config file: `%s` ...", cfgFilename)
 	buffer, err := ioutil.ReadFile(cfgFilename)
 	if err != nil {
-		return fmt.Errorf("config: unable to `ReadFile`: `%s`", cfgFilename)
+		return fmt.Errorf("unable to `ReadFile`: `%s`", cfgFilename)
 	}
 
 	err = json.Unmarshal(buffer, &SupportedFormatConfig)
 	if err != nil {
-		return fmt.Errorf("config: cannot `Unmarshal`: `%s`", cfgFilename)
+		return fmt.Errorf("cannot `Unmarshal`: `%s`", cfgFilename)
 	}
 
-	// TODO: validate ONLY ONE schema is marked `default` (for use when version match not possible)
-	return nil
+	return
 }
 
 // Candidate SBOM document (context) information
