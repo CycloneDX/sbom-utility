@@ -284,8 +284,10 @@ func (sbom *Sbom) GetCdxMetadataLicenses() (licenses []CDXLicenseChoice) {
 }
 
 func (sbom *Sbom) GetKeyValueAsString(key string) (sValue string, err error) {
-	getLogger().Enter(key)
-	defer getLogger().Exit(key, ':', sValue)
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	getLogger().Tracef("key: `%s`", key)
 
 	if (sbom.JsonMap) == nil {
 		err := fmt.Errorf("document object does not have a Map allocated")
@@ -299,6 +301,7 @@ func (sbom *Sbom) GetKeyValueAsString(key string) (sValue string, err error) {
 		return "", nil
 	}
 
+	getLogger().Tracef("value: `%v` (%T)", value, value)
 	return value.(string), nil
 }
 

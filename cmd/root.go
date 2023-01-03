@@ -67,14 +67,15 @@ const (
 )
 
 const (
-	MSG_APP_NAME        = "Software Bill-of-Materials (SBOM) utility."
-	MSG_APP_DESCRIPTION = "This utility serves as centralized command line interface into various Software Bill-of-Materials (SBOM) helper utilities."
-	MSG_FLAG_TRACE      = "enable trace logging"
-	MSG_FLAG_DEBUG      = "enable debug logging"
-	MSG_FLAG_INPUT      = "input filename (e.g., \"path/sbom.json\")"
-	MSG_FLAG_OUTPUT     = "output filename"
-	MSG_FLAG_LOG_QUIET  = "enable quiet logging mode (e.g., removes all [INFO] messages from output). Overrides other logging commands."
-	MSG_FLAG_LOG_INDENT = "enable log indentation of functional callstack."
+	MSG_APP_NAME           = "Software Bill-of-Materials (SBOM) utility."
+	MSG_APP_DESCRIPTION    = "This utility serves as centralized command line interface into various Software Bill-of-Materials (SBOM) helper utilities."
+	MSG_FLAG_TRACE         = "enable trace logging"
+	MSG_FLAG_DEBUG         = "enable debug logging"
+	MSG_FLAG_INPUT         = "input filename (e.g., \"path/sbom.json\")"
+	MSG_FLAG_OUTPUT        = "output filename"
+	MSG_FLAG_LOG_QUIET     = "enable quiet logging mode (e.g., removes all [INFO] messages from output). Overrides other logging commands."
+	MSG_FLAG_LOG_INDENT    = "enable log indentation of functional callstack."
+	MSG_FLAG_CONFIG_SCHEMA = "provide custom location and/or filename for application configuration (i.e., replaces default `config.json`"
 )
 
 const (
@@ -128,7 +129,7 @@ func init() {
 	cobra.OnInitialize(initConfigurations)
 
 	// Declare top-level, persistent flags used for configuration of utility
-	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigSchemaFile, FLAG_CONFIG_SCHEMA, "", DEFAULT_SCHEMA_CONFIG, "TODO")
+	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigSchemaFile, FLAG_CONFIG_SCHEMA, "", DEFAULT_SCHEMA_CONFIG, MSG_FLAG_CONFIG_SCHEMA)
 	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigLicensePolicyFile, FLAG_CONFIG_LICENSE_POLICY, "", DEFAULT_LICENSE_POLICIES, "TODO")
 	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigCustomValidationFile, FLAG_CONFIG_CUSTOM_VALIDATION, "", DEFAULT_CUSTOM_VALIDATION_CONFIG, "TODO")
 
