@@ -324,7 +324,7 @@ func (log MiniLogger) dumpInterface(lvl Level, tag string, value interface{}, sk
 			sb.WriteString(fmt.Sprintf("[%s] ", LevelNames[lvl]))
 
 			// Append UTC timestamp if level is TRACE or DEBUG
-			if lvl == TRACE || lvl == DEBUG {
+			if log.logLevel == TRACE || log.logLevel == DEBUG {
 				// Append (optional) tag
 				if tag != "" {
 					sb.WriteString(fmt.Sprintf("[%s] ", tag))
@@ -340,7 +340,7 @@ func (log MiniLogger) dumpInterface(lvl Level, tag string, value interface{}, sk
 
 			// Append calling callstack/function information
 			// for log levels used for developer problem determination
-			if lvl == TRACE || lvl == DEBUG || lvl == ERROR {
+			if log.logLevel == TRACE || log.logLevel == DEBUG || log.logLevel == ERROR {
 
 				// Append basic filename, line number, function name
 				basicFile := fn[strings.LastIndex(fn, "/")+1:]

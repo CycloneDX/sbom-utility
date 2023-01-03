@@ -21,6 +21,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+
+	"github.com/scs/sbom-utility/utils"
 )
 
 // Globals
@@ -34,7 +36,7 @@ func LoadCustomValidationConfig(filename string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	cfgFilename, err := FindConfigFile(filename)
+	cfgFilename, err := utils.FindVerifyConfigFileAbsPath(getLogger(), filename)
 
 	if err != nil {
 		return fmt.Errorf("unable to find custom validation config file: `%s`", filename)

@@ -27,7 +27,7 @@ import (
 	"sync"
 
 	"github.com/jwangsadinata/go-multimap/slicemultimap"
-	"github.com/scs/sbom-utility/schema"
+	"github.com/scs/sbom-utility/utils"
 )
 
 const (
@@ -100,7 +100,7 @@ func (config *LicenseComplianceConfig) LoadLicensePolicies(filename string) (err
 	// Only load the policy config. once
 	config.loadOnce.Do(func() {
 		// locate the license policy file
-		config.policyConfigFile, err = schema.FindConfigFile(filename)
+		config.policyConfigFile, err = utils.FindVerifyConfigFileAbsPath(getLogger(), filename)
 
 		if err != nil {
 			err = fmt.Errorf("unable to find license policy config file: `%s`", filename)
