@@ -29,9 +29,10 @@ import (
 const (
 	SUBCOMMAND_LICENSE_LIST   = "list"
 	SUBCOMMAND_LICENSE_POLICY = "policy"
+	SUBCOMMAND_LICENSE_HELP   = "help"
 )
 
-var VALID_SUBCOMMANDS = []string{SUBCOMMAND_LICENSE_LIST, SUBCOMMAND_LICENSE_POLICY}
+var VALID_SUBCOMMANDS = []string{SUBCOMMAND_LICENSE_LIST, SUBCOMMAND_LICENSE_POLICY, SUBCOMMAND_LICENSE_HELP}
 
 // License list default values
 const (
@@ -133,13 +134,19 @@ func NewCommandLicense() *cobra.Command {
 	return command
 }
 
-// TODO: Remove this if Cobra does not reference since we assume subcommands
+// Additional handling is needed to display help for subcommands
+// TODO: look to do this in the "pre-check" callback function
 func licenseCmdImpl(cmd *cobra.Command, args []string) error {
 	getLogger().Enter(args)
 	defer getLogger().Exit()
-	// No-op for now. The pre-check function should prevent this from being called
-	getLogger().Debugf("NO-OP: Empty function")
-	os.Exit(ERROR_APPLICATION)
+
+	// Display command "help" if subcommand not provided or help requested explicitly
+	if len(args) == 0 || args[0] == SUBCOMMAND_LICENSE_HELP {
+		cmd.Help()
+		if len(args) == 0 {
+			os.Exit(ERROR_APPLICATION)
+		}
+	}
 	return nil
 }
 

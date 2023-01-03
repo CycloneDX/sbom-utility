@@ -44,7 +44,7 @@ func initCommandSchema(command *cobra.Command) {
 	defer getLogger().Exit()
 
 	command.Flags().Bool("list", true, "List all configured schemas by format")
-	rootCmd.AddCommand(command)
+	//rootCmd.AddCommand(command)
 }
 
 func formatSchemaVariant(variant string) (formattedVariant string) {

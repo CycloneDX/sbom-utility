@@ -50,8 +50,8 @@ const (
 
 const (
 	FLAG_CONFIG_SCHEMA            = "config-schema"
-	FLAG_CONFIG_LICENSE_POLICY    = "config-license-policy"
-	FLAG_CONFIG_CUSTOM_VALIDATION = "config-custom-validation"
+	FLAG_CONFIG_LICENSE_POLICY    = "config-license"
+	FLAG_CONFIG_CUSTOM_VALIDATION = "config-validation"
 	FLAG_TRACE                    = "trace"
 	FLAG_TRACE_SHORT              = "t"
 	FLAG_DEBUG                    = "debug"
@@ -67,15 +67,16 @@ const (
 )
 
 const (
-	MSG_APP_NAME           = "Software Bill-of-Materials (SBOM) utility."
-	MSG_APP_DESCRIPTION    = "This utility serves as centralized command line interface into various Software Bill-of-Materials (SBOM) helper utilities."
-	MSG_FLAG_TRACE         = "enable trace logging"
-	MSG_FLAG_DEBUG         = "enable debug logging"
-	MSG_FLAG_INPUT         = "input filename (e.g., \"path/sbom.json\")"
-	MSG_FLAG_OUTPUT        = "output filename"
-	MSG_FLAG_LOG_QUIET     = "enable quiet logging mode (e.g., removes all [INFO] messages from output). Overrides other logging commands."
-	MSG_FLAG_LOG_INDENT    = "enable log indentation of functional callstack."
-	MSG_FLAG_CONFIG_SCHEMA = "provide custom location and/or filename for application configuration (i.e., replaces default `config.json`"
+	MSG_APP_NAME            = "Software Bill-of-Materials (SBOM) utility."
+	MSG_APP_DESCRIPTION     = "This utility serves as centralized command line interface into various Software Bill-of-Materials (SBOM) helper utilities."
+	MSG_FLAG_TRACE          = "enable trace logging"
+	MSG_FLAG_DEBUG          = "enable debug logging"
+	MSG_FLAG_INPUT          = "input filename (e.g., \"path/sbom.json\")"
+	MSG_FLAG_OUTPUT         = "output filename"
+	MSG_FLAG_LOG_QUIET      = "enable quiet logging mode (e.g., removes all [INFO] messages from output). Overrides other logging commands."
+	MSG_FLAG_LOG_INDENT     = "enable log indentation of functional callstack."
+	MSG_FLAG_CONFIG_SCHEMA  = "provide custom location and/or filename for application schema configuration (i.e., replaces default `config.json`"
+	MSG_FLAG_CONFIG_LICENSE = "provide custom location and/or filename for application license policy configuration (i.e., replaces default `license.json`"
 )
 
 const (
@@ -95,8 +96,8 @@ const (
 
 var rootCmd = &cobra.Command{
 	Use:           fmt.Sprintf("%s [command] [flags]", utils.GlobalFlags.Project),
-	SilenceErrors: false, // TODO: investigate if we should use
-	SilenceUsage:  false, // TODO: investigate if we should use
+	SilenceErrors: false,
+	SilenceUsage:  false,
 	Short:         MSG_APP_NAME,
 	Long:          MSG_APP_DESCRIPTION,
 	RunE:          RootCmdImpl,
@@ -130,8 +131,10 @@ func init() {
 
 	// Declare top-level, persistent flags used for configuration of utility
 	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigSchemaFile, FLAG_CONFIG_SCHEMA, "", DEFAULT_SCHEMA_CONFIG, MSG_FLAG_CONFIG_SCHEMA)
-	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigLicensePolicyFile, FLAG_CONFIG_LICENSE_POLICY, "", DEFAULT_LICENSE_POLICIES, "TODO")
-	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigCustomValidationFile, FLAG_CONFIG_CUSTOM_VALIDATION, "", DEFAULT_CUSTOM_VALIDATION_CONFIG, "TODO")
+	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigLicensePolicyFile, FLAG_CONFIG_LICENSE_POLICY, "", DEFAULT_LICENSE_POLICIES, MSG_FLAG_CONFIG_LICENSE)
+	utils.GlobalFlags.ConfigCustomValidationFile = DEFAULT_CUSTOM_VALIDATION_CONFIG
+	// TODO: Make configurable once we have organized the set of custom validation configurations
+	//rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigCustomValidationFile, FLAG_CONFIG_CUSTOM_VALIDATION, "", DEFAULT_CUSTOM_VALIDATION_CONFIG, "TODO")
 
 	// Declare top-level, persistent flags and where to place the post-parse values
 	rootCmd.PersistentFlags().BoolVarP(&utils.GlobalFlags.Trace, FLAG_TRACE, FLAG_TRACE_SHORT, false, MSG_FLAG_TRACE)
