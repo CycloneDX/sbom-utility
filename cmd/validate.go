@@ -174,7 +174,7 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 	// Create a loader for the SBOM (JSON) document
 	documentLoader := gojsonschema.NewReferenceLoader(PROTOCOL_PREFIX_FILE + utils.GlobalFlags.InputFile)
 
-	schemaName := document.SchemaInfo.Name
+	schemaName := document.SchemaInfo.File
 	var schemaLoader gojsonschema.JSONLoader
 	var errRead error
 	var bSchema []byte

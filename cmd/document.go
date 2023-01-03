@@ -38,18 +38,23 @@ func LoadInputSbomFileAndDetectSchema() (document *schema.Sbom, err error) {
 	document = schema.NewSbom(utils.GlobalFlags.InputFile)
 
 	// Load the raw, candidate SBOM (file) as JSON data
-	getLogger().Infof("Unmarshalling file `%s`...", utils.GlobalFlags.InputFile)
+	getLogger().Infof("Attempting to load and unmarshal file `%s`...", utils.GlobalFlags.InputFile)
 	err = document.UnmarshalSBOMAsJsonMap() // i.e., utils.Flags.InputFile
 	if err != nil {
 		return
 	}
+	getLogger().Infof("Successfully unmarshalled data from: `%s`", utils.GlobalFlags.InputFile)
 
 	// Search the document keys/values for known SBOM formats and schema in the config. file
-	getLogger().Infof("Determining file's sbom format and version...")
+	getLogger().Infof("Determining file's SBOM format and version...")
 	err = document.FindFormatAndSchema()
 	if err != nil {
 		return
 	}
 
+	getLogger().Infof("Determined SBOM format, version: `%s`, `%s`",
+		document.FormatInfo.CanonicalName,
+		document.SchemaInfo.Version)
+	getLogger().Infof("Matching SBOM schema (for validation): %s", document.SchemaInfo.File)
 	return
 }

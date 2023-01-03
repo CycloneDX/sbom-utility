@@ -182,7 +182,7 @@ func LoadSchemaConfig(filename string) (err error) {
 
 	// Note we actively supply informative error messages to help user
 	// understand exactly how the load failed
-	getLogger().Infof("Loading schema config file: `%s` ...", cfgFilename)
+	getLogger().Tracef("Reading schema config file: `%s` ...", cfgFilename)
 	buffer, err := ioutil.ReadFile(cfgFilename)
 	if err != nil {
 		return fmt.Errorf("unable to `ReadFile`: `%s`", cfgFilename)
@@ -330,8 +330,6 @@ func (sbom *Sbom) UnmarshalSBOMAsJsonMap() error {
 		return errOpen
 	}
 
-	getLogger().Info(fmt.Sprintf("Successfully Opened: `%s`", sbom.filename))
-
 	// defer the closing of our jsonFile
 	defer jsonFile.Close()
 
@@ -341,6 +339,7 @@ func (sbom *Sbom) UnmarshalSBOMAsJsonMap() error {
 	if errReadAll != nil {
 		getLogger().Error(errReadAll)
 	}
+	getLogger().Tracef("read data from: `%s`", sbom.filename)
 	getLogger().Tracef("\n  >> rawBytes[:100]=[%s]", sbom.rawBytes[:100])
 
 	// Attempt to unmarshal the prospective JSON document to a map
@@ -357,6 +356,7 @@ func (sbom *Sbom) UnmarshalSBOMAsJsonMap() error {
 
 	// Print the data type of result variable
 	getLogger().Tracef("sbom.jsonMap(%s)", reflect.TypeOf(sbom.JsonMap))
+
 	return nil
 }
 
