@@ -47,6 +47,15 @@ func initCommandSchema(command *cobra.Command) {
 	rootCmd.AddCommand(command)
 }
 
+func formatSchemaVariant(variant string) (formattedVariant string) {
+	var variantName string = schema.SCHEMA_VARIANT_LATEST
+	if variant != "" {
+		variantName = variant
+	}
+	formattedVariant = "(" + variantName + ")"
+	return
+}
+
 func schemaCmdImpl(cmd *cobra.Command, args []string) error {
 	getLogger().Enter()
 	defer getLogger().Exit()
@@ -71,18 +80,13 @@ func schemaCmdImpl(cmd *cobra.Command, args []string) error {
 			formatName = format.CanonicalName
 
 			if len(format.Schemas) > 0 {
-				for _, schema := range format.Schemas {
-
-					variant := schema.Variant
-					if schema.Variant == "" {
-						variant = "(latest)"
-					}
+				for _, currentSchema := range format.Schemas {
 					fmt.Fprintf(w, "%v\t%s\t%s\t%s\t%s\n",
 						formatName,
-						schema.Version,
-						variant,
-						schema.File,
-						schema.Url)
+						currentSchema.Version,
+						formatSchemaVariant(currentSchema.Variant),
+						currentSchema.File,
+						currentSchema.Url)
 				}
 			} else {
 				getLogger().Warningf("No supported schemas for format `%s`.\n", formatName)

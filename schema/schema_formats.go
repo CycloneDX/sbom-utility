@@ -34,6 +34,10 @@ const (
 )
 
 const (
+	SCHEMA_VARIANT_LATEST = "latest"
+)
+
+const (
 	ERR_TYPE_UNSUPPORTED_FORMAT = "format not supported"
 	ERR_TYPE_UNSUPPORTED_SCHEMA = "schema not supported"
 	//MSG_CONFIG_SCHEMA_FORMAT_NOT_FOUND  = "schema format not found in configuration."

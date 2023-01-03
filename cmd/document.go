@@ -52,9 +52,11 @@ func LoadInputSbomFileAndDetectSchema() (document *schema.Sbom, err error) {
 		return
 	}
 
-	getLogger().Infof("Determined SBOM format, version: `%s`, `%s`",
+	// Display detected format, version with (optional) schema variant (i.e., if requested on command line)
+	getLogger().Infof("Determined SBOM format, version (variant): `%s`, `%s` %s",
 		document.FormatInfo.CanonicalName,
-		document.SchemaInfo.Version)
+		document.SchemaInfo.Version,
+		formatSchemaVariant(document.SchemaInfo.Variant))
 	getLogger().Infof("Matching SBOM schema (for validation): %s", document.SchemaInfo.File)
 	return
 }
