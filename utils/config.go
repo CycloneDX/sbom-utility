@@ -20,6 +20,7 @@ package utils
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/scs/sbom-utility/log"
 )
@@ -43,9 +44,9 @@ func FindVerifyConfigFileAbsPath(logger *log.MiniLogger, filename string) (absFi
 
 	// if the filename was not passed using an absolute path, attempt to find it
 	// relative to the executable directory then the current working directory
-	if filename[0] != '/' {
+	if filepath.IsAbs(filename) {
 		// first, attempt to find file relative to the executable
-		tmpFilename := GlobalFlags.ExecDir + "/" + filename
+		tmpFilename := filepath.Join(GlobalFlags.ExecDir, filename)
 		logger.Tracef("Checking for config relative to executable: `%s`...", tmpFilename)
 		if _, err = os.Stat(tmpFilename); err == nil {
 			absFilename = tmpFilename
@@ -55,7 +56,7 @@ func FindVerifyConfigFileAbsPath(logger *log.MiniLogger, filename string) (absFi
 
 		// Last, attempt to find the config file in the current working directory
 		// Note: this is sometimes needed in IDE/test environments
-		tmpFilename = GlobalFlags.WorkingDir + "/" + filename
+		tmpFilename = filepath.Join(GlobalFlags.WorkingDir, filename)
 		logger.Tracef("Checking for config relative to working directory: `%s`...", tmpFilename)
 		if _, err = os.Stat(tmpFilename); err == nil {
 			absFilename = tmpFilename

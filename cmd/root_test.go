@@ -118,6 +118,7 @@ func initTestApplicationDirectories() (err error) {
 		wd, _ := os.Getwd()
 		// TODO: have package subdirectory name passed in and verify the WD
 		// indeed "endsWith" that path before removing it. Emit warning if already stripped
+		// NOTE: The direct use of "/" below limits functional testing to Unix systems
 		last := strings.LastIndex(wd, "/")
 		os.Chdir(wd[:last])
 

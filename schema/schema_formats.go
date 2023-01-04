@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
 
 	"github.com/scs/sbom-utility/log"
@@ -319,8 +320,8 @@ func (sbom *Sbom) UnmarshalSBOMAsJsonMap() error {
 	}
 
 	// Conditionally append working directory if no abs. path detected
-	if len(sbom.filename) > 0 && sbom.filename[0] != '/' {
-		sbom.absFilename = utils.GlobalFlags.WorkingDir + "/" + sbom.filename
+	if len(sbom.filename) > 0 && !filepath.IsAbs(sbom.filename) {
+		sbom.absFilename = filepath.Join(utils.GlobalFlags.WorkingDir, sbom.filename)
 	} else {
 		sbom.absFilename = sbom.filename
 	}
