@@ -40,8 +40,8 @@ const (
 
 // Query command flag help messages
 const (
-	FLAG_OUTPUT_FORMAT_HELP = "Format output using the specific type. Valid values: \"json\""
-	FLAG_QUERY_SELECT_HELP  = "comma-separated list of JSON key names used to select fields within the object designated by the FROM flag." +
+	FLAG_QUERY_OUTPUT_FORMAT_HELP = "format output using the specific type.\n- Supported formats: json"
+	FLAG_QUERY_SELECT_HELP        = "comma-separated list of JSON key names used to select fields within the object designated by the FROM flag." +
 		" The wildcard character `*` can be used to denote inclusion of all found key-values."
 	FLAG_QUERY_FROM_HELP = "dot-separated list of JSON key names used to dereference into the JSON document." +
 		" If not present, the query assumes document \"root\" as the `--from` object."
@@ -135,7 +135,7 @@ func initCommandQuery(command *cobra.Command) {
 	defer getLogger().Exit()
 
 	// Add local flags to command
-	command.PersistentFlags().StringVar(&utils.GlobalFlags.OutputFormat, FLAG_OUTPUT_FORMAT, FLAG_VALUE_OUTPUT_JSON, FLAG_OUTPUT_FORMAT_HELP)
+	command.PersistentFlags().StringVar(&utils.GlobalFlags.OutputFormat, FLAG_OUTPUT_FORMAT, FLAG_VALUE_OUTPUT_JSON, FLAG_QUERY_OUTPUT_FORMAT_HELP)
 	command.Flags().StringP(FLAG_QUERY_SELECT, "", QUERY_TOKEN_WILDCARD, FLAG_QUERY_SELECT_HELP)
 	command.Flags().StringP(FLAG_QUERY_FROM, "", "", FLAG_QUERY_FROM_HELP)
 	command.Flags().StringP(FLAG_QUERY_WHERE, "", "", FLAG_QUERY_WHERE_HELP)

@@ -41,9 +41,9 @@ const (
 	FLAG_SCHEMA_FORCE          = "force"
 	FLAG_SCHEMA_VARIANT        = "variant"
 	FLAG_CUSTOM_VALIDATION     = "custom"
-	MSG_SCHEMA_FORCE           = "Explicit JSON schema file URL to force for validation; overrides inferred schema"
-	MSG_SCHEMA_VARIANT         = "Select named schema variant (e.g., \"strict\"). Must be declared in \"config.json\"."
-	MSG_FLAG_CUSTOM_VALIDATION = "Perform custom validation"
+	MSG_SCHEMA_FORCE           = "force specified schema file for validation; overrides inferred schema"
+	MSG_SCHEMA_VARIANT         = "select named schema variant (e.g., \"strict\"); variant must be declared in configuration file (i.e., \"config.json\")"
+	MSG_FLAG_CUSTOM_VALIDATION = "perform custom validation using custom configuration settings (i.e., \"custom.json\")"
 )
 
 // limits

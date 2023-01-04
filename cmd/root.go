@@ -43,7 +43,7 @@ const (
 )
 
 const (
-	CMD_USAGE_VALIDATE     = CMD_VALIDATE + " -i input_file" + "[--force schema_file]"
+	CMD_USAGE_VALIDATE     = CMD_VALIDATE + " -i input_file" + " [--force schema_file]"
 	CMD_USAGE_QUERY        = CMD_QUERY + " -i input_filename [--select * | field1[,fieldN]] [--from [key1[.keyN]] [--where key=regex[,...]]"
 	CMD_USAGE_LICENSE_LIST = SUBCOMMAND_LICENSE_LIST + "  -i input_file [[--summary] [--policy]] [--format json|txt|csv|md]"
 )
