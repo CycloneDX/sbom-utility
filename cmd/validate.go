@@ -60,8 +60,8 @@ func NewCommandValidate() *cobra.Command {
 	// NOTE: `RunE` function takes precedent over `Run` (anonymous) function if both provided
 	var command = new(cobra.Command)
 	command.Use = CMD_USAGE_VALIDATE
-	command.Short = "validate input file against its declared SBOM schema."
-	command.Long = "validate input file against its declared SBOM schema, if detectable and supported."
+	command.Short = "Validate input file against its declared SBOM schema"
+	command.Long = "Validate input file against its declared SBOM schema, if detectable and supported."
 	command.RunE = validateCmdImpl
 
 	command.PreRunE = func(cmd *cobra.Command, args []string) error {

@@ -48,6 +48,12 @@ func NewCommandPolicy() *cobra.Command {
 	command.Long = "List caller-supplied, \"allow/deny\"-style policies associated with known software, hardware or data licenses"
 	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", "", FLAG_POLICY_OUTPUT_FORMAT_HELP)
 	command.RunE = policyCmdImpl
+	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
+		if len(args) != 0 {
+			return getLogger().Errorf("Too many arguments provided: %v", args)
+		}
+		return
+	}
 	return command
 }
 

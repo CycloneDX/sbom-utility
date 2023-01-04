@@ -29,10 +29,9 @@ import (
 const (
 	SUBCOMMAND_LICENSE_LIST   = "list"
 	SUBCOMMAND_LICENSE_POLICY = "policy"
-	SUBCOMMAND_LICENSE_HELP   = "help"
 )
 
-var VALID_SUBCOMMANDS = []string{SUBCOMMAND_LICENSE_LIST, SUBCOMMAND_LICENSE_POLICY, SUBCOMMAND_LICENSE_HELP}
+var VALID_SUBCOMMANDS_LICENSE = []string{SUBCOMMAND_LICENSE_LIST, SUBCOMMAND_LICENSE_POLICY}
 
 // License list default values
 const (
@@ -106,47 +105,32 @@ func AppendLicenseInfo(key string, licenseInfo LicenseInfo) {
 }
 
 func NewCommandLicense() *cobra.Command {
-	getLogger().Enter()
-	defer getLogger().Exit()
 	var command = new(cobra.Command)
 	command.Use = "license [subcommand] [flags]"
 	command.Short = "Process licenses found in SBOM input file"
 	command.Long = "Process licenses found in SBOM input file"
 	command.RunE = licenseCmdImpl
-	command.ValidArgs = VALID_SUBCOMMANDS
-	command.PreRunE = func(cmd *cobra.Command, args []string) error {
+	command.ValidArgs = VALID_SUBCOMMANDS_LICENSE
+	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		// the license command requires at least 1 valid subcommand (argument)
 		getLogger().Tracef("args: %v\n", args)
 		if len(args) == 0 {
 			return getLogger().Errorf("Missing required argument(s).")
 		} else if len(args) > 1 {
-			return getLogger().Errorf("Too many arguments provided. %v", args)
+			return getLogger().Errorf("Too many arguments provided: %v", args)
 		}
-
-		for _, cmd := range VALID_SUBCOMMANDS {
-			if args[0] == cmd {
-				getLogger().Tracef("Valid subcommand `%v` found", args[0])
-				return nil
-			}
+		// Make sure subcommand is known
+		if !preRunTestForSubcommand(command, VALID_SUBCOMMANDS_LICENSE, args[0]) {
+			return getLogger().Errorf("Subcommand provided is not valid: `%v`", args[0])
 		}
-		return getLogger().Errorf("Argument provided is not valid: `%v`", args[0])
+		return
 	}
 	return command
 }
 
-// Additional handling is needed to display help for subcommands
-// TODO: look to do this in the "pre-check" callback function
 func licenseCmdImpl(cmd *cobra.Command, args []string) error {
 	getLogger().Enter(args)
 	defer getLogger().Exit()
-
-	// Display command "help" if subcommand not provided or help requested explicitly
-	if len(args) == 0 || args[0] == SUBCOMMAND_LICENSE_HELP {
-		cmd.Help()
-		if len(args) == 0 {
-			os.Exit(ERROR_APPLICATION)
-		}
-	}
 	return nil
 }
 

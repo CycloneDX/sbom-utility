@@ -428,7 +428,8 @@ func (sbom *Sbom) findSchemaVersionWithVariant(format FormatSchema, version stri
 			// If a variant is also requested, see if we can find one for that criteria
 			// Note: the default value for "variant" is an empty string
 			if utils.GlobalFlags.Variant == schema.Variant {
-				getLogger().Tracef("Match found for requested schema variant: `%s`", utils.GlobalFlags.Variant)
+				getLogger().Tracef("Match found for requested schema variant: `%s`",
+					FormatSchemaVariant(utils.GlobalFlags.Variant))
 				sbom.SchemaInfo = schema
 				return
 			}
@@ -480,6 +481,15 @@ func CalcLineAndCharacterPos(data []byte, offset int64) (lineNum int, charNum in
 	}
 
 	return lineNum, charNum - 1
+}
+
+func FormatSchemaVariant(variant string) (formattedVariant string) {
+	var variantName string = SCHEMA_VARIANT_LATEST
+	if variant != "" {
+		variantName = variant
+	}
+	formattedVariant = "(" + variantName + ")"
+	return
 }
 
 // TODO: use a Hash map to look up known schemas using the following `SchemaKey`

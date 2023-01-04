@@ -27,33 +27,39 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	SUBCOMMAND_SCHEMA_HELP = "help"
+)
+
+var VALID_SCHEMA_SUBCOMMANDS = []string{SUBCOMMAND_SCHEMA_HELP}
+
 var SCHEMA_LIST_TITLES = []string{"Format", "Version", "Variant", "File", "Source"}
 
 func NewCommandSchema() *cobra.Command {
 	var command = new(cobra.Command)
 	command.Use = "schema"
-	command.Short = "view built-in SBOM schemas."
-	command.Long = fmt.Sprintf("view built-in SBOM schemas supported by the utility. The default command produces a list based upon `%s`", DEFAULT_SCHEMA_CONFIG)
+	command.Short = "View supported SBOM schemas"
+	command.Long = fmt.Sprintf("view built-in SBOM schemas supported by the utility. The default command produces a list based upon `%s`.", DEFAULT_SCHEMA_CONFIG)
 	command.RunE = schemaCmdImpl
-	initCommandSchema(command)
-	return command
-}
+	command.PreRunE = func(cmd *cobra.Command, args []string) error {
+		// the license command requires at least 1 valid subcommand (argument)
+		getLogger().Tracef("args: %v\n", args)
 
-func initCommandSchema(command *cobra.Command) {
-	getLogger().Enter()
-	defer getLogger().Exit()
+		if len(args) == 0 {
+			return nil
+		} else if len(args) > 1 {
+			return getLogger().Errorf("Too many arguments provided: %v", args)
+		}
 
-	command.Flags().Bool("list", true, "List all configured schemas by format")
-	//rootCmd.AddCommand(command)
-}
-
-func formatSchemaVariant(variant string) (formattedVariant string) {
-	var variantName string = schema.SCHEMA_VARIANT_LATEST
-	if variant != "" {
-		variantName = variant
+		for _, cmd := range VALID_SCHEMA_SUBCOMMANDS {
+			if args[0] == cmd {
+				getLogger().Tracef("Valid subcommand `%v` found", args[0])
+				return nil
+			}
+		}
+		return getLogger().Errorf("Subcommand provided is not valid: `%v`", args[0])
 	}
-	formattedVariant = "(" + variantName + ")"
-	return
+	return command
 }
 
 func schemaCmdImpl(cmd *cobra.Command, args []string) error {
@@ -84,7 +90,7 @@ func schemaCmdImpl(cmd *cobra.Command, args []string) error {
 					fmt.Fprintf(w, "%v\t%s\t%s\t%s\t%s\n",
 						formatName,
 						currentSchema.Version,
-						formatSchemaVariant(currentSchema.Variant),
+						schema.FormatSchemaVariant(currentSchema.Variant),
 						currentSchema.File,
 						currentSchema.Url)
 				}

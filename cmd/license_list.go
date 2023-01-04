@@ -41,9 +41,14 @@ const (
 
 // License list command flag help messages
 const (
-	FLAG_LICENSE_LIST_OUTPUT_FORMAT_HELP = "Format output using the specific type. Supported list formats: "
-	FLAG_LICENSE_LIST_SUMMARY_HELP       = "Summarize licenses and component references in table format. Supported summary formats: "
-	FLAG_LICENSE_LIST_POLICY_HELP        = "Include policy evaluation in summary listing"
+	FLAG_LICENSE_LIST_OUTPUT_FORMAT_HELP = "format output using the specified format type"
+	FLAG_LICENSE_LIST_SUMMARY_HELP       = "summarize licenses and component references in table format (see --format flag help for supported types)"
+	FLAG_LICENSE_LIST_POLICY_HELP        = "include policy evaluation in summary listing"
+)
+
+const (
+	LICENSE_SUPPORTED_FORMATS_LIST_HELP         = "\n- Supported formats: "
+	LICENSE_SUPPORTED_FORMATS_LIST_SUMMARY_HELP = "\n- Supported formats using the --summary flag: "
 )
 
 // License list command informational messages
@@ -55,8 +60,9 @@ const (
 	LICENSE_LIST_TITLE_ROW_SEPARATOR = "-"
 )
 
-var LICENSE_LIST_SUPPORTED_FORMATS = strings.Join([]string{OUTPUT_JSON, OUTPUT_CSV}, ", ")
-var LICENSE_LIST_SUMMARY_SUPPORTED_FORMATS = strings.Join([]string{OUTPUT_TEXT, OUTPUT_CSV, OUTPUT_MARKDOWN}, ", ")
+// Command help formatting
+var LICENSE_LIST_SUPPORTED_FORMATS = LICENSE_SUPPORTED_FORMATS_LIST_HELP + strings.Join([]string{OUTPUT_JSON, OUTPUT_CSV}, ", ")
+var LICENSE_LIST_SUMMARY_SUPPORTED_FORMATS = LICENSE_SUPPORTED_FORMATS_LIST_SUMMARY_HELP + strings.Join([]string{OUTPUT_TEXT, OUTPUT_CSV, OUTPUT_MARKDOWN}, ", ")
 
 // Title row names for formatted lists (reports)
 var LICENSE_LIST_TITLE_POLICY = []string{"Policy"}
@@ -66,17 +72,20 @@ var LICENSE_LIST_TITLES_LICENSE_CHOICE = []string{"License.Id", "License.Name", 
 // WARNING: Cobra will not recognize a subcommand if its `command.Use` is not a single
 // word string that matches one of the `command.ValidArgs` set on the parent command
 func NewCommandList() *cobra.Command {
-	getLogger().Enter()
-	defer getLogger().Exit()
 	var command = new(cobra.Command)
 	command.Use = CMD_USAGE_LICENSE_LIST
 	command.Short = "List licenses found in SBOM input file"
 	command.Long = "List licenses found in SBOM input file"
-	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", "", FLAG_LICENSE_LIST_OUTPUT_FORMAT_HELP+LICENSE_LIST_SUPPORTED_FORMATS)
-	command.Flags().Bool(FLAG_LICENSE_SUMMARY, false, FLAG_LICENSE_LIST_SUMMARY_HELP+LICENSE_LIST_SUMMARY_SUPPORTED_FORMATS)
+	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", "",
+		FLAG_LICENSE_LIST_OUTPUT_FORMAT_HELP+LICENSE_LIST_SUPPORTED_FORMATS+LICENSE_LIST_SUMMARY_SUPPORTED_FORMATS)
+	command.Flags().Bool(FLAG_LICENSE_SUMMARY, false, FLAG_LICENSE_LIST_SUMMARY_HELP)
 	command.Flags().Bool(FLAG_LICENSE_POLICY, false, FLAG_LICENSE_LIST_POLICY_HELP)
 	command.RunE = listCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
+		if len(args) != 0 {
+			return getLogger().Errorf("Too many arguments provided: %v", args)
+		}
+		// Test for required flags (parameters)
 		err = preRunTestForInputFile(cmd, args)
 		return
 	}

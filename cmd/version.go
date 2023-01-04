@@ -27,8 +27,8 @@ import (
 func NewCommandVersion() *cobra.Command {
 	var command = new(cobra.Command)
 	command.Use = CMD_VERSION
-	command.Short = "display program, binary and version information"
-	command.Long = "display program, binary and version information in SemVer format (e.g., `<project> version <x.y.z>`)"
+	command.Short = "Display program, binary and version information"
+	command.Long = "Display program, binary and version information in SemVer format (e.g., `<project> version <x.y.z>`)"
 	command.Run = func(cmd *cobra.Command, args []string) {
 		getLogger().Enter()
 		defer getLogger().Exit()

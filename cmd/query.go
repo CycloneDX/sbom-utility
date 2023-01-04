@@ -120,7 +120,7 @@ func NewQueryResponse() *QueryResponse {
 func NewCommandQuery() *cobra.Command {
 	var command = new(cobra.Command)
 	command.Use = CMD_USAGE_QUERY
-	command.Short = "query objects and key-values from SBOM (JSON) document"
+	command.Short = "Query objects and key-values from SBOM (JSON) document"
 	command.Long = "SQL-like query (i.e. SELECT x,y FROM a.b.c WHERE x=<regex>) of JSON objects and specified fields from SBOM (JSON) document."
 	command.RunE = queryCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) error {

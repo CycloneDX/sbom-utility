@@ -73,10 +73,10 @@ const (
 	MSG_FLAG_DEBUG          = "enable debug logging"
 	MSG_FLAG_INPUT          = "input filename (e.g., \"path/sbom.json\")"
 	MSG_FLAG_OUTPUT         = "output filename"
-	MSG_FLAG_LOG_QUIET      = "enable quiet logging mode (e.g., removes all [INFO] messages from output). Overrides other logging commands."
-	MSG_FLAG_LOG_INDENT     = "enable log indentation of functional callstack."
-	MSG_FLAG_CONFIG_SCHEMA  = "provide custom location and/or filename for application schema configuration (i.e., replaces default `config.json`"
-	MSG_FLAG_CONFIG_LICENSE = "provide custom location and/or filename for application license policy configuration (i.e., replaces default `license.json`"
+	MSG_FLAG_LOG_QUIET      = "enable quiet logging mode (removes all information messages from console output); overrides other logging commands"
+	MSG_FLAG_LOG_INDENT     = "enable log indentation of functional callstack"
+	MSG_FLAG_CONFIG_SCHEMA  = "provide custom location and/or filename for application schema configuration (i.e., replaces default `config.json`)"
+	MSG_FLAG_CONFIG_LICENSE = "provide custom location and/or filename for application license policy configuration (i.e., replaces default `license.json`)"
 )
 
 const (
@@ -245,6 +245,22 @@ func preRunTestForInputFile(cmd *cobra.Command, args []string) error {
 		return getLogger().Errorf("File not found: `%s`", file)
 	}
 	return nil
+}
+
+// TODO: when the package "golang.org/x/exp/slices" is graduated from "experimental", replace
+// for loop with the "Contains" method.
+func preRunTestForSubcommand(cmd *cobra.Command, validSubcommands []string, subcommand string) bool {
+	getLogger().Enter()
+	defer getLogger().Exit()
+	getLogger().Tracef("subcommands: %v, subcommand: `%v`", validSubcommands, subcommand)
+
+	for _, value := range validSubcommands {
+		if value == subcommand {
+			getLogger().Tracef("Valid subcommand `%v` found", subcommand)
+			return true
+		}
+	}
+	return false
 }
 
 func createOutputFile(outputFilename string) (outputFile *os.File, writer io.Writer, err error) {
