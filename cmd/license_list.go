@@ -53,7 +53,7 @@ const (
 
 // License list command informational messages
 const (
-	MSG_LICENSE_NO_LICENSES_FOUND = "[WARN] no licenses found in document"
+	OUTPUT_MSG_LICENSE_NO_LICENSES_FOUND = "[WARN] no licenses found in document"
 )
 
 const (
@@ -259,7 +259,7 @@ func DisplayLicenseListCSV(output io.Writer) {
 	licenseKeys := licenseMap.KeySet()
 
 	if isEmptyLicenseList(licenseKeys) {
-		currentRow = append(currentRow, MSG_LICENSE_NO_LICENSES_FOUND)
+		currentRow = append(currentRow, OUTPUT_MSG_LICENSE_NO_LICENSES_FOUND)
 		w.Write(currentRow)
 		return
 	}
@@ -321,7 +321,7 @@ func DisplayLicenseListSummaryText(output io.Writer) {
 
 	// Emit no license warning into output
 	if isEmptyLicenseList(licenseKeys) {
-		fmt.Fprintf(w, "%s\n", MSG_LICENSE_NO_LICENSES_FOUND)
+		fmt.Fprintf(w, "%s\n", OUTPUT_MSG_LICENSE_NO_LICENSES_FOUND)
 		return
 	}
 
@@ -376,7 +376,7 @@ func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
 
 	// Emit no license warning into output
 	if isEmptyLicenseList(licenseKeys) {
-		currentRow = append(currentRow, MSG_LICENSE_NO_LICENSES_FOUND)
+		currentRow = append(currentRow, OUTPUT_MSG_LICENSE_NO_LICENSES_FOUND)
 		w.Write(currentRow)
 		return
 	}
@@ -441,7 +441,7 @@ func DisplayLicenseListSummaryMarkdown(output io.Writer) {
 
 	// Emit no license warning into output
 	if isEmptyLicenseList(licenseKeys) {
-		fmt.Fprintf(output, "%s\n", MSG_LICENSE_NO_LICENSES_FOUND)
+		fmt.Fprintf(output, "%s\n", OUTPUT_MSG_LICENSE_NO_LICENSES_FOUND)
 		return
 	}
 

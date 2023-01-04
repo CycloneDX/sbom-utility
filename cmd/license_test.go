@@ -228,8 +228,8 @@ func TestLicenseListCSVCdxNoneFound(t *testing.T) {
 	}
 
 	s := outputBuffer.String()
-	if !strings.Contains(s, MSG_LICENSE_NO_LICENSES_FOUND) {
-		t.Errorf("ListLicenses(): did not include the message: `%s`", MSG_LICENSE_NO_LICENSES_FOUND)
+	if !strings.Contains(s, OUTPUT_MSG_LICENSE_NO_LICENSES_FOUND) {
+		t.Errorf("ListLicenses(): did not include the message: `%s`", OUTPUT_MSG_LICENSE_NO_LICENSES_FOUND)
 		t.Logf("%s", outputBuffer.String())
 	}
 
@@ -244,8 +244,8 @@ func TestLicenseListCSVCdxNoneFound(t *testing.T) {
 	}
 
 	s = outputBuffer.String()
-	if !strings.Contains(s, MSG_LICENSE_NO_LICENSES_FOUND) {
-		t.Errorf("ListLicenses(): did not include the message: `%s`", MSG_LICENSE_NO_LICENSES_FOUND)
+	if !strings.Contains(s, OUTPUT_MSG_LICENSE_NO_LICENSES_FOUND) {
+		t.Errorf("ListLicenses(): did not include the message: `%s`", OUTPUT_MSG_LICENSE_NO_LICENSES_FOUND)
 		t.Logf("%s", outputBuffer.String())
 	}
 }
@@ -262,8 +262,8 @@ func TestLicenseListTextSummaryCdx14NoneFound(t *testing.T) {
 
 	// verify there is a (warning) message present when no licenses are found
 	s := outputBuffer.String()
-	if !strings.Contains(s, MSG_LICENSE_NO_LICENSES_FOUND) {
-		t.Errorf("ListLicenses(): did not include the message: `%s`", MSG_LICENSE_NO_LICENSES_FOUND)
+	if !strings.Contains(s, OUTPUT_MSG_LICENSE_NO_LICENSES_FOUND) {
+		t.Errorf("ListLicenses(): did not include the message: `%s`", OUTPUT_MSG_LICENSE_NO_LICENSES_FOUND)
 		t.Logf("%s", outputBuffer.String())
 	}
 }

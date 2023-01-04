@@ -412,8 +412,8 @@ func DisplayLicensePoliciesMarkdown(output io.Writer) (err error) {
 	keyNames := familyNameMap.KeySet()
 
 	if len(keyNames) == 0 {
-		fmt.Fprintf(output, "%s\n", MSG_LICENSE_NO_LICENSES_FOUND)
-		return fmt.Errorf(MSG_LICENSE_NO_LICENSES_FOUND)
+		fmt.Fprintf(output, "%s\n", OUTPUT_MSG_LICENSE_NO_LICENSES_FOUND)
+		return fmt.Errorf(OUTPUT_MSG_LICENSE_NO_LICENSES_FOUND)
 	}
 
 	// Sort entries by family name
