@@ -253,7 +253,7 @@ func TestLicensePolicyList(t *testing.T) {
 	var outputBuffer bytes.Buffer
 	var outputWriter = bufio.NewWriter(&outputBuffer)
 
-	DisplayLicensePolicies(outputWriter)
+	DisplayLicensePoliciesTabbedText(outputWriter)
 
 	// The list routine uses other "writers" and flushes them
 	// we must flush our "backing" writer (in this case to our byte buffer)

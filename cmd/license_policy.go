@@ -90,9 +90,9 @@ func ListPolicies(writer io.Writer) (err error) {
 	switch utils.GlobalFlags.OutputFormat {
 	case OUTPUT_DEFAULT:
 		// defaults to text if no explicit `--format` parameter
-		err = DisplayLicensePolicies(writer)
+		err = DisplayLicensePoliciesTabbedText(writer)
 	case OUTPUT_TEXT:
-		err = DisplayLicensePolicies(writer)
+		err = DisplayLicensePoliciesTabbedText(writer)
 	case OUTPUT_CSV:
 		err = DisplayLicensePoliciesCSV(writer)
 	case OUTPUT_MARKDOWN:
@@ -101,7 +101,7 @@ func ListPolicies(writer io.Writer) (err error) {
 		// default to text format for anything else
 		getLogger().Warningf("Unsupported format: `%s`; using default format.",
 			utils.GlobalFlags.OutputFormat)
-		err = DisplayLicensePolicies(writer)
+		err = DisplayLicensePoliciesTabbedText(writer)
 	}
 	return
 }
@@ -290,7 +290,7 @@ func truncateString(value string, maxLength int) string {
 // NOTE: assumes all entries in the policy config file MUST have family names
 // TODO: Allow caller to pass flag to truncate or not (perhaps with value)
 // TODO: Add a --no-title flag to skip title output
-func DisplayLicensePolicies(output io.Writer) (err error) {
+func DisplayLicensePoliciesTabbedText(output io.Writer) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 

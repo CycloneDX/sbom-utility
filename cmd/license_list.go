@@ -48,7 +48,8 @@ const (
 
 // License list command informational messages
 const (
-	MSG_OUTPUT_NO_LICENSES_FOUND = "[WARN] no licenses found in document"
+	MSG_OUTPUT_NO_LICENSES_FOUND = "[WARN] no licenses found in SBOM document"
+	MSG_OUTPUT_NO_SCHEMAS_FOUND  = "[WARN] no schemas found in configuration (i.e., \"config.json\")"
 )
 
 const (

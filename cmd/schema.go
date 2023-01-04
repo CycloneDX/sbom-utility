@@ -19,13 +19,23 @@ package cmd
 
 import (
 	"fmt"
-	"os"
+	"io"
 	"strings"
 	"text/tabwriter"
 
 	"github.com/scs/sbom-utility/schema"
+	"github.com/scs/sbom-utility/utils"
 	"github.com/spf13/cobra"
 )
+
+// Subcommand flags
+const (
+	FLAG_SCHEMA_OUTPUT_FORMAT_HELP = "format output using the specified type"
+)
+
+// Command help formatting
+var SCHEMA_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
+	strings.Join([]string{OUTPUT_TEXT, OUTPUT_CSV, OUTPUT_MARKDOWN}, ", ")
 
 var SCHEMA_LIST_TITLES = []string{"Format", "Version", "Variant", "File", "Source"}
 
@@ -34,6 +44,8 @@ func NewCommandSchema() *cobra.Command {
 	command.Use = "schema"
 	command.Short = "View supported SBOM schemas"
 	command.Long = fmt.Sprintf("View built-in SBOM schemas supported by the utility. The default command produces a list based upon `%s`.", DEFAULT_SCHEMA_CONFIG)
+	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", OUTPUT_TEXT,
+		FLAG_SCHEMA_OUTPUT_FORMAT_HELP+SCHEMA_SUPPORTED_FORMATS)
 	command.RunE = schemaCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		if len(args) != 0 {
@@ -44,7 +56,51 @@ func NewCommandSchema() *cobra.Command {
 	return command
 }
 
-func schemaCmdImpl(cmd *cobra.Command, args []string) error {
+func schemaCmdImpl(cmd *cobra.Command, args []string) (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	outputFile, writer, err := createOutputFile(utils.GlobalFlags.OutputFile)
+
+	if err == nil {
+		err = ListSchemas(writer)
+	}
+
+	// always close the output file
+	if outputFile != nil {
+		outputFile.Close()
+		getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.OutputFile)
+	}
+
+	return
+}
+
+func ListSchemas(writer io.Writer) (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	// default output (writer) to standard out
+	switch utils.GlobalFlags.OutputFormat {
+	case OUTPUT_DEFAULT:
+		// defaults to text if no explicit `--format` parameter
+		err = DisplaySchemasTabbedText(writer)
+	case OUTPUT_TEXT:
+		err = DisplaySchemasTabbedText(writer)
+	// case OUTPUT_CSV:
+	// 	err = DisplayLicensePoliciesCSV(writer)
+	case OUTPUT_MARKDOWN:
+		err = DisplaySchemasMarkdown(writer)
+	default:
+		// default to text format for anything else
+		getLogger().Warningf("Unsupported format: `%s`; using default format.",
+			utils.GlobalFlags.OutputFormat)
+		err = DisplaySchemasTabbedText(writer)
+	}
+	return
+}
+
+// TODO: Add a --no-title flag to skip title output
+func DisplaySchemasTabbedText(output io.Writer) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -52,7 +108,7 @@ func schemaCmdImpl(cmd *cobra.Command, args []string) error {
 	w := new(tabwriter.Writer)
 
 	// min-width, tab-width, padding, pad-char, flags
-	w.Init(os.Stdout, 8, 2, 2, ' ', 0)
+	w.Init(output, 8, 2, 2, ' ', 0)
 
 	defer w.Flush()
 
@@ -86,4 +142,67 @@ func schemaCmdImpl(cmd *cobra.Command, args []string) error {
 
 	fmt.Fprintln(w, "")
 	return nil
+}
+
+// TODO: Add a --no-title flag to skip title output
+func DisplaySchemasMarkdown(output io.Writer) (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	// create title row
+	titles, _ := createTitleRows(SCHEMA_LIST_TITLES, nil)
+	titleRow := createMarkdownRow(titles)
+	fmt.Fprintf(output, "%s\n", titleRow)
+
+	alignments := createMarkdownColumnAlignment(titles)
+	alignmentRow := createMarkdownRow(alignments)
+	fmt.Fprintf(output, "%s\n", alignmentRow)
+
+	// Emit no schemas found warning into output
+	if len(schema.SupportedFormatConfig.Formats) == 0 {
+		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_SCHEMAS_FOUND)
+		return fmt.Errorf(MSG_OUTPUT_NO_SCHEMAS_FOUND)
+	}
+
+	// TODO: Sort entries by schema format and version
+	// sort.Slice(keyNames, func(i, j int) bool {
+	// 	return keyNames[i].(string) < keyNames[j].(string)
+	// })
+
+	var line []string
+	var lineRow string
+	var formatName = ""
+
+	for _, format := range (schema.SupportedFormatConfig).Formats {
+		formatName = format.CanonicalName
+
+		if len(format.Schemas) > 0 {
+			for _, currentSchema := range format.Schemas {
+
+				line = nil
+				lineRow = ""
+
+				// fmt.Fprintf(w, "%v\t%s\t%s\t%s\t%s\n",
+				// 	formatName,
+				// 	currentSchema.Version,
+				// 	schema.FormatSchemaVariant(currentSchema.Variant),
+				// 	currentSchema.File,
+				// 	currentSchema.Url)
+
+				line = append(line,
+					formatName,
+					currentSchema.Version,
+					schema.FormatSchemaVariant(currentSchema.Variant),
+					currentSchema.File,
+					currentSchema.Url)
+
+				lineRow = createMarkdownRow(line)
+				fmt.Fprintf(output, "%s\n", lineRow)
+			}
+		} else {
+			getLogger().Warningf("No supported schemas for format `%s`.\n", formatName)
+		}
+	}
+
+	return
 }
