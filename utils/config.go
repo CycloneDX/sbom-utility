@@ -29,6 +29,8 @@ func FindVerifyConfigFileAbsPath(logger *log.MiniLogger, filename string) (absFi
 	logger.Enter()
 	defer logger.Exit()
 
+	logger.Tracef("filename: %s", filename)
+
 	if len(filename) == 0 {
 		err = fmt.Errorf("invalid config filename: `%s`", filename)
 		return
@@ -44,7 +46,7 @@ func FindVerifyConfigFileAbsPath(logger *log.MiniLogger, filename string) (absFi
 
 	// if the filename was not passed using an absolute path, attempt to find it
 	// relative to the executable directory then the current working directory
-	if filepath.IsAbs(filename) {
+	if !filepath.IsAbs(filename) {
 		// first, attempt to find file relative to the executable
 		tmpFilename := filepath.Join(GlobalFlags.ExecDir, filename)
 		logger.Tracef("Checking for config relative to executable: `%s`...", tmpFilename)

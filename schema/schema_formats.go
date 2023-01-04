@@ -178,6 +178,7 @@ func (err UnsupportedSchemaError) Error() string {
 func LoadSchemaConfig(filename string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
+	getLogger().Tracef("filename: `%s` ...", filename)
 
 	cfgFilename, err := utils.FindVerifyConfigFileAbsPath(getLogger(), filename)
 
