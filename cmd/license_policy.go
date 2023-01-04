@@ -33,8 +33,12 @@ import (
 
 // Subcommand flags
 const (
-	FLAG_POLICY_OUTPUT_FORMAT_HELP = "Format output using the specific type. Valid values: \"txt\", \"csv\", \"md\""
+	FLAG_POLICY_OUTPUT_FORMAT_HELP = "format output using the specified type"
 )
+
+// Command help formatting
+var LICENSE_POLICY_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
+	strings.Join([]string{OUTPUT_TEXT, OUTPUT_CSV, OUTPUT_MARKDOWN}, ", ")
 
 // Titles for lists
 var LICENSE_POLICY_SUMMARY_TITLES = []string{"Policy", "Family", "SPDX ID", "Name", "Annotations", "Notes"}
@@ -46,7 +50,8 @@ func NewCommandPolicy() *cobra.Command {
 	command.Use = "policy"
 	command.Short = "List policies associated with known licenses"
 	command.Long = "List caller-supplied, \"allow/deny\"-style policies associated with known software, hardware or data licenses"
-	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", "", FLAG_POLICY_OUTPUT_FORMAT_HELP)
+	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", OUTPUT_TEXT,
+		FLAG_POLICY_OUTPUT_FORMAT_HELP+LICENSE_POLICY_SUPPORTED_FORMATS)
 	command.RunE = policyCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		if len(args) != 0 {
@@ -412,8 +417,8 @@ func DisplayLicensePoliciesMarkdown(output io.Writer) (err error) {
 	keyNames := familyNameMap.KeySet()
 
 	if len(keyNames) == 0 {
-		fmt.Fprintf(output, "%s\n", OUTPUT_MSG_LICENSE_NO_LICENSES_FOUND)
-		return fmt.Errorf(OUTPUT_MSG_LICENSE_NO_LICENSES_FOUND)
+		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_LICENSES_FOUND)
+		return fmt.Errorf(MSG_OUTPUT_NO_LICENSES_FOUND)
 	}
 
 	// Sort entries by family name

@@ -80,6 +80,11 @@ const (
 )
 
 const (
+	MSG_SUPPORTED_OUTPUT_FORMATS_HELP         = "\n- Supported formats: "
+	MSG_SUPPORTED_OUTPUT_FORMATS_SUMMARY_HELP = "\n- Supported formats using the --summary flag: "
+)
+
+const (
 	DEFAULT_SCHEMA_CONFIG            = "config.json"
 	DEFAULT_CUSTOM_VALIDATION_CONFIG = "custom.json"
 	DEFAULT_LICENSE_POLICIES         = "license.json"

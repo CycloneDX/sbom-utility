@@ -40,18 +40,13 @@ const (
 
 // Query command flag help messages
 const (
-	FLAG_QUERY_OUTPUT_FORMAT_HELP = "format output using the specific type.\n- Supported formats: json"
-	FLAG_QUERY_SELECT_HELP        = "comma-separated list of JSON key names used to select fields within the object designated by the FROM flag." +
-		" The wildcard character `*` can be used to denote inclusion of all found key-values."
-	FLAG_QUERY_FROM_HELP = "dot-separated list of JSON key names used to dereference into the JSON document." +
-		" If not present, the query assumes document \"root\" as the `--from` object."
-	FLAG_QUERY_WHERE_HELP    = "comma-separated list of key=<regex> used to filter the SELECT result set."
-	FLAG_QUERY_ORDER_BY_HELP = "key name that appears in the SELECT result set used to order the result records."
-)
-
-// Valid `--format` formats
-const (
-	FLAG_VALUE_OUTPUT_JSON = "json"
+	FLAG_QUERY_OUTPUT_FORMAT_HELP = "format output using the specified type"
+	FLAG_QUERY_SELECT_HELP        = "comma-separated list of JSON key names used to select fields within the object designated by the FROM flag" +
+		"\n- the wildcard character `*` can be used to denote inclusion of all found key-values"
+	FLAG_QUERY_FROM_HELP = "dot-separated list of JSON key names used to dereference into the JSON document" +
+		"\n - if not present, the query assumes document \"root\" as the `--from` object"
+	FLAG_QUERY_WHERE_HELP    = "comma-separated list of key=<regex> used to filter the SELECT result set"
+	FLAG_QUERY_ORDER_BY_HELP = "key name that appears in the SELECT result set used to order the result records"
 )
 
 // Named tokens
@@ -62,6 +57,9 @@ const (
 	QUERY_WHERE_EXPRESSION_SEP = ","
 	QUERY_WHERE_OPERAND_EQUALS = "="
 )
+
+var QUERY_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
+	strings.Join([]string{OUTPUT_JSON}, ", ")
 
 // query JSON map and return selected subset
 // SELECT
@@ -135,8 +133,11 @@ func initCommandQuery(command *cobra.Command) {
 	defer getLogger().Exit()
 
 	// Add local flags to command
-	command.PersistentFlags().StringVar(&utils.GlobalFlags.OutputFormat, FLAG_OUTPUT_FORMAT, FLAG_VALUE_OUTPUT_JSON, FLAG_QUERY_OUTPUT_FORMAT_HELP)
+	command.PersistentFlags().StringVar(&utils.GlobalFlags.OutputFormat, FLAG_OUTPUT_FORMAT, OUTPUT_JSON,
+		FLAG_QUERY_OUTPUT_FORMAT_HELP+QUERY_SUPPORTED_FORMATS)
 	command.Flags().StringP(FLAG_QUERY_SELECT, "", QUERY_TOKEN_WILDCARD, FLAG_QUERY_SELECT_HELP)
+	// NOTE: TODO: There appears to be a bug in Cobra where the type of the `from`` flag is `--from`
+	// This bug does not exhibit on any other flags
 	command.Flags().StringP(FLAG_QUERY_FROM, "", "", FLAG_QUERY_FROM_HELP)
 	command.Flags().StringP(FLAG_QUERY_WHERE, "", "", FLAG_QUERY_WHERE_HELP)
 	command.Flags().StringP(FLAG_QUERY_ORDER_BY, "", "", FLAG_QUERY_ORDER_BY_HELP)

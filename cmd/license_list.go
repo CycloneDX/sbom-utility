@@ -46,14 +46,9 @@ const (
 	FLAG_LICENSE_LIST_POLICY_HELP        = "include policy evaluation in summary listing"
 )
 
-const (
-	LICENSE_SUPPORTED_FORMATS_LIST_HELP         = "\n- Supported formats: "
-	LICENSE_SUPPORTED_FORMATS_LIST_SUMMARY_HELP = "\n- Supported formats using the --summary flag: "
-)
-
 // License list command informational messages
 const (
-	OUTPUT_MSG_LICENSE_NO_LICENSES_FOUND = "[WARN] no licenses found in document"
+	MSG_OUTPUT_NO_LICENSES_FOUND = "[WARN] no licenses found in document"
 )
 
 const (
@@ -61,10 +56,10 @@ const (
 )
 
 // Command help formatting
-var LICENSE_LIST_SUPPORTED_FORMATS = LICENSE_SUPPORTED_FORMATS_LIST_HELP +
+var LICENSE_LIST_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{OUTPUT_JSON, OUTPUT_CSV}, ", ") +
 	" (default: json)"
-var LICENSE_LIST_SUMMARY_SUPPORTED_FORMATS = LICENSE_SUPPORTED_FORMATS_LIST_SUMMARY_HELP +
+var LICENSE_LIST_SUMMARY_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_SUMMARY_HELP +
 	strings.Join([]string{OUTPUT_TEXT, OUTPUT_CSV, OUTPUT_MARKDOWN}, ", ") +
 	" (default: txt)"
 
@@ -81,7 +76,9 @@ func NewCommandList() *cobra.Command {
 	command.Short = "List licenses found in SBOM input file"
 	command.Long = "List licenses found in SBOM input file"
 	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", "",
-		FLAG_LICENSE_LIST_OUTPUT_FORMAT_HELP+LICENSE_LIST_SUPPORTED_FORMATS+LICENSE_LIST_SUMMARY_SUPPORTED_FORMATS)
+		FLAG_LICENSE_LIST_OUTPUT_FORMAT_HELP+
+			LICENSE_LIST_SUPPORTED_FORMATS+
+			LICENSE_LIST_SUMMARY_SUPPORTED_FORMATS)
 	command.Flags().Bool(FLAG_LICENSE_SUMMARY, false, FLAG_LICENSE_LIST_SUMMARY_HELP)
 	command.Flags().Bool(FLAG_LICENSE_POLICY, false, FLAG_LICENSE_LIST_POLICY_HELP)
 	command.RunE = listCmdImpl
@@ -259,7 +256,7 @@ func DisplayLicenseListCSV(output io.Writer) {
 	licenseKeys := licenseMap.KeySet()
 
 	if isEmptyLicenseList(licenseKeys) {
-		currentRow = append(currentRow, OUTPUT_MSG_LICENSE_NO_LICENSES_FOUND)
+		currentRow = append(currentRow, MSG_OUTPUT_NO_LICENSES_FOUND)
 		w.Write(currentRow)
 		return
 	}
@@ -321,7 +318,7 @@ func DisplayLicenseListSummaryText(output io.Writer) {
 
 	// Emit no license warning into output
 	if isEmptyLicenseList(licenseKeys) {
-		fmt.Fprintf(w, "%s\n", OUTPUT_MSG_LICENSE_NO_LICENSES_FOUND)
+		fmt.Fprintf(w, "%s\n", MSG_OUTPUT_NO_LICENSES_FOUND)
 		return
 	}
 
@@ -376,7 +373,7 @@ func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
 
 	// Emit no license warning into output
 	if isEmptyLicenseList(licenseKeys) {
-		currentRow = append(currentRow, OUTPUT_MSG_LICENSE_NO_LICENSES_FOUND)
+		currentRow = append(currentRow, MSG_OUTPUT_NO_LICENSES_FOUND)
 		w.Write(currentRow)
 		return
 	}
@@ -441,7 +438,7 @@ func DisplayLicenseListSummaryMarkdown(output io.Writer) {
 
 	// Emit no license warning into output
 	if isEmptyLicenseList(licenseKeys) {
-		fmt.Fprintf(output, "%s\n", OUTPUT_MSG_LICENSE_NO_LICENSES_FOUND)
+		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_LICENSES_FOUND)
 		return
 	}
 

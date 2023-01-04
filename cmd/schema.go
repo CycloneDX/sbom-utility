@@ -27,37 +27,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const (
-	SUBCOMMAND_SCHEMA_HELP = "help"
-)
-
-var VALID_SCHEMA_SUBCOMMANDS = []string{SUBCOMMAND_SCHEMA_HELP}
-
 var SCHEMA_LIST_TITLES = []string{"Format", "Version", "Variant", "File", "Source"}
 
 func NewCommandSchema() *cobra.Command {
 	var command = new(cobra.Command)
 	command.Use = "schema"
 	command.Short = "View supported SBOM schemas"
-	command.Long = fmt.Sprintf("view built-in SBOM schemas supported by the utility. The default command produces a list based upon `%s`.", DEFAULT_SCHEMA_CONFIG)
+	command.Long = fmt.Sprintf("View built-in SBOM schemas supported by the utility. The default command produces a list based upon `%s`.", DEFAULT_SCHEMA_CONFIG)
 	command.RunE = schemaCmdImpl
-	command.PreRunE = func(cmd *cobra.Command, args []string) error {
-		// the license command requires at least 1 valid subcommand (argument)
-		getLogger().Tracef("args: %v\n", args)
-
-		if len(args) == 0 {
-			return nil
-		} else if len(args) > 1 {
+	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
+		if len(args) != 0 {
 			return getLogger().Errorf("Too many arguments provided: %v", args)
 		}
-
-		for _, cmd := range VALID_SCHEMA_SUBCOMMANDS {
-			if args[0] == cmd {
-				getLogger().Tracef("Valid subcommand `%v` found", args[0])
-				return nil
-			}
-		}
-		return getLogger().Errorf("Subcommand provided is not valid: `%v`", args[0])
+		return
 	}
 	return command
 }
