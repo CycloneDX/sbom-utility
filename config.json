@@ -29,6 +29,14 @@
                     "url": "https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3/schemas/spdx-schema.json",
                     "default": true,
                     "variant": ""
+                },
+                {
+                    "version": "SPDX-2.3",
+                    "name": "schema/spdx/2.3.1/spdx-schema.json",
+                    "file": "schema/spdx/2.3.1/spdx-schema.json",
+                    "url": "https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3.1/schemas/spdx-schema.json",
+                    "default": false,
+                    "variant": "development"
                 }
             ]
         },
