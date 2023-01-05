@@ -113,16 +113,17 @@ You can verify which formats and schemas are available for validation by using t
 Sample output:
 
 ```bash
-Format     Version   Variant   File                                                 Source
-------     -------   -------   ----                                                 ------
-SPDX       SPDX-2.3  (latest)  schema/spdx/2.3/spdx-schema.json                     https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3/schemas/spdx-schema.json
-SPDX       SPDX-2.2  2.2.1     schema/spdx/2.2.1/spdx-schema.json                   https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json
-SPDX       SPDX-2.2  (latest)  schema/spdx/2.2.2/spdx-schema.json                   https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.2/schemas/spdx-schema.json
-CycloneDX  1.2       (latest)  schema/cyclonedx/1.2/bom-1.2.schema.json             https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2.schema.json
-CycloneDX  1.2       strict    schema/cyclonedx/1.2/bom-1.2-strict.schema.json      https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2-strict.schema.json
-CycloneDX  1.3       (latest)  schema/cyclonedx/1.3/bom-1.3.schema.json             https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3.schema.json
-CycloneDX  1.3       strict    schema/cyclonedx/1.3/bom-1.3-strict.schema.json      https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3-strict.schema.json
-CycloneDX  1.4       (latest)  schema/cyclonedx/1.4/bom-1.4.schema.json             https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json
+Format     Version   Variant   File                                             Source
+------     -------   -------   ----                                             ------
+SPDX       SPDX-2.2  (2.2.1)   schema/spdx/2.2.1/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json
+SPDX       SPDX-2.2  (latest)  schema/spdx/2.2.2/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.2/schemas/spdx-schema.json
+SPDX       SPDX-2.3  (latest)  schema/spdx/2.3/spdx-schema.json                 https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3/schemas/spdx-schema.json
+CycloneDX  1.2       (latest)  schema/cyclonedx/1.2/bom-1.2.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2.schema.json
+CycloneDX  1.2       (strict)  schema/cyclonedx/1.2/bom-1.2-strict.schema.json  https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2-strict.schema.json
+CycloneDX  1.3       (latest)  schema/cyclonedx/1.3/bom-1.3.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3.schema.json
+CycloneDX  1.3       (strict)  schema/cyclonedx/1.3/bom-1.3-strict.schema.json  https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3-strict.schema.json
+CycloneDX  1.4       (latest)  schema/cyclonedx/1.4/bom-1.4.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json
+CycloneDX  1.5       (latest)  schema/cyclonedx/1.5/bom-1.5.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/v1.5-dev/schema/bom-1.5.schema.json
 ```
 
 #### Adding schemas
@@ -229,13 +230,16 @@ For example, output a license summary for an SBOM to a file named `output.txt`:
 ```
 
 ```bash
-[INFO] : Creating output file: `output.txt`...
-[INFO] : Unmarshalling file `test/cyclonedx/cdx-1-3-license-list.json`...
-[INFO] : Successfully Opened: `test/cyclonedx/cdx-1-3-license-list.json`
-[INFO] : Determining file's sbom format and version...
-[INFO] : Scanning document for licenses...
-[INFO] : Outputting summary (`txt` format)...
-[INFO] : Closed output file: `output.txt`
+[INFO] Loading license policy config file: `license.json`...
+[INFO] Creating output file: `output.txt`...
+[INFO] Attempting to load and unmarshal file `test/cyclonedx/cdx-1-3-license-list.json`...
+[INFO] Successfully unmarshalled data from: `test/cyclonedx/cdx-1-3-license-list.json`
+[INFO] Determining file's SBOM format and version...
+[INFO] Determined SBOM format, version (variant): `CycloneDX`, `1.3` (latest)
+[INFO] Matching SBOM schema (for validation): schema/cyclonedx/1.3/bom-1.3.schema.json
+[INFO] Scanning document for licenses...
+[INFO] Outputting summary (`txt` format)...
+[INFO] Closed output file: `output.txt`
 ```
 
 ---
