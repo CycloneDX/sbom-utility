@@ -1,5 +1,5 @@
 sbom-utility
-© Copyright IBM Corporation 2022.
+© Copyright IBM Corporation 2022, 2023.
 
-This repository includes software developed by 
+This repository includes software developed by
 Matt Rutkowski, working for IBM
