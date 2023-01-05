@@ -305,7 +305,7 @@ func parseWhereFilter(rawExpression string) (pWhereSelector *WhereFilter) {
 
 	var errCompile error
 	whereFilter.ValueRegEx, errCompile = compileRegex(whereFilter.Value)
-	getLogger().Debugf(">> Regular expression: `%v` ...", whereFilter.ValueRegEx)
+	getLogger().Debugf(">> Regular expression: `%v`...", whereFilter.ValueRegEx)
 
 	if errCompile != nil {
 		return // nil
