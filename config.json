@@ -80,7 +80,7 @@
                 },
                 {
                     "version": "1.5",
-                    "name": "bom-1.5.schema.json",
+                    "name": "bom-1.5-dev.schema.json",
                     "file": "schema/cyclonedx/1.5/bom-1.5-dev.schema.json",
                     "url": "https://raw.githubusercontent.com/CycloneDX/specification/v1.5-dev/schema/bom-1.5.schema.json",
                     "default": false,
