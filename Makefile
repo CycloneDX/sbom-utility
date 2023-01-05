@@ -51,6 +51,10 @@ release: clean config sbom
 	GOOS=linux GOARCH=arm64 go build ${LDFLAGS} -o ${RELEASE_DIR}/sbom-utility-linux-arm64
 	GOOS=windows GOARCH=amd64 go build ${LDFLAGS} -o ${RELEASE_DIR}/sbom-utility-windows-amd64
 	GOOS=windows GOARCH=arm64 go build ${LDFLAGS} -o ${RELEASE_DIR}/sbom-utility-windows-arm64
+	GOOS=windows GOARCH=arm64 go build ${LDFLAGS} -o ${RELEASE_DIR}/sbom-utility-windows-arm64
+	GOOS=linux GOARCH=ppc64 go build ${LDFLAGS} -o ${RELEASE_DIR}/sbom-utility-linux-ppc64
+	GOOS=linux GOARCH=ppc64le go build ${LDFLAGS} -o ${RELEASE_DIR}/sbom-utility-linux-ppc64le
+	GOOS=linux GOARCH=s390x go build ${LDFLAGS} -o ${RELEASE_DIR}/sbom-utility-linux-s390x
 	cp config.json ${RELEASE_DIR}/
 	cp license.json ${RELEASE_DIR}/
 	cp custom.json ${RELEASE_DIR}/
