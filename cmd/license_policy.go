@@ -363,6 +363,12 @@ func DisplayLicensePoliciesCSV(output io.Writer) (err error) {
 	}
 	keyNames := familyNameMap.KeySet()
 
+	// Emit no schemas found warning into output
+	if len(keyNames) == 0 {
+		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_LICENSES_FOUND)
+		return fmt.Errorf(MSG_OUTPUT_NO_LICENSES_FOUND)
+	}
+
 	// Sort entries by family name
 	sort.Slice(keyNames, func(i, j int) bool {
 		return keyNames[i].(string) < keyNames[j].(string)
@@ -416,6 +422,7 @@ func DisplayLicensePoliciesMarkdown(output io.Writer) (err error) {
 	// Display a warning messing in the actual output and return (short-circuit)
 	keyNames := familyNameMap.KeySet()
 
+	// Emit no schemas found warning into output
 	if len(keyNames) == 0 {
 		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_LICENSES_FOUND)
 		return fmt.Errorf(MSG_OUTPUT_NO_LICENSES_FOUND)
@@ -443,7 +450,6 @@ func DisplayLicensePoliciesMarkdown(output io.Writer) (err error) {
 
 			// reset loop variables for new assignments
 			line = nil
-			lineRow = ""
 
 			line = append(line, policy.UsagePolicy,
 				policy.Family,

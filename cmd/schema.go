@@ -18,6 +18,7 @@
 package cmd
 
 import (
+	"encoding/csv"
 	"fmt"
 	"io"
 	"strings"
@@ -86,8 +87,8 @@ func ListSchemas(writer io.Writer) (err error) {
 		err = DisplaySchemasTabbedText(writer)
 	case OUTPUT_TEXT:
 		err = DisplaySchemasTabbedText(writer)
-	// case OUTPUT_CSV:
-	// 	err = DisplayLicensePoliciesCSV(writer)
+	case OUTPUT_CSV:
+		err = DisplaySchemasCSV(writer)
 	case OUTPUT_MARKDOWN:
 		err = DisplaySchemasMarkdown(writer)
 	default:
@@ -179,15 +180,8 @@ func DisplaySchemasMarkdown(output io.Writer) (err error) {
 		if len(format.Schemas) > 0 {
 			for _, currentSchema := range format.Schemas {
 
+				// reset current line
 				line = nil
-				lineRow = ""
-
-				// fmt.Fprintf(w, "%v\t%s\t%s\t%s\t%s\n",
-				// 	formatName,
-				// 	currentSchema.Version,
-				// 	schema.FormatSchemaVariant(currentSchema.Variant),
-				// 	currentSchema.File,
-				// 	currentSchema.Url)
 
 				line = append(line,
 					formatName,
@@ -201,6 +195,56 @@ func DisplaySchemasMarkdown(output io.Writer) (err error) {
 			}
 		} else {
 			getLogger().Warningf("No supported schemas for format `%s`.\n", formatName)
+		}
+	}
+
+	return
+}
+
+// TODO: Add a --no-title flag to skip title output
+func DisplaySchemasCSV(output io.Writer) (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	// initialize writer and prepare the list of entries (i.e., the "rows")
+	w := csv.NewWriter(output)
+	defer w.Flush()
+
+	if err = w.Write(SCHEMA_LIST_TITLES); err != nil {
+		return getLogger().Errorf("error writing record to csv (%v): %s", output, err)
+	}
+
+	// Emit no schemas found warning into output
+	if len(schema.SupportedFormatConfig.Formats) == 0 {
+		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_SCHEMAS_FOUND)
+		return fmt.Errorf(MSG_OUTPUT_NO_SCHEMAS_FOUND)
+	}
+
+	// TODO: Sort entries by schema format and version
+	// sort.Slice(keyNames, func(i, j int) bool {
+	// 	return keyNames[i].(string) < keyNames[j].(string)
+	// })
+	var line []string
+	var formatName = ""
+
+	for _, format := range (schema.SupportedFormatConfig).Formats {
+		formatName = format.CanonicalName
+
+		if len(format.Schemas) > 0 {
+			for _, currentSchema := range format.Schemas {
+
+				line = nil
+				line = append(line,
+					formatName,
+					currentSchema.Version,
+					schema.FormatSchemaVariant(currentSchema.Variant),
+					currentSchema.File,
+					currentSchema.Url)
+
+				if err = w.Write(line); err != nil {
+					getLogger().Errorf("csv.Write: %w", err)
+				}
+			}
 		}
 	}
 

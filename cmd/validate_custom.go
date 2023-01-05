@@ -136,7 +136,7 @@ func validateCustomMetadataProperties(document *schema.Sbom) (err error) {
 	}
 
 	for _, checks := range validationProps {
-		getLogger().Tracef("Running validation checks: Property name: `%s`, checks(s): `%v` ...", checks.Name, checks)
+		getLogger().Tracef("Running validation checks: Property name: `%s`, checks(s): `%v`...", checks.Name, checks)
 		values, found := hashmap.Get(checks.Name)
 		if !found {
 			err = NewSbomMetadataPropertyError(
@@ -150,7 +150,7 @@ func validateCustomMetadataProperties(document *schema.Sbom) (err error) {
 		// i.e., Multiple values with same "key" (specified), not provided
 		// TODO: currently hashmap assumes "name" as the key; this could be dynamic (using reflect)
 		if checks.CheckUnique != "" {
-			getLogger().Tracef("CheckUnique: key: `%s`, `%s`, value(s): `%v` ...", checks.Key, checks.CheckUnique, values)
+			getLogger().Tracef("CheckUnique: key: `%s`, `%s`, value(s): `%v`...", checks.Key, checks.CheckUnique, values)
 			// if multi-hashmap has more than one value, property is NOT unique
 			if len(values) > 1 {
 				err := NewSbomMetadataPropertyError(
@@ -162,7 +162,7 @@ func validateCustomMetadataProperties(document *schema.Sbom) (err error) {
 		}
 
 		if checks.CheckRegex != "" {
-			getLogger().Tracef("CheckRegex: field: `%s`, regex: `%v` ...", checks.CheckRegex, checks.Value)
+			getLogger().Tracef("CheckRegex: field: `%s`, regex: `%v`...", checks.CheckRegex, checks.Value)
 			compiledRegex, errCompile := compileRegex(checks.Value)
 			if errCompile != nil {
 				return errCompile
@@ -171,7 +171,7 @@ func validateCustomMetadataProperties(document *schema.Sbom) (err error) {
 			// TODO: check multiple values if provided
 			value := values[0]
 			if stringValue, ok := value.(string); ok {
-				getLogger().Debugf(">> Testing value: `%s` ...", stringValue)
+				getLogger().Debugf(">> Testing value: `%s`...", stringValue)
 				matched := compiledRegex.Match([]byte(stringValue))
 				if !matched {
 					err = NewSbomMetadataPropertyError(

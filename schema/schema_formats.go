@@ -178,7 +178,7 @@ func (err UnsupportedSchemaError) Error() string {
 func LoadSchemaConfig(filename string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
-	getLogger().Tracef("filename: `%s` ...", filename)
+	getLogger().Tracef("filename: `%s`...", filename)
 
 	cfgFilename, err := utils.FindVerifyConfigFileAbsPath(getLogger(), filename)
 
@@ -188,7 +188,7 @@ func LoadSchemaConfig(filename string) (err error) {
 
 	// Note we actively supply informative error messages to help user
 	// understand exactly how the load failed
-	getLogger().Tracef("Reading schema config file: `%s` ...", cfgFilename)
+	getLogger().Tracef("Reading schema config file: `%s`...", cfgFilename)
 	buffer, err := ioutil.ReadFile(cfgFilename)
 	if err != nil {
 		return fmt.Errorf("unable to `ReadFile`: `%s`", cfgFilename)
@@ -204,7 +204,7 @@ func LoadSchemaConfig(filename string) (err error) {
 
 // Candidate SBOM document (context) information
 // TODO: rename to SBOM to jive more with Go conventions;
-// although it may look like a constant unless we expand the name ...
+// although it may look like a constant unless we expand the name...
 type Sbom struct {
 	filename    string
 	absFilename string
@@ -420,7 +420,7 @@ func (sbom *Sbom) findSchemaVersionWithVariant(format FormatSchema, version stri
 	// Iterate over known schema versions to see if SBOM's version is supported
 	for _, schema := range format.Schemas {
 		// Compare requested version to current schema version AND make sure variant matches
-		getLogger().Tracef("Comparing SBOM version: `%s` to schema.version: `%s` ...", version, schema.Version)
+		getLogger().Tracef("Comparing SBOM version: `%s` to schema.version: `%s`...", version, schema.Version)
 		if version == schema.Version {
 
 			// Make note that we did find a viable matching schema and version

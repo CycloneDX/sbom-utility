@@ -107,7 +107,7 @@ func (config *LicenseComplianceConfig) LoadLicensePolicies(filename string) (err
 			return
 		}
 
-		getLogger().Infof("Loading license policy config file: `%s` ...", config.policyConfigFile)
+		getLogger().Infof("Loading license policy config file: `%s`...", config.policyConfigFile)
 
 		// attempt to read in contents of the policy config.
 		buffer, errRead := ioutil.ReadFile(config.policyConfigFile)
