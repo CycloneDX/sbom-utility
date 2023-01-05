@@ -44,7 +44,7 @@ build: clean
 # See this Gist for details: https://gist.github.com/asukakenji/f15ba7e588ac42795f421b48b8aede63
 # TODO: perhaps create universal binaries for various OS
 # TODO: See "lipo" tool for MacOS universal binary
-release: clean config
+release: clean config sbom
 	GOOS=darwin GOARCH=amd64 go build ${LDFLAGS} -o ${RELEASE_DIR}/sbom-utility-darwin-amd64
 	GOOS=darwin GOARCH=arm64 go build ${LDFLAGS} -o ${RELEASE_DIR}/sbom-utility-darwin-arm64
 	GOOS=linux GOARCH=amd64 go build ${LDFLAGS} -o ${RELEASE_DIR}/sbom-utility-linux-amd64
@@ -54,6 +54,12 @@ release: clean config
 	cp config.json ${RELEASE_DIR}/
 	cp license.json ${RELEASE_DIR}/
 	cp custom.json ${RELEASE_DIR}/
+
+sbom:
+	@echo "Creating Software-Bill-Of-Materials (CycloneDX latest JSON format)"
+	go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest
+	mkdir -p ${RELEASE_DIR}
+	cyclonedx-gomod mod -json=true -output ${RELEASE_DIR}/${BINARY}-${VERSION}.bom.json .
 
 # Clean test cache
 test_clean:

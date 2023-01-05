@@ -166,6 +166,7 @@ func DisplaySchemasMarkdown(output io.Writer) (err error) {
 	}
 
 	// TODO: Sort entries by schema format and version
+	// NOTE: for now, entries are already sorted by creating them that way in the config.json file
 	// sort.Slice(keyNames, func(i, j int) bool {
 	// 	return keyNames[i].(string) < keyNames[j].(string)
 	// })
