@@ -20,6 +20,7 @@ package cmd
 import (
 	"fmt"
 	"io"
+	"sort"
 	"strings"
 	"text/tabwriter"
 
@@ -61,11 +62,8 @@ type ResourceInfo struct {
 // Holds resources (e.g., components, services) declared license(s)
 var resourceMap = slicemultimap.New()
 
-//var resourceSlice []ResourceInfo  // for sorting
-
 func ClearGlobalResourceData() {
 	resourceMap.Clear()
-	//resourceSlice = nil
 }
 
 func NewCommandResource() *cobra.Command {
@@ -245,6 +243,14 @@ func hashComponentAsResource(cdxComponent schema.CDXComponent, location int) (ri
 	var resourceInfo ResourceInfo
 	ri = &resourceInfo
 
+	if cdxComponent.Name == "" {
+		getLogger().Errorf("Component missing `name` : %s ", cdxComponent.Name)
+	}
+
+	if cdxComponent.BomRef == "" {
+		getLogger().Warningf("Component missing `bom-ref`, Name : %s ", cdxComponent.BomRef)
+	}
+
 	// hash any component w/o a license using special key name
 	resourceInfo.EntityType = "Component"
 	resourceInfo.Component = cdxComponent
@@ -291,6 +297,14 @@ func hashServiceAsResource(cdxService schema.CDXService, location int) (ri *Reso
 	defer getLogger().Exit(err)
 	var resourceInfo ResourceInfo
 	ri = &resourceInfo
+
+	if cdxService.Name == "" {
+		getLogger().Errorf("Service missing `name` : %s ", cdxService.Name)
+	}
+
+	if cdxService.BomRef == "" {
+		getLogger().Warningf("Service missing `bom-ref`, Name : %s ", cdxService.BomRef)
+	}
 
 	// hash any component w/o a license using special key name
 	resourceInfo.EntityType = "Service"
@@ -350,10 +364,16 @@ func DisplayResourceListText(output io.Writer) {
 		return
 	}
 
-	// TODO
-	// sort.Slice(keyset, func(i, j int) bool {
-	// 	return keyset[i].(string) < keyset[j].(string)
-	// })
+	// Sort by Type
+	sort.Slice(entries, func(i, j int) bool {
+		resource1 := (entries[i].Value).(ResourceInfo)
+		resource2 := (entries[j].Value).(ResourceInfo)
+		if resource1.EntityType != resource2.EntityType {
+			return resource1.EntityType < resource2.EntityType
+		}
+
+		return resource1.EntityName < resource2.EntityName
+	})
 
 	var resourceInfo ResourceInfo
 
