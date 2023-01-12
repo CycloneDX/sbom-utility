@@ -141,29 +141,29 @@ func TestResourceListSummaryTextCdx13(t *testing.T) {
 // 	outputBuffer, err := innerTestResourceList(t,
 // 		TEST_RESOURCE_LIST_CDX_1_3_NONE_FOUND,
 // 		OUTPUT_CSV)
-//
+
 // 	if err != nil {
 // 		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
 // 	}
-//
+
 // 	s := outputBuffer.String()
-// 	if !strings.Contains(s, MSG_OUTPUT_NO_LICENSES_FOUND) {
-// 		t.Errorf("ListResources(): did not include the message: `%s`", MSG_OUTPUT_NO_LICENSES_FOUND)
+// 	if !strings.Contains(s, MSG_OUTPUT_NO_RESOURCES_FOUND) {
+// 		t.Errorf("ListResources(): did not include the message: `%s`", MSG_OUTPUT_NO_RESOURCES_FOUND)
 // 		t.Logf("%s", outputBuffer.String())
 // 	}
-//
+
 // 	// Test CDX 1.4 document
 // 	outputBuffer, err = innerTestResourceList(t,
 // 		TEST_RESOURCE_LIST_CDX_1_4_NONE_FOUND,
 // 		OUTPUT_CSV)
-//
+
 // 	if err != nil {
 // 		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
 // 	}
-//
+
 // 	s = outputBuffer.String()
-// 	if !strings.Contains(s, MSG_OUTPUT_NO_LICENSES_FOUND) {
-// 		t.Errorf("ListResources(): did not include the message: `%s`", MSG_OUTPUT_NO_LICENSES_FOUND)
+// 	if !strings.Contains(s, MSG_OUTPUT_NO_RESOURCES_FOUND) {
+// 		t.Errorf("ListResources(): did not include the message: `%s`", MSG_OUTPUT_NO_RESOURCES_FOUND)
 // 		t.Logf("%s", outputBuffer.String())
 // 	}
 // }

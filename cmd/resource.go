@@ -246,7 +246,7 @@ func hashComponentAsResource(cdxComponent schema.CDXComponent, location int) (ri
 	ri = &resourceInfo
 
 	if cdxComponent.Name == "" {
-		getLogger().Errorf("Component missing `name` : %s ", cdxComponent.Name)
+		getLogger().Errorf("Component missing `name` : %v ", cdxComponent)
 	}
 
 	if cdxComponent.BomRef == "" {
