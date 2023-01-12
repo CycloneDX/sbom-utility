@@ -106,7 +106,7 @@ func AppendLicenseInfo(key string, licenseInfo LicenseInfo) {
 
 func NewCommandLicense() *cobra.Command {
 	var command = new(cobra.Command)
-	command.Use = "license [subcommand] [flags]"
+	command.Use = "license"
 	command.Short = "Process licenses found in SBOM input file"
 	command.Long = "Process licenses found in SBOM input file"
 	command.RunE = licenseCmdImpl
