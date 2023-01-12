@@ -68,7 +68,7 @@ func ClearGlobalResourceData() {
 
 func NewCommandResource() *cobra.Command {
 	var command = new(cobra.Command)
-	command.Use = "resource [subcommand] [flags]"
+	command.Use = CMD_USAGE_RESOURCE_LIST
 	command.Short = "Report on resources found in SBOM input file"
 	command.Long = "Report on resources found in SBOM input file"
 	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", OUTPUT_TEXT,
