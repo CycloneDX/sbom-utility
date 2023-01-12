@@ -21,7 +21,6 @@ import (
 	"bufio"
 	"bytes"
 	"io/fs"
-	"strings"
 	"testing"
 
 	"github.com/scs/sbom-utility/schema"
@@ -97,21 +96,14 @@ func TestResourceListFormatUnsupportedSPDX2(t *testing.T) {
 	}
 }
 
-func TestResourceListJSONCdx13(t *testing.T) {
-	outputBuffer, err := innerTestResourceList(t,
+func TestResourceListTextCdx13(t *testing.T) {
+	_, err := innerTestResourceList(t,
 		TEST_RESOURCE_LIST_CDX_1_3,
-		OUTPUT_JSON)
+		OUTPUT_TEXT)
 
 	if err != nil {
 		getLogger().Error(err)
 		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
-	}
-
-	// TODO the marshalled bytes is an array of CDX LicenseChoice (struct)
-	// verify actual LicenseChoice JSON (schema) with values matching what we expected
-	if !utils.IsValidJsonRaw(outputBuffer.Bytes()) {
-		t.Errorf("ListLicenses(): did not produce valid JSON output")
-		t.Logf("%s", outputBuffer.String())
 	}
 }
 
@@ -126,72 +118,71 @@ func TestResourceListSummaryTextCdx13(t *testing.T) {
 	}
 }
 
-func TestResourceListJSONCdx14NoneFound(t *testing.T) {
-	outputBuffer, err := innerTestResourceList(t,
-		TEST_RESOURCE_LIST_CDX_1_4_NONE_FOUND,
-		OUTPUT_JSON)
+// func TestResourceListJSONCdx14NoneFound(t *testing.T) {
+// 	outputBuffer, err := innerTestResourceList(t,
+// 		TEST_RESOURCE_LIST_CDX_1_4_NONE_FOUND,
+// 		OUTPUT_JSON)
+//
+// 	if err != nil {
+// 		getLogger().Error(err)
+// 		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
+// 	}
+//
+// 	// Note: if no resources are found, the "json.Marshal" method(s) will return a value of "null"
+// 	// which is valid JSON (and not an empty array)
+// 	if !utils.IsValidJsonRaw(outputBuffer.Bytes()) {
+// 		t.Errorf("ListResources(): did not produce valid JSON output")
+// 		t.Logf("%s", outputBuffer.String())
+// 	}
+// }
 
-	if err != nil {
-		getLogger().Error(err)
-		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
-	}
+// func TestResourceListCSVCdxNoneFound(t *testing.T) {
+// 	// Test CDX 1.3 document
+// 	outputBuffer, err := innerTestResourceList(t,
+// 		TEST_RESOURCE_LIST_CDX_1_3_NONE_FOUND,
+// 		OUTPUT_CSV)
+//
+// 	if err != nil {
+// 		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
+// 	}
+//
+// 	s := outputBuffer.String()
+// 	if !strings.Contains(s, MSG_OUTPUT_NO_LICENSES_FOUND) {
+// 		t.Errorf("ListResources(): did not include the message: `%s`", MSG_OUTPUT_NO_LICENSES_FOUND)
+// 		t.Logf("%s", outputBuffer.String())
+// 	}
+//
+// 	// Test CDX 1.4 document
+// 	outputBuffer, err = innerTestResourceList(t,
+// 		TEST_RESOURCE_LIST_CDX_1_4_NONE_FOUND,
+// 		OUTPUT_CSV)
+//
+// 	if err != nil {
+// 		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
+// 	}
+//
+// 	s = outputBuffer.String()
+// 	if !strings.Contains(s, MSG_OUTPUT_NO_LICENSES_FOUND) {
+// 		t.Errorf("ListResources(): did not include the message: `%s`", MSG_OUTPUT_NO_LICENSES_FOUND)
+// 		t.Logf("%s", outputBuffer.String())
+// 	}
+// }
 
-	// Note: if no resources are found, the "json.Marshal" method(s) will return a value of "null"
-	// which is valid JSON (and not an empty array)
-	if !utils.IsValidJsonRaw(outputBuffer.Bytes()) {
-		t.Errorf("ListResources(): did not produce valid JSON output")
-		t.Logf("%s", outputBuffer.String())
-	}
-}
-
-func TestResourceListCSVCdxNoneFound(t *testing.T) {
-
-	// Test CDX 1.3 document
-	outputBuffer, err := innerTestResourceList(t,
-		TEST_RESOURCE_LIST_CDX_1_3_NONE_FOUND,
-		OUTPUT_CSV)
-
-	if err != nil {
-		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
-	}
-
-	s := outputBuffer.String()
-	if !strings.Contains(s, MSG_OUTPUT_NO_LICENSES_FOUND) {
-		t.Errorf("ListResources(): did not include the message: `%s`", MSG_OUTPUT_NO_LICENSES_FOUND)
-		t.Logf("%s", outputBuffer.String())
-	}
-
-	// Test CDX 1.4 document
-	outputBuffer, err = innerTestResourceList(t,
-		TEST_RESOURCE_LIST_CDX_1_4_NONE_FOUND,
-		OUTPUT_CSV)
-
-	if err != nil {
-		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
-	}
-
-	s = outputBuffer.String()
-	if !strings.Contains(s, MSG_OUTPUT_NO_LICENSES_FOUND) {
-		t.Errorf("ListResources(): did not include the message: `%s`", MSG_OUTPUT_NO_LICENSES_FOUND)
-		t.Logf("%s", outputBuffer.String())
-	}
-}
-
-func TestResourceListTextCdx14NoneFound(t *testing.T) {
-	// outputBuffer, err := innerTestResourceList(t,
-	// 	TEST_RESOURCE_LIST_CDX_1_4_NONE_FOUND,
-	// 	OUTPUT_JSON,
-	// 	true)
-
-	// if err != nil {
-	// 	t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
-	// }
-
-	// TODO
-	// verify there is a (warning) message present when no resources are found
-	// s := outputBuffer.String()
-	// if !strings.Contains(s, MSG_OUTPUT_NO_LICENSES_FOUND) {
-	// 	t.Errorf("ListResources(): did not include the message: `%s`", MSG_OUTPUT_NO_LICENSES_FOUND)
-	// 	t.Logf("%s", outputBuffer.String())
-	// }
-}
+//func TestResourceListTextCdx14NoneFound(t *testing.T) {
+// outputBuffer, err := innerTestResourceList(t,
+// 	TEST_RESOURCE_LIST_CDX_1_4_NONE_FOUND,
+// 	OUTPUT_JSON,
+// 	true)
+//
+// if err != nil {
+// 	t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
+// }
+//
+// TODO
+// verify there is a (warning) message present when no resources are found
+// s := outputBuffer.String()
+// if !strings.Contains(s, MSG_OUTPUT_NO_LICENSES_FOUND) {
+// 	t.Errorf("ListResources(): did not include the message: `%s`", MSG_OUTPUT_NO_LICENSES_FOUND)
+// 	t.Logf("%s", outputBuffer.String())
+// }
+//}

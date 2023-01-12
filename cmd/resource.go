@@ -18,6 +18,7 @@
 package cmd
 
 import (
+	"encoding/csv"
 	"fmt"
 	"io"
 	"sort"
@@ -161,7 +162,7 @@ func ListResources(output io.Writer, format string) (err error) {
 	case OUTPUT_TEXT:
 		DisplayResourceListText(output)
 	case OUTPUT_CSV:
-		//DisplayResourceListCSV(output)
+		DisplayResourceListCSV(output)
 	case OUTPUT_MARKDOWN:
 		//DisplayResourceListMarkdown(output)
 	case OUTPUT_JSON:
@@ -237,6 +238,7 @@ func hashComponents(components []schema.CDXComponent, location int) (err error) 
 }
 
 // Hash a CDX Component and recursively those of any "nested" components
+// TODO we should WARN if version is not a valid semver (e.g., examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json)
 func hashComponentAsResource(cdxComponent schema.CDXComponent, location int) (ri *ResourceInfo, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
@@ -334,9 +336,7 @@ func hashServiceAsResource(cdxService schema.CDXService, location int) (ri *Reso
 }
 
 // NOTE: This list is NOT de-duplicated
-// TODO: Make policy column optional
 // TODO: Add a --no-title flag to skip title output
-// TODO: Support a new --sort <column> flag
 func DisplayResourceListText(output io.Writer) {
 	getLogger().Enter()
 	defer getLogger().Exit()
@@ -388,4 +388,59 @@ func DisplayResourceListText(output io.Writer) {
 			resourceInfo.EntityVersion,
 			resourceInfo.EntityRef)
 	}
+}
+
+// TODO: Add a --no-title flag to skip title output
+func DisplayResourceListCSV(output io.Writer) (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	// initialize writer and prepare the list of entries (i.e., the "rows")
+	w := csv.NewWriter(output)
+	defer w.Flush()
+
+	if err = w.Write(RESOURCE_LIST_TITLES); err != nil {
+		return getLogger().Errorf("error writing record to csv (%v): %s", output, err)
+	}
+
+	// Display a warning "missing" in the actual output and return (short-circuit)
+	entries := resourceMap.Entries()
+
+	// Emit no resource found warning into output
+	if len(entries) == 0 {
+		currentRow := []string{MSG_OUTPUT_NO_RESOURCES_FOUND}
+		w.Write(currentRow)
+		return fmt.Errorf(currentRow[0])
+	}
+
+	// Sort by Type
+	sort.Slice(entries, func(i, j int) bool {
+		resource1 := (entries[i].Value).(ResourceInfo)
+		resource2 := (entries[j].Value).(ResourceInfo)
+		if resource1.EntityType != resource2.EntityType {
+			return resource1.EntityType < resource2.EntityType
+		}
+
+		return resource1.EntityName < resource2.EntityName
+	})
+
+	var resourceInfo ResourceInfo
+	var line []string
+
+	for _, entry := range entries {
+		value := entry.Value
+		resourceInfo = value.(ResourceInfo)
+		line = nil
+		line = append(line,
+			resourceInfo.EntityType,
+			resourceInfo.EntityName,
+			resourceInfo.EntityVersion,
+			resourceInfo.EntityRef)
+
+		if err = w.Write(line); err != nil {
+			getLogger().Errorf("csv.Write: %w", err)
+		}
+	}
+
+	return
 }

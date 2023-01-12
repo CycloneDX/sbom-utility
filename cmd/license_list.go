@@ -376,9 +376,9 @@ func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
 
 	// Emit no license warning into output
 	if isEmptyLicenseList(licenseKeys) {
-		currentRow = append(currentRow, MSG_OUTPUT_NO_LICENSES_FOUND)
+		currentRow := []string{MSG_OUTPUT_NO_LICENSES_FOUND}
 		w.Write(currentRow)
-		return
+		return fmt.Errorf(currentRow[0])
 	}
 
 	// output the each license entry as a row

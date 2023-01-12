@@ -288,12 +288,3 @@ func createOutputFile(outputFilename string) (outputFile *os.File, writer io.Wri
 	}
 	return
 }
-
-// Misc. common funcs
-// Note: intend to use for truncation of fields in (text) reports/lists
-func min(i, j int) int {
-	if i < j {
-		return i
-	}
-	return j
-}

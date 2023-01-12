@@ -217,8 +217,9 @@ func DisplaySchemasCSV(output io.Writer) (err error) {
 
 	// Emit no schemas found warning into output
 	if len(schema.SupportedFormatConfig.Formats) == 0 {
-		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_SCHEMAS_FOUND)
-		return fmt.Errorf(MSG_OUTPUT_NO_SCHEMAS_FOUND)
+		currentRow := []string{MSG_OUTPUT_NO_SCHEMAS_FOUND}
+		w.Write(currentRow)
+		return fmt.Errorf(currentRow[0])
 	}
 
 	// TODO: Sort entries by schema format and version
