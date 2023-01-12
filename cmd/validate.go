@@ -217,8 +217,8 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 	// we force result to INVALID as any errors from the library means
 	// we could NOT actually confirm the input documents validity
 	// WARNING: if schemas reference "remote" schemas which are loaded
-	// over http... then there is a chance of 503 errors... attempt
-	// again...
+	// over http... then there is a chance of 503 errors (as the pkg. loads
+	// externally referenced schemas over network)... attempt fixed retry...
 	for i := 0; i < RETRY; i++ {
 		jsonSbomSchema, errLoad = gojsonschema.NewSchema(schemaLoader)
 

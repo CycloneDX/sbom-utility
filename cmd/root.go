@@ -40,6 +40,7 @@ const (
 	CMD_VALIDATE = "validate"
 	CMD_LICENSE  = "license"
 	CMD_QUERY    = "query"
+	CMD_RESOURCE = "resource"
 )
 
 const (
@@ -160,6 +161,7 @@ func init() {
 	rootCmd.AddCommand(NewCommandSchema())
 	rootCmd.AddCommand(NewCommandValidate())
 	rootCmd.AddCommand(NewCommandQuery())
+	rootCmd.AddCommand(NewCommandResource())
 
 	// Add license command its subcommands
 	licenseCmd := NewCommandLicense()

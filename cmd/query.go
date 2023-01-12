@@ -72,8 +72,6 @@ var QUERY_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 //    <key.N>               // "lastname"
 //
 // e.g.,SELECT * FROM product.customers WHERE country="Germany";
-// TODO: design abbreviated WHERE syntax for command line
-// TODO: design abbreviated ORDERBY syntax for command line
 type QueryRequest struct {
 	selectFieldsRaw     string
 	selectFields        []string
@@ -136,7 +134,7 @@ func initCommandQuery(command *cobra.Command) {
 	command.PersistentFlags().StringVar(&utils.GlobalFlags.OutputFormat, FLAG_OUTPUT_FORMAT, OUTPUT_JSON,
 		FLAG_QUERY_OUTPUT_FORMAT_HELP+QUERY_SUPPORTED_FORMATS)
 	command.Flags().StringP(FLAG_QUERY_SELECT, "", QUERY_TOKEN_WILDCARD, FLAG_QUERY_SELECT_HELP)
-	// NOTE: TODO: There appears to be a bug in Cobra where the type of the `from`` flag is `--from`
+	// NOTE: TODO: There appears to be a bug in Cobra where the type of the `from`` flag is `--from` (i.e., not string)
 	// This bug does not exhibit on any other flags
 	command.Flags().StringP(FLAG_QUERY_FROM, "", "", FLAG_QUERY_FROM_HELP)
 	command.Flags().StringP(FLAG_QUERY_WHERE, "", "", FLAG_QUERY_WHERE_HELP)

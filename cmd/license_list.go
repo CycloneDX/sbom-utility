@@ -48,8 +48,9 @@ const (
 
 // License list command informational messages
 const (
-	MSG_OUTPUT_NO_LICENSES_FOUND = "[WARN] no licenses found in SBOM document"
-	MSG_OUTPUT_NO_SCHEMAS_FOUND  = "[WARN] no schemas found in configuration (i.e., \"config.json\")"
+	MSG_OUTPUT_NO_LICENSES_FOUND  = "[WARN] no licenses found in SBOM document"
+	MSG_OUTPUT_NO_SCHEMAS_FOUND   = "[WARN] no schemas found in configuration (i.e., \"config.json\")"
+	MSG_OUTPUT_NO_RESOURCES_FOUND = "[WARN] no matching resources found for query"
 )
 
 const (
@@ -125,6 +126,7 @@ func listCmdImpl(cmd *cobra.Command, args []string) (err error) {
 		return getLogger().Errorf("`%s` flag not valid without `%s` flag", FLAG_LICENSE_POLICY, FLAG_LICENSE_SUMMARY)
 	}
 
+	// Create output writer
 	outputFile, writer, err := createOutputFile(utils.GlobalFlags.OutputFile)
 
 	if err == nil {
@@ -314,7 +316,7 @@ func DisplayLicenseListSummaryText(output io.Writer) {
 	fmt.Fprintf(w, "%s\n", strings.Join(titles, "\t"))
 	fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
-	// Display a warning messing in the actual output and return (short-circuit)
+	// Display a warning missing in the actual output and return (short-circuit)
 	licenseKeys := licenseMap.KeySet()
 
 	// Emit no license warning into output

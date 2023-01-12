@@ -20,6 +20,7 @@ package cmd
 import "strings"
 
 // Text report helpers
+// TODO Make function params. variadic
 func createTitleRows(titles1 []string, titles2 []string) (titles []string, underlines []string) {
 	titles = append(titles1, titles2...)
 	underlines = append(createTitleTextSeparators(titles1), createTitleTextSeparators(titles2)...)

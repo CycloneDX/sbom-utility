@@ -176,8 +176,8 @@ func TestLicenseListJSONCdx13(t *testing.T) {
 		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
 	}
 
-	// TODO Actually the marshalled bytes is an array of CDX LicenseChoice (struct)
-	// with values matching what we expected
+	// TODO the marshalled bytes is an array of CDX LicenseChoice (struct)
+	// verify actual LicenseChoice JSON (schema) with values matching what we expected
 	if !utils.IsValidJsonRaw(outputBuffer.Bytes()) {
 		t.Errorf("ListLicenses(): did not produce valid JSON output")
 		t.Logf("%s", outputBuffer.String())

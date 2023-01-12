@@ -35,7 +35,7 @@ const (
 )
 
 // Command help formatting
-var SCHEMA_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
+var SCHEMA_LIST_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{OUTPUT_TEXT, OUTPUT_CSV, OUTPUT_MARKDOWN}, ", ")
 
 var SCHEMA_LIST_TITLES = []string{"Format", "Version", "Variant", "File", "Source"}
@@ -46,7 +46,7 @@ func NewCommandSchema() *cobra.Command {
 	command.Short = "View supported SBOM schemas"
 	command.Long = fmt.Sprintf("View built-in SBOM schemas supported by the utility. The default command produces a list based upon `%s`.", DEFAULT_SCHEMA_CONFIG)
 	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", OUTPUT_TEXT,
-		FLAG_SCHEMA_OUTPUT_FORMAT_HELP+SCHEMA_SUPPORTED_FORMATS)
+		FLAG_SCHEMA_OUTPUT_FORMAT_HELP+SCHEMA_LIST_SUPPORTED_FORMATS)
 	command.RunE = schemaCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		if len(args) != 0 {
