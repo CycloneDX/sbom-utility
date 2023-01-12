@@ -249,8 +249,12 @@ func hashComponentAsResource(cdxComponent schema.CDXComponent, location int) (ri
 		getLogger().Errorf("Component missing `name` : %v ", cdxComponent)
 	}
 
+	if cdxComponent.Version == "" {
+		getLogger().Warningf("Component missing `version`, Name : %s ", cdxComponent.Name)
+	}
+
 	if cdxComponent.BomRef == "" {
-		getLogger().Warningf("Component missing `bom-ref`, Name : %s ", cdxComponent.BomRef)
+		getLogger().Warningf("Component missing `bom-ref`, Name : %s ", cdxComponent.Name)
 	}
 
 	// hash any component w/o a license using special key name
@@ -301,11 +305,15 @@ func hashServiceAsResource(cdxService schema.CDXService, location int) (ri *Reso
 	ri = &resourceInfo
 
 	if cdxService.Name == "" {
-		getLogger().Errorf("Service missing `name` : %s ", cdxService.Name)
+		getLogger().Errorf("Service missing `name` : %v ", cdxService)
+	}
+
+	if cdxService.Version == "" {
+		getLogger().Warningf("Service missing `version`, Name : %s ", cdxService.Name)
 	}
 
 	if cdxService.BomRef == "" {
-		getLogger().Warningf("Service missing `bom-ref`, Name : %s ", cdxService.BomRef)
+		getLogger().Warningf("Service missing `bom-ref`, Name : %s ", cdxService.Name)
 	}
 
 	// hash any component w/o a license using special key name

@@ -118,6 +118,13 @@ func TestResourceListSummaryTextCdx13(t *testing.T) {
 	}
 }
 
+func TestResourceListCSVCdx13(t *testing.T) {
+	// Test CDX 1.3 document
+	innerTestResourceList(t,
+		TEST_RESOURCE_LIST_CDX_1_3_NONE_FOUND,
+		OUTPUT_CSV)
+}
+
 // func TestResourceListJSONCdx14NoneFound(t *testing.T) {
 // 	outputBuffer, err := innerTestResourceList(t,
 // 		TEST_RESOURCE_LIST_CDX_1_4_NONE_FOUND,
