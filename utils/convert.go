@@ -34,11 +34,22 @@ func IsValidJsonRaw(test []byte) bool {
 	return err == nil
 }
 
-// TODO: What is the value of this wrapper method over basic encoder?
+// NOTE: simple wrapper method on json package to standardize parms
 func ConvertMapToJson(mapIn interface{}) (string, error) {
 	// Indent each level with 2 space chars.
 	byteMapOut, err := json.MarshalIndent(mapIn, "", "  ")
 	return string(byteMapOut), err
+}
+
+func ConvertStructToMap(structIn interface{}) (mapOut map[string]interface{}, err error) {
+	var bytesOut []byte
+	bytesOut, err = json.Marshal(structIn)
+
+	if err != nil {
+		return
+	}
+	err = json.Unmarshal(bytesOut, &mapOut)
+	return
 }
 
 // TODO: function NOT complete, only placeholder type switch

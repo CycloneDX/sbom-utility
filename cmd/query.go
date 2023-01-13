@@ -510,8 +510,6 @@ func selectFieldsFromSlice(request *QueryRequest, jsonSlice []interface{}) (slic
 
 	whereFilters := request.whereFilters
 	getLogger().Debugf("whereFilters: %v", whereFilters)
-	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
 
 	for _, iObject := range jsonSlice {
 		mapObject, ok := iObject.(map[string]interface{})
@@ -521,35 +519,11 @@ func selectFieldsFromSlice(request *QueryRequest, jsonSlice []interface{}) (slic
 			return
 		}
 
-		var match bool = false
-		var key string
-		for _, filter := range whereFilters {
+		match, errMatch := whereFilterMatch(mapObject, whereFilters)
 
-			key = filter.key
-			value, present := mapObject[key]
-			getLogger().Tracef("testing object map[%s]: `%v`", key, value)
-
-			if !present {
-				match = false
-				err = getLogger().Errorf("key `%s` not found ib object map", key)
-				break
-			}
-
-			// Reset the encoder'a byte buffer on each iteration and
-			// convert the value (an interface{}) to []byte we can use on regex. eval.
-			buf.Reset()
-			err = enc.Encode(value)
-
-			if err != nil {
-				err = getLogger().Errorf("Unable to convert value: `%v`, to []byte", value)
-				return
-			}
-
-			// Test that the field value matches the regex supplied in the current filter
-			// Note: the regex compilation is performed during command param. processing
-			if match = filter.ValueRegEx.Match(buf.Bytes()); !match {
-				break
-			}
+		if errMatch != nil {
+			err = errMatch
+			return
 		}
 
 		// If ALL WHERE filters matched the regexp. provided,
@@ -558,6 +532,45 @@ func selectFieldsFromSlice(request *QueryRequest, jsonSlice []interface{}) (slic
 			mapObject, err = selectFieldsFromMap(request, mapObject)
 			// Reduce result object to only the requested SELECT fields
 			sliceSelectedFields = append(sliceSelectedFields, mapObject)
+		}
+	}
+
+	return
+}
+
+func whereFilterMatch(mapObject map[string]interface{}, whereFilters []WhereFilter) (match bool, err error) {
+	var buf bytes.Buffer
+	var key string
+
+	// create a byte encoder
+	enc := gob.NewEncoder(&buf)
+
+	for _, filter := range whereFilters {
+
+		key = filter.key
+		value, present := mapObject[key]
+		getLogger().Tracef("testing object map[%s]: `%v`", key, value)
+
+		if !present {
+			match = false
+			err = getLogger().Errorf("key `%s` not found ib object map", key)
+			break
+		}
+
+		// Reset the encoder'a byte buffer on each iteration and
+		// convert the value (an interface{}) to []byte we can use on regex. eval.
+		buf.Reset()
+		err = enc.Encode(value)
+
+		if err != nil {
+			err = getLogger().Errorf("Unable to convert value: `%v`, to []byte", value)
+			return
+		}
+
+		// Test that the field value matches the regex supplied in the current filter
+		// Note: the regex compilation is performed during command param. processing
+		if match = filter.ValueRegEx.Match(buf.Bytes()); !match {
+			break
 		}
 	}
 
