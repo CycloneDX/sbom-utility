@@ -58,11 +58,12 @@ var RESOURCE_LIST_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 
 // resource types
 const (
+	RESOURCE_TYPE_DEFAULT   = "" // i.e., all resource types
 	RESOURCE_TYPE_COMPONENT = "component"
 	RESOURCE_TYPE_SERVICE   = "service"
 )
 
-var VALID_RESOURCE_TYPES = []string{RESOURCE_TYPE_COMPONENT, RESOURCE_TYPE_SERVICE}
+var VALID_RESOURCE_TYPES = []string{RESOURCE_TYPE_DEFAULT, RESOURCE_TYPE_COMPONENT, RESOURCE_TYPE_SERVICE}
 
 // filter keys
 const (
@@ -100,7 +101,7 @@ func NewCommandResource() *cobra.Command {
 	command.Long = "Report on resources found in SBOM input file"
 	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", OUTPUT_TEXT,
 		FLAG_RESOURCE_OUTPUT_FORMAT_HELP+RESOURCE_LIST_SUPPORTED_FORMATS)
-	command.Flags().StringP(FLAG_RESOURCE_TYPE, "", "", FLAG_RESOURCE_TYPE_HELP)
+	command.Flags().StringP(FLAG_RESOURCE_TYPE, "", RESOURCE_TYPE_DEFAULT, FLAG_RESOURCE_TYPE_HELP)
 	command.Flags().StringP(FLAG_RESOURCE_WHERE, "", "", FLAG_RESOURCE_WHERE_HELP)
 	command.RunE = resourceCmdImpl
 	command.ValidArgs = VALID_SUBCOMMANDS_RESOURCE
@@ -154,6 +155,27 @@ func retrieveWhereFilters(cmd *cobra.Command) (whereFilters []WhereFilter, err e
 	return
 }
 
+func retrieveResourceType(cmd *cobra.Command) (resourceType string, err error) {
+
+	resourceType, err = cmd.Flags().GetString(FLAG_RESOURCE_TYPE)
+
+	if err != nil {
+		return
+	}
+
+	// validate value
+	for _, validType := range VALID_RESOURCE_TYPES {
+		if resourceType == validType {
+			// valid
+			return
+		}
+	}
+
+	// invalid
+	err = getLogger().Errorf("invalid resource `type`: `%s`", resourceType)
+	return
+}
+
 func resourceCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	getLogger().Enter(args)
 	defer getLogger().Exit()
@@ -171,6 +193,7 @@ func resourceCmdImpl(cmd *cobra.Command, args []string) (err error) {
 		}
 	}()
 
+	// Process flag: --where
 	var whereFilters []WhereFilter
 	whereFilters, err = retrieveWhereFilters(cmd)
 
@@ -178,7 +201,11 @@ func resourceCmdImpl(cmd *cobra.Command, args []string) (err error) {
 		return
 	}
 
-	ListResources(writer, utils.GlobalFlags.OutputFormat, whereFilters)
+	// Process flag: --type
+	var resourceType string
+	resourceType, err = retrieveResourceType(cmd)
+
+	ListResources(writer, utils.GlobalFlags.OutputFormat, resourceType, whereFilters)
 
 	return
 }
@@ -190,7 +217,8 @@ func processResourceListResults(err error) {
 	}
 }
 
-func ListResources(output io.Writer, format string, whereFilters []WhereFilter) (err error) {
+// NOTE: resourceType has already been validated
+func ListResources(output io.Writer, format string, resourceType string, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -211,15 +239,10 @@ func ListResources(output io.Writer, format string, whereFilters []WhereFilter) 
 
 	// Hash all licenses within input file
 	getLogger().Infof("Scanning document for licenses...")
-	err = loadDocumentResources(document, whereFilters)
+	err = loadDocumentResources(document, resourceType)
 
 	if err != nil {
 		return
-	}
-
-	// If no format requested, default to JSON format
-	if format == "" {
-		format = OUTPUT_JSON
 	}
 
 	getLogger().Infof("Outputting listing (`%s` format)...", format)
@@ -231,7 +254,7 @@ func ListResources(output io.Writer, format string, whereFilters []WhereFilter) 
 	case OUTPUT_MARKDOWN:
 		//DisplayResourceListMarkdown(output)
 	default:
-		// Default to JSON output for anything else
+		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
 			format, OUTPUT_JSON)
 		DisplayResourceListText(output)
@@ -240,7 +263,7 @@ func ListResources(output io.Writer, format string, whereFilters []WhereFilter) 
 	return
 }
 
-func loadDocumentResources(document *schema.Sbom, whereFilters []WhereFilter) (err error) {
+func loadDocumentResources(document *schema.Sbom, resourceType string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -263,24 +286,28 @@ func loadDocumentResources(document *schema.Sbom, whereFilters []WhereFilter) (e
 	}
 
 	// Add top-level SBOM component
-	var resourceInfo *ResourceInfo
-	resourceInfo, err = hashComponentAsResource(*document.GetCdxMetadataComponent(), LC_LOC_METADATA_COMPONENT)
-	if err != nil {
-		return
-	}
-	resourceInfo.isRoot = true
-
-	// Hash all components found in the (root).components[] (+ "nested" components)
-	if components := document.GetCdxComponents(); len(components) > 0 {
-		if err = hashComponents(components, LC_LOC_COMPONENTS); err != nil {
+	if resourceType == RESOURCE_TYPE_DEFAULT || resourceType == RESOURCE_TYPE_COMPONENT {
+		var resourceInfo *ResourceInfo
+		resourceInfo, err = hashComponentAsResource(*document.GetCdxMetadataComponent(), LC_LOC_METADATA_COMPONENT)
+		if err != nil {
 			return
+		}
+		resourceInfo.isRoot = true
+
+		// Hash all components found in the (root).components[] (+ "nested" components)
+		if components := document.GetCdxComponents(); len(components) > 0 {
+			if err = hashComponents(components, LC_LOC_COMPONENTS); err != nil {
+				return
+			}
 		}
 	}
 
-	// Hash services found in the (root).services[] (array) (+ "nested" services)
-	if services := document.GetCdxServices(); len(services) > 0 {
-		if err = hashServices(services, LC_LOC_SERVICES); err != nil {
-			return
+	if resourceType == RESOURCE_TYPE_DEFAULT || resourceType == RESOURCE_TYPE_SERVICE {
+		// Hash services found in the (root).services[] (array) (+ "nested" services)
+		if services := document.GetCdxServices(); len(services) > 0 {
+			if err = hashServices(services, LC_LOC_SERVICES); err != nil {
+				return
+			}
 		}
 	}
 
