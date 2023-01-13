@@ -37,23 +37,42 @@ const (
 
 var VALID_SUBCOMMANDS_RESOURCE = []string{SUBCOMMAND_RESOURCE_LIST}
 
-// Command help formatting
-var RESOURCE_LIST_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
-	strings.Join([]string{OUTPUT_TEXT, OUTPUT_CSV, OUTPUT_MARKDOWN}, ", ")
-
 var RESOURCE_LIST_TITLES = []string{"type", "name", "version", "bom-ref"}
+var VALID_RESOURCE_WHERE_FILTER_KEYS = []string{}
 
 // Flags. Reuse query flag values where possible
 const (
+	FLAG_RESOURCE_TYPE       = "type"
+	FLAG_RESOURCE_TYPE_HELP  = "filter output by resource type (i.e., component | service"
 	FLAG_RESOURCE_WHERE      = FLAG_QUERY_WHERE
 	FLAG_RESOURCE_WHERE_HELP = "comma-separated list of key=<regex> used to filter result set"
 )
+
+// Command help formatting
+const (
+	FLAG_RESOURCE_OUTPUT_FORMAT_HELP = "format output using the specified type"
+)
+
+var RESOURCE_LIST_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
+	strings.Join([]string{OUTPUT_TEXT, OUTPUT_CSV, OUTPUT_MARKDOWN}, ", ")
 
 // resource types
 const (
 	RESOURCE_TYPE_COMPONENT = "component"
 	RESOURCE_TYPE_SERVICE   = "service"
 )
+
+var VALID_RESOURCE_TYPES = []string{RESOURCE_TYPE_COMPONENT, RESOURCE_TYPE_SERVICE}
+
+// filter keys
+const (
+	RESOURCE_FILTER_KEY_TYPE   = "type"
+	RESOURCE_FILTER_KEY_NAME   = "name"
+	RESOURCE_FILTER_KEY_VALUE  = "value"
+	RESOURCE_FILTER_KEY_BOMREF = "bom-ref"
+)
+
+var VALID_FILTER_KEYS = []string{RESOURCE_FILTER_KEY_TYPE, RESOURCE_FILTER_KEY_NAME, RESOURCE_FILTER_KEY_VALUE, RESOURCE_FILTER_KEY_BOMREF}
 
 type ResourceInfo struct {
 	isRoot           bool
@@ -80,7 +99,8 @@ func NewCommandResource() *cobra.Command {
 	command.Short = "Report on resources found in SBOM input file"
 	command.Long = "Report on resources found in SBOM input file"
 	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", OUTPUT_TEXT,
-		FLAG_SCHEMA_OUTPUT_FORMAT_HELP+RESOURCE_LIST_SUPPORTED_FORMATS)
+		FLAG_RESOURCE_OUTPUT_FORMAT_HELP+RESOURCE_LIST_SUPPORTED_FORMATS)
+	command.Flags().StringP(FLAG_RESOURCE_TYPE, "", "", FLAG_RESOURCE_TYPE_HELP)
 	command.Flags().StringP(FLAG_RESOURCE_WHERE, "", "", FLAG_RESOURCE_WHERE_HELP)
 	command.RunE = resourceCmdImpl
 	command.ValidArgs = VALID_SUBCOMMANDS_RESOURCE
