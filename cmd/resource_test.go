@@ -45,7 +45,7 @@ func innerTestResourceList(t *testing.T, inputFile string, format string) (outpu
 
 	// Use a test input SBOM formatted in SPDX
 	utils.GlobalFlags.InputFile = inputFile
-	err = ListResources(outputWriter, format, nil)
+	err = ListResources(outputWriter, format, RESOURCE_TYPE_DEFAULT, nil)
 
 	return
 }
