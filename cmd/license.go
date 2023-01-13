@@ -185,7 +185,7 @@ func findDocumentLicenses(document *schema.Sbom) (err error) {
 		}
 	}
 
-	// 4. Hash all service licenses found in the (root).services[] (array) (+ "nested" components)
+	// 4. Hash all service licenses found in the (root).services[] (array) (+ "nested" services)
 	if services := document.GetCdxServices(); len(services) > 0 {
 		if err = hashServicesLicenses(services, LC_LOC_SERVICES); err != nil {
 			return

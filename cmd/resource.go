@@ -37,27 +37,34 @@ const (
 
 var VALID_SUBCOMMANDS_RESOURCE = []string{SUBCOMMAND_RESOURCE_LIST}
 
-// License list default values
-const (
-	RESOURCE_NONE = "(none)"
-)
-
 // Command help formatting
 var RESOURCE_LIST_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{OUTPUT_TEXT, OUTPUT_CSV, OUTPUT_MARKDOWN}, ", ")
 
-var RESOURCE_LIST_TITLES = []string{"Type", "Name", "Version", "bom-ref"}
+var RESOURCE_LIST_TITLES = []string{"type", "name", "version", "bom-ref"}
+
+// Flags. Reuse query flag values where possible
+const (
+	FLAG_RESOURCE_WHERE      = FLAG_QUERY_WHERE
+	FLAG_RESOURCE_WHERE_HELP = "comma-separated list of key=<regex> used to filter result set"
+)
+
+// resource types
+const (
+	RESOURCE_TYPE_COMPONENT = "component"
+	RESOURCE_TYPE_SERVICE   = "service"
+)
 
 type ResourceInfo struct {
-	isRoot                 bool
-	EntityType             string
-	EntityRef              string
-	EntityName             string
-	EntityVersion          string
-	EntitySupplierProvider schema.CDXOrganizationalEntity
-	EntityProperties       []schema.CDXProperty
-	Component              schema.CDXComponent
-	Service                schema.CDXService
+	isRoot           bool
+	Type             string
+	BomRef           string // TODO: need to strip `-` from `bom-ref` for where filter
+	Name             string
+	Version          string
+	SupplierProvider schema.CDXOrganizationalEntity
+	Properties       []schema.CDXProperty
+	Component        schema.CDXComponent
+	Service          schema.CDXService
 }
 
 // Holds resources (e.g., components, services) declared license(s)
@@ -74,6 +81,7 @@ func NewCommandResource() *cobra.Command {
 	command.Long = "Report on resources found in SBOM input file"
 	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", OUTPUT_TEXT,
 		FLAG_SCHEMA_OUTPUT_FORMAT_HELP+RESOURCE_LIST_SUPPORTED_FORMATS)
+	command.Flags().StringP(FLAG_RESOURCE_WHERE, "", "", FLAG_RESOURCE_WHERE_HELP)
 	command.RunE = resourceCmdImpl
 	command.ValidArgs = VALID_SUBCOMMANDS_RESOURCE
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
@@ -98,6 +106,34 @@ func NewCommandResource() *cobra.Command {
 	return command
 }
 
+func retrieveWhereFilters(cmd *cobra.Command) (whereFilters []WhereFilter, err error) {
+	var whereExpressions []string
+	whereValues, errGet := cmd.Flags().GetString(FLAG_RESOURCE_WHERE)
+
+	if errGet != nil {
+		err = getLogger().Errorf("failed to read flag `%s` value", FLAG_RESOURCE_WHERE)
+		return
+	}
+
+	if whereValues != "" {
+		whereExpressions = strings.Split(whereValues, QUERY_WHERE_EXPRESSION_SEP)
+
+		var filter *WhereFilter
+		for _, clause := range whereExpressions {
+
+			filter = parseWhereFilter(clause)
+
+			if filter == nil {
+				err = NewQueryWhereClauseError(nil, clause)
+				return
+			}
+
+			whereFilters = append(whereFilters, *filter)
+		}
+	}
+	return
+}
+
 func resourceCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	getLogger().Enter(args)
 	defer getLogger().Exit()
@@ -106,26 +142,35 @@ func resourceCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	outputFile, writer, err := createOutputFile(utils.GlobalFlags.OutputFile)
 	getLogger().Tracef("outputFile: `%v`; writer: `%v`", outputFile, writer)
 
-	if err == nil {
-		ListResources(writer, utils.GlobalFlags.OutputFormat)
+	// use function closure to assure consistent error output based upon error type
+	defer func() {
+		// always close the output file
+		if outputFile != nil {
+			outputFile.Close()
+			getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.OutputFile)
+		}
+	}()
+
+	var whereFilters []WhereFilter
+	whereFilters, err = retrieveWhereFilters(cmd)
+
+	if err != nil {
+		return
 	}
 
-	// always close the output file
-	if outputFile != nil {
-		outputFile.Close()
-		getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.OutputFile)
-	}
+	ListResources(writer, utils.GlobalFlags.OutputFormat, whereFilters)
 
 	return
 }
 
 func processResourceListResults(err error) {
 	if err != nil {
+		// No special processing at this time
 		getLogger().Error(err)
 	}
 }
 
-func ListResources(output io.Writer, format string) (err error) {
+func ListResources(output io.Writer, format string, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -146,7 +191,7 @@ func ListResources(output io.Writer, format string) (err error) {
 
 	// Hash all licenses within input file
 	getLogger().Infof("Scanning document for licenses...")
-	err = loadDocumentResources(document)
+	err = loadDocumentResources(document, whereFilters)
 
 	if err != nil {
 		return
@@ -165,8 +210,6 @@ func ListResources(output io.Writer, format string) (err error) {
 		DisplayResourceListCSV(output)
 	case OUTPUT_MARKDOWN:
 		//DisplayResourceListMarkdown(output)
-	case OUTPUT_JSON:
-		//DisplayResourceListJson(output))
 	default:
 		// Default to JSON output for anything else
 		getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
@@ -177,7 +220,7 @@ func ListResources(output io.Writer, format string) (err error) {
 	return
 }
 
-func loadDocumentResources(document *schema.Sbom) (err error) {
+func loadDocumentResources(document *schema.Sbom, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -214,7 +257,7 @@ func loadDocumentResources(document *schema.Sbom) (err error) {
 		}
 	}
 
-	// Hash services found in the (root).services[] (array) (+ "nested" components)
+	// Hash services found in the (root).services[] (array) (+ "nested" services)
 	if services := document.GetCdxServices(); len(services) > 0 {
 		if err = hashServices(services, LC_LOC_SERVICES); err != nil {
 			return
@@ -250,29 +293,29 @@ func hashComponentAsResource(cdxComponent schema.CDXComponent, location int) (ri
 	}
 
 	if cdxComponent.Version == "" {
-		getLogger().Warningf("component missing `version`, Name : %s ", cdxComponent.Name)
+		getLogger().Warningf("component named `%s` missing `version`", cdxComponent.Name)
 	}
 
 	if cdxComponent.BomRef == "" {
-		getLogger().Warningf("component missing `bom-ref`, Name : %s ", cdxComponent.Name)
+		getLogger().Warningf("component named `%s` missing `bom-ref`", cdxComponent.Name)
 	}
 
 	// hash any component w/o a license using special key name
-	resourceInfo.EntityType = "Component"
+	resourceInfo.Type = RESOURCE_TYPE_COMPONENT
 	resourceInfo.Component = cdxComponent
-	resourceInfo.EntityName = cdxComponent.Name
-	resourceInfo.EntityRef = cdxComponent.BomRef
-	resourceInfo.EntityVersion = cdxComponent.Version
-	resourceInfo.EntitySupplierProvider = cdxComponent.Supplier
-	resourceInfo.EntityProperties = cdxComponent.Properties
+	resourceInfo.Name = cdxComponent.Name
+	resourceInfo.BomRef = cdxComponent.BomRef
+	resourceInfo.Version = cdxComponent.Version
+	resourceInfo.SupplierProvider = cdxComponent.Supplier
+	resourceInfo.Properties = cdxComponent.Properties
 
 	// TODO: AppendLicenseInfo(LICENSE_NONE, resourceInfo)
-	resourceMap.Put(resourceInfo.EntityRef, resourceInfo)
+	resourceMap.Put(resourceInfo.BomRef, resourceInfo)
 
 	getLogger().Tracef("Put: %s (`%s`), `%s`)",
-		resourceInfo.EntityName,
-		resourceInfo.EntityVersion,
-		resourceInfo.EntityRef)
+		resourceInfo.Name,
+		resourceInfo.Version,
+		resourceInfo.BomRef)
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
 	if len(cdxComponent.Components) > 0 {
@@ -309,29 +352,29 @@ func hashServiceAsResource(cdxService schema.CDXService, location int) (ri *Reso
 	}
 
 	if cdxService.Version == "" {
-		getLogger().Warningf("service missing `version`, Name : %s ", cdxService.Name)
+		getLogger().Warningf("service named `%s` missing `version`", cdxService.Name)
 	}
 
 	if cdxService.BomRef == "" {
-		getLogger().Warningf("Service missing `bom-ref`, Name : %s ", cdxService.Name)
+		getLogger().Warningf("service named `%s` missing `bom-ref`", cdxService.Name)
 	}
 
 	// hash any component w/o a license using special key name
-	resourceInfo.EntityType = "Service"
+	resourceInfo.Type = RESOURCE_TYPE_SERVICE
 	resourceInfo.Service = cdxService
-	resourceInfo.EntityName = cdxService.Name
-	resourceInfo.EntityRef = cdxService.BomRef
-	resourceInfo.EntityVersion = cdxService.Version
-	resourceInfo.EntitySupplierProvider = cdxService.Provider
-	resourceInfo.EntityProperties = cdxService.Properties
+	resourceInfo.Name = cdxService.Name
+	resourceInfo.BomRef = cdxService.BomRef
+	resourceInfo.Version = cdxService.Version
+	resourceInfo.SupplierProvider = cdxService.Provider
+	resourceInfo.Properties = cdxService.Properties
 
 	// TODO: AppendLicenseInfo(LICENSE_NONE, resourceInfo)
-	resourceMap.Put(resourceInfo.EntityRef, resourceInfo)
+	resourceMap.Put(resourceInfo.BomRef, resourceInfo)
 
 	getLogger().Tracef("Put: %s (`%s`), `%s`)",
-		resourceInfo.EntityName,
-		resourceInfo.EntityVersion,
-		resourceInfo.EntityRef)
+		resourceInfo.Name,
+		resourceInfo.Version,
+		resourceInfo.BomRef)
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
 	if len(cdxService.Services) > 0 {
@@ -376,11 +419,11 @@ func DisplayResourceListText(output io.Writer) {
 	sort.Slice(entries, func(i, j int) bool {
 		resource1 := (entries[i].Value).(ResourceInfo)
 		resource2 := (entries[j].Value).(ResourceInfo)
-		if resource1.EntityType != resource2.EntityType {
-			return resource1.EntityType < resource2.EntityType
+		if resource1.Type != resource2.Type {
+			return resource1.Type < resource2.Type
 		}
 
-		return resource1.EntityName < resource2.EntityName
+		return resource1.Name < resource2.Name
 	})
 
 	var resourceInfo ResourceInfo
@@ -391,10 +434,10 @@ func DisplayResourceListText(output io.Writer) {
 
 		// Format line and write to output
 		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
-			resourceInfo.EntityType,
-			resourceInfo.EntityName,
-			resourceInfo.EntityVersion,
-			resourceInfo.EntityRef)
+			resourceInfo.Type,
+			resourceInfo.Name,
+			resourceInfo.Version,
+			resourceInfo.BomRef)
 	}
 }
 
@@ -425,11 +468,11 @@ func DisplayResourceListCSV(output io.Writer) (err error) {
 	sort.Slice(entries, func(i, j int) bool {
 		resource1 := (entries[i].Value).(ResourceInfo)
 		resource2 := (entries[j].Value).(ResourceInfo)
-		if resource1.EntityType != resource2.EntityType {
-			return resource1.EntityType < resource2.EntityType
+		if resource1.Type != resource2.Type {
+			return resource1.Type < resource2.Type
 		}
 
-		return resource1.EntityName < resource2.EntityName
+		return resource1.Name < resource2.Name
 	})
 
 	var resourceInfo ResourceInfo
@@ -440,10 +483,10 @@ func DisplayResourceListCSV(output io.Writer) (err error) {
 		resourceInfo = value.(ResourceInfo)
 		line = nil
 		line = append(line,
-			resourceInfo.EntityType,
-			resourceInfo.EntityName,
-			resourceInfo.EntityVersion,
-			resourceInfo.EntityRef)
+			resourceInfo.Type,
+			resourceInfo.Name,
+			resourceInfo.Version,
+			resourceInfo.BomRef)
 
 		if err = w.Write(line); err != nil {
 			getLogger().Errorf("csv.Write: %w", err)

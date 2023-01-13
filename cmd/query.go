@@ -93,6 +93,12 @@ type WhereFilter struct {
 	ValueRegEx *regexp.Regexp
 }
 
+func (filter *WhereFilter) GetNormalizeKey() (normalizedKey string) {
+	normalizedKey = strings.ToLower(filter.key)
+	normalizedKey = strings.Replace(normalizedKey, "-", "", -1)
+	return
+}
+
 // Implement the Stringer interface for QueryRequest
 func (qr *QueryRequest) String() string {
 	sb := new(strings.Builder)

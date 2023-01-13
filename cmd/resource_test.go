@@ -29,12 +29,8 @@ import (
 
 const (
 	// Test "resource list" command
-	TEST_RESOURCE_LIST_CDX_1_3            = "test/cyclonedx/cdx-1-3-license-list.json"
-	TEST_RESOURCE_LIST_CDX_1_3_NONE_FOUND = "test/cyclonedx/cdx-1-3-license-list-empty.json"
-	TEST_RESOURCE_LIST_CDX_1_4_NONE_FOUND = TEST_CUSTOM_CDX_1_4_INVALID_LICENSES_NOT_FOUND
-
-	TEST_RESOURCE_LIST_TEXT_CDX_1_4_INVALID_RESOURCE_ID   = "test/cyclonedx/cdx-1-4-license-policy-invalid-spdx-id.json"
-	TEST_RESOURCE_LIST_TEXT_CDX_1_4_INVALID_RESOURCE_NAME = "test/cyclonedx/cdx-1-4-license-policy-invalid-license-name.json"
+	TEST_RESOURCE_LIST_CDX_1_3        = "test/cyclonedx/cdx-1-3-license-list.json"
+	TEST_RESOURCE_LIST_CDX_1_4_SAAS_1 = "examples/cyclonedx/SaaSBOM/apigateway-microservices-datastores/bom.json"
 )
 
 // -------------------------------------------
@@ -49,7 +45,7 @@ func innerTestResourceList(t *testing.T, inputFile string, format string) (outpu
 
 	// Use a test input SBOM formatted in SPDX
 	utils.GlobalFlags.InputFile = inputFile
-	err = ListResources(outputWriter, format)
+	err = ListResources(outputWriter, format, nil)
 
 	return
 }
@@ -96,7 +92,8 @@ func TestResourceListFormatUnsupportedSPDX2(t *testing.T) {
 	}
 }
 
-func TestResourceListTextCdx13(t *testing.T) {
+// Assure text format listing (report) works
+func TestResourceListTextCdx13Licenses(t *testing.T) {
 	_, err := innerTestResourceList(t,
 		TEST_RESOURCE_LIST_CDX_1_3,
 		OUTPUT_TEXT)
@@ -107,22 +104,15 @@ func TestResourceListTextCdx13(t *testing.T) {
 	}
 }
 
-// Assure listing (report) works with summary flag (i.e., format: "txt")
-func TestResourceListSummaryTextCdx13(t *testing.T) {
+func TestResourceListTextCdx14SaaS(t *testing.T) {
 	_, err := innerTestResourceList(t,
-		TEST_RESOURCE_LIST_CDX_1_3,
+		TEST_RESOURCE_LIST_CDX_1_4_SAAS_1,
 		OUTPUT_TEXT)
 
 	if err != nil {
-		t.Error(err)
+		getLogger().Error(err)
+		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
 	}
-}
-
-func TestResourceListCSVCdx13(t *testing.T) {
-	// Test CDX 1.3 document
-	innerTestResourceList(t,
-		TEST_RESOURCE_LIST_CDX_1_3_NONE_FOUND,
-		OUTPUT_CSV)
 }
 
 // func TestResourceListJSONCdx14NoneFound(t *testing.T) {
