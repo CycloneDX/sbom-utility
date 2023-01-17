@@ -128,14 +128,8 @@ func NewCommandResource() *cobra.Command {
 	return command
 }
 
-func retrieveWhereFilters(cmd *cobra.Command) (whereFilters []WhereFilter, err error) {
+func retrieveWhereFilters(whereValues string) (whereFilters []WhereFilter, err error) {
 	var whereExpressions []string
-	whereValues, errGet := cmd.Flags().GetString(FLAG_RESOURCE_WHERE)
-
-	if errGet != nil {
-		err = getLogger().Errorf("failed to read flag `%s` value", FLAG_RESOURCE_WHERE)
-		return
-	}
 
 	if whereValues != "" {
 		whereExpressions = strings.Split(whereValues, QUERY_WHERE_EXPRESSION_SEP)
@@ -195,8 +189,15 @@ func resourceCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	}()
 
 	// Process flag: --where
+	whereValues, errGet := cmd.Flags().GetString(FLAG_RESOURCE_WHERE)
+
+	if errGet != nil {
+		err = getLogger().Errorf("failed to read flag `%s` value", FLAG_RESOURCE_WHERE)
+		return
+	}
+
 	var whereFilters []WhereFilter
-	whereFilters, err = retrieveWhereFilters(cmd)
+	whereFilters, err = retrieveWhereFilters(whereValues)
 
 	if err != nil {
 		return

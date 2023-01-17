@@ -38,7 +38,7 @@ const (
 // -------------------------------------------
 // resource list test helper functions
 // -------------------------------------------
-func innerTestResourceList(t *testing.T, inputFile string, format string) (outputBuffer bytes.Buffer, err error) {
+func innerTestResourceList(t *testing.T, inputFile string, format string, resourceType string, whereFilters []WhereFilter) (outputBuffer bytes.Buffer, err error) {
 
 	// Declare an output outputBuffer/outputWriter to use used during tests
 	var outputWriter = bufio.NewWriter(&outputBuffer)
@@ -47,9 +47,13 @@ func innerTestResourceList(t *testing.T, inputFile string, format string) (outpu
 
 	// Use a test input SBOM formatted in SPDX
 	utils.GlobalFlags.InputFile = inputFile
-	err = ListResources(outputWriter, format, RESOURCE_TYPE_DEFAULT, nil)
+	err = ListResources(outputWriter, format, resourceType, whereFilters)
 
 	return
+}
+
+func innerTestResourceListBasic(t *testing.T, inputFile string, format string) (outputBuffer bytes.Buffer, err error) {
+	return innerTestResourceList(t, inputFile, format, RESOURCE_TYPE_DEFAULT, nil)
 }
 
 // ----------------------------------------
@@ -57,7 +61,7 @@ func innerTestResourceList(t *testing.T, inputFile string, format string) (outpu
 // ----------------------------------------
 
 func TestResourceListInvalidInputFileLoad(t *testing.T) {
-	_, err := innerTestResourceList(t,
+	_, err := innerTestResourceListBasic(t,
 		TEST_INPUT_FILE_NON_EXISTENT,
 		OUTPUT_DEFAULT)
 
@@ -71,8 +75,7 @@ func TestResourceListInvalidInputFileLoad(t *testing.T) {
 // Test format unsupported (SPDX)
 // -------------------------------------------
 func TestResourceListFormatUnsupportedSPDX1(t *testing.T) {
-
-	_, err := innerTestResourceList(t,
+	_, err := innerTestResourceListBasic(t,
 		TEST_SPDX_2_2_MIN_REQUIRED,
 		OUTPUT_DEFAULT)
 
@@ -83,8 +86,7 @@ func TestResourceListFormatUnsupportedSPDX1(t *testing.T) {
 }
 
 func TestResourceListFormatUnsupportedSPDX2(t *testing.T) {
-
-	_, err := innerTestResourceList(t,
+	_, err := innerTestResourceListBasic(t,
 		TEST_SPDX_2_2_EXAMPLE_1,
 		OUTPUT_DEFAULT)
 
@@ -99,7 +101,7 @@ func TestResourceListFormatUnsupportedSPDX2(t *testing.T) {
 // -------------------------------------------
 
 func TestResourceListTextCdx14NoneFound(t *testing.T) {
-	outputBuffer, err := innerTestResourceList(t,
+	outputBuffer, err := innerTestResourceListBasic(t,
 		TEST_RESOURCE_LIST_CDX_1_3_NONE_FOUND,
 		OUTPUT_TEXT)
 
@@ -120,8 +122,8 @@ func TestResourceListTextCdx14NoneFound(t *testing.T) {
 // -------------------------------------------
 
 // Assure text format listing (report) works
-func TestResourceListTextCdx13Licenses(t *testing.T) {
-	_, err := innerTestResourceList(t,
+func TestResourceListTextCdx13(t *testing.T) {
+	_, err := innerTestResourceListBasic(t,
 		TEST_RESOURCE_LIST_CDX_1_3,
 		OUTPUT_TEXT)
 
@@ -132,7 +134,7 @@ func TestResourceListTextCdx13Licenses(t *testing.T) {
 }
 
 func TestResourceListTextCdx14SaaS(t *testing.T) {
-	_, err := innerTestResourceList(t,
+	_, err := innerTestResourceListBasic(t,
 		TEST_RESOURCE_LIST_CDX_1_4_SAAS_1,
 		OUTPUT_TEXT)
 
@@ -143,8 +145,25 @@ func TestResourceListTextCdx14SaaS(t *testing.T) {
 }
 
 // -------------------------------------------
-// CDX variants - List only
+// CDX variants - WHERE clause tests
 // -------------------------------------------
+
+func TestResourceListTextCdx13WhereClause(t *testing.T) {
+	whereFilters, errParse := retrieveWhereFilters("name=Library A")
+	if errParse != nil {
+		getLogger().Error(errParse)
+		t.Errorf("%s: input file: %s", errParse.Error(), utils.GlobalFlags.InputFile)
+	}
+
+	_, err := innerTestResourceList(t,
+		TEST_RESOURCE_LIST_CDX_1_3,
+		OUTPUT_TEXT, RESOURCE_TYPE_DEFAULT, whereFilters)
+
+	if err != nil {
+		getLogger().Error(err)
+		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
+	}
+}
 
 // func TestResourceListJSONCdx14NoneFound(t *testing.T) {
 // 	outputBuffer, err := innerTestResourceList(t,
