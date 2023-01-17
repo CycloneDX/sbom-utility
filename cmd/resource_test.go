@@ -21,6 +21,7 @@ import (
 	"bufio"
 	"bytes"
 	"io/fs"
+	"strings"
 	"testing"
 
 	"github.com/scs/sbom-utility/schema"
@@ -29,8 +30,9 @@ import (
 
 const (
 	// Test "resource list" command
-	TEST_RESOURCE_LIST_CDX_1_3        = "test/cyclonedx/cdx-1-3-license-list.json"
-	TEST_RESOURCE_LIST_CDX_1_4_SAAS_1 = "examples/cyclonedx/SaaSBOM/apigateway-microservices-datastores/bom.json"
+	TEST_RESOURCE_LIST_CDX_1_3            = "test/cyclonedx/cdx-1-3-resource-list.json"
+	TEST_RESOURCE_LIST_CDX_1_3_NONE_FOUND = "test/cyclonedx/cdx-1-3-resource-list-none-found.json"
+	TEST_RESOURCE_LIST_CDX_1_4_SAAS_1     = "examples/cyclonedx/SaaSBOM/apigateway-microservices-datastores/bom.json"
 )
 
 // -------------------------------------------
@@ -92,6 +94,31 @@ func TestResourceListFormatUnsupportedSPDX2(t *testing.T) {
 	}
 }
 
+// -------------------------------------------
+// CDX variants - Test for list (data) errors
+// -------------------------------------------
+
+func TestResourceListTextCdx14NoneFound(t *testing.T) {
+	outputBuffer, err := innerTestResourceList(t,
+		TEST_RESOURCE_LIST_CDX_1_3_NONE_FOUND,
+		OUTPUT_TEXT)
+
+	if err != nil {
+		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
+	}
+
+	// verify there is a (warning) message present when no resources are found
+	s := outputBuffer.String()
+	if !strings.Contains(s, MSG_OUTPUT_NO_RESOURCES_FOUND) {
+		t.Errorf("ListResources(): did not include the message: `%s`", MSG_OUTPUT_NO_LICENSES_FOUND)
+		t.Logf("%s", outputBuffer.String())
+	}
+}
+
+// -------------------------------------------
+// CDX variants - List only
+// -------------------------------------------
+
 // Assure text format listing (report) works
 func TestResourceListTextCdx13Licenses(t *testing.T) {
 	_, err := innerTestResourceList(t,
@@ -114,6 +141,10 @@ func TestResourceListTextCdx14SaaS(t *testing.T) {
 		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
 	}
 }
+
+// -------------------------------------------
+// CDX variants - List only
+// -------------------------------------------
 
 // func TestResourceListJSONCdx14NoneFound(t *testing.T) {
 // 	outputBuffer, err := innerTestResourceList(t,

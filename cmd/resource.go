@@ -21,6 +21,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"reflect"
 	"sort"
 	"strings"
 	"text/tabwriter"
@@ -288,7 +289,7 @@ func loadDocumentResources(document *schema.Sbom, resourceType string) (err erro
 	// Add top-level SBOM component
 	if resourceType == RESOURCE_TYPE_DEFAULT || resourceType == RESOURCE_TYPE_COMPONENT {
 		var resourceInfo *ResourceInfo
-		resourceInfo, err = hashComponentAsResource(*document.GetCdxMetadataComponent(), LC_LOC_METADATA_COMPONENT)
+		resourceInfo, err = hashComponentAsResource(*document.GetCdxMetadataComponent(), true)
 		if err != nil {
 			return
 		}
@@ -296,7 +297,7 @@ func loadDocumentResources(document *schema.Sbom, resourceType string) (err erro
 
 		// Hash all components found in the (root).components[] (+ "nested" components)
 		if components := document.GetCdxComponents(); len(components) > 0 {
-			if err = hashComponents(components, LC_LOC_COMPONENTS); err != nil {
+			if err = hashComponents(components, false); err != nil {
 				return
 			}
 		}
@@ -305,7 +306,7 @@ func loadDocumentResources(document *schema.Sbom, resourceType string) (err erro
 	if resourceType == RESOURCE_TYPE_DEFAULT || resourceType == RESOURCE_TYPE_SERVICE {
 		// Hash services found in the (root).services[] (array) (+ "nested" services)
 		if services := document.GetCdxServices(); len(services) > 0 {
-			if err = hashServices(services, LC_LOC_SERVICES); err != nil {
+			if err = hashServices(services); err != nil {
 				return
 			}
 		}
@@ -314,12 +315,12 @@ func loadDocumentResources(document *schema.Sbom, resourceType string) (err erro
 	return
 }
 
-func hashComponents(components []schema.CDXComponent, location int) (err error) {
+func hashComponents(components []schema.CDXComponent, root bool) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
 	for _, cdxComponent := range components {
-		_, err = hashComponentAsResource(cdxComponent, location)
+		_, err = hashComponentAsResource(cdxComponent, root)
 		if err != nil {
 			return
 		}
@@ -329,11 +330,16 @@ func hashComponents(components []schema.CDXComponent, location int) (err error) 
 
 // Hash a CDX Component and recursively those of any "nested" components
 // TODO we should WARN if version is not a valid semver (e.g., examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json)
-func hashComponentAsResource(cdxComponent schema.CDXComponent, location int) (ri *ResourceInfo, err error) {
+func hashComponentAsResource(cdxComponent schema.CDXComponent, root bool) (ri *ResourceInfo, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 	var resourceInfo ResourceInfo
 	ri = &resourceInfo
+
+	if reflect.DeepEqual(cdxComponent, schema.CDXComponent{}) {
+		getLogger().Errorf("invalid component: missing or empty : %v ", cdxComponent)
+		return
+	}
 
 	if cdxComponent.Name == "" {
 		getLogger().Errorf("component missing required value `name` : %v ", cdxComponent)
@@ -348,6 +354,7 @@ func hashComponentAsResource(cdxComponent schema.CDXComponent, location int) (ri
 	}
 
 	// hash any component w/o a license using special key name
+	resourceInfo.isRoot = root
 	resourceInfo.Type = RESOURCE_TYPE_COMPONENT
 	resourceInfo.Component = cdxComponent
 	resourceInfo.Name = cdxComponent.Name
@@ -366,7 +373,7 @@ func hashComponentAsResource(cdxComponent schema.CDXComponent, location int) (ri
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
 	if len(cdxComponent.Components) > 0 {
-		err = hashComponents(cdxComponent.Components, location)
+		err = hashComponents(cdxComponent.Components, root)
 		if err != nil {
 			return
 		}
@@ -374,12 +381,12 @@ func hashComponentAsResource(cdxComponent schema.CDXComponent, location int) (ri
 	return
 }
 
-func hashServices(services []schema.CDXService, location int) (err error) {
+func hashServices(services []schema.CDXService) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
 	for _, cdxService := range services {
-		_, err = hashServiceAsResource(cdxService, location)
+		_, err = hashServiceAsResource(cdxService)
 		if err != nil {
 			return
 		}
@@ -388,11 +395,16 @@ func hashServices(services []schema.CDXService, location int) (err error) {
 }
 
 // Hash a CDX Component and recursively those of any "nested" components
-func hashServiceAsResource(cdxService schema.CDXService, location int) (ri *ResourceInfo, err error) {
+func hashServiceAsResource(cdxService schema.CDXService) (ri *ResourceInfo, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 	var resourceInfo ResourceInfo
 	ri = &resourceInfo
+
+	if reflect.DeepEqual(cdxService, schema.CDXService{}) {
+		getLogger().Errorf("invalid service: missing or empty : %v", cdxService)
+		return
+	}
 
 	if cdxService.Name == "" {
 		getLogger().Errorf("service missing required value `name` : %v ", cdxService)
@@ -425,7 +437,7 @@ func hashServiceAsResource(cdxService schema.CDXService, location int) (ri *Reso
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
 	if len(cdxService.Services) > 0 {
-		err = hashServices(cdxService.Services, location)
+		err = hashServices(cdxService.Services)
 		if err != nil {
 			return
 		}
