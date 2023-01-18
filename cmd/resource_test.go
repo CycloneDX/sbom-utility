@@ -149,7 +149,7 @@ func TestResourceListTextCdx14NoneFound(t *testing.T) {
 	// verify there is a (warning) message present when no resources are found
 	s := outputBuffer.String()
 	if !strings.Contains(s, MSG_OUTPUT_NO_RESOURCES_FOUND) {
-		t.Errorf("ListResources(): did not include the message: `%s`", MSG_OUTPUT_NO_LICENSES_FOUND)
+		t.Errorf("list results did not include the message: `%s`", MSG_OUTPUT_NO_LICENSES_FOUND)
 		t.Logf("%s", outputBuffer.String())
 	}
 }
