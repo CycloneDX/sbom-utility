@@ -20,6 +20,7 @@ package cmd
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io/fs"
 	"strings"
 	"testing"
@@ -38,22 +39,73 @@ const (
 // -------------------------------------------
 // resource list test helper functions
 // -------------------------------------------
-func innerTestResourceList(t *testing.T, inputFile string, format string, resourceType string, whereFilters []WhereFilter) (outputBuffer bytes.Buffer, err error) {
+
+func innerTestResourceList(t *testing.T, inputFile string, format string, resourceType string, whereClause string, expected error) (outputBuffer bytes.Buffer, testInfo string, err error) {
+
+	testInfo = fmt.Sprintf("test file: \"%s\", format: %s, resource type: %s, where clause: %s", inputFile, format, resourceType, whereClause)
+	getLogger().Trace(testInfo)
 
 	// Declare an output outputBuffer/outputWriter to use used during tests
 	var outputWriter = bufio.NewWriter(&outputBuffer)
 	// ensure all data is written to buffer before further validation
 	defer outputWriter.Flush()
 
+	var whereFilters []WhereFilter = nil
+	if whereClause != "" {
+		whereFilters, err = retrieveWhereFilters(whereClause)
+		if err != nil {
+			getLogger().Error(err)
+			t.Errorf("Test failed: %s: details: %s ", testInfo, err.Error())
+		}
+	}
+
 	// Use a test input SBOM formatted in SPDX
 	utils.GlobalFlags.InputFile = inputFile
 	err = ListResources(outputWriter, format, resourceType, whereFilters)
 
+	if expected != nil {
+		if !ErrorTypesMatch(err, expected) {
+			t.Errorf("expected error: %T, actual error: %T", &fs.PathError{}, err)
+		}
+		return
+	}
+
+	if err != nil {
+		t.Errorf("Test failed: %s: details: %s ", testInfo, err.Error())
+	}
+
 	return
 }
 
-func innerTestResourceListBasic(t *testing.T, inputFile string, format string) (outputBuffer bytes.Buffer, err error) {
-	return innerTestResourceList(t, inputFile, format, RESOURCE_TYPE_DEFAULT, nil)
+func innerTestResourceListBasic(t *testing.T, inputFile string, format string, expected error) (outputBuffer bytes.Buffer, testInfo string, err error) {
+	return innerTestResourceList(t, inputFile, format, RESOURCE_TYPE_DEFAULT, "", expected)
+}
+
+func innerTestResourceListResults(t *testing.T, inputFile string, format string, resourceType string, whereClause string, resultContains string, resultLines int, expected error) (outputBuffer bytes.Buffer, testInfo string, err error) {
+
+	outputBuffer, testInfo, err = innerTestResourceList(t,
+		inputFile,
+		format,
+		resourceType,
+		whereClause,
+		expected)
+
+	// Test buffer has ONLY correct results for test case
+	if err == nil {
+		str := outputBuffer.String()
+		lines := strings.Count(str, "\n")
+		getLogger().Debugf("output: \"%s\"", str)
+
+		if lines > resultLines || !strings.Contains(str, resultContains) {
+			err = getLogger().Errorf("invalid output for where clause")
+			t.Errorf("%s: input file: `%s`, where clause: `%s`",
+				err.Error(),
+				inputFile,
+				whereClause)
+		}
+	}
+
+	return
 }
 
 // ----------------------------------------
@@ -61,39 +113,27 @@ func innerTestResourceListBasic(t *testing.T, inputFile string, format string) (
 // ----------------------------------------
 
 func TestResourceListInvalidInputFileLoad(t *testing.T) {
-	_, err := innerTestResourceListBasic(t,
+	innerTestResourceListBasic(t,
 		TEST_INPUT_FILE_NON_EXISTENT,
-		OUTPUT_DEFAULT)
-
-	// Assure we return path error
-	if err == nil || !ErrorTypesMatch(err, &fs.PathError{}) {
-		t.Errorf("expected error: %T, actual error: %T", &fs.PathError{}, err)
-	}
+		OUTPUT_DEFAULT,
+		&fs.PathError{})
 }
 
 // -------------------------------------------
 // Test format unsupported (SPDX)
 // -------------------------------------------
 func TestResourceListFormatUnsupportedSPDX1(t *testing.T) {
-	_, err := innerTestResourceListBasic(t,
+	innerTestResourceListBasic(t,
 		TEST_SPDX_2_2_MIN_REQUIRED,
-		OUTPUT_DEFAULT)
-
-	if !ErrorTypesMatch(err, &schema.UnsupportedFormatError{}) {
-		getLogger().Error(err)
-		t.Errorf("expected error type: `%T`, actual type: `%T`", &schema.UnsupportedFormatError{}, err)
-	}
+		OUTPUT_DEFAULT,
+		&schema.UnsupportedFormatError{})
 }
 
 func TestResourceListFormatUnsupportedSPDX2(t *testing.T) {
-	_, err := innerTestResourceListBasic(t,
+	innerTestResourceListBasic(t,
 		TEST_SPDX_2_2_EXAMPLE_1,
-		OUTPUT_DEFAULT)
-
-	if !ErrorTypesMatch(err, &schema.UnsupportedFormatError{}) {
-		getLogger().Error(err)
-		t.Errorf("expected error type: `%T`, actual type: `%T`", &schema.UnsupportedFormatError{}, err)
-	}
+		OUTPUT_DEFAULT,
+		&schema.UnsupportedFormatError{})
 }
 
 // -------------------------------------------
@@ -101,13 +141,10 @@ func TestResourceListFormatUnsupportedSPDX2(t *testing.T) {
 // -------------------------------------------
 
 func TestResourceListTextCdx14NoneFound(t *testing.T) {
-	outputBuffer, err := innerTestResourceListBasic(t,
+	outputBuffer, _, _ := innerTestResourceListBasic(t,
 		TEST_RESOURCE_LIST_CDX_1_3_NONE_FOUND,
-		OUTPUT_TEXT)
-
-	if err != nil {
-		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
-	}
+		OUTPUT_TEXT,
+		nil)
 
 	// verify there is a (warning) message present when no resources are found
 	s := outputBuffer.String()
@@ -123,127 +160,34 @@ func TestResourceListTextCdx14NoneFound(t *testing.T) {
 
 // Assure text format listing (report) works
 func TestResourceListTextCdx13(t *testing.T) {
-	_, err := innerTestResourceListBasic(t,
+	innerTestResourceListBasic(t,
 		TEST_RESOURCE_LIST_CDX_1_3,
-		OUTPUT_TEXT)
-
-	if err != nil {
-		getLogger().Error(err)
-		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
-	}
+		OUTPUT_TEXT,
+		nil)
 }
 
 func TestResourceListTextCdx14SaaS(t *testing.T) {
-	_, err := innerTestResourceListBasic(t,
+	innerTestResourceListBasic(t,
 		TEST_RESOURCE_LIST_CDX_1_4_SAAS_1,
-		OUTPUT_TEXT)
-
-	if err != nil {
-		getLogger().Error(err)
-		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
-	}
+		OUTPUT_TEXT,
+		nil)
 }
 
 // -------------------------------------------
 // CDX variants - WHERE clause tests
 // -------------------------------------------
 
-func TestResourceListTextCdx13WhereClause(t *testing.T) {
-	whereFilters, errParse := retrieveWhereFilters("name=Library A")
-	if errParse != nil {
-		getLogger().Error(errParse)
-		t.Errorf("%s: input file: %s", errParse.Error(), utils.GlobalFlags.InputFile)
-	}
+func TestResourceListTextCdx13WhereClauseAndResults(t *testing.T) {
+	TEST_INPUT_WHERE_FILTERS := "name=Library A"
+	TEST_OUTPUT_CONTAINS := "Library A"
+	TEST_OUTPUT_LINES := 3
 
-	buffer, err := innerTestResourceList(t,
+	innerTestResourceListResults(t,
 		TEST_RESOURCE_LIST_CDX_1_3,
 		OUTPUT_TEXT,
 		RESOURCE_TYPE_DEFAULT,
-		whereFilters)
-
-	if err != nil {
-		getLogger().Error(err)
-		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
-	}
-
-	// Test buffer has ONLY correct results for test case
-	str := buffer.String()
-	lines := strings.Count(str, "\n")
-	getLogger().Debugf("output: \"%s\"", str)
-	if lines > 3 || !strings.Contains(str, "Library A") {
-		err = getLogger().Errorf("invalid output for where clause")
-		t.Errorf("%s: input file: `%s`, where filters: `%v`",
-			err.Error(),
-			TEST_RESOURCE_LIST_CDX_1_3,
-			whereFilters)
-	}
+		TEST_INPUT_WHERE_FILTERS,
+		TEST_OUTPUT_CONTAINS,
+		TEST_OUTPUT_LINES,
+		nil)
 }
-
-// func TestResourceListJSONCdx14NoneFound(t *testing.T) {
-// 	outputBuffer, err := innerTestResourceList(t,
-// 		TEST_RESOURCE_LIST_CDX_1_4_NONE_FOUND,
-// 		OUTPUT_JSON)
-//
-// 	if err != nil {
-// 		getLogger().Error(err)
-// 		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
-// 	}
-//
-// 	// Note: if no resources are found, the "json.Marshal" method(s) will return a value of "null"
-// 	// which is valid JSON (and not an empty array)
-// 	if !utils.IsValidJsonRaw(outputBuffer.Bytes()) {
-// 		t.Errorf("ListResources(): did not produce valid JSON output")
-// 		t.Logf("%s", outputBuffer.String())
-// 	}
-// }
-
-// func TestResourceListCSVCdxNoneFound(t *testing.T) {
-// 	// Test CDX 1.3 document
-// 	outputBuffer, err := innerTestResourceList(t,
-// 		TEST_RESOURCE_LIST_CDX_1_3_NONE_FOUND,
-// 		OUTPUT_CSV)
-
-// 	if err != nil {
-// 		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
-// 	}
-
-// 	s := outputBuffer.String()
-// 	if !strings.Contains(s, MSG_OUTPUT_NO_RESOURCES_FOUND) {
-// 		t.Errorf("ListResources(): did not include the message: `%s`", MSG_OUTPUT_NO_RESOURCES_FOUND)
-// 		t.Logf("%s", outputBuffer.String())
-// 	}
-
-// 	// Test CDX 1.4 document
-// 	outputBuffer, err = innerTestResourceList(t,
-// 		TEST_RESOURCE_LIST_CDX_1_4_NONE_FOUND,
-// 		OUTPUT_CSV)
-
-// 	if err != nil {
-// 		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
-// 	}
-
-// 	s = outputBuffer.String()
-// 	if !strings.Contains(s, MSG_OUTPUT_NO_RESOURCES_FOUND) {
-// 		t.Errorf("ListResources(): did not include the message: `%s`", MSG_OUTPUT_NO_RESOURCES_FOUND)
-// 		t.Logf("%s", outputBuffer.String())
-// 	}
-// }
-
-//func TestResourceListTextCdx14NoneFound(t *testing.T) {
-// outputBuffer, err := innerTestResourceList(t,
-// 	TEST_RESOURCE_LIST_CDX_1_4_NONE_FOUND,
-// 	OUTPUT_JSON,
-// 	true)
-//
-// if err != nil {
-// 	t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
-// }
-//
-// TODO
-// verify there is a (warning) message present when no resources are found
-// s := outputBuffer.String()
-// if !strings.Contains(s, MSG_OUTPUT_NO_LICENSES_FOUND) {
-// 	t.Errorf("ListResources(): did not include the message: `%s`", MSG_OUTPUT_NO_LICENSES_FOUND)
-// 	t.Logf("%s", outputBuffer.String())
-// }
-//}
