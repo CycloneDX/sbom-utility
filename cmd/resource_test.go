@@ -206,3 +206,20 @@ func TestResourceListTextCdx13WhereClauseAndResults2(t *testing.T) {
 		TEST_OUTPUT_LINES,
 		nil)
 }
+
+func TestResourceListTextCdx13WhereClauseAndResultsNone(t *testing.T) {
+	TEST_INPUT_WHERE_FILTERS := "version=2.0"
+	TEST_OUTPUT_CONTAINS := MSG_OUTPUT_NO_RESOURCES_FOUND
+	TEST_OUTPUT_LINES := 3
+
+	// THere are no services that meet the where filter criteria
+	// check for warning message in output
+	innerTestResourceListResults(t,
+		TEST_RESOURCE_LIST_CDX_1_3,
+		OUTPUT_TEXT,
+		RESOURCE_TYPE_SERVICE,
+		TEST_INPUT_WHERE_FILTERS,
+		TEST_OUTPUT_CONTAINS,
+		TEST_OUTPUT_LINES,
+		nil)
+}
