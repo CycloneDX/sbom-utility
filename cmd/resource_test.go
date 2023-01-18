@@ -177,7 +177,7 @@ func TestResourceListTextCdx14SaaS(t *testing.T) {
 // CDX variants - WHERE clause tests
 // -------------------------------------------
 
-func TestResourceListTextCdx13WhereClauseAndResults(t *testing.T) {
+func TestResourceListTextCdx13WhereClauseAndResults1(t *testing.T) {
 	TEST_INPUT_WHERE_FILTERS := "name=Library A"
 	TEST_OUTPUT_CONTAINS := "Library A"
 	TEST_OUTPUT_LINES := 3
@@ -186,6 +186,21 @@ func TestResourceListTextCdx13WhereClauseAndResults(t *testing.T) {
 		TEST_RESOURCE_LIST_CDX_1_3,
 		OUTPUT_TEXT,
 		RESOURCE_TYPE_DEFAULT,
+		TEST_INPUT_WHERE_FILTERS,
+		TEST_OUTPUT_CONTAINS,
+		TEST_OUTPUT_LINES,
+		nil)
+}
+
+func TestResourceListTextCdx13WhereClauseAndResults2(t *testing.T) {
+	TEST_INPUT_WHERE_FILTERS := "version=2.0"
+	TEST_OUTPUT_CONTAINS := "ACME Application"
+	TEST_OUTPUT_LINES := 3
+
+	innerTestResourceListResults(t,
+		TEST_RESOURCE_LIST_CDX_1_3,
+		OUTPUT_TEXT,
+		RESOURCE_TYPE_COMPONENT,
 		TEST_INPUT_WHERE_FILTERS,
 		TEST_OUTPUT_CONTAINS,
 		TEST_OUTPUT_LINES,
