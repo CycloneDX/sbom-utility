@@ -255,7 +255,7 @@ func ListResources(output io.Writer, format string, resourceType string, whereFi
 	case OUTPUT_CSV:
 		DisplayResourceListCSV(output)
 	case OUTPUT_MARKDOWN:
-		//DisplayResourceListMarkdown(output)
+		DisplayResourceListMarkdown(output)
 	default:
 		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
@@ -567,6 +567,63 @@ func DisplayResourceListCSV(output io.Writer) (err error) {
 		if err = w.Write(line); err != nil {
 			getLogger().Errorf("csv.Write: %w", err)
 		}
+	}
+
+	return
+}
+
+// TODO: Add a --no-title flag to skip title output
+func DisplayResourceListMarkdown(output io.Writer) (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	// create title row
+	titles, _ := createTitleRows(RESOURCE_LIST_TITLES, nil)
+	titleRow := createMarkdownRow(titles)
+	fmt.Fprintf(output, "%s\n", titleRow)
+
+	alignments := createMarkdownColumnAlignment(titles)
+	alignmentRow := createMarkdownRow(alignments)
+	fmt.Fprintf(output, "%s\n", alignmentRow)
+
+	// Display a warning "missing" in the actual output and return (short-circuit)
+	entries := resourceMap.Entries()
+
+	// Emit no resource found warning into output
+	if len(entries) == 0 {
+		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_RESOURCES_FOUND)
+		return fmt.Errorf(MSG_OUTPUT_NO_RESOURCES_FOUND)
+	}
+
+	// Sort by Type
+	sort.Slice(entries, func(i, j int) bool {
+		resource1 := (entries[i].Value).(ResourceInfo)
+		resource2 := (entries[j].Value).(ResourceInfo)
+		if resource1.Type != resource2.Type {
+			return resource1.Type < resource2.Type
+		}
+
+		return resource1.Name < resource2.Name
+	})
+
+	var resourceInfo ResourceInfo
+	var line []string
+	var lineRow string
+
+	for _, entry := range entries {
+		value := entry.Value
+		resourceInfo = value.(ResourceInfo)
+		// reset current line
+		line = nil
+
+		line = append(line,
+			resourceInfo.Type,
+			resourceInfo.Name,
+			resourceInfo.Version,
+			resourceInfo.BomRef)
+
+		lineRow = createMarkdownRow(line)
+		fmt.Fprintf(output, "%s\n", lineRow)
 	}
 
 	return
