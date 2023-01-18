@@ -76,12 +76,13 @@ const (
 
 var VALID_FILTER_KEYS = []string{RESOURCE_FILTER_KEY_TYPE, RESOURCE_FILTER_KEY_NAME, RESOURCE_FILTER_KEY_VALUE, RESOURCE_FILTER_KEY_BOMREF}
 
+// TODO: need to strip `-` from `bom-ref` for where filter
 type ResourceInfo struct {
 	isRoot           bool
-	Type             string
-	BomRef           string // TODO: need to strip `-` from `bom-ref` for where filter
-	Name             string
-	Version          string
+	Type             string `json:"type"`
+	BomRef           string `json:"bom-ref"`
+	Name             string `json:"name"`
+	Version          string `json:"version"`
 	SupplierProvider schema.CDXOrganizationalEntity
 	Properties       []schema.CDXProperty
 	Component        schema.CDXComponent
@@ -241,7 +242,7 @@ func ListResources(output io.Writer, format string, resourceType string, whereFi
 
 	// Hash all licenses within input file
 	getLogger().Infof("Scanning document for licenses...")
-	err = loadDocumentResources(document, resourceType)
+	err = loadDocumentResources(document, resourceType, whereFilters)
 
 	if err != nil {
 		return
@@ -265,7 +266,7 @@ func ListResources(output io.Writer, format string, resourceType string, whereFi
 	return
 }
 
-func loadDocumentResources(document *schema.Sbom, resourceType string) (err error) {
+func loadDocumentResources(document *schema.Sbom, resourceType string, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -290,7 +291,7 @@ func loadDocumentResources(document *schema.Sbom, resourceType string) (err erro
 	// Add top-level SBOM component
 	if resourceType == RESOURCE_TYPE_DEFAULT || resourceType == RESOURCE_TYPE_COMPONENT {
 		var resourceInfo *ResourceInfo
-		resourceInfo, err = hashComponentAsResource(*document.GetCdxMetadataComponent(), true)
+		resourceInfo, err = hashComponentAsResource(*document.GetCdxMetadataComponent(), whereFilters, true)
 		if err != nil {
 			return
 		}
@@ -298,7 +299,7 @@ func loadDocumentResources(document *schema.Sbom, resourceType string) (err erro
 
 		// Hash all components found in the (root).components[] (+ "nested" components)
 		if components := document.GetCdxComponents(); len(components) > 0 {
-			if err = hashComponents(components, false); err != nil {
+			if err = hashComponents(components, whereFilters, false); err != nil {
 				return
 			}
 		}
@@ -307,7 +308,7 @@ func loadDocumentResources(document *schema.Sbom, resourceType string) (err erro
 	if resourceType == RESOURCE_TYPE_DEFAULT || resourceType == RESOURCE_TYPE_SERVICE {
 		// Hash services found in the (root).services[] (array) (+ "nested" services)
 		if services := document.GetCdxServices(); len(services) > 0 {
-			if err = hashServices(services); err != nil {
+			if err = hashServices(services, whereFilters); err != nil {
 				return
 			}
 		}
@@ -316,12 +317,12 @@ func loadDocumentResources(document *schema.Sbom, resourceType string) (err erro
 	return
 }
 
-func hashComponents(components []schema.CDXComponent, root bool) (err error) {
+func hashComponents(components []schema.CDXComponent, whereFilters []WhereFilter, root bool) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
 	for _, cdxComponent := range components {
-		_, err = hashComponentAsResource(cdxComponent, root)
+		_, err = hashComponentAsResource(cdxComponent, whereFilters, root)
 		if err != nil {
 			return
 		}
@@ -331,7 +332,7 @@ func hashComponents(components []schema.CDXComponent, root bool) (err error) {
 
 // Hash a CDX Component and recursively those of any "nested" components
 // TODO we should WARN if version is not a valid semver (e.g., examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json)
-func hashComponentAsResource(cdxComponent schema.CDXComponent, root bool) (ri *ResourceInfo, err error) {
+func hashComponentAsResource(cdxComponent schema.CDXComponent, whereFilters []WhereFilter, root bool) (ri *ResourceInfo, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 	var resourceInfo ResourceInfo
@@ -364,17 +365,24 @@ func hashComponentAsResource(cdxComponent schema.CDXComponent, root bool) (ri *R
 	resourceInfo.SupplierProvider = cdxComponent.Supplier
 	resourceInfo.Properties = cdxComponent.Properties
 
-	// TODO: AppendLicenseInfo(LICENSE_NONE, resourceInfo)
-	resourceMap.Put(resourceInfo.BomRef, resourceInfo)
+	var match bool = true
+	if len(whereFilters) > 0 {
+		mapResourceInfo, _ := utils.ConvertStructToMap(resourceInfo)
+		match, _ = whereFilterMatch(mapResourceInfo, whereFilters)
+	}
 
-	getLogger().Tracef("Put: %s (`%s`), `%s`)",
-		resourceInfo.Name,
-		resourceInfo.Version,
-		resourceInfo.BomRef)
+	if match {
+		resourceMap.Put(resourceInfo.BomRef, resourceInfo)
+
+		getLogger().Tracef("Put: %s (`%s`), `%s`)",
+			resourceInfo.Name,
+			resourceInfo.Version,
+			resourceInfo.BomRef)
+	}
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
 	if len(cdxComponent.Components) > 0 {
-		err = hashComponents(cdxComponent.Components, root)
+		err = hashComponents(cdxComponent.Components, whereFilters, root)
 		if err != nil {
 			return
 		}
@@ -382,12 +390,12 @@ func hashComponentAsResource(cdxComponent schema.CDXComponent, root bool) (ri *R
 	return
 }
 
-func hashServices(services []schema.CDXService) (err error) {
+func hashServices(services []schema.CDXService, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
 	for _, cdxService := range services {
-		_, err = hashServiceAsResource(cdxService)
+		_, err = hashServiceAsResource(cdxService, whereFilters)
 		if err != nil {
 			return
 		}
@@ -396,7 +404,7 @@ func hashServices(services []schema.CDXService) (err error) {
 }
 
 // Hash a CDX Component and recursively those of any "nested" components
-func hashServiceAsResource(cdxService schema.CDXService) (ri *ResourceInfo, err error) {
+func hashServiceAsResource(cdxService schema.CDXService, whereFilters []WhereFilter) (ri *ResourceInfo, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 	var resourceInfo ResourceInfo
@@ -428,17 +436,25 @@ func hashServiceAsResource(cdxService schema.CDXService) (ri *ResourceInfo, err 
 	resourceInfo.SupplierProvider = cdxService.Provider
 	resourceInfo.Properties = cdxService.Properties
 
-	// TODO: AppendLicenseInfo(LICENSE_NONE, resourceInfo)
-	resourceMap.Put(resourceInfo.BomRef, resourceInfo)
+	var match bool = true
+	if len(whereFilters) > 0 {
+		mapResourceInfo, _ := utils.ConvertStructToMap(resourceInfo)
+		match, _ = whereFilterMatch(mapResourceInfo, whereFilters)
+	}
 
-	getLogger().Tracef("Put: %s (`%s`), `%s`)",
-		resourceInfo.Name,
-		resourceInfo.Version,
-		resourceInfo.BomRef)
+	if match {
+		// TODO: AppendLicenseInfo(LICENSE_NONE, resourceInfo)
+		resourceMap.Put(resourceInfo.BomRef, resourceInfo)
+
+		getLogger().Tracef("Put: %s (`%s`), `%s`)",
+			resourceInfo.Name,
+			resourceInfo.Version,
+			resourceInfo.BomRef)
+	}
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
 	if len(cdxService.Services) > 0 {
-		err = hashServices(cdxService.Services)
+		err = hashServices(cdxService.Services, whereFilters)
 		if err != nil {
 			return
 		}

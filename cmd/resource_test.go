@@ -155,13 +155,27 @@ func TestResourceListTextCdx13WhereClause(t *testing.T) {
 		t.Errorf("%s: input file: %s", errParse.Error(), utils.GlobalFlags.InputFile)
 	}
 
-	_, err := innerTestResourceList(t,
+	buffer, err := innerTestResourceList(t,
 		TEST_RESOURCE_LIST_CDX_1_3,
-		OUTPUT_TEXT, RESOURCE_TYPE_DEFAULT, whereFilters)
+		OUTPUT_TEXT,
+		RESOURCE_TYPE_DEFAULT,
+		whereFilters)
 
 	if err != nil {
 		getLogger().Error(err)
 		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
+	}
+
+	// Test buffer has ONLY correct results for test case
+	str := buffer.String()
+	lines := strings.Count(str, "\n")
+	getLogger().Debugf("output: \"%s\"", str)
+	if lines > 3 || !strings.Contains(str, "Library A") {
+		err = getLogger().Errorf("invalid output for where clause")
+		t.Errorf("%s: input file: `%s`, where filters: `%v`",
+			err.Error(),
+			TEST_RESOURCE_LIST_CDX_1_3,
+			whereFilters)
 	}
 }
 
