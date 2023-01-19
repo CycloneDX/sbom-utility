@@ -14,7 +14,7 @@ In the future, we envision additional kinds of SBOMs (e.g., Hardware, Machine Le
 
 #### Functional priorities
 
-The utility additionally prioritizes commands that help provide insight into contents of the SBOM (e.g., [license](#license), [resource](#resource) and [query](#query) commands) to search for missing (i.e., completeness) or specific data requirements (e.g., for a given organization or customer).  In general, the goal of these prioritized commands is to support data verification for many of the primary SBOM use cases as identified by the CycloneDX community (see https://cyclonedx.org/use-cases/).  Functional development has been prioritized to support those use cases that are designed toward inventory (resource identity), legal compliance (e.g., license), and security analysis (e.g., vulnerability) which are foundational to any SBOM.
+The utility additionally prioritizes commands that help provide insight into contents of the SBOM (e.g., [license](#license), [resource](#resource) and [query](#query) commands) to search for missing (i.e., completeness) or specific data requirements (e.g., for a given organization or customer).  In general, the goal of these prioritized commands is to support data verification for many of the primary SBOM use cases as identified by the CycloneDX community (see https://cyclonedx.org/use-cases/).  Functional development has focused on those use cases that verify inventory (resource identity), legal compliance (e.g., license), and security analysis (e.g., vulnerability) which are foundational to any SBOM.
 
 Initially, such functionality is reflected in the `license`, `resource` and `query` commands which to be able to extract or produce formatted reports from inherent knowledge of the CycloneDX format.
 
