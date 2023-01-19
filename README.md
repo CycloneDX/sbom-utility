@@ -22,7 +22,7 @@ The `license` command, for example, has many options and configurations to not o
 
 The `query` command functionality is geared towards an SBOM-format aware SQL-style query that could be used to generate customized reports/views into the SBOM data for any use case when other resource-specific commands are not provided or fall short.
 
-Further commands and reports are planned that prioritize use cases that enable greater insight and analysis of the legal, security and compliance data captured in the SBOM such as **copyright** and **vulnerability** (VEX) information.
+Further commands and reports are planned that prioritize use cases that enable greater insight and analysis of the legal, security and compliance data captured in the SBOM such as **vulnerability** (VEX) information and resource **signage** (identifying resource fingerprints).
 
 #### Design considerations
 
