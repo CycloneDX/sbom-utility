@@ -14,11 +14,11 @@ In the future, we envision additional kinds of SBOMs (e.g., Function-as-a-Servic
 
 The utility additionally supports commands that help provide insight into contents of the SBOM.  These commands have been developed to support verification for some of the primary SBOM use cases (see https://cyclonedx.org/use-cases/).  Functional development has been prioritized to support those use cases that are designed toward legal, security and compliance analysis which are foundational to any SBOM.
 
-Initially, such functionality is reflected in the `license` and `query` commands which to be able to extract or produce formatted reports from inherent knowledge of the CycloneDX format.
+Initially, such functionality is reflected in the `license`, `resource` and `query` commands which to be able to extract or produce formatted reports from inherent knowledge of the CycloneDX format.
 
 The `license` command, for example, has many options and configurations to not only produce raw JSON output of license data, but also produce summarized reports in many human-readable formats (e.g., text, csv, markdown). Furthermore, the license command is able to apply configurable "usage policies" for the licenses identified in the reports.
 
-The `query` command functionality is geared towards an SBOM-format aware SQL-style query that could be used to generate customized reports/views into the SBOM data for any use case.
+The `query` command functionality is geared towards an SBOM-format aware SQL-style query that could be used to generate customized reports/views into the SBOM data for any use case when other resource-specific commands are not provided or fall short.
 
 Further commands and reports are planned that prioritize use cases that enable greater insight and analysis of the legal, security and compliance data captured in the SBOM such as **copyright** and **vulnerability** (VEX) information.
 
@@ -34,7 +34,7 @@ The utility also is designed to produce output formats (e.g., JSON) and handle e
 
 - [Installation](#installation)
 - [Running](#running)
-  - [Commands](#commands) - validate, license, query, schema, etc.
+  - [Commands](#commands) - validate, license, resource, query, schema, etc.
   - [Exit codes](#exit-codes)
   - [Quiet mode](#quiet-mode)
 - [Contributing](#contributing)
@@ -76,6 +76,7 @@ Currently, the utility supports the following commands:
 - [validate](#validate)
 - [schema](#schema)
 - [license](#license)
+- [resource](#resource)
 - [query](#query)
 - [help](#help)
 
@@ -402,7 +403,74 @@ allow         Apache           Apache-2.0            Apache License 2.0    APPRO
 
 ---
 
-#### Query
+### Resource
+
+The `resource` command is geared toward inspecting various resources types and their information from SBOMs against future maturity models being developed as part of the [OWASP Software Component Verification Standard (SCVS)](https://owasp.org/www-project-software-component-verification-standard/).  In the SCVS model, a "resource" is  the parent classification for software (components), services, Machine Learning (ML) models, data, hardware, tools and more.
+
+Primarily, the command is used to generate lists of resources, by type, that are included in a CycloneDX SBOM by invoking `resource list`.
+
+As of now, the list can be filtered by resource `type` which include `component` or `service`.  In addition a `where` filter flags can be supplied to only include results where values meet supplied regex.  Supported keys for the `where` filter include `name`, `version`, `type` and `bom-ref` *(i.e., all names of columns in the actual report)*.
+
+#### Result sorting
+
+Currently, all `resource list` command results are sorted by resource `type` then by resource `name` (required field).
+
+##### Example: list all
+
+```bash
+sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --quiet
+```
+
+```bash
+type       name               version  bom-ref
+----       ----               -------  -------
+component  ACME Application   2.0.0    pkg:app/sample@1.0.0
+component  Library A          1.0.0    pkg:lib/libraryA@1.0.0
+component  Library B          1.0.0    pkg:lib/libraryB@1.0.0
+component  Library C          1.0.0    pkg:lib/libraryC@1.0.0
+component  Library D          1.0.0    pkg:lib/libraryD@1.0.0
+component  Library E          1.0.0    pkg:lib/libraryE@1.0.0
+component  Library F          1.0.0    pkg:lib/libraryF@1.0.0
+component  Library G          1.0.0    pkg:lib/libraryG@1.0.0
+component  Library H          1.0.0    pkg:lib/libraryH@1.0.0
+component  Library J          1.0.0    pkg:lib/libraryJ@1.0.0
+component  Library NoLicense  1.0.0    pkg:lib/libraryNoLicense@1.0.0
+service    Bar                         service:example.com/myservices/bar
+service    Foo                         service:example.com/myservices/foo
+```
+
+##### Example: list by type service
+
+This example uses the `type` flag to specific `service`.  The other valid type is `component`.  Future versions of CycloneDX schema will include more resource types such as "ml" (machine learning) or "tool".
+
+```bash
+sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --type service --quiet
+```
+
+```bash
+type     name    version  bom-ref
+----     ----    -------  -------
+service  Bar              service:example.com/myservices/bar
+service  Foo              service:example.com/myservices/foo
+```
+
+##### Example: list with name match
+
+This example uses the `where` filter on the `name` field. In this case we supply an exact "startswith" regex. for the `name` filter.
+
+```bash
+sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --where "name=Library A" --quiet
+```
+
+```
+type       name       version  bom-ref
+----       ----       -------  -------
+component  Library A  1.0.0    pkg:lib/libraryA@1.0.0
+```
+
+---
+
+### Query
 
 This command allows you to perform SQL-like queries into JSON format SBOMs.  Currently, the command recognizes the `--select` and `--from` as well as the `--where` filter.
 
@@ -414,7 +482,7 @@ If the result set is an array, the array entries can be reduced by applying the 
 
 **Note**: All `query` command results are returned as valid JSON documents.  This includes a `null` value for empty result sets.
 
-#### Example: Select a JSON object
+##### Example: Select a JSON object
 
 In this example, only the `--from` clause is needed to select an object.  The `--select` clause is omitted which is equivalent to using the "select all" wildcard character `*` which returns all fields and values from the object.
 
@@ -456,7 +524,7 @@ Sample output:
   ...
 ```
 
-#### Example: Select fields from JSON object
+##### Example: Select fields from JSON object
 
 In this example, the `--from` clause references the  singleton JSON object `component` found under the top-level `metadata` object. It then reduces the resultant JSON object to only return the `name` and `value` fields and their values as requested on the `--select` clause.
 
@@ -473,7 +541,7 @@ Sample output:
 }
 ```
 
-#### Example: Filter result entries with a specified value
+##### Example: Filter result entries with a specified value
 
 In this example, the `--where` filter will be applied to a set of `properties` results to only include entries that match the specified regex.
 
