@@ -6,13 +6,15 @@ This utility is designed to be an API platform used *primarily to validate Cyclo
 
 More importantly, the utility enables validation of SBOMs against derivative, "customized" schemas that can be used to enforce further data requirements not captured in the "base" schemas (e.g., industry or company-specific schemas).
 
-Specifically, the utility is able to parse standardized SBOM output (produced by your favorite tooling) and validate it using a known schema format (e.g., SPDX, CycloneDX) and version (e.g., "2.2", "1.4", etc.) as declared within the SBOM document itself (i.e., "inferred" or "implicit") or against "customized" JSON schemas you can specify on the command line (i.e., "explicit").  Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file.
+Specifically, the utility is able to parse standardized SBOMs (produced by your favorite tooling) and validate it using a published schema formats (e.g., SPDX, CycloneDX) and version (e.g., "2.2", "1.4", etc.) as declared within the SBOM document itself (i.e., "inferred" or "implicit"; use the [schema](#schema) command for supported schemas).
 
-In the future, we envision additional kinds of SBOMs (e.g., Function-as-a-Service (Serverless), Machine Learning (ML), etc.) with each again having different sets of data requirements and levels of maturity which will increase the need for domain-specific validation.
+In addition, the [validate](#validate) command can also use "customized" variants of the standard JSON schemas using the `--variant` command which can be added to the configuration file. The command also supports validation against "explicit" schemas that can be specified using the `--force` flag.  Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file.
+
+In the future, we envision additional kinds of SBOMs (e.g., Function-as-a-Service (Serverless), Machine Learning (ML), etc.) with each again having different sets of data requirements and levels of maturity which will increase the need for domain-specific validation.  Specifically, this utility intends to support the work of the [OWASP Software Component Verification Standard (SCVS)](https://owasp.org/www-project-software-component-verification-standard/) which is defining a BOM Maturity Model (BMM).
 
 #### Functional priorities
 
-The utility additionally supports commands that help provide insight into contents of the SBOM.  These commands have been developed to support verification for some of the primary SBOM use cases (see https://cyclonedx.org/use-cases/).  Functional development has been prioritized to support those use cases that are designed toward legal, security and compliance analysis which are foundational to any SBOM.
+The utility additionally supports commands that help provide insight into contents of the SBOM (e.g., [license](#license), [resource](#resource) and [query](#query) commands).  These commands have been developed to support verification of contents to address some of the primary SBOM use cases as identified by the CycloneDX community (see https://cyclonedx.org/use-cases/).  Functional development has been prioritized to support those use cases that are designed toward legal, security and compliance analysis which are foundational to any SBOM.
 
 Initially, such functionality is reflected in the `license`, `resource` and `query` commands which to be able to extract or produce formatted reports from inherent knowledge of the CycloneDX format.
 
@@ -34,7 +36,13 @@ The utility also is designed to produce output formats (e.g., JSON) and handle e
 
 - [Installation](#installation)
 - [Running](#running)
-  - [Commands](#commands) - validate, license, resource, query, schema, etc.
+  - [Commands](#commands)
+    - [license](#license)
+    - [query](#query)
+    - [resource](#resource)
+    - [schema](#schema)
+    - [validate](#validate)
+    - [help](#help)
   - [Exit codes](#exit-codes)
   - [Quiet mode](#quiet-mode)
 - [Contributing](#contributing)
@@ -73,11 +81,11 @@ Currently, you must build an executable for your local system. See the [Prerequi
 
 Currently, the utility supports the following commands:
 
-- [validate](#validate)
-- [schema](#schema)
 - [license](#license)
-- [resource](#resource)
 - [query](#query)
+- [resource](#resource)
+- [schema](#schema)
+- [validate](#validate)
 - [help](#help)
 
 #### Exit codes
@@ -100,110 +108,6 @@ which return one of the following exit code values:
 #### Quiet mode
 
 By default, the utility outputs informational and processing text as well as any results of the command to `stdout`.  If you wish to only see the command results (JSON) or report (tables) you can run any command in "quiet mode" by simply supplying the `-q` or `--quiet` flag.
-
----
-
-### Schema
-
-You can verify which formats and schemas are available for validation by using the `schema` command:
-
-```bash
-./sbom-utility schema
-```
-
-Sample output:
-
-```bash
-Format     Version   Variant   File                                             Source
-------     -------   -------   ----                                             ------
-SPDX       SPDX-2.2  (2.2.1)        schema/spdx/2.2.1/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json
-SPDX       SPDX-2.2  (latest)       schema/spdx/2.2.2/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.2/schemas/spdx-schema.json
-SPDX       SPDX-2.3  (latest)       schema/spdx/2.3/spdx-schema.json                 https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3/schemas/spdx-schema.json
-SPDX       SPDX-2.3  (development)  schema/spdx/2.3.1/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3.1/schemas/spdx-schema.json
-CycloneDX  1.2       (latest)       schema/cyclonedx/1.2/bom-1.2.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2.schema.json
-CycloneDX  1.2       (strict)       schema/cyclonedx/1.2/bom-1.2-strict.schema.json  https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2-strict.schema.json
-CycloneDX  1.3       (latest)       schema/cyclonedx/1.3/bom-1.3.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3.schema.json
-CycloneDX  1.3       (strict)       schema/cyclonedx/1.3/bom-1.3-strict.schema.json  https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3-strict.schema.json
-CycloneDX  1.4       (latest)       schema/cyclonedx/1.4/bom-1.4.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json
-CycloneDX  1.5       (development)  schema/cyclonedx/1.5/bom-1.5-dev.schema.json     https://raw.githubusercontent.com/CycloneDX/specification/v1.5-dev/schema/bom-1.5.schema.json
-```
-
-#### Adding schemas
-
-Entries for new or "custom" schemas can be added to the `config.json` file simply by adding a new entry schema entry within the pre-defined format definitions.
-
-These new entries will tell the schema loader where to find the new schema locally, relative to the utility's executable.
-
-#### Embedding schemas
-
-If you wish to have the new schema *embedded in the executable*, simply add it to the project's `resources` subdirectory following the format and version-based directory structure.
-
-For details see "[Supporting new SBOM formats and schema versions](#supporting-new-sbom-formats-and-schema-versions)" section.
-
----
-
-### Validate
-
-Validating the "juice shop" SBOM (CycloneDX 1.2) example provided in this repository using a "built" (i.e., `make build`) binary:
-
-```bash
-./sbom-utility validate -i examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json
-```
-
-Sample output:
-
-```bash
-[INFO] Loading license policy config file: `license.json`...
-[INFO] Attempting to load and unmarshal file `examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json`...
-[INFO] Successfully unmarshalled data from: `examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json`
-[INFO] Determining file's SBOM format and version...
-[INFO] Determined SBOM format, version (variant): `CycloneDX`, `1.2` (latest)
-[INFO] Matching SBOM schema (for validation): schema/cyclonedx/1.2/bom-1.2.schema.json
-[INFO] Loading schema `schema/cyclonedx/1.2/bom-1.2.schema.json`...
-[INFO] Schema `schema/cyclonedx/1.2/bom-1.2.schema.json` loaded.
-[INFO] Validating `examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json`...
-[INFO] SBOM valid against JSON schema: `true`
-```
-
-You can also verify the [exit code](#exit-codes) from the validate command:
-
-```bash
-$ echo $?
-0  // no error (valid)
-```
-
-#### Validating using "custom" schema variants
-
-The validation command will use the declared format and version found within the SBOM JSON file itself to lookup the default (latest) matching schema version (as declared in`config.json`; however, if variants of that same schema (same format and version) are declared, they can be requested via the `--variant` command line flag:
-
-```bash
-./sbom-utility validate -i test/cyclonedx/cdx-1-4-mature-example-1.json --variant custom-dev
-```
-
-If you run the sample command above, you would see several "custom" schema errors resulting in an invalid SBOM determination:
-
-```text
-[INFO] : Unmarshalling file `test/cyclonedx/cdx-1-4-mature-example-1.json`...
-[INFO] : Successfully Opened: `test/cyclonedx/cdx-1-4-mature-example-1.json`
-[INFO] : Determining file's sbom format and version...
-[INFO] : Loading schema `schema/cyclonedx/1.4/bom-1.4-ibm-development.schema.json`...
-[INFO] : Schema `schema/cyclonedx/1.4/bom-1.4-ibm-development.schema.json` loaded.
-[INFO] : Validating `test/cyclonedx/cdx-1-4-mature-example-1.json`...
-[INFO] : Valid: `false`
-[ERROR] validate.go(133) cmd.processValidationResults(): invalid SBOM: schema errors found (test/cyclonedx/cdx-1-4-mature-example-1.json):
-(11) Schema errors detected (use `--debug` for more details):
-	1. Type: [contains], Field: [metadata.properties], Description: [At least one of the items must match]
-	Failing object: [[
-	  {
-	    "name": "urn:example.com:classification",
-	    "value": " ... (truncated)
-	2. Type: [pattern], Field: [metadata.properties.0.name], Description: [Does not match pattern '^urn:ibm:legal:disclaimer$']
-	Failing object: ["urn:example.com:classification"]
-	3. Type: [const], Field: [metadata.properties.0.value], Description: [metadata.properties.0.value does not match: ... (truncated)]
-  ...
-```
-
-For example, the first schema error indicates a missing (required) property object where the second error specifies that the property should have a `name` field with value `"urn:example.com:classification"` which should have been paired with a predetermined `value`. In this case the `value` should have been a constant (that did not validate against schema regex).
 
 ---
 
@@ -254,7 +158,7 @@ For example, output a license summary for an SBOM to a file named `output.txt`:
 This subcommand will emit a list of all licenses found in and SBOM (defaults to `json` format):
 
 ```bash
-./sbom-utility license list -i examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json
+././sbom-utility license list -i examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json
 ```
 
  The output will be an array of CycloneDX `LicenseChoice` data structures.  For example, you would see licenses identified using SPDX IDs, license expressions (of SPDX IDs) or ones with "names" of licenses that do not necessarily map to a canonical SPDX ID along with the actual base64-encoded license or legal text.
@@ -403,73 +307,6 @@ allow         Apache           Apache-2.0            Apache License 2.0    APPRO
 
 ---
 
-### Resource
-
-The `resource` command is geared toward inspecting various resources types and their information from SBOMs against future maturity models being developed as part of the [OWASP Software Component Verification Standard (SCVS)](https://owasp.org/www-project-software-component-verification-standard/).  In the SCVS model, a "resource" is  the parent classification for software (components), services, Machine Learning (ML) models, data, hardware, tools and more.
-
-Primarily, the command is used to generate lists of resources, by type, that are included in a CycloneDX SBOM by invoking `resource list`.
-
-As of now, the list can be filtered by resource `type` which include `component` or `service`.  In addition a `where` filter flags can be supplied to only include results where values meet supplied regex.  Supported keys for the `where` filter include `name`, `version`, `type` and `bom-ref` *(i.e., all names of columns in the actual report)*.
-
-#### Result sorting
-
-Currently, all `resource list` command results are sorted by resource `type` then by resource `name` (required field).
-
-##### Example: list all
-
-```bash
-sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --quiet
-```
-
-```bash
-type       name               version  bom-ref
-----       ----               -------  -------
-component  ACME Application   2.0.0    pkg:app/sample@1.0.0
-component  Library A          1.0.0    pkg:lib/libraryA@1.0.0
-component  Library B          1.0.0    pkg:lib/libraryB@1.0.0
-component  Library C          1.0.0    pkg:lib/libraryC@1.0.0
-component  Library D          1.0.0    pkg:lib/libraryD@1.0.0
-component  Library E          1.0.0    pkg:lib/libraryE@1.0.0
-component  Library F          1.0.0    pkg:lib/libraryF@1.0.0
-component  Library G          1.0.0    pkg:lib/libraryG@1.0.0
-component  Library H          1.0.0    pkg:lib/libraryH@1.0.0
-component  Library J          1.0.0    pkg:lib/libraryJ@1.0.0
-component  Library NoLicense  1.0.0    pkg:lib/libraryNoLicense@1.0.0
-service    Bar                         service:example.com/myservices/bar
-service    Foo                         service:example.com/myservices/foo
-```
-
-##### Example: list by type service
-
-This example uses the `type` flag to specific `service`.  The other valid type is `component`.  Future versions of CycloneDX schema will include more resource types such as "ml" (machine learning) or "tool".
-
-```bash
-sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --type service --quiet
-```
-
-```bash
-type     name    version  bom-ref
-----     ----    -------  -------
-service  Bar              service:example.com/myservices/bar
-service  Foo              service:example.com/myservices/foo
-```
-
-##### Example: list with name match
-
-This example uses the `where` filter on the `name` field. In this case we supply an exact "startswith" regex. for the `name` filter.
-
-```bash
-sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --where "name=Library A" --quiet
-```
-
-```
-type       name       version  bom-ref
-----       ----       -------  -------
-component  Library A  1.0.0    pkg:lib/libraryA@1.0.0
-```
-
----
-
 ### Query
 
 This command allows you to perform SQL-like queries into JSON format SBOMs.  Currently, the command recognizes the `--select` and `--from` as well as the `--where` filter.
@@ -482,6 +319,8 @@ If the result set is an array, the array entries can be reduced by applying the 
 
 **Note**: All `query` command results are returned as valid JSON documents.  This includes a `null` value for empty result sets.
 
+#### Query Examples
+
 ##### Example: Select a JSON object
 
 In this example, only the `--from` clause is needed to select an object.  The `--select` clause is omitted which is equivalent to using the "select all" wildcard character `*` which returns all fields and values from the object.
@@ -489,9 +328,10 @@ In this example, only the `--from` clause is needed to select an object.  The `-
 ```bash
 ./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from metadata.component
 ```
-is equivalent to
 
-```
+is equivalent to:
+
+```bash
 ./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --select * --from metadata.component
 ```
 
@@ -529,7 +369,7 @@ Sample output:
 In this example, the `--from` clause references the  singleton JSON object `component` found under the top-level `metadata` object. It then reduces the resultant JSON object to only return the `name` and `value` fields and their values as requested on the `--select` clause.
 
 ```bash
-$ ./sbom-utility query --select name,version --from metadata.component -i examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json
+./sbom-utility query --select name,version --from metadata.component -i examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json
 ```
 
 Sample output:
@@ -546,7 +386,7 @@ Sample output:
 In this example, the `--where` filter will be applied to a set of `properties` results to only include entries that match the specified regex.
 
 ```bash
-$ ./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from metadata.properties --where name=urn:example.com:classification
+./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from metadata.properties --where name=urn:example.com:classification
 ```
 
 Sample output:
@@ -563,7 +403,7 @@ Sample output:
 additionally, you can apply a `--select` clause to simply obtain the matching entry's `value`:
 
 ```bash
-$ ./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --select value --from metadata.properties --where name=urn:example.com:classification
+./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --select value --from metadata.properties --where name=urn:example.com:classification
 ```
 
 ```json
@@ -576,6 +416,190 @@ $ ./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --select 
 
 ---
 
+### Resource
+
+The `resource` command is geared toward inspecting various resources types and their information from SBOMs against future maturity models being developed as part of the [OWASP Software Component Verification Standard (SCVS)](https://owasp.org/www-project-software-component-verification-standard/).  In the SCVS model, a "resource" is  the parent classification for software (components), services, Machine Learning (ML) models, data, hardware, tools and more.
+
+Primarily, the command is used to generate lists of resources, by type, that are included in a CycloneDX SBOM by invoking `resource list`.
+
+As of now, the list can be filtered by resource `type` which include `component` or `service`.  In addition a `where` filter flags can be supplied to only include results where values meet supplied regex.  Supported keys for the `where` filter include `name`, `version`, `type` and `bom-ref` *(i.e., all names of columns in the actual report)*.
+
+#### Result sorting
+
+Currently, all `resource list` command results are sorted by resource `type` then by resource `name` (required field).
+
+#### Resource Examples
+
+##### Example: list all
+
+```bash
+./sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --quiet
+```
+
+```bash
+type       name               version  bom-ref
+----       ----               -------  -------
+component  ACME Application   2.0.0    pkg:app/sample@1.0.0
+component  Library A          1.0.0    pkg:lib/libraryA@1.0.0
+component  Library B          1.0.0    pkg:lib/libraryB@1.0.0
+component  Library C          1.0.0    pkg:lib/libraryC@1.0.0
+component  Library D          1.0.0    pkg:lib/libraryD@1.0.0
+component  Library E          1.0.0    pkg:lib/libraryE@1.0.0
+component  Library F          1.0.0    pkg:lib/libraryF@1.0.0
+component  Library G          1.0.0    pkg:lib/libraryG@1.0.0
+component  Library H          1.0.0    pkg:lib/libraryH@1.0.0
+component  Library J          1.0.0    pkg:lib/libraryJ@1.0.0
+component  Library NoLicense  1.0.0    pkg:lib/libraryNoLicense@1.0.0
+service    Bar                         service:example.com/myservices/bar
+service    Foo                         service:example.com/myservices/foo
+```
+
+##### Example: list by type service
+
+This example uses the `type` flag to specific `service`.  The other valid type is `component`.  Future versions of CycloneDX schema will include more resource types such as "ml" (machine learning) or "tool".
+
+```bash
+./sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --type service --quiet
+```
+
+```bash
+type     name    version  bom-ref
+----     ----    -------  -------
+service  Bar              service:example.com/myservices/bar
+service  Foo              service:example.com/myservices/foo
+```
+
+##### Example: list with name match
+
+This example uses the `where` filter on the `name` field. In this case we supply an exact "startswith" regex. for the `name` filter.
+
+```bash
+./sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --where "name=Library A" --quiet
+```
+
+```
+type       name       version  bom-ref
+----       ----       -------  -------
+component  Library A  1.0.0    pkg:lib/libraryA@1.0.0
+```
+
+---
+
+### Schema
+
+You can verify which formats and schemas are available for validation by using the `schema` command:
+
+```bash
+./sbom-utility schema
+```
+
+Sample output:
+
+```bash
+Format     Version   Variant   File                                             Source
+------     -------   -------   ----                                             ------
+SPDX       SPDX-2.2  (2.2.1)        schema/spdx/2.2.1/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json
+SPDX       SPDX-2.2  (latest)       schema/spdx/2.2.2/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.2/schemas/spdx-schema.json
+SPDX       SPDX-2.3  (latest)       schema/spdx/2.3/spdx-schema.json                 https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3/schemas/spdx-schema.json
+SPDX       SPDX-2.3  (development)  schema/spdx/2.3.1/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3.1/schemas/spdx-schema.json
+CycloneDX  1.2       (latest)       schema/cyclonedx/1.2/bom-1.2.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2.schema.json
+CycloneDX  1.2       (strict)       schema/cyclonedx/1.2/bom-1.2-strict.schema.json  https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2-strict.schema.json
+CycloneDX  1.3       (latest)       schema/cyclonedx/1.3/bom-1.3.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3.schema.json
+CycloneDX  1.3       (strict)       schema/cyclonedx/1.3/bom-1.3-strict.schema.json  https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3-strict.schema.json
+CycloneDX  1.4       (latest)       schema/cyclonedx/1.4/bom-1.4.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json
+CycloneDX  1.5       (development)  schema/cyclonedx/1.5/bom-1.5-dev.schema.json     https://raw.githubusercontent.com/CycloneDX/specification/v1.5-dev/schema/bom-1.5.schema.json
+```
+
+#### Adding schemas
+
+Entries for new or "custom" schemas can be added to the `config.json` file simply by adding a new entry schema entry within the pre-defined format definitions.
+
+These new entries will tell the schema loader where to find the new schema locally, relative to the utility's executable.
+
+#### Embedding schemas
+
+If you wish to have the new schema *embedded in the executable*, simply add it to the project's `resources` subdirectory following the format and version-based directory structure.
+
+For details see "[Supporting new SBOM formats and schema versions](#supporting-new-sbom-formats-and-schema-versions)" section.
+
+---
+
+### Validate
+
+This command will parse standardized SBOMs and validate it against its declared format and version (e.g., SPDX 2.2, CycloneDX 1.4). Custom  variants of standard JSON schemas can be used for validation by supplying the `--variant` name as a flag. Explicit JSON schemas can be specified using the `--force` flag.
+
+**Notes**
+
+- Use the [schema](#schema) command to list supported schemas formats, versions and variants.
+- Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file.
+
+#### Validation Examples
+
+##### Example: Using inferred format and schema
+
+Validating the "juice shop" SBOM (CycloneDX 1.2) example provided in this repository.
+
+```bash
+./sbom-utility validate -i examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json
+```
+
+Sample output:
+
+```bash
+[INFO] Loading license policy config file: `license.json`...
+[INFO] Attempting to load and unmarshal file `examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json`...
+[INFO] Successfully unmarshalled data from: `examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json`
+[INFO] Determining file's SBOM format and version...
+[INFO] Determined SBOM format, version (variant): `CycloneDX`, `1.2` (latest)
+[INFO] Matching SBOM schema (for validation): schema/cyclonedx/1.2/bom-1.2.schema.json
+[INFO] Loading schema `schema/cyclonedx/1.2/bom-1.2.schema.json`...
+[INFO] Schema `schema/cyclonedx/1.2/bom-1.2.schema.json` loaded.
+[INFO] Validating `examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json`...
+[INFO] SBOM valid against JSON schema: `true`
+```
+
+You can also verify the [exit code](#exit-codes) from the validate command:
+
+```bash
+$ echo $?
+0  // no error (valid)
+```
+
+#### Example: Using "custom" schema variants
+
+The validation command will use the declared format and version found within the SBOM JSON file itself to lookup the default (latest) matching schema version (as declared in`config.json`; however, if variants of that same schema (same format and version) are declared, they can be requested via the `--variant` command line flag:
+
+```bash
+./sbom-utility validate -i test/cyclonedx/cdx-1-4-mature-example-1.json --variant custom-dev
+```
+
+If you run the sample command above, you would see several "custom" schema errors resulting in an invalid SBOM determination:
+
+```text
+[INFO] : Unmarshalling file `test/cyclonedx/cdx-1-4-mature-example-1.json`...
+[INFO] : Successfully Opened: `test/cyclonedx/cdx-1-4-mature-example-1.json`
+[INFO] : Determining file's sbom format and version...
+[INFO] : Loading schema `schema/cyclonedx/1.4/bom-1.4-ibm-development.schema.json`...
+[INFO] : Schema `schema/cyclonedx/1.4/bom-1.4-ibm-development.schema.json` loaded.
+[INFO] : Validating `test/cyclonedx/cdx-1-4-mature-example-1.json`...
+[INFO] : Valid: `false`
+[ERROR] validate.go(133) cmd.processValidationResults(): invalid SBOM: schema errors found (test/cyclonedx/cdx-1-4-mature-example-1.json):
+(11) Schema errors detected (use `--debug` for more details):
+	1. Type: [contains], Field: [metadata.properties], Description: [At least one of the items must match]
+	Failing object: [[
+	  {
+	    "name": "urn:example.com:classification",
+	    "value": " ... (truncated)
+	2. Type: [pattern], Field: [metadata.properties.0.name], Description: [Does not match pattern '^urn:ibm:legal:disclaimer$']
+	Failing object: ["urn:example.com:classification"]
+	3. Type: [const], Field: [metadata.properties.0.value], Description: [metadata.properties.0.value does not match: ... (truncated)]
+  ...
+```
+
+For example, the first schema error indicates a missing (required) property object where the second error specifies that the property should have a `name` field with value `"urn:example.com:classification"` which should have been paired with a predetermined `value`. In this case the `value` should have been a constant (that did not validate against schema regex).
+
+---
+
 ### Help
 
 The utility supports the `help` command for the root command as well as any supported commands
@@ -583,13 +607,13 @@ The utility supports the `help` command for the root command as well as any supp
 For example, to list top-level (root command) help which lists the supported "Available Commands":
 
 ```bash
-$ ./sbom-utility help
+./sbom-utility help
 ```
 
 A specific command-level help listing is also available. For example, you can access the help for the `validate` command:
 
 ```bash
-$ ./sbom-utility help validate
+./sbom-utility help validate
 ```
 
 ---
@@ -615,6 +639,8 @@ An ad-hoc list of featured "TODOs" geared at making the tool more accessible, ex
 - **--orderby** Support ordering of query result sets by comparison of values from a specified field key.
 - **license.json** Document license policy configuration JSON schema structure and how to add entries relative to a CycloneDX `LicenseChoice` object for entries with SPDX IDs and those without.
 - **license.json** Add more widely-recognized licenses (both from SPDX identifier lists as well as those not recognized by the SPDX community).
+
+---
 
 ### Development
 
