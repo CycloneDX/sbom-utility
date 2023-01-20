@@ -154,7 +154,6 @@ func retrieveWhereFilters(whereValues string) (whereFilters []WhereFilter, err e
 func retrieveResourceType(cmd *cobra.Command) (resourceType string, err error) {
 
 	resourceType, err = cmd.Flags().GetString(FLAG_RESOURCE_TYPE)
-
 	if err != nil {
 		return
 	}
@@ -290,12 +289,10 @@ func loadDocumentResources(document *schema.Sbom, resourceType string, whereFilt
 
 	// Add top-level SBOM component
 	if resourceType == RESOURCE_TYPE_DEFAULT || resourceType == RESOURCE_TYPE_COMPONENT {
-		var resourceInfo *ResourceInfo
-		resourceInfo, err = hashComponentAsResource(*document.GetCdxMetadataComponent(), whereFilters, true)
+		_, err = hashComponentAsResource(*document.GetCdxMetadataComponent(), whereFilters, true)
 		if err != nil {
 			return
 		}
-		resourceInfo.isRoot = true
 
 		// Hash all components found in the (root).components[] (+ "nested" components)
 		if components := document.GetCdxComponents(); len(components) > 0 {

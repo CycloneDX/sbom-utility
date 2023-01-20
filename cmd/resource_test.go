@@ -36,6 +36,11 @@ const (
 	TEST_RESOURCE_LIST_CDX_1_4_SAAS_1     = "examples/cyclonedx/SaaSBOM/apigateway-microservices-datastores/bom.json"
 )
 
+// default ResourceTestInfo struct values
+const (
+	RTI_DEFAULT_LINE_COUNT = -1
+)
+
 type ResourceTestInfo struct {
 	InputFile       string
 	Format          string
@@ -58,9 +63,6 @@ func NewResourceTestInfo(inputFile string, format string, resourceType string,
 	rti.InputFile = inputFile
 	rti.Format = format
 	rti.ResourceType = resourceType
-	if !sliceContains(VALID_RESOURCE_TYPES, resourceType) {
-		rti.ResourceType = RESOURCE_TYPE_DEFAULT
-	}
 	rti.WhereClause = whereClause
 	rti.ResultContains = resultContains
 	rti.ResultLineCount = resultLines
@@ -69,7 +71,7 @@ func NewResourceTestInfo(inputFile string, format string, resourceType string,
 }
 
 func NewResourceTestInfoBasic(inputFile string, format string, resourceType string, expectedError error) *ResourceTestInfo {
-	return NewResourceTestInfo(inputFile, format, resourceType, "", "", -1, expectedError)
+	return NewResourceTestInfo(inputFile, format, resourceType, "", "", RTI_DEFAULT_LINE_COUNT, expectedError)
 }
 
 // -------------------------------------------
@@ -90,6 +92,7 @@ func innerTestResourceList(t *testing.T, testInfo *ResourceTestInfo) (outputBuff
 		if err != nil {
 			getLogger().Error(err)
 			t.Errorf("test failed: %s: detail: %s ", basicTestInfo, err.Error())
+			return
 		}
 	}
 
@@ -97,13 +100,17 @@ func innerTestResourceList(t *testing.T, testInfo *ResourceTestInfo) (outputBuff
 	utils.GlobalFlags.InputFile = testInfo.InputFile
 	err = ListResources(outputWriter, testInfo.Format, testInfo.ResourceType, whereFilters)
 
+	// Expected an error; does it match
 	if testInfo.ExpectedError != nil {
+		// NOTE: err = nil will also fail if error was expected
 		if !ErrorTypesMatch(err, testInfo.ExpectedError) {
 			t.Errorf("expected error: %T, actual error: %T", &fs.PathError{}, err)
 		}
+		// Always return the expected error
 		return
 	}
 
+	// Unexpected error
 	if err != nil {
 		t.Errorf("test failed: %s: detail: %s ", testInfo, err.Error())
 	}
@@ -130,7 +137,8 @@ func innerTestResourceListResults(t *testing.T, testInfo *ResourceTestInfo) (out
 			return
 		}
 
-		if outputLineCount != testInfo.ResultLineCount {
+		if testInfo.ResultLineCount >= RTI_DEFAULT_LINE_COUNT &&
+			outputLineCount != testInfo.ResultLineCount {
 			err = getLogger().Errorf("output did not contain expected line count: %v/%v (expected/actual)", testInfo.ResultLineCount, outputLineCount)
 			t.Errorf("%s: input file: `%s`, where clause: `%s`",
 				err.Error(),
@@ -161,7 +169,7 @@ func TestResourceListInvalidInputFileLoad(t *testing.T) {
 // -------------------------------------------
 // Test format unsupported (SPDX)
 // -------------------------------------------
-func TestResourceListFormatUnsupportedSPDX1(t *testing.T) {
+func TestResourceListFormatUnsupportedSPDXMinReq(t *testing.T) {
 	rti := NewResourceTestInfoBasic(
 		TEST_SPDX_2_2_MIN_REQUIRED,
 		OUTPUT_DEFAULT,
@@ -172,7 +180,7 @@ func TestResourceListFormatUnsupportedSPDX1(t *testing.T) {
 	innerTestResourceList(t, rti)
 }
 
-func TestResourceListFormatUnsupportedSPDX2(t *testing.T) {
+func TestResourceListFormatUnsupportedSPDX22(t *testing.T) {
 	rti := NewResourceTestInfoBasic(
 		TEST_SPDX_2_2_EXAMPLE_1,
 		OUTPUT_DEFAULT,
@@ -187,7 +195,7 @@ func TestResourceListFormatUnsupportedSPDX2(t *testing.T) {
 // CDX variants - Test for list (data) errors
 // -------------------------------------------
 
-func TestResourceListTextCdx14NoneFound(t *testing.T) {
+func TestResourceListTextCdx14NoServicesFound(t *testing.T) {
 	rti := NewResourceTestInfoBasic(
 		TEST_RESOURCE_LIST_CDX_1_3_NONE_FOUND,
 		OUTPUT_TEXT,
@@ -217,7 +225,7 @@ func TestResourceListTextCdx13(t *testing.T) {
 func TestResourceListTextCdx14SaaS(t *testing.T) {
 
 	rti := NewResourceTestInfoBasic(
-		TEST_RESOURCE_LIST_CDX_1_3,
+		TEST_RESOURCE_LIST_CDX_1_4_SAAS_1,
 		OUTPUT_TEXT,
 		RESOURCE_TYPE_COMPONENT,
 		nil)

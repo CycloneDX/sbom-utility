@@ -289,11 +289,11 @@ func createOutputFile(outputFilename string) (outputFile *os.File, writer io.Wri
 	return
 }
 
-func sliceContains(slice []string, value string) bool {
-	for _, candidate := range slice {
-		if value == candidate {
-			return true
-		}
-	}
-	return false
-}
+// func sliceContains(slice []string, value string) bool {
+// 	for _, candidate := range slice {
+// 		if value == candidate {
+// 			return true
+// 		}
+// 	}
+// 	return false
+// }

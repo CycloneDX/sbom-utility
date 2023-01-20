@@ -151,8 +151,8 @@ func findDocumentLicenses(document *schema.Sbom) (err error) {
 	// At this time, fail SPDX format SBOMs as "unsupported" (for "any" format)
 	if !document.FormatInfo.IsCycloneDx() {
 		err = schema.NewUnsupportedFormatForCommandError(
-			document.FormatInfo.CanonicalName,
 			document.GetFilename(),
+			document.FormatInfo.CanonicalName,
 			CMD_LICENSE, "<any>")
 		return
 	}

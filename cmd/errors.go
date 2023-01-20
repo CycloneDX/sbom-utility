@@ -300,6 +300,7 @@ func (err SBOMCompositionError) Error() string {
 // Error type checks (for convenience)
 // ------------------------------------------------
 
+// NOTE: err = nil will also fail if error was expected
 func ErrorTypesMatch(err error, expected error) bool {
 	return reflect.TypeOf(err) == reflect.TypeOf(expected)
 }
