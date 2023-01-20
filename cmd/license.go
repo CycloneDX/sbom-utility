@@ -153,7 +153,7 @@ func findDocumentLicenses(document *schema.Sbom) (err error) {
 		err = schema.NewUnsupportedFormatForCommandError(
 			document.GetFilename(),
 			document.FormatInfo.CanonicalName,
-			CMD_LICENSE, "<any>")
+			CMD_LICENSE, FORMAT_ANY)
 		return
 	}
 

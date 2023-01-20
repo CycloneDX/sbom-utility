@@ -274,7 +274,7 @@ func loadDocumentResources(document *schema.Sbom, resourceType string, whereFilt
 		err = schema.NewUnsupportedFormatForCommandError(
 			document.FormatInfo.CanonicalName,
 			document.GetFilename(),
-			CMD_LICENSE, "<any>")
+			CMD_LICENSE, FORMAT_ANY)
 		return
 	}
 

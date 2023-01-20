@@ -101,6 +101,7 @@ const (
 	FORMAT_JSON     = "json"
 	FORMAT_CSV      = "csv"
 	FORMAT_MARKDOWN = "md"
+	FORMAT_ANY      = "<any>" // Used for test errors
 )
 
 var rootCmd = &cobra.Command{

@@ -349,7 +349,7 @@ func query(request *QueryRequest, response *QueryResponse) (resultJson interface
 		err = schema.NewUnsupportedFormatForCommandError(
 			document.GetFilename(),
 			document.FormatInfo.CanonicalName,
-			CMD_QUERY, "<any>")
+			CMD_QUERY, FORMAT_ANY)
 		return
 	}
 
