@@ -1,5 +1,9 @@
-sbom-utility
-© Copyright IBM Corporation 2022, 2023.
+OWASP CycloneDX/sbom-utility
+@ Copyright 2023-present OWASP Foundation
 
-This repository includes software developed by
-Matt Rutkowski, working for IBM
+This product includes software developed at
+The OWASP Foundation's CycloneDX project (https://owasp.org/www-project-cyclonedx/).
+
+The Initial Developer of the sbom-utility
+was Matt Rutkowski (mrutkows@us.ibm.com), working for IBM Corporation (http://www.ibm.com/)
+© Copyright IBM Corporation 2022, 2023.
