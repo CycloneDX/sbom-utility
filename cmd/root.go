@@ -96,11 +96,11 @@ const (
 
 // Supported output formats
 const (
-	OUTPUT_DEFAULT  = ""
-	OUTPUT_TEXT     = "txt"
-	OUTPUT_JSON     = "json"
-	OUTPUT_CSV      = "csv"
-	OUTPUT_MARKDOWN = "md"
+	FORMAT_DEFAULT  = ""
+	FORMAT_TEXT     = "txt"
+	FORMAT_JSON     = "json"
+	FORMAT_CSV      = "csv"
+	FORMAT_MARKDOWN = "md"
 )
 
 var rootCmd = &cobra.Command{

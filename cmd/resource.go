@@ -55,7 +55,7 @@ const (
 )
 
 var RESOURCE_LIST_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
-	strings.Join([]string{OUTPUT_TEXT, OUTPUT_CSV, OUTPUT_MARKDOWN}, ", ")
+	strings.Join([]string{FORMAT_TEXT, FORMAT_CSV, FORMAT_MARKDOWN}, ", ")
 
 // resource types
 const (
@@ -101,7 +101,7 @@ func NewCommandResource() *cobra.Command {
 	command.Use = CMD_USAGE_RESOURCE_LIST
 	command.Short = "Report on resources found in SBOM input file"
 	command.Long = "Report on resources found in SBOM input file"
-	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", OUTPUT_TEXT,
+	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
 		FLAG_RESOURCE_OUTPUT_FORMAT_HELP+RESOURCE_LIST_SUPPORTED_FORMATS)
 	command.Flags().StringP(FLAG_RESOURCE_TYPE, "", RESOURCE_TYPE_DEFAULT, FLAG_RESOURCE_TYPE_HELP)
 	command.Flags().StringP(FLAG_RESOURCE_WHERE, "", "", FLAG_RESOURCE_WHERE_HELP)
@@ -249,16 +249,16 @@ func ListResources(output io.Writer, format string, resourceType string, whereFi
 
 	getLogger().Infof("Outputting listing (`%s` format)...", format)
 	switch format {
-	case OUTPUT_TEXT:
+	case FORMAT_TEXT:
 		DisplayResourceListText(output)
-	case OUTPUT_CSV:
+	case FORMAT_CSV:
 		DisplayResourceListCSV(output)
-	case OUTPUT_MARKDOWN:
+	case FORMAT_MARKDOWN:
 		DisplayResourceListMarkdown(output)
 	default:
 		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
-			format, OUTPUT_JSON)
+			format, FORMAT_JSON)
 		DisplayResourceListText(output)
 	}
 

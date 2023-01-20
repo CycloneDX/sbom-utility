@@ -78,7 +78,7 @@ func listOutputContainsLicense(buffer bytes.Buffer, policy string, licenseType s
 func TestLicenseListInvalidInputFileLoad(t *testing.T) {
 	_, err := innerTestLicenseList(t,
 		TEST_INPUT_FILE_NON_EXISTENT,
-		OUTPUT_DEFAULT,
+		FORMAT_DEFAULT,
 		false)
 
 	// Assure we return path error
@@ -140,7 +140,7 @@ func TestLicenseListFormatUnsupportedSPDX1(t *testing.T) {
 
 	_, err := innerTestLicenseList(t,
 		TEST_SPDX_2_2_MIN_REQUIRED,
-		OUTPUT_DEFAULT,
+		FORMAT_DEFAULT,
 		false)
 
 	if !ErrorTypesMatch(err, &schema.UnsupportedFormatError{}) {
@@ -153,7 +153,7 @@ func TestLicenseListFormatUnsupportedSPDX2(t *testing.T) {
 
 	_, err := innerTestLicenseList(t,
 		TEST_SPDX_2_2_EXAMPLE_1,
-		OUTPUT_DEFAULT,
+		FORMAT_DEFAULT,
 		false)
 
 	if !ErrorTypesMatch(err, &schema.UnsupportedFormatError{}) {
@@ -168,7 +168,7 @@ func TestLicenseListFormatUnsupportedSPDX2(t *testing.T) {
 func TestLicenseListJSONCdx13(t *testing.T) {
 	outputBuffer, err := innerTestLicenseList(t,
 		TEST_LICENSE_LIST_CDX_1_3,
-		OUTPUT_JSON,
+		FORMAT_JSON,
 		false)
 
 	if err != nil {
@@ -188,7 +188,7 @@ func TestLicenseListJSONCdx13(t *testing.T) {
 func TestLicenseListSummaryTextCdx13(t *testing.T) {
 	_, err := innerTestLicenseList(t,
 		TEST_LICENSE_LIST_CDX_1_3,
-		OUTPUT_TEXT,
+		FORMAT_TEXT,
 		true)
 
 	if err != nil {
@@ -199,7 +199,7 @@ func TestLicenseListSummaryTextCdx13(t *testing.T) {
 func TestLicenseListJSONCdx14NoneFound(t *testing.T) {
 	outputBuffer, err := innerTestLicenseList(t,
 		TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND,
-		OUTPUT_JSON,
+		FORMAT_JSON,
 		false)
 
 	if err != nil {
@@ -220,7 +220,7 @@ func TestLicenseListCSVCdxNoneFound(t *testing.T) {
 	// Test CDX 1.3 document
 	outputBuffer, err := innerTestLicenseList(t,
 		TEST_LICENSE_LIST_CDX_1_3_NONE_FOUND,
-		OUTPUT_CSV,
+		FORMAT_CSV,
 		false)
 
 	if err != nil {
@@ -236,7 +236,7 @@ func TestLicenseListCSVCdxNoneFound(t *testing.T) {
 	// Test CDX 1.4 document
 	outputBuffer, err = innerTestLicenseList(t,
 		TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND,
-		OUTPUT_CSV,
+		FORMAT_CSV,
 		false)
 
 	if err != nil {
@@ -253,7 +253,7 @@ func TestLicenseListCSVCdxNoneFound(t *testing.T) {
 func TestLicenseListTextSummaryCdx14NoneFound(t *testing.T) {
 	outputBuffer, err := innerTestLicenseList(t,
 		TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND,
-		OUTPUT_JSON,
+		FORMAT_JSON,
 		true)
 
 	if err != nil {
@@ -275,7 +275,7 @@ func TestLicenseListPolicyCdx14InvalidLicenseId(t *testing.T) {
 
 	output, err := innerTestLicenseList(t,
 		TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_ID,
-		OUTPUT_TEXT,
+		FORMAT_TEXT,
 		true)
 
 	if err != nil {
@@ -296,7 +296,7 @@ func TestLicenseListPolicyCdx14InvalidLicenseName(t *testing.T) {
 
 	output, err := innerTestLicenseList(t,
 		TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_NAME,
-		OUTPUT_TEXT,
+		FORMAT_TEXT,
 		true)
 
 	if err != nil {

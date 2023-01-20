@@ -59,10 +59,10 @@ const (
 
 // Command help formatting
 var LICENSE_LIST_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
-	strings.Join([]string{OUTPUT_JSON, OUTPUT_CSV}, ", ") +
+	strings.Join([]string{FORMAT_JSON, FORMAT_CSV}, ", ") +
 	" (default: json)"
 var LICENSE_LIST_SUMMARY_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_SUMMARY_HELP +
-	strings.Join([]string{OUTPUT_TEXT, OUTPUT_CSV, OUTPUT_MARKDOWN}, ", ") +
+	strings.Join([]string{FORMAT_TEXT, FORMAT_CSV, FORMAT_MARKDOWN}, ", ") +
 	" (default: txt)"
 
 // Title row names for formatted lists (reports)
@@ -173,38 +173,38 @@ func ListLicenses(output io.Writer, format string, summary bool) (err error) {
 	if summary {
 		// set default format to text for license summary
 		if format == "" {
-			format = OUTPUT_TEXT
+			format = FORMAT_TEXT
 		}
 
 		getLogger().Infof("Outputting summary (`%s` format)...", format)
 		switch format {
-		case OUTPUT_TEXT:
+		case FORMAT_TEXT:
 			DisplayLicenseListSummaryText(output)
-		case OUTPUT_CSV:
+		case FORMAT_CSV:
 			DisplayLicenseListSummaryCSV(output)
-		case OUTPUT_MARKDOWN:
+		case FORMAT_MARKDOWN:
 			DisplayLicenseListSummaryMarkdown(output)
 		default:
 			// Default to text output
-			getLogger().Warningf("Summary not supported for `%s` format; defaulting to `%s` format...", format, OUTPUT_TEXT)
+			getLogger().Warningf("Summary not supported for `%s` format; defaulting to `%s` format...", format, FORMAT_TEXT)
 			DisplayLicenseListSummaryText(output)
 		}
 	} else {
 		// If no format requested, default to JSON format
 		if format == "" {
-			format = OUTPUT_JSON
+			format = FORMAT_JSON
 		}
 
 		getLogger().Infof("Outputting listing (`%s` format)...", format)
 		switch format {
-		case OUTPUT_JSON:
+		case FORMAT_JSON:
 			DisplayLicenseListJson(output)
-		case OUTPUT_CSV:
+		case FORMAT_CSV:
 			DisplayLicenseListCSV(output)
 		default:
 			// Default to JSON output for anything else
 			getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
-				format, OUTPUT_JSON)
+				format, FORMAT_JSON)
 			DisplayLicenseListJson(output)
 		}
 	}

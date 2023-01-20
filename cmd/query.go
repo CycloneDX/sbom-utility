@@ -59,7 +59,7 @@ const (
 )
 
 var QUERY_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
-	strings.Join([]string{OUTPUT_JSON}, ", ")
+	strings.Join([]string{FORMAT_JSON}, ", ")
 
 // query JSON map and return selected subset
 // SELECT
@@ -137,7 +137,7 @@ func initCommandQuery(command *cobra.Command) {
 	defer getLogger().Exit()
 
 	// Add local flags to command
-	command.PersistentFlags().StringVar(&utils.GlobalFlags.OutputFormat, FLAG_OUTPUT_FORMAT, OUTPUT_JSON,
+	command.PersistentFlags().StringVar(&utils.GlobalFlags.OutputFormat, FLAG_OUTPUT_FORMAT, FORMAT_JSON,
 		FLAG_QUERY_OUTPUT_FORMAT_HELP+QUERY_SUPPORTED_FORMATS)
 	command.Flags().StringP(FLAG_QUERY_SELECT, "", QUERY_TOKEN_WILDCARD, FLAG_QUERY_SELECT_HELP)
 	// NOTE: TODO: There appears to be a bug in Cobra where the type of the `from`` flag is `--from` (i.e., not string)

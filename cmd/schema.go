@@ -36,7 +36,7 @@ const (
 
 // Command help formatting
 var SCHEMA_LIST_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
-	strings.Join([]string{OUTPUT_TEXT, OUTPUT_CSV, OUTPUT_MARKDOWN}, ", ")
+	strings.Join([]string{FORMAT_TEXT, FORMAT_CSV, FORMAT_MARKDOWN}, ", ")
 
 var SCHEMA_LIST_TITLES = []string{"Format", "Version", "Variant", "File", "Source"}
 
@@ -45,7 +45,7 @@ func NewCommandSchema() *cobra.Command {
 	command.Use = "schema"
 	command.Short = "View supported SBOM schemas"
 	command.Long = fmt.Sprintf("View built-in SBOM schemas supported by the utility. The default command produces a list based upon `%s`.", DEFAULT_SCHEMA_CONFIG)
-	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", OUTPUT_TEXT,
+	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
 		FLAG_SCHEMA_OUTPUT_FORMAT_HELP+SCHEMA_LIST_SUPPORTED_FORMATS)
 	command.RunE = schemaCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
@@ -82,14 +82,14 @@ func ListSchemas(writer io.Writer) (err error) {
 
 	// default output (writer) to standard out
 	switch utils.GlobalFlags.OutputFormat {
-	case OUTPUT_DEFAULT:
+	case FORMAT_DEFAULT:
 		// defaults to text if no explicit `--format` parameter
 		err = DisplaySchemasTabbedText(writer)
-	case OUTPUT_TEXT:
+	case FORMAT_TEXT:
 		err = DisplaySchemasTabbedText(writer)
-	case OUTPUT_CSV:
+	case FORMAT_CSV:
 		err = DisplaySchemasCSV(writer)
-	case OUTPUT_MARKDOWN:
+	case FORMAT_MARKDOWN:
 		err = DisplaySchemasMarkdown(writer)
 	default:
 		// default to text format for anything else

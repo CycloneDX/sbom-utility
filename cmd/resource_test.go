@@ -158,7 +158,7 @@ func innerTestResourceListResults(t *testing.T, testInfo *ResourceTestInfo) (out
 func TestResourceListInvalidInputFileLoad(t *testing.T) {
 	rti := NewResourceTestInfoBasic(
 		TEST_INPUT_FILE_NON_EXISTENT,
-		OUTPUT_DEFAULT,
+		FORMAT_DEFAULT,
 		RESOURCE_TYPE_DEFAULT,
 		&fs.PathError{})
 
@@ -172,7 +172,7 @@ func TestResourceListInvalidInputFileLoad(t *testing.T) {
 func TestResourceListFormatUnsupportedSPDXMinReq(t *testing.T) {
 	rti := NewResourceTestInfoBasic(
 		TEST_SPDX_2_2_MIN_REQUIRED,
-		OUTPUT_DEFAULT,
+		FORMAT_DEFAULT,
 		RESOURCE_TYPE_DEFAULT,
 		&schema.UnsupportedFormatError{})
 
@@ -183,7 +183,7 @@ func TestResourceListFormatUnsupportedSPDXMinReq(t *testing.T) {
 func TestResourceListFormatUnsupportedSPDX22(t *testing.T) {
 	rti := NewResourceTestInfoBasic(
 		TEST_SPDX_2_2_EXAMPLE_1,
-		OUTPUT_DEFAULT,
+		FORMAT_DEFAULT,
 		RESOURCE_TYPE_DEFAULT,
 		&schema.UnsupportedFormatError{})
 
@@ -198,7 +198,7 @@ func TestResourceListFormatUnsupportedSPDX22(t *testing.T) {
 func TestResourceListTextCdx14NoServicesFound(t *testing.T) {
 	rti := NewResourceTestInfoBasic(
 		TEST_RESOURCE_LIST_CDX_1_3_NONE_FOUND,
-		OUTPUT_TEXT,
+		FORMAT_TEXT,
 		RESOURCE_TYPE_SERVICE,
 		nil)
 
@@ -215,7 +215,7 @@ func TestResourceListTextCdx14NoServicesFound(t *testing.T) {
 func TestResourceListTextCdx13(t *testing.T) {
 	rti := NewResourceTestInfoBasic(
 		TEST_RESOURCE_LIST_CDX_1_3,
-		OUTPUT_TEXT,
+		FORMAT_TEXT,
 		RESOURCE_TYPE_DEFAULT,
 		nil)
 
@@ -226,7 +226,7 @@ func TestResourceListTextCdx14SaaS(t *testing.T) {
 
 	rti := NewResourceTestInfoBasic(
 		TEST_RESOURCE_LIST_CDX_1_4_SAAS_1,
-		OUTPUT_TEXT,
+		FORMAT_TEXT,
 		RESOURCE_TYPE_COMPONENT,
 		nil)
 
@@ -244,7 +244,7 @@ func TestResourceListTextCdx13WhereClauseAndResults1(t *testing.T) {
 
 	rti := NewResourceTestInfo(
 		TEST_RESOURCE_LIST_CDX_1_3,
-		OUTPUT_TEXT,
+		FORMAT_TEXT,
 		RESOURCE_TYPE_COMPONENT,
 		TEST_INPUT_WHERE_CLAUSE,
 		TEST_OUTPUT_CONTAINS,
@@ -261,7 +261,7 @@ func TestResourceListTextCdx13WhereClauseAndResults2(t *testing.T) {
 
 	rti := NewResourceTestInfo(
 		TEST_RESOURCE_LIST_CDX_1_3,
-		OUTPUT_TEXT,
+		FORMAT_TEXT,
 		RESOURCE_TYPE_COMPONENT,
 		TEST_INPUT_WHERE_CLAUSE,
 		TEST_OUTPUT_CONTAINS,
@@ -278,7 +278,7 @@ func TestResourceListTextCdx13WhereClauseAndResultsNone(t *testing.T) {
 
 	rti := NewResourceTestInfo(
 		TEST_RESOURCE_LIST_CDX_1_3,
-		OUTPUT_TEXT,
+		FORMAT_TEXT,
 		RESOURCE_TYPE_SERVICE,
 		TEST_INPUT_WHERE_CLAUSE,
 		TEST_OUTPUT_CONTAINS,
