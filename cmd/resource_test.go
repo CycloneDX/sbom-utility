@@ -244,7 +244,7 @@ func TestResourceListTextCdx14SaaS(t *testing.T) {
 // CDX variants - WHERE clause tests
 // -------------------------------------------
 
-func TestResourceListTextCdx13WhereClauseAndResults1(t *testing.T) {
+func TestResourceListTextCdx13WhereClauseAndResultsByNameStartswith(t *testing.T) {
 	TEST_INPUT_WHERE_CLAUSE := "name=Library A"
 	TEST_OUTPUT_CONTAINS := "Library A"
 	TEST_OUTPUT_LINES := 3
@@ -261,7 +261,41 @@ func TestResourceListTextCdx13WhereClauseAndResults1(t *testing.T) {
 	innerTestResourceList(t, rti)
 }
 
-func TestResourceListTextCdx13WhereClauseAndResults2(t *testing.T) {
+func TestResourceListTextCdx13WhereClauseAndResultsByNameContains(t *testing.T) {
+	TEST_INPUT_WHERE_CLAUSE := "name=^.*\\sF.*$"
+	TEST_OUTPUT_CONTAINS := "Library F"
+	TEST_OUTPUT_LINES := 3
+
+	rti := NewResourceTestInfo(
+		TEST_RESOURCE_LIST_CDX_1_3,
+		FORMAT_TEXT,
+		RESOURCE_TYPE_COMPONENT,
+		TEST_INPUT_WHERE_CLAUSE,
+		TEST_OUTPUT_CONTAINS,
+		TEST_OUTPUT_LINES,
+		nil)
+
+	innerTestResourceList(t, rti)
+}
+
+func TestResourceListTextCdx13WhereClauseAndResultsBomRefContains(t *testing.T) {
+	TEST_INPUT_WHERE_CLAUSE := "bom-ref=^.*library.*$"
+	TEST_OUTPUT_CONTAINS := "pkg:lib/libraryE@1.0.0"
+	TEST_OUTPUT_LINES := 12
+
+	rti := NewResourceTestInfo(
+		TEST_RESOURCE_LIST_CDX_1_3,
+		FORMAT_TEXT,
+		RESOURCE_TYPE_COMPONENT,
+		TEST_INPUT_WHERE_CLAUSE,
+		TEST_OUTPUT_CONTAINS,
+		TEST_OUTPUT_LINES,
+		nil)
+
+	innerTestResourceList(t, rti)
+}
+
+func TestResourceListTextCdx13WhereClauseAndResultsVersionStartswith(t *testing.T) {
 	TEST_INPUT_WHERE_CLAUSE := "version=2.0"
 	TEST_OUTPUT_CONTAINS := "ACME Application"
 	TEST_OUTPUT_LINES := 3
