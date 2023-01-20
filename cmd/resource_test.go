@@ -51,6 +51,7 @@ type ResourceTestInfo struct {
 	ResultLineCount int
 }
 
+// Stringer interface for ResourceTestInfo (just display subset of key values)
 func (rti *ResourceTestInfo) String() string {
 	return fmt.Sprintf("InputFile: `%s`, Format: `%s`, ResourceType: `%s`, WhereClause: `%s`",
 		rti.InputFile, rti.Format, rti.ResourceType, rti.WhereClause)
