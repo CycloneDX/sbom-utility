@@ -77,15 +77,20 @@ func NewResourceTestInfoBasic(inputFile string, format string, resourceType stri
 // -------------------------------------------
 // resource list test helper functions
 // -------------------------------------------
-
-func innerTestResourceList(t *testing.T, testInfo *ResourceTestInfo) (outputBuffer bytes.Buffer, basicTestInfo string, err error) {
-	getLogger().Tracef("TestInfo: %s", testInfo)
-
+func innerBufferedTestResourceList(t *testing.T, testInfo *ResourceTestInfo, whereFilters []WhereFilter) (outputBuffer bytes.Buffer, err error) {
 	// Declare an output outputBuffer/outputWriter to use used during tests
 	var outputWriter = bufio.NewWriter(&outputBuffer)
 	// ensure all data is written to buffer before further validation
 	defer outputWriter.Flush()
 
+	err = ListResources(outputWriter, testInfo.Format, testInfo.ResourceType, whereFilters)
+	return
+}
+
+func innerTestResourceList(t *testing.T, testInfo *ResourceTestInfo) (outputBuffer bytes.Buffer, basicTestInfo string, err error) {
+	getLogger().Tracef("TestInfo: %s", testInfo)
+
+	// Prepare WHERE filters from where clause
 	var whereFilters []WhereFilter = nil
 	if testInfo.WhereClause != "" {
 		whereFilters, err = retrieveWhereFilters(testInfo.WhereClause)
@@ -96,11 +101,13 @@ func innerTestResourceList(t *testing.T, testInfo *ResourceTestInfo) (outputBuff
 		}
 	}
 
-	// Use a test input SBOM formatted in SPDX
+	// The command looks for the input filename in global flags struct
 	utils.GlobalFlags.InputFile = testInfo.InputFile
-	err = ListResources(outputWriter, testInfo.Format, testInfo.ResourceType, whereFilters)
 
-	// Expected an error; does it match
+	// invoke resource list command with a byte buffer
+	outputBuffer, err = innerBufferedTestResourceList(t, testInfo, whereFilters)
+
+	// TEST: Expected error matches actual error
 	if testInfo.ExpectedError != nil {
 		// NOTE: err = nil will also fail if error was expected
 		if !ErrorTypesMatch(err, testInfo.ExpectedError) {
@@ -110,22 +117,16 @@ func innerTestResourceList(t *testing.T, testInfo *ResourceTestInfo) (outputBuff
 		return
 	}
 
-	// Unexpected error
+	// Unexpected error: return immediately/do not test output/results
 	if err != nil {
 		t.Errorf("test failed: %s: detail: %s ", testInfo, err.Error())
 	}
 
-	return
-}
-
-func innerTestResourceListResults(t *testing.T, testInfo *ResourceTestInfo) (outputBuffer bytes.Buffer, testDetails string, err error) {
-
-	outputBuffer, testDetails, err = innerTestResourceList(t, testInfo)
-
-	// Test buffer has ONLY correct results for test case
-	if err == nil {
-		outputResults := outputBuffer.String()
-		outputLineCount := strings.Count(outputResults, "\n")
+	// TEST: Output contains string(s)
+	// TODO: Support []string
+	var outputResults string
+	if testInfo.ResultContains != "" {
+		outputResults = outputBuffer.String()
 		getLogger().Debugf("output: \"%s\"", outputResults)
 
 		if !strings.Contains(outputResults, testInfo.ResultContains) {
@@ -136,9 +137,15 @@ func innerTestResourceListResults(t *testing.T, testInfo *ResourceTestInfo) (out
 				testInfo.WhereClause)
 			return
 		}
+	}
 
-		if testInfo.ResultLineCount >= RTI_DEFAULT_LINE_COUNT &&
-			outputLineCount != testInfo.ResultLineCount {
+	// TEST: Line Count
+	if testInfo.ResultLineCount != RTI_DEFAULT_LINE_COUNT {
+		if outputResults == "" {
+			outputResults = outputBuffer.String()
+		}
+		outputLineCount := strings.Count(outputResults, "\n")
+		if outputLineCount != testInfo.ResultLineCount {
 			err = getLogger().Errorf("output did not contain expected line count: %v/%v (expected/actual)", testInfo.ResultLineCount, outputLineCount)
 			t.Errorf("%s: input file: `%s`, where clause: `%s`",
 				err.Error(),
@@ -251,7 +258,7 @@ func TestResourceListTextCdx13WhereClauseAndResults1(t *testing.T) {
 		TEST_OUTPUT_LINES,
 		nil)
 
-	innerTestResourceListResults(t, rti)
+	innerTestResourceList(t, rti)
 }
 
 func TestResourceListTextCdx13WhereClauseAndResults2(t *testing.T) {
@@ -268,7 +275,7 @@ func TestResourceListTextCdx13WhereClauseAndResults2(t *testing.T) {
 		TEST_OUTPUT_LINES,
 		nil)
 
-	innerTestResourceListResults(t, rti)
+	innerTestResourceList(t, rti)
 }
 
 func TestResourceListTextCdx13WhereClauseAndResultsNone(t *testing.T) {
@@ -287,5 +294,5 @@ func TestResourceListTextCdx13WhereClauseAndResultsNone(t *testing.T) {
 
 	// THere are no services that meet the where filter criteria
 	// check for warning message in output
-	innerTestResourceListResults(t, rti)
+	innerTestResourceList(t, rti)
 }
