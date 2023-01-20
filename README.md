@@ -22,7 +22,7 @@ In addition to the [validate](#validate) command, priority functionality is refl
 
 The `license` command, for example, has many options and configurations to not only produce raw JSON output of license data, but also produce summarized reports in many human-readable formats (e.g., text, csv, markdown). Furthermore, the license command is able to apply configurable "usage policies" for the licenses identified in the reports.
 
-The `resource` command is designed to better understand what resources are being referenced as part of the SBOM's inventory and/or dependency graph along with required fields such as name, version and bom-ref.
+The `resource` command is designed to better understand what resources are being referenced as part of the SBOM's inventory and/or dependency graph with the ability to filter by common, required fields such as name, version and bom-ref using regular expressions (regex).
 
 The `query` command functionality is geared towards an SBOM format-aware (CycloneDX-only for now), SQL-style query that could be used to generate customized reports/views into the SBOM data for any use case when other resource-specific commands are not provided or fall short.
 
