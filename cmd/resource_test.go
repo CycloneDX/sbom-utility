@@ -36,14 +36,48 @@ const (
 	TEST_RESOURCE_LIST_CDX_1_4_SAAS_1     = "examples/cyclonedx/SaaSBOM/apigateway-microservices-datastores/bom.json"
 )
 
+type ResourceTestInfo struct {
+	InputFile       string
+	Format          string
+	ResourceType    string
+	WhereClause     string
+	ExpectedError   error
+	ResultContains  string
+	ResultLineCount int
+}
+
+func (rti *ResourceTestInfo) String() string {
+	return fmt.Sprintf("InputFile: `%s`, Format: `%s`, ResourceType: `%s`, WhereClause: `%s`",
+		rti.InputFile, rti.Format, rti.ResourceType, rti.WhereClause)
+}
+
+func NewResourceTestInfo(inputFile string, format string, resourceType string,
+	whereClause string, resultContains string, resultLines int, expectedError error) *ResourceTestInfo {
+
+	var rti = new(ResourceTestInfo)
+	rti.InputFile = inputFile
+	rti.Format = format
+	rti.ResourceType = resourceType
+	if !sliceContains(VALID_RESOURCE_TYPES, resourceType) {
+		rti.ResourceType = RESOURCE_TYPE_DEFAULT
+	}
+	rti.WhereClause = whereClause
+	rti.ResultContains = resultContains
+	rti.ResultLineCount = resultLines
+	rti.ExpectedError = expectedError
+	return rti
+}
+
+func NewResourceTestInfoBasic(inputFile string, format string, resourceType string, expectedError error) *ResourceTestInfo {
+	return NewResourceTestInfo(inputFile, format, resourceType, "", "", -1, expectedError)
+}
+
 // -------------------------------------------
 // resource list test helper functions
 // -------------------------------------------
 
-func innerTestResourceList(t *testing.T, inputFile string, format string, resourceType string, whereClause string, expected error) (outputBuffer bytes.Buffer, testInfo string, err error) {
-
-	testInfo = fmt.Sprintf("test file: \"%s\", format: %s, resource type: %s, where clause: %s", inputFile, format, resourceType, whereClause)
-	getLogger().Trace(testInfo)
+func innerTestResourceList(t *testing.T, testInfo *ResourceTestInfo) (outputBuffer bytes.Buffer, basicTestInfo string, err error) {
+	getLogger().Tracef("TestInfo: %s", testInfo)
 
 	// Declare an output outputBuffer/outputWriter to use used during tests
 	var outputWriter = bufio.NewWriter(&outputBuffer)
@@ -51,57 +85,58 @@ func innerTestResourceList(t *testing.T, inputFile string, format string, resour
 	defer outputWriter.Flush()
 
 	var whereFilters []WhereFilter = nil
-	if whereClause != "" {
-		whereFilters, err = retrieveWhereFilters(whereClause)
+	if testInfo.WhereClause != "" {
+		whereFilters, err = retrieveWhereFilters(testInfo.WhereClause)
 		if err != nil {
 			getLogger().Error(err)
-			t.Errorf("Test failed: %s: details: %s ", testInfo, err.Error())
+			t.Errorf("test failed: %s: detail: %s ", basicTestInfo, err.Error())
 		}
 	}
 
 	// Use a test input SBOM formatted in SPDX
-	utils.GlobalFlags.InputFile = inputFile
-	err = ListResources(outputWriter, format, resourceType, whereFilters)
+	utils.GlobalFlags.InputFile = testInfo.InputFile
+	err = ListResources(outputWriter, testInfo.Format, testInfo.ResourceType, whereFilters)
 
-	if expected != nil {
-		if !ErrorTypesMatch(err, expected) {
+	if testInfo.ExpectedError != nil {
+		if !ErrorTypesMatch(err, testInfo.ExpectedError) {
 			t.Errorf("expected error: %T, actual error: %T", &fs.PathError{}, err)
 		}
 		return
 	}
 
 	if err != nil {
-		t.Errorf("Test failed: %s: details: %s ", testInfo, err.Error())
+		t.Errorf("test failed: %s: detail: %s ", testInfo, err.Error())
 	}
 
 	return
 }
 
-func innerTestResourceListBasic(t *testing.T, inputFile string, format string, expected error) (outputBuffer bytes.Buffer, testInfo string, err error) {
-	return innerTestResourceList(t, inputFile, format, RESOURCE_TYPE_DEFAULT, "", expected)
-}
+func innerTestResourceListResults(t *testing.T, testInfo *ResourceTestInfo) (outputBuffer bytes.Buffer, testDetails string, err error) {
 
-func innerTestResourceListResults(t *testing.T, inputFile string, format string, resourceType string, whereClause string, resultContains string, resultLines int, expected error) (outputBuffer bytes.Buffer, testInfo string, err error) {
-
-	outputBuffer, testInfo, err = innerTestResourceList(t,
-		inputFile,
-		format,
-		resourceType,
-		whereClause,
-		expected)
+	outputBuffer, testDetails, err = innerTestResourceList(t, testInfo)
 
 	// Test buffer has ONLY correct results for test case
 	if err == nil {
-		str := outputBuffer.String()
-		lines := strings.Count(str, "\n")
-		getLogger().Debugf("output: \"%s\"", str)
+		outputResults := outputBuffer.String()
+		outputLineCount := strings.Count(outputResults, "\n")
+		getLogger().Debugf("output: \"%s\"", outputResults)
 
-		if lines > resultLines || !strings.Contains(str, resultContains) {
-			err = getLogger().Errorf("invalid output for where clause")
+		if !strings.Contains(outputResults, testInfo.ResultContains) {
+			err = getLogger().Errorf("output did not contain expected value: `%s`", testInfo.ResultContains)
 			t.Errorf("%s: input file: `%s`, where clause: `%s`",
 				err.Error(),
-				inputFile,
-				whereClause)
+				testInfo.InputFile,
+				testInfo.WhereClause)
+			return
+		}
+
+		if outputLineCount != testInfo.ResultLineCount {
+			err = getLogger().Errorf("output did not contain expected line count: %v/%v (expected/actual)", testInfo.ResultLineCount, outputLineCount)
+			t.Errorf("%s: input file: `%s`, where clause: `%s`",
+				err.Error(),
+				testInfo.InputFile,
+				testInfo.WhereClause)
+			return
 		}
 	}
 
@@ -113,27 +148,39 @@ func innerTestResourceListResults(t *testing.T, inputFile string, format string,
 // ----------------------------------------
 
 func TestResourceListInvalidInputFileLoad(t *testing.T) {
-	innerTestResourceListBasic(t,
+	rti := NewResourceTestInfoBasic(
 		TEST_INPUT_FILE_NON_EXISTENT,
 		OUTPUT_DEFAULT,
+		RESOURCE_TYPE_DEFAULT,
 		&fs.PathError{})
+
+	// verify correct error is returned
+	innerTestResourceList(t, rti)
 }
 
 // -------------------------------------------
 // Test format unsupported (SPDX)
 // -------------------------------------------
 func TestResourceListFormatUnsupportedSPDX1(t *testing.T) {
-	innerTestResourceListBasic(t,
+	rti := NewResourceTestInfoBasic(
 		TEST_SPDX_2_2_MIN_REQUIRED,
 		OUTPUT_DEFAULT,
+		RESOURCE_TYPE_DEFAULT,
 		&schema.UnsupportedFormatError{})
+
+	// verify correct error is returned
+	innerTestResourceList(t, rti)
 }
 
 func TestResourceListFormatUnsupportedSPDX2(t *testing.T) {
-	innerTestResourceListBasic(t,
+	rti := NewResourceTestInfoBasic(
 		TEST_SPDX_2_2_EXAMPLE_1,
 		OUTPUT_DEFAULT,
+		RESOURCE_TYPE_DEFAULT,
 		&schema.UnsupportedFormatError{})
+
+	// verify correct error is returned
+	innerTestResourceList(t, rti)
 }
 
 // -------------------------------------------
@@ -141,17 +188,15 @@ func TestResourceListFormatUnsupportedSPDX2(t *testing.T) {
 // -------------------------------------------
 
 func TestResourceListTextCdx14NoneFound(t *testing.T) {
-	outputBuffer, _, _ := innerTestResourceListBasic(t,
+	rti := NewResourceTestInfoBasic(
 		TEST_RESOURCE_LIST_CDX_1_3_NONE_FOUND,
 		OUTPUT_TEXT,
+		RESOURCE_TYPE_SERVICE,
 		nil)
 
 	// verify there is a (warning) message present when no resources are found
-	s := outputBuffer.String()
-	if !strings.Contains(s, MSG_OUTPUT_NO_RESOURCES_FOUND) {
-		t.Errorf("list results did not include the message: `%s`", MSG_OUTPUT_NO_LICENSES_FOUND)
-		t.Logf("%s", outputBuffer.String())
-	}
+	rti.ResultContains = MSG_OUTPUT_NO_RESOURCES_FOUND
+	innerTestResourceList(t, rti)
 }
 
 // -------------------------------------------
@@ -160,17 +205,24 @@ func TestResourceListTextCdx14NoneFound(t *testing.T) {
 
 // Assure text format listing (report) works
 func TestResourceListTextCdx13(t *testing.T) {
-	innerTestResourceListBasic(t,
+	rti := NewResourceTestInfoBasic(
 		TEST_RESOURCE_LIST_CDX_1_3,
 		OUTPUT_TEXT,
+		RESOURCE_TYPE_DEFAULT,
 		nil)
+
+	innerTestResourceList(t, rti)
 }
 
 func TestResourceListTextCdx14SaaS(t *testing.T) {
-	innerTestResourceListBasic(t,
-		TEST_RESOURCE_LIST_CDX_1_4_SAAS_1,
+
+	rti := NewResourceTestInfoBasic(
+		TEST_RESOURCE_LIST_CDX_1_3,
 		OUTPUT_TEXT,
+		RESOURCE_TYPE_COMPONENT,
 		nil)
+
+	innerTestResourceList(t, rti)
 }
 
 // -------------------------------------------
@@ -178,48 +230,54 @@ func TestResourceListTextCdx14SaaS(t *testing.T) {
 // -------------------------------------------
 
 func TestResourceListTextCdx13WhereClauseAndResults1(t *testing.T) {
-	TEST_INPUT_WHERE_FILTERS := "name=Library A"
+	TEST_INPUT_WHERE_CLAUSE := "name=Library A"
 	TEST_OUTPUT_CONTAINS := "Library A"
 	TEST_OUTPUT_LINES := 3
 
-	innerTestResourceListResults(t,
-		TEST_RESOURCE_LIST_CDX_1_3,
-		OUTPUT_TEXT,
-		RESOURCE_TYPE_DEFAULT,
-		TEST_INPUT_WHERE_FILTERS,
-		TEST_OUTPUT_CONTAINS,
-		TEST_OUTPUT_LINES,
-		nil)
-}
-
-func TestResourceListTextCdx13WhereClauseAndResults2(t *testing.T) {
-	TEST_INPUT_WHERE_FILTERS := "version=2.0"
-	TEST_OUTPUT_CONTAINS := "ACME Application"
-	TEST_OUTPUT_LINES := 3
-
-	innerTestResourceListResults(t,
+	rti := NewResourceTestInfo(
 		TEST_RESOURCE_LIST_CDX_1_3,
 		OUTPUT_TEXT,
 		RESOURCE_TYPE_COMPONENT,
-		TEST_INPUT_WHERE_FILTERS,
+		TEST_INPUT_WHERE_CLAUSE,
 		TEST_OUTPUT_CONTAINS,
 		TEST_OUTPUT_LINES,
 		nil)
+
+	innerTestResourceListResults(t, rti)
+}
+
+func TestResourceListTextCdx13WhereClauseAndResults2(t *testing.T) {
+	TEST_INPUT_WHERE_CLAUSE := "version=2.0"
+	TEST_OUTPUT_CONTAINS := "ACME Application"
+	TEST_OUTPUT_LINES := 3
+
+	rti := NewResourceTestInfo(
+		TEST_RESOURCE_LIST_CDX_1_3,
+		OUTPUT_TEXT,
+		RESOURCE_TYPE_COMPONENT,
+		TEST_INPUT_WHERE_CLAUSE,
+		TEST_OUTPUT_CONTAINS,
+		TEST_OUTPUT_LINES,
+		nil)
+
+	innerTestResourceListResults(t, rti)
 }
 
 func TestResourceListTextCdx13WhereClauseAndResultsNone(t *testing.T) {
-	TEST_INPUT_WHERE_FILTERS := "version=2.0"
+	TEST_INPUT_WHERE_CLAUSE := "version=2.0"
 	TEST_OUTPUT_CONTAINS := MSG_OUTPUT_NO_RESOURCES_FOUND
 	TEST_OUTPUT_LINES := 3
 
-	// THere are no services that meet the where filter criteria
-	// check for warning message in output
-	innerTestResourceListResults(t,
+	rti := NewResourceTestInfo(
 		TEST_RESOURCE_LIST_CDX_1_3,
 		OUTPUT_TEXT,
 		RESOURCE_TYPE_SERVICE,
-		TEST_INPUT_WHERE_FILTERS,
+		TEST_INPUT_WHERE_CLAUSE,
 		TEST_OUTPUT_CONTAINS,
 		TEST_OUTPUT_LINES,
 		nil)
+
+	// THere are no services that meet the where filter criteria
+	// check for warning message in output
+	innerTestResourceListResults(t, rti)
 }

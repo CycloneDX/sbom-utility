@@ -14,13 +14,13 @@ In the future, we envision additional kinds of SBOMs (e.g., Hardware, Machine Le
 
 #### Functional priorities
 
-The utility additionally prioritizes commands that help provide insight into contents of the SBOM (e.g., [license](#license), [resource](#resource) and [query](#query) commands) to search for missing (i.e., completeness) or specific data requirements (e.g., for a given organization or customer).  In general, the goal of these prioritized commands is to support data verification for many of the primary SBOM use cases as identified by the CycloneDX community (see https://cyclonedx.org/use-cases/).  Functional development has focused on those use cases that verify inventory (resource identity), legal compliance (e.g., license), and security analysis (e.g., vulnerability) which are foundational to any SBOM.
+The utility additionally prioritizes commands that help provide insight into contents of the SBOM to search for and report on missing (i.e., completeness) or specific data requirements (e.g.,   organization or customer-specific requirements).  In general, the goal of these prioritized commands is to support data verification for many of the primary SBOM use cases as identified by the CycloneDX community (see https://cyclonedx.org/use-cases/).  Functional development has focused on those use cases that verify inventory (resource identity), legal compliance (e.g., license), and security analysis (e.g., vulnerability) which are foundational to any SBOM.
 
-Initially, such functionality is reflected in the `license`, `resource` and `query` commands which to be able to extract or produce formatted reports from inherent knowledge of the CycloneDX format.
+Initially, such functionality is reflected in the [license](#license), [resource](#resource) and [query](#query) commands which to be able to extract or produce formatted reports from inherent knowledge of the CycloneDX format.
 
 The `license` command, for example, has many options and configurations to not only produce raw JSON output of license data, but also produce summarized reports in many human-readable formats (e.g., text, csv, markdown). Furthermore, the license command is able to apply configurable "usage policies" for the licenses identified in the reports.
 
-The `query` command functionality is geared towards an SBOM-format aware SQL-style query that could be used to generate customized reports/views into the SBOM data for any use case when other resource-specific commands are not provided or fall short.
+The `query` command functionality is geared towards an SBOM format-aware, SQL-style query that could be used to generate customized reports/views into the SBOM data for any use case when other resource-specific commands are not provided or fall short.
 
 Further commands and reports are planned that prioritize use cases that enable greater insight and analysis of the legal, security and compliance data captured in the SBOM such as **vulnerability** (VEX) information and resource **signage** (identifying resource fingerprints).
 
@@ -130,7 +130,7 @@ Use the `--format` flag on the `license list` or `license policy` subcommands  t
 
 ##### Output flag
 
-Use the `-o <filename>` (or `--output-file`) flag to send the (formatted) output to a file.
+Use the `-o <filename>` (or its long form `--output-file`) flag to send the (formatted) output to a file.
 
 For example, output a license summary for an SBOM to a file named `output.txt`:
 
