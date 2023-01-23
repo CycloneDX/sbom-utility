@@ -72,7 +72,7 @@ Since the utility comes with a default configuration file and input schemas read
 Over time, we hope to be able to create a release process for the binary with just the necessary supporting files, but at this time achieving the validation function is tactically important.
 
 ```bash
-git clone git@github.com/IBM/sbom-utility.git
+git clone git@github.com:IBM/sbom-utility.git
 ```
 
 ---
@@ -574,41 +574,41 @@ $ echo $?
 The validation command will use the declared format and version found within the SBOM JSON file itself to lookup the default (latest) matching schema version (as declared in`config.json`; however, if variants of that same schema (same format and version) are declared, they can be requested via the `--variant` command line flag:
 
 ```bash
-./sbom-utility validate -i test/custom/test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json --variant custom
+./sbom-utility validate -i test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json --variant custom
 ```
 
 If you run the sample command above, you would see several "custom" schema errors resulting in an invalid SBOM determination (i.e., `exit status 2`):
 
 ```text
 [INFO] Loading license policy config file: `license.json`...
-[INFO] Attempting to load and unmarshal file `test/custom/cdx-1-4-test-custom-metadata-property-classification-invalid.json`...
-[INFO] Successfully unmarshalled data from: `test/custom/cdx-1-4-test-custom-metadata-property-classification-invalid.json`
+[INFO] Attempting to load and unmarshal file `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`...
+[INFO] Successfully unmarshalled data from: `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`
 [INFO] Determining file's SBOM format and version...
 [INFO] Determined SBOM format, version (variant): `CycloneDX`, `1.4` (custom)
 [INFO] Matching SBOM schema (for validation): schema/test/bom-1.4-custom.schema.json
 [INFO] Loading schema `schema/test/bom-1.4-custom.schema.json`...
 [INFO] Schema `schema/test/bom-1.4-custom.schema.json` loaded.
-[INFO] Validating `test/custom/cdx-1-4-test-custom-metadata-property-classification-invalid.json`...
+[INFO] Validating `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`...
 [INFO] SBOM valid against JSON schema: `false`
-[ERROR] invalid SBOM: schema errors found (test/custom/cdx-1-4-test-custom-metadata-property-classification-invalid.json):
+[ERROR] invalid SBOM: schema errors found (test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json):
 (3) Schema errors detected (use `--debug` for more details):
 	1. Type: [contains], Field: [metadata.properties], Description: [At least one of the items must match]
 	Failing object: [[
 	  {
 	    "name": "urn:example.com:disclaimer",
 	    "value": "This ... (truncated)
-	2. Type: [const], Field: [metadata.properties.1.value], Description: [metadata.properties.1.value does not match: "This SBOM is Confidential Information. Do not distribute."]
-	Failing object: ["This SBOM is Confidential Information."]
+	2. Type: [const], Field: [metadata.properties.0.value], Description: [metadata.properties.0.value does not match: "This SBOM is current as of the date it was generated and is subject to change."]
+	Failing object: ["This SBOM is current as of the date it was generated."]
 	3. Type: [number_all_of], Field: [metadata.properties], Description: [Must validate all the schemas (allOf)]
 	Failing object: [[
 	  {
 	    "name": "urn:example.com:disclaimer",
 	    "value": "This ... (truncated)
-[INFO] document `test/custom/cdx-1-4-test-custom-metadata-property-classification-invalid.json`: valid=[false]
+[INFO] document `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`: valid=[false]
 exit status 2
 ```
 
-For example, the first schema error indicates a missing (required) property object where the second error specifies that the property should have a `name` field with value `"urn:example.com:classification"` which should have been paired with a predetermined `value`. In this case the `value` should have been a constant (that did not validate against schema regex).
+For example, the first schema error indicates the failing object; in this case, the CycloneDX property object with `name` with a value  `"urn:example.com:disclaimer"`. The second error indicates the property's `value` field SHOULD have had a value of `"This SBOM is current as of the date it was generated and is subject to change."`; however, it was found to have `"This SBOM is current as of the date it was generated."` as was required by the custom schema's regex).
 
 ---
 
