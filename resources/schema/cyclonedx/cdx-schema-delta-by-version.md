@@ -42,7 +42,7 @@ The version 1.4 schema description for the `version` field reads:
 
 *"Whenever an existing BOM is modified, either manually or through automated processes, the version of the BOM SHOULD be incremented by 1. When a system is presented with multiple BOMs with identical serial numbers, the system SHOULD use the most recent version of the BOM. The default version is '1'."*
 
-**Note**: For IBM SBOM generation,  tools **SHOULD NOT** increment the `version` field.  If editing is necessary after publishing, a new serial number should be generated with a new `timestamp`.
+**Note**: Automated SBOM tools **SHOULD NOT** increment the `version` field.  If editing is necessary after publishing, a new serial number should be generated with a new `timestamp`.
 
 ### Changes by field
 
