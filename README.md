@@ -808,23 +808,9 @@ or add it globally to the `settings.json` file:
 
 ### Testing
 
-#### Authoring tests
+### SBOM test files
 
-As the actual tests files, `config.json` as well as the schema definition files are loaded relative to the project root, you will need to assure you change the working directory when initializing any `_test.go` module. For example, in `cmd/validate_test.go` file, you would need to change the working directory one level back:
-
-```go
-wd, _ := os.Getwd()
-last := strings.LastIndex(wd, "/")
-os.Chdir(wd[:last])
-```
-
-The "cmd" package already has a ready-made method named `initTestInfrastructure()` in the `test.go` module that can be called during test module initialize to assure the proper working directory is setup to read any path-relative input files used by `go test` methods:
-
-```go
-func init() {
-  initTestInfra()
-}
-```
+The built-in `go test` command is used to execute all functional tests that appear in `*._test.go` files.  By default, `go test` executes tests within the same directory where its respective `*._test.go` file is located and sets that as the working directory. For example, tests in the `validate_test.go` file are executed from the `cmd` subdirectory. This is a problem as the actual test SBOM JSON test files are located relative the project root, one level higher, and would not be found.  In order to correct for that, the test working directory is automatically changed for all tests within the `TestMain` routine found in `root_test.go`.
 
 ### Running tests
 
@@ -867,7 +853,7 @@ go test github.com/ibm/sbom-utility/cmd -v --args --trace
 Several tests will still output error and warning messages as designed.  If these messages are distracting, you can turn them off using the `--quiet` flag.
 
 ```bash
-$ go test github.com/ibm/sbom-utility/cmd -v --args --quiet
+go test github.com/ibm/sbom-utility/cmd -v --args --quiet
 ```
 
 **Note**: Always use the `--args` flag of `go test` as this will assure non-conflict with built-in flags.
