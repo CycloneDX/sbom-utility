@@ -608,7 +608,7 @@ If you run the sample command above, you would see several "custom" schema error
 exit status 2
 ```
 
-For example, the first schema error indicates the failing object; in this case, the CycloneDX property object with `name` with a value  `"urn:example.com:disclaimer"`. The second error indicates the property's `value` field SHOULD have had a value of `"This SBOM is current as of the date it was generated and is subject to change."`; however, it was found to have `"This SBOM is current as of the date it was generated."` as was required by the custom schema's regex).
+For example, the first schema error indicates the failing object; in this case, the CycloneDX property object with a `name` field () with a value  `"urn:example.com:disclaimer"`. The second error indicates the property's `value` field SHOULD have had a constant value of `"This SBOM is current as of the date it was generated and is subject to change."`; (as was required by the custom schema's regex); however, it was found to have only a partial match of `"This SBOM is current as of the date it was generated."`.
 
 ---
 
