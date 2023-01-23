@@ -20,7 +20,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/scs/sbom-utility/schema"
+	"github.com/ibm/sbom-utility/schema"
 )
 
 // -----------------------------------------------------------

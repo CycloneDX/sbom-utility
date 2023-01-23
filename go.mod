@@ -1,4 +1,4 @@
-module github.com/scs/sbom-utility
+module github.com/ibm/sbom-utility
 
 go 1.16
 

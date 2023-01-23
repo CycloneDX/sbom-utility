@@ -24,8 +24,8 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/scs/sbom-utility/schema"
-	"github.com/scs/sbom-utility/utils"
+	"github.com/ibm/sbom-utility/schema"
+	"github.com/ibm/sbom-utility/utils"
 	"github.com/spf13/cobra"
 )
 

@@ -72,7 +72,7 @@ Since the utility comes with a default configuration file and input schemas read
 Over time, we hope to be able to create a release process for the binary with just the necessary supporting files, but at this time achieving the validation function is tactically important.
 
 ```bash
-git clone git@github.com/ibm/Supply-Chain-Security/sbom-utility.git
+git clone git@github.com/IBM/sbom-utility.git
 ```
 
 ---
@@ -574,30 +574,38 @@ $ echo $?
 The validation command will use the declared format and version found within the SBOM JSON file itself to lookup the default (latest) matching schema version (as declared in`config.json`; however, if variants of that same schema (same format and version) are declared, they can be requested via the `--variant` command line flag:
 
 ```bash
-./sbom-utility validate -i test/cyclonedx/cdx-1-4-mature-example-1.json --variant custom-dev
+./sbom-utility validate -i test/custom/test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json --variant custom
 ```
 
-If you run the sample command above, you would see several "custom" schema errors resulting in an invalid SBOM determination:
+If you run the sample command above, you would see several "custom" schema errors resulting in an invalid SBOM determination (i.e., `exit status 2`):
 
 ```text
-[INFO] : Unmarshalling file `test/cyclonedx/cdx-1-4-mature-example-1.json`...
-[INFO] : Successfully Opened: `test/cyclonedx/cdx-1-4-mature-example-1.json`
-[INFO] : Determining file's sbom format and version...
-[INFO] : Loading schema `schema/cyclonedx/1.4/bom-1.4-ibm-development.schema.json`...
-[INFO] : Schema `schema/cyclonedx/1.4/bom-1.4-ibm-development.schema.json` loaded.
-[INFO] : Validating `test/cyclonedx/cdx-1-4-mature-example-1.json`...
-[INFO] : Valid: `false`
-[ERROR] validate.go(133) cmd.processValidationResults(): invalid SBOM: schema errors found (test/cyclonedx/cdx-1-4-mature-example-1.json):
-(11) Schema errors detected (use `--debug` for more details):
+[INFO] Loading license policy config file: `license.json`...
+[INFO] Attempting to load and unmarshal file `test/custom/cdx-1-4-test-custom-metadata-property-classification-invalid.json`...
+[INFO] Successfully unmarshalled data from: `test/custom/cdx-1-4-test-custom-metadata-property-classification-invalid.json`
+[INFO] Determining file's SBOM format and version...
+[INFO] Determined SBOM format, version (variant): `CycloneDX`, `1.4` (custom)
+[INFO] Matching SBOM schema (for validation): schema/test/bom-1.4-custom.schema.json
+[INFO] Loading schema `schema/test/bom-1.4-custom.schema.json`...
+[INFO] Schema `schema/test/bom-1.4-custom.schema.json` loaded.
+[INFO] Validating `test/custom/cdx-1-4-test-custom-metadata-property-classification-invalid.json`...
+[INFO] SBOM valid against JSON schema: `false`
+[ERROR] invalid SBOM: schema errors found (test/custom/cdx-1-4-test-custom-metadata-property-classification-invalid.json):
+(3) Schema errors detected (use `--debug` for more details):
 	1. Type: [contains], Field: [metadata.properties], Description: [At least one of the items must match]
 	Failing object: [[
 	  {
-	    "name": "urn:example.com:classification",
-	    "value": " ... (truncated)
-	2. Type: [pattern], Field: [metadata.properties.0.name], Description: [Does not match pattern '^urn:ibm:legal:disclaimer$']
-	Failing object: ["urn:example.com:classification"]
-	3. Type: [const], Field: [metadata.properties.0.value], Description: [metadata.properties.0.value does not match: ... (truncated)]
-  ...
+	    "name": "urn:example.com:disclaimer",
+	    "value": "This ... (truncated)
+	2. Type: [const], Field: [metadata.properties.1.value], Description: [metadata.properties.1.value does not match: "This SBOM is Confidential Information. Do not distribute."]
+	Failing object: ["This SBOM is Confidential Information."]
+	3. Type: [number_all_of], Field: [metadata.properties], Description: [Must validate all the schemas (allOf)]
+	Failing object: [[
+	  {
+	    "name": "urn:example.com:disclaimer",
+	    "value": "This ... (truncated)
+[INFO] document `test/custom/cdx-1-4-test-custom-metadata-property-classification-invalid.json`: valid=[false]
+exit status 2
 ```
 
 For example, the first schema error indicates a missing (required) property object where the second error specifies that the property should have a `name` field with value `"urn:example.com:classification"` which should have been paired with a predetermined `value`. In this case the `value` should have been a constant (that did not validate against schema regex).
@@ -837,13 +845,13 @@ $ make test_cmd
 Example: running all tests in the `cmd` package:
 
 ```bash
-go test github.com/scs/sbom-utility/cmd -v
+go test github.com/ibm/sbom-utility/cmd -v
 ```
 
 run an individual test within the `cmd` package:
 
 ```bash
-go test github.com/scs/sbom-utility/cmd -v -run TestCdx13MinRequiredBasic
+go test github.com/ibm/sbom-utility/cmd -v -run TestCdx13MinRequiredBasic
 ```
 
 #### Debugging go tests
@@ -851,7 +859,7 @@ go test github.com/scs/sbom-utility/cmd -v -run TestCdx13MinRequiredBasic
 Simply append the flags `--args --trace` or `--args --debug` to your `go test` command to enable trace or debug output for your designated test(s):
 
 ```bash
-go test github.com/scs/sbom-utility/cmd -v --args --trace
+go test github.com/ibm/sbom-utility/cmd -v --args --trace
 ```
 
 #### Eliminating extraneous test output
@@ -859,7 +867,7 @@ go test github.com/scs/sbom-utility/cmd -v --args --trace
 Several tests will still output error and warning messages as designed.  If these messages are distracting, you can turn them off using the `--quiet` flag.
 
 ```bash
-$ go test github.com/scs/sbom-utility/cmd -v --args --quiet
+$ go test github.com/ibm/sbom-utility/cmd -v --args --quiet
 ```
 
 **Note**: Always use the `--args` flag of `go test` as this will assure non-conflict with built-in flags.

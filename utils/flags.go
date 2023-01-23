@@ -20,7 +20,7 @@ package utils
 import (
 	"fmt"
 
-	"github.com/scs/sbom-utility/log"
+	"github.com/ibm/sbom-utility/log"
 )
 
 // Globals

@@ -22,7 +22,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/scs/sbom-utility/log"
+	"github.com/ibm/sbom-utility/log"
 )
 
 func FindVerifyConfigFileAbsPath(logger *log.MiniLogger, filename string) (absFilename string, err error) {

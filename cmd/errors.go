@@ -23,7 +23,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/scs/sbom-utility/schema"
+	"github.com/ibm/sbom-utility/schema"
 	"github.com/xeipuuv/gojsonschema"
 )
 

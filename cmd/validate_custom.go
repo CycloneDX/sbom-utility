@@ -20,9 +20,9 @@ package cmd
 import (
 	"regexp"
 
+	"github.com/ibm/sbom-utility/schema"
+	"github.com/ibm/sbom-utility/utils"
 	"github.com/jwangsadinata/go-multimap/slicemultimap"
-	"github.com/scs/sbom-utility/schema"
-	"github.com/scs/sbom-utility/utils"
 )
 
 // Validate all custom requirements that cannot be found be schema validation

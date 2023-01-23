@@ -23,10 +23,10 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/scs/sbom-utility/cmd"
-	"github.com/scs/sbom-utility/log"
-	"github.com/scs/sbom-utility/schema"
-	"github.com/scs/sbom-utility/utils"
+	"github.com/ibm/sbom-utility/cmd"
+	"github.com/ibm/sbom-utility/log"
+	"github.com/ibm/sbom-utility/schema"
+	"github.com/ibm/sbom-utility/utils"
 )
 
 // Struct used to hold tagged (release) build information

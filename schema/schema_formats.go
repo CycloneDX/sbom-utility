@@ -25,8 +25,8 @@ import (
 	"path/filepath"
 	"reflect"
 
-	"github.com/scs/sbom-utility/log"
-	"github.com/scs/sbom-utility/utils"
+	"github.com/ibm/sbom-utility/log"
+	"github.com/ibm/sbom-utility/utils"
 )
 
 const (
