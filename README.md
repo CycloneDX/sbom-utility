@@ -69,7 +69,7 @@ The utility also is designed to produce output formats (e.g., JSON) and handle e
 
 Since the utility comes with a default configuration file and input schemas ready-mde for both SPDX and CycloneDX validation, the best way to install it (at this time) is to clone the entirety of the repository and then [build it](#building) using the `Makefile`.
 
-Over time, we hope to be able to create a release process for the binary with just the necessary supporting files, but at this time achieving the validation function is tactically important.
+Over time, we hope to be able to create a release process for the binary with just the necessary supporting files.
 
 ```bash
 git clone git@github.com:IBM/sbom-utility.git
@@ -130,9 +130,9 @@ The `license` command supports the following subcommands:
 
 Use the `--format` flag on the `license list` or `license policy` subcommands  to choose one of the supported output formats:
 
-- **Text** (default): `--format text`
-- **Comma Separated Value (CSV)** `--format csv` flag:
-- **Markdown** (table): `--format md`
+- **list**: json (default), csv, md
+- **list** with `--summary` flag : txt (default), csv, md
+- **policy**:  txt (default), csv, md
 
 ##### Output flag
 

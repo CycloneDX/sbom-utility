@@ -59,7 +59,7 @@ const (
 
 // Command help formatting
 var LICENSE_LIST_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
-	strings.Join([]string{FORMAT_JSON, FORMAT_CSV}, ", ") +
+	strings.Join([]string{FORMAT_JSON, FORMAT_CSV, FORMAT_MARKDOWN}, ", ") +
 	" (default: json)"
 var LICENSE_LIST_SUMMARY_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_SUMMARY_HELP +
 	strings.Join([]string{FORMAT_TEXT, FORMAT_CSV, FORMAT_MARKDOWN}, ", ") +
@@ -201,6 +201,8 @@ func ListLicenses(output io.Writer, format string, summary bool) (err error) {
 			DisplayLicenseListJson(output)
 		case FORMAT_CSV:
 			DisplayLicenseListCSV(output)
+		case FORMAT_MARKDOWN:
+			DisplayLicenseListMarkdown(output)
 		default:
 			// Default to JSON output for anything else
 			getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
@@ -288,6 +290,69 @@ func DisplayLicenseListCSV(output io.Writer) {
 				getLogger().Errorf("csvWriter.Write(): %w", errWrite)
 				return
 			}
+		}
+	}
+}
+
+// NOTE: This list is NOT de-duplicated
+func DisplayLicenseListMarkdown(output io.Writer) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	var licenseInfo LicenseInfo
+
+	// create title row
+	titles, _ := createTitleRows(LICENSE_LIST_TITLES_LICENSE_CHOICE, nil)
+	titleRow := createMarkdownRow(titles)
+	fmt.Fprintf(output, "%s\n", titleRow)
+
+	alignments := createMarkdownColumnAlignment(titles)
+	alignmentRow := createMarkdownRow(alignments)
+	fmt.Fprintf(output, "%s\n", alignmentRow)
+
+	// Display a warning messing in the actual output and return (short-circuit)
+	licenseKeys := licenseMap.KeySet()
+
+	// Emit no license warning into output
+	if isEmptyLicenseList(licenseKeys) {
+		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_LICENSES_FOUND)
+		return
+	}
+
+	var line []string
+	var lineRow string
+	var content string
+
+	for _, licenseName := range licenseKeys {
+		arrLicenseInfo, _ := licenseMap.Get(licenseName)
+
+		for _, iInfo := range arrLicenseInfo {
+			licenseInfo = iInfo.(LicenseInfo)
+			lc := licenseInfo.LicenseChoice
+
+			// Each row will contain every field of a CDX LicenseChoice object
+			line = nil
+			lineRow = ""
+			content = lc.License.Text.Content
+
+			// Truncate encoded content
+			if content != "" {
+				content = fmt.Sprintf("%s (truncated from %v) ...", content[0:8], len(content))
+			}
+
+			// Format line and write to output
+			line = append(line,
+				lc.License.Id,
+				lc.License.Name,
+				lc.License.Url,
+				lc.Expression,
+				lc.License.Text.ContentType,
+				lc.License.Text.Encoding,
+				content)
+
+			lineRow = createMarkdownRow(line)
+			fmt.Fprintf(output, "%s\n", lineRow)
+
 		}
 	}
 }
