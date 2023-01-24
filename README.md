@@ -128,7 +128,7 @@ The `license` command supports the following subcommands:
 
 ##### Format flag
 
-Use the `--format` flag on the `license list` or `license policy` subcommands  to choose one of the supported output formats:
+Use the `--format` flag on the `license list` or `license policy` subcommands to choose one of the supported output formats:
 
 - **list**: json (default), csv, md
 - **list** with `--summary` flag : txt (default), csv, md
@@ -429,6 +429,12 @@ The `resource` command is geared toward inspecting various resources types and t
 Primarily, the command is used to generate lists of resources, by type, that are included in a CycloneDX SBOM by invoking `resource list`.
 
 As of now, the list can be filtered by resource `type` which include `component` or `service`.  In addition a `where` filter flags can be supplied to only include results where values meet supplied regex.  Supported keys for the `where` filter include `name`, `version`, `type` and `bom-ref` *(i.e., all names of columns in the actual report)*.
+
+#### Format flag
+
+Use the `--format` flag on the to choose one of the supported output formats:
+
+- txt (default), csv, md
 
 #### Result sorting
 
