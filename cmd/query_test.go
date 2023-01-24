@@ -243,6 +243,15 @@ func TestQueryCdx14MetadataComponentPublisher(t *testing.T) {
 	VerifySelectedFieldsInJsonMap(t, &request, results)
 }
 
+func TestQueryCdx14MetadataAllWithWildcard(t *testing.T) {
+	request := QueryRequest{
+		selectFieldsRaw: "*",
+		fromObjectsRaw:  "metadata.component",
+	}
+	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_BASE, &request, nil)
+	VerifySelectedFieldsInJsonMap(t, &request, results)
+}
+
 // // NOTE: licenses is an []interface
 // TODO: Look into supporting reducing array result objects (not maps) to strictly selected fields
 // func TestQueryCdx14MetadataComponentLicenseExpression(t *testing.T) {

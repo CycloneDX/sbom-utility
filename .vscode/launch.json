@@ -6,6 +6,15 @@
     "configurations": [
         {
             "showGlobalVariables": true,
+            "name": "Query: SELECT * FROM metadata.component",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "main.go", // "program": "${file}",
+            "args": ["query", "-i", "test/cyclonedx/cdx-1-4-mature-example-1.json", "--select", "*", "--from", "metadata.component"]
+        },
+        {
+            "showGlobalVariables": true,
             "name": "license: list: BAD license exp.",
             "type": "go",
             "request": "launch",

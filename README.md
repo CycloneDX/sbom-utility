@@ -335,10 +335,10 @@ In this example, only the `--from` clause is needed to select an object.  The `-
 ./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from metadata.component
 ```
 
-is equivalent to:
+is equivalent to using the wildcard character (which may need to be enclosed in single or double quotes depending on your shell):
 
 ```bash
-./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --select * --from metadata.component
+./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --select '*' --from metadata.component
 ```
 
 Sample output:
