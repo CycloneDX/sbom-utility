@@ -20,7 +20,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/ibm/sbom-utility/utils"
+	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/spf13/cobra"
 )
 

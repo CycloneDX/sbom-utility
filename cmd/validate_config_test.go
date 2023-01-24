@@ -20,7 +20,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/ibm/sbom-utility/schema"
+	"github.com/CycloneDX/sbom-utility/schema"
 )
 
 // -----------------------------------------------------------

@@ -24,7 +24,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/ibm/sbom-utility/utils"
+	"github.com/CycloneDX/sbom-utility/utils"
 )
 
 // Test files that span commands

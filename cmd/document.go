@@ -20,8 +20,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/ibm/sbom-utility/schema"
-	"github.com/ibm/sbom-utility/utils"
+	"github.com/CycloneDX/sbom-utility/schema"
+	"github.com/CycloneDX/sbom-utility/utils"
 )
 
 func LoadInputSbomFileAndDetectSchema() (document *schema.Sbom, err error) {

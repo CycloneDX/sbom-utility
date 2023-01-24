@@ -26,8 +26,8 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/ibm/sbom-utility/schema"
-	"github.com/ibm/sbom-utility/utils"
+	"github.com/CycloneDX/sbom-utility/schema"
+	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/jwangsadinata/go-multimap/slicemultimap"
 	"github.com/spf13/cobra"
 )

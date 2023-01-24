@@ -23,10 +23,10 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/ibm/sbom-utility/cmd"
-	"github.com/ibm/sbom-utility/log"
-	"github.com/ibm/sbom-utility/schema"
-	"github.com/ibm/sbom-utility/utils"
+	"github.com/CycloneDX/sbom-utility/cmd"
+	"github.com/CycloneDX/sbom-utility/log"
+	"github.com/CycloneDX/sbom-utility/schema"
+	"github.com/CycloneDX/sbom-utility/utils"
 )
 
 // Struct used to hold tagged (release) build information

@@ -853,13 +853,18 @@ $ make test_cmd
 Example: running all tests in the `cmd` package:
 
 ```bash
-go test github.com/ibm/sbom-utility/cmd -v
+go test github.com/CycloneDX/sbom-utility/cmd -v
+```
+
+Run in "quiet" mode to not see error test output:
+```bash
+go test github.com/CycloneDX/sbom-utility/cmd -v --quiet
 ```
 
 run an individual test within the `cmd` package:
 
 ```bash
-go test github.com/ibm/sbom-utility/cmd -v -run TestCdx13MinRequiredBasic
+go test github.com/CycloneDX/sbom-utility/cmd -v -run TestCdx13MinRequiredBasic
 ```
 
 #### Debugging go tests
@@ -867,7 +872,7 @@ go test github.com/ibm/sbom-utility/cmd -v -run TestCdx13MinRequiredBasic
 Simply append the flags `--args --trace` or `--args --debug` to your `go test` command to enable trace or debug output for your designated test(s):
 
 ```bash
-go test github.com/ibm/sbom-utility/cmd -v --args --trace
+go test github.com/CycloneDX/sbom-utility/cmd -v --args --trace
 ```
 
 #### Eliminating extraneous test output
@@ -875,7 +880,7 @@ go test github.com/ibm/sbom-utility/cmd -v --args --trace
 Several tests will still output error and warning messages as designed.  If these messages are distracting, you can turn them off using the `--quiet` flag.
 
 ```bash
-go test github.com/ibm/sbom-utility/cmd -v --args --quiet
+go test github.com/CycloneDX/sbom-utility/cmd -v --args --quiet
 ```
 
 **Note**: Always use the `--args` flag of `go test` as this will assure non-conflict with built-in flags.

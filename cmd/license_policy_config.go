@@ -26,7 +26,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/ibm/sbom-utility/utils"
+	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/jwangsadinata/go-multimap/slicemultimap"
 )
 

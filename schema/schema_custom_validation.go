@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/ibm/sbom-utility/utils"
+	"github.com/CycloneDX/sbom-utility/utils"
 )
 
 // Globals

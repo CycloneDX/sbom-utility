@@ -23,10 +23,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ibm/sbom-utility/log"
-	"github.com/ibm/sbom-utility/resources"
-	"github.com/ibm/sbom-utility/schema"
-	"github.com/ibm/sbom-utility/utils"
+	"github.com/CycloneDX/sbom-utility/log"
+	"github.com/CycloneDX/sbom-utility/resources"
+	"github.com/CycloneDX/sbom-utility/schema"
+	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/spf13/cobra"
 	"github.com/xeipuuv/gojsonschema"
 )
