@@ -164,7 +164,7 @@ For example, output a license summary for an SBOM to a file named `output.txt`:
 This subcommand will emit a list of all licenses found in and SBOM (defaults to `json` format):
 
 ```bash
-././sbom-utility license list -i examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json
+./sbom-utility license list -i examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json
 ```
 
  The output will be an array of CycloneDX `LicenseChoice` data structures.  For example, you would see licenses identified using SPDX IDs, license expressions (of SPDX IDs) or ones with "names" of licenses that do not necessarily map to a canonical SPDX ID along with the actual base64-encoded license or legal text.
