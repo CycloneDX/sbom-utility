@@ -249,6 +249,9 @@ func TestQueryCdx14MetadataAllWithWildcard(t *testing.T) {
 		fromObjectsRaw:  "metadata.component",
 	}
 	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_BASE, &request, nil)
+
+	// Check for all known values
+	request.selectFieldsRaw = "type,bom-ref,licenses,properties,publisher,purl,name,description,version,externalReferences"
 	VerifySelectedFieldsInJsonMap(t, &request, results)
 }
 
