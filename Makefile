@@ -18,10 +18,10 @@
 SOURCEDIR=.
 
 SOURCES := $(shell find $(SOURCEDIR) -name '*.go')
-BINARY=sbom-utility
+BINARY?=sbom-utility
 
 # LDFLAG values
-VERSION=latest
+VERSION?=latest
 BUILD=`git rev-parse HEAD`
 BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
 RELEASE_DIR=release
@@ -45,15 +45,15 @@ build: clean
 # TODO: perhaps create universal binaries for various OS
 # TODO: See "lipo" tool for MacOS universal binary
 release: clean config sbom
-	GOOS=darwin GOARCH=amd64 go build ${LDFLAGS} -o ${RELEASE_DIR}/sbom-utility-darwin-amd64
-	GOOS=darwin GOARCH=arm64 go build ${LDFLAGS} -o ${RELEASE_DIR}/sbom-utility-darwin-arm64
-	GOOS=linux GOARCH=amd64 go build ${LDFLAGS} -o ${RELEASE_DIR}/sbom-utility-linux-amd64
-	GOOS=linux GOARCH=arm64 go build ${LDFLAGS} -o ${RELEASE_DIR}/sbom-utility-linux-arm64
-	GOOS=windows GOARCH=amd64 go build ${LDFLAGS} -o ${RELEASE_DIR}/sbom-utility-windows-amd64
-	GOOS=windows GOARCH=arm64 go build ${LDFLAGS} -o ${RELEASE_DIR}/sbom-utility-windows-arm64
-	GOOS=windows GOARCH=arm64 go build ${LDFLAGS} -o ${RELEASE_DIR}/sbom-utility-windows-arm64
-	GOOS=linux GOARCH=ppc64 go build ${LDFLAGS} -o ${RELEASE_DIR}/sbom-utility-linux-ppc64
-	GOOS=linux GOARCH=s390x go build ${LDFLAGS} -o ${RELEASE_DIR}/sbom-utility-linux-s390x
+	GOOS=darwin GOARCH=amd64 go build ${LDFLAGS} -o ${RELEASE_DIR}/${BINARY}-darwin-amd64
+	GOOS=darwin GOARCH=arm64 go build ${LDFLAGS} -o ${RELEASE_DIR}/${BINARY}-darwin-arm64
+	GOOS=linux GOARCH=amd64 go build ${LDFLAGS} -o ${RELEASE_DIR}/${BINARY}-linux-amd64
+	GOOS=linux GOARCH=arm64 go build ${LDFLAGS} -o ${RELEASE_DIR}/${BINARY}-linux-arm64
+	GOOS=windows GOARCH=amd64 go build ${LDFLAGS} -o ${RELEASE_DIR}/${BINARY}-windows-amd64
+	GOOS=windows GOARCH=arm64 go build ${LDFLAGS} -o ${RELEASE_DIR}/${BINARY}-windows-arm64
+	GOOS=windows GOARCH=arm64 go build ${LDFLAGS} -o ${RELEASE_DIR}/${BINARY}-windows-arm64
+	GOOS=linux GOARCH=ppc64 go build ${LDFLAGS} -o ${RELEASE_DIR}/${BINARY}-linux-ppc64
+	GOOS=linux GOARCH=s390x go build ${LDFLAGS} -o ${RELEASE_DIR}/${BINARY}-linux-s390x
 	cp config.json ${RELEASE_DIR}/
 	cp license.json ${RELEASE_DIR}/
 	cp custom.json ${RELEASE_DIR}/

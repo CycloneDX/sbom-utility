@@ -682,13 +682,11 @@ The will produce a binary named `sbom-utility` with version set to `latest` in t
 
 ```bash
 $ ls
-
 -rwxr-xr-x   1 Matt  staff  11501122 Jan 24 08:29 sbom-utility
 ```
 
 ```bash
 $ ./sbom-utility version
-
 Welcome to the sbom-utility! Version `latest` (sbom-utility) (darwin/arm64)
 ```
 
@@ -698,23 +696,6 @@ If you wish to build binaries for all supported combinations of `GOOS` and `GOAR
 
 ```bash
 make release
-```
-
-```bash
-drwxr-xr-x  14 Matt  staff       448 Jan 24 08:21 .
-drwxr-xr-x  27 Matt  staff       864 Jan 24 08:20 ..
--rw-r--r--   1 Matt  staff      5175 Jan 24 08:21 config.json
--rw-r--r--   1 Matt  staff       869 Jan 24 08:21 custom.json
--rw-r--r--   1 Matt  staff     62541 Jan 24 08:21 license.json
--rwxr-xr-x   1 Matt  staff  11485840 Jan 24 08:20 sbom-utility-darwin-amd64
--rwxr-xr-x   1 Matt  staff  11302946 Jan 24 08:20 sbom-utility-darwin-arm64
--rw-r--r--   1 Matt  staff     11778 Jan 24 08:20 sbom-utility-latest.bom.json
--rwxr-xr-x   1 Matt  staff   8376320 Jan 24 08:20 sbom-utility-linux-amd64
--rwxr-xr-x   1 Matt  staff   8060928 Jan 24 08:20 sbom-utility-linux-arm64
--rwxr-xr-x   1 Matt  staff   7995392 Jan 24 08:21 sbom-utility-linux-ppc64
--rwxr-xr-x   1 Matt  staff   8585216 Jan 24 08:21 sbom-utility-linux-s390x
--rwxr-xr-x   1 Matt  staff   8457728 Jan 24 08:21 sbom-utility-windows-amd64
--rwxr-xr-x   1 Matt  staff   8081408 Jan 24 08:21 sbom-utility-windows-arm64
 ```
 
 ```bash
