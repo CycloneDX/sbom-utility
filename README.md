@@ -55,6 +55,7 @@ The utility also is designed to produce output formats (e.g., JSON) and handle e
 - [Development](#development)
   - [Prerequisites](#prerequisites)
   - [Building](#building)
+  - [Releasing](#releasing)
   - [Running from source](#running-from-source)
   - [Supporting new SBOM formats and schema versions](#supporting-new-sbom-formats-and-schema-versions)
   - [VSCode](#vscode)
@@ -694,15 +695,14 @@ Welcome to the sbom-utility! Version `latest` (sbom-utility) (darwin/arm64)
 
 If you wish to build binaries for all supported combinations of `GOOS` and `GOARCH` values, use the `release` target (i.e., `make release`) which will produce named binaries of the form `sbom-utility-${GOOS}-${GOARCH}` under the `release` directory (e.g., `sbom-utility-darwin-amd64`).
 
+#### Releasing
+
 ```bash
 make release
 ```
 
 ```bash
 ls release
-```
-
-```bash
 total 131680
 drwxr-xr-x   8 User1  staff       256 Oct 27 14:43 .
 drwxr-xr-x  27 User1  staff       864 Oct 27 14:43 ..
