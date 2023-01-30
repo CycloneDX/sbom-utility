@@ -332,7 +332,6 @@ func DisplayLicenseListMarkdown(output io.Writer) {
 
 			// Each row will contain every field of a CDX LicenseChoice object
 			line = nil
-			lineRow = ""
 			content = lc.License.Text.Content
 
 			// Truncate encoded content
@@ -521,7 +520,6 @@ func DisplayLicenseListSummaryMarkdown(output io.Writer) {
 
 			// reset loop variables for new assignments
 			line = nil
-			lineRow = ""
 
 			// Format line and write to output
 			line = append(line,

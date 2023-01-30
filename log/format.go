@@ -32,11 +32,12 @@ const (
 	EMPTY_STRING = "\"\""
 )
 
+// TODO enable consumer to configure colors from preset palette
 var (
-	boldBlue   = color.New(color.FgBlue, color.Bold).SprintFunc()
-	boldGreen  = color.New(color.FgGreen, color.Bold).SprintFunc()
-	boldCyan   = color.New(color.FgCyan, color.Bold).SprintFunc()
-	boldYellow = color.New(color.FgYellow, color.Bold).SprintFunc()
+	BoldBlue   = color.New(color.FgBlue, color.Bold).SprintFunc()
+	BoldGreen  = color.New(color.FgGreen, color.Bold).SprintFunc()
+	BoldCyan   = color.New(color.FgCyan, color.Bold).SprintFunc()
+	BoldYellow = color.New(color.FgYellow, color.Bold).SprintFunc()
 )
 
 func FormatMap(mapName string, field map[string]interface{}) (string, error) {

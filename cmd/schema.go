@@ -114,7 +114,7 @@ func DisplaySchemasTabbedText(output io.Writer) (err error) {
 	defer w.Flush()
 
 	if len(schema.SupportedFormatConfig.Formats) > 0 {
-		var formatName = ""
+		var formatName string
 
 		// Create title row and add tabs between column titles for the tabWRiter
 		titles, underlines := createTitleRows(SCHEMA_LIST_TITLES, nil)
@@ -173,7 +173,7 @@ func DisplaySchemasMarkdown(output io.Writer) (err error) {
 
 	var line []string
 	var lineRow string
-	var formatName = ""
+	var formatName string
 
 	for _, format := range (schema.SupportedFormatConfig).Formats {
 		formatName = format.CanonicalName
@@ -227,7 +227,7 @@ func DisplaySchemasCSV(output io.Writer) (err error) {
 	// 	return keyNames[i].(string) < keyNames[j].(string)
 	// })
 	var line []string
-	var formatName = ""
+	var formatName string
 
 	for _, format := range (schema.SupportedFormatConfig).Formats {
 		formatName = format.CanonicalName

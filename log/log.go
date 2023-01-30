@@ -298,10 +298,9 @@ func (log MiniLogger) dumpInterface(lvl Level, tag string, value interface{}, sk
 	// if so, suppress any logging that is not an error
 	// Note: Quiet mode even means NO error output... that is, caller MUST
 	// use application return code value to detect an error condition
+	//fmt.Printf("Quiet mode: %t", log.quietMode)
 	if log.quietMode {
 		return
-	} else {
-		//fmt.Printf("Quiet mode: %t", log.quietMode)
 	}
 
 	sb := bytes.NewBufferString("")

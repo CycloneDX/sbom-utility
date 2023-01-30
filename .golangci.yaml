@@ -1,0 +1,11 @@
+# https://golangci-lint.run/usage/configuration/
+run:
+  issues-exit-code: 2
+
+# https://golangci-lint.run/usage/false-positives/
+# https://staticcheck.io/docs/
+linters-settings:
+  staticcheck:
+    checks:
+      - all
+      - '-SA4005' # disable the rule SA1000
