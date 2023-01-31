@@ -54,6 +54,7 @@ release: clean config sbom
 	GOOS=windows GOARCH=arm64 go build ${LDFLAGS} -o ${RELEASE_DIR}/${BINARY}-windows-arm64
 	GOOS=linux GOARCH=ppc64 go build ${LDFLAGS} -o ${RELEASE_DIR}/${BINARY}-linux-ppc64
 	GOOS=linux GOARCH=s390x go build ${LDFLAGS} -o ${RELEASE_DIR}/${BINARY}-linux-s390x
+	cp LICENSE ${RELEASE_DIR}/
 	cp config.json ${RELEASE_DIR}/
 	cp license.json ${RELEASE_DIR}/
 	cp custom.json ${RELEASE_DIR}/
