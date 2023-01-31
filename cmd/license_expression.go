@@ -133,7 +133,7 @@ func parseCompoundExpression(expression *CompoundExpression, tokens []string, in
 		case RIGHT_PARENS:
 			getLogger().Debugf("[%v] RIGHT_PARENS: `%v`", index, token)
 			err = FinalizeCompoundPolicy(expression)
-			return index, nil // Do NOT Increment, parent caller will do that
+			return index, err // Do NOT Increment, parent caller will do that
 		case AND:
 			getLogger().Debugf("[%v] AND (Conjunction): `%v`", index, token)
 			expression.Conjunction = token
@@ -180,7 +180,7 @@ func parseCompoundExpression(expression *CompoundExpression, tokens []string, in
 		index = index + 1
 	}
 
-	FinalizeCompoundPolicy(expression)
+	err = FinalizeCompoundPolicy(expression)
 	return index, err
 }
 
