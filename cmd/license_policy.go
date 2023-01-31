@@ -352,7 +352,7 @@ func DisplayLicensePoliciesCSV(output io.Writer) (err error) {
 	defer w.Flush()
 
 	if err = w.Write(LICENSE_POLICY_SUMMARY_TITLES); err != nil {
-		return getLogger().Errorf("error writing record to csv (%v): %s", output, err)
+		return getLogger().Errorf("error writing to output (%v): %s", LICENSE_POLICY_SUMMARY_TITLES, err)
 	}
 
 	// NOTE: the "family" name hashmap SHOULD have all policy entries (i.e., with/without SPDX IDs)

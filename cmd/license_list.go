@@ -176,12 +176,13 @@ func ListLicenses(output io.Writer, format string, summary bool) (err error) {
 			format = FORMAT_TEXT
 		}
 
+		// TODO surface errors returned from "DisplayXXX" functionss
 		getLogger().Infof("Outputting summary (`%s` format)...", format)
 		switch format {
 		case FORMAT_TEXT:
 			DisplayLicenseListSummaryText(output)
 		case FORMAT_CSV:
-			DisplayLicenseListSummaryCSV(output)
+			err = DisplayLicenseListSummaryCSV(output)
 		case FORMAT_MARKDOWN:
 			DisplayLicenseListSummaryMarkdown(output)
 		default:
@@ -195,12 +196,13 @@ func ListLicenses(output io.Writer, format string, summary bool) (err error) {
 			format = FORMAT_JSON
 		}
 
+		// TODO surface errors returned from "DisplayXXX" functions
 		getLogger().Infof("Outputting listing (`%s` format)...", format)
 		switch format {
 		case FORMAT_JSON:
 			DisplayLicenseListJson(output)
 		case FORMAT_CSV:
-			DisplayLicenseListCSV(output)
+			err = DisplayLicenseListCSV(output)
 		case FORMAT_MARKDOWN:
 			DisplayLicenseListMarkdown(output)
 		default:
@@ -240,7 +242,7 @@ func DisplayLicenseListJson(output io.Writer) {
 }
 
 // NOTE: This list is NOT de-duplicated
-func DisplayLicenseListCSV(output io.Writer) {
+func DisplayLicenseListCSV(output io.Writer) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -252,9 +254,8 @@ func DisplayLicenseListCSV(output io.Writer) {
 
 	// Emit title row
 	titles, _ := createTitleRows(nil, LICENSE_LIST_TITLES_LICENSE_CHOICE)
-	if errWrite := w.Write(titles); errWrite != nil {
-		getLogger().Errorf("csvWriter.Write(): (%v): %w", output, errWrite)
-		return
+	if err = w.Write(titles); err != nil {
+		return getLogger().Errorf("error writing to output (%v): %s", titles, err)
 	}
 
 	// Emit warning (confirmation) message if no licenses found in document
@@ -262,8 +263,10 @@ func DisplayLicenseListCSV(output io.Writer) {
 
 	if isEmptyLicenseList(licenseKeys) {
 		currentRow = append(currentRow, MSG_OUTPUT_NO_LICENSES_FOUND)
-		w.Write(currentRow)
-		return
+		if err = w.Write(currentRow); err != nil {
+			return getLogger().Errorf("error writing to output (%v): %s", currentRow, err)
+		}
+		return fmt.Errorf(currentRow[0])
 	}
 
 	for _, licenseName := range licenseKeys {
@@ -287,11 +290,11 @@ func DisplayLicenseListCSV(output io.Writer) {
 				lc.License.Text.Content)
 
 			if errWrite := w.Write(currentRow); errWrite != nil {
-				getLogger().Errorf("csvWriter.Write(): %w", errWrite)
-				return
+				return getLogger().Errorf("error writing to output (%v): %s", currentRow, err)
 			}
 		}
 	}
+	return
 }
 
 // NOTE: This list is NOT de-duplicated
@@ -431,7 +434,7 @@ func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
 
 	// TODO: Make policy column optional
 	if errWrite := w.Write(titles); errWrite != nil {
-		err = getLogger().Errorf("error writing record to csv (%v): %s", output, errWrite)
+		err = getLogger().Errorf("error writing to output (%v): %s", titles, errWrite)
 		return
 	}
 
@@ -441,7 +444,9 @@ func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
 	// Emit no license warning into output
 	if isEmptyLicenseList(licenseKeys) {
 		currentRow := []string{MSG_OUTPUT_NO_LICENSES_FOUND}
-		w.Write(currentRow)
+		if err = w.Write(currentRow); err != nil {
+			return getLogger().Errorf("error writing to output (%v): %s", currentRow, err)
+		}
 		return fmt.Errorf(currentRow[0])
 	}
 

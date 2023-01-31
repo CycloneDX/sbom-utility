@@ -222,7 +222,8 @@ func RootCmdImpl(cmd *cobra.Command, args []string) error {
 
 	// no commands (empty) passed; display help
 	if len(args) == 0 {
-		cmd.Help()
+		// Show intent to not check error return as no recovery steps possible
+		_ = cmd.Help()
 		os.Exit(ERROR_APPLICATION)
 	}
 	return nil

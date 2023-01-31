@@ -83,7 +83,8 @@ func printWelcome() {
 		echo := fmt.Sprintf("Welcome to the %s! Version `%s` (%s) %s\n", Project, Version, Binary, goos)
 		// Logger will only print the welcome if log level requested indicates INFO level (or higher)
 		Logger.DumpString(echo)
-		Logger.DumpSeparator('=', len(echo)-1)
+		// Show intent to not check for error returns as there is no recovery
+		_, _ = Logger.DumpSeparator('=', len(echo)-1)
 	}
 }
 

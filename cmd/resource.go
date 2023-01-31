@@ -524,7 +524,7 @@ func DisplayResourceListCSV(output io.Writer) (err error) {
 	defer w.Flush()
 
 	if err = w.Write(RESOURCE_LIST_TITLES); err != nil {
-		return getLogger().Errorf("error writing record to csv (%v): %s", output, err)
+		return getLogger().Errorf("error writing to output (%v): %s", RESOURCE_LIST_TITLES, err)
 	}
 
 	// Display a warning "missing" in the actual output and return (short-circuit)
@@ -533,7 +533,10 @@ func DisplayResourceListCSV(output io.Writer) (err error) {
 	// Emit no resource found warning into output
 	if len(entries) == 0 {
 		currentRow := []string{MSG_OUTPUT_NO_RESOURCES_FOUND}
-		w.Write(currentRow)
+		if err = w.Write(currentRow); err != nil {
+			// unable to emit an error message into output stream
+			return getLogger().Errorf("error writing to output (%v): %s", currentRow, err)
+		}
 		return fmt.Errorf(currentRow[0])
 	}
 

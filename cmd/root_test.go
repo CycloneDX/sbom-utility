@@ -115,7 +115,12 @@ func initTestApplicationDirectories() (err error) {
 		// Need to change the working directory to the application root instead of
 		// the "cmd" directory where this "_test" file runs so that all test files
 		// as well as "config.json" and its referenced JSON schema files load properly.
-		os.Chdir("..")
+		err = os.Chdir("..")
+
+		if err != nil {
+			// unable to change working directory; test data will not be found
+			return
+		}
 
 		// Need 'workingDir' to prepend to relative test files
 		utils.GlobalFlags.WorkingDir, _ = os.Getwd()

@@ -223,8 +223,14 @@ func TestLicenseListCSVCdxNoneFound(t *testing.T) {
 		FORMAT_CSV,
 		false)
 
+	// TODO Make "no license found" and explicit error type and
+	// test for mismatch instead of string contents
 	if err != nil {
-		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
+		if !strings.Contains(err.Error(), MSG_OUTPUT_NO_LICENSES_FOUND) {
+			t.Errorf("ListLicenses(): did not include the message: `%s`", MSG_OUTPUT_NO_LICENSES_FOUND)
+			t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
+			t.Logf("%s", err.Error())
+		}
 	}
 
 	s := outputBuffer.String()
@@ -240,7 +246,11 @@ func TestLicenseListCSVCdxNoneFound(t *testing.T) {
 		false)
 
 	if err != nil {
-		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
+		if !strings.Contains(err.Error(), MSG_OUTPUT_NO_LICENSES_FOUND) {
+			t.Errorf("ListLicenses(): did not include the message: `%s`", MSG_OUTPUT_NO_LICENSES_FOUND)
+			t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
+			t.Logf("%s", err.Error())
+		}
 	}
 
 	s = outputBuffer.String()

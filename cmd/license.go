@@ -93,7 +93,8 @@ func AppendLicenseInfo(key string, licenseInfo LicenseInfo) {
 	policy, err := FindPolicy(licenseInfo)
 
 	if err != nil {
-		getLogger().Errorf("%s", MSG_LICENSE_INVALID_DATA)
+		// Show intent to not check for error returns as there is no recovery
+		_ = getLogger().Errorf("%s", MSG_LICENSE_INVALID_DATA)
 		os.Exit(ERROR_VALIDATION)
 	}
 	licenseInfo.Policy = policy
@@ -329,7 +330,8 @@ func hashComponentLicense(cdxComponent schema.CDXComponent, location int) (li *L
 		err = hashLicenseInfo(licenseInfo)
 
 		if err != nil {
-			getLogger().Errorf("Unable to hash empty license: %v", licenseInfo)
+			// Show intent to not check for error returns as there no intent to recover
+			_ = getLogger().Errorf("Unable to hash empty license: %v", licenseInfo)
 			return
 		}
 	}
@@ -390,7 +392,8 @@ func hashServiceLicense(cdxService schema.CDXService, location int) (err error) 
 	if len(cdxService.Services) > 0 {
 		err = hashServicesLicenses(cdxService.Services, location)
 		if err != nil {
-			getLogger().Errorf("Unable to hash empty license: %v", licenseInfo)
+			// Show intent to not check for error returns as there is no recovery
+			_ = getLogger().Errorf("Unable to hash empty license: %v", licenseInfo)
 			return
 		}
 	}

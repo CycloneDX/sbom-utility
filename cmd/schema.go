@@ -212,13 +212,15 @@ func DisplaySchemasCSV(output io.Writer) (err error) {
 	defer w.Flush()
 
 	if err = w.Write(SCHEMA_LIST_TITLES); err != nil {
-		return getLogger().Errorf("error writing record to csv (%v): %s", output, err)
+		return getLogger().Errorf("error writing to output (%v): %s", SCHEMA_LIST_TITLES, err)
 	}
 
 	// Emit no schemas found warning into output
 	if len(schema.SupportedFormatConfig.Formats) == 0 {
 		currentRow := []string{MSG_OUTPUT_NO_SCHEMAS_FOUND}
-		w.Write(currentRow)
+		if err = w.Write(currentRow); err != nil {
+			return getLogger().Errorf("error writing to output (%v): %s", currentRow, err)
+		}
 		return fmt.Errorf(currentRow[0])
 	}
 
@@ -244,7 +246,7 @@ func DisplaySchemasCSV(output io.Writer) (err error) {
 					currentSchema.Url)
 
 				if err = w.Write(line); err != nil {
-					getLogger().Errorf("csv.Write: %w", err)
+					return getLogger().Errorf("error writing to output (%v): %s", line, err)
 				}
 			}
 		}

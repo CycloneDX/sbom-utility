@@ -459,11 +459,13 @@ func DisplayJSONErrorDetails(data []byte, err error) {
 
 	if jsonError, ok := err.(*json.SyntaxError); ok {
 		line, character := CalcLineAndCharacterPos(data, jsonError.Offset)
-		getLogger().Errorf("JSON Syntax error: offset: %d, line %d, character %d: %v", jsonError.Offset, line, character, jsonError.Error())
+		// Show intent to not check for error returns as there is no recovery
+		_ = getLogger().Errorf("JSON Syntax error: offset: %d, line %d, character %d: %v", jsonError.Offset, line, character, jsonError.Error())
 
 	} else if jsonError, ok := err.(*json.UnmarshalTypeError); ok {
 		line, character := CalcLineAndCharacterPos(data, jsonError.Offset)
-		getLogger().Errorf("JSON Unmarshal error: offset: %d, line %d, character %d: %v", jsonError.Offset, line, character, jsonError.Error())
+		// Show intent to not check for error returns as there is no recovery
+		_ = getLogger().Errorf("JSON Unmarshal error: offset: %d, line %d, character %d: %v", jsonError.Offset, line, character, jsonError.Error())
 	}
 }
 
