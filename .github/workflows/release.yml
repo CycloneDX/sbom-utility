@@ -26,7 +26,7 @@ jobs:
           - goos: windows
             goarch: s390x
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set APP_VERSION env
       # TODO: replace with simplified env. var: GITHUB_REF_NAME
@@ -36,7 +36,7 @@ jobs:
     - name: List of the GitHub Actions environment variables on Windows
       run: env
 
-    - uses: wangyoucao577/go-release-action@v1.16
+    - uses: wangyoucao577/go-release-action@v1.35
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         goos: ${{ matrix.goos }}
