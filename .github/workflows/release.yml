@@ -1,0 +1,48 @@
+name: Release Go Binaries
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+
+
+jobs:
+  releases-matrix:
+    name: Release Matrix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [darwin, linux, windows]
+        # NOTE: Intentionally, support legacy architectures for windows and darwin (MacOS)
+        goarch: [arm64, amd64, ppc64, s390x]
+        exclude:
+          # NOTE: PowerPC and System 390 only support Linux
+          - goos: darwin
+            goarch: ppc64
+          - goos: darwin
+            goarch: s390x
+          - goos: windows
+            goarch: ppc64
+          - goos: windows
+            goarch: s390x
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set APP_VERSION env
+      # TODO: replace with simplified env. var: GITHUB_REF_NAME
+      run: echo APP_VERSION=$(echo ${GITHUB_REF} | rev | cut -d'/' -f 1 | rev ) >> ${GITHUB_ENV}
+    - name: Set BUILD_TIME env
+      run: echo BUILD_TIME=$(date) >> ${GITHUB_ENV}
+    - name: List of the GitHub Actions environment variables on Windows
+        run: env
+
+    - uses: wangyoucao577/go-release-action@v1.16
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        goos: ${{ matrix.goos }}
+        goarch: ${{ matrix.goarch }}
+        extra_files: LICENSE config.json license.json custom.json
+        # NOTE: This verbose flag could be removed
+        build_flags: -v
+        # NOTE: need VERSION and BINARY (base name)
+        ldflags: -X "main.Version=${{ env.APP_VERSION }}" -X "main.Binary=sbom-utility"
