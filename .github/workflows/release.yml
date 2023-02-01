@@ -36,7 +36,7 @@ jobs:
       run: echo BUILD_TIME=$(date) >> ${GITHUB_ENV}
       # GITHUB_REPOSITORY=CycloneDX/sbom-utility
     - name: Set APP_NAME
-      run echo APP_NAME=$(echo ${GITHUB_REPOSITORY} | rev | cut -d'/' -f 1 | rev ) >> ${GITHUB_ENV}
+      run: echo APP_NAME=$(echo ${GITHUB_REPOSITORY} | rev | cut -d'/' -f 1 | rev ) >> ${GITHUB_ENV}
     - name: List of the GitHub Actions environment variables on Windows
       run: env
 
