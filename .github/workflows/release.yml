@@ -28,25 +28,36 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    # Set build/link environment variables
+    - name: Set APP_NAME
+      run: echo APP_NAME=$(echo ${GITHUB_REPOSITORY} | rev | cut -d'/' -f 1 | rev ) >> ${GITHUB_ENV}
     - name: Set APP_VERSION env
       run: echo APP_VERSION=echo ${GITHUB_REF_NAME} >> ${GITHUB_ENV}
     - name: Set BUILD_TIME env
       run: echo BUILD_TIME=$(date) >> ${GITHUB_ENV}
       # GITHUB_REPOSITORY=CycloneDX/sbom-utility
-    - name: Set APP_NAME
-      run: echo APP_NAME=$(echo ${GITHUB_REPOSITORY} | rev | cut -d'/' -f 1 | rev ) >> ${GITHUB_ENV}
     - name: List of the GitHub Actions environment variables on Windows
       run: env
 
+    # Generate an SBOM
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.18
+    - name: Install SBOM generator (latest)
+      run: go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest
+    - name: Generate SBOM (from `go.mod`)
+      run: cyclonedx-gomod mod -json=true -output ${APP_NAME}-${APP_VERSION}.bom.json .
+
+    # Release binaries in all GOOS/GOARCH combinations (with all config. files)
     - uses: wangyoucao577/go-release-action@v1.35
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
         extra_files: LICENSE config.json license.json custom.json
-        # auto will use ZIP for Windows, otherwise default is TAR
+        # "auto" will use ZIP for Windows, otherwise default is TAR
         compress_assets: auto
-        # NOTE: This verbose flag could be removed
+        # NOTE: This verbose flag may be removed
         build_flags: -v
-        # NOTE: need VERSION and BINARY (base name)
         ldflags: -X "main.Version=${{ env.APP_VERSION }}" -X "main.Binary=${{ env.APP_NAME }}"

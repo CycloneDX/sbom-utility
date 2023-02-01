@@ -509,8 +509,8 @@ You can verify which formats and schemas are available for validation by using t
 Sample output:
 
 ```bash
-Format     Version   Variant   File                                             Source
-------     -------   -------   ----                                             ------
+Format     Version   Variant        File                                             Source
+------     -------   -------        ----                                             ------
 SPDX       SPDX-2.2  (2.2.1)        schema/spdx/2.2.1/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json
 SPDX       SPDX-2.2  (latest)       schema/spdx/2.2.2/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.2/schemas/spdx-schema.json
 SPDX       SPDX-2.3  (latest)       schema/spdx/2.3/spdx-schema.json                 https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3/schemas/spdx-schema.json
