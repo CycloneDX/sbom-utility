@@ -47,7 +47,9 @@ jobs:
     - name: Install SBOM generator (latest)
       run: go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest
     - name: Generate SBOM (from `go.mod`)
-      run: cyclonedx-gomod mod -json=true -output ${APP_NAME}-${APP_VERSION}.bom.json .
+      # run: cyclonedx-gomod mod -json=true "-output ${{env.APP_NAME}}-${{env.APP_VERSION}}.bom.json" .
+      run: echo ${{env.APP_NAME}}-${{env.APP_VERSION}}.bom.json
+      run: cyclonedx-gomod mod -json=true
 
     # Release binaries in all GOOS/GOARCH combinations (with all config. files)
     - uses: wangyoucao577/go-release-action@v1.35
