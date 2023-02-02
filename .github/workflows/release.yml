@@ -37,7 +37,7 @@ jobs:
     - name: Set BUILD_TIME env
       run: echo BUILD_TIME=$(date) >> ${GITHUB_ENV}
     - name: Set SBOM_NAME env
-      run: echo SBOM_NAME=$(echo ${{env.APP_NAME}}${{env.APP_VERSION}}.bom.json) >> ${GITHUB_ENV}
+      run: echo SBOM_NAME=$(${env.APP_NAME}-${env.APP_VERSION}.bom.json) >> ${GITHUB_ENV}
     - name: List of the GitHub Actions environment variables on Windows
       run: env | sort
 
