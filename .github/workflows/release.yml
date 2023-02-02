@@ -33,7 +33,7 @@ jobs:
       # GITHUB_REPOSITORY=CycloneDX/sbom-utility
       run: echo APP_NAME=$(echo ${GITHUB_REPOSITORY} | rev | cut -d'/' -f 1 | rev ) >> ${GITHUB_ENV}
     - name: Set APP_VERSION env
-      run: echo APP_VERSION=echo ${GITHUB_REF_NAME} >> ${GITHUB_ENV}
+      run: echo "APP_VERSION=${GITHUB_REF_NAME}" >> ${GITHUB_ENV}
     - name: Set BUILD_TIME env
       run: echo BUILD_TIME=$(date) >> ${GITHUB_ENV}
     - name: Set SBOM_NAME env
