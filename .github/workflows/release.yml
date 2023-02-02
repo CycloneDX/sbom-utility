@@ -37,7 +37,7 @@ jobs:
     - name: Set BUILD_TIME env
       run: echo BUILD_TIME=$(date) >> ${GITHUB_ENV}
     - name: Set SBOM_NAME env
-      run: echo "SBOM_NAME=${{env.APP_NAME}}.${{env.APP_VERSION}}.bom.json" >> ${GITHUB_ENV}
+      run: echo "SBOM_NAME=${{env.APP_NAME}}-${{env.APP_VERSION}}.bom.json" >> ${GITHUB_ENV}
     - name: List of the GitHub Actions environment variables on Windows
       run: env | sort
 
@@ -50,7 +50,7 @@ jobs:
       run: go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest
     - name: Generate SBOM (from `go.mod`)
       # run: cyclonedx-gomod mod -json=true "-output ${{env.APP_NAME}}-${{env.APP_VERSION}}.bom.json" .
-      run: cyclonedx-gomod mod -json=true
+      run: cyclonedx-gomod mod -json=true -output ${{SBOM_NAME}}
 
     # Release binaries in all GOOS/GOARCH combinations (with all config. files)
     - uses: wangyoucao577/go-release-action@v1.35
@@ -58,7 +58,7 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
-        extra_files: LICENSE config.json license.json custom.json
+        extra_files: LICENSE config.json license.json custom.json ${{SBOM_NAME}}
         # "auto" will use ZIP for Windows, otherwise default is TAR
         compress_assets: auto
         # NOTE: This verbose flag may be removed
