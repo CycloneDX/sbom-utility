@@ -29,15 +29,17 @@ jobs:
     - uses: actions/checkout@v3
 
     # Set build/link environment variables
-    - name: Set APP_NAME
+    - name: Set APP_NAME env
+      # GITHUB_REPOSITORY=CycloneDX/sbom-utility
       run: echo APP_NAME=$(echo ${GITHUB_REPOSITORY} | rev | cut -d'/' -f 1 | rev ) >> ${GITHUB_ENV}
     - name: Set APP_VERSION env
       run: echo APP_VERSION=echo ${GITHUB_REF_NAME} >> ${GITHUB_ENV}
     - name: Set BUILD_TIME env
       run: echo BUILD_TIME=$(date) >> ${GITHUB_ENV}
-      # GITHUB_REPOSITORY=CycloneDX/sbom-utility
+    - name: Set SBOM_NAME env
+      run: echo SBOM_NAME=$(echo ${{env.APP_NAME}}-${{env.APP_VERSION}}.bom.json) >> ${GITHUB_ENV}
     - name: List of the GitHub Actions environment variables on Windows
-      run: env
+      run: env | sort
 
     # Generate an SBOM
     - name: Set up Go
@@ -49,8 +51,6 @@ jobs:
     - name: Generate SBOM (from `go.mod`)
       # run: cyclonedx-gomod mod -json=true "-output ${{env.APP_NAME}}-${{env.APP_VERSION}}.bom.json" .
       run: cyclonedx-gomod mod -json=true
-    - name: echo
-      run: echo ${{env.APP_NAME}}-${{env.APP_VERSION}}.bom.json
 
     # Release binaries in all GOOS/GOARCH combinations (with all config. files)
     - uses: wangyoucao577/go-release-action@v1.35
