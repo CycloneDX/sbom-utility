@@ -672,6 +672,7 @@ An ad-hoc list of featured "TODOs" geared at making the tool more accessible, ex
 - **--orderby** Support ordering of query result sets by comparison of values from a specified field key.
 - **license.json** Document license policy configuration JSON schema structure and how to add entries relative to a CycloneDX `LicenseChoice` object for entries with SPDX IDs and those without.
 - **license.json** Add more widely-recognized licenses (both from SPDX identifier lists as well as those not recognized by the SPDX community).
+- **Go libraries** Replace `go-prettyjson`, `go-multimap` libraries with alternatives that produce maintained releases.
 
 ---
 

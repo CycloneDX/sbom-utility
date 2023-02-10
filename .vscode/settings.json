@@ -24,6 +24,7 @@
             "Freetype",
             "Globus",
             "gojsonschema",
+            "gomod",
             "GTPL",
             "hokaccha",
             "HSQLDB",
