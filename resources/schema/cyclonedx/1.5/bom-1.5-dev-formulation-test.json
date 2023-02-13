@@ -24,11 +24,7 @@
             "required": ["bom-ref", "name"]
         },
         "componentType": {
-            "allOf": [
-                {
-                    "$ref": "#/definitions/abstractResourceType"
-                }
-            ],
+            "allOf": [ {"$ref": "#/definitions/abstractResourceType"}],
             "properties": {
                 "type": {"type": "string",
                     "enum": ["application","library","container",
@@ -42,6 +38,25 @@
                 "externalReferences": {}
             },
             "additionalProperties": false
+        },
+        "serviceType": {
+            "allOf": [ {"$ref": "#/definitions/abstractResourceType"}],
+             "properties": {
+                "endpoints": {"type": "string"},
+                "bom-ref": {},
+                "name": {},
+                "version": {},
+                "description": {},
+                "externalReferences": {}
+            },
+            "additionalProperties": false
+        },
+        "resourceChoice": {
+            "type": "object",
+               "oneOf": [
+                  { "$ref": "#/definitions/componentType" },
+                  {"$ref": "#/definitions/serviceType"}
+               ]
         }
     }
 }
