@@ -53,10 +53,10 @@
         },
         "resourceChoice": {
             "type": "object",
-               "oneOf": [
-                  { "$ref": "#/definitions/componentType" },
-                  {"$ref": "#/definitions/serviceType"}
-               ]
+            "oneOf": [
+                {"$ref": "#/definitions/componentType" },
+                {"$ref": "#/definitions/serviceType"}
+            ]
         }
     }
 }
