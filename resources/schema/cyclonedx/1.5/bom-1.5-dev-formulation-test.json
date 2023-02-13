@@ -1,0 +1,47 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://test-polymorphic",
+    "type": "object",
+    "required": ["input"],
+    "properties": {
+        "resource": {
+            "properties": {
+                "component": {"$ref": "#/definitions/componentType"}
+            },
+            "required": ["component"]
+        }
+    },
+    "definitions": {
+        "abstractResourceType": {
+            "type": "object",
+            "properties": {
+                "bom-ref": {"type": "string"},
+                "name": {"type": "string"},
+				"version": {"type": "string"},
+                "description": {"type": "string"},
+                "externalReferences": {"type": "string"}
+            },
+            "required": ["bom-ref", "name"]
+        },
+        "componentType": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/abstractResourceType"
+                }
+            ],
+            "properties": {
+                "type": {"type": "string",
+                    "enum": ["application","library","container",
+                      "operating-system","file",
+                      "configuration", "ml-model"]},
+                "cpe": {"type": "string"},
+                "bom-ref": {},
+                "name": {},
+                "version": {},
+                "description": {},
+                "externalReferences": {}
+            },
+            "additionalProperties": false
+        }
+    }
+}
