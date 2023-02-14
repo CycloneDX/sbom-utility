@@ -39,18 +39,6 @@
             },
             "additionalProperties": false
         },
-        "machineLearningModelType": {
-            "allOf": [ {"$ref": "#/definitions/abstractResourceType"}],
-            "properties": {
-                "modelCard": {"type": "object"},
-                "bom-ref": {},
-                "name": {},
-                "version": {},
-                "description": {},
-                "externalReferences": {}
-            },
-            "additionalProperties": false
-        },
         "serviceType": {
             "allOf": [ {"$ref": "#/definitions/abstractResourceType"}],
              "properties": {
@@ -63,11 +51,24 @@
             },
             "additionalProperties": false
         },
+        "machineLearningModelType": {
+            "allOf": [ {"$ref": "#/definitions/abstractResourceType"}],
+            "properties": {
+                "modelCard": {"type": "object"},
+                "bom-ref": {},
+                "name": {},
+                "version": {},
+                "description": {},
+                "externalReferences": {}
+            },
+            "additionalProperties": false
+        },
         "resourceChoice": {
             "type": "object",
             "oneOf": [
                 {"$ref": "#/definitions/componentType" },
-                {"$ref": "#/definitions/serviceType"}
+                {"$ref": "#/definitions/serviceType"},
+                {"$ref": "#/definitions/machineLearningModelType"}
             ]
         },
         "resourceReferenceChoice": {
