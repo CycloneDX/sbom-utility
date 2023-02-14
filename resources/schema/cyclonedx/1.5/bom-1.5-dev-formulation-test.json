@@ -19,7 +19,7 @@
                 "name": {"type": "string"},
 				"version": {"type": "string"},
                 "description": {"type": "string"},
-                "externalReferences": {"type": "string"}
+                "externalReferences": {"type": "object"}
             },
             "required": ["bom-ref", "name"]
         },
@@ -31,6 +31,18 @@
                       "operating-system","file",
                       "configuration", "ml-model"]},
                 "cpe": {"type": "string"},
+                "bom-ref": {},
+                "name": {},
+                "version": {},
+                "description": {},
+                "externalReferences": {}
+            },
+            "additionalProperties": false
+        },
+        "machineLearningModelType": {
+            "allOf": [ {"$ref": "#/definitions/abstractResourceType"}],
+            "properties": {
+                "modelCard": {"type": "object"},
                 "bom-ref": {},
                 "name": {},
                 "version": {},
@@ -56,6 +68,17 @@
             "oneOf": [
                 {"$ref": "#/definitions/componentType" },
                 {"$ref": "#/definitions/serviceType"}
+            ]
+        },
+        "resourceReferenceChoice": {
+            "type": "object",
+            "properties": {
+                "bom-ref": { "$ref": "#/definitions/refType"},
+                "externalReference": {"$ref": "#/definitions/externalReference"}
+            },
+            "oneOf":[
+                {"required": ["bom-ref"]},
+                {"required": ["externalReference"]}
             ]
         }
     }
