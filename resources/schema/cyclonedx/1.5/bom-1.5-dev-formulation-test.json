@@ -17,17 +17,17 @@
         "workflow": {
           "type": "object",
           "properties": {
-            "tasks": {
-                "type": "array",
-                "items": {"$ref": "#/definitions/task"},
-                "uniqueItems": true
-            }
+              "tasks": {
+                  "type": "array",
+                  "items": {"$ref": "#/definitions/task"},
+                  "uniqueItems": true
+              }
           },
           "required": ["tasks"]
         },
         "task": {
             "type": "object",
-            "allOf": [ {"$ref": "#/definitions/abstractResourceType"}],
+            "allOf": [{"$ref": "#/definitions/abstractResourceType"}],
             "properties": {
                 "steps": {
                     "type": "array",
@@ -101,7 +101,8 @@
                 "name": {},
                 "version": {},
                 "description": {},
-                "externalReferences": {}
+                "externalReferences": {},
+                "properties": {}
             },
             "additionalProperties": false
         },
@@ -113,7 +114,8 @@
                 "name": {},
                 "version": {},
                 "description": {},
-                "externalReferences": {}
+                "externalReferences": {},
+                "properties": {}
             },
             "additionalProperties": false
         },
@@ -125,7 +127,8 @@
                 "name": {},
                 "version": {},
                 "description": {},
-                "externalReferences": {}
+                "externalReferences": {},
+                "properties": {}
             },
             "additionalProperties": false
         },
