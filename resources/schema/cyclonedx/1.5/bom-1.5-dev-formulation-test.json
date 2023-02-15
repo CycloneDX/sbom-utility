@@ -11,36 +11,33 @@
             },
             "additionalItems": false,
             "required": ["workflow"]
-        },
-        "choice-concrete-example": {
-            "type": "object",
-            "properties": {
-                "resource": {"$ref": "#/definitions/resourceChoice"},
-                "service": {"$ref": "#/definitions/serviceType"}
-            },
-            "required": ["resource", "service"]
         }
     },
     "definitions": {
         "workflow": {
-          "tasks": {
-            "type": "array",
-            "items": {"$ref": "#/definitions/task"},
-            "uniqueItems": true
-          }
+          "type": "object",
+          "properties": {
+            "tasks": {
+                "type": "array",
+                "items": {"$ref": "#/definitions/task"},
+                "uniqueItems": true
+            }
+          },
+          "required": ["tasks"]
         },
         "task": {
+            "type": "object",
             "allOf": [ {"$ref": "#/definitions/abstractResourceType"}],
-            "steps": {
-                "type": "array",
-                "items": {"$ref": "#/definitions/step"},
-                "uniqueItems": true
+            "properties": {
+                "steps": {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/step"},
+                    "uniqueItems": true
+                },
+                "bom-ref": {},
+                "name": {}
             },
-            "inputs": "inputType",
-            "outputs": "outputType",
-            "runtime": {"$ref": "#/definitions/resourceReferenceChoice"},
-            "executor": {"$ref": "#/definitions/resourceReferenceChoice"},
-            "hardware": {"$ref": "#/definitions/resourceReferenceChoice"}
+            "additionalProperties": false
         },
         "step": {
             "type": "object"
@@ -58,7 +55,8 @@
                     "items": {"$ref": "#/definitions/properties"},
                     "uniqueItems": true
                 }
-            }
+            },
+            "additionalProperties": false
         },
         "outputType": {
             "type": "object",
@@ -73,7 +71,8 @@
                     "items": {"$ref": "#/definitions/properties"},
                     "uniqueItems": true
                 }
-            }
+            },
+            "additionalProperties": false
         },
         "abstractResourceType": {
             "type": "object",
@@ -82,7 +81,12 @@
                 "name": {"type": "string"},
 				"version": {"type": "string"},
                 "description": {"type": "string"},
-                "externalReferences": {"type": "object"}
+                "externalReferences": {"type": "object"},
+                "properties": {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/property"},
+                    "additionalItems": false
+                }
             },
             "required": ["bom-ref", "name"]
         },
@@ -113,17 +117,6 @@
             },
             "additionalProperties": false
         },
-        "toolType": {
-            "allOf": [ {"$ref": "#/definitions/abstractResourceType"}],
-            "properties": {
-                "bom-ref": {},
-                "name": {},
-                "version": {},
-                "description": {},
-                "externalReferences": {}
-            },
-            "additionalProperties": false
-        },
         "machineLearningModelType": {
             "allOf": [ {"$ref": "#/definitions/abstractResourceType"}],
             "properties": {
@@ -141,7 +134,6 @@
             "oneOf": [
                 {"$ref": "#/definitions/componentType" },
                 {"$ref": "#/definitions/serviceType"},
-                {"$ref": "#/definitions/toolType"},
                 {"$ref": "#/definitions/machineLearningModelType"}
             ]
         },
@@ -155,6 +147,13 @@
                 {"required": ["bom-ref"]},
                 {"required": ["externalReference"]}
             ]
-        }
+        },
+        "property": {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string"},
+                "value": {"type": "string"}
+            }
+         }
     }
 }
