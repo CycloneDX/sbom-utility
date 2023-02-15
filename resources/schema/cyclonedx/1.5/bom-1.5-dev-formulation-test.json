@@ -141,6 +141,7 @@
             "oneOf": [
                 {"$ref": "#/definitions/componentType" },
                 {"$ref": "#/definitions/serviceType"},
+                {"$ref": "#/definitions/toolType"},
                 {"$ref": "#/definitions/machineLearningModelType"}
             ]
         },
