@@ -21,6 +21,11 @@
                   "type": "array",
                   "items": {"$ref": "#/definitions/task"},
                   "uniqueItems": true
+              },
+              "dependencies": {
+                  "type": "array",
+                  "items": {"$ref": "#/definitions/dependency"},
+                  "uniqueItems": true
               }
           },
           "required": ["tasks"]
@@ -157,6 +162,20 @@
                 "name": {"type": "string"},
                 "value": {"type": "string"}
             }
-         }
+        },
+        "dependency": {
+            "type": "object",
+            "required": ["ref"],
+            "additionalProperties": false,
+            "properties": {
+                "ref": {"$ref": "#/definitions/refType"},
+                "dependsOn": {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/refType"},
+                    "uniqueItems": true
+                }
+            }
+        },
+        "refType": {"type": "string"}
     }
 }
