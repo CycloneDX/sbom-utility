@@ -2,16 +2,79 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "https://test-polymorphic",
     "type": "object",
-    "required": ["input"],
+    "required": ["bom"],
     "properties": {
-        "resource": {
+        "bom": {
+            "type": "object",
             "properties": {
-                "component": {"$ref": "#/definitions/componentType"}
+                "workflow": {"$ref": "#/definitions/workflow"}
             },
-            "required": ["component"]
+            "additionalItems": false,
+            "required": ["workflow"]
+        },
+        "choice-concrete-example": {
+            "type": "object",
+            "properties": {
+                "resource": {"$ref": "#/definitions/resourceChoice"},
+                "service": {"$ref": "#/definitions/serviceType"}
+            },
+            "required": ["resource", "service"]
         }
     },
     "definitions": {
+        "workflow": {
+          "tasks": {
+            "type": "array",
+            "items": {"$ref": "#/definitions/task"},
+            "uniqueItems": true
+          }
+        },
+        "task": {
+            "allOf": [ {"$ref": "#/definitions/abstractResourceType"}],
+            "steps": {
+                "type": "array",
+                "items": {"$ref": "#/definitions/step"},
+                "uniqueItems": true
+            },
+            "inputs": "inputType",
+            "outputs": "outputType",
+            "runtime": {"$ref": "#/definitions/resourceReferenceChoice"},
+            "executor": {"$ref": "#/definitions/resourceReferenceChoice"},
+            "hardware": {"$ref": "#/definitions/resourceReferenceChoice"}
+        },
+        "step": {
+            "type": "object"
+        },
+        "inputType": {
+            "type": "object",
+            "properties": {
+                "resourceRefs": {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/resourceReferenceChoice"},
+                    "uniqueItems": true
+                },
+                "environmentVars": {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/properties"},
+                    "uniqueItems": true
+                }
+            }
+        },
+        "outputType": {
+            "type": "object",
+            "properties": {
+                "resourceRefs": {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/resourceReferenceChoice"},
+                    "uniqueItems": true
+                },
+                "environmentVars": {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/properties"},
+                    "uniqueItems": true
+                }
+            }
+        },
         "abstractResourceType": {
             "type": "object",
             "properties": {
@@ -27,9 +90,8 @@
             "allOf": [ {"$ref": "#/definitions/abstractResourceType"}],
             "properties": {
                 "type": {"type": "string",
-                    "enum": ["application","library","container",
-                      "operating-system","file",
-                      "configuration", "ml-model"]},
+                    "enum": ["application", "library", "container",
+                      "operating-system", "file", "configuration", "log"]},
                 "cpe": {"type": "string"},
                 "bom-ref": {},
                 "name": {},
@@ -42,7 +104,18 @@
         "serviceType": {
             "allOf": [ {"$ref": "#/definitions/abstractResourceType"}],
              "properties": {
-                "endpoints": {"type": "string"},
+                "endpoints": {"type": "object"},
+                "bom-ref": {},
+                "name": {},
+                "version": {},
+                "description": {},
+                "externalReferences": {}
+            },
+            "additionalProperties": false
+        },
+        "toolType": {
+            "allOf": [ {"$ref": "#/definitions/abstractResourceType"}],
+            "properties": {
                 "bom-ref": {},
                 "name": {},
                 "version": {},
