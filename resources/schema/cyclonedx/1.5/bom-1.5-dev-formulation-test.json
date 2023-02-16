@@ -1,22 +1,55 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "https://test-polymorphic",
+    "$id": "https://test-formulation",
     "type": "object",
     "required": ["bom"],
     "properties": {
         "bom": {
             "type": "object",
             "properties": {
-                "workflow": {"$ref": "#/definitions/workflow"}
+                "formula": {"$ref": "#/definitions/formula"}
             },
             "additionalItems": false,
-            "required": ["workflow"]
+            "required": ["formula"]
         }
     },
     "definitions": {
+         "formula": {
+             "type": "object",
+             "properties": {
+               "components": {
+                 "description": "Transient components that are used in tasks that constitute one or more of this formula's workflows",
+                 "type": "array",
+                 "items": {"$ref": "#/definitions/component"},
+                 "uniqueItems": true
+               },
+               "services": {
+                  "description": "Transient services that are used in tasks that constitute one or more of this formula's workflows",
+                  "type": "array",
+                  "items": {"$ref": "#/definitions/service"},
+                  "uniqueItems": true
+               },
+               "workflows": {
+                  "description": "List of workflows that can be triggered",
+                  "type": "array",
+                  "items": {"$ref": "#/definitions/workflow"},
+                  "uniqueItems": true
+               }
+             }
+        },
         "workflow": {
           "type": "object",
+          "allOf": [{"$ref": "#/definitions/abstractResourceType"}],
           "properties": {
+              "type": {
+                 "type": "string",
+                 "enum": ["lint", "scan", "build", "test", "deploy", "release",
+                    "continuous-integration", "continuous-delivery"]
+              },
+              "instanceId": {
+                "type": "string",
+                "description": "unique identifier of the specific workflow execution instance"
+              },
               "tasks": {
                   "type": "array",
                   "items": {"$ref": "#/definitions/task"},
@@ -26,9 +59,12 @@
                   "type": "array",
                   "items": {"$ref": "#/definitions/dependency"},
                   "uniqueItems": true
-              }
+              },
+              "bom-ref": {},
+              "name": {},
+              "description": {}
           },
-          "required": ["tasks"]
+          "required": ["type", "tasks"]
         },
         "task": {
             "type": "object",
@@ -40,7 +76,8 @@
                     "uniqueItems": true
                 },
                 "bom-ref": {},
-                "name": {}
+                "name": {},
+                "description": {}
             },
             "additionalProperties": false
         },
@@ -95,7 +132,7 @@
             },
             "required": ["bom-ref", "name"]
         },
-        "componentType": {
+        "component": {
             "allOf": [ {"$ref": "#/definitions/abstractResourceType"}],
             "properties": {
                 "type": {"type": "string",
@@ -111,7 +148,7 @@
             },
             "additionalProperties": false
         },
-        "serviceType": {
+        "service": {
             "allOf": [ {"$ref": "#/definitions/abstractResourceType"}],
              "properties": {
                 "endpoints": {"type": "object"},
@@ -124,7 +161,7 @@
             },
             "additionalProperties": false
         },
-        "machineLearningModelType": {
+        "machineLearningModel": {
             "allOf": [ {"$ref": "#/definitions/abstractResourceType"}],
             "properties": {
                 "modelCard": {"type": "object"},
@@ -140,9 +177,9 @@
         "resourceChoice": {
             "type": "object",
             "oneOf": [
-                {"$ref": "#/definitions/componentType" },
-                {"$ref": "#/definitions/serviceType"},
-                {"$ref": "#/definitions/machineLearningModelType"}
+                {"$ref": "#/definitions/component" },
+                {"$ref": "#/definitions/service"},
+                {"$ref": "#/definitions/machineLearningModel"}
             ]
         },
         "resourceReferenceChoice": {
