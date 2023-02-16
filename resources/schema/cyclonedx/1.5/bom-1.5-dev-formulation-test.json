@@ -1,16 +1,13 @@
 {
+    "$id": "http://cyclonedx.org/schema/bom-1.5-dev-formulation.schema.json",
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "https://test-formulation",
     "type": "object",
-    "required": ["bom"],
+    "required": ["formula"],
+    "additionalProperties": false,
     "properties": {
-        "bom": {
+        "formula": {
             "type": "object",
-            "properties": {
-                "formula": {"$ref": "#/definitions/formula"}
-            },
-            "additionalItems": false,
-            "required": ["formula"]
+            "$ref": "#/definitions/formula"
         }
     },
     "definitions": {
