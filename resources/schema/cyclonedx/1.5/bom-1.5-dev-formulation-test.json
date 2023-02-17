@@ -51,7 +51,7 @@
                   "items": {"$ref": "#/definitions/task"},
                   "uniqueItems": true
               },
-              "dependencies": {
+              "taskDependencies": {
                   "type": "array",
                   "items": {"$ref": "#/definitions/dependency"},
                   "uniqueItems": true
@@ -64,8 +64,10 @@
         },
         "task": {
             "type": "object",
+            "additionalProperties": false,
             "allOf": [{"$ref": "#/definitions/abstractResourceType"}],
             "properties": {
+                "trigger": {"$ref": "#/definitions/trigger"},
                 "steps": {
                     "type": "array",
                     "items": {"$ref": "#/definitions/step"},
@@ -75,13 +77,80 @@
                 "name": {},
                 "description": {}
             },
-            "additionalProperties": false
+            "timeStart": {
+                "type": "string",
+                "format": "date-time",
+                "title": "timeStart",
+                "description": "The date and time (timestamp) when the task started."
+              },
+              "timeEnd": {
+                "type": "string",
+                "format": "date-time",
+                "title": "timeEnd",
+                "description": "The date and time (timestamp) when the task ended."
+              }
         },
         "step": {
-            "type": "object"
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "commands": {
+                    "description": "Ordered list of commands or directives for the step",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "trigger": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "type": "string",
+                     "enum": ["api", "webhook", "cron"]
+                },
+                "event": { "$ref": "#/definitions/event"},
+                "resource": {
+                    "$ref": "#/definitions/resourceReferenceChoice",
+                    "description": "The trigger's implementation (e.g., a component or service)"
+                },
+                "condition": {
+                    "type": "object",
+                    "properties": {
+                       "description": { "type": "string"},
+                       "expression": { "type": "string"}
+                    }
+                },
+                "timeActivated": {
+                    "type": "string",
+                    "format": "date-time",
+                    "title": "timeActivated",
+                    "description": "The date and time (timestamp) when the trigger was activated."
+                }
+            }
+        },
+        "event": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "id": { "type": "string"},
+                "description": { "type": "string"},
+                "timeReceived": {
+                    "type": "string",
+                    "format": "date-time",
+                    "title": "timeReceived",
+                    "description": "The date and time (timestamp) when the event was received."
+                },
+                "data": {"$ref": "#/definitions/attachment"},
+                "source": {"$ref": "#/definitions/resourceReferenceChoice"},
+                "target": {"$ref": "#/definitions/resourceReferenceChoice"}
+            }
         },
         "inputType": {
             "type": "object",
+            "additionalProperties": false,
             "properties": {
                 "resourceRefs": {
                     "type": "array",
@@ -93,11 +162,11 @@
                     "items": {"$ref": "#/definitions/property"},
                     "uniqueItems": true
                 }
-            },
-            "additionalProperties": false
+            }
         },
         "outputType": {
             "type": "object",
+            "additionalProperties": false,
             "properties": {
                 "resourceRefs": {
                     "type": "array",
@@ -109,8 +178,7 @@
                     "items": {"$ref": "#/definitions/property"},
                     "uniqueItems": true
                 }
-            },
-            "additionalProperties": false
+            }
         },
         "abstractResourceType": {
             "type": "object",
@@ -220,6 +288,24 @@
               "comment": {"type": "string"},
               "type": {"type": "string"},
               "hashes": {"type": "string"}
+            }
+        },
+        "attachment": {
+            "type": "object",
+            "required": ["content"],
+            "additionalProperties": false,
+            "properties": {
+              "contentType": {
+                "type": "string",
+                "default": "text/plain"
+              },
+              "encoding": {
+                "type": "string",
+                "enum": ["base64"]
+              },
+              "content": {
+                "type": "string"
+              }
             }
         },
         "refType": {"type": "string"}
