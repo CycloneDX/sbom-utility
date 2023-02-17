@@ -183,30 +183,38 @@
         "abstractResourceType": {
             "type": "object",
             "properties": {
-                "bom-ref": {"type": "string"},
+                "bom-ref": {"#ref": "#/definitions/refType"},
                 "name": {"type": "string"},
 				"version": {"type": "string"},
                 "description": {"type": "string"},
+                "licenses": {"type": "object"},
+                "releaseNotes": {"type": "object"},
                 "externalReferences": {"type": "object"},
                 "properties": {
                     "type": "array",
                     "items": {"$ref": "#/definitions/property"},
                     "additionalItems": false
-                }
+                },
+                "signature": {"type": "object"}
             },
             "required": ["bom-ref", "name"]
         },
         "component": {
             "allOf": [ {"$ref": "#/definitions/abstractResourceType"}],
             "properties": {
-                "type": {"type": "string",
+                "type": {
+                    "type": "string",
                     "enum": ["application", "library", "container",
                       "operating-system", "file", "configuration", "log"]},
                 "cpe": {"type": "string"},
+                "purl": {"type": "string"},
+                "swid": {"type": "string"},
+                "copyright": {"type": "string"},
                 "bom-ref": {},
                 "name": {},
                 "version": {},
                 "description": {},
+                "licenses": {},
                 "externalReferences": {},
                 "properties": {}
             },
@@ -215,7 +223,12 @@
         "service": {
             "allOf": [ {"$ref": "#/definitions/abstractResourceType"}],
              "properties": {
+                "provider": {"$ref": "#/definitions/organizationalEntity"},
+                "group": {"type": "string"},
                 "endpoints": {"type": "object"},
+                "authenticated": {"type": "boolean"},
+                "x-trust-boundary": {"type": "boolean"},
+                "data": {"type": "object"},
                 "bom-ref": {},
                 "name": {},
                 "version": {},
@@ -305,6 +318,26 @@
               },
               "content": {
                 "type": "string"
+              }
+            }
+        },
+        "organizationalEntity": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "url": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "iri-reference"
+                }
+              },
+              "contact": {
+                "type": "array",
+                "items": {"type": "string"}
               }
             }
         },
