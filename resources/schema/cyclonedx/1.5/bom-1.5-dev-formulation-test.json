@@ -6,7 +6,6 @@
     "additionalProperties": false,
     "properties": {
         "formula": {
-            "type": "object",
             "$ref": "#/definitions/formula"
         }
     },
@@ -91,7 +90,7 @@
                 },
                 "environmentVars": {
                     "type": "array",
-                    "items": {"$ref": "#/definitions/properties"},
+                    "items": {"$ref": "#/definitions/property"},
                     "uniqueItems": true
                 }
             },
@@ -107,7 +106,7 @@
                 },
                 "environmentVars": {
                     "type": "array",
-                    "items": {"$ref": "#/definitions/properties"},
+                    "items": {"$ref": "#/definitions/property"},
                     "uniqueItems": true
                 }
             },
@@ -208,6 +207,19 @@
                     "items": {"$ref": "#/definitions/refType"},
                     "uniqueItems": true
                 }
+            }
+        },
+        "externalReference": {
+            "type": "object",
+            "title": "External Reference",
+            "description": "Specifies an individual external reference",
+            "required": [ "url", "type" ],
+            "additionalProperties": false,
+            "properties": {
+              "url": {"type": "string"},
+              "comment": {"type": "string"},
+              "type": {"type": "string"},
+              "hashes": {"type": "string"}
             }
         },
         "refType": {"type": "string"}
