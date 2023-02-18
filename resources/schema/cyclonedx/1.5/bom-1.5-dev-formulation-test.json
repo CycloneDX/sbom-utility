@@ -73,22 +73,24 @@
                     "items": {"$ref": "#/definitions/step"},
                     "uniqueItems": true
                 },
+                "timeStart": {
+                    "type": "string",
+                    "format": "date-time",
+                    "title": "timeStart",
+                    "description": "The date and time (timestamp) when the task started."
+                },
+                "timeEnd": {
+                    "type": "string",
+                    "format": "date-time",
+                    "title": "timeEnd",
+                    "description": "The date and time (timestamp) when the task ended."
+                 },
                 "bom-ref": {},
                 "name": {},
-                "description": {}
-            },
-            "timeStart": {
-                "type": "string",
-                "format": "date-time",
-                "title": "timeStart",
-                "description": "The date and time (timestamp) when the task started."
-              },
-              "timeEnd": {
-                "type": "string",
-                "format": "date-time",
-                "title": "timeEnd",
-                "description": "The date and time (timestamp) when the task ended."
-              }
+                "description": {},
+                "version": {},
+                "properties": {}
+            }
         },
         "step": {
             "type": "object",
@@ -189,7 +191,11 @@
                 "description": {"type": "string"},
                 "licenses": {"type": "object"},
                 "releaseNotes": {"type": "object"},
-                "externalReferences": {"type": "object"},
+                "externalReferences": {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/externalReference"},
+                    "additionalItems": false
+                },
                 "properties": {
                     "type": "array",
                     "items": {"$ref": "#/definitions/property"},
@@ -272,6 +278,8 @@
         },
         "property": {
             "type": "object",
+            "$comment": "TODO: v1.5 missing `additionalProperties` constraint",
+            "additionalProperties": false,
             "properties": {
                 "name": {"type": "string"},
                 "value": {"type": "string"}
@@ -292,8 +300,6 @@
         },
         "externalReference": {
             "type": "object",
-            "title": "External Reference",
-            "description": "Specifies an individual external reference",
             "required": [ "url", "type" ],
             "additionalProperties": false,
             "properties": {
