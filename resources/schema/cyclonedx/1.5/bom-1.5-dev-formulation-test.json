@@ -99,6 +99,22 @@
                     "items": {"$ref": "#/definitions/step"},
                     "uniqueItems": true
                 },
+                "inputs": {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/inputType"},
+                    "uniqueItems": true
+                },
+                "outputs": {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/outputType"},
+                    "uniqueItems": true
+                },
+                "tools": {
+                    "$comment": "TBD: Tools could be declared as inputs/outputs/both",
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/outputType"},
+                    "uniqueItems": true
+                },
                 "timeStart": {
                     "type": "string",
                     "format": "date-time",
