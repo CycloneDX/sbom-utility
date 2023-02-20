@@ -35,12 +35,14 @@
         },
         "workflow": {
           "type": "object",
-          "allOf": [{"$ref": "#/definitions/abstractResourceType"}],
+          "additionalProperties": false,
+          "required": ["type", "tasks"],
+          "allOf": [{"$ref": "#/definitions/taskType"}],
           "properties": {
               "type": {
                  "type": "string",
                  "enum": ["lint", "scan", "build", "test", "deploy", "release",
-                    "continuous-integration", "continuous-delivery"]
+                    "continuous-integration", "continuous-delivery", "other"]
               },
               "instanceId": {
                 "type": "string",
@@ -56,15 +58,39 @@
                   "items": {"$ref": "#/definitions/dependency"},
                   "uniqueItems": true
               },
+              "workspaces": {
+                "type": "array",
+                "items": {"$ref": "#/definitions/workspace"},
+                "uniqueItems": true
+            },
+              "trigger": {},
               "bom-ref": {},
               "name": {},
               "description": {}
-          },
-          "required": ["type", "tasks"]
+          }
         },
         "task": {
-            "type": "object",
             "additionalProperties": false,
+            "allOf": [{"$ref": "#/definitions/taskType"}],
+            "properties": {
+                "trigger": {},
+                "steps": {},
+                "timeStart": {},
+                "timeEnd": {},
+                "bom-ref": {},
+                "name": {},
+                "description": {},
+                "version": {},
+                "licenses": {},
+                "releaseNotes": {},
+                "externalReferences": {},
+                "properties": {},
+                "signature": {}
+            }
+        },
+        "taskType": {
+            "type": "object",
+            "additionalProperties": true,
             "allOf": [{"$ref": "#/definitions/abstractResourceType"}],
             "properties": {
                 "trigger": {"$ref": "#/definitions/trigger"},
@@ -84,12 +110,21 @@
                     "format": "date-time",
                     "title": "timeEnd",
                     "description": "The date and time (timestamp) when the task ended."
-                 },
+                },
+                 "workspaceRefs": {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/workspaceRef"},
+                    "uniqueItems": true
+                },
                 "bom-ref": {},
                 "name": {},
                 "description": {},
                 "version": {},
-                "properties": {}
+                "licenses": {},
+                "releaseNotes": {},
+                "externalReferences": {},
+                "properties": {},
+                "signature": {}
             }
         },
         "step": {
@@ -104,6 +139,43 @@
                     }
                 }
             }
+        },
+        "workspace": {
+            "type": "object",
+            "$comment": "https://kubernetes.io/docs/concepts/storage/persistent-volumes/",
+            "additionalProperties": true,
+            "allOf": [{"$ref": "#/definitions/abstractResourceType"}],
+            "properties": {
+                "accessMode": {
+                    "type": "string",
+                    "enum": ["read-write-once","read-only", "read-write-many", "write-once", "write-only"]
+                },
+                "mountPath": {"type": "string"},
+                "sizeAllocated": {"type": "string"},
+                "volume": {
+                    "$ref": "#/definitions/volume"
+                },
+                "description": {}
+            }
+        },
+        "workspaceRef": {
+            "type": "object",
+            "additionalProperties": true,
+            "allOf": [{"$ref": "#/definitions/abstractResourceType"}],
+            "properties": {
+                "name": {},
+                "description": {}
+            }
+        },
+        "volume": {
+            "properties": {
+                "volumeName": {"type": "string"},
+                "volumeMode": {
+                    "type": "string",
+                    "enum": ["filesystem"]
+                },
+                "volumePath": {"type": "string"}
+           }
         },
         "trigger": {
             "type": "object",
@@ -244,25 +316,11 @@
             },
             "additionalProperties": false
         },
-        "machineLearningModel": {
-            "allOf": [ {"$ref": "#/definitions/abstractResourceType"}],
-            "properties": {
-                "modelCard": {"type": "object"},
-                "bom-ref": {},
-                "name": {},
-                "version": {},
-                "description": {},
-                "externalReferences": {},
-                "properties": {}
-            },
-            "additionalProperties": false
-        },
         "resourceChoice": {
             "type": "object",
             "oneOf": [
                 {"$ref": "#/definitions/component" },
-                {"$ref": "#/definitions/service"},
-                {"$ref": "#/definitions/machineLearningModel"}
+                {"$ref": "#/definitions/service"}
             ]
         },
         "resourceReferenceChoice": {
