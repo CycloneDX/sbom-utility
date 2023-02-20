@@ -112,7 +112,7 @@
                 "tools": {
                     "$comment": "TBD: Tools could be declared as inputs/outputs/both",
                     "type": "array",
-                    "items": {"$ref": "#/definitions/outputType"},
+                    "items": {"$ref": "#/definitions/resourceReferenceChoice"},
                     "uniqueItems": true
                 },
                 "timeStart": {
