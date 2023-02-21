@@ -63,10 +63,14 @@
                 "items": {"$ref": "#/definitions/workspace"},
                 "uniqueItems": true
             },
-              "trigger": {},
-              "bom-ref": {},
-              "name": {},
-              "description": {}
+            "trigger": {},
+            "timeStart": {},
+            "timeEnd": {},
+            "name": {},
+            "description": {},
+            "bom-ref": {},
+            "externalReferences": {},
+            "properties": {}
           }
         },
         "task": {
@@ -78,14 +82,11 @@
                 "timeStart": {},
                 "timeEnd": {},
                 "bom-ref": {},
+                "externalReferences": {},
                 "name": {},
                 "description": {},
                 "version": {},
-                "licenses": {},
-                "releaseNotes": {},
-                "externalReferences": {},
-                "properties": {},
-                "signature": {}
+                "properties": {}
             }
         },
         "taskType": {
@@ -135,25 +136,33 @@
                 "bom-ref": {},
                 "name": {},
                 "description": {},
-                "version": {},
-                "licenses": {},
-                "releaseNotes": {},
                 "externalReferences": {},
-                "properties": {},
-                "signature": {}
+                "properties": {}
             }
         },
         "step": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
+                "name": {"type": "string"},
+                "description": {"type": "string"},
                 "commands": {
                     "description": "Ordered list of commands or directives for the step",
                     "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "items": { "$ref": "#/definitions/command"}
+                },
+                "properties": {
+                    "type": "array",
+                    "additionalItems": false,
+                    "items": {"$ref": "#/definitions/property"}
                 }
+            }
+        },
+        "command": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "executed": { "type": "string" }
             }
         },
         "workspace": {
@@ -167,7 +176,6 @@
                     "enum": ["read-write-once","read-only", "read-write-many", "write-once", "write-only"]
                 },
                 "mountPath": {"type": "string"},
-                "sizeAllocated": {"type": "string"},
                 "volume": {
                     "$ref": "#/definitions/volume"
                 },
@@ -184,13 +192,16 @@
             }
         },
         "volume": {
+            "type": "object",
+            "additionalProperties": false,
             "properties": {
                 "volumeName": {"type": "string"},
                 "volumeMode": {
                     "type": "string",
                     "enum": ["filesystem"]
                 },
-                "volumePath": {"type": "string"}
+                "volumePath": {"type": "string"},
+                "sizeAllocated": {"type": "string"}
            }
         },
         "trigger": {
@@ -293,63 +304,6 @@
             },
             "required": ["bom-ref", "name"]
         },
-        "component": {
-            "allOf": [ {"$ref": "#/definitions/abstractResourceType"}],
-            "properties": {
-                "type": {
-                    "type": "string",
-                    "enum": ["application", "library", "container",
-                      "operating-system", "file", "configuration", "log"]},
-                "cpe": {"type": "string"},
-                "purl": {"type": "string"},
-                "swid": {"type": "string"},
-                "copyright": {"type": "string"},
-                "bom-ref": {},
-                "name": {},
-                "version": {},
-                "description": {},
-                "licenses": {},
-                "externalReferences": {},
-                "properties": {}
-            },
-            "additionalProperties": false
-        },
-        "service": {
-            "allOf": [ {"$ref": "#/definitions/abstractResourceType"}],
-             "properties": {
-                "provider": {"$ref": "#/definitions/organizationalEntity"},
-                "group": {"type": "string"},
-                "endpoints": {"type": "object"},
-                "authenticated": {"type": "boolean"},
-                "x-trust-boundary": {"type": "boolean"},
-                "data": {"type": "object"},
-                "bom-ref": {},
-                "name": {},
-                "version": {},
-                "description": {},
-                "externalReferences": {},
-                "properties": {}
-            },
-            "additionalProperties": false
-        },
-        "resourceChoice": {
-            "type": "object",
-            "oneOf": [
-                {"$ref": "#/definitions/component" },
-                {"$ref": "#/definitions/service"}
-            ]
-        },
-        "resourceReferenceChoice": {
-            "type": "object",
-            "properties": {
-                "bom-ref": { "$ref": "#/definitions/refType"},
-                "externalReference": {"$ref": "#/definitions/externalReference"}
-            },
-            "oneOf":[
-                {"required": ["bom-ref"]},
-                {"required": ["externalReference"]}
-            ]
-        },
         "property": {
             "type": "object",
             "$comment": "TODO: v1.5 missing `additionalProperties` constraint",
@@ -379,7 +333,16 @@
             "properties": {
               "url": {"type": "string"},
               "comment": {"type": "string"},
-              "type": {"type": "string"},
+              "type": {
+                "type": "string",
+                "enum": [ "vcs", "issue-tracker", "website",
+                    "advisories", "bom", "mailing-list",
+                    "social", "chat", "documentation",
+                    "support", "distribution", "license", "build-meta",
+                    "build-system", "release-notes", "other",
+                    "log", "configuration", "evidence"
+                  ]
+              },
               "hashes": {"type": "string"}
             }
         },
@@ -421,6 +384,127 @@
               }
             }
         },
-        "refType": {"type": "string"}
+        "component": {
+            "type": "object",
+            "required": ["type", "name" ],
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [ "application", "framework","library", "container",
+                    "operating-system", "device", "firmware", "file",
+                    "log", "configuration", "evidence", "utility", "client"
+                ]
+              },
+              "mime-type": {"type": "string"},
+              "bom-ref": {
+                "$ref": "#/definitions/refType"
+              },
+              "supplier": {"type": "string"},
+              "author": {"type": "string"},
+              "publisher": {"type": "string"},
+              "group": {"type": "string"},
+              "name": {"type": "string"},
+              "version": {"type": "string"},
+              "description": {"type": "string"},
+              "scope": {"type": "string"},
+              "hashes": {
+                "type": "array",
+                "additionalItems": false,
+                "items": {"type": "string"}
+              },
+              "licenses": {
+                "type": "array",
+                "additionalItems": false,
+                "items": {"type": "string"}
+              },
+              "copyright": {"type": "string"},
+              "cpe": {"type": "string"},
+              "purl": {"type": "string"},
+              "swid": {"type": "string"},
+              "pedigree": {
+                "type": "object"
+              },
+              "externalReferences": {
+                "type": "array",
+                "additionalItems": false,
+                "items": {"$ref": "#/definitions/externalReference"}
+              },
+              "components": {
+                "type": "array",
+                "additionalItems": false,
+                "items": {"$ref": "#/definitions/component"},
+                "uniqueItems": true
+              },
+              "evidence": {"type": "string"},
+              "releaseNotes": {"type": "string"},
+              "properties": {
+                "type": "array",
+                "additionalItems": false,
+                "items": {"$ref": "#/definitions/property"}
+              },
+              "signature": {"type": "string"}
+            }
+        },
+        "service": {
+            "type": "object",
+            "required": ["name"],
+            "additionalProperties": false,
+            "properties": {
+              "bom-ref": {"$ref": "#/definitions/refType"},
+              "provider": {"type": "string"},
+              "group": {"type": "string"},
+              "name": {"type": "string"},
+              "version": {"type": "string"},
+              "description": {"type": "string"},
+              "endpoints": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "authenticated": {"type": "boolean"},
+              "x-trust-boundary": {"type": "boolean"},
+              "data": {"type": "string"},
+              "licenses": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "externalReferences": {
+                "type": "array",
+                "items": {"$ref": "#/definitions/externalReference"}
+              },
+              "services": {
+                "type": "array",
+                "additionalItems": false,
+                "items": {"$ref": "#/definitions/service"},
+                "uniqueItems": true
+              },
+              "releaseNotes": {"type": "string"},
+              "properties": {
+                "type": "array",
+                "additionalItems": false,
+                "items": {"$ref": "#/definitions/property"}
+              },
+              "signature": { "type": "string"}
+            }
+        },
+        "refType": {"type": "string"},
+        "resourceChoice": {
+            "type": "object",
+            "oneOf": [
+                {"$ref": "#/definitions/component" },
+                {"$ref": "#/definitions/service"}
+            ]
+        },
+        "resourceReferenceChoice": {
+            "type": "object",
+            "properties": {
+                "bom-ref": { "$ref": "#/definitions/refType"},
+                "externalReference": {"$ref": "#/definitions/externalReference"}
+            },
+            "oneOf":[
+                {"required": ["bom-ref"]},
+                {"required": ["externalReference"]}
+            ]
+        }
     }
 }
