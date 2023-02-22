@@ -257,19 +257,31 @@
                     "type": "string",
                     "enum": [ "configuration", "parameters", "environment-vars", "data", "other"]
                 },
-                "source": {"$ref": "#/definitions/resourceReferenceChoice"},
+                "source": {
+                    "$comment": "Component or service the provided the input to the task (e.g., reference to a service data flow value of `inbound`)",
+                    "$ref": "#/definitions/resourceReferenceChoice"
+                },
                 "environmentVars": {
                     "type": "array",
                     "items": {"$ref": "#/definitions/property"},
                     "uniqueItems": true
-                }
+                },
+                "data": {"$ref": "#/definitions/attachment"}
             }
         },
         "outputType": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "target": {"$ref": "#/definitions/resourceReferenceChoice"},
+                "type": {
+                    "type": "string",
+                    "enum": [ "log", "evidence", "metrics", "data", "other"]
+                },
+                "target": {
+                    "$comment": "Component or service the provided the input to the task (e.g., reference to a service data flow value of `outbound`)",
+                    "$ref": "#/definitions/resourceReferenceChoice"
+                },
+                "data": {"$ref": "#/definitions/attachment"},
                 "resourceRef": {"$ref": "#/definitions/resourceReferenceChoice"}
             }
         },
