@@ -253,11 +253,11 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "resourceRefs": {
-                    "type": "array",
-                    "items": {"$ref": "#/definitions/resourceReferenceChoice"},
-                    "uniqueItems": true
+                "type": {
+                    "type": "string",
+                    "enum": [ "configuration", "parameters", "environment-vars", "data", "other"]
                 },
+                "source": {"$ref": "#/definitions/resourceReferenceChoice"},
                 "environmentVars": {
                     "type": "array",
                     "items": {"$ref": "#/definitions/property"},
@@ -269,16 +269,8 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "resourceRefs": {
-                    "type": "array",
-                    "items": {"$ref": "#/definitions/resourceReferenceChoice"},
-                    "uniqueItems": true
-                },
-                "environmentVars": {
-                    "type": "array",
-                    "items": {"$ref": "#/definitions/property"},
-                    "uniqueItems": true
-                }
+                "target": {"$ref": "#/definitions/resourceReferenceChoice"},
+                "resourceRef": {"$ref": "#/definitions/resourceReferenceChoice"}
             }
         },
         "abstractResourceType": {
@@ -391,14 +383,13 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": [ "application", "framework","library", "container",
+                "enum": [ "application", "framework", "library", "container",
                     "operating-system", "device", "firmware", "file",
                     "log", "configuration", "evidence", "utility", "client"
                 ]
               },
               "mime-type": {"type": "string"},
               "bom-ref": {
-                "$ref": "#/definitions/refType"
               },
               "supplier": {"type": "string"},
               "author": {"type": "string"},
