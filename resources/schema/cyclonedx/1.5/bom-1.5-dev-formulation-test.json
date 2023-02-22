@@ -258,7 +258,11 @@
                     "enum": [ "configuration", "parameters", "environment-vars", "data", "other"]
                 },
                 "source": {
-                    "$comment": "Component or service the provided the input to the task (e.g., reference to a service data flow value of `inbound`)",
+                    "$comment": "Component or service the provided the input to the task (e.g., reference to a service with data flow value of `inbound`)",
+                    "$ref": "#/definitions/resourceReferenceChoice"
+                },
+                "target": {
+                    "$comment": "Component or service that received or stored the input if not the task itself (e.g., a local, named storage workspace)",
                     "$ref": "#/definitions/resourceReferenceChoice"
                 },
                 "environmentVars": {
@@ -277,8 +281,12 @@
                     "type": "string",
                     "enum": [ "log", "evidence", "metrics", "data", "other"]
                 },
+                "source": {
+                    "$comment": "Component or service that generated or provided the output from the task (e.g., a build tool)",
+                    "$ref": "#/definitions/resourceReferenceChoice"
+                },
                 "target": {
-                    "$comment": "Component or service the provided the input to the task (e.g., reference to a service data flow value of `outbound`)",
+                    "$comment": "Component or service that received the output from the task (e.g., reference to an artifactory service with data flow value of `outbound`)",
                     "$ref": "#/definitions/resourceReferenceChoice"
                 },
                 "data": {"$ref": "#/definitions/attachment"},
