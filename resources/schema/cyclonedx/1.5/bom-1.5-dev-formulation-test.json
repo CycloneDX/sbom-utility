@@ -405,7 +405,8 @@
                 "type": "string",
                 "enum": [ "application", "framework", "library", "container",
                     "operating-system", "device", "firmware", "file",
-                    "log", "configuration", "evidence", "utility", "client"
+                    "resource-definition", "configuration", "tool", "client",
+                    "repository"
                 ]
               },
               "mime-type": {"type": "string"},
@@ -499,7 +500,38 @@
             }
         },
         "refType": {"type": "string"},
+        "instanceInfo": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "uid": {
+                    "type": "string",
+                    "title": "Identifier",
+                    "description": "The unique identifier for the resource instance within its deployment context."
+                },
+                "name": {
+                    "type": "string",
+                    "title": "Name",
+                    "description": "The name of the resource instance."
+                },
+                  "description": {
+                    "type": "string",
+                    "title": "Description",
+                    "description": "A description of the resource instance."
+                },
+                "properties": {
+                    "type": "array",
+                    "title": "Properties",
+                    "description": "Provides the ability to document properties in a name-value store. This provides flexibility to include data not officially supported in the standard without having to use additional namespaces or create extensions. Unlike key-value stores, properties support duplicate names, each potentially having different values. Property names of interest to the general public are encouraged to be registered in the [CycloneDX Property Taxonomy](https://github.com/CycloneDX/cyclonedx-property-taxonomy). Formal registration is OPTIONAL.",
+                    "additionalItems": false,
+                    "items": {
+                      "$ref": "#/definitions/property"
+                    }
+                }
+            }
+        },
         "resourceChoice": {
+            "$comment": "Enables construction of resource graphs from any of the constrained list of concrete types",
             "type": "object",
             "oneOf": [
                 {"$ref": "#/definitions/component" },
@@ -507,10 +539,13 @@
             ]
         },
         "resourceReferenceChoice": {
+            "$comment": "Enables reference to a resource that participats in a a workflow; using either internal (bom-ref) or external (externalReference) types.",
             "type": "object",
+            "additionalProperties": false,
             "properties": {
                 "bom-ref": { "$ref": "#/definitions/refType"},
-                "externalReference": {"$ref": "#/definitions/externalReference"}
+                "externalReference": {"$ref": "#/definitions/externalReference"},
+                "instanceInfo": {"$ref": "#/definitions/instanceInfo"}
             },
             "oneOf":[
                 {"required": ["bom-ref"]},
