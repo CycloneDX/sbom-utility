@@ -31,69 +31,66 @@
                   "items": {"$ref": "#/definitions/workflow"},
                   "uniqueItems": true
                }
-             }
+            }
         },
         "workflow": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["type", "tasks"],
+          "required": ["tasks"],
           "allOf": [{"$ref": "#/definitions/taskType"}],
           "properties": {
-              "type": {
-                 "type": "string",
-                 "enum": ["lint", "scan", "build", "test", "deploy", "release",
-                    "continuous-integration", "continuous-delivery", "other"]
-              },
-              "instanceId": {
-                "type": "string",
-                "description": "unique identifier of the specific workflow execution instance"
-              },
-              "tasks": {
-                  "type": "array",
-                  "items": {"$ref": "#/definitions/task"},
-                  "uniqueItems": true
-              },
-              "taskDependencies": {
-                  "type": "array",
-                  "items": {"$ref": "#/definitions/dependency"},
-                  "uniqueItems": true
-              },
-              "workspaces": {
-                "type": "array",
-                "items": {"$ref": "#/definitions/workspace"},
-                "uniqueItems": true
-            },
-            "trigger": {},
-            "timeStart": {},
-            "timeEnd": {},
-            "name": {},
-            "description": {},
-            "bom-ref": {},
-            "externalReferences": {},
-            "properties": {}
-          }
+                "tasks": {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/task"},
+                    "uniqueItems": true
+                },
+                "taskDependencies": {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/dependency"},
+                    "uniqueItems": true
+                },
+                "workspaces": {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/workspace"},
+                    "uniqueItems": true
+                },
+                "type": {},
+                "trigger": {},
+                "timeStart": {},
+                "timeEnd": {},
+                "name": {},
+                "description": {},
+                "bom-ref": {},
+                "uid": {},
+                "properties": {}
+           }
         },
         "task": {
             "additionalProperties": false,
             "allOf": [{"$ref": "#/definitions/taskType"}],
             "properties": {
+                "type": {},
                 "trigger": {},
                 "steps": {},
                 "timeStart": {},
                 "timeEnd": {},
                 "bom-ref": {},
-                "externalReferences": {},
+                "uid": {},
                 "name": {},
                 "description": {},
-                "version": {},
                 "properties": {}
             }
         },
         "taskType": {
             "type": "object",
             "additionalProperties": true,
-            "allOf": [{"$ref": "#/definitions/abstractResourceType"}],
+            "required": ["type"],
+            "allOf": [{"$ref": "#/definitions/resourceInstance"}],
             "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [ "lint", "scan", "build", "test", "deploy", "release", "clean", "other"]
+                },
                 "trigger": {"$ref": "#/definitions/trigger"},
                 "steps": {
                     "type": "array",
@@ -128,15 +125,15 @@
                     "title": "timeEnd",
                     "description": "The date and time (timestamp) when the task ended."
                 },
-                 "workspaceRefs": {
+                "workspaces": {
                     "type": "array",
-                    "items": {"$ref": "#/definitions/workspaceRef"},
+                    "items": {"$ref": "#/definitions/workspace"},
                     "uniqueItems": true
                 },
                 "bom-ref": {},
+                "uid": {},
                 "name": {},
                 "description": {},
-                "externalReferences": {},
                 "properties": {}
             }
         },
@@ -167,9 +164,10 @@
         },
         "workspace": {
             "type": "object",
-            "$comment": "https://kubernetes.io/docs/concepts/storage/persistent-volumes/",
+            "$comment": "Shared storage for workflow tasks",
+            "examples": ["https://kubernetes.io/docs/concepts/storage/persistent-volumes/"],
             "additionalProperties": true,
-            "allOf": [{"$ref": "#/definitions/abstractResourceType"}],
+            "allOf": [{"$ref": "#/definitions/resourceInstance"}],
             "properties": {
                 "accessMode": {
                     "type": "string",
@@ -179,14 +177,8 @@
                 "volume": {
                     "$ref": "#/definitions/volume"
                 },
-                "description": {}
-            }
-        },
-        "workspaceRef": {
-            "type": "object",
-            "additionalProperties": true,
-            "allOf": [{"$ref": "#/definitions/abstractResourceType"}],
-            "properties": {
+                "bom-ref": {},
+                "uid": {},
                 "name": {},
                 "description": {}
             }
@@ -245,29 +237,62 @@
                     "description": "The date and time (timestamp) when the event was received."
                 },
                 "data": {"$ref": "#/definitions/attachment"},
-                "source": {"$ref": "#/definitions/resourceReferenceChoice"},
-                "target": {"$ref": "#/definitions/resourceReferenceChoice"}
+                "source": {
+                    "$comment": "Component or service that was the source of the event",
+                    "$ref": "#/definitions/resourceReferenceChoice"
+                },
+                "target": {
+                    "$comment": "Component or service that was the target of the event",
+                    "$ref": "#/definitions/resourceReferenceChoice"
+                }
             }
         },
         "inputType": {
             "type": "object",
+            "oneOf": [
+                {
+                  "required": ["resource"]
+                },
+                {
+                  "required": ["parameters"]
+                },
+                {
+                  "required": ["environmentVars"]
+                },
+                {
+                  "required": ["data"]
+                }
+            ],
             "additionalProperties": false,
             "properties": {
-                "type": {
-                    "type": "string",
-                    "enum": [ "configuration", "parameters", "environment-vars", "data", "other"]
-                },
                 "source": {
-                    "$comment": "Component or service the provided the input to the task (e.g., reference to a service with data flow value of `inbound`)",
+                    "$comment": "Component or service that provided the input to the task (e.g., reference to a service with data flow value of `inbound`)",
+                    "examples": ["source code repository", "database"],
                     "$ref": "#/definitions/resourceReferenceChoice"
                 },
                 "target": {
                     "$comment": "Component or service that received or stored the input if not the task itself (e.g., a local, named storage workspace)",
+                    "examples": ["workspace", "directory"],
                     "$ref": "#/definitions/resourceReferenceChoice"
+                },
+                "resource": {
+                    "$comment": "A reference to an independent resource provided as an input to a task by the workflow runtime.",
+                    "examples": ["configuration file", "source code", "scanning service"],
+                    "$ref": "#/definitions/resourceReferenceChoice"
+                },
+                "parameters": {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/property"},
+                    "uniqueItems": true
                 },
                 "environmentVars": {
                     "type": "array",
-                    "items": {"$ref": "#/definitions/property"},
+                    "items": {
+                        "oneOf": [
+                            {"$ref": "#/definitions/property"},
+                            {"type": "string" }
+                        ]
+                    },
                     "uniqueItems": true
                 },
                 "data": {"$ref": "#/definitions/attachment"}
@@ -289,9 +314,13 @@
                     "$comment": "Component or service that received the output from the task (e.g., reference to an artifactory service with data flow value of `outbound`)",
                     "$ref": "#/definitions/resourceReferenceChoice"
                 },
-                "data": {"$ref": "#/definitions/attachment"},
-                "resourceRef": {"$ref": "#/definitions/resourceReferenceChoice"}
-            }
+                "resource": {
+                    "$comment": "A reference to an independent resource generated as output by the task.",
+                    "examples": ["configuration file", "source code", "scanning service"],
+                    "$ref": "#/definitions/resourceReferenceChoice"
+                },
+                "data": {"$ref": "#/definitions/attachment"}
+             }
         },
         "abstractResourceType": {
             "type": "object",
@@ -500,13 +529,40 @@
             }
         },
         "refType": {"type": "string"},
-        "instanceInfo": {
+        "resourceChoice": {
+            "$comment": "Enables construction of resource graphs from any of the constrained list of concrete types",
+            "type": "object",
+            "oneOf": [
+                {"$ref": "#/definitions/component" },
+                {"$ref": "#/definitions/service"}
+            ]
+        },
+        "resourceReferenceChoice": {
+            "$comment": "Enables reference to a resource that participats in a a workflow; using either internal (bom-ref) or external (externalReference) types.",
             "type": "object",
             "additionalProperties": false,
             "properties": {
+                "bom-ref": { "$ref": "#/definitions/refType"},
+                "externalReference": {"$ref": "#/definitions/externalReference"}
+            },
+            "oneOf":[
+                {"required": ["bom-ref"]},
+                {"required": ["externalReference"]}
+            ]
+        },
+        "instanceType": {
+            "type": "object",
+            "required": ["bom-ref"],
+            "anyOf":[
+                {"required": ["uid"]},
+                {"required": ["name"]}
+            ],
+            "additionalProperties": true,
+            "properties": {
+                "bom-ref": {"#ref": "#/definitions/refType"},
                 "uid": {
                     "type": "string",
-                    "title": "Identifier",
+                    "title": "Unique Identifier",
                     "description": "The unique identifier for the resource instance within its deployment context."
                 },
                 "name": {
@@ -514,7 +570,7 @@
                     "title": "Name",
                     "description": "The name of the resource instance."
                 },
-                  "description": {
+                "description": {
                     "type": "string",
                     "title": "Description",
                     "description": "A description of the resource instance."
@@ -530,27 +586,19 @@
                 }
             }
         },
-        "resourceChoice": {
-            "$comment": "Enables construction of resource graphs from any of the constrained list of concrete types",
-            "type": "object",
-            "oneOf": [
-                {"$ref": "#/definitions/component" },
-                {"$ref": "#/definitions/service"}
-            ]
-        },
-        "resourceReferenceChoice": {
+        "resourceInstance": {
             "$comment": "Enables reference to a resource that participats in a a workflow; using either internal (bom-ref) or external (externalReference) types.",
             "type": "object",
-            "additionalProperties": false,
+            "allOf": [{"$ref": "#/definitions/instanceType"}],
+            "additionalProperties": true,
             "properties": {
-                "bom-ref": { "$ref": "#/definitions/refType"},
-                "externalReference": {"$ref": "#/definitions/externalReference"},
-                "instanceInfo": {"$ref": "#/definitions/instanceInfo"}
-            },
-            "oneOf":[
-                {"required": ["bom-ref"]},
-                {"required": ["externalReference"]}
-            ]
+                "resourceReference": {"$ref": "#/definitions/resourceReferenceChoice"},
+                "bom-ref": {},
+                "uid": {},
+                "name": {},
+                "description": {},
+                "properties": {}
+            }
         }
     }
 }
