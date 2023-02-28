@@ -40,6 +40,7 @@
           "allOf": [{"$ref": "#/definitions/taskType"}],
           "properties": {
                 "tasks": {
+                    "$comment": "The tasks that comprise the workflow. Note that tasks can appear more than once as different instances (by name or uid).",
                     "type": "array",
                     "items": {"$ref": "#/definitions/task"},
                     "uniqueItems": true
@@ -128,6 +129,12 @@
                 "workspaces": {
                     "type": "array",
                     "items": {"$ref": "#/definitions/workspace"},
+                    "uniqueItems": true
+                },
+                "runtimeTopology": {
+                    "$comment": "A description of the runtime component and service topology.  This can describe a partial or complete topology used to host and execute the task (e.g., hardware, operating systems, configurations, etc.),",
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/dependency"},
                     "uniqueItems": true
                 },
                 "bom-ref": {},
