@@ -16,6 +16,7 @@
             "type": "object",
             "properties": {
                 "components": {
+                    "title": "components",
                     "description": "Transient components that are used in tasks that constitute one or more of this formula's workflows",
                     "type": "array",
                     "items": {
@@ -24,6 +25,7 @@
                     "uniqueItems": true
                 },
                 "services": {
+                    "title": "services",
                     "description": "Transient services that are used in tasks that constitute one or more of this formula's workflows",
                     "type": "array",
                     "items": {
@@ -32,7 +34,9 @@
                     "uniqueItems": true
                 },
                 "workflows": {
-                    "description": "List of workflows that can be triggered",
+                    "title": "workflows",
+                    "description": "List of workflows that can be independently triggered.",
+                    "$comment": "Workflows are specialized orchestration tasks.",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/workflow"
@@ -42,11 +46,11 @@
             }
         },
         "workflow": {
+            "title": "workflow",
+            "description": "A specialized orchestration tasks.",
+            "$comment": "Workflows and tasks can trigger worklows.  These relationships can be modeled in the taskDependencies array (graph).",
             "type": "object",
             "additionalProperties": false,
-            "required": [
-                "tasks"
-            ],
             "allOf": [
                 {
                     "$ref": "#/definitions/taskType"
@@ -75,7 +79,7 @@
                     },
                     "uniqueItems": true
                 },
-                "type": {},
+                "types": {},
                 "trigger": {},
                 "timeStart": {},
                 "timeEnd": {},
@@ -94,7 +98,7 @@
                 }
             ],
             "properties": {
-                "type": {},
+                "types": {},
                 "trigger": {},
                 "steps": {},
                 "timeStart": {},
@@ -108,28 +112,35 @@
         },
         "taskType": {
             "type": "object",
-            "additionalProperties": true,
             "required": [
-                "type"
+                "types"
             ],
             "allOf": [
                 {
                     "$ref": "#/definitions/resourceInstance"
                 }
             ],
+            "additionalProperties": true,
             "properties": {
-                "type": {
-                    "type": "string",
-                    "enum": [
-                        "lint",
-                        "scan",
-                        "build",
-                        "test",
-                        "deploy",
-                        "release",
-                        "clean",
-                        "other"
-                    ]
+                "types": {
+                    "$comment": "Indicates the types of activities performed by the task.",
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "uniqueItems": true,
+                        "enum": [
+                            "lint",
+                            "scan",
+                            "merge",
+                            "build",
+                            "test",
+                            "deliver",
+                            "deploy",
+                            "release",
+                            "clean",
+                            "other"
+                        ]
+                    }
                 },
                 "trigger": {
                     "$ref": "#/definitions/trigger"
@@ -142,6 +153,8 @@
                     "uniqueItems": true
                 },
                 "inputs": {
+                    "description": "Represents dynamic resources brought into a task at runtime by executor or task commands",
+                    "examples": ["a `configuration` file which was declared as a local `component` or `externalReference`"],
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/inputType"
@@ -149,17 +162,11 @@
                     "uniqueItems": true
                 },
                 "outputs": {
+                    "description": "Represents dynamic resources output from a task at runtime by executor or task commands",
+                    "examples": ["a log file or metrics data produced by the task"],
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/outputType"
-                    },
-                    "uniqueItems": true
-                },
-                "tools": {
-                    "$comment": "TBD: Tools could be declared as inputs/outputs/both",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/resourceReferenceChoice"
                     },
                     "uniqueItems": true
                 },
@@ -229,6 +236,13 @@
             "properties": {
                 "executed": {
                     "type": "string"
+                },
+                "properties": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/property"
+                    },
+                    "additionalItems": false
                 }
             }
         },
@@ -291,10 +305,17 @@
         "trigger": {
             "type": "object",
             "additionalProperties": false,
+            "description": "The trigger's instance representation (e.g., a component or service)",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/resourceInstance"
+                }
+            ],
             "properties": {
                 "type": {
                     "type": "string",
                     "enum": [
+                        "manual",
                         "api",
                         "webhook",
                         "cron"
@@ -302,10 +323,6 @@
                 },
                 "event": {
                     "$ref": "#/definitions/event"
-                },
-                "resource": {
-                    "$ref": "#/definitions/resourceReferenceChoice",
-                    "description": "The trigger's implementation (e.g., a component or service)"
                 },
                 "condition": {
                     "type": "object",
@@ -315,6 +332,13 @@
                         },
                         "expression": {
                             "type": "string"
+                        },
+                        "properties": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/property"
+                            },
+                            "additionalItems": false
                         }
                     }
                 },
@@ -429,11 +453,35 @@
                 },
                 "data": {
                     "$ref": "#/definitions/attachment"
+                },
+                "properties": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/property"
+                    },
+                    "additionalItems": false
                 }
             }
         },
         "outputType": {
             "type": "object",
+            "oneOf": [
+                {
+                    "required": [
+                        "resource"
+                    ]
+                },
+                {
+                    "required": [
+                        "environmentVars"
+                    ]
+                },
+                {
+                    "required": [
+                        "data"
+                    ]
+                }
+            ],
             "additionalProperties": false,
             "properties": {
                 "type": {
@@ -452,6 +500,7 @@
                 },
                 "target": {
                     "$comment": "Component or service that received the output from the task (e.g., reference to an artifactory service with data flow value of `outbound`)",
+                    "examples": ["a log file described as an `externalReference` within its target domain."],
                     "$ref": "#/definitions/resourceReferenceChoice"
                 },
                 "resource": {
@@ -465,6 +514,27 @@
                 },
                 "data": {
                     "$ref": "#/definitions/attachment"
+                },
+                "environmentVars": {
+                    "type": "array",
+                    "items": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/definitions/property"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    },
+                    "uniqueItems": true
+                },
+                "properties": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/property"
+                    },
+                    "additionalItems": false
                 }
             }
         },
@@ -650,11 +720,9 @@
                         "device",
                         "firmware",
                         "file",
-                        "definition",
                         "configuration",
                         "tool",
                         "task",
-                        "client",
                         "repository"
                     ]
                 },
@@ -902,8 +970,6 @@
                 },
                 "properties": {
                     "type": "array",
-                    "title": "Properties",
-                    "description": "Provides the ability to document properties in a name-value store. This provides flexibility to include data not officially supported in the standard without having to use additional namespaces or create extensions. Unlike key-value stores, properties support duplicate names, each potentially having different values. Property names of interest to the general public are encouraged to be registered in the [CycloneDX Property Taxonomy](https://github.com/CycloneDX/cyclonedx-property-taxonomy). Formal registration is OPTIONAL.",
                     "additionalItems": false,
                     "items": {
                         "$ref": "#/definitions/property"
