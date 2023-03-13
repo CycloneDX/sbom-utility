@@ -6,6 +6,7 @@
                   "family": "0BSD",
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
+                  "aliases":["Free Public License 1.0.0"],
                   "notes": [""],
                   "urls": ["https://spdx.org/licenses/0BSD"]
             },
@@ -144,6 +145,10 @@
                   "family": "Apache",
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
+                  "aliases": ["Apache License, Version 2.0",
+                        "Apache License v. 2.0",
+                        "Apache License Version 2.0",
+                        "Apache Software License v2.0"],
                   "notes": [""],
                   "urls": ["https://spdx.org/licenses/Apache-2.0"]
             },
@@ -230,6 +235,7 @@
                   "family": "BSD",
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
+                  "aliases":["2-clause BSDL"],
                   "notes": [""]
             },
             {
@@ -254,7 +260,7 @@
                   "id": "BSD-2-Clause-Patent",
                   "name": "BSD-2-Clause Plus Patent License",
                   "family": "BSD-2-Clause-Plus-Patent-License",
-                  "usagePolicy": "allow",
+                  "usagePolicy": "needs-review",
                   "annotationRefs": ["NEEDS-APPROVAL", "NEEDS-IP-LEGAL-REVIEW"],
                   "notes": [""]
             },
@@ -272,6 +278,11 @@
                   "family": "BSD",
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
+                  "aliases":[
+                        "BSD 3-clause \"New\" License",
+                        "New BSD License",
+                        "Modified BSD License"
+                  ],
                   "notes": [""]
             },
             {
@@ -349,15 +360,51 @@
             {
                   "id": "BSD-4-Clause-UC",
                   "name": "BSD-4-Clause (University of California-Specific)",
-                  "family": "BSD-4-Clause-University-of-California-Specific",
+                  "family": "BSD-4-Clause-UC",
                   "usagePolicy": "needs-review",
                   "annotationRefs": ["NEEDS-APPROVAL", "NEEDS-IP-LEGAL-REVIEW"],
                   "notes": [""]
             },
             {
+                  "id": "BSD-4.3RENO",
+                  "name": "BSD 4.3 RENO License",
+                  "family": "BSD-4.3",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "NEEDS-IP-LEGAL-REVIEW"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/BSD-4.3RENO.html"]
+            },
+            {
+                  "id": "BSD-4.3TAHOE",
+                  "name": "BSD 4.3 TAHOE License",
+                  "family": "BSD-4.3",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "NEEDS-IP-LEGAL-REVIEW"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/BSD-4.3TAHOE.html"]
+            },
+            {
+                  "id": "BSD-Advertising-Acknowledgement",
+                  "name": "BSD Advertising Acknowledgement License",
+                  "family": "BSD-Advertising-Acknowledgement",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "NEEDS-IP-LEGAL-REVIEW"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/BSD-Advertising-Acknowledgement.html"]
+            },
+            {
+                  "id": "BSD-Attribution-HPND-disclaimer",
+                  "name": "BSD with Attribution and HPND disclaimer",
+                  "family": "BSD-Attribution-HPND-disclaimer",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "NEEDS-IP-LEGAL-REVIEW"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/BSD-Attribution-HPND-disclaimer.html"]
+            },
+            {
                   "id": "BSD-Protection",
                   "name": "BSD Protection License",
-                  "family": "BSD",
+                  "family": "BSD-Protection",
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
                   "notes": [""]
@@ -365,7 +412,7 @@
             {
                   "id": "BSD-Source-Code",
                   "name": "BSD Source Code Attribution",
-                  "family": "BSD",
+                  "family": "BSD-Source-Code",
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
                   "notes": [""]
@@ -490,6 +537,7 @@
                   "children": [
                         "CC-BY-NC-SA-1.0",
                         "CC-BY-NC-SA-2.0",
+                        "CC-BY-NC-SA-2.0-DE",
                         "CC-BY-NC-SA-2.0-FR",
                         "CC-BY-NC-SA-2.0-UK",
                         "CC-BY-NC-SA-2.5",
@@ -611,7 +659,7 @@
                   "family": "Commons-Clause",
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED", "NO-SPDX"],
-                  "notes": ["SPDX decided NOT to grant it a license ID"],
+                  "notes": ["SPDX decided NOT to grant this license a license ID"],
                   "urls": ["https://github.com/spdx/license-list-XML/issues/902"]
             },
             {
@@ -656,8 +704,7 @@
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED", "NO-SPDX"],
                   "notes": [
-                        "The CWI license is the license applied to early releases of Hack",
-                        "Confirm this license that was approved by IP legal as linked"],
+                        "The CWI license is the license applied to early releases of Hack"],
                   "urls": ["https://nethackwiki.com/wiki/CWI_license"]
             },
             {
@@ -687,12 +734,15 @@
                   "notes": [""]
             },
             {
-                  "id": "",
-                  "name": "Elastic License 2.0 (ELv2)",
+                  "id": "Elastic-2.0",
+                  "name": "Elastic License 2.0",
                   "family": "Elastic",
+                  "aliases": ["ELv2"],
                   "usagePolicy": "needs-review",
                   "annotationRefs": ["NEEDS-APPROVAL", "NO-SPDX"],
-                  "urls": ["https://www.elastic.co/licensing/elastic-license"]
+                  "urls": ["https://spdx.org/licenses/Elastic-2.0.html",
+                        "https://www.elastic.co/licensing/elastic-license"
+                  ]
             },
             {
                   "id": "EPL-1.0",
@@ -929,7 +979,7 @@
                   "family": "GTPL",
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED","NO-SPDX"],
-                  "notes": ["Claims to be equiv. to Apache-2.0 license"],
+                  "notes": ["Claims to be equivalent to an Apache-2.0 license"],
                   "urls": ["https://www.globus.org/legal/toolkit-license"]
             },
             {
@@ -958,14 +1008,6 @@
                   "urls": ["https://spdx.org/licenses/Hippocratic-2.1.html"]
             },
             {
-                  "id": "",
-                  "name": "IBM/Sun OO Agreement",
-                  "family": "IBM-Sun-OO-Agreement",
-                  "usagePolicy": "allow",
-                  "annotationRefs": ["APPROVED", "NO-SPDX"],
-                  "notes": ["IBM/Sun legal agreement text; not a public license"]
-            },
-            {
                   "id": "IJG",
                   "name": "Independent JPEG Group License",
                   "family": "IJG",
@@ -991,9 +1033,8 @@
                   "annotationRefs": ["APPROVED","NO-SPDX"],
                   "notes": ["JDBM is a transactional persistence engine for Java"],
                   "urls": [
-                        "http://jdbm.sourceforge.net/",
-                        "https://scancode-licensedb.aboutcode.org/jdbm-1.00.html",
-                        "https://github.com/joval/jdbm/blob/master/LICENSE.txt"
+                        "https://github.com/joval/jdbm/blob/master/LICENSE.txt",
+                        "http://jdbm.sourceforge.net/"
                   ]
             },
             {
@@ -1003,7 +1044,7 @@
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED","NO-SPDX"],
                   "notes": [""],
-                  "urls": ["https://scancode-licensedb.aboutcode.org/jdom.html"]
+                  "urls": ["http://www.jdom.org/docs/faq.html#a0030"]
             },
             {
                   "id": "JSON",
@@ -1271,10 +1312,20 @@
             {
                   "id": "Python-2.0",
                   "name": "Python License 2.0",
-                  "family": "Python",
+                  "family": "Python-2.0",
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
-                  "notes": [""]
+                  "notes": [""],
+                  "urls":["https://spdx.org/licenses/Python-2.0.html"]
+            },
+            {
+                  "id": "Python-2.0.1",
+                  "name": "Python License 2.0.1",
+                  "family": "Python-2.0.1",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL","NEEDS-IP-LEGAL-REVIEW"],
+                  "notes": [""],
+                  "urls":["https://spdx.org/licenses/Python-2.0.1.html"]
             },
             {
                   "id": "RSA-MD",
@@ -1282,7 +1333,8 @@
                   "family": "RSA",
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
-                  "notes": [""]
+                  "notes": [""],
+                  "urls":["https://spdx.org/licenses/RSA-MD.html"]
             },
             {
                   "id": "Ruby",
@@ -1290,7 +1342,8 @@
                   "family": "Ruby",
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
-                  "notes": [""]
+                  "notes": [""],
+                  "urls":["https://spdx.org/licenses/Ruby.html"]
             },
             {
                   "id": "SCEA",
@@ -1298,7 +1351,8 @@
                   "family": "SCEA",
                   "usagePolicy": "needs-review",
                   "annotationRefs": ["NEEDS-APPROVAL"],
-                  "notes": [""]
+                  "notes": [""],
+                  "urls":["https://spdx.org/licenses/SCEA.html"]
             },
             {
                   "id": "SISSL",
@@ -1310,20 +1364,22 @@
                   "urls": ["https://spdx.org/licenses/SISSL.html"]
             },
             {
-                  "id": "SISSL-1.2",
-                  "name": "Sun Industry Standards Source License v1.2",
-                  "family": "SISSL",
-                  "usagePolicy": "allow",
-                  "annotationRefs": ["APPROVED"],
-                  "notes": [""]
-            },
-            {
                   "id": "SSPL-1.0",
                   "name": "Server Side Public License, v 1",
                   "family": "SSPL",
                   "usagePolicy": "needs-review",
                   "annotationRefs": ["NEEDS-APPROVAL"],
-                  "notes": [""]
+                  "notes": [""],
+                  "urls":["https://spdx.org/licenses/SSPL-1.0.html"]
+            },
+            {
+                  "id": "SISSL-1.2",
+                  "name": "Sun Industry Standards Source License v1.2",
+                  "family": "SISSL",
+                  "usagePolicy": "allow",
+                  "annotationRefs": ["APPROVED"],
+                  "notes": [""],
+                  "urls":["https://spdx.org/licenses/SISSL-1.2.html"]
             },
             {
                   "id": "UFL-1.0",
@@ -1340,7 +1396,8 @@
                   "family": "Unicode",
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
-                  "notes": [""]
+                  "notes": [""],
+                  "urls":["https://spdx.org/licenses/Unicode-DFS-2015.html"]
             },
             {
                   "id": "Unicode-DFS-2016",
@@ -1348,7 +1405,8 @@
                   "family": "Unicode",
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
-                  "notes": [""]
+                  "notes": [""],
+                  "urls":["https://spdx.org/licenses/Unicode-DFS-2016.html"]
             },
             {
                   "id": "Unicode-TOU",
@@ -1356,7 +1414,8 @@
                   "family": "Unicode",
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
-                  "notes": [""]
+                  "notes": [""],
+                  "urls":["https://spdx.org/licenses/Unicode-TOU.html"]
             },
             {
                   "id": "",
@@ -1373,7 +1432,8 @@
                   "family": "Vim",
                   "usagePolicy": "needs-review",
                   "annotationRefs": ["NEEDS-APPROVAL"],
-                  "notes": [""]
+                  "notes": [""],
+                  "urls":["https://spdx.org/licenses/Vim.html"]
             },
             {
                   "id": "W3C",
@@ -1381,7 +1441,8 @@
                   "family": "W3C",
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
-                  "notes": [""]
+                  "notes": [""],
+                  "urls":["https://spdx.org/licenses/W3C.html"]
             },
             {
                   "id": "W3C-19980720",
@@ -1389,7 +1450,8 @@
                   "family": "W3C",
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
-                  "notes": [""]
+                  "notes": [""],
+                  "urls":["https://spdx.org/licenses/W3C-19980720.html"]
             },
             {
                   "id": "W3C-20150513",
@@ -1397,7 +1459,17 @@
                   "family": "W3C",
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
-                  "notes": [""]
+                  "notes": [""],
+                  "urls":["https://spdx.org/licenses/W3C-20150513.html"]
+            },
+            {
+                  "id": "w3m",
+                  "name": "w3m License",
+                  "family": "w3m",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL", "NEEDS-IP-LEGAL-REVIEW"],
+                  "notes": [""],
+                  "urls":["https://spdx.org/licenses/w3m.html"]
             },
             {
                   "id": "WTFPL",
@@ -1405,7 +1477,8 @@
                   "family": "WTFPL",
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
-                  "notes": [""]
+                  "notes": [""],
+                  "urls":["https://spdx.org/licenses/WTFPL.html"]
             },
             {
                   "id": "X11",

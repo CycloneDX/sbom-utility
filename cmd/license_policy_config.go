@@ -63,6 +63,7 @@ type LicensePolicy struct {
 	Family         string   `json:"family"`
 	Name           string   `json:"name"`
 	UsagePolicy    string   `json:"usagePolicy"`
+	Aliases        []string `json:"aliases"`
 	Children       []string `json:"children"`
 	Notes          []string `json:"notes"`
 	Urls           []string `json:"urls"`
