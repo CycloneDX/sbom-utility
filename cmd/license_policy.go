@@ -47,7 +47,7 @@ var LICENSE_POLICY_SUMMARY_TITLES = []string{"Policy", "Family", "SPDX ID", "Nam
 // word string that matches one of the `command.ValidArgs` set on the parent command
 func NewCommandPolicy() *cobra.Command {
 	var command = new(cobra.Command)
-	command.Use = "policy"
+	command.Use = CMD_USAGE_LICENSE_POLICY
 	command.Short = "List policies associated with known licenses"
 	command.Long = "List caller-supplied, \"allow/deny\"-style policies associated with known software, hardware or data licenses"
 	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,

@@ -24,14 +24,13 @@ package schema
 // - Since we see that both SPDX and CycloneDX both support "semver" of their specification versions
 // BUT, they only provide the "MAJOR.MINOR" components of "semver" we will use the
 // "latest" ".PATCH" version of the JSON schema to test against
-// NOTE: If any of these 3 components are not found in an SBOM then the schema is
-// not deterministic.
-// TODO:  support "override" or "supplemental" (defaults) to be provided on
-// the command line.
-// TODO: Allow for discrete "semver" for a scheam to be provided as an override
+// NOTE: If any of these 3 components are not found in an SBOM then the schema is not deterministic.
+// TODO:  support "override" or "supplemental" (defaults) to be provided on the command line.
+// TODO: Allow for discrete "semver" for a schema to be provided as an override
 // that includes full "MAJOR.MINOR.PATCH" granularity
 
 // Format ID (key component)
+// UNUSED, TODO Use these values to verify remotely loaded schema files
 const (
 	ID_SPDX      = "SPDXRef-DOCUMENT"
 	ID_CYCLONEDX = "CycloneDX"
@@ -39,6 +38,7 @@ const (
 
 // Document property keys
 // JSON document property keys to lookup values in their respective SBOM formats
+// UNUSED, TODO Use these values to verify remotely loaded schema files
 const (
 	// SPDX
 	PROPKEY_ID_SPDX      = "SPDXID"
@@ -46,25 +46,4 @@ const (
 	// CycloneDX
 	PROPKEY_ID_CYCLONEDX      = "bomFormat"
 	PROPKEY_VERSION_CYCLONEDX = "specVersion"
-)
-
-// Version (key component)
-const (
-	VERSION_SPDX_2_2      = "SPDX-2.2"
-	VERSION_CYCLONEDX_1_3 = "1.3"
-)
-
-// TODO: Support remote schema retrieval as an optional program flag
-// However, we want to default to local for performance where possible
-// as well as plan for local, secure bundling of schema with this utility
-// in CI build systems (towards improved security, isolated builds)
-// NOTE: we have also found that standards orgs. freely move their schema files
-// within SCM systems thereby being a cause for remote retrieval failures.
-const (
-	SCHEMA_SPDX_2_2_2_LOCAL            = "file://schema/spdx/2.2/spdx-schema.json"
-	SCHEMA_SPDX_2_2_2_REMOTE           = "https://github.com/spdx/spdx-spec/blob/master/schemas/spdx-schema.json"
-	SCHEMA_CYCLONEDX_1_3_LOCAL         = "file://schema/cyclonedx/1.3/bom-1.3.schema.json"
-	SCHEMA_CYCLONEDX_1_3_REMOTE        = "https://github.com/CycloneDX/specification/blob/master/schema/bom-1.3.schema.json"
-	SCHEMA_CYCLONEDX_1_3_STRICT_LOCAL  = "file://schema/cyclonedx/1.3/bom-1.3-strict.schema.json"
-	SCHEMA_CYCLONEDX_1_3_STRICT_REMOTE = "https://github.com/CycloneDX/specification/blob/master/schema/bom-1.3-strict.schema.json"
 )
