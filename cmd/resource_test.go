@@ -38,7 +38,7 @@ const (
 
 // default ResourceTestInfo struct values
 const (
-	RTI_DEFAULT_LINE_COUNT = -1
+	VTI_DEFAULT_LINE_COUNT = -1
 )
 
 type ResourceTestInfo struct {
@@ -72,7 +72,7 @@ func NewResourceTestInfo(inputFile string, format string, resourceType string,
 }
 
 func NewResourceTestInfoBasic(inputFile string, format string, resourceType string, expectedError error) *ResourceTestInfo {
-	return NewResourceTestInfo(inputFile, format, resourceType, "", "", RTI_DEFAULT_LINE_COUNT, expectedError)
+	return NewResourceTestInfo(inputFile, format, resourceType, "", "", VTI_DEFAULT_LINE_COUNT, expectedError)
 }
 
 // -------------------------------------------
@@ -141,7 +141,7 @@ func innerTestResourceList(t *testing.T, testInfo *ResourceTestInfo) (outputBuff
 	}
 
 	// TEST: Line Count
-	if testInfo.ResultLineCount != RTI_DEFAULT_LINE_COUNT {
+	if testInfo.ResultLineCount != VTI_DEFAULT_LINE_COUNT {
 		if outputResults == "" {
 			outputResults = outputBuffer.String()
 		}
