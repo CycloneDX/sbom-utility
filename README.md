@@ -638,14 +638,16 @@ Specifically, the output shows a first schema error indicating the failing JSON 
 
 ### Vulnerability
 
-This command will extract basic vulnerability report data. More column data and flags to filter results are planned.
+This command will extract basic vulnerability report data from an SBOM that has a "vulnerabilities" list or from a standalone VEX in CycloneDX format. It includes the ability to filter reports data by applying regex to any of the named column data.
+
+**Note**: More column data and flags to filter results are planned.
 
 #### Where flag filtering
 
 In addition a `where` filter flag can be supplied to only include results where values match supplied regex.  Supported keys for the `where` filter include the following column names in the report (i.e., `id`, `bom-ref`, `created`
 `published`, `updated`, `rejected` and `description`).
 
-- **Note**: filtering using `source.name` and `source.url` are coming soon
+**Note**: filtering using `source.name` and `source.url` are coming soon
 
 #### Format flag
 
@@ -657,7 +659,19 @@ Use the `--format` flag on the to choose one of the supported output formats:
 
 Currently, all `vulnerability list` command results are sorted by vulnerability `id` then by `created` date.
 
-#### Resource Examples
+#### Vulnerability Examples
+
+##### Simple list
+
+```bash
+./sbom-utility vulnerability list -i test/vex/cdx-1-4-vex-example1.json  --quiet
+```
+
+```bash
+id              bom-ref  source.url  source.name                                      created                   published                 updated                   rejected  description
+--              -------  ----------  -----------                                      -------                   ---------                 -------                   --------  -----------
+CVE-2020-25649           NVD         https://nvd.nist.gov/vuln/detail/CVE-2020-25649  2020-12-03T00:00:00.000Z  2020-12-03T00:00:00.000Z  2021-10-26T00:00:00.000Z            com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection.
+```
 
 ---
 
