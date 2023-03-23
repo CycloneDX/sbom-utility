@@ -5,6 +5,8 @@ sbom-utility*
 # IDEs
 *.code-workspace
 .vscode/*.log
+cmd/__debug_bin
+*/__debug_bin
 
 # Misc
 *.gpg
