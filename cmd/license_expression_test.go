@@ -70,3 +70,28 @@ func TestLicenseExpressionCompoundLeftSide(t *testing.T) {
 	parsedExpression, _ := parseExpression(EXP)
 	getLogger().Infof("expression:\n%v", parsedExpression)
 }
+
+// Test license expression entirely inside a logical group (i.e., outer parens)
+func TestLicenseExpressionSingleCompoundAllow(t *testing.T) {
+	EXP := "(MIT OR CC0-1.0)"
+	parsedExpression, _ := parseExpression(EXP)
+	getLogger().Infof("expression:\n%v", parsedExpression)
+}
+
+func TestLicenseExpressionSingleCompoundUndefinedBoth(t *testing.T) {
+	EXP := "(FOO OR BAR)"
+	parsedExpression, _ := parseExpression(EXP)
+	getLogger().Infof("expression:\n%v", parsedExpression)
+}
+
+func TestLicenseExpressionSingleCompoundUndefinedLeft(t *testing.T) {
+	EXP := "(FOO OR MIT)"
+	parsedExpression, _ := parseExpression(EXP)
+	getLogger().Infof("expression:\n%v", parsedExpression)
+}
+
+func TestLicenseExpressionSingleCompoundUndefinedRight(t *testing.T) {
+	EXP := "(MIT OR BAR)"
+	parsedExpression, _ := parseExpression(EXP)
+	getLogger().Infof("expression:\n%v", parsedExpression)
+}

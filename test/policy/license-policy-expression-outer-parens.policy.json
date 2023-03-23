@@ -1,0 +1,31 @@
+{
+      "policies": [
+            {
+                  "id": "CC0-1.0",
+                  "name": "Creative Commons Zero v1.0 Universal",
+                  "family": "CC0",
+                  "usagePolicy": "allow",
+                  "annotationRefs": [
+                        "APPROVED"
+                  ],
+                  "notes": [
+                        ""
+                  ]
+            },
+            {
+                  "id": "MIT",
+                  "name": "MIT License",
+                  "family": "MIT",
+                  "usagePolicy": "allow",
+                  "annotationRefs": [
+                        "APPROVED"
+                  ],
+                  "notes": [
+                        ""
+                  ],
+                  "urls": [
+                        "https://spdx.org/licenses/MIT.html"
+                  ]
+            }
+      ]
+}

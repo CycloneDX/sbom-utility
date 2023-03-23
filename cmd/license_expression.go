@@ -151,7 +151,7 @@ func parseCompoundExpression(expression *CompoundExpression, tokens []string, in
 		default:
 			getLogger().Debugf("[%v] Simple Expression: `%v`", index, token)
 			// if we have no conjunction, this compound expression represents the "left" operand
-			if expression.Conjunction == "" {
+			if expression.Conjunction == CONJUNCTION_UNDEFINED {
 				if expression.PrepLeft == "" {
 					expression.SimpleLeft = token
 					// Also, check for the unary "plus" operator
@@ -188,11 +188,36 @@ func FinalizeCompoundPolicy(expression *CompoundExpression) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	// Short-circuit of either left or right policies resolved to UNDEFINED
-	if expression.LeftUsagePolicy == POLICY_UNDEFINED ||
-		expression.RightUsagePolicy == POLICY_UNDEFINED {
-		expression.CompoundUsagePolicy = POLICY_UNDEFINED
-		return nil
+	if expression == nil {
+		return getLogger().Errorf("Expression is nil")
+	}
+
+	getLogger().Debugf("Evaluating policy: (`%s` `%s` `%s`)",
+		expression.LeftUsagePolicy,
+		expression.Conjunction,
+		expression.RightUsagePolicy)
+
+	// Undefined Short-circuit
+	// If either left or right policy is UNDEFINED with the AND conjunction
+	// then the compound policy resolves to UNDEFINED
+	if expression.Conjunction == AND {
+		if expression.LeftUsagePolicy == POLICY_UNDEFINED ||
+			expression.RightUsagePolicy == POLICY_UNDEFINED {
+			expression.CompoundUsagePolicy = POLICY_UNDEFINED
+			return nil
+		}
+	} else if expression.Conjunction == OR {
+		if expression.LeftUsagePolicy == POLICY_UNDEFINED {
+			// default to right policy (regardless of value)
+			expression.CompoundUsagePolicy = expression.RightUsagePolicy
+			getLogger().Debugf("Left usage policy is UNDEFINED")
+			return nil
+		} else if expression.RightUsagePolicy == POLICY_UNDEFINED {
+			// default to left policy (regardless of value)
+			expression.CompoundUsagePolicy = expression.LeftUsagePolicy
+			getLogger().Debugf("Right usage policy is UNDEFINED")
+			return nil
+		}
 	}
 
 	// The policy config. has 3 states: { "allow", "deny", "needs-review" }; n=3
@@ -246,6 +271,13 @@ func FinalizeCompoundPolicy(expression *CompoundExpression) (err error) {
 			// 6. POLICY_DENY OR POLICY_DENY
 			expression.CompoundUsagePolicy = POLICY_DENY
 		}
+	case CONJUNCTION_UNDEFINED:
+		// Test for single compound expression (i.e., "(" compound-expression ")" )
+		// which is the only valid one that does not have an AND, OR or WITH conjunction
+		if expression.LeftUsagePolicy != POLICY_UNDEFINED &&
+			expression.RightUsagePolicy == POLICY_UNDEFINED {
+			expression.CompoundUsagePolicy = expression.LeftUsagePolicy
+		} // else default expression.CompoundUsagePolicy is UNDEFINED
 	default:
 		expression.CompoundUsagePolicy = POLICY_UNDEFINED
 		return getLogger().Errorf("%s: %s: `%s`",
