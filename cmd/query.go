@@ -544,6 +544,9 @@ func selectFieldsFromSlice(request *QueryRequest, jsonSlice []interface{}) (slic
 	return
 }
 
+// Note: Golang supports the RE2 regular exp. engine which does not support many
+// features such as lookahead, lookbehind, etc.
+// See: https://en.wikipedia.org/wiki/Comparison_of_regular_expression_engines
 func whereFilterMatch(mapObject map[string]interface{}, whereFilters []WhereFilter) (match bool, err error) {
 	var buf bytes.Buffer
 	var key string

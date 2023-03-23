@@ -85,7 +85,7 @@ unit_tests: test_clean
 	go test ./... -v -tags=unit
 
 # Run the integration tests
-integration_tests:
+integration_tests: test_clean
 	@echo "Testing -tags=integration"
 	go test -v ./... -tags=integration
 

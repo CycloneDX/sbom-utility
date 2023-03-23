@@ -392,6 +392,8 @@ type CDXVulnerability struct {
 	Analysis       CDXAnalysis   `json:"analysis"` // anon. type
 	Affects        []CDXAffect   `json:"affects"`  // anon. type
 	Properties     []CDXProperty `json:"properties"`
+	// v1.5 properties follow
+	Rejected string `json:"rejected"` // v1.5: added
 }
 
 // v1.4: created "credit" defn. to represent the in-line, anon. type

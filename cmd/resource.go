@@ -38,7 +38,12 @@ const (
 
 var VALID_SUBCOMMANDS_RESOURCE = []string{SUBCOMMAND_RESOURCE_LIST}
 
-var RESOURCE_LIST_TITLES = []string{"type", "name", "version", "bom-ref"}
+var RESOURCE_LIST_TITLES = []string{
+	RESOURCE_FILTER_KEY_TYPE,
+	RESOURCE_FILTER_KEY_NAME,
+	RESOURCE_FILTER_KEY_VERSION,
+	RESOURCE_FILTER_KEY_BOMREF,
+}
 var VALID_RESOURCE_WHERE_FILTER_KEYS = []string{}
 
 // Flags. Reuse query flag values where possible
@@ -68,13 +73,18 @@ var VALID_RESOURCE_TYPES = []string{RESOURCE_TYPE_DEFAULT, RESOURCE_TYPE_COMPONE
 
 // filter keys
 const (
-	RESOURCE_FILTER_KEY_TYPE   = "type"
-	RESOURCE_FILTER_KEY_NAME   = "name"
-	RESOURCE_FILTER_KEY_VALUE  = "value"
-	RESOURCE_FILTER_KEY_BOMREF = "bom-ref"
+	RESOURCE_FILTER_KEY_TYPE    = "type"
+	RESOURCE_FILTER_KEY_NAME    = "name"
+	RESOURCE_FILTER_KEY_VERSION = "version"
+	RESOURCE_FILTER_KEY_BOMREF  = "bom-ref"
 )
 
-var VALID_FILTER_KEYS = []string{RESOURCE_FILTER_KEY_TYPE, RESOURCE_FILTER_KEY_NAME, RESOURCE_FILTER_KEY_VALUE, RESOURCE_FILTER_KEY_BOMREF}
+var VALID_RESOURCE_FILTER_KEYS = []string{
+	RESOURCE_FILTER_KEY_TYPE,
+	RESOURCE_FILTER_KEY_NAME,
+	RESOURCE_FILTER_KEY_VERSION,
+	RESOURCE_FILTER_KEY_BOMREF,
+}
 
 // TODO: need to strip `-` from `bom-ref` for where filter
 type ResourceInfo struct {
@@ -259,7 +269,7 @@ func ListResources(output io.Writer, format string, resourceType string, whereFi
 		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_JSON)
-		DisplayResourceListText(output)
+		DisplayVulnListText(output)
 	}
 
 	return
@@ -443,10 +453,12 @@ func hashServiceAsResource(cdxService schema.CDXService, whereFilters []WhereFil
 		// TODO: AppendLicenseInfo(LICENSE_NONE, resourceInfo)
 		resourceMap.Put(resourceInfo.BomRef, resourceInfo)
 
-		getLogger().Tracef("Put: %s (`%s`), `%s`)",
+		getLogger().Tracef("Put: [`%s`] %s (`%s`), `%s`)",
+			resourceInfo.Type,
 			resourceInfo.Name,
 			resourceInfo.Version,
-			resourceInfo.BomRef)
+			resourceInfo.BomRef,
+		)
 	}
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
@@ -562,7 +574,8 @@ func DisplayResourceListCSV(output io.Writer) (err error) {
 			resourceInfo.Type,
 			resourceInfo.Name,
 			resourceInfo.Version,
-			resourceInfo.BomRef)
+			resourceInfo.BomRef,
+		)
 
 		if err = w.Write(line); err != nil {
 			getLogger().Errorf("csv.Write: %w", err)
@@ -620,7 +633,8 @@ func DisplayResourceListMarkdown(output io.Writer) (err error) {
 			resourceInfo.Type,
 			resourceInfo.Name,
 			resourceInfo.Version,
-			resourceInfo.BomRef)
+			resourceInfo.BomRef,
+		)
 
 		lineRow = createMarkdownRow(line)
 		fmt.Fprintf(output, "%s\n", lineRow)

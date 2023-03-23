@@ -442,7 +442,9 @@ The `resource` command is geared toward inspecting various resources types and t
 
 Primarily, the command is used to generate lists of resources, by type, that are included in a CycloneDX SBOM by invoking `resource list`.
 
-As of now, the list can be filtered by resource `type` which include `component` or `service`.  In addition a `where` filter flags can be supplied to only include results where values meet supplied regex.  Supported keys for the `where` filter include `name`, `version`, `type` and `bom-ref` *(i.e., all names of columns in the actual report)*.
+#### Where flag filtering
+
+As of now, the list can be filtered by resource `type` which include `component` or `service`.  In addition, a `where` filter flag can be supplied to only include results where values match supplied regex.  Supported keys for the `where` filter include `name`, `version`, `type` and `bom-ref` *(i.e., all names of columns in the actual report)*.
 
 #### Format flag
 
@@ -631,6 +633,59 @@ exit status 2
 ```
 
 Specifically, the output shows a first schema error indicating the failing JSON object; in this case, the CycloneDX property object with a `name` field with the value  `"urn:example.com:disclaimer"`. The second error indicates the property's `value` field SHOULD have had a constant value of `"This SBOM is current as of the date it was generated and is subject to change."` (as was required by the custom schema's regex). However, it was found to have only a partial match of `"This SBOM is current as of the date it was generated."`.
+
+---
+
+### Vulnerability
+
+This command will extract basic vulnerability report data from an SBOM that has a "vulnerabilities" list or from a standalone VEX in CycloneDX format. It includes the ability to filter reports data by applying regex to any of the named column data.
+
+**Note**: More column data and flags to filter results are planned.
+
+#### Where flag filtering
+
+In addition a `where` filter flag can be supplied to only include results where values match supplied regex.  Supported keys for the `where` filter include the following column names in the report (i.e., `id`, `bom-ref`, `created`
+`published`, `updated`, `rejected` and `description`).
+
+**Note**: filtering using `source.name` and `source.url` are coming soon
+
+#### Format flag
+
+Use the `--format` flag on the to choose one of the supported output formats:
+
+- txt (default), csv, md
+
+#### Result sorting
+
+Currently, all `vulnerability list` command results are sorted by vulnerability `id` then by `created` date.
+
+#### Vulnerability Examples
+
+##### Simple list
+
+```bash
+./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --quiet
+```
+
+```bash
+id              bom-ref  source.url  source.name                                      created                   published                 updated                   rejected  description
+--              -------  ----------  -----------                                      -------                   ---------                 -------                   --------  -----------
+CVE-2020-25649           NVD         https://nvd.nist.gov/vuln/detail/CVE-2020-25649  2020-12-03T00:00:00.000Z  2020-12-03T00:00:00.000Z  2023-02-02T00:00:00.000Z            com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection.
+CVE-2022-42003           NVD         https://nvd.nist.gov/vuln/detail/CVE-2022-42003  2022-10-02T00:00:00.000Z  2022-10-02T00:00:00.000Z  2022-10-02T00:00:00.000Z            In FasterXML jackson-databind before 2.14.0-rc1, resource exhaustion can occur because of a lack of a check in primitive value deserializers to avoid deep wrapper array nesting, when the UNWRAP_SINGLE_VALUE_ARRAYS feature is enabled.
+CVE-2022-42004           NVD         https://nvd.nist.gov/vuln/detail/CVE-2022-42004  2022-10-02T00:00:00.000Z  2022-10-02T00:00:00.000Z  2022-10-02T00:00:00.000Z            In FasterXML jackson-databind before 2.13.4, resource exhaustion can occur because of a lack of a check in BeanDeserializer._deserializeFromArray to prevent use of deeply nested arrays.
+```
+
+##### Simple list with where filter
+
+```bash
+./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --where id=2020 --quiet
+```
+
+```bash
+id              bom-ref  source.url  source.name                                      created                   published                 updated                   rejected  description
+--              -------  ----------  -----------                                      -------                   ---------                 -------                   --------  -----------
+CVE-2020-25649           NVD         https://nvd.nist.gov/vuln/detail/CVE-2020-25649  2020-12-03T00:00:00.000Z  2020-12-03T00:00:00.000Z  2023-02-02T00:00:00.000Z            com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection.
+```
 
 ---
 

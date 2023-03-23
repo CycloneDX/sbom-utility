@@ -175,6 +175,12 @@ func (err UnsupportedSchemaError) Error() string {
 }
 
 // TODO: Add error messages as constants (for future i18n)
+// TODO: Support remote schema retrieval as an optional program flag
+// However, we want to default to local for performance where possible
+// as well as plan for local, secure bundling of schema with this utility
+// in CI build systems (towards improved security, isolated builds)
+// NOTE: we have also found that standards orgs. freely move their schema files
+// within SCM systems thereby being a cause for remote retrieval failures.
 func LoadSchemaConfig(filename string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
@@ -287,6 +293,13 @@ func (sbom *Sbom) GetCdxMetadataLicenses() (licenses []CDXLicenseChoice) {
 		licenses = metadata.Licenses
 	}
 	return licenses
+}
+
+func (sbom *Sbom) GetCdxVulnerabilities() (vulnerabilities []CDXVulnerability) {
+	if bom := sbom.GetCdxBom(); bom != nil {
+		vulnerabilities = bom.Vulnerabilities
+	}
+	return vulnerabilities
 }
 
 func (sbom *Sbom) GetKeyValueAsString(key string) (sValue string, err error) {
