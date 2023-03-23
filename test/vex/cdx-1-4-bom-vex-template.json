@@ -1,0 +1,53 @@
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.4",
+    "version": 1,
+    "vulnerabilities": [
+      {
+        "id": "CVE-YYYY-XXXXX",
+        "cwes": [502],
+        "description": "",
+        "detail": "",
+        "recommendation": "",
+        "created": "YYYY-MM-DDT00:00:00.000Z",
+        "published": "YYYY-MM-DDT00:00:00.000Z",
+        "updated": "YYYY-MM-DDT00:00:00.000Z",
+        "source": {
+          "name": "NVD",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-YYYY-XXXXX"
+        },
+        "references": [
+          {
+            "id": "",
+            "source": {
+              "name": "",
+              "url": ""
+            }
+          }
+        ],
+        "ratings": [
+          {
+            "source": {
+              "name": "NVD",
+              "url": "https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator?vector=AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N&version=3.1"
+            },
+            "score": 7.5,
+            "severity": "high",
+            "method": "CVSSv31",
+            "vector": "AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+          }
+        ],
+        "advisories": [
+          {
+            "title": "GitHub Commit",
+            "url": "https://github.com/FasterXML/jackson-databind/commit/612f971b78c60202e9cd75a299050c8f2d724a59"
+          }
+        ],
+        "affects": [
+          {
+            "ref": ""
+          }
+        ]
+      }
+    ]
+  }
