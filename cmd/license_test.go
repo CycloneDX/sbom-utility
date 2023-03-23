@@ -355,7 +355,7 @@ func TestLicenseListPolicyCdx14CustomPolicy(t *testing.T) {
 
 	matched := listOutputContainsLicense(output, TEST_POLICY, TEST_LICENSE_TYPE, TEST_LICENSE_ID_OR_NAME)
 	if !matched {
-		t.Errorf("ListLicenses(): did not include license policy `%s`, type `%s`, name `%s`\n",
+		t.Errorf("LicenseList(): did not include license policy `%s`, type `%s`, name `%s`\n",
 			TEST_POLICY, TEST_LICENSE_TYPE, TEST_LICENSE_ID_OR_NAME)
 	}
 }
