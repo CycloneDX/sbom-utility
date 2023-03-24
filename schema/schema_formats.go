@@ -506,7 +506,7 @@ func FormatSchemaVariant(variant string) (formattedVariant string) {
 	if variant != "" {
 		variantName = variant
 	}
-	formattedVariant = "(" + variantName + ")"
+	formattedVariant = variantName
 	return
 }
 

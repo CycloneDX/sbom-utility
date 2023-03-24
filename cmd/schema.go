@@ -205,20 +205,33 @@ func DisplaySchemasMarkdown(output io.Writer) (err error) {
 		return fmt.Errorf(MSG_OUTPUT_NO_SCHEMAS_FOUND)
 	}
 
-	// TODO: Sort entries by schema format and version
-	// NOTE: for now, entries are already sorted by creating them that way in the config.json file
-	// sort.Slice(keyNames, func(i, j int) bool {
-	// 	return keyNames[i].(string) < keyNames[j].(string)
-	// })
-
 	var line []string
 	var lineRow string
 	var formatName string
 
-	for _, format := range (schema.SupportedFormatConfig).Formats {
+	// Get format array
+	aFormats := (schema.SupportedFormatConfig).Formats
+
+	// Sort by Format name
+	sort.Slice(aFormats, func(i, j int) bool {
+		format1 := aFormats[i]
+		format2 := aFormats[j]
+		return format1.CanonicalName < format2.CanonicalName
+	})
+
+	for _, format := range aFormats {
 		formatName = format.CanonicalName
 
-		if len(format.Schemas) > 0 {
+		// Get schema array
+		aSchemas := format.Schemas
+
+		sort.Slice(aSchemas, func(i, j int) bool {
+			schema1 := aSchemas[i]
+			schema2 := aSchemas[j]
+			return schema1.Name > schema2.Name
+		})
+
+		if len(aSchemas) > 0 {
 			for _, currentSchema := range format.Schemas {
 
 				// reset current line
@@ -266,18 +279,33 @@ func DisplaySchemasCSV(output io.Writer) (err error) {
 		return fmt.Errorf(currentRow[0])
 	}
 
-	// TODO: Sort entries by schema format and version
-	// sort.Slice(keyNames, func(i, j int) bool {
-	// 	return keyNames[i].(string) < keyNames[j].(string)
-	// })
 	var line []string
 	var formatName string
 
-	for _, format := range (schema.SupportedFormatConfig).Formats {
+	// Get format array
+	aFormats := (schema.SupportedFormatConfig).Formats
+
+	// Sort by Format name
+	sort.Slice(aFormats, func(i, j int) bool {
+		format1 := aFormats[i]
+		format2 := aFormats[j]
+		return format1.CanonicalName < format2.CanonicalName
+	})
+
+	for _, format := range aFormats {
 		formatName = format.CanonicalName
 
-		if len(format.Schemas) > 0 {
-			for _, currentSchema := range format.Schemas {
+		// Get schema array
+		aSchemas := format.Schemas
+
+		sort.Slice(aSchemas, func(i, j int) bool {
+			schema1 := aSchemas[i]
+			schema2 := aSchemas[j]
+			return schema1.Name > schema2.Name
+		})
+
+		if len(aSchemas) > 0 {
+			for _, currentSchema := range aSchemas {
 
 				line = nil
 				line = append(line,
