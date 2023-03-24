@@ -63,6 +63,8 @@ const (
 	MSG_LICENSE_INVALID_POLICY                 = "invalid license policy"
 	MSG_LICENSES_NOT_FOUND                     = "licenses not found"
 	MSG_LICENSE_EXPRESSION_INVALID_CONJUNCTION = "invalid conjunction"
+	MSG_LICENSE_EXPRESSION_UNDEFINED_POLICY    = "contains an undefined policy"
+	MSG_LICENSE_EXPRESSION                     = "license expression"
 )
 
 // Query error messages

@@ -103,6 +103,16 @@ func parseExpression(rawExpression string) (ce *CompoundExpression, err error) {
 func parseCompoundExpression(expression *CompoundExpression, tokens []string, index int) (i int, err error) {
 	getLogger().Enter("expression:", expression)
 	defer getLogger().Exit()
+	defer func() {
+		if expression.CompoundUsagePolicy == POLICY_UNDEFINED {
+			getLogger().Warningf("%s: %s: expression: left term: %s, right term: %s",
+				MSG_LICENSE_EXPRESSION,
+				MSG_LICENSE_EXPRESSION_UNDEFINED_POLICY,
+				expression.LeftUsagePolicy,
+				expression.RightUsagePolicy,
+			)
+		}
+	}()
 	var token string
 	for index < len(tokens) {
 		token = tokens[index]
@@ -197,28 +207,28 @@ func FinalizeCompoundPolicy(expression *CompoundExpression) (err error) {
 		expression.Conjunction,
 		expression.RightUsagePolicy)
 
-	// Undefined Short-circuit
-	// If either left or right policy is UNDEFINED with the AND conjunction
-	// then the compound policy resolves to UNDEFINED
-	if expression.Conjunction == AND {
-		if expression.LeftUsagePolicy == POLICY_UNDEFINED ||
-			expression.RightUsagePolicy == POLICY_UNDEFINED {
-			expression.CompoundUsagePolicy = POLICY_UNDEFINED
-			return nil
-		}
-	} else if expression.Conjunction == OR {
-		if expression.LeftUsagePolicy == POLICY_UNDEFINED {
-			// default to right policy (regardless of value)
-			expression.CompoundUsagePolicy = expression.RightUsagePolicy
-			getLogger().Debugf("Left usage policy is UNDEFINED")
-			return nil
-		} else if expression.RightUsagePolicy == POLICY_UNDEFINED {
-			// default to left policy (regardless of value)
-			expression.CompoundUsagePolicy = expression.LeftUsagePolicy
-			getLogger().Debugf("Right usage policy is UNDEFINED")
-			return nil
-		}
-	}
+	// // Undefined Short-circuit
+	// // If either left or right policy is UNDEFINED with the AND conjunction
+	// // then the compound policy resolves to UNDEFINED
+	// if expression.Conjunction == AND {
+	// 	if expression.LeftUsagePolicy == POLICY_UNDEFINED ||
+	// 		expression.RightUsagePolicy == POLICY_UNDEFINED {
+	// 		expression.CompoundUsagePolicy = POLICY_UNDEFINED
+	// 		return nil
+	// 	}
+	// } else if expression.Conjunction == OR {
+	// 	if expression.LeftUsagePolicy == POLICY_UNDEFINED {
+	// 		// default to right policy (regardless of value)
+	// 		expression.CompoundUsagePolicy = expression.RightUsagePolicy
+	// 		getLogger().Debugf("Left usage policy is UNDEFINED")
+	// 		return nil
+	// 	} else if expression.RightUsagePolicy == POLICY_UNDEFINED {
+	// 		// default to left policy (regardless of value)
+	// 		expression.CompoundUsagePolicy = expression.LeftUsagePolicy
+	// 		getLogger().Debugf("Right usage policy is UNDEFINED")
+	// 		return nil
+	// 	}
+	// }
 
 	// The policy config. has 3 states: { "allow", "deny", "needs-review" }; n=3
 	// which are always paired with a conjunctions; r=2
@@ -230,6 +240,22 @@ func FinalizeCompoundPolicy(expression *CompoundExpression) (err error) {
 	// then look for any "needs-review" policy as we assume it COULD be a "deny" determination upon review
 	// this leaves the remaining state which is "allow" (both sides) as the only "positive" outcome
 	case AND:
+		// Undefined Short-circuit:
+		// If either left or right policy is UNDEFINED with the AND conjunction,
+		// take the pessimistic value (DENY) result if offered by either term
+		if expression.LeftUsagePolicy == POLICY_UNDEFINED ||
+			expression.RightUsagePolicy == POLICY_UNDEFINED {
+
+			if expression.LeftUsagePolicy == POLICY_DENY ||
+				expression.RightUsagePolicy == POLICY_DENY {
+				expression.CompoundUsagePolicy = POLICY_DENY
+
+			} else {
+				expression.CompoundUsagePolicy = POLICY_UNDEFINED
+			}
+			return nil
+		}
+
 		// This "deny" comparator block covers 3 of the 6 combinations:
 		// 1. POLICY_DENY AND POLICY_ALLOW
 		// 2. POLICY_DENY AND POLICY_NEEDS_REVIEW
@@ -253,6 +279,21 @@ func FinalizeCompoundPolicy(expression *CompoundExpression) (err error) {
 	// then look for any "needs-review" policy as we assume it COULD be an "allow" determination upon review
 	// this leaves the remaining state which is "allow" (both sides) as the only "positive" outcome
 	case OR:
+		// Undefined Short-circuit:
+		// If either left or right policy is UNDEFINED with the OR conjunction,
+		// take the result offered by the other term (which could also be UNDEFINED)
+		if expression.LeftUsagePolicy == POLICY_UNDEFINED {
+			// default to right policy (regardless of value)
+			expression.CompoundUsagePolicy = expression.RightUsagePolicy
+			getLogger().Debugf("Left usage policy is UNDEFINED")
+			return nil
+		} else if expression.RightUsagePolicy == POLICY_UNDEFINED {
+			// default to left policy (regardless of value)
+			expression.CompoundUsagePolicy = expression.LeftUsagePolicy
+			getLogger().Debugf("Right usage policy is UNDEFINED")
+			return nil
+		}
+
 		// This "allow" comparator block covers 3 of the 6 combinations:
 		// 1. POLICY_ALLOW OR POLICY_DENY
 		// 2. POLICY_ALLOW OR POLICY_NEEDS_REVIEW
