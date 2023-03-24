@@ -21,6 +21,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"sort"
 	"strings"
 	"text/tabwriter"
 
@@ -130,20 +131,40 @@ func DisplaySchemasTabbedText(output io.Writer) (err error) {
 
 	defer w.Flush()
 
-	if len(schema.SupportedFormatConfig.Formats) > 0 {
+	// Get format array
+	aFormats := (schema.SupportedFormatConfig).Formats
+
+	if len(aFormats) > 0 {
 		var formatName string
+
+		// Sort by Format name
+		sort.Slice(aFormats, func(i, j int) bool {
+			format1 := aFormats[i]
+			format2 := aFormats[j]
+			return format1.CanonicalName < format2.CanonicalName
+		})
 
 		// Create title row and add tabs between column titles for the tabWRiter
 		titles, underlines := createTitleRows(SCHEMA_LIST_TITLES, nil)
 		fmt.Fprintf(w, "%s\n", strings.Join(titles, "\t"))
 		fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
-		for _, format := range (schema.SupportedFormatConfig).Formats {
+		for _, format := range aFormats {
 			formatName = format.CanonicalName
 
-			if len(format.Schemas) > 0 {
+			// Get schema array
+			aSchemas := format.Schemas
+
+			if len(aSchemas) > 0 {
+
+				sort.Slice(aSchemas, func(i, j int) bool {
+					schema1 := aSchemas[i]
+					schema2 := aSchemas[j]
+					return schema1.Name > schema2.Name
+				})
+
 				for _, currentSchema := range format.Schemas {
-					fmt.Fprintf(w, "%v\t%s\t%s\t%s\t%st%s\n",
+					fmt.Fprintf(w, "%v\t%s\t%s\t%s\t%s\t%s\n",
 						currentSchema.Name,
 						formatName,
 						currentSchema.Version,
