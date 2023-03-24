@@ -4,7 +4,8 @@
 	"spdxVersion" : "SPDX-2.2",
 	"dataLicense" : "CC0-1.0",
 	"creationInfo" : {
-	  "created" : "2022-01-14T00:00:00Z"
+	  "created" : "2022-01-14T00:00:00Z",
+	  "creators" : [ "Tool: sbom generator", "Organization: my.security.org", "Person: Foo Bar" ]
 	},
 	"documentNamespace" : "https://sbom-utility.org/test/spdx/"
 }
