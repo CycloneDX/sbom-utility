@@ -138,6 +138,7 @@ This command is used to aggregate and summarize software, hardware and data lice
 The `license` command supports the following subcommands:
 
 - [list](#list-subcommand) - list or create a summarized report of licenses found in input SBOM.
+  - [list with --summary](#summary-flag) - As full license information can be very large, a summary view is often most useful.
 - [policy](#policy-subcommand) - list user configured license policies by SPDX license ID and/or license family name.
 
 ##### Format flag
@@ -238,7 +239,8 @@ Use the `--summary` flag on the `license list` command to produce a summary repo
 
 The values for the `policy` column are derived from the `license.json` policy configuration file which the utility looks for in the execution root directory.
 
-- *A policy of `UNDEFINED` indicates that `license.json` provided no entry that matched the declared license (`id` or `name`) in the SBOM.*
+- A policy of `UNDEFINED` indicates that `license.json` provided no entry that matched the declared license (`id` or `name`) in the SBOM.
+- License expressions (e.g., `(MIT or GPL-2.0)`) with one term resolving to `UNDEFINED` and the the other term having a concrete policy will resolve to the "optimistic" policy for `OR` expressions and the "pessimistic" policy for `AND` expressions.  In addition, a warning of this resolution is emitted.
 
 ###### Text format example (default)
 
