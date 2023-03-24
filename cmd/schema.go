@@ -38,7 +38,24 @@ const (
 var SCHEMA_LIST_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{FORMAT_TEXT, FORMAT_CSV, FORMAT_MARKDOWN}, ", ")
 
-var SCHEMA_LIST_TITLES = []string{"Format", "Version", "Variant", "File", "Source"}
+const (
+	SCHEMA_FILTER_KEY_NAME        = "Name"
+	SCHEMA_FILTER_KEY_FORMAT      = "Format"
+	SCHEMA_FILTER_KEY_VERSION     = "Version"
+	SCHEMA_FILTER_KEY_VARIANT     = "Variant"
+	SCHEMA_FILTER_KEY_FILE        = "File (local)"
+	SCHEMA_FILTER_KEY_SOURCE      = "URL (remote)"
+	SCHEMA_FILTER_KEY_DEVELOPMENT = "Development" // Unused (for now)
+)
+
+var SCHEMA_LIST_TITLES = []string{
+	SCHEMA_FILTER_KEY_NAME,
+	SCHEMA_FILTER_KEY_FORMAT,
+	SCHEMA_FILTER_KEY_VERSION,
+	SCHEMA_FILTER_KEY_VARIANT,
+	SCHEMA_FILTER_KEY_FILE,
+	SCHEMA_FILTER_KEY_SOURCE,
+}
 
 func NewCommandSchema() *cobra.Command {
 	var command = new(cobra.Command)
@@ -126,12 +143,14 @@ func DisplaySchemasTabbedText(output io.Writer) (err error) {
 
 			if len(format.Schemas) > 0 {
 				for _, currentSchema := range format.Schemas {
-					fmt.Fprintf(w, "%v\t%s\t%s\t%s\t%s\n",
+					fmt.Fprintf(w, "%v\t%s\t%s\t%s\t%st%s\n",
+						currentSchema.Name,
 						formatName,
 						currentSchema.Version,
 						schema.FormatSchemaVariant(currentSchema.Variant),
 						currentSchema.File,
-						currentSchema.Url)
+						currentSchema.Url,
+					)
 				}
 			} else {
 				getLogger().Warningf("No supported schemas for format `%s`.\n", formatName)
@@ -185,11 +204,13 @@ func DisplaySchemasMarkdown(output io.Writer) (err error) {
 				line = nil
 
 				line = append(line,
+					currentSchema.Name,
 					formatName,
 					currentSchema.Version,
 					schema.FormatSchemaVariant(currentSchema.Variant),
 					currentSchema.File,
-					currentSchema.Url)
+					currentSchema.Url,
+				)
 
 				lineRow = createMarkdownRow(line)
 				fmt.Fprintf(output, "%s\n", lineRow)
@@ -239,11 +260,13 @@ func DisplaySchemasCSV(output io.Writer) (err error) {
 
 				line = nil
 				line = append(line,
+					currentSchema.Name,
 					formatName,
 					currentSchema.Version,
 					schema.FormatSchemaVariant(currentSchema.Variant),
 					currentSchema.File,
-					currentSchema.Url)
+					currentSchema.Url,
+				)
 
 				if err = w.Write(line); err != nil {
 					return getLogger().Errorf("error writing to output (%v): %s", line, err)
