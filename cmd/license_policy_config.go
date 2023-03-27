@@ -80,6 +80,13 @@ type LicenseComplianceConfig struct {
 	licenseIdMap         *slicemultimap.MultiMap
 }
 
+func (config *LicenseComplianceConfig) Debug() {
+	fmt.Printf(">> policyConfigFile: %s\n", config.policyConfigFile)
+	fmt.Printf(">> PolicyList (length): %v\n", len(config.PolicyList))
+	fmt.Printf(">> licenseFamilyNameMap.Keys\n() (length): %v\n", len(config.licenseFamilyNameMap.Keys()))
+	fmt.Printf(">> licenseIdMap.Keys\n() (length): %v\n", len(config.licenseIdMap.Keys()))
+}
+
 func (config *LicenseComplianceConfig) GetFamilyNameMap() (hashmap *slicemultimap.MultiMap, err error) {
 	if config.licenseFamilyNameMap == nil {
 		err = config.HashLicensePolicies()
@@ -100,54 +107,70 @@ func (config *LicenseComplianceConfig) LoadLicensePolicies(filename string) (err
 
 	// Only load the policy config. once
 	config.loadOnce.Do(func() {
-		// locate the license policy file
-		config.policyConfigFile, err = utils.FindVerifyConfigFileAbsPath(getLogger(), filename)
-
-		if err != nil {
-			err = fmt.Errorf("unable to find license policy config file: `%s`", filename)
-			return
-		}
-
-		getLogger().Infof("Loading license policy config file: `%s`...", config.policyConfigFile)
-
-		// attempt to read in contents of the policy config.
-		buffer, errRead := ioutil.ReadFile(config.policyConfigFile)
-		if errRead != nil {
-			err = fmt.Errorf("unable to `ReadFile`: `%s`", config.policyConfigFile)
-			return
-		}
-
-		// NOTE: this cleverly unmarshals into the current config instance this function is associated with
-		errUnmarshal := json.Unmarshal(buffer, config)
-		if errUnmarshal != nil {
-			err = fmt.Errorf("cannot `Unmarshal`: `%s`", config.policyConfigFile)
-			return
-		}
+		err = config.innerLoadLicensePolicies(filename)
 	})
 
 	return
 }
 
-func (config *LicenseComplianceConfig) HashLicensePolicies() error {
+func (config *LicenseComplianceConfig) innerLoadLicensePolicies(filename string) (err error) {
+	getLogger().Enter(filename)
+	defer getLogger().Exit()
+
+	// locate the license policy file
+	config.policyConfigFile, err = utils.FindVerifyConfigFileAbsPath(getLogger(), filename)
+
+	if err != nil {
+		err = fmt.Errorf("unable to find license policy config file: `%s`", filename)
+		return
+	}
+
+	getLogger().Infof("Loading license policy config file: `%s`...", config.policyConfigFile)
+
+	// attempt to read in contents of the policy config.
+	buffer, errRead := ioutil.ReadFile(config.policyConfigFile)
+	if errRead != nil {
+		err = fmt.Errorf("unable to `ReadFile`: `%s`", config.policyConfigFile)
+		return
+	}
+
+	// NOTE: this cleverly unmarshals into the current config instance this function is associated with
+	errUnmarshal := json.Unmarshal(buffer, config)
+	if errUnmarshal != nil {
+		err = fmt.Errorf("cannot `Unmarshal`: `%s`", config.policyConfigFile)
+		return
+	}
+
+	return
+}
+
+func (config *LicenseComplianceConfig) HashLicensePolicies() (hashError error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
-	var hashError error
 
 	config.hashOnce.Do(func() {
-		// Note: we only need test to see if one of the maps has not been allocated
-		// and populated to infer neither has
-		config.licenseFamilyNameMap = slicemultimap.New()
-		config.licenseIdMap = slicemultimap.New()
-
-		for _, policy := range config.PolicyList {
-			hashError = config.hashPolicy(policy)
-			if hashError != nil {
-				hashError = fmt.Errorf("unable to hash policy: %v", policy)
-				return
-			}
-		}
+		hashError = config.innerHashLicensePolicies()
 	})
-	return hashError
+	return
+}
+
+func (config *LicenseComplianceConfig) innerHashLicensePolicies() (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	// Note: we only need test to see if one of the maps has not been allocated
+	// and populated to infer neither has
+	config.licenseFamilyNameMap = slicemultimap.New()
+	config.licenseIdMap = slicemultimap.New()
+
+	for _, policy := range config.PolicyList {
+		err = config.hashPolicy(policy)
+		if err != nil {
+			err = fmt.Errorf("unable to hash policy: %v", policy)
+			return
+		}
+	}
+	return
 }
 
 // We will take the raw license policy and make it accessible for fast hash lookup

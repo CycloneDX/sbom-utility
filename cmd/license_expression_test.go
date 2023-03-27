@@ -22,6 +22,16 @@ import (
 	"testing"
 )
 
+func innerTestLicenseExpressionParsing(t *testing.T, expression string, expectedPolicy string) (parsedExpression *CompoundExpression, err error) {
+	parsedExpression, err = parseExpression(expression)
+	getLogger().Infof("expression:\n%v", parsedExpression)
+	if parsedExpression.CompoundUsagePolicy != expectedPolicy {
+		t.Errorf("License Expression: expected `%s`, actual `%s`\n",
+			expectedPolicy, parsedExpression.CompoundUsagePolicy)
+	}
+	return
+}
+
 // TODO: Need tests that include unary operators (e.g., AFL-2.0+)
 // which is an outdated concept and replaced by newer approach as seen
 // with GPL (e.g., GPL-2.0-or-later) using suffixes "or-later" or "only" (restrict)
@@ -52,21 +62,91 @@ func TestLicenseExpressionTokenizerWhitespaceNewlineTabRemoval(t *testing.T) {
 	}
 }
 
-func TestLicenseExpressionParsingTestBasic(t *testing.T) {
+// Tests for expression parser
+
+func TestLicenseExpressionParsingTestComplex1(t *testing.T) {
 	SPDX_LICENSE_EXPRESSION_TEST1 := "Apache-2.0 AND (MIT OR GPL-2.0-only)"
-	result, _ := parseExpression(SPDX_LICENSE_EXPRESSION_TEST1)
-	json := getLogger().FormatStruct(result)
-	getLogger().Infof("expression:\n%s", json)
+	EXPECTED_POLICY := POLICY_ALLOW
+	result, _ := innerTestLicenseExpressionParsing(t, SPDX_LICENSE_EXPRESSION_TEST1, EXPECTED_POLICY)
+	if result.LeftUsagePolicy != POLICY_ALLOW && result.RightUsagePolicy != POLICY_ALLOW {
+		t.Errorf("License Expression: expectedLeft `%s`, actualLeft `%s`, expectedRight `%s`, actualRight `%s`\n",
+			POLICY_ALLOW, result.LeftUsagePolicy, POLICY_ALLOW, result.RightUsagePolicy)
+	}
+}
+
+func TestLicenseExpressionParsingTestComplex2(t *testing.T) {
+	SPDX_LICENSE_EXPRESSION_TEST1 := "MPL-1.0 AND (MIT AND AGPL-3.0)"
+	EXPECTED_POLICY := POLICY_NEEDS_REVIEW
+	result, _ := innerTestLicenseExpressionParsing(t, SPDX_LICENSE_EXPRESSION_TEST1, EXPECTED_POLICY)
+	if result.LeftUsagePolicy != POLICY_ALLOW && result.RightUsagePolicy != POLICY_ALLOW {
+		t.Errorf("License Expression: expectedLeft `%s`, actualLeft `%s`, expectedRight `%s`, actualRight `%s`\n",
+			POLICY_ALLOW, result.LeftUsagePolicy, POLICY_ALLOW, result.RightUsagePolicy)
+	}
 }
 
 func TestLicenseExpressionParsingCompoundRightSide(t *testing.T) {
 	EXP := "Apache-2.0 AND (MIT OR GPL-2.0-only )"
-	parsedExpression, _ := parseExpression(EXP)
-	getLogger().Infof("expression:\n%v", parsedExpression)
+	EXPECTED_POLICY := POLICY_ALLOW
+	innerTestLicenseExpressionParsing(t, EXP, EXPECTED_POLICY)
 }
 
 func TestLicenseExpressionCompoundLeftSide(t *testing.T) {
 	EXP := "(Apache-1.0 OR Apache-1.1 ) AND 0BSD"
-	parsedExpression, _ := parseExpression(EXP)
-	getLogger().Infof("expression:\n%v", parsedExpression)
+	EXPECTED_POLICY := POLICY_ALLOW
+	innerTestLicenseExpressionParsing(t, EXP, EXPECTED_POLICY)
+}
+
+// Test license expression entirely inside a logical group (i.e., outer parens)
+func TestLicenseExpressionSingleCompoundAllow(t *testing.T) {
+	EXP := "(MIT OR CC0-1.0)"
+	EXPECTED_POLICY := POLICY_ALLOW
+	innerTestLicenseExpressionParsing(t, EXP, EXPECTED_POLICY)
+}
+
+func TestLicenseExpressionSingleCompoundUndefinedBoth(t *testing.T) {
+	EXP := "(FOO OR BAR)"
+	EXPECTED_POLICY := POLICY_UNDEFINED
+	innerTestLicenseExpressionParsing(t, EXP, EXPECTED_POLICY)
+}
+
+func TestLicenseExpressionSingleCompoundUndefinedLeft(t *testing.T) {
+	EXP := "(FOO OR MIT)"
+	EXPECTED_POLICY := POLICY_ALLOW
+	innerTestLicenseExpressionParsing(t, EXP, EXPECTED_POLICY)
+}
+
+func TestLicenseExpressionSingleCompoundUndefinedRight(t *testing.T) {
+	EXP := "(MIT OR BAR)"
+	EXPECTED_POLICY := POLICY_ALLOW
+	innerTestLicenseExpressionParsing(t, EXP, EXPECTED_POLICY)
+}
+
+func TestLicenseExpressionSingleCompoundInvalid(t *testing.T) {
+	EXP := "()"
+	EXPECTED_POLICY := POLICY_UNDEFINED
+	innerTestLicenseExpressionParsing(t, EXP, EXPECTED_POLICY)
+}
+
+func TestLicenseExpressionSingleCompoundInvalidAND(t *testing.T) {
+	EXP := "AND"
+	EXPECTED_POLICY := POLICY_UNDEFINED
+	innerTestLicenseExpressionParsing(t, EXP, EXPECTED_POLICY)
+}
+
+func TestLicenseExpressionSingleCompoundInvalidOR(t *testing.T) {
+	EXP := "OR"
+	EXPECTED_POLICY := POLICY_UNDEFINED
+	innerTestLicenseExpressionParsing(t, EXP, EXPECTED_POLICY)
+}
+
+func TestLicenseExpressionSingleCompoundInvalidAND2(t *testing.T) {
+	EXP := "AND GPL-2.0-only"
+	EXPECTED_POLICY := POLICY_UNDEFINED
+	innerTestLicenseExpressionParsing(t, EXP, EXPECTED_POLICY)
+}
+
+func TestLicenseExpressionSingleCompoundInvalidOR2(t *testing.T) {
+	EXP := "OR GPL-2.0-only"
+	EXPECTED_POLICY := POLICY_NEEDS_REVIEW
+	innerTestLicenseExpressionParsing(t, EXP, EXPECTED_POLICY)
 }

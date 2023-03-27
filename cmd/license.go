@@ -149,6 +149,9 @@ func findDocumentLicenses(document *schema.Sbom) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
+	// NOTE: DEBUG: use this to debug license policy hashmaps have appropriate # of entries
+	//licensePolicyConfig.Debug()
+
 	// At this time, fail SPDX format SBOMs as "unsupported" (for "any" format)
 	if !document.FormatInfo.IsCycloneDx() {
 		err = schema.NewUnsupportedFormatForCommandError(

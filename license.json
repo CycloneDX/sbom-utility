@@ -29,6 +29,15 @@
                   "urls": ["https://spdx.org/licenses/Adobe-2006.html"]
             },
             {
+                  "id": "ADSL",
+                  "name": "Amazon Digital Services License",
+                  "family": "ADSL",
+                  "usagePolicy": "needs-review",
+                  "annotationRefs": ["NEEDS-APPROVAL"],
+                  "notes": [""],
+                  "urls": ["https://spdx.org/licenses/ADSL.html"]
+            },
+            {
                   "id": "AFL-1.1",
                   "name": "Academic Free License v1.1",
                   "family": "AFL",

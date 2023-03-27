@@ -36,6 +36,10 @@ const (
 
 	TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_ID   = "test/cyclonedx/cdx-1-4-license-policy-invalid-spdx-id.json"
 	TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_NAME = "test/cyclonedx/cdx-1-4-license-policy-invalid-license-name.json"
+
+	// Test custom license policy (with license expression)
+	TEST_CUSTOM_POLICY_1                           = "test/policy/license-policy-expression-outer-parens.policy.json"
+	TEST_LICENSE_LIST_TEXT_CDX_1_4_CUSTOM_POLICY_1 = "test/policy/license-policy-expression-outer-parens.bom.json"
 )
 
 // -------------------------------------------
@@ -52,6 +56,17 @@ func innerTestLicenseList(t *testing.T, inputFile string, format string, summary
 	utils.GlobalFlags.InputFile = inputFile
 	err = ListLicenses(outputWriter, format, summary)
 
+	return
+}
+
+func loadHashCustomPolicyFile(policyFile string) (err error) {
+	err = licensePolicyConfig.innerLoadLicensePolicies(policyFile)
+	if err != nil {
+		return
+	}
+	// Note: the HashLicensePolicies function creates new id and name hashmaps
+	// therefore there is no need to clear them
+	err = licensePolicyConfig.innerHashLicensePolicies()
 	return
 }
 
@@ -137,7 +152,6 @@ func TestLicenseSpdxIdFailWhiteSpace(t *testing.T) {
 // Test format unsupported (SPDX)
 // -------------------------------------------
 func TestLicenseListFormatUnsupportedSPDX1(t *testing.T) {
-
 	_, err := innerTestLicenseList(t,
 		TEST_SPDX_2_2_MIN_REQUIRED,
 		FORMAT_DEFAULT,
@@ -150,7 +164,6 @@ func TestLicenseListFormatUnsupportedSPDX1(t *testing.T) {
 }
 
 func TestLicenseListFormatUnsupportedSPDX2(t *testing.T) {
-
 	_, err := innerTestLicenseList(t,
 		TEST_SPDX_2_2_EXAMPLE_1,
 		FORMAT_DEFAULT,
@@ -316,6 +329,33 @@ func TestLicenseListPolicyCdx14InvalidLicenseName(t *testing.T) {
 	matched := listOutputContainsLicense(output, TEST_POLICY, TEST_LICENSE_TYPE, TEST_LICENSE_ID_OR_NAME)
 	if !matched {
 		t.Errorf("ListLicenses(): did not include license policy `%s`, type `%s`, name `%s`\n",
+			TEST_POLICY, TEST_LICENSE_TYPE, TEST_LICENSE_ID_OR_NAME)
+	}
+}
+
+func TestLicenseListPolicyCdx14CustomPolicy(t *testing.T) {
+	TEST_POLICY := POLICY_ALLOW
+	TEST_LICENSE_TYPE := "expression"
+	TEST_LICENSE_ID_OR_NAME := "(MIT OR CC0-1.0)"
+
+	// Load a custom policy file ONLY for the specific unit test
+	loadHashCustomPolicyFile(TEST_CUSTOM_POLICY_1)
+
+	output, err := innerTestLicenseList(t,
+		TEST_LICENSE_LIST_TEXT_CDX_1_4_CUSTOM_POLICY_1,
+		FORMAT_TEXT,
+		true)
+
+	// MUST!!! restore default policy file to default for all other tests
+	loadHashCustomPolicyFile(utils.GlobalFlags.ConfigLicensePolicyFile)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	matched := listOutputContainsLicense(output, TEST_POLICY, TEST_LICENSE_TYPE, TEST_LICENSE_ID_OR_NAME)
+	if !matched {
+		t.Errorf("LicenseList(): did not include license policy `%s`, type `%s`, name `%s`\n",
 			TEST_POLICY, TEST_LICENSE_TYPE, TEST_LICENSE_ID_OR_NAME)
 	}
 }
