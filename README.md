@@ -138,6 +138,7 @@ This command is used to aggregate and summarize software, hardware and data lice
 The `license` command supports the following subcommands:
 
 - [list](#list-subcommand) - list or create a summarized report of licenses found in input SBOM.
+  - [list with --summary](#summary-flag) - As full license information can be very large, a summary view is often most useful.
 - [policy](#policy-subcommand) - list user configured license policies by SPDX license ID and/or license family name.
 
 ##### Format flag
@@ -238,7 +239,8 @@ Use the `--summary` flag on the `license list` command to produce a summary repo
 
 The values for the `policy` column are derived from the `license.json` policy configuration file which the utility looks for in the execution root directory.
 
-- *A policy of `UNDEFINED` indicates that `license.json` provided no entry that matched the declared license (`id` or `name`) in the SBOM.*
+- A policy of `UNDEFINED` indicates that `license.json` provided no entry that matched the declared license (`id` or `name`) in the SBOM.
+- License expressions (e.g., `(MIT or GPL-2.0)`) with one term resolving to `UNDEFINED` and the the other term having a concrete policy will resolve to the "optimistic" policy for `OR` expressions and the "pessimistic" policy for `AND` expressions.  In addition, a warning of this resolution is emitted.
 
 ###### Text format example (default)
 
@@ -249,24 +251,26 @@ The values for the `policy` column are derived from the `license.json` policy co
 Sample output:
 
 ```bash
-Policy        Type        ID/Name/Expression                    Component(s)      BOM ref.                            Document location
-------        ----        ------------------                    ------------      --------                            -----------------
-needs-review  name        UFL                                   ACME Application  pkg:app/sample@1.0.0                metadata.component
-allow         expression  Apache-2.0 AND (MIT OR BSD-2-Clause)  Library B         pkg:lib/libraryB@1.0.0              components
-needs-review  id          GPL-3.0-only                          Library D         pkg:lib/libraryD@1.0.0              components
-allow         id          Apache-1.0                            Library E         pkg:lib/libraryE@1.0.0              components
-needs-review  name        GPL                                   Library H         pkg:lib/libraryH@1.0.0              components
-allow         name        BSD                                   Library J         pkg:lib/libraryJ@1.0.0              components
-allow         id          Apache-2.0                            N/A               N/A                                 metadata.licenses
-allow         id          Apache-2.0                            Library A         pkg:lib/libraryA@1.0.0              components
-allow         id          Apache-2.0                            Library F         pkg:lib/libraryF@1.0.0              components
-allow         id          MIT                                   ACME Application  pkg:app/sample@1.0.0                metadata.component
-allow         id          MIT                                   Library A         pkg:lib/libraryA@1.0.0              components
-allow         name        Apache                                Library B         pkg:lib/libraryB@1.0.0              components
-needs-review  id          GPL-2.0-only                          Library C         pkg:lib/libraryC@1.0.0              components
-allow         name        CC-BY-NC                              Library G         pkg:lib/libraryG@1.0.0              components
-needs-review  name        AGPL                                  Library J         pkg:lib/libraryJ@1.0.0              components
-UNDEFINED     id          ADSL                                  Foo               service:example.com/myservices/foo  services
+Policy        Type        ID/Name/Expression                    Component(s)       BOM ref.                            Document location
+------        ----        ------------------                    ------------       --------                            -----------------
+needs-review  id          ADSL                                  Foo                service:example.com/myservices/foo  services
+needs-review  name        AGPL                                  Library J          pkg:lib/libraryJ@1.0.0              components
+allow         name        Apache                                Library B          pkg:lib/libraryB@1.0.0              components
+allow         id          Apache-1.0                            Library E          pkg:lib/libraryE@1.0.0              components
+allow         id          Apache-2.0                            N/A                N/A                                 metadata.licenses
+allow         id          Apache-2.0                            Library A          pkg:lib/libraryA@1.0.0              components
+allow         id          Apache-2.0                            Library F          pkg:lib/libraryF@1.0.0              components
+allow         expression  Apache-2.0 AND (MIT OR BSD-2-Clause)  Library B          pkg:lib/libraryB@1.0.0              components
+allow         name        BSD                                   Library J          pkg:lib/libraryJ@1.0.0              components
+deny          name        CC-BY-NC                              Library G          pkg:lib/libraryG@1.0.0              components
+needs-review  name        GPL                                   Library H          pkg:lib/libraryH@1.0.0              components
+needs-review  id          GPL-2.0-only                          Library C          pkg:lib/libraryC@1.0.0              components
+needs-review  id          GPL-3.0-only                          Library D          pkg:lib/libraryD@1.0.0              components
+allow         id          MIT                                   ACME Application   pkg:app/sample@1.0.0                metadata.component
+allow         id          MIT                                   Library A          pkg:lib/libraryA@1.0.0              components
+UNDEFINED     invalid     NOASSERTION                           Library NoLicense  pkg:lib/libraryNoLicense@1.0.0      components
+UNDEFINED     invalid     NOASSERTION                           Bar                service:example.com/myservices/bar  services
+needs-review  name        UFL                                   ACME Application   pkg:app/sample@1.0.0                metadata.component
 ```
 
 ###### CSV format example
