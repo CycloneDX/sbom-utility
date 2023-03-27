@@ -531,10 +531,8 @@ Sample output:
 Name                          Format     Version   Variant        File (local)                                     URL (remote)
 ----                          ------     -------   -------        ------------                                     ------------
 CycloneDX v1.5 (development)  CycloneDX  1.5       (development)  schema/cyclonedx/1.5/bom-1.5-dev.schema.json     https://raw.githubusercontent.com/CycloneDX/specification/v1.5-dev/schema/bom-1.5.schema.json
-CycloneDX v1.4 (custom)       CycloneDX  1.4       (custom)       schema/test/bom-1.4-custom.schema.json
 CycloneDX v1.4                CycloneDX  1.4       (latest)       schema/cyclonedx/1.4/bom-1.4.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json
 CycloneDX v1.3 (strict)       CycloneDX  1.3       (strict)       schema/cyclonedx/1.3/bom-1.3-strict.schema.json  https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3-strict.schema.json
-CycloneDX v1.3 (custom)       CycloneDX  1.3       (custom)       schema/test/bom-1.3-custom.schema.json
 CycloneDX v1.3                CycloneDX  1.3       (latest)       schema/cyclonedx/1.3/bom-1.3.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3.schema.json
 CycloneDX v1.2 (strict)       CycloneDX  1.2       (strict)       schema/cyclonedx/1.2/bom-1.2-strict.schema.json  https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2-strict.schema.json
 CycloneDX v1.2                CycloneDX  1.2       (latest)       schema/cyclonedx/1.2/bom-1.2.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2.schema.json
