@@ -30,6 +30,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	SUBCOMMAND_SCHEMA_LIST = "list"
+)
+
+var VALID_SUBCOMMANDS_SCHEMA = []string{SUBCOMMAND_SCHEMA_LIST}
+
 // Subcommand flags
 const (
 	FLAG_SCHEMA_OUTPUT_FORMAT_HELP = "format output using the specified type"
@@ -67,8 +73,14 @@ func NewCommandSchema() *cobra.Command {
 		FLAG_SCHEMA_OUTPUT_FORMAT_HELP+SCHEMA_LIST_SUPPORTED_FORMATS)
 	command.RunE = schemaCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
-		if len(args) != 0 {
+		// the resource command requires at least 1 valid subcommand (argument)
+		if len(args) > 1 {
 			return getLogger().Errorf("Too many arguments provided: %v", args)
+		}
+
+		// Make sure subcommand is known
+		if !preRunTestForSubcommand(command, VALID_SUBCOMMANDS_SCHEMA, args[0]) {
+			return getLogger().Errorf("Subcommand provided is not valid: `%v`", args[0])
 		}
 		return
 	}
