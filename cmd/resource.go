@@ -500,7 +500,7 @@ func DisplayResourceListText(output io.Writer) {
 		return
 	}
 
-	// Sort by Type
+	// Sort by Type then Name
 	sort.Slice(entries, func(i, j int) bool {
 		resource1 := (entries[i].Value).(ResourceInfo)
 		resource2 := (entries[j].Value).(ResourceInfo)

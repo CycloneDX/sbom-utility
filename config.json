@@ -8,35 +8,39 @@
             "schemas": [
                 {
                     "version": "SPDX-2.2",
-                    "name": "schema/spdx/2.2.1/spdx-schema.json",
-                    "file": "schema/spdx/2.2.1/spdx-schema.json",
-                    "url": "https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json",
-                    "default": false,
-                    "variant": "2.2.1"
+                    "variant": "",
+                    "name": "SPDX v2.2.2",
+                    "file": "schema/spdx/2.2.2/spdx-schema.json",
+                    "development": "https://github.com/spdx/spdx-spec/blob/development/v2.2.2/schemas/spdx-schema.json",
+                    "url": "https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.2/schemas/spdx-schema.json",
+                    "default": false
                 },
                 {
                     "version": "SPDX-2.2",
-                    "name": "schema/spdx/2.2.2/spdx-schema.json",
-                    "file": "schema/spdx/2.2.2/spdx-schema.json",
-                    "url": "https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.2/schemas/spdx-schema.json",
-                    "default": false,
-                    "variant": ""
+                    "variant": "2.2.1",
+                    "name": "SPDX v2.2.1",
+                    "file": "schema/spdx/2.2.1/spdx-schema.json",
+                    "development": "https://github.com/spdx/spdx-spec/blob/development/v2.2.1/schemas/spdx-schema.json",
+                    "url": "https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json",
+                    "default": false
                 },
                 {
                     "version": "SPDX-2.3",
-                    "name": "schema/spdx/2.3/spdx-schema.json",
+                    "variant": "",
+                    "name": "SPDX v2.3",
                     "file": "schema/spdx/2.3/spdx-schema.json",
+                    "development": "https://github.com/spdx/spdx-spec/blob/development/v2.3/schemas/spdx-schema.json",
                     "url": "https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3/schemas/spdx-schema.json",
-                    "default": true,
-                    "variant": ""
+                    "default": true
                 },
                 {
                     "version": "SPDX-2.3",
-                    "name": "schema/spdx/2.3.1/spdx-schema.json",
+                    "variant": "development",
+                    "name": "SPDX v2.3.1 (development)",
                     "file": "schema/spdx/2.3.1/spdx-schema.json",
+                    "development": "https://github.com/spdx/spdx-spec/blob/development/v2.3.1/schemas/spdx-schema.json",
                     "url": "https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3.1/schemas/spdx-schema.json",
-                    "default": false,
-                    "variant": "development"
+                    "default": false
                 }
             ]
         },
@@ -48,67 +52,75 @@
             "schemas": [
                 {
                     "version": "1.2",
-                    "name": "bom-1.2.schema.json",
+                    "variant": "",
+                    "name": "CycloneDX v1.2",
                     "file": "schema/cyclonedx/1.2/bom-1.2.schema.json",
+                    "development": "https://github.com/CycloneDX/specification/blob/master/schema/bom-1.2.schema.json",
                     "url": "https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2.schema.json",
-                    "default": false,
-                    "variant": ""
+                    "default": false
                 },
                 {
                     "version": "1.2",
-                    "name": "bom-1.2-strict.schema.json",
+                    "variant": "strict",
+                    "name": "CycloneDX v1.2 (strict)",
                     "file": "schema/cyclonedx/1.2/bom-1.2-strict.schema.json",
+                    "development": "https://github.com/CycloneDX/specification/blob/master/schema/bom-1.2-strict.schema.json",
                     "url": "https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2-strict.schema.json",
-                    "default": false,
-                    "variant": "strict"
+                    "default": false
                 },
                 {
                     "version": "1.3",
-                    "name": "bom-1.3.schema.json",
+                    "variant": "",
+                    "name": "CycloneDX v1.3",
                     "file": "schema/cyclonedx/1.3/bom-1.3.schema.json",
+                    "development": "https://github.com/CycloneDX/specification/blob/master/schema/bom-1.3.schema.json",
                     "url": "https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3.schema.json",
-                    "default": false,
-                    "variant": ""
+                    "default": false
                 },
                 {
                     "version": "1.3",
-                    "name": "bom-1.3-strict.schema.json",
+                    "variant": "strict",
+                    "name": "CycloneDX v1.3 (strict)",
                     "file": "schema/cyclonedx/1.3/bom-1.3-strict.schema.json",
+                    "development": "https://github.com/CycloneDX/specification/blob/master/schema/bom-1.3-strict.schema.json",
                     "url": "https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3-strict.schema.json",
-                    "default": false,
-                    "variant": "strict"
+                    "default": false
                 },
                 {
                     "version": "1.4",
-                    "name": "bom-1.4.schema.json",
+                    "variant": "",
+                    "name": "CycloneDX v1.4",
                     "file": "schema/cyclonedx/1.4/bom-1.4.schema.json",
+                    "development": "https://github.com/CycloneDX/specification/blob/master/schema/bom-1.4.schema.json",
                     "url": "https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json",
-                    "default": true,
-                    "variant": ""
+                    "default": true
                 },
                 {
                     "version": "1.5",
-                    "name": "bom-1.5-dev.schema.json",
+                    "variant": "development",
+                    "name": "CycloneDX v1.5 (development)",
                     "file": "schema/cyclonedx/1.5/bom-1.5-dev.schema.json",
+                    "development": "https://github.com/CycloneDX/specification/blob/v1.5-dev/schema/bom-1.5.schema.json",
                     "url": "https://raw.githubusercontent.com/CycloneDX/specification/v1.5-dev/schema/bom-1.5.schema.json",
-                    "default": false,
-                    "variant": "development"
+                    "default": false
                 },
                 {
                     "version": "1.3",
-                    "name": "bom-1.3-custom.schema.json",
+                    "variant": "custom",
+                    "name": "CycloneDX v1.3 (custom)",
                     "file": "schema/test/bom-1.3-custom.schema.json",
+                    "development":"https://github.com/CycloneDX/sbom-utility/blob/main/resources/schema/test/bom-1.3-custom.schema.json",
                     "url": "",
-                    "default": false,
-                    "variant": "custom"
+                    "default": false
                 },
                 {
                     "version": "1.4",
-                    "name": "bom-1.4-custom.schema.json",
+                    "variant": "custom",
+                    "name": "CycloneDX v1.4 (custom)",
                     "file": "schema/test/bom-1.4-custom.schema.json",
+                    "development":"https://github.com/CycloneDX/sbom-utility/blob/main/resources/schema/test/bom-1.4-custom.schema.json",
                     "url": "",
-                    "default": false,
-                    "variant": "custom"
+                    "default": false
                 }
             ]
         }

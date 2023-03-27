@@ -528,18 +528,18 @@ You can verify which formats and schemas are available for validation by using t
 Sample output:
 
 ```bash
-Format     Version   Variant        File                                             Source
-------     -------   -------        ----                                             ------
-SPDX       SPDX-2.2  (2.2.1)        schema/spdx/2.2.1/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json
-SPDX       SPDX-2.2  (latest)       schema/spdx/2.2.2/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.2/schemas/spdx-schema.json
-SPDX       SPDX-2.3  (latest)       schema/spdx/2.3/spdx-schema.json                 https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3/schemas/spdx-schema.json
-SPDX       SPDX-2.3  (development)  schema/spdx/2.3.1/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3.1/schemas/spdx-schema.json
-CycloneDX  1.2       (latest)       schema/cyclonedx/1.2/bom-1.2.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2.schema.json
-CycloneDX  1.2       (strict)       schema/cyclonedx/1.2/bom-1.2-strict.schema.json  https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2-strict.schema.json
-CycloneDX  1.3       (latest)       schema/cyclonedx/1.3/bom-1.3.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3.schema.json
-CycloneDX  1.3       (strict)       schema/cyclonedx/1.3/bom-1.3-strict.schema.json  https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3-strict.schema.json
-CycloneDX  1.4       (latest)       schema/cyclonedx/1.4/bom-1.4.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json
-CycloneDX  1.5       (development)  schema/cyclonedx/1.5/bom-1.5-dev.schema.json     https://raw.githubusercontent.com/CycloneDX/specification/v1.5-dev/schema/bom-1.5.schema.json
+Name                          Format     Version   Variant        File (local)                                     URL (remote)
+----                          ------     -------   -------        ------------                                     ------------
+CycloneDX v1.5 (development)  CycloneDX  1.5       (development)  schema/cyclonedx/1.5/bom-1.5-dev.schema.json     https://raw.githubusercontent.com/CycloneDX/specification/v1.5-dev/schema/bom-1.5.schema.json
+CycloneDX v1.4                CycloneDX  1.4       (latest)       schema/cyclonedx/1.4/bom-1.4.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json
+CycloneDX v1.3 (strict)       CycloneDX  1.3       (strict)       schema/cyclonedx/1.3/bom-1.3-strict.schema.json  https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3-strict.schema.json
+CycloneDX v1.3                CycloneDX  1.3       (latest)       schema/cyclonedx/1.3/bom-1.3.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3.schema.json
+CycloneDX v1.2 (strict)       CycloneDX  1.2       (strict)       schema/cyclonedx/1.2/bom-1.2-strict.schema.json  https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2-strict.schema.json
+CycloneDX v1.2                CycloneDX  1.2       (latest)       schema/cyclonedx/1.2/bom-1.2.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2.schema.json
+SPDX v2.3.1 (development)     SPDX       SPDX-2.3  (development)  schema/spdx/2.3.1/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3.1/schemas/spdx-schema.json
+SPDX v2.3                     SPDX       SPDX-2.3  (latest)       schema/spdx/2.3/spdx-schema.json                 https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3/schemas/spdx-schema.json
+SPDX v2.2.2                   SPDX       SPDX-2.2  (latest)       schema/spdx/2.2.2/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.2/schemas/spdx-schema.json
+SPDX v2.2.1                   SPDX       SPDX-2.2  (2.2.1)        schema/spdx/2.2.1/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json
 ```
 
 #### Adding schemas
@@ -963,29 +963,38 @@ go test github.com/CycloneDX/sbom-utility/cmd -v --args --quiet
 ### CycloneDX
 
 - [CycloneDX Specification Overview](https://cyclonedx.org/specification/overview/)
-- Specification (all versions): https://github.com/CycloneDX/specification
-  - (JSON) Schemas: https://github.com/CycloneDX/specification/tree/master/schema
+- GitHub: https://github.com/CycloneDX
+  - Specifications (by branch): https://github.com/CycloneDX/specification
+  - Schemas (all versions): https://github.com/CycloneDX/specification/tree/master/schema
   - Examples: https://github.com/CycloneDX/sbom-examples
+- CycloneDX Tool Center : https://cyclonedx.org/tool-center/
 
 #### CycloneDX use cases
 
-- [CycloneDX Use Cases](https://cyclonedx.org/use-cases/) (comprehensive)
-  - [Inventory](https://cyclonedx.org/use-cases/#inventory) (PoC)
-  - [License Compliance](https://cyclonedx.org/use-cases/#license-compliance) (PoC)
-  - [Known Vulnerabilities](https://cyclonedx.org/use-cases/#known-vulnerabilities) (PoC)
-- CycloneDX 1.4 Vulnerability Exploitability Exchange (VEX) BOM format
-  - Overview: [https://cyclonedx.org/capabilities/vex/](https://cyclonedx.org/capabilities/vex/)
-  - VEX examples: [https://github.com/CycloneDX/bom-examples/tree/master/VEX](https://github.com/CycloneDX/bom-examples/tree/master/VEX)
+- [CycloneDX Use Cases](https://cyclonedx.org/use-cases/) (comprehensive), including:
+  - [Inventory](https://cyclonedx.org/use-cases/#inventory)
+  - [License Compliance](https://cyclonedx.org/use-cases/#license-compliance)
+  - [Known Vulnerabilities](https://cyclonedx.org/use-cases/#known-vulnerabilities)
+
+- [CycloneDX Vulnerability Exploitability Exchange (VEX) format Overview](https://cyclonedx.org/capabilities/vex/)
+  - Examples: https://github.com/CycloneDX/bom-examples/tree/master/VEX
 
 ### SPDX
 
 - GitHub: https://github.com/spdx
-  - Specification: https://github.com/spdx/spdx-spec
-  - Schemas: https://github.com/spdx/spdx-spec/tree/development/v2.2.2/schemas
-- https://tools.spdx.org/app/convert/ - Used this to convert from tv format to json
-  - NOTE: tool could not convert `example6-bin.spdx`; resulted in an error
+  - Specifications (by branch): https://github.com/spdx/spdx-spec
+  - Schemas (by branch):
+    - https://github.com/spdx/spdx-spec/tree/development/v2.3.1/schemas
+    - https://github.com/spdx/spdx-spec/tree/development/v2.3/schemas
+    - https://github.com/spdx/spdx-spec/tree/development/v2.2.2/schemas
+  - Examples: https://github.com/spdx/spdx-examples
+
+- Tools
+  - SPDX Online Tool: https://tools.spdx.org/app/
+    - **Note** Used the [convert](https://tools.spdx.org/app/convert/) tool to convert SPDX examples from `.tv` format to `.json`; however, conversion of [`example6-bin.spdx`](https://github.com/spdx/spdx-examples/blob/master/example6/spdx/example6-bin.spdx) resulted in an error.
 
 ### Software-Bill-of-Materials (SBOM)
 
-- [FOSSA - Software Bill Of Materials: Formats, Use Cases, and Tools](https://fossa.com/blog/software-bill-of-materials-formats-use-cases-tools/)
 - [NTIA - SBOM Minimum Requirements](https://www.ntia.doc.gov/blog/2021/ntia-releases-minimum-elements-software-bill-materials)
+- [CISA - Software Bill of Materials (SBOM)](https://www.cisa.gov/sbom)
+- [FOSSA - Software Bill Of Materials: Formats, Use Cases, and Tools](https://fossa.com/blog/software-bill-of-materials-formats-use-cases-tools/)
