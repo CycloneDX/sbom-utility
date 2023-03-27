@@ -965,29 +965,38 @@ go test github.com/CycloneDX/sbom-utility/cmd -v --args --quiet
 ### CycloneDX
 
 - [CycloneDX Specification Overview](https://cyclonedx.org/specification/overview/)
-- Specification (all versions): https://github.com/CycloneDX/specification
-  - (JSON) Schemas: https://github.com/CycloneDX/specification/tree/master/schema
+- GitHub: https://github.com/CycloneDX
+  - Specifications (by branch): https://github.com/CycloneDX/specification
+  - Schemas (all versions): https://github.com/CycloneDX/specification/tree/master/schema
   - Examples: https://github.com/CycloneDX/sbom-examples
+- CycloneDX Tool Center : https://cyclonedx.org/tool-center/
 
 #### CycloneDX use cases
 
-- [CycloneDX Use Cases](https://cyclonedx.org/use-cases/) (comprehensive)
-  - [Inventory](https://cyclonedx.org/use-cases/#inventory) (PoC)
-  - [License Compliance](https://cyclonedx.org/use-cases/#license-compliance) (PoC)
-  - [Known Vulnerabilities](https://cyclonedx.org/use-cases/#known-vulnerabilities) (PoC)
-- CycloneDX 1.4 Vulnerability Exploitability Exchange (VEX) BOM format
-  - Overview: [https://cyclonedx.org/capabilities/vex/](https://cyclonedx.org/capabilities/vex/)
-  - VEX examples: [https://github.com/CycloneDX/bom-examples/tree/master/VEX](https://github.com/CycloneDX/bom-examples/tree/master/VEX)
+- [CycloneDX Use Cases](https://cyclonedx.org/use-cases/) (comprehensive), including:
+  - [Inventory](https://cyclonedx.org/use-cases/#inventory)
+  - [License Compliance](https://cyclonedx.org/use-cases/#license-compliance)
+  - [Known Vulnerabilities](https://cyclonedx.org/use-cases/#known-vulnerabilities)
+
+- [CycloneDX Vulnerability Exploitability Exchange (VEX) format Overview](https://cyclonedx.org/capabilities/vex/)
+  - Examples: https://github.com/CycloneDX/bom-examples/tree/master/VEX
 
 ### SPDX
 
 - GitHub: https://github.com/spdx
-  - Specification: https://github.com/spdx/spdx-spec
-  - Schemas: https://github.com/spdx/spdx-spec/tree/development/v2.2.2/schemas
-- https://tools.spdx.org/app/convert/ - Used this to convert from tv format to json
-  - NOTE: tool could not convert `example6-bin.spdx`; resulted in an error
+  - Specifications (by branch): https://github.com/spdx/spdx-spec
+  - Schemas (by branch):
+    - https://github.com/spdx/spdx-spec/tree/development/v2.3.1/schemas
+    - https://github.com/spdx/spdx-spec/tree/development/v2.3/schemas
+    - https://github.com/spdx/spdx-spec/tree/development/v2.2.2/schemas
+  - Examples: https://github.com/spdx/spdx-examples
+
+- Tools
+  - SPDX Online Tool: https://tools.spdx.org/app/
+    - **Note** Used the [convert](https://tools.spdx.org/app/convert/) tool to convert SPDX examples from `.tv` format to `.json`; however, conversion of [`example6-bin.spdx`](https://github.com/spdx/spdx-examples/blob/master/example6/spdx/example6-bin.spdx) resulted in an error.
 
 ### Software-Bill-of-Materials (SBOM)
 
-- [FOSSA - Software Bill Of Materials: Formats, Use Cases, and Tools](https://fossa.com/blog/software-bill-of-materials-formats-use-cases-tools/)
 - [NTIA - SBOM Minimum Requirements](https://www.ntia.doc.gov/blog/2021/ntia-releases-minimum-elements-software-bill-materials)
+- [CISA - Software Bill of Materials (SBOM)](https://www.cisa.gov/sbom)
+- [FOSSA - Software Bill Of Materials: Formats, Use Cases, and Tools](https://fossa.com/blog/software-bill-of-materials-formats-use-cases-tools/)
