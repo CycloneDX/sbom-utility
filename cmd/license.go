@@ -70,6 +70,7 @@ type LicenseInfo struct {
 	BomRef            string `json:"bom-ref"`
 	BomLocation       int    `json:"bom-location"`
 	LicenseChoiceType int    `json:"license-type"`
+	UsagePolicy       string `json:"usage-policy"`
 	ResourceName      string `json:"resource-name"`
 	LicenseKey        string
 	LicenseChoice     schema.CDXLicenseChoice
@@ -98,6 +99,7 @@ func AppendLicenseInfo(key string, licenseInfo LicenseInfo) {
 		os.Exit(ERROR_VALIDATION)
 	}
 	licenseInfo.Policy = policy
+	licenseInfo.UsagePolicy = policy.UsagePolicy
 	licenseInfo.LicenseKey = key
 	licenseSlice = append(licenseSlice, licenseInfo)
 
@@ -213,7 +215,7 @@ func hashMetadataLicenses(document *schema.Sbom, location int) (err error) {
 				MSG_LICENSES_NOT_FOUND,
 				CDX_LICENSE_LOCATION_NAMES[location]),
 			nil, nil)
-		// Issue a warning as an SBOM without at least one  top-level license
+		// Issue a warning as an SBOM without at least one, top-level license
 		// (in the metadata license summary) SHOULD be noted.
 		// Note: An actual error SHOULD ONLY be returned by
 		// the custom validation code.

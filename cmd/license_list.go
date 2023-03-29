@@ -58,30 +58,30 @@ const (
 //"Type", "ID/Name/Expression", "Component(s)", "BOM ref.", "Document location"
 // filter keys
 const (
-	LICENSE_FILTER_KEY_POLICY        = "policy"
+	LICENSE_FILTER_KEY_USAGE_POLICY  = "usage-policy"
 	LICENSE_FILTER_KEY_TYPE          = "type"
 	LICENSE_FILTER_KEY_NAME          = "id|name|expression"
 	LICENSE_FILTER_KEY_RESOURCE_NAME = "resource-name"
-	LICENSE_FILTER_KEY_BOMREF        = "bom-ref"
-	LICENSE_FILTER_KEY_LOCATION      = "bom-location"
+	LICENSE_FILTER_KEY_BOM_REF       = "bom-ref"
+	LICENSE_FILTER_KEY_BOM_LOCATION  = "bom-location"
 )
 
 var LICENSE_SUMMARY_TITLES = []string{
-	LICENSE_FILTER_KEY_POLICY,
+	LICENSE_FILTER_KEY_USAGE_POLICY,
 	LICENSE_FILTER_KEY_TYPE,
 	LICENSE_FILTER_KEY_NAME,
 	LICENSE_FILTER_KEY_RESOURCE_NAME,
-	LICENSE_FILTER_KEY_BOMREF,
-	LICENSE_FILTER_KEY_LOCATION,
+	LICENSE_FILTER_KEY_BOM_REF,
+	LICENSE_FILTER_KEY_BOM_LOCATION,
 }
 
 var VALID_LICENSE_FILTER_KEYS = []string{
-	LICENSE_FILTER_KEY_POLICY,
+	LICENSE_FILTER_KEY_USAGE_POLICY,
 	LICENSE_FILTER_KEY_TYPE,
 	LICENSE_FILTER_KEY_NAME,
 	LICENSE_FILTER_KEY_RESOURCE_NAME,
-	LICENSE_FILTER_KEY_BOMREF,
-	LICENSE_FILTER_KEY_LOCATION,
+	LICENSE_FILTER_KEY_BOM_REF,
+	LICENSE_FILTER_KEY_BOM_LOCATION,
 }
 
 // licenseInfo.Policy.UsagePolicy,
@@ -91,12 +91,12 @@ var VALID_LICENSE_FILTER_KEYS = []string{
 // licenseInfo.EntityRef,
 // CDX_LICENSE_LOCATION_NAMES[licenseInfo.LicenseLocation])
 var LicenseFilterKeyMap = map[string]string{
-	LICENSE_FILTER_KEY_POLICY:        "Policy.UsagePolicy",
+	LICENSE_FILTER_KEY_USAGE_POLICY:  LICENSE_FILTER_KEY_USAGE_POLICY,
 	LICENSE_FILTER_KEY_TYPE:          "LicenseChoiceType",
 	LICENSE_FILTER_KEY_NAME:          "", // key into map which is an id, name or expression
-	LICENSE_FILTER_KEY_RESOURCE_NAME: "EntityName",
-	LICENSE_FILTER_KEY_BOMREF:        LICENSE_FILTER_KEY_BOMREF,
-	LICENSE_FILTER_KEY_LOCATION:      "LicenseLocation",
+	LICENSE_FILTER_KEY_RESOURCE_NAME: LICENSE_FILTER_KEY_RESOURCE_NAME,
+	LICENSE_FILTER_KEY_BOM_REF:       LICENSE_FILTER_KEY_BOM_REF,
+	LICENSE_FILTER_KEY_BOM_LOCATION:  LICENSE_FILTER_KEY_BOM_LOCATION,
 }
 
 // Command help formatting
@@ -206,7 +206,7 @@ func ListLicenses(output io.Writer, format string, summary bool) (err error) {
 		return
 	}
 
-	// Hash all licenses within input file
+	// Find an hash all licenses within input BOM file
 	getLogger().Infof("Scanning document for licenses...")
 	err = findDocumentLicenses(document)
 
@@ -444,6 +444,9 @@ func DisplayLicenseListSummaryText(output io.Writer) {
 
 		for _, iInfo := range arrLicenseInfo {
 			licenseInfo = iInfo.(LicenseInfo)
+			mapOut, _ := utils.ConvertStructToMap(licenseInfo)
+			fMap, _ := log.FormatMap("LicenseInfo", mapOut)
+			fmt.Println(fMap)
 
 			// Format line and write to output
 			fmt.Fprintf(w, "%s\t%v\t%s\t%s\t%s\t%s\n",
