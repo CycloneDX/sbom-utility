@@ -36,14 +36,16 @@ import (
 // TODO: Support a new --sort <column> flag
 const (
 	FLAG_LICENSE_SUMMARY = "summary"
-	FLAG_LICENSE_POLICY  = "policy"
+	FLAG_LICENSE_EXCLUDE = "exclude"
+	FLAG_LICENSE_POLICY  = "policy" // policy-match, policy-filter, etc.
 )
 
 // License list command flag help messages
 const (
 	FLAG_LICENSE_LIST_OUTPUT_FORMAT_HELP = "format output using the specified format type"
 	FLAG_LICENSE_LIST_SUMMARY_HELP       = "summarize licenses and component references in table format (see --format flag help for supported types)"
-	FLAG_LICENSE_LIST_POLICY_HELP        = "include policy evaluation in summary listing"
+	FLAG_LICENSE_LIST_EXCLUDE_HELP       = "exclude policy column from summary listing"
+	FLAG_LICENSE_LIST_POLICY_HELP        = "filter license summary by usage policy (i.e., allow|deny|needs-review|UNDEFINED)"
 )
 
 // License list command informational messages
@@ -53,9 +55,49 @@ const (
 	MSG_OUTPUT_NO_RESOURCES_FOUND = "[WARN] no matching resources found for query"
 )
 
+//"Type", "ID/Name/Expression", "Component(s)", "BOM ref.", "Document location"
+// filter keys
 const (
-	LICENSE_LIST_TITLE_ROW_SEPARATOR = "-"
+	LICENSE_FILTER_KEY_POLICY        = "policy"
+	LICENSE_FILTER_KEY_TYPE          = "type"
+	LICENSE_FILTER_KEY_NAME          = "id|name|expression"
+	LICENSE_FILTER_KEY_RESOURCE_NAME = "resource-name"
+	LICENSE_FILTER_KEY_BOMREF        = "bom-ref"
+	LICENSE_FILTER_KEY_LOCATION      = "bom-location"
 )
+
+var LICENSE_SUMMARY_TITLES = []string{
+	LICENSE_FILTER_KEY_POLICY,
+	LICENSE_FILTER_KEY_TYPE,
+	LICENSE_FILTER_KEY_NAME,
+	LICENSE_FILTER_KEY_RESOURCE_NAME,
+	LICENSE_FILTER_KEY_BOMREF,
+	LICENSE_FILTER_KEY_LOCATION,
+}
+
+var VALID_LICENSE_FILTER_KEYS = []string{
+	LICENSE_FILTER_KEY_POLICY,
+	LICENSE_FILTER_KEY_TYPE,
+	LICENSE_FILTER_KEY_NAME,
+	LICENSE_FILTER_KEY_RESOURCE_NAME,
+	LICENSE_FILTER_KEY_BOMREF,
+	LICENSE_FILTER_KEY_LOCATION,
+}
+
+// licenseInfo.Policy.UsagePolicy,
+// LC_TYPE_NAMES[licenseInfo.LicenseChoiceType],
+// licenseName.(string),
+// licenseInfo.EntityName,
+// licenseInfo.EntityRef,
+// CDX_LICENSE_LOCATION_NAMES[licenseInfo.LicenseLocation])
+var LicenseFilterKeyMap = map[string]string{
+	LICENSE_FILTER_KEY_POLICY:        "Policy.UsagePolicy",
+	LICENSE_FILTER_KEY_TYPE:          "LicenseChoiceType",
+	LICENSE_FILTER_KEY_NAME:          "", // key into map which is an id, name or expression
+	LICENSE_FILTER_KEY_RESOURCE_NAME: "EntityName",
+	LICENSE_FILTER_KEY_BOMREF:        LICENSE_FILTER_KEY_BOMREF,
+	LICENSE_FILTER_KEY_LOCATION:      "LicenseLocation",
+}
 
 // Command help formatting
 var LICENSE_LIST_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
@@ -66,8 +108,6 @@ var LICENSE_LIST_SUMMARY_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_SUMMAR
 	" (default: txt)"
 
 // Title row names for formatted lists (reports)
-var LICENSE_LIST_TITLE_POLICY = []string{"Policy"}
-var LICENSE_LIST_TITLES_SUMMARY = []string{"Type", "ID/Name/Expression", "Component(s)", "BOM ref.", "Document location"}
 var LICENSE_LIST_TITLES_LICENSE_CHOICE = []string{"License.Id", "License.Name", "License.Url", "Expression", "License.Text.ContentType", "License.Text.Encoding", "License.Text.Content"}
 
 // WARNING: Cobra will not recognize a subcommand if its `command.Use` is not a single
@@ -81,13 +121,27 @@ func NewCommandList() *cobra.Command {
 		FLAG_LICENSE_LIST_OUTPUT_FORMAT_HELP+
 			LICENSE_LIST_SUPPORTED_FORMATS+
 			LICENSE_LIST_SUMMARY_SUPPORTED_FORMATS)
-	command.Flags().Bool(FLAG_LICENSE_SUMMARY, false, FLAG_LICENSE_LIST_SUMMARY_HELP)
-	command.Flags().Bool(FLAG_LICENSE_POLICY, false, FLAG_LICENSE_LIST_POLICY_HELP)
+	command.Flags().BoolVarP(
+		&utils.GlobalFlags.LicenseFlags.Summary,
+		FLAG_LICENSE_SUMMARY, "", false,
+		FLAG_LICENSE_LIST_SUMMARY_HELP)
+	command.Flags().StringVarP(
+		&utils.GlobalFlags.LicenseFlags.Policy,
+		FLAG_LICENSE_POLICY, "", "",
+		FLAG_LICENSE_LIST_POLICY_HELP)
 	command.RunE = listCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		if len(args) != 0 {
 			return getLogger().Errorf("Too many arguments provided: %v", args)
 		}
+
+		// Validate command line flag combinations
+		// TODO: document this flag relationship more clearly
+		bSummary := utils.GlobalFlags.LicenseFlags.Summary
+		if utils.GlobalFlags.LicenseFlags.Policy != "" && !bSummary {
+			return getLogger().Errorf("`%s` flag not valid without `%s` flag", FLAG_LICENSE_POLICY, FLAG_LICENSE_SUMMARY)
+		}
+
 		// Test for required flags (parameters)
 		err = preRunTestForInputFile(cmd, args)
 		return
@@ -117,20 +171,11 @@ func listCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	getLogger().Enter(args)
 	defer getLogger().Exit()
 
-	// Validate command line flag combinations
-	bSummary, _ := cmd.Flags().GetBool(FLAG_LICENSE_SUMMARY)
-	bPolicy, _ := cmd.Flags().GetBool(FLAG_LICENSE_POLICY)
-
-	// TODO: document this flag relationship more clearly
-	if bPolicy && !bSummary {
-		return getLogger().Errorf("`%s` flag not valid without `%s` flag", FLAG_LICENSE_POLICY, FLAG_LICENSE_SUMMARY)
-	}
-
 	// Create output writer
 	outputFile, writer, err := createOutputFile(utils.GlobalFlags.OutputFile)
 
 	if err == nil {
-		err = ListLicenses(writer, utils.GlobalFlags.OutputFormat, bSummary)
+		err = ListLicenses(writer, utils.GlobalFlags.OutputFormat, utils.GlobalFlags.LicenseFlags.Summary)
 	}
 
 	// always close the output file
@@ -253,9 +298,8 @@ func DisplayLicenseListCSV(output io.Writer) (err error) {
 	defer w.Flush()
 
 	// Emit title row
-	titles, _ := createTitleRows(nil, LICENSE_LIST_TITLES_LICENSE_CHOICE)
-	if err = w.Write(titles); err != nil {
-		return getLogger().Errorf("error writing to output (%v): %s", titles, err)
+	if err = w.Write(LICENSE_LIST_TITLES_LICENSE_CHOICE); err != nil {
+		return getLogger().Errorf("error writing to output (%v): %s", LICENSE_LIST_TITLES_LICENSE_CHOICE, err)
 	}
 
 	// Emit warning (confirmation) message if no licenses found in document
@@ -305,11 +349,10 @@ func DisplayLicenseListMarkdown(output io.Writer) {
 	var licenseInfo LicenseInfo
 
 	// create title row
-	titles, _ := createTitleRows(LICENSE_LIST_TITLES_LICENSE_CHOICE, nil)
-	titleRow := createMarkdownRow(titles)
+	titleRow := createMarkdownRow(LICENSE_LIST_TITLES_LICENSE_CHOICE)
 	fmt.Fprintf(output, "%s\n", titleRow)
 
-	alignments := createMarkdownColumnAlignment(titles)
+	alignments := createMarkdownColumnAlignment(LICENSE_LIST_TITLES_LICENSE_CHOICE)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(output, "%s\n", alignmentRow)
 
@@ -377,10 +420,10 @@ func DisplayLicenseListSummaryText(output io.Writer) {
 	var licenseInfo LicenseInfo
 
 	// create title row and underline row from slices of optional and compulsory titles
-	titles, underlines := createTitleRows(LICENSE_LIST_TITLE_POLICY, LICENSE_LIST_TITLES_SUMMARY)
+	underlines := createTitleTextSeparators(LICENSE_SUMMARY_TITLES)
 
 	// Add tabs between column titles for the tabWRiter
-	fmt.Fprintf(w, "%s\n", strings.Join(titles, "\t"))
+	fmt.Fprintf(w, "%s\n", strings.Join(LICENSE_SUMMARY_TITLES, "\t"))
 	fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
 	// Display a warning missing in the actual output and return (short-circuit)
@@ -407,9 +450,9 @@ func DisplayLicenseListSummaryText(output io.Writer) {
 				licenseInfo.Policy.UsagePolicy,
 				LC_TYPE_NAMES[licenseInfo.LicenseChoiceType],
 				licenseName,
-				licenseInfo.EntityName,
-				licenseInfo.EntityRef,
-				CDX_LICENSE_LOCATION_NAMES[licenseInfo.LicenseLocation])
+				licenseInfo.ResourceName,
+				licenseInfo.BomRef,
+				CDX_LICENSE_LOCATION_NAMES[licenseInfo.BomLocation])
 		}
 	}
 }
@@ -429,12 +472,10 @@ func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
 	var currentRow []string
 	var licenseInfo LicenseInfo
 
-	// create title row and underline row from slices of optional and compulsory titles
-	titles, _ := createTitleRows(LICENSE_LIST_TITLE_POLICY, LICENSE_LIST_TITLES_SUMMARY)
-
+	// create title row and underline row
 	// TODO: Make policy column optional
-	if errWrite := w.Write(titles); errWrite != nil {
-		err = getLogger().Errorf("error writing to output (%v): %s", titles, errWrite)
+	if errWrite := w.Write(LICENSE_SUMMARY_TITLES); errWrite != nil {
+		err = getLogger().Errorf("error writing to output (%v): %s", LICENSE_SUMMARY_TITLES, errWrite)
 		return
 	}
 
@@ -473,9 +514,9 @@ func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
 				licenseInfo.Policy.UsagePolicy,
 				LC_TYPE_NAMES[licenseInfo.LicenseChoiceType],
 				licenseName.(string),
-				licenseInfo.EntityName,
-				licenseInfo.EntityRef,
-				CDX_LICENSE_LOCATION_NAMES[licenseInfo.LicenseLocation])
+				licenseInfo.ResourceName,
+				licenseInfo.BomRef,
+				CDX_LICENSE_LOCATION_NAMES[licenseInfo.BomLocation])
 
 			if errWrite := w.Write(currentRow); errWrite != nil {
 				err = getLogger().Errorf("csvWriter.Write(): %w", errWrite)
@@ -497,11 +538,10 @@ func DisplayLicenseListSummaryMarkdown(output io.Writer) {
 	var licenseInfo LicenseInfo
 
 	// create title row
-	titles, _ := createTitleRows(LICENSE_LIST_TITLE_POLICY, LICENSE_LIST_TITLES_SUMMARY)
-	titleRow := createMarkdownRow(titles)
+	titleRow := createMarkdownRow(LICENSE_SUMMARY_TITLES)
 	fmt.Fprintf(output, "%s\n", titleRow)
 
-	alignments := createMarkdownColumnAlignment(titles)
+	alignments := createMarkdownColumnAlignment(LICENSE_SUMMARY_TITLES)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(output, "%s\n", alignmentRow)
 
@@ -531,9 +571,9 @@ func DisplayLicenseListSummaryMarkdown(output io.Writer) {
 				licenseInfo.Policy.UsagePolicy,
 				LC_TYPE_NAMES[licenseInfo.LicenseChoiceType],
 				licenseName.(string),
-				licenseInfo.EntityName,
-				licenseInfo.EntityRef,
-				CDX_LICENSE_LOCATION_NAMES[licenseInfo.LicenseLocation])
+				licenseInfo.ResourceName,
+				licenseInfo.BomRef,
+				CDX_LICENSE_LOCATION_NAMES[licenseInfo.BomLocation])
 
 			lineRow = createMarkdownRow(line)
 			fmt.Fprintf(output, "%s\n", lineRow)

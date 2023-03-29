@@ -18,15 +18,19 @@ The utility additionally prioritizes commands that help provide insight into con
 
 ##### Featured commands
 
-In addition to the [validate](#validate) command, priority functionality is reflected in the [license](#license), [resource](#resource) and [query](#query) commands which to be able to extract or produce formatted reports from inherent knowledge of the CycloneDX format.
+- [license](#license), [query](#query), [resource](#resource), [schema](#schema), [vulnerability](#vulnerability), [validate](#validate)
 
-The `license` command, for example, has many options and configurations to not only produce raw JSON output of license data, but also produce summarized reports in many human-readable formats (e.g., text, csv, markdown). Furthermore, the license command is able to apply configurable "usage policies" for the licenses identified in the reports.
+In addition to the [validate](#validate) command, priority functionality is reflected in the [resource](#resource), [license](#license), [vulnerability](#vulnerability) and [query](#query) commands which are able to extract or produce formatted reports from inherent knowledge of the CycloneDX format.
 
-The `resource` command is designed to better understand what resources are being referenced as part of the SBOM's inventory and/or dependency graph with the ability to filter by common, required fields such as name, version and bom-ref using regular expressions (regex).
+- The `resource` command is designed to better understand what resources are being referenced as part of the SBOM's inventory and/or dependency graph with the ability to filter by common, required fields such as name, version and bom-ref using regular expressions (regex).
 
-The `query` command functionality is geared towards an SBOM format-aware (CycloneDX-only for now), SQL-style query that could be used to generate customized reports/views into the SBOM data for any use case when other resource-specific commands are not provided or fall short.
+- The `license` command, for example, has many options and configurations to not only produce raw JSON output of license data, but also produce summarized reports in many human-readable formats (e.g., text, csv, markdown). Furthermore, the license command is able to apply configurable "usage policies" for the licenses identified in the reports.
 
-Further commands and reports are planned that prioritize use cases that enable greater insight and analysis of the legal, security and compliance data captured in the SBOM such as **vulnerability** (VEX) information and resource **signage** (e.g., verifying resource identities by hashes or fingerprints).
+- The `vulnerability` command is able to produce a filterable summary of vulnerabilities (containing high-level information of interest) from an SBOM's or independent CycloneDX Vulnerability Exploitability eXchange (VEX) file's declared vulnerability list.
+
+- The `query` command functionality is geared towards an SBOM format-aware (CycloneDX-only for now), SQL-style query that could be used to generate customized reports/views into the SBOM data for any use case when other resource-specific commands are not provided or fall short.
+
+Further commands and reports are planned that prioritize use cases that enable greater insight and analysis of the legal, security and compliance data captured in the SBOM such as component **provenance** and **signage** (e.g., verifying resource identities by hashes or fingerprints).
 
 #### Design considerations
 
@@ -45,6 +49,7 @@ The utility also is designed to produce output formats (e.g., JSON) and handle e
     - [query](#query)
     - [resource](#resource)
     - [schema](#schema)
+    - [vulnerability](#vulnerability)
     - [validate](#validate)
     - [help](#help)
   - [Exit codes](#exit-codes)
@@ -998,3 +1003,8 @@ go test github.com/CycloneDX/sbom-utility/cmd -v --args --quiet
 - [NTIA - SBOM Minimum Requirements](https://www.ntia.doc.gov/blog/2021/ntia-releases-minimum-elements-software-bill-materials)
 - [CISA - Software Bill of Materials (SBOM)](https://www.cisa.gov/sbom)
 - [FOSSA - Software Bill Of Materials: Formats, Use Cases, and Tools](https://fossa.com/blog/software-bill-of-materials-formats-use-cases-tools/)
+
+#### Guides
+
+- [FOSSA](https://fossa.com/)
+  - "A Practical Guide to CycloneDX": https://fossa.com/cyclonedx

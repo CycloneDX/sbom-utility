@@ -274,8 +274,8 @@ func TestLicensePolicyList(t *testing.T) {
 		t.Errorf("DisplayLicensePolicies(): returned entry: %s; expected it to contain: `%s`", value, LICENSE_POLICY_SUMMARY_TITLES[0])
 	}
 
-	if value := values[1]; !strings.Contains(value, LICENSE_LIST_TITLE_ROW_SEPARATOR) {
-		t.Errorf("DisplayLicensePolicies(): returned entry: %s; expected it to contain: `%s`", value, LICENSE_LIST_TITLE_ROW_SEPARATOR)
+	if value := values[1]; !strings.Contains(value, REPORT_LIST_TITLE_ROW_SEPARATOR) {
+		t.Errorf("DisplayLicensePolicies(): returned entry: %s; expected it to contain: `%s`", value, REPORT_LIST_TITLE_ROW_SEPARATOR)
 	}
 
 	// validate policy rows listing (i.e., indexes 0 and 1)

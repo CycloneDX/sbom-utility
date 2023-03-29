@@ -39,6 +39,7 @@ const (
 )
 
 var VALID_USAGE_POLICIES = []string{POLICY_ALLOW, POLICY_DENY, POLICY_NEEDS_REVIEW}
+var ALL_USAGE_POLICIES = []string{POLICY_ALLOW, POLICY_DENY, POLICY_NEEDS_REVIEW, POLICY_UNDEFINED, POLICY_CONFLICT}
 
 // Note: the SPDX spec. does not provide regex for an SPDX ID, but provides the following in ABNF:
 //     string = 1*(ALPHA / DIGIT / "-" / "." )

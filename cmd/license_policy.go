@@ -303,11 +303,11 @@ func DisplayLicensePoliciesTabbedText(output io.Writer) (err error) {
 	// min-width, tab-width, padding, pad-char, flags
 	w.Init(output, 8, 2, 2, ' ', 0)
 
-	// create title row and underline row from slices of optional and compulsory titles
-	titles, underlines := createTitleRows(LICENSE_POLICY_SUMMARY_TITLES, nil)
+	// create underline row from slices of optional and compulsory titles
+	underlines := createTitleTextSeparators(LICENSE_POLICY_SUMMARY_TITLES)
 
 	// Add tabs between column titles for the tabWRiter
-	fmt.Fprintf(w, "%s\n", strings.Join(titles, "\t"))
+	fmt.Fprintf(w, "%s\n", strings.Join(LICENSE_POLICY_SUMMARY_TITLES, "\t"))
 	fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
 	// NOTE: the "family" name hashmap SHOULD have all policy entries (i.e., with/without SPDX IDs)
@@ -404,11 +404,10 @@ func DisplayLicensePoliciesMarkdown(output io.Writer) (err error) {
 	defer getLogger().Exit()
 
 	// create title row
-	titles, _ := createTitleRows(LICENSE_POLICY_SUMMARY_TITLES, nil)
-	titleRow := createMarkdownRow(titles)
+	titleRow := createMarkdownRow(LICENSE_POLICY_SUMMARY_TITLES)
 	fmt.Fprintf(output, "%s\n", titleRow)
 
-	alignments := createMarkdownColumnAlignment(titles)
+	alignments := createMarkdownColumnAlignment(LICENSE_POLICY_SUMMARY_TITLES)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(output, "%s\n", alignmentRow)
 

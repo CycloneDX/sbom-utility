@@ -157,8 +157,8 @@ func DisplaySchemasTabbedText(output io.Writer) (err error) {
 		})
 
 		// Create title row and add tabs between column titles for the tabWRiter
-		titles, underlines := createTitleRows(SCHEMA_LIST_TITLES, nil)
-		fmt.Fprintf(w, "%s\n", strings.Join(titles, "\t"))
+		underlines := createTitleTextSeparators(SCHEMA_LIST_TITLES)
+		fmt.Fprintf(w, "%s\n", strings.Join(SCHEMA_LIST_TITLES, "\t"))
 		fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
 		for _, format := range aFormats {
@@ -203,11 +203,10 @@ func DisplaySchemasMarkdown(output io.Writer) (err error) {
 	defer getLogger().Exit()
 
 	// create title row
-	titles, _ := createTitleRows(SCHEMA_LIST_TITLES, nil)
-	titleRow := createMarkdownRow(titles)
+	titleRow := createMarkdownRow(SCHEMA_LIST_TITLES)
 	fmt.Fprintf(output, "%s\n", titleRow)
 
-	alignments := createMarkdownColumnAlignment(titles)
+	alignments := createMarkdownColumnAlignment(SCHEMA_LIST_TITLES)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(output, "%s\n", alignmentRow)
 

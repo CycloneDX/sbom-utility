@@ -19,18 +19,15 @@ package cmd
 
 import "strings"
 
-// Text report helpers
-// TODO Make function params. variadic
-func createTitleRows(titles1 []string, titles2 []string) (titles []string, underlines []string) {
-	titles = append(titles1, titles2...)
-	underlines = append(createTitleTextSeparators(titles1), createTitleTextSeparators(titles2)...)
-	return
-}
+const (
+	REPORT_LIST_TITLE_ROW_SEPARATOR = "-"
+)
 
+// Text report helpers
 func createTitleTextSeparators(titles []string) (separatorLine []string) {
 	var underline string
 	for _, title := range titles {
-		underline = strings.Repeat(LICENSE_LIST_TITLE_ROW_SEPARATOR, len(title))
+		underline = strings.Repeat(REPORT_LIST_TITLE_ROW_SEPARATOR, len(title))
 		separatorLine = append(separatorLine, underline)
 	}
 	return

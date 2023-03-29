@@ -44,7 +44,12 @@ var RESOURCE_LIST_TITLES = []string{
 	RESOURCE_FILTER_KEY_VERSION,
 	RESOURCE_FILTER_KEY_BOMREF,
 }
-var VALID_RESOURCE_WHERE_FILTER_KEYS = []string{}
+var VALID_RESOURCE_WHERE_FILTER_KEYS = []string{
+	RESOURCE_FILTER_KEY_TYPE,
+	RESOURCE_FILTER_KEY_NAME,
+	RESOURCE_FILTER_KEY_VERSION,
+	RESOURCE_FILTER_KEY_BOMREF,
+}
 
 // Flags. Reuse query flag values where possible
 const (
@@ -484,11 +489,11 @@ func DisplayResourceListText(output io.Writer) {
 	// min-width, tab-width, padding, pad-char, flags
 	w.Init(output, 8, 2, 2, ' ', 0)
 
-	// create title row and underline row from slices of optional and compulsory titles
-	titles, underlines := createTitleRows(RESOURCE_LIST_TITLES, nil)
+	// create underline row from compulsory titles
+	underlines := createTitleTextSeparators(RESOURCE_LIST_TITLES)
 
 	// Add tabs between column titles for the tabWRiter
-	fmt.Fprintf(w, "%s\n", strings.Join(titles, "\t"))
+	fmt.Fprintf(w, "%s\n", strings.Join(RESOURCE_LIST_TITLES, "\t"))
 	fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
 	// Display a warning "missing" in the actual output and return (short-circuit)
@@ -591,11 +596,10 @@ func DisplayResourceListMarkdown(output io.Writer) (err error) {
 	defer getLogger().Exit()
 
 	// create title row
-	titles, _ := createTitleRows(RESOURCE_LIST_TITLES, nil)
-	titleRow := createMarkdownRow(titles)
+	titleRow := createMarkdownRow(RESOURCE_LIST_TITLES)
 	fmt.Fprintf(output, "%s\n", titleRow)
 
-	alignments := createMarkdownColumnAlignment(titles)
+	alignments := createMarkdownColumnAlignment(RESOURCE_LIST_TITLES)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(output, "%s\n", alignmentRow)
 

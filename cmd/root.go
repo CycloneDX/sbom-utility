@@ -50,7 +50,7 @@ const (
 const (
 	CMD_USAGE_VALIDATE           = CMD_VALIDATE + " -i input_file" + " [--force schema_file]"
 	CMD_USAGE_QUERY              = CMD_QUERY + " -i input_filename [--select * | field1[,fieldN]] [--from [key1[.keyN]] [--where key=regex[,...]]"
-	CMD_USAGE_LICENSE_LIST       = SUBCOMMAND_LICENSE_LIST + " -i input_file [[--summary] [--policy]] [--format json|txt|csv|md]"
+	CMD_USAGE_LICENSE_LIST       = SUBCOMMAND_LICENSE_LIST + " -i input_file [[--summary] [--policy allow|deny|needs-review|UNDEFINED]] [--format json|txt|csv|md]"
 	CMD_USAGE_LICENSE_POLICY     = SUBCOMMAND_LICENSE_POLICY + " -i input_file [--format json|txt|csv|md]"
 	CMD_USAGE_RESOURCE_LIST      = CMD_RESOURCE + " -i input_file [--type component|service] [--where key=regex[,...]] [--format json|txt|csv|md]"
 	CMD_USAGE_SCHEMA_LIST        = CMD_SCHEMA + " -i input_file [--format json|txt|csv|md]"
