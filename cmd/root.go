@@ -297,6 +297,7 @@ func createOutputFile(outputFilename string) (outputFile *os.File, writer io.Wri
 	return
 }
 
+// TODO: Move to use new experimental Go 1.18 experimental package slices which uses generics
 // func sliceContains(slice []string, value string) bool {
 // 	for _, candidate := range slice {
 // 		if value == candidate {
