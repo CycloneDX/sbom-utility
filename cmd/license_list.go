@@ -84,21 +84,6 @@ var VALID_LICENSE_FILTER_KEYS = []string{
 	LICENSE_FILTER_KEY_BOM_LOCATION,
 }
 
-// licenseInfo.Policy.UsagePolicy,
-// LC_TYPE_NAMES[licenseInfo.LicenseChoiceType],
-// licenseName.(string),
-// licenseInfo.EntityName,
-// licenseInfo.EntityRef,
-// CDX_LICENSE_LOCATION_NAMES[licenseInfo.LicenseLocation])
-var LicenseFilterKeyMap = map[string]string{
-	LICENSE_FILTER_KEY_USAGE_POLICY:  LICENSE_FILTER_KEY_USAGE_POLICY,
-	LICENSE_FILTER_KEY_LICENSE_TYPE:  LICENSE_FILTER_KEY_LICENSE_TYPE,
-	LICENSE_FILTER_KEY_LICENSE:       "", // TODO: key into map which is an id, name or expression
-	LICENSE_FILTER_KEY_RESOURCE_NAME: LICENSE_FILTER_KEY_RESOURCE_NAME,
-	LICENSE_FILTER_KEY_BOM_REF:       LICENSE_FILTER_KEY_BOM_REF,
-	LICENSE_FILTER_KEY_BOM_LOCATION:  LICENSE_FILTER_KEY_BOM_LOCATION,
-}
-
 // Command help formatting
 var LICENSE_LIST_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{FORMAT_JSON, FORMAT_CSV, FORMAT_MARKDOWN}, ", ") +
@@ -115,8 +100,8 @@ var LICENSE_LIST_TITLES_LICENSE_CHOICE = []string{"License.Id", "License.Name", 
 func NewCommandList() *cobra.Command {
 	var command = new(cobra.Command)
 	command.Use = CMD_USAGE_LICENSE_LIST
-	command.Short = "List licenses found in SBOM input file"
-	command.Long = "List licenses found in SBOM input file"
+	command.Short = "List licenses found in the BOM input file"
+	command.Long = "List licenses and associated policies found in the BOM input file"
 	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", "",
 		FLAG_LICENSE_LIST_OUTPUT_FORMAT_HELP+
 			LICENSE_LIST_SUPPORTED_FORMATS+
@@ -129,6 +114,7 @@ func NewCommandList() *cobra.Command {
 		&utils.GlobalFlags.LicenseFlags.Policy,
 		FLAG_LICENSE_POLICY, "", "",
 		FLAG_LICENSE_LIST_POLICY_HELP)
+	command.Flags().StringP(FLAG_REPORT_WHERE, "", "", FLAG_REPORT_WHERE_HELP)
 	command.RunE = listCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		if len(args) != 0 {
@@ -149,6 +135,7 @@ func NewCommandList() *cobra.Command {
 	return (command)
 }
 
+// Assure all errors are logged
 func processLicenseListResults(err error) {
 	if err != nil {
 		getLogger().Error(err)
@@ -174,20 +161,26 @@ func listCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	// Create output writer
 	outputFile, writer, err := createOutputFile(utils.GlobalFlags.OutputFile)
 
-	if err == nil {
-		err = ListLicenses(writer, utils.GlobalFlags.OutputFormat, utils.GlobalFlags.LicenseFlags.Summary)
-	}
+	// use function closure to assure consistent error output based upon error type
+	defer func() {
+		// always close the output file
+		if outputFile != nil {
+			err = outputFile.Close()
+			getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.OutputFile)
+		}
+	}()
 
-	// always close the output file
-	if outputFile != nil {
-		outputFile.Close()
-		getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.OutputFile)
+	// process filters supplied on the --where command flag
+	whereFilters, err := processWhereFlag(cmd)
+
+	if err == nil {
+		err = ListLicenses(writer, utils.GlobalFlags.OutputFormat, utils.GlobalFlags.LicenseFlags.Summary, whereFilters)
 	}
 
 	return
 }
 
-func ListLicenses(output io.Writer, format string, summary bool) (err error) {
+func ListLicenses(output io.Writer, format string, summary bool, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -208,7 +201,7 @@ func ListLicenses(output io.Writer, format string, summary bool) (err error) {
 
 	// Find an hash all licenses within input BOM file
 	getLogger().Infof("Scanning document for licenses...")
-	err = findDocumentLicenses(document)
+	err = loadDocumentLicenses(document, whereFilters)
 
 	if err != nil {
 		return
@@ -221,7 +214,7 @@ func ListLicenses(output io.Writer, format string, summary bool) (err error) {
 			format = FORMAT_TEXT
 		}
 
-		// TODO surface errors returned from "DisplayXXX" functionss
+		// TODO surface errors returned from "DisplayXXX" functions
 		getLogger().Infof("Outputting summary (`%s` format)...", format)
 		switch format {
 		case FORMAT_TEXT:

@@ -45,6 +45,7 @@ const (
 // -------------------------------------------
 // license test helper functions
 // -------------------------------------------
+// TODO support passing in []WhereFilter
 func innerTestLicenseList(t *testing.T, inputFile string, format string, summary bool) (outputBuffer bytes.Buffer, err error) {
 
 	// Declare an output outputBuffer/outputWriter to use used during tests
@@ -54,7 +55,9 @@ func innerTestLicenseList(t *testing.T, inputFile string, format string, summary
 
 	// Use a test input SBOM formatted in SPDX
 	utils.GlobalFlags.InputFile = inputFile
-	err = ListLicenses(outputWriter, format, summary)
+
+	// TODO support passing in []WhereFilter
+	err = ListLicenses(outputWriter, format, summary, nil)
 
 	return
 }

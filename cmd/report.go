@@ -17,7 +17,17 @@
 
 package cmd
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/spf13/cobra"
+)
+
+// Common/reusable Flags used across multiple report commands
+const (
+	FLAG_REPORT_WHERE      = "where"
+	FLAG_REPORT_WHERE_HELP = "comma-separated list of `key=<regex>` clauses used to filter the result set"
+)
 
 const (
 	REPORT_LIST_TITLE_ROW_SEPARATOR = "-"
@@ -52,4 +62,41 @@ func createMarkdownRow(data []string) string {
 	return MD_COLUMN_SEPARATOR +
 		strings.Join(data, MD_COLUMN_SEPARATOR) +
 		MD_COLUMN_SEPARATOR
+}
+
+// Report processing helpers
+func processWhereFlag(cmd *cobra.Command) (whereFilters []WhereFilter, err error) {
+	// Process flag: --where
+	whereValues, errGet := cmd.Flags().GetString(FLAG_REPORT_WHERE)
+
+	if errGet != nil {
+		err = getLogger().Errorf("failed to read flag `%s` value", FLAG_REPORT_WHERE)
+		return
+	}
+
+	whereFilters, err = retrieveWhereFilters(whereValues)
+
+	return
+}
+
+func retrieveWhereFilters(whereValues string) (whereFilters []WhereFilter, err error) {
+	var whereExpressions []string
+
+	if whereValues != "" {
+		whereExpressions = strings.Split(whereValues, QUERY_WHERE_EXPRESSION_SEP)
+
+		var filter *WhereFilter
+		for _, clause := range whereExpressions {
+
+			filter = parseWhereFilter(clause)
+
+			if filter == nil {
+				err = NewQueryWhereClauseError(nil, clause)
+				return
+			}
+
+			whereFilters = append(whereFilters, *filter)
+		}
+	}
+	return
 }

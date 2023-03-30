@@ -53,10 +53,8 @@ var VALID_RESOURCE_WHERE_FILTER_KEYS = []string{
 
 // Flags. Reuse query flag values where possible
 const (
-	FLAG_RESOURCE_TYPE       = "type"
-	FLAG_RESOURCE_TYPE_HELP  = "filter output by resource type (i.e., component | service"
-	FLAG_RESOURCE_WHERE      = FLAG_QUERY_WHERE
-	FLAG_RESOURCE_WHERE_HELP = "comma-separated list of key=<regex> used to filter result set"
+	FLAG_RESOURCE_TYPE      = "type"
+	FLAG_RESOURCE_TYPE_HELP = "filter output by resource type (i.e., component | service"
 )
 
 // Command help formatting
@@ -119,7 +117,7 @@ func NewCommandResource() *cobra.Command {
 	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
 		FLAG_RESOURCE_OUTPUT_FORMAT_HELP+RESOURCE_LIST_SUPPORTED_FORMATS)
 	command.Flags().StringP(FLAG_RESOURCE_TYPE, "", RESOURCE_TYPE_DEFAULT, FLAG_RESOURCE_TYPE_HELP)
-	command.Flags().StringP(FLAG_RESOURCE_WHERE, "", "", FLAG_RESOURCE_WHERE_HELP)
+	command.Flags().StringP(FLAG_REPORT_WHERE, "", "", FLAG_REPORT_WHERE_HELP)
 	command.RunE = resourceCmdImpl
 	command.ValidArgs = VALID_SUBCOMMANDS_RESOURCE
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
@@ -142,28 +140,6 @@ func NewCommandResource() *cobra.Command {
 		return
 	}
 	return command
-}
-
-func retrieveWhereFilters(whereValues string) (whereFilters []WhereFilter, err error) {
-	var whereExpressions []string
-
-	if whereValues != "" {
-		whereExpressions = strings.Split(whereValues, QUERY_WHERE_EXPRESSION_SEP)
-
-		var filter *WhereFilter
-		for _, clause := range whereExpressions {
-
-			filter = parseWhereFilter(clause)
-
-			if filter == nil {
-				err = NewQueryWhereClauseError(nil, clause)
-				return
-			}
-
-			whereFilters = append(whereFilters, *filter)
-		}
-	}
-	return
 }
 
 func retrieveResourceType(cmd *cobra.Command) (resourceType string, err error) {
@@ -203,20 +179,8 @@ func resourceCmdImpl(cmd *cobra.Command, args []string) (err error) {
 		}
 	}()
 
-	// Process flag: --where
-	whereValues, errGet := cmd.Flags().GetString(FLAG_RESOURCE_WHERE)
-
-	if errGet != nil {
-		err = getLogger().Errorf("failed to read flag `%s` value", FLAG_RESOURCE_WHERE)
-		return
-	}
-
-	var whereFilters []WhereFilter
-	whereFilters, err = retrieveWhereFilters(whereValues)
-
-	if err != nil {
-		return
-	}
+	// process filters supplied on the --where command flag
+	whereFilters, err := processWhereFlag(cmd)
 
 	// Process flag: --type
 	var resourceType string
@@ -227,6 +191,7 @@ func resourceCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	return
 }
 
+// Assure all errors are logged
 func processResourceListResults(err error) {
 	if err != nil {
 		// No special processing at this time

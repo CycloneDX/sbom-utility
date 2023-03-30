@@ -225,13 +225,15 @@ func hashMetadataProperties(hashmap *slicemultimap.MultiMap, properties []schema
 // TODO: Assure that after hashing "license" data within the "components" array
 // that at least one valid license is found
 // TODO: Assure top-level "metadata.component"
+// TODO support []WhereFilter
 func validateLicenseData(document *schema.Sbom) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
 	// Now we need to validate that the input file contains licenses
 	// the license "hash" function does this validation checking for us...
-	err = findDocumentLicenses(document)
+	// TODO support []WhereFilter
+	err = loadDocumentLicenses(document, nil)
 
 	if err != nil {
 		return

@@ -148,12 +148,14 @@ func licenseCmdImpl(cmd *cobra.Command, args []string) error {
 // 2. (root).metadata.component.licenses[] + all "nested" components
 // 3. (root).components[](.license[]) (each component + all "nested" components)
 // 4. (root).services[](.license[]) (each service + all "nested" services)
-func findDocumentLicenses(document *schema.Sbom) (err error) {
+func loadDocumentLicenses(document *schema.Sbom, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
 	// NOTE: DEBUG: use this to debug license policy hashmaps have appropriate # of entries
 	//licensePolicyConfig.Debug()
+
+	// TODO Support processing of []WhereFilter
 
 	// At this time, fail SPDX format SBOMs as "unsupported" (for "any" format)
 	if !document.FormatInfo.IsCycloneDx() {
