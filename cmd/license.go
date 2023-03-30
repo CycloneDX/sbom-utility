@@ -66,13 +66,14 @@ var CDX_LICENSE_LOCATION_NAMES = map[int]string{
 // Declare a fixed-sized array for LC type names
 var LC_TYPE_NAMES = [...]string{"invalid", "id", "name", "expression"}
 
+// Note: the "License" property is used as hashmap key
 type LicenseInfo struct {
+	UsagePolicy       string `json:"usage-policy"`
+	LicenseChoiceType int    `json:"type"`
+	License           string `json:"license"`
+	ResourceName      string `json:"resource-name"`
 	BomRef            string `json:"bom-ref"`
 	BomLocation       int    `json:"bom-location"`
-	LicenseChoiceType int    `json:"license-type"`
-	UsagePolicy       string `json:"usage-policy"`
-	ResourceName      string `json:"resource-name"`
-	LicenseKey        string
 	LicenseChoice     schema.CDXLicenseChoice
 	Policy            LicensePolicy
 	Component         schema.CDXComponent
@@ -100,7 +101,7 @@ func AppendLicenseInfo(key string, licenseInfo LicenseInfo) {
 	}
 	licenseInfo.Policy = policy
 	licenseInfo.UsagePolicy = policy.UsagePolicy
-	licenseInfo.LicenseKey = key
+	licenseInfo.License = key
 	licenseSlice = append(licenseSlice, licenseInfo)
 
 	// Hash by license key
@@ -313,7 +314,7 @@ func hashComponentLicense(cdxComponent schema.CDXComponent, location int) (li *L
 		licenseInfo.BomRef = cdxComponent.BomRef
 		AppendLicenseInfo(LICENSE_NONE, licenseInfo)
 
-		getLogger().Warningf("%s: %s (`%s`, %s, %s)",
+		getLogger().Warningf("%s: %s (name:`%s`, version: `%s`, package-url: `%s`)",
 			"No license found for component. bomRef",
 			cdxComponent.BomRef,
 			cdxComponent.Name,
@@ -368,7 +369,7 @@ func hashServiceLicense(cdxService schema.CDXService, location int) (err error) 
 		licenseInfo.BomRef = cdxService.BomRef
 		AppendLicenseInfo(LICENSE_NONE, licenseInfo)
 
-		getLogger().Warningf("%s: %s (`%s`, %s)",
+		getLogger().Warningf("%s: %s (name: `%s`, version: `%s`)",
 			"No license found for service. bomRef",
 			cdxService.BomRef,
 			cdxService.Name,

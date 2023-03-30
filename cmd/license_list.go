@@ -59,8 +59,8 @@ const (
 // filter keys
 const (
 	LICENSE_FILTER_KEY_USAGE_POLICY  = "usage-policy"
-	LICENSE_FILTER_KEY_TYPE          = "type"
-	LICENSE_FILTER_KEY_NAME          = "id|name|expression"
+	LICENSE_FILTER_KEY_LICENSE_TYPE  = "type"
+	LICENSE_FILTER_KEY_LICENSE       = "license"
 	LICENSE_FILTER_KEY_RESOURCE_NAME = "resource-name"
 	LICENSE_FILTER_KEY_BOM_REF       = "bom-ref"
 	LICENSE_FILTER_KEY_BOM_LOCATION  = "bom-location"
@@ -68,8 +68,8 @@ const (
 
 var LICENSE_SUMMARY_TITLES = []string{
 	LICENSE_FILTER_KEY_USAGE_POLICY,
-	LICENSE_FILTER_KEY_TYPE,
-	LICENSE_FILTER_KEY_NAME,
+	LICENSE_FILTER_KEY_LICENSE_TYPE,
+	LICENSE_FILTER_KEY_LICENSE,
 	LICENSE_FILTER_KEY_RESOURCE_NAME,
 	LICENSE_FILTER_KEY_BOM_REF,
 	LICENSE_FILTER_KEY_BOM_LOCATION,
@@ -77,8 +77,8 @@ var LICENSE_SUMMARY_TITLES = []string{
 
 var VALID_LICENSE_FILTER_KEYS = []string{
 	LICENSE_FILTER_KEY_USAGE_POLICY,
-	LICENSE_FILTER_KEY_TYPE,
-	LICENSE_FILTER_KEY_NAME,
+	LICENSE_FILTER_KEY_LICENSE_TYPE,
+	LICENSE_FILTER_KEY_LICENSE,
 	LICENSE_FILTER_KEY_RESOURCE_NAME,
 	LICENSE_FILTER_KEY_BOM_REF,
 	LICENSE_FILTER_KEY_BOM_LOCATION,
@@ -92,8 +92,8 @@ var VALID_LICENSE_FILTER_KEYS = []string{
 // CDX_LICENSE_LOCATION_NAMES[licenseInfo.LicenseLocation])
 var LicenseFilterKeyMap = map[string]string{
 	LICENSE_FILTER_KEY_USAGE_POLICY:  LICENSE_FILTER_KEY_USAGE_POLICY,
-	LICENSE_FILTER_KEY_TYPE:          "LicenseChoiceType",
-	LICENSE_FILTER_KEY_NAME:          "", // key into map which is an id, name or expression
+	LICENSE_FILTER_KEY_LICENSE_TYPE:  LICENSE_FILTER_KEY_LICENSE_TYPE,
+	LICENSE_FILTER_KEY_LICENSE:       "", // TODO: key into map which is an id, name or expression
 	LICENSE_FILTER_KEY_RESOURCE_NAME: LICENSE_FILTER_KEY_RESOURCE_NAME,
 	LICENSE_FILTER_KEY_BOM_REF:       LICENSE_FILTER_KEY_BOM_REF,
 	LICENSE_FILTER_KEY_BOM_LOCATION:  LICENSE_FILTER_KEY_BOM_LOCATION,
@@ -444,13 +444,13 @@ func DisplayLicenseListSummaryText(output io.Writer) {
 
 		for _, iInfo := range arrLicenseInfo {
 			licenseInfo = iInfo.(LicenseInfo)
-			mapOut, _ := utils.ConvertStructToMap(licenseInfo)
-			fMap, _ := log.FormatMap("LicenseInfo", mapOut)
-			fmt.Println(fMap)
+			// mapOut, _ := utils.ConvertStructToMap(licenseInfo)
+			// fMap, _ := log.FormatMap("LicenseInfo", mapOut)
+			// fmt.Println(fMap)
 
 			// Format line and write to output
 			fmt.Fprintf(w, "%s\t%v\t%s\t%s\t%s\t%s\n",
-				licenseInfo.Policy.UsagePolicy,
+				licenseInfo.UsagePolicy,
 				LC_TYPE_NAMES[licenseInfo.LicenseChoiceType],
 				licenseName,
 				licenseInfo.ResourceName,
