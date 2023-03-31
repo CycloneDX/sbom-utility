@@ -50,9 +50,10 @@ const (
 
 // License list command informational messages
 const (
-	MSG_OUTPUT_NO_LICENSES_FOUND  = "[WARN] no licenses found in SBOM document"
-	MSG_OUTPUT_NO_SCHEMAS_FOUND   = "[WARN] no schemas found in configuration (i.e., \"config.json\")"
-	MSG_OUTPUT_NO_RESOURCES_FOUND = "[WARN] no matching resources found for query"
+	MSG_OUTPUT_NO_LICENSES_FOUND            = "No licenses found in BOM document"
+	MSG_OUTPUT_NO_LICENSES_ONLY_NOASSERTION = "No valid licenses found in BOM document (only licenses marked NOASSERTION)"
+	MSG_OUTPUT_NO_SCHEMAS_FOUND             = "[WARN] no schemas found in configuration (i.e., \"config.json\")"
+	MSG_OUTPUT_NO_RESOURCES_FOUND           = "[WARN] no matching resources found for query"
 )
 
 //"Type", "ID/Name/Expression", "Component(s)", "BOM ref.", "Document location"
@@ -143,10 +144,13 @@ func processLicenseListResults(err error) {
 }
 
 // NOTE: parm. licenseKeys is actually a string slice
-func isEmptyLicenseList(licenseKeys []interface{}) (empty bool) {
-	if len(licenseKeys) == 0 ||
-		(len(licenseKeys) == 1 && licenseKeys[0].(string) == LICENSE_NONE) {
+func checkLicenseListEmptyOrNoAssertionOnly(licenseKeys []interface{}) (empty bool) {
+	if len(licenseKeys) == 0 {
 		empty = true
+		getLogger().Warningf("%s\n", MSG_OUTPUT_NO_LICENSES_FOUND)
+	} else if len(licenseKeys) == 1 && licenseKeys[0].(string) == LICENSE_NONE {
+		empty = true
+		getLogger().Warningf("%s\n", MSG_OUTPUT_NO_LICENSES_ONLY_NOASSERTION)
 	}
 	return
 }
@@ -270,7 +274,9 @@ func DisplayLicenseListJson(output io.Writer) {
 
 		for _, iInfo := range arrLicenseInfo {
 			licenseInfo = iInfo.(LicenseInfo)
-			lc = append(lc, licenseInfo.LicenseChoice)
+			if licenseInfo.LicenseChoiceTypeValue != LC_TYPE_INVALID {
+				lc = append(lc, licenseInfo.LicenseChoice)
+			}
 		}
 	}
 	json, _ := log.FormatInterfaceAsJson(lc)
@@ -298,36 +304,34 @@ func DisplayLicenseListCSV(output io.Writer) (err error) {
 	// Emit warning (confirmation) message if no licenses found in document
 	licenseKeys := licenseMap.KeySet()
 
-	if isEmptyLicenseList(licenseKeys) {
-		currentRow = append(currentRow, MSG_OUTPUT_NO_LICENSES_FOUND)
-		if err = w.Write(currentRow); err != nil {
-			return getLogger().Errorf("error writing to output (%v): %s", currentRow, err)
-		}
-		return fmt.Errorf(currentRow[0])
-	}
+	// Emit no license or assertion-only warning into output
+	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
 
 	for _, licenseName := range licenseKeys {
 		arrLicenseInfo, _ := licenseMap.Get(licenseName)
 
 		for _, iInfo := range arrLicenseInfo {
 			licenseInfo = iInfo.(LicenseInfo)
-			lc := licenseInfo.LicenseChoice
 
-			// reset line after each iteration
-			currentRow = nil
+			if licenseInfo.LicenseChoiceTypeValue != LC_TYPE_INVALID {
+				// reset line after each iteration
+				currentRow = nil
 
-			// Each row will contain every field of a CDX LicenseChoice object
-			currentRow = append(currentRow,
-				lc.License.Id,
-				lc.License.Name,
-				lc.License.Url,
-				lc.Expression,
-				lc.License.Text.ContentType,
-				lc.License.Text.Encoding,
-				lc.License.Text.Content)
+				lc := licenseInfo.LicenseChoice
 
-			if errWrite := w.Write(currentRow); errWrite != nil {
-				return getLogger().Errorf("error writing to output (%v): %s", currentRow, err)
+				// Each row will contain every field of a CDX LicenseChoice object
+				currentRow = append(currentRow,
+					lc.License.Id,
+					lc.License.Name,
+					lc.License.Url,
+					lc.Expression,
+					lc.License.Text.ContentType,
+					lc.License.Text.Encoding,
+					lc.License.Text.Content)
+
+				if errWrite := w.Write(currentRow); errWrite != nil {
+					return getLogger().Errorf("error writing to output (%v): %s", currentRow, err)
+				}
 			}
 		}
 	}
@@ -352,11 +356,8 @@ func DisplayLicenseListMarkdown(output io.Writer) {
 	// Display a warning messing in the actual output and return (short-circuit)
 	licenseKeys := licenseMap.KeySet()
 
-	// Emit no license warning into output
-	if isEmptyLicenseList(licenseKeys) {
-		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_LICENSES_FOUND)
-		return
-	}
+	// Emit no license or assertion-only warning into output
+	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
 
 	var line []string
 	var lineRow string
@@ -367,29 +368,32 @@ func DisplayLicenseListMarkdown(output io.Writer) {
 
 		for _, iInfo := range arrLicenseInfo {
 			licenseInfo = iInfo.(LicenseInfo)
-			lc := licenseInfo.LicenseChoice
 
-			// Each row will contain every field of a CDX LicenseChoice object
-			line = nil
-			content = lc.License.Text.Content
+			if licenseInfo.LicenseChoiceTypeValue != LC_TYPE_INVALID {
+				// Each row will contain every field of a CDX LicenseChoice object
+				line = nil
 
-			// Truncate encoded content
-			if content != "" {
-				content = fmt.Sprintf("%s (truncated from %v) ...", content[0:8], len(content))
+				lc := licenseInfo.LicenseChoice
+				content = lc.License.Text.Content
+
+				// Truncate encoded content
+				if content != "" {
+					content = fmt.Sprintf("%s (truncated from %v) ...", content[0:8], len(content))
+				}
+
+				// Format line and write to output
+				line = append(line,
+					lc.License.Id,
+					lc.License.Name,
+					lc.License.Url,
+					lc.Expression,
+					lc.License.Text.ContentType,
+					lc.License.Text.Encoding,
+					content)
+
+				lineRow = createMarkdownRow(line)
+				fmt.Fprintf(output, "%s\n", lineRow)
 			}
-
-			// Format line and write to output
-			line = append(line,
-				lc.License.Id,
-				lc.License.Name,
-				lc.License.Url,
-				lc.Expression,
-				lc.License.Text.ContentType,
-				lc.License.Text.Encoding,
-				content)
-
-			lineRow = createMarkdownRow(line)
-			fmt.Fprintf(output, "%s\n", lineRow)
 
 		}
 	}
@@ -422,11 +426,8 @@ func DisplayLicenseListSummaryText(output io.Writer) {
 	// Display a warning missing in the actual output and return (short-circuit)
 	licenseKeys := licenseMap.KeySet()
 
-	// Emit no license warning into output
-	if isEmptyLicenseList(licenseKeys) {
-		fmt.Fprintf(w, "%s\n", MSG_OUTPUT_NO_LICENSES_FOUND)
-		return
-	}
+	// Emit no license or assertion-only warning into output
+	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
 
 	sort.Slice(licenseKeys, func(i, j int) bool {
 		return licenseKeys[i].(string) < licenseKeys[j].(string)
@@ -437,19 +438,15 @@ func DisplayLicenseListSummaryText(output io.Writer) {
 
 		for _, iInfo := range arrLicenseInfo {
 			licenseInfo = iInfo.(LicenseInfo)
-			// TODO REMOVE or make debug only output
-			// mapOut, _ := utils.ConvertStructToMap(licenseInfo)
-			// fMap, _ := log.FormatMap("LicenseInfo", mapOut)
-			// fmt.Println(fMap)
 
 			// Format line and write to output
 			fmt.Fprintf(w, "%s\t%v\t%s\t%s\t%s\t%s\n",
 				licenseInfo.UsagePolicy,
-				licenseInfo.LicenseChoiceType, //LC_TYPE_NAMES[licenseInfo.LicenseChoiceTypeValue],
+				licenseInfo.LicenseChoiceType,
 				licenseName,
 				licenseInfo.ResourceName,
 				licenseInfo.BomRef,
-				licenseInfo.BomLocation, //CDX_LICENSE_LOCATION_NAMES[licenseInfo.BomLocationValue]
+				licenseInfo.BomLocation,
 			)
 		}
 	}
@@ -480,14 +477,8 @@ func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
 	// retrieve all hashed licenses (keys) found in the document and verify we have ones to process
 	licenseKeys := licenseMap.KeySet()
 
-	// Emit no license warning into output
-	if isEmptyLicenseList(licenseKeys) {
-		currentRow := []string{MSG_OUTPUT_NO_LICENSES_FOUND}
-		if err = w.Write(currentRow); err != nil {
-			return getLogger().Errorf("error writing to output (%v): %s", currentRow, err)
-		}
-		return fmt.Errorf(currentRow[0])
-	}
+	// Emit no license or assertion-only warning into output
+	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
 
 	// output the each license entry as a row
 	for _, licenseName := range licenseKeys {
@@ -547,11 +538,8 @@ func DisplayLicenseListSummaryMarkdown(output io.Writer) {
 	// Display a warning messing in the actual output and return (short-circuit)
 	licenseKeys := licenseMap.KeySet()
 
-	// Emit no license warning into output
-	if isEmptyLicenseList(licenseKeys) {
-		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_LICENSES_FOUND)
-		return
-	}
+	// Emit no license or assertion-only warning into output
+	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
 
 	var line []string
 	var lineRow string

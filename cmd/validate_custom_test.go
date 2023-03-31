@@ -45,7 +45,7 @@ const (
 	// License tests
 	// Note: The "invalid" tests below is also used in "list" command tests
 	// which tests for a "none found" warning messages being displayed to stdout
-	TEST_CUSTOM_CDX_1_4_INVALID_LICENSES_NOT_FOUND = "test/custom/cdx-1-4-invalid-licenses-not-found.json"
+	TEST_CUSTOM_CDX_1_4_INVALID_LICENSES_NOT_FOUND = TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND
 
 	// Composition
 	TEST_CUSTOM_CDX_1_3_INVALID_COMPOSITION_COMPONENTS         = "test/custom/cdx-1-3-test-custom-invalid-composition-components.json"
@@ -205,3 +205,12 @@ func TestValidateCustomErrorCdx13InvalidCompositionComponents(t *testing.T) {
 		SCHEMA_VARIANT_NONE,
 		&SBOMCompositionError{})
 }
+
+// Make sure we can List all components in an SBOM, including those in hierarchical compositions
+// TODO: Actually verify one or more of the hierarchical comps. appear in list results
+// func TestValidateCustomCompositionHierarchicalComponentList(t *testing.T) {
+// 	innerCustomValidateError(t,
+// 		TEST_CUSTOM_CDX_1_4_COMPOSITION_HIERARCHICAL_COMPONENTS,
+// 		SCHEMA_VARIANT_NONE,
+// 		nil)
+// }
