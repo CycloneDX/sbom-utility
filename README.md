@@ -189,37 +189,28 @@ This subcommand will emit a list of all licenses found in and SBOM (defaults to 
 
  The output will be an array of CycloneDX `LicenseChoice` data structures.  For example, you would see licenses identified using SPDX IDs, license expressions (of SPDX IDs) or ones with "names" of licenses that do not necessarily map to a canonical SPDX ID along with the actual base64-encoded license or legal text.
 
- For example, the sample output output below shows the types of data you will see:
+ For example, the output below shows the three types of license data you would see:
 
 ```json
 [
-    {
+    {  // by license `id`
         "license": {
             "id": "MIT",
             "name": "",
-            "text": {
-                "contentType": "",
-                "encoding": "",
-                "content": ""
-            },
             "url": ""
+            ...
         },
         "expression": ""
     },
-    {
+    { // by license `expression`
         "license": {
             "id": "",
             "name": "",
-            "text": {
-                "contentType": "",
-                "encoding": "",
-                "content": ""
-            },
             "url": ""
         },
         "expression": "Apache-2.0 AND (MIT OR GPL-2.0-only)"
     },
-    {
+    { // by license `name` with full license encoding
         "license": {
             "id": "",
             "name": "Apache 2",
@@ -253,29 +244,27 @@ The values for the `policy` column are derived from the `license.json` policy co
 ./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary
 ```
 
-Sample output:
-
 ```bash
-Policy        Type        ID/Name/Expression                    Component(s)       BOM ref.                            Document location
-------        ----        ------------------                    ------------       --------                            -----------------
-needs-review  id          ADSL                                  Foo                service:example.com/myservices/foo  services
-needs-review  name        AGPL                                  Library J          pkg:lib/libraryJ@1.0.0              components
-allow         name        Apache                                Library B          pkg:lib/libraryB@1.0.0              components
-allow         id          Apache-1.0                            Library E          pkg:lib/libraryE@1.0.0              components
-allow         id          Apache-2.0                            N/A                N/A                                 metadata.licenses
-allow         id          Apache-2.0                            Library A          pkg:lib/libraryA@1.0.0              components
-allow         id          Apache-2.0                            Library F          pkg:lib/libraryF@1.0.0              components
-allow         expression  Apache-2.0 AND (MIT OR BSD-2-Clause)  Library B          pkg:lib/libraryB@1.0.0              components
-allow         name        BSD                                   Library J          pkg:lib/libraryJ@1.0.0              components
-deny          name        CC-BY-NC                              Library G          pkg:lib/libraryG@1.0.0              components
-needs-review  name        GPL                                   Library H          pkg:lib/libraryH@1.0.0              components
-needs-review  id          GPL-2.0-only                          Library C          pkg:lib/libraryC@1.0.0              components
-needs-review  id          GPL-3.0-only                          Library D          pkg:lib/libraryD@1.0.0              components
-allow         id          MIT                                   ACME Application   pkg:app/sample@1.0.0                metadata.component
-allow         id          MIT                                   Library A          pkg:lib/libraryA@1.0.0              components
-UNDEFINED     invalid     NOASSERTION                           Library NoLicense  pkg:lib/libraryNoLicense@1.0.0      components
-UNDEFINED     invalid     NOASSERTION                           Bar                service:example.com/myservices/bar  services
-needs-review  name        UFL                                   ACME Application   pkg:app/sample@1.0.0                metadata.component
+usage-policy  license-type  license                               resource-name      bom-ref                             bom-location
+------------  ------------  -------                               -------------      -------                             ------------
+needs-review  id            ADSL                                  Foo                service:example.com/myservices/foo  services
+needs-review  name          AGPL                                  Library J          pkg:lib/libraryJ@1.0.0              components
+allow         name          Apache                                Library B          pkg:lib/libraryB@1.0.0              components
+allow         id            Apache-1.0                            Library E          pkg:lib/libraryE@1.0.0              components
+allow         id            Apache-2.0                            N/A                N/A                                 metadata.licenses
+allow         id            Apache-2.0                            Library A          pkg:lib/libraryA@1.0.0              components
+allow         id            Apache-2.0                            Library F          pkg:lib/libraryF@1.0.0              components
+allow         expression    Apache-2.0 AND (MIT OR BSD-2-Clause)  Library B          pkg:lib/libraryB@1.0.0              components
+allow         name          BSD                                   Library J          pkg:lib/libraryJ@1.0.0              components
+deny          name          CC-BY-NC                              Library G          pkg:lib/libraryG@1.0.0              components
+needs-review  name          GPL                                   Library H          pkg:lib/libraryH@1.0.0              components
+needs-review  id            GPL-2.0-only                          Library C          pkg:lib/libraryC@1.0.0              components
+needs-review  id            GPL-3.0-only                          Library D          pkg:lib/libraryD@1.0.0              components
+allow         id            MIT                                   ACME Application   pkg:app/sample@1.0.0                metadata.component
+allow         id            MIT                                   Library A          pkg:lib/libraryA@1.0.0              components
+UNDEFINED     invalid       NOASSERTION                           Library NoLicense  pkg:lib/libraryNoLicense@1.0.0      components
+UNDEFINED     invalid       NOASSERTION                           Bar                service:example.com/myservices/bar  services
+needs-review  name          UFL                                   ACME Application   pkg:app/sample@1.0.0                metadata.component
 ```
 
 ###### CSV format example
@@ -284,26 +273,64 @@ needs-review  name        UFL                                   ACME Application
 ./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --quiet --format csv
 ```
 
-Sample output:
-
 ```bash
-Policy,Type,ID/Name/Expression,Component(s),BOM ref.,Document location
-allow,expression,Apache-2.0 AND (MIT OR BSD-2-Clause),Library B,pkg:lib/libraryB@1.0.0,components
-needs-review,id,GPL-2.0-only,Library C,pkg:lib/libraryC@1.0.0,components
-needs-review,id,GPL-3.0-only,Library D,pkg:lib/libraryD@1.0.0,components
-allow,id,Apache-1.0,Library E,pkg:lib/libraryE@1.0.0,components
-needs-review,name,GPL,Library H,pkg:lib/libraryH@1.0.0,components
-allow,name,BSD,Library J,pkg:lib/libraryJ@1.0.0,components
-UNDEFINED,id,ADSL,Foo,service:example.com/myservices/foo,services
+usage-policy,license-type,license,resource-name,bom-ref,bom-location
 allow,id,Apache-2.0,N/A,N/A,metadata.licenses
 allow,id,Apache-2.0,Library A,pkg:lib/libraryA@1.0.0,components
 allow,id,Apache-2.0,Library F,pkg:lib/libraryF@1.0.0,components
+allow,expression,Apache-2.0 AND (MIT OR BSD-2-Clause),Library B,pkg:lib/libraryB@1.0.0,components
+needs-review,id,GPL-3.0-only,Library D,pkg:lib/libraryD@1.0.0,components
+needs-review,name,GPL,Library H,pkg:lib/libraryH@1.0.0,components
 allow,id,MIT,ACME Application,pkg:app/sample@1.0.0,metadata.component
 allow,id,MIT,Library A,pkg:lib/libraryA@1.0.0,components
+allow,name,CC-BY-NC,Library G,pkg:lib/libraryG@1.0.0,components
+needs-review,id,ADSL,Foo,service:example.com/myservices/foo,services
 needs-review,name,UFL,ACME Application,pkg:app/sample@1.0.0,metadata.component
 allow,name,Apache,Library B,pkg:lib/libraryB@1.0.0,components
-allow,name,CC-BY-NC,Library G,pkg:lib/libraryG@1.0.0,components
+allow,id,Apache-1.0,Library E,pkg:lib/libraryE@1.0.0,components
 needs-review,name,AGPL,Library J,pkg:lib/libraryJ@1.0.0,components
+UNDEFINED,invalid,NOASSERTION,Library NoLicense,pkg:lib/libraryNoLicense@1.0.0,components
+UNDEFINED,invalid,NOASSERTION,Bar,service:example.com/myservices/bar,services
+needs-review,id,GPL-2.0-only,Library C,pkg:lib/libraryC@1.0.0,components
+allow,name,BSD,Library J,pkg:lib/libraryJ@1.0.0,components
+```
+
+#### Where flag filtering
+
+The list command results can be filtered using the `--where` flag using the column names in the report. These include `usage-policy`, `license-type`, `license`, `resource-name`, `bom-ref` and `bom-location`.
+
+The following example shows filtering of component licenses using the `license-type` column where the license was described as a `name` value:
+
+```bash
+./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --where license-type=name
+```
+
+```bash
+usage-policy  license-type  license   resource-name     bom-ref                 bom-location
+------------  ------------  -------   -------------     -------                 ------------
+needs-review  name          AGPL      Library J         pkg:lib/libraryJ@1.0.0  components
+allow         name          Apache    Library B         pkg:lib/libraryB@1.0.0  components
+allow         name          BSD       Library J         pkg:lib/libraryJ@1.0.0  components
+deny          name          CC-BY-NC  Library G         pkg:lib/libraryG@1.0.0  components
+needs-review  name          GPL       Library H         pkg:lib/libraryH@1.0.0  components
+needs-review  name          UFL       ACME Application  pkg:app/sample@1.0.0    metadata.component
+```
+
+In another example, the list is filtered by the `usage-policy` where the value is `needs-review`:
+
+```bash
+./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --where usage-policy=needs-review
+```
+
+```bash
+usage-policy  license-type  license       resource-name     bom-ref                             bom-location
+------------  ------------  -------       -------------     -------                             ------------
+needs-review  id            ADSL          Foo               service:example.com/myservices/foo  services
+needs-review  name          AGPL          Library J         pkg:lib/libraryJ@1.0.0              components
+needs-review  name          GPL           Library H         pkg:lib/libraryH@1.0.0              components
+needs-review  id            GPL-2.0-only  Library C         pkg:lib/libraryC@1.0.0              components
+needs-review  id            GPL-3.0-only  Library D         pkg:lib/libraryD@1.0.0              components
+needs-review  name          UFL           ACME Application  pkg:app/sample@1.0.0                metadata.component
 ```
 
 ---
@@ -315,8 +342,6 @@ To view a report listing the contents of the current policy file (i.e., `license
 ```bash
 ./sbom-utility license policy
 ```
-
-Sample output:
 
 ```bash
 Policy        Family           SPDX ID               Name                  Annotations
@@ -364,8 +389,6 @@ is equivalent to using the wildcard character (which may need to be enclosed in 
 ./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --select '*' --from metadata.component
 ```
 
-Sample output:
-
 ```json
 {
   "name": "Example Application v10.0.4",
@@ -401,8 +424,6 @@ In this example, the `--from` clause references the  singleton JSON object `comp
 ./sbom-utility query --select name,version --from metadata.component -i examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json
 ```
 
-Sample output:
-
 ```json
 {
   "name": "juice-shop",
@@ -417,8 +438,6 @@ In this example, the `--where` filter will be applied to a set of `properties` r
 ```bash
 ./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from metadata.properties --where name=urn:example.com:classification
 ```
-
-Sample output:
 
 ```json
 [
@@ -530,8 +549,6 @@ You can verify which formats and schemas are available for validation by using t
 ./sbom-utility schema
 ```
 
-Sample output:
-
 ```bash
 Name                          Format     Version   Variant        File (local)                                     URL (remote)
 ----                          ------     -------   -------        ------------                                     ------------
@@ -579,8 +596,6 @@ Validating the "juice shop" SBOM (CycloneDX 1.2) example provided in this reposi
 ```bash
 ./sbom-utility validate -i examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json
 ```
-
-Sample output:
 
 ```bash
 [INFO] Loading license policy config file: `license.json`...

@@ -59,7 +59,7 @@ const (
 // filter keys
 const (
 	LICENSE_FILTER_KEY_USAGE_POLICY  = "usage-policy"
-	LICENSE_FILTER_KEY_LICENSE_TYPE  = "type"
+	LICENSE_FILTER_KEY_LICENSE_TYPE  = "license-type"
 	LICENSE_FILTER_KEY_LICENSE       = "license"
 	LICENSE_FILTER_KEY_RESOURCE_NAME = "resource-name"
 	LICENSE_FILTER_KEY_BOM_REF       = "bom-ref"
@@ -437,6 +437,7 @@ func DisplayLicenseListSummaryText(output io.Writer) {
 
 		for _, iInfo := range arrLicenseInfo {
 			licenseInfo = iInfo.(LicenseInfo)
+			// TODO REMOVE or make debug only output
 			// mapOut, _ := utils.ConvertStructToMap(licenseInfo)
 			// fMap, _ := log.FormatMap("LicenseInfo", mapOut)
 			// fmt.Println(fMap)
@@ -444,11 +445,12 @@ func DisplayLicenseListSummaryText(output io.Writer) {
 			// Format line and write to output
 			fmt.Fprintf(w, "%s\t%v\t%s\t%s\t%s\t%s\n",
 				licenseInfo.UsagePolicy,
-				LC_TYPE_NAMES[licenseInfo.LicenseChoiceType],
+				licenseInfo.LicenseChoiceType, //LC_TYPE_NAMES[licenseInfo.LicenseChoiceTypeValue],
 				licenseName,
 				licenseInfo.ResourceName,
 				licenseInfo.BomRef,
-				CDX_LICENSE_LOCATION_NAMES[licenseInfo.BomLocation])
+				licenseInfo.BomLocation, //CDX_LICENSE_LOCATION_NAMES[licenseInfo.BomLocationValue]
+			)
 		}
 	}
 }
@@ -508,11 +510,12 @@ func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
 			// which is automatically done by the CSV writer
 			currentRow = append(currentRow,
 				licenseInfo.Policy.UsagePolicy,
-				LC_TYPE_NAMES[licenseInfo.LicenseChoiceType],
+				licenseInfo.LicenseChoiceType, //LC_TYPE_NAMES[licenseInfo.LicenseChoiceTypeValue],
 				licenseName.(string),
 				licenseInfo.ResourceName,
 				licenseInfo.BomRef,
-				CDX_LICENSE_LOCATION_NAMES[licenseInfo.BomLocation])
+				licenseInfo.BomLocation, //CDX_LICENSE_LOCATION_NAMES[licenseInfo.BomLocationValue]
+			)
 
 			if errWrite := w.Write(currentRow); errWrite != nil {
 				err = getLogger().Errorf("csvWriter.Write(): %w", errWrite)
@@ -565,11 +568,12 @@ func DisplayLicenseListSummaryMarkdown(output io.Writer) {
 			// Format line and write to output
 			line = append(line,
 				licenseInfo.Policy.UsagePolicy,
-				LC_TYPE_NAMES[licenseInfo.LicenseChoiceType],
+				licenseInfo.LicenseChoiceType, // LC_TYPE_NAMES[licenseInfo.LicenseChoiceTypeValue],
 				licenseName.(string),
 				licenseInfo.ResourceName,
 				licenseInfo.BomRef,
-				CDX_LICENSE_LOCATION_NAMES[licenseInfo.BomLocation])
+				licenseInfo.BomLocation, // CDX_LICENSE_LOCATION_NAMES[licenseInfo.BomLocationValue]
+			)
 
 			lineRow = createMarkdownRow(line)
 			fmt.Fprintf(output, "%s\n", lineRow)

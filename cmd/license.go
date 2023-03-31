@@ -69,16 +69,18 @@ var LC_TYPE_NAMES = [...]string{"invalid", "id", "name", "expression"}
 
 // Note: the "License" property is used as hashmap key
 type LicenseInfo struct {
-	UsagePolicy       string `json:"usage-policy"`
-	LicenseChoiceType int    `json:"type"`
-	License           string `json:"license"`
-	ResourceName      string `json:"resource-name"`
-	BomRef            string `json:"bom-ref"`
-	BomLocation       int    `json:"bom-location"`
-	LicenseChoice     schema.CDXLicenseChoice
-	Policy            LicensePolicy
-	Component         schema.CDXComponent
-	Service           schema.CDXService
+	UsagePolicy            string `json:"usage-policy"`
+	LicenseChoiceTypeValue int    `json:"license-type-value"`
+	LicenseChoiceType      string `json:"license-type"`
+	License                string `json:"license"`
+	ResourceName           string `json:"resource-name"`
+	BomRef                 string `json:"bom-ref"`
+	BomLocationValue       int    `json:"bom-location-value"`
+	BomLocation            string `json:"bom-location"`
+	LicenseChoice          schema.CDXLicenseChoice
+	Policy                 LicensePolicy
+	Component              schema.CDXComponent
+	Service                schema.CDXService
 }
 
 // License hashmap
@@ -91,7 +93,7 @@ func ClearGlobalLicenseData() {
 	licenseSlice = nil
 }
 
-func AppendLicenseInfo(key string, licenseInfo LicenseInfo, whereFilters []WhereFilter) {
+func HashLicenseInfo(key string, licenseInfo LicenseInfo, whereFilters []WhereFilter) {
 	// Append to slice
 	policy, err := FindPolicy(licenseInfo)
 
@@ -100,9 +102,12 @@ func AppendLicenseInfo(key string, licenseInfo LicenseInfo, whereFilters []Where
 		_ = getLogger().Errorf("%s", MSG_LICENSE_INVALID_DATA)
 		os.Exit(ERROR_VALIDATION)
 	}
+	licenseInfo.License = key
 	licenseInfo.Policy = policy
 	licenseInfo.UsagePolicy = policy.UsagePolicy
-	licenseInfo.License = key
+	// Derive values for report filtering
+	licenseInfo.LicenseChoiceType = LC_TYPE_NAMES[licenseInfo.LicenseChoiceTypeValue]
+	licenseInfo.BomLocation = CDX_LICENSE_LOCATION_NAMES[licenseInfo.BomLocationValue]
 	licenseSlice = append(licenseSlice, licenseInfo)
 
 	var match bool = true
@@ -112,7 +117,7 @@ func AppendLicenseInfo(key string, licenseInfo LicenseInfo, whereFilters []Where
 	}
 
 	if match {
-		// Hash by license key
+		// Hash LicenseInfo by license key (i.e., id|name|expression)
 		licenseMap.Put(key, licenseInfo)
 
 		getLogger().Tracef("Put: %s (`%s`), `%s`)",
@@ -246,7 +251,7 @@ func hashMetadataLicenses(document *schema.Sbom, location int, whereFilters []Wh
 			lc.License.Id, lc.License.Name)
 
 		licenseInfo.LicenseChoice = lc
-		licenseInfo.BomLocation = location
+		licenseInfo.BomLocationValue = location
 		licenseInfo.ResourceName = LICENSE_LIST_NOT_APPLICABLE
 		licenseInfo.BomRef = LICENSE_LIST_NOT_APPLICABLE
 		err = hashLicenseInfo(licenseInfo, whereFilters)
@@ -325,10 +330,10 @@ func hashComponentLicense(cdxComponent schema.CDXComponent, location int, whereF
 	if len(cdxComponent.Licenses) == 0 {
 		// hash any component w/o a license using special key name
 		licenseInfo.Component = cdxComponent
-		licenseInfo.BomLocation = location
+		licenseInfo.BomLocationValue = location
 		licenseInfo.ResourceName = cdxComponent.Name
 		licenseInfo.BomRef = cdxComponent.BomRef
-		AppendLicenseInfo(LICENSE_NONE, licenseInfo, whereFilters)
+		HashLicenseInfo(LICENSE_NONE, licenseInfo, whereFilters)
 
 		getLogger().Warningf("%s: %s (name:`%s`, version: `%s`, package-url: `%s`)",
 			"No license found for component. bomRef",
@@ -346,7 +351,7 @@ func hashComponentLicense(cdxComponent schema.CDXComponent, location int, whereF
 
 		licenseInfo.LicenseChoice = licenseChoice
 		licenseInfo.Component = cdxComponent
-		licenseInfo.BomLocation = location
+		licenseInfo.BomLocationValue = location
 		licenseInfo.ResourceName = cdxComponent.Name
 		licenseInfo.BomRef = cdxComponent.BomRef
 		err = hashLicenseInfo(licenseInfo, whereFilters)
@@ -380,10 +385,10 @@ func hashServiceLicense(cdxService schema.CDXService, location int, whereFilters
 	if len(cdxService.Licenses) == 0 {
 		// hash any service w/o a license using special key name
 		licenseInfo.Service = cdxService
-		licenseInfo.BomLocation = location
+		licenseInfo.BomLocationValue = location
 		licenseInfo.ResourceName = cdxService.Name
 		licenseInfo.BomRef = cdxService.BomRef
-		AppendLicenseInfo(LICENSE_NONE, licenseInfo, whereFilters)
+		HashLicenseInfo(LICENSE_NONE, licenseInfo, whereFilters)
 
 		getLogger().Warningf("%s: %s (name: `%s`, version: `%s`)",
 			"No license found for service. bomRef",
@@ -402,7 +407,7 @@ func hashServiceLicense(cdxService schema.CDXService, location int, whereFilters
 		licenseInfo.Service = cdxService
 		licenseInfo.ResourceName = cdxService.Name
 		licenseInfo.BomRef = cdxService.BomRef
-		licenseInfo.BomLocation = location
+		licenseInfo.BomLocationValue = location
 		err = hashLicenseInfo(licenseInfo, whereFilters)
 
 		if err != nil {
@@ -436,14 +441,14 @@ func hashLicenseInfo(licenseInfo LicenseInfo, whereFilters []WhereFilter) (err e
 	licenseChoice := licenseInfo.LicenseChoice
 
 	if licenseChoice.License.Id != "" {
-		licenseInfo.LicenseChoiceType = LC_TYPE_ID
-		AppendLicenseInfo(licenseChoice.License.Id, licenseInfo, whereFilters)
+		licenseInfo.LicenseChoiceTypeValue = LC_TYPE_ID
+		HashLicenseInfo(licenseChoice.License.Id, licenseInfo, whereFilters)
 	} else if licenseChoice.License.Name != "" {
-		licenseInfo.LicenseChoiceType = LC_TYPE_NAME
-		AppendLicenseInfo(licenseChoice.License.Name, licenseInfo, whereFilters)
+		licenseInfo.LicenseChoiceTypeValue = LC_TYPE_NAME
+		HashLicenseInfo(licenseChoice.License.Name, licenseInfo, whereFilters)
 	} else if licenseChoice.Expression != "" {
-		licenseInfo.LicenseChoiceType = LC_TYPE_EXPRESSION
-		AppendLicenseInfo(licenseChoice.Expression, licenseInfo, whereFilters)
+		licenseInfo.LicenseChoiceTypeValue = LC_TYPE_EXPRESSION
+		HashLicenseInfo(licenseChoice.Expression, licenseInfo, whereFilters)
 	} else {
 		// Note: This code path only executes if hashing is performed
 		// without schema validation (which would find this as an error)

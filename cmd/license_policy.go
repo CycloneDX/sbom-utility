@@ -221,7 +221,7 @@ func FindPolicy(licenseInfo LicenseInfo) (matchedPolicy LicensePolicy, err error
 	// Initialize to empty
 	matchedPolicy = LicensePolicy{}
 
-	switch licenseInfo.LicenseChoiceType {
+	switch licenseInfo.LicenseChoiceTypeValue {
 	case LC_TYPE_ID:
 		matchedPolicy.UsagePolicy, matchedPolicy = FindPolicyBySpdxId(licenseInfo.LicenseChoice.License.Id)
 	case LC_TYPE_NAME:
