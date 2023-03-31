@@ -288,6 +288,14 @@ func TestLicensePolicyList(t *testing.T) {
 	if value := values[4]; !strings.Contains(value, LICENSE_ID_MAYBE) || !strings.Contains(value, POLICY_NEEDS_REVIEW) {
 		t.Errorf("DisplayLicensePolicies(): returned entry: %s; expected ID and policy: `%s`, `%s`", value, LICENSE_ID_MAYBE, POLICY_NEEDS_REVIEW)
 	}
+
+	// !!! IMPORTANT !!!!
+	// Reset the license (policy) to default file (or other tests in package will fail)
+	licensePolicyConfig = new(LicenseComplianceConfig)
+	errPolicies = licensePolicyConfig.LoadLicensePolicies(DEFAULT_LICENSE_POLICIES)
+	if errPolicies != nil {
+		t.Errorf(errPolicies.Error())
+	}
 }
 
 // The policy config. has 3 states: { "allow", "deny", "needs-review" }; n=3
@@ -378,6 +386,14 @@ func TestLicensePolicyUsageConjunctionsANDCombinations(t *testing.T) {
 	resolvedPolicy = parsedExpression.CompoundUsagePolicy
 	if resolvedPolicy != EXPECTED_USAGE_POLICY {
 		t.Errorf("parseExpression(): \"%s\" returned: `%s`; expected: `%s`", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
+	}
+
+	// !!! IMPORTANT !!!!
+	// Reset the license (policy) to default file (or other tests in package will fail)
+	licensePolicyConfig = new(LicenseComplianceConfig)
+	errPolicies = licensePolicyConfig.LoadLicensePolicies(DEFAULT_LICENSE_POLICIES)
+	if errPolicies != nil {
+		t.Errorf(errPolicies.Error())
 	}
 }
 
@@ -470,6 +486,14 @@ func TestLicensePolicyUsageConjunctionsORCombinations(t *testing.T) {
 	if resolvedPolicy != EXPECTED_USAGE_POLICY {
 		t.Errorf("parseExpression(): \"%s\" returned: `%s`; expected: `%s`", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
 	}
+
+	// !!! IMPORTANT !!!!
+	// Reset the license (policy) to default file (or other tests in package will fail)
+	licensePolicyConfig = new(LicenseComplianceConfig)
+	errPolicies = licensePolicyConfig.LoadLicensePolicies(DEFAULT_LICENSE_POLICIES)
+	if errPolicies != nil {
+		t.Errorf(errPolicies.Error())
+	}
 }
 
 // Use test file "test/policy/license-policy-family-name-usage-conflict.json"
@@ -480,11 +504,16 @@ func TestLicensePolicyFamilyUsagePolicyConflict(t *testing.T) {
 	licensePolicyConfig = new(LicenseComplianceConfig)
 	errPolicies := licensePolicyConfig.LoadLicensePolicies(POLICY_FILE_FAMILY_NAME_USAGE_CONFLICT)
 	// Note: the conflict is only encountered on the "hash"; load only loads what policies are defined in the config.
-
 	if errPolicies != nil {
 		t.Errorf(errPolicies.Error())
 	}
-
+	// !!! IMPORTANT !!!!
+	// Reset the license (policy) to default file (or other tests in package will fail)
+	licensePolicyConfig = new(LicenseComplianceConfig)
+	errPolicies = licensePolicyConfig.LoadLicensePolicies(DEFAULT_LICENSE_POLICIES)
+	if errPolicies != nil {
+		t.Errorf(errPolicies.Error())
+	}
 }
 
 func TestLicensePolicyMatchByFamilyNameBadExpression(t *testing.T) {

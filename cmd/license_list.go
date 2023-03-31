@@ -311,11 +311,11 @@ func DisplayLicenseListCSV(output io.Writer) (err error) {
 		arrLicenseInfo, _ := licenseMap.Get(licenseName)
 
 		for _, iInfo := range arrLicenseInfo {
+			// reset line after each iteration
+			currentRow = nil
 			licenseInfo = iInfo.(LicenseInfo)
 
 			if licenseInfo.LicenseChoiceTypeValue != LC_TYPE_INVALID {
-				// reset line after each iteration
-				currentRow = nil
 
 				lc := licenseInfo.LicenseChoice
 
@@ -367,12 +367,11 @@ func DisplayLicenseListMarkdown(output io.Writer) {
 		arrLicenseInfo, _ := licenseMap.Get(licenseName)
 
 		for _, iInfo := range arrLicenseInfo {
+			// Each row will contain every field of a CDX LicenseChoice object
+			line = nil
 			licenseInfo = iInfo.(LicenseInfo)
 
 			if licenseInfo.LicenseChoiceTypeValue != LC_TYPE_INVALID {
-				// Each row will contain every field of a CDX LicenseChoice object
-				line = nil
-
 				lc := licenseInfo.LicenseChoice
 				content = lc.License.Text.Content
 

@@ -160,10 +160,12 @@ func innerTestLicenseList(t *testing.T, testInfo *LicenseTestInfo) (outputBuffer
 		outputLineCount := strings.Count(outputResults, "\n")
 		if outputLineCount != testInfo.ResultLineCount {
 			err = getLogger().Errorf("output did not contain expected line count: %v/%v (expected/actual)", testInfo.ResultLineCount, outputLineCount)
-			t.Errorf("%s: input file: `%s`, where clause: `%s`",
+			t.Errorf("%s: input file: `%s`, where clause: `%s`: \n%s",
 				err.Error(),
 				testInfo.InputFile,
-				testInfo.WhereClause)
+				testInfo.WhereClause,
+				outputResults,
+			)
 			return
 		}
 	}
@@ -402,12 +404,21 @@ func TestLicenseListPolicyCdx14InvalidLicenseName(t *testing.T) {
 func TestLicenseListSummaryTextCdx13WhereUsageNeedsReview(t *testing.T) {
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3, FORMAT_TEXT, true)
 	lti.WhereClause = "usage-policy=needs-review"
+	lti.ResultLineCount = 8 // title and data rows
 	innerTestLicenseList(t, lti)
 }
 
 func TestLicenseListSummaryTextCdx13WhereUsageUndefined(t *testing.T) {
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3, FORMAT_TEXT, true)
 	lti.WhereClause = "usage-policy=UNDEFINED"
+	lti.ResultLineCount = 4 // title and data rows
+	innerTestLicenseList(t, lti)
+}
+
+func TestLicenseListSummaryTextCdx13WhereLicenseTypeName(t *testing.T) {
+	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3, FORMAT_TEXT, true)
+	lti.WhereClause = "license-type=name"
+	lti.ResultLineCount = 8 // title and data rows
 	innerTestLicenseList(t, lti)
 }
 
@@ -425,12 +436,12 @@ func TestLicenseListPolicyCdx14CustomPolicy(t *testing.T) {
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_TEXT_CDX_1_4_CUSTOM_POLICY_1, FORMAT_TEXT, true)
 	outputBuffer, _ := innerTestLicenseList(t, lti)
 
-	// MUST!!! restore default policy file to default for all other tests
-	loadHashCustomPolicyFile(utils.GlobalFlags.ConfigLicensePolicyFile)
-
 	matched := listOutputContainsLicense(outputBuffer, TEST_POLICY, TEST_LICENSE_TYPE, TEST_LICENSE_ID_OR_NAME)
 	if !matched {
 		t.Errorf("LicenseList(): did not include license policy `%s`, type `%s`, name `%s`\n",
 			TEST_POLICY, TEST_LICENSE_TYPE, TEST_LICENSE_ID_OR_NAME)
 	}
+
+	// !!! IMPORTANT !!! restore default policy file to default for all other tests
+	loadHashCustomPolicyFile(utils.GlobalFlags.ConfigLicensePolicyFile)
 }
