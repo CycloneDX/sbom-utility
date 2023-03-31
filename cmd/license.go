@@ -254,7 +254,7 @@ func hashMetadataLicenses(document *schema.Sbom, location int, whereFilters []Wh
 		licenseInfo.BomLocationValue = location
 		licenseInfo.ResourceName = LICENSE_LIST_NOT_APPLICABLE
 		licenseInfo.BomRef = LICENSE_LIST_NOT_APPLICABLE
-		err = hashLicenseInfo(licenseInfo, whereFilters)
+		err = hashLicenseInfoByLicenseType(licenseInfo, whereFilters)
 
 		if err != nil {
 			return
@@ -354,7 +354,7 @@ func hashComponentLicense(cdxComponent schema.CDXComponent, location int, whereF
 		licenseInfo.BomLocationValue = location
 		licenseInfo.ResourceName = cdxComponent.Name
 		licenseInfo.BomRef = cdxComponent.BomRef
-		err = hashLicenseInfo(licenseInfo, whereFilters)
+		err = hashLicenseInfoByLicenseType(licenseInfo, whereFilters)
 
 		if err != nil {
 			// Show intent to not check for error returns as there no intent to recover
@@ -408,7 +408,7 @@ func hashServiceLicense(cdxService schema.CDXService, location int, whereFilters
 		licenseInfo.ResourceName = cdxService.Name
 		licenseInfo.BomRef = cdxService.BomRef
 		licenseInfo.BomLocationValue = location
-		err = hashLicenseInfo(licenseInfo, whereFilters)
+		err = hashLicenseInfoByLicenseType(licenseInfo, whereFilters)
 
 		if err != nil {
 			return
@@ -433,7 +433,7 @@ func hashServiceLicense(cdxService schema.CDXService, location int, whereFilters
 // 2. Where the license was found within the SBOM
 // 3. The entity name (e.g., service or component name) that declared the license
 // 4. The entity local BOM reference (i.e., "bomRef")
-func hashLicenseInfo(licenseInfo LicenseInfo, whereFilters []WhereFilter) (err error) {
+func hashLicenseInfoByLicenseType(licenseInfo LicenseInfo, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 

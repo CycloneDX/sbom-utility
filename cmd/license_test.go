@@ -45,8 +45,24 @@ const (
 // -------------------------------------------
 // license test helper functions
 // -------------------------------------------
-// TODO support passing in []WhereFilter
 func innerTestLicenseList(t *testing.T, inputFile string, format string, summary bool) (outputBuffer bytes.Buffer, err error) {
+
+	// // Declare an output outputBuffer/outputWriter to use used during tests
+	// var outputWriter = bufio.NewWriter(&outputBuffer)
+	// // ensure all data is written to buffer before further validation
+	// defer outputWriter.Flush()
+
+	// // Use a test input SBOM formatted in SPDX
+	// utils.GlobalFlags.InputFile = inputFile
+
+	// // TODO support passing in []WhereFilter
+	// err = ListLicenses(outputWriter, format, summary, nil)
+
+	return innerTestLicenseListWithFilter(t, inputFile, format, summary, nil)
+}
+
+// TODO support passing in []WhereFilter
+func innerTestLicenseListWithFilter(t *testing.T, inputFile string, format string, summary bool, whereFilters []WhereFilter) (outputBuffer bytes.Buffer, err error) {
 
 	// Declare an output outputBuffer/outputWriter to use used during tests
 	var outputWriter = bufio.NewWriter(&outputBuffer)
@@ -57,7 +73,7 @@ func innerTestLicenseList(t *testing.T, inputFile string, format string, summary
 	utils.GlobalFlags.InputFile = inputFile
 
 	// TODO support passing in []WhereFilter
-	err = ListLicenses(outputWriter, format, summary, nil)
+	err = ListLicenses(outputWriter, format, summary, whereFilters)
 
 	return
 }
@@ -336,6 +352,9 @@ func TestLicenseListPolicyCdx14InvalidLicenseName(t *testing.T) {
 	}
 }
 
+//---------------------------
+// Custom policy file tests
+//---------------------------
 func TestLicenseListPolicyCdx14CustomPolicy(t *testing.T) {
 	TEST_POLICY := POLICY_ALLOW
 	TEST_LICENSE_TYPE := "expression"
@@ -362,6 +381,26 @@ func TestLicenseListPolicyCdx14CustomPolicy(t *testing.T) {
 			TEST_POLICY, TEST_LICENSE_TYPE, TEST_LICENSE_ID_OR_NAME)
 	}
 }
+
+func TestLicenseListSummaryTextCdx13WhereUsageNeedsReview(t *testing.T) {
+	whereValuesRaw := "usage-policy=needs-review"
+	whereFilters, _ := retrieveWhereFilters(whereValuesRaw)
+
+	_, err := innerTestLicenseListWithFilter(t,
+		TEST_LICENSE_LIST_CDX_1_3,
+		FORMAT_TEXT,
+		true,
+		whereFilters,
+	)
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+//---------------------------
+// Where filter tests
+//---------------------------
 
 // Make sure we can List all components in an SBOM, including those in hierarchical compositions
 // TODO: Actually verify one or more of the hierarchical comps. appear in list results

@@ -582,7 +582,7 @@ For details see "[Supporting new SBOM formats and schema versions](#supporting-n
 
 This command will parse standardized SBOMs and validate it against its declared format and version (e.g., SPDX 2.2, CycloneDX 1.4). Custom  variants of standard JSON schemas can be used for validation by supplying the `--variant` name as a flag. Explicit JSON schemas can be specified using the `--force` flag.
 
-**Notes**
+##### Notes
 
 - Use the [schema](#schema) command to list supported schemas formats, versions and variants.
 - Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file.
