@@ -29,9 +29,10 @@ However, the utility seeks to provide a rich set of commands in support of [BOM 
   - [Prerequisites](#prerequisites)
   - [Building](#building)
   - [Running from source](#running-from-source)
-  - [Adding SBOM formats, schema versions and variants](#adding-sbom-formats-schema-versions-and-variants)
   - [Debugging](#debugging)
     - [VSCode](#vscode)
+  - [Adding SBOM formats, schema versions and variants](#adding-sbom-formats-schema-versions-and-variants)
+
 - [Contributing](#contributing)
   - [TODO list](#todo-list)
   - [Priority features](#priority-features)
@@ -552,11 +553,11 @@ Entries for new or "custom" schemas can be added to the `config.json` file simpl
 
 These new entries will tell the schema loader where to find the new schema locally, relative to the utility's executable.
 
+For details see the "[Adding SBOM formats, schema versions and variants](#adding-sbom-formats-schema-versions-and-variants)" section.
+
 #### Embedding schemas
 
 If you wish to have the new schema *embedded in the executable*, simply add it to the project's `resources` subdirectory following the format and version-based directory structure.
-
-For details see the "[Adding SBOM formats, schema versions and variants](#adding-sbom-formats-schema-versions-and-variants)" section.
 
 ---
 
