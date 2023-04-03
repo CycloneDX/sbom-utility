@@ -36,7 +36,7 @@ However, the utility seeks to provide a rich set of commands in support of [BOM 
   - [TODO list](#todo-list)
   - [Priority features](#priority-features)
 - [Testing](#testing)
-  - [Authoring tests](#authoring-tests)
+  - [Go test files](#go-test-files)
   - [Running tests](#running-tests)
 - [Releasing](#releasing)
 - [References](#references): [CycloneDX](#cyclonedx), [SPDX](#spdx)
@@ -921,7 +921,7 @@ The fields `canonicalName`, `propertyKeyFormat`, `propertyKeyVersion`, and `prop
 
 ## Testing
 
-### SBOM test files
+### Go test files
 
 The built-in `go test` command is used to execute all functional tests that appear in `*._test.go` files.  By default, `go test` executes tests within the same directory where its respective `*._test.go` file is located and sets that as the working directory. For example, tests in the `validate_test.go` file are executed from the `cmd` subdirectory. This is a problem as the actual test SBOM JSON test files are located relative the project root, one level higher, and would not be found.  In order to correct for that, the test working directory is automatically changed for all tests within the `TestMain` routine found in `root_test.go`.
 
