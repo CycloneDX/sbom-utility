@@ -32,7 +32,6 @@ However, the utility seeks to provide a rich set of commands in support of [BOM 
   - [Debugging](#debugging)
     - [VSCode](#vscode)
   - [Adding SBOM formats, schema versions and variants](#adding-sbom-formats-schema-versions-and-variants)
-
 - [Contributing](#contributing)
   - [TODO list](#todo-list)
   - [Priority features](#priority-features)
