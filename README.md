@@ -556,7 +556,7 @@ These new entries will tell the schema loader where to find the new schema local
 
 If you wish to have the new schema *embedded in the executable*, simply add it to the project's `resources` subdirectory following the format and version-based directory structure.
 
-For details see "[Supporting new SBOM formats and schema versions](#supporting-new-sbom-formats-and-schema-versions)" section.
+For details see the "[Adding SBOM formats, schema versions and variants](#adding-sbom-formats-schema-versions-and-variants)" section.
 
 ---
 
