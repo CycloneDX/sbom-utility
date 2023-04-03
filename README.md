@@ -175,25 +175,26 @@ This subcommand will emit a list of all licenses found in and SBOM (defaults to 
 
 ```json
 [
-    {  // by license `id`
+    {
         "license": {
+            "$comment": "by license `id",
             "id": "MIT",
             "name": "",
             "url": ""
-            ...
-        },
-        "expression": ""
+        }
     },
-    { // by license `expression`
+    {
         "license": {
+            "$comment": "by license `expression",
             "id": "",
             "name": "",
             "url": ""
         },
         "expression": "Apache-2.0 AND (MIT OR GPL-2.0-only)"
     },
-    { // by license `name` with full license encoding
+    {
         "license": {
+            "$comment": "by license `name` with full license encoding",
             "id": "",
             "name": "Apache 2",
             "text": {
@@ -202,8 +203,7 @@ This subcommand will emit a list of all licenses found in and SBOM (defaults to 
                 "content": "CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIEFwYWNoZSBMaWNlbnNlCiAgICAgICAgICAgICAgICAgICAgICAgICAgIFZlcnNpb24 ..."
             },
             "url": "https://www.apache.org/licenses/LICENSE-2.0.txt"
-        },
-        "expression": ""
+        }
     },
     ...
 ]
