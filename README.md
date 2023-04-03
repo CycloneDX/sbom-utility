@@ -2,41 +2,17 @@
 
 # sbom-utility
 
-This utility is designed to be an API platform used primarily to **validate CycloneDX or SPDX SBOMs** (encoded in JSON format) against versioned JSON schemas as published by their respective organizations.
+This utility is designed to be an API platform used primarily to **validate CycloneDX or SPDX SBOMs** (encoded in JSON format) against versioned JSON schemas as published by their respective organizations or custom variants provided by organizations that have stricter requirements.
 
-More importantly, the utility enables validation of SBOMs against derivative, "customized" schemas that can be used to enforce further data requirements not captured in the "base" schemas (e.g., industry or company-specific schemas).
+However, the utility seeks to provide a rich set of commands in support of [BOM use cases](#cyclonedx-use-cases) for insight, in the form of filterable reports, into key BOM data elements reflected in the names of their respective commands. The full list of supported commands, with links to their full descriptions, syntax and example:
 
-Specifically, the utility is able to parse standardized SBOMs (produced by your favorite tooling), find its declared format (e.g., SPDX, CycloneDX) and version (e.g., "2.2", "1.4", etc.) and then validate it against the corresponding JSON schemas which are built into the utility (use the [schema](#schema) command for supported schemas).
-
-In addition, the [validate](#validate) command can also use "customized" variants of the standard JSON schemas using the `--variant` command which can be added to the configuration file. The command also supports validation against "explicit" schemas, perhaps to test an SBOM against a newer schema version, that can be specified using the `--force` flag.  Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file (see the `schema` command's [adding schemas](#adding-schemas) section).
-
-In the future, we envision additional kinds of SBOMs (e.g., Hardware, Machine Learning (ML), Function-as-a-Service (Serverless), etc.) with each again having different data requirements and levels of maturity which will increase the need for domain-specific validation.  Specifically, this utility intends to support the work of the [OWASP Software Component Verification Standard (SCVS)](https://owasp.org/www-project-software-component-verification-standard/) which is defining a BOM Maturity Model (BMM).
-
-#### Functional priorities
-
-The utility additionally prioritizes commands that help provide insight into contents of the SBOM to search for and report on missing (i.e., completeness) or specific data requirements (e.g.,   organization or customer-specific requirements).  In general, the goal of these prioritized commands is to support data verification for many of the primary SBOM use cases as identified by the CycloneDX community (see https://cyclonedx.org/use-cases/).  Functional development has focused on those use cases that verify inventory (resource identity), legal compliance (e.g., license), and security analysis (e.g., vulnerability) which are foundational to any SBOM.
-
-##### Featured commands
-
-- [license](#license), [query](#query), [resource](#resource), [schema](#schema), [vulnerability](#vulnerability), [validate](#validate)
-
-In addition to the [validate](#validate) command, priority functionality is reflected in the [resource](#resource), [license](#license), [vulnerability](#vulnerability) and [query](#query) commands which are able to extract or produce formatted reports from inherent knowledge of the CycloneDX format.
-
-- The `resource` command is designed to better understand what resources are being referenced as part of the SBOM's inventory and/or dependency graph with the ability to filter by common, required fields such as name, version and bom-ref using regular expressions (regex).
-
-- The `license` command, for example, has many options and configurations to not only produce raw JSON output of license data, but also produce summarized reports in many human-readable formats (e.g., text, csv, markdown). Furthermore, the license command is able to apply configurable "usage policies" for the licenses identified in the reports.
-
-- The `vulnerability` command is able to produce a filterable summary of vulnerabilities (containing high-level information of interest) from an SBOM's or independent CycloneDX Vulnerability Exploitability eXchange (VEX) file's declared vulnerability list.
-
-- The `query` command functionality is geared towards an SBOM format-aware (CycloneDX-only for now), SQL-style query that could be used to generate customized reports/views into the SBOM data for any use case when other resource-specific commands are not provided or fall short.
-
-Further commands and reports are planned that prioritize use cases that enable greater insight and analysis of the legal, security and compliance data captured in the SBOM such as component **provenance** and **signage** (e.g., verifying resource identities by hashes or fingerprints).
-
-#### Design considerations
-
-The utility itself is written in `Go` to advantage the language's built-in typing enforcement and memory safe features and its ability to be compiled for a wide range of target platforms and architectures.
-
-The utility also is designed to produce output formats (e.g., JSON) and handle exit codes consistently to make it immediately useful standalone or as part of automated Continuous Integration (CI) tool chains for downstream use or inspection.
+- [license](#license) with [list](#list-subcommand) and [policy](#policy-subcommand) subcommands
+- [query](#query)
+- [resource](#resource)
+- [schema](#schema)
+- [vulnerability](#vulnerability)
+- [validate](#validate)
+- [help](#help)
 
 ---
 
@@ -44,30 +20,26 @@ The utility also is designed to produce output formats (e.g., JSON) and handle e
 
 - [Installation](#installation)
 - [Running](#running)
-  - [Commands](#commands)
-    - [license](#license)
-    - [query](#query)
-    - [resource](#resource)
-    - [schema](#schema)
-    - [vulnerability](#vulnerability)
-    - [validate](#validate)
-    - [help](#help)
+- [Commands](#commands)
+  - [Overview](#overview)
   - [Exit codes](#exit-codes)
   - [Quiet mode](#quiet-mode)
-- [Contributing](#contributing)
-  - [TODO list](#todo-list)
-  - [Priority features](#priority-features)
+- [Design considerations](#design-considerations)
 - [Development](#development)
   - [Prerequisites](#prerequisites)
   - [Building](#building)
-  - [Releasing](#releasing)
   - [Running from source](#running-from-source)
-  - [Supporting new SBOM formats and schema versions](#supporting-new-sbom-formats-and-schema-versions)
-  - [VSCode](#vscode)
+  - [Adding SBOM formats, schema versions and variants](#adding-sbom-formats-schema-versions-and-variants)
+  - [Debugging](#debugging)
+    - [VSCode](#vscode)
+- [Contributing](#contributing)
+  - [TODO list](#todo-list)
+  - [Priority features](#priority-features)
 - [Testing](#testing)
   - [Authoring tests](#authoring-tests)
   - [Running tests](#running-tests)
-- [References](#references)
+- [Releasing](#releasing)
+- [References](#references): [CycloneDX](#cyclonedx), [SPDX](#spdx)
 
 ---
 
@@ -84,7 +56,7 @@ The archive will contain the following files:
 - `license.json` - optional license policy configuration file
 - `custom.json` *(experimental)* - optional custom validation configuration file
 - `LICENSE` - the software license for the utility (i.e. Apache 2)
-- `sbom-utility`-\<version\>.sbom.json - the Software Bill-of-Materials for the utility
+- `sbom-utility-<version>.sbom.json` - the Software Bill-of-Materials for the utility
 
 ---
 
@@ -104,14 +76,24 @@ On MacOS, the utility is not a registered Apple application and may warn you tha
 
 ### Commands
 
+#### Overview
+
 Currently, the utility supports the following commands:
 
-- [license](#license)
-- [query](#query)
-- [resource](#resource)
-- [schema](#schema)
-- [validate](#validate)
-- [help](#help)
+- **[license](#license)** used to produce listings or summarized reports on license data contained in a BOM.  Reports can be produced in many human-readable formats (e.g., text, csv, markdown) or extracted listings in `json` format. Furthermore, the license command is able to apply configurable "usage policies" for the licenses identified in the reports.
+
+- **[query](#query)** is geared towards an SBOM format-aware (CycloneDX-only for now), SQL-style query that could be used to generate customized reports/views into the SBOM data for any use case when other resource-specific commands are not provided or fall short.
+
+- **[resource](#resource)** provides views on the SBOM's inventory or resources including components and services with the ability to filter by common, required fields such as name, version and bom-ref using regular expressions (regex).
+
+- **[schema](#schema)** lists the "built-in" set of schema formats, versions and variants supported by the `validation` command.
+  - Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file (see the `schema` command's [adding schemas](#adding-schemas) section).
+
+- **[validate](#validate)** enables validation of SBOMs against their declared format (e.g., SPDX, CycloneDX) and version (e.g., "2.2", "1.4", etc.) using their JSON schemas.
+  - Derivative, "customized" schemas can be referenced using the `--variant` flag (e.g., industry or company-specific schemas).
+  - You can override an BOM's default version using the `--force` flag (e.g., test an SBOM output against a newer specification version).
+
+- **[vulnerability](#vulnerability)** command is able to produce a filterable summary of vulnerabilities (containing high-level information of interest) from an SBOM's or independent CycloneDX Vulnerability Exploitability eXchange (VEX) file's declared vulnerability list.
 
 #### Exit codes
 
@@ -731,27 +713,21 @@ A specific command-level help listing is also available. For example, you can ac
 
 ---
 
-## Contributing
+#### Functional priorities
 
-Contributions are welcome under the Apache 2.0 license.
+The utility additionally prioritizes commands that help provide insight into contents of the SBOM to search for and report on missing (i.e., completeness) or specific data requirements (e.g.,   organization or customer-specific requirements).  In general, the goal of these prioritized commands is to support data verification for many of the primary SBOM use cases as identified by the CycloneDX community (see https://cyclonedx.org/use-cases/).  Functional development has focused on those use cases that verify inventory (resource identity), legal compliance (e.g., license), and security analysis (e.g., vulnerability) which are foundational to any SBOM.
 
-### TODO list
+---
 
-The entirety of the code contains the tag "**TODO**" with comments of things that are features or improvements conceived while authoring the base functionality.  Most of these do not have active issues opened form them.
+### Design considerations
 
-Feel free to "grep" for the "TODO" tag, open an issue and/or submit a draft PR.
+The utility itself is written in `Go` to advantage the language's built-in typing enforcement and memory safe features and its ability to be compiled for a wide range of target platforms and architectures.
 
-#### Priority features
+The utility also is designed to produce output formats (e.g., JSON) and handle exit codes consistently to make it immediately useful standalone or as part of automated Continuous Integration (CI) tool chains for downstream use or inspection.
 
-An ad-hoc list of featured "TODOs" geared at making the tool more accessible, extensible and useful especially around "core" commands such as validation.
+Further commands and reports are planned that prioritize use cases that enable greater insight and analysis of the legal, security and compliance data captured in the SBOM such as component **provenance** and **signage** (e.g., verifying resource identities by hashes or fingerprints).
 
-- **Embedded resources** Look to optionally embed a default `config.json` (format/schema config.), `license.json` (license policy config.) and `custom.json` (experimental, custom validation config.) files.
-- **Merge command** Support merge of two (both validated) SBOMs with de-duplication and configurable. Please note that some method of normalization prior to merge will be necessary.
-- **Remote Schema loading** Support using SBOM schema files that are remotely hosted  (network accessible) from known, trusted source locations (e.g., releases of SPDX, CycloneDX specification schemas). Note that the config file has an existing `url` field per entry that can be used for this purpose.
-- **--orderby** Support ordering of query result sets by comparison of values from a specified field key.
-- **license.json** Document license policy configuration JSON schema structure and how to add entries relative to a CycloneDX `LicenseChoice` object for entries with SPDX IDs and those without.
-- **license.json** Add more widely-recognized licenses (both from SPDX identifier lists as well as those not recognized by the SPDX community).
-- **Go libraries** Replace `go-prettyjson`, `go-multimap` libraries with alternatives that produce maintained releases.
+In the future, we envision additional kinds of SBOMs (e.g., Hardware, Machine Learning (ML), Function-as-a-Service (Serverless), etc.) with each again having different data requirements and levels of maturity which will increase the need for domain-specific validation.  Specifically, this utility intends to support the work of the [OWASP Software Component Verification Standard (SCVS)](https://owasp.org/www-project-software-component-verification-standard/) which is defining a BOM Maturity Model (BMM).
 
 ---
 
@@ -787,56 +763,7 @@ Welcome to the sbom-utility! Version `latest` (sbom-utility) (darwin/arm64)
 
 If you wish to build binaries for all supported combinations of `GOOS` and `GOARCH` values, use the `release` target (i.e., `make release`) which will produce named binaries of the form `sbom-utility-${GOOS}-${GOARCH}` under the `release` directory (e.g., `sbom-utility-darwin-amd64`).
 
-#### Releasing
-
-##### GitHub
-
-In order to initiate the release workflow, simply go to the release page of the repository:
-
-- https://github.com/CycloneDX/sbom-utility/releases
-
-and click on the `Draft a new release` button.  Follow the instructions to create a new version tag, provide an appropriate release title and description and `publish` the release.  The GitHub release workflow will be triggered automatically.
-
-##### Local
-
-For local development, you may choose to make a release on your machine using the `Makefile` directive `release`:
-
-```bash
-make release
-```
-
-```bash
-ls release
-total 131680
-drwxr-xr-x   8 User1  staff       256 Oct 27 14:43 .
-drwxr-xr-x  27 User1  staff       864 Oct 27 14:43 ..
--rw-r--r--   1 User1  staff      7121 Oct 27 14:43 config.json
--rw-r--r--   1 User1  staff      1346 Oct 27 14:43 custom.json
--rw-r--r--   1 User1  staff     62532 Oct 27 14:43 license.json
--rwxr-xr-x   1 User1  staff  11336640 Oct 27 14:43 sbom-utility-darwin-amd64
--rwxr-xr-x   1 User1  staff  11146770 Oct 27 14:43 sbom-utility-darwin-arm64
--rwxr-xr-x   1 User1  staff  11495647 Oct 27 14:43 sbom-utility-linux-amd64
--rwxr-xr-x   1 User1  staff  11076025 Oct 27 14:43 sbom-utility-linux-arm64
--rwxr-xr-x   1 User1  staff  11416576 Oct 27 14:43 sbom-utility-windows-amd64
--rwxr-xr-x   1 User1  staff  10934272 Oct 27 14:43 sbom-utility-windows-arm64
-```
-
-- *Please also note that the common `*.json` configuration files are also copied to the `release` directory.*
-
-##### Versioning
-
-to produce a release version you can set the following flags and invoke `go build` directly:
-
-```bash
-BINARY=sbom-utility
-VERSION=latest
-LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.Binary=${BINARY}"
-$ go build ${LDFLAGS} -o ${BINARY}
-```
-
-**TODO**: Update the `Makefile's` `release` target to conditionally pull the release version from environment variable values and only uses the hardcoded values as defaults when not found in the runtime build environment.
-
-### Running from source
+#### Running from source
 
 Developers can run using the current source code in their local branch using `go run main.go`. For example:
 
@@ -844,7 +771,44 @@ Developers can run using the current source code in their local branch using `go
 go run main.go validate -i test/cyclonedx/cdx-1-4-mature-example-1.json
 ```
 
-### Supporting new SBOM formats and schema versions
+#### Debugging
+
+##### VSCode
+
+This project was developed using VSCode and can be seamlessly loaded as a project.
+
+##### Debugging globals
+
+In order to see global variables while debugging a specific configuration, you can add the `"showGlobalVariables": true` to it within your `launch.json` config. file:
+
+```json
+        {
+            "showGlobalVariables": true,
+            "name": "Test name",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "main.go",
+            "args": ["validate", "-i", "test/cyclonedx/cdx-1-3-min-required.json","-t"]
+        },
+```
+
+or add it globally to the `settings.json` file:
+
+1. Use `Command-Shift-P` to open `settings.json`
+2. Select "Preferences: Open Settings (JSON)"
+3. Add the following block at the top level:
+
+```json
+"go.delveConfig": {
+    "showGlobalVariables": true
+},
+```
+
+**Note**: *The `showGlobalVariables` setting was only recently disabled as the default in VSCode as a stop-gap measure due to performance (loading) problems under Windows.*
+
+
+#### Adding SBOM formats, schema versions and variants
 
 The utility uses the [`config.json`](./config.json) file to lookup supported formats and their associated versioned schemas.  To add another SBOM format simply add another entry to the `format` array in the root of the document:
 
@@ -883,43 +847,79 @@ The fields `canonicalName`, `propertyKeyFormat`, `propertyKeyVersion`, and `prop
 - Assure **only one** `schema` object entry for a given format and version has the value `latest` set to `true`.  This latest schema will be used when the SBOM being validated does not have a clear version declared **or** used with the `--force latest` flag.
 - If you have a customized or "variant" version of a schema (with the same format and version values) you wish to use for validation (e.g., a `corporate`or `staging` version with added requirements or for testing an unreleased version), you can create an entry that has the same `version` as another entry, but also declare its `variant` name *(non-empty value)*.  This value can be supplied on the commend line with the `--variant <variant name>` flag to force the validator to use it instead of the default *(empty variant value)*.
 
-### VSCode
 
-This project was developed using VSCode and can be seamlessly loaded as a project.
-
-#### Debugging globals
-
-In order to see global variables while debugging a specific configuration, you can add the `"showGlobalVariables": true` to it within your `launch.json` config. file:
-
-```json
-        {
-            "showGlobalVariables": true,
-            "name": "Test name",
-            "type": "go",
-            "request": "launch",
-            "mode": "debug",
-            "program": "main.go",
-            "args": ["validate", "-i", "test/cyclonedx/cdx-1-3-min-required.json","-t"]
-        },
-```
-
-or add it globally to the `settings.json` file:
-
-1. Use `Command-Shift-P` to open `settings.json`
-2. Select "Preferences: Open Settings (JSON)"
-3. Add the following block at the top level:
-
-```json
-"go.delveConfig": {
-    "showGlobalVariables": true
-},
-```
-
-**Note**: *The `showGlobalVariables` setting was only recently disabled as the default in VSCode as a stop-gap measure due to performance (loading) problems under Windows.*
 
 ---
 
-### Testing
+### Contributing
+
+Contributions are welcome under the Apache 2.0 license.
+
+#### TODO list
+
+The entirety of the code contains the tag "**TODO**" with comments of things that are features or improvements conceived while authoring the base functionality.  Most of these do not have active issues opened form them.
+
+Feel free to "grep" for the "TODO" tag, open an issue and/or submit a draft PR.
+
+#### Priority features
+
+An ad-hoc list of featured "TODOs" geared at making the tool more accessible, extensible and useful especially around "core" commands such as validation.
+
+- **Embedded resources** Look to optionally embed a default `config.json` (format/schema config.), `license.json` (license policy config.) and `custom.json` (experimental, custom validation config.) files.
+- **Merge command** Support merge of two (both validated) SBOMs with de-duplication and configurable. Please note that some method of normalization prior to merge will be necessary.
+- **Remote Schema loading** Support using SBOM schema files that are remotely hosted  (network accessible) from known, trusted source locations (e.g., releases of SPDX, CycloneDX specification schemas). Note that the config file has an existing `url` field per entry that can be used for this purpose.
+- **--orderby** Support ordering of query result sets by comparison of values from a specified field key.
+- **license.json** Document license policy configuration JSON schema structure and how to add entries relative to a CycloneDX `LicenseChoice` object for entries with SPDX IDs and those without.
+- **license.json** Add more widely-recognized licenses (both from SPDX identifier lists as well as those not recognized by the SPDX community).
+- **Go libraries** Replace `go-prettyjson`, `go-multimap` libraries with alternatives that produce maintained releases.
+
+---
+
+### Supporting new SBOM formats and schema versions
+
+The utility uses the [`config.json`](./config.json) file to lookup supported formats and their associated versioned schemas.  To add another SBOM format simply add another entry to the `format` array in the root of the document:
+
+```json
+{
+            "canonicalName": "SPDX",
+            "propertyKeyFormat": "SPDXID",
+            "propertyKeyVersion": "spdxVersion",
+            "propertyValueFormat": "SPDXRef-DOCUMENT",
+            "schemas": [
+                {
+                   ...
+                }
+            ]
+   ...
+}
+```
+
+The value for `propertyKeyFormat` should be the exact name of key field that would appear in the JSON SBOM itself which can be used to confirm it is indeed a format match.  In addition, the corresponding value to match for that key should be declared in the `propertyValueFormat` value.
+
+The fields `canonicalName`, `propertyKeyFormat`, `propertyKeyVersion`, and `propertyValueFormat` are required. The `format` object **MUST** have at least one valid `schema` object. The `schema` object appears as follows:
+
+```json
+{
+  {
+      "version": "SPDX-2.3",
+      "variant": "",  // None
+      "name": "SPDX v2.3",
+      "file": "schema/spdx/2.3/spdx-schema.json",
+      "development": "https://github.com/spdx/spdx-spec/blob/development/v2.3/schemas/spdx-schema.json",
+      "url": "https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3/schemas/spdx-schema.json",
+      "default": true
+  },
+},
+```
+
+- Add a copy of the JSON schema file locally in the project under the structure `resources/schema/<format>/<version>/<schema filename>`.
+  - **Note** If the schema exists under the `resources` directory, it will automatically be embedded in in the executable binary when built using `go build` which includes using the project's `Makefile`.
+- Assure **only one** `schema` object entry for a given format and version has the value `latest` set to `true`.  This latest schema will be used when the SBOM being validated does not have a clear version declared **or** used with the `--force latest` flag.
+- If you have a customized or "variant" version of a schema (with the same format and version values) you wish to use for validation (e.g., a `corporate`or `staging` version with added requirements or for testing an unreleased version), you can create an entry that has the same `version` as another entry, but also declare its `variant` name *(non-empty value)*.  This value can be supplied on the commend line with the `--variant <variant name>` flag to force the validator to use it instead of the default *(empty variant value)*.
+
+---
+
+## Testing
 
 ### SBOM test files
 
@@ -975,6 +975,58 @@ go test github.com/CycloneDX/sbom-utility/cmd -v --args --quiet
 ```
 
 **Note**: Always use the `--args` flag of `go test` as this will assure non-conflict with built-in flags.
+
+---
+
+#### Releasing
+
+##### GitHub
+
+In order to initiate the release workflow, simply go to the release page of the repository:
+
+- https://github.com/CycloneDX/sbom-utility/releases
+
+and click on the `Draft a new release` button.  Follow the instructions to create a new version tag, provide an appropriate release title and description and `publish` the release.  The GitHub release workflow will be triggered automatically.
+
+##### Local
+
+For local development, you may choose to make a release on your machine using the `Makefile` directive `release`:
+
+```bash
+make release
+```
+
+```bash
+ls release
+total 131680
+drwxr-xr-x   8 User1  staff       256 Jan 27 14:43 .
+drwxr-xr-x  27 User1  staff       864 Jan 27 14:43 ..
+-rw-r--r--   1 User1  staff      7121 Jan 27 14:43 config.json
+-rw-r--r--   1 User1  staff      1346 Jan 27 14:43 custom.json
+-rw-r--r--   1 User1  staff     62532 Jan 27 14:43 license.json
+-rwxr-xr-x   1 User1  staff  11336640 Jan 27 14:43 sbom-utility-darwin-amd64
+-rwxr-xr-x   1 User1  staff  11146770 Jan 27 14:43 sbom-utility-darwin-arm64
+-rwxr-xr-x   1 User1  staff  11495647 Jan 27 14:43 sbom-utility-linux-amd64
+-rwxr-xr-x   1 User1  staff  11076025 Jan 27 14:43 sbom-utility-linux-arm64
+-rwxr-xr-x   1 User1  staff  11416576 Jan 27 14:43 sbom-utility-windows-amd64
+-rwxr-xr-x   1 User1  staff  10934272 Jan 27 14:43 sbom-utility-windows-arm64
+...
+```
+
+- *Please also note that the common `*.json` configuration files are also copied to the `release` directory.*
+
+##### Versioning
+
+to produce a release version you can set the following flags and invoke `go build` directly:
+
+```bash
+BINARY=sbom-utility
+VERSION=latest
+LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.Binary=${BINARY}"
+$ go build ${LDFLAGS} -o ${BINARY}
+```
+
+**TODO**: Update the `Makefile's` `release` target to conditionally pull the release version from environment variable values and only uses the hardcoded values as defaults when not found in the runtime build environment.
 
 ---
 
