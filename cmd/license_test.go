@@ -20,6 +20,7 @@ package cmd
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io/fs"
 	"strings"
 	"testing"
@@ -31,8 +32,8 @@ import (
 const (
 	// Test "license list" command
 	TEST_LICENSE_LIST_CDX_1_3            = "test/cyclonedx/cdx-1-3-license-list.json"
-	TEST_LICENSE_LIST_CDX_1_3_NONE_FOUND = "test/cyclonedx/cdx-1-3-license-list-empty.json"
-	TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND = TEST_CUSTOM_CDX_1_4_INVALID_LICENSES_NOT_FOUND
+	TEST_LICENSE_LIST_CDX_1_3_NONE_FOUND = "test/cyclonedx/cdx-1-3-license-list-none-found.json"
+	TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND = "test/cyclonedx/cdx-1-4-license-list-none-found.json"
 
 	TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_ID   = "test/cyclonedx/cdx-1-4-license-policy-invalid-spdx-id.json"
 	TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_NAME = "test/cyclonedx/cdx-1-4-license-policy-invalid-license-name.json"
@@ -42,19 +43,146 @@ const (
 	TEST_LICENSE_LIST_TEXT_CDX_1_4_CUSTOM_POLICY_1 = "test/policy/license-policy-expression-outer-parens.bom.json"
 )
 
+// default ResourceTestInfo struct values
+const (
+	LTI_DEFAULT_LINE_COUNT = -1
+)
+
+type LicenseTestInfo struct {
+	InputFile       string
+	Format          string
+	WhereClause     string
+	ExpectedError   error
+	ResultContains  string
+	ResultLineCount int
+	Summary         bool
+	ValidateJson    bool
+}
+
+// Stringer interface for ResourceTestInfo (just display subset of key values)
+func (lti *LicenseTestInfo) String() string {
+	return fmt.Sprintf("InputFile: `%s`, Format: `%s`, WhereClause: `%s`, Summary: `%v`",
+		lti.InputFile, lti.Format, lti.WhereClause, lti.Summary)
+}
+
+func NewLicenseTestInfo(inputFile string, format string, whereClause string, summary bool, validateJson bool,
+	resultContains string, resultLines int, expectedError error) *LicenseTestInfo {
+
+	var lti = new(LicenseTestInfo)
+	lti.InputFile = inputFile
+	lti.Format = format
+	lti.WhereClause = whereClause
+	lti.ResultContains = resultContains
+	lti.ResultLineCount = resultLines
+	lti.ExpectedError = expectedError
+	lti.Summary = summary
+	lti.ValidateJson = validateJson
+	return lti
+}
+
+func NewLicenseTestInfoBasic(inputFile string, format string, summary bool) *LicenseTestInfo {
+	return NewLicenseTestInfo(inputFile, format, "", summary, true, "", LTI_DEFAULT_LINE_COUNT, nil)
+}
+
 // -------------------------------------------
 // license test helper functions
 // -------------------------------------------
-func innerTestLicenseList(t *testing.T, inputFile string, format string, summary bool) (outputBuffer bytes.Buffer, err error) {
 
+func innerTestLicenseListBuffered(t *testing.T, testInfo *LicenseTestInfo, whereFilters []WhereFilter) (outputBuffer bytes.Buffer, err error) {
 	// Declare an output outputBuffer/outputWriter to use used during tests
 	var outputWriter = bufio.NewWriter(&outputBuffer)
 	// ensure all data is written to buffer before further validation
 	defer outputWriter.Flush()
 
 	// Use a test input SBOM formatted in SPDX
-	utils.GlobalFlags.InputFile = inputFile
-	err = ListLicenses(outputWriter, format, summary)
+	utils.GlobalFlags.InputFile = testInfo.InputFile
+
+	// TODO support passing in []WhereFilter
+	err = ListLicenses(outputWriter, testInfo.Format, testInfo.Summary, whereFilters)
+
+	return
+}
+
+func innerTestLicenseList(t *testing.T, testInfo *LicenseTestInfo) (outputBuffer bytes.Buffer, err error) {
+
+	// Prepare WHERE filters from where clause
+	var whereFilters []WhereFilter = nil
+	if testInfo.WhereClause != "" {
+		whereFilters, err = retrieveWhereFilters(testInfo.WhereClause)
+		if err != nil {
+			getLogger().Error(err)
+			t.Errorf("test failed: %s: detail: %s ", testInfo, err.Error())
+			return
+		}
+	}
+
+	// Perform the test with buffered output
+	outputBuffer, err = innerTestLicenseListBuffered(t, testInfo, whereFilters)
+
+	// TEST: Expected error matches actual error
+	if testInfo.ExpectedError != nil {
+		// NOTE: err = nil will also fail if error was expected
+		if !ErrorTypesMatch(err, testInfo.ExpectedError) {
+			t.Errorf("expected error: %T, actual error: %T", testInfo.ExpectedError, err)
+		}
+		// Always return the expected error
+		return
+	}
+
+	// Unexpected error: return immediately/do not test output/results
+	if err != nil {
+		t.Errorf("test failed: %s: detail: %s ", testInfo, err.Error())
+		return
+	}
+
+	// TEST: Output contains string(s)
+	// TODO: Support []string
+	var outputResults string
+	if testInfo.ResultContains != "" {
+		outputResults = outputBuffer.String()
+		getLogger().Debugf("output: \"%s\"", outputResults)
+
+		if !strings.Contains(outputResults, testInfo.ResultContains) {
+			err = getLogger().Errorf("output did not contain expected value: `%s`", testInfo.ResultContains)
+			t.Errorf("%s: input file: `%s`, where clause: `%s`",
+				err.Error(),
+				testInfo.InputFile,
+				testInfo.WhereClause)
+			return
+		}
+	}
+
+	// TEST: Line Count
+	if testInfo.ResultLineCount != LTI_DEFAULT_LINE_COUNT {
+		if outputResults == "" {
+			outputResults = outputBuffer.String()
+		}
+		outputLineCount := strings.Count(outputResults, "\n")
+		if outputLineCount != testInfo.ResultLineCount {
+			err = getLogger().Errorf("output did not contain expected line count: %v/%v (expected/actual)", testInfo.ResultLineCount, outputLineCount)
+			t.Errorf("%s: input file: `%s`, where clause: `%s`: \n%s",
+				err.Error(),
+				testInfo.InputFile,
+				testInfo.WhereClause,
+				outputResults,
+			)
+			return
+		}
+	}
+
+	// TEST: valid JSON if format JSON
+	// TODO the marshalled bytes is an array of CDX LicenseChoice (struct)
+	// TODO: add general validation for CSV and Markdown formats
+	if testInfo.ValidateJson {
+		if testInfo.Format == FORMAT_JSON {
+			// Use Marshal to test for validity
+			if !utils.IsValidJsonRaw(outputBuffer.Bytes()) {
+				t.Errorf("output did not contain valid JSON")
+				t.Logf("%s", outputBuffer.String())
+				return
+			}
+		}
+	}
 
 	return
 }
@@ -71,7 +199,6 @@ func loadHashCustomPolicyFile(policyFile string) (err error) {
 }
 
 func listOutputContainsLicense(buffer bytes.Buffer, policy string, licenseType string, licenseId string) bool {
-
 	lines := strings.Split(buffer.String(), "\n")
 	getLogger().Tracef("output: %s", lines)
 
@@ -91,15 +218,9 @@ func listOutputContainsLicense(buffer bytes.Buffer, policy string, licenseType s
 // ----------------------------------------
 
 func TestLicenseListInvalidInputFileLoad(t *testing.T) {
-	_, err := innerTestLicenseList(t,
-		TEST_INPUT_FILE_NON_EXISTENT,
-		FORMAT_DEFAULT,
-		false)
-
-	// Assure we return path error
-	if err == nil || !ErrorTypesMatch(err, &fs.PathError{}) {
-		t.Errorf("expected error: %T, actual error: %T", &fs.PathError{}, err)
-	}
+	lti := NewLicenseTestInfoBasic(TEST_INPUT_FILE_NON_EXISTENT, FORMAT_DEFAULT, false)
+	lti.ExpectedError = &fs.PathError{}
+	innerTestLicenseList(t, lti)
 }
 
 // -------------------------------------------
@@ -152,143 +273,99 @@ func TestLicenseSpdxIdFailWhiteSpace(t *testing.T) {
 // Test format unsupported (SPDX)
 // -------------------------------------------
 func TestLicenseListFormatUnsupportedSPDX1(t *testing.T) {
-	_, err := innerTestLicenseList(t,
-		TEST_SPDX_2_2_MIN_REQUIRED,
-		FORMAT_DEFAULT,
-		false)
-
-	if !ErrorTypesMatch(err, &schema.UnsupportedFormatError{}) {
-		getLogger().Error(err)
-		t.Errorf("expected error type: `%T`, actual type: `%T`", &schema.UnsupportedFormatError{}, err)
-	}
+	lti := NewLicenseTestInfoBasic(TEST_SPDX_2_2_MIN_REQUIRED, FORMAT_DEFAULT, false)
+	lti.ExpectedError = &schema.UnsupportedFormatError{}
+	innerTestLicenseList(t, lti)
 }
 
 func TestLicenseListFormatUnsupportedSPDX2(t *testing.T) {
-	_, err := innerTestLicenseList(t,
-		TEST_SPDX_2_2_EXAMPLE_1,
-		FORMAT_DEFAULT,
-		false)
-
-	if !ErrorTypesMatch(err, &schema.UnsupportedFormatError{}) {
-		getLogger().Error(err)
-		t.Errorf("expected error type: `%T`, actual type: `%T`", &schema.UnsupportedFormatError{}, err)
-	}
+	lti := NewLicenseTestInfoBasic(TEST_SPDX_2_2_EXAMPLE_1, FORMAT_DEFAULT, false)
+	lti.ExpectedError = &schema.UnsupportedFormatError{}
+	innerTestLicenseList(t, lti)
 }
+
+//---------------------------
+// Raw output tests
+//---------------------------
 
 // Verify "license list" command finds all licenses regardless of where they
 // are declared in schema (e.g., metadata.component, components list, service list, etc.)
 // Note: this includes licenses in ANY hierarchical nesting of components as well.
-func TestLicenseListJSONCdx13(t *testing.T) {
-	outputBuffer, err := innerTestLicenseList(t,
-		TEST_LICENSE_LIST_CDX_1_3,
-		FORMAT_JSON,
-		false)
-
-	if err != nil {
-		getLogger().Error(err)
-		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
-	}
-
-	// TODO the marshalled bytes is an array of CDX LicenseChoice (struct)
-	// verify actual LicenseChoice JSON (schema) with values matching what we expected
-	if !utils.IsValidJsonRaw(outputBuffer.Bytes()) {
-		t.Errorf("ListLicenses(): did not produce valid JSON output")
-		t.Logf("%s", outputBuffer.String())
-	}
+func TestLicenseListCdx13JsonNoneFound(t *testing.T) {
+	// Test CDX 1.3 document
+	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3_NONE_FOUND, FORMAT_JSON, false)
+	lti.ResultLineCount = 1 // null (valid json)
+	innerTestLicenseList(t, lti)
 }
+func TestLicenseListCdx14JsonNoneFound(t *testing.T) {
+	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND, FORMAT_JSON, false)
+	lti.ResultLineCount = 1 // null (valid json)
+	innerTestLicenseList(t, lti)
+}
+
+func TestLicenseListCdx13CsvNoneFound(t *testing.T) {
+	// Test CDX 1.3 document
+	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3_NONE_FOUND, FORMAT_CSV, false)
+	lti.ResultLineCount = 1 // title only
+	innerTestLicenseList(t, lti)
+}
+
+func TestLicenseListCdx14CsvNoneFound(t *testing.T) {
+	// Test CDX 1.4 document
+	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND, FORMAT_CSV, false)
+	lti.ResultLineCount = 1 // title only
+	innerTestLicenseList(t, lti)
+}
+
+func TestLicenseListCdx13MarkdownNoneFound(t *testing.T) {
+	// Test CDX 1.3 document
+	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3_NONE_FOUND, FORMAT_MARKDOWN, false)
+	lti.ResultLineCount = 2 // title and separator rows
+	innerTestLicenseList(t, lti)
+}
+
+func TestLicenseListCdx14MarkdownNoneFound(t *testing.T) {
+	// Test CDX 1.4 document
+	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND, FORMAT_MARKDOWN, false)
+	lti.ResultLineCount = 2 // title and separator rows
+	innerTestLicenseList(t, lti)
+}
+
+func TestLicenseListCdx13Json(t *testing.T) {
+	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3, FORMAT_JSON, false)
+	lti.ResultLineCount = 210 // array of LicenseChoice JSON objects
+	innerTestLicenseList(t, lti)
+}
+
+//---------------------------
+// Summary flag tests
+//---------------------------
 
 // Assure listing (report) works with summary flag (i.e., format: "txt")
-func TestLicenseListSummaryTextCdx13(t *testing.T) {
-	_, err := innerTestLicenseList(t,
-		TEST_LICENSE_LIST_CDX_1_3,
-		FORMAT_TEXT,
-		true)
-
-	if err != nil {
-		t.Error(err)
-	}
+func TestLicenseListSummaryCdx13Text(t *testing.T) {
+	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3, FORMAT_TEXT, true)
+	lti.ResultLineCount = 20 // title, separator and data rows
+	innerTestLicenseList(t, lti)
 }
 
-func TestLicenseListJSONCdx14NoneFound(t *testing.T) {
-	outputBuffer, err := innerTestLicenseList(t,
-		TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND,
-		FORMAT_JSON,
-		false)
-
-	if err != nil {
-		getLogger().Error(err)
-		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
-	}
-
-	// Note: if no license are found, the "json.Marshal" method(s) will return a value of "null"
-	// which is valid JSON (and not an empty array)
-	if !utils.IsValidJsonRaw(outputBuffer.Bytes()) {
-		t.Errorf("ListLicenses(): did not produce valid JSON output")
-		t.Logf("%s", outputBuffer.String())
-	}
+func TestLicenseListSummaryCdx13Markdown(t *testing.T) {
+	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3, FORMAT_MARKDOWN, true)
+	lti.ResultLineCount = 20 // title, separator and data rows
+	innerTestLicenseList(t, lti)
 }
 
-func TestLicenseListCSVCdxNoneFound(t *testing.T) {
-
-	// Test CDX 1.3 document
-	outputBuffer, err := innerTestLicenseList(t,
-		TEST_LICENSE_LIST_CDX_1_3_NONE_FOUND,
-		FORMAT_CSV,
-		false)
-
-	// TODO Make "no license found" and explicit error type and
-	// test for mismatch instead of string contents
-	if err != nil {
-		if !strings.Contains(err.Error(), MSG_OUTPUT_NO_LICENSES_FOUND) {
-			t.Errorf("ListLicenses(): did not include the message: `%s`", MSG_OUTPUT_NO_LICENSES_FOUND)
-			t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
-			t.Logf("%s", err.Error())
-		}
-	}
-
-	s := outputBuffer.String()
-	if !strings.Contains(s, MSG_OUTPUT_NO_LICENSES_FOUND) {
-		t.Errorf("ListLicenses(): did not include the message: `%s`", MSG_OUTPUT_NO_LICENSES_FOUND)
-		t.Logf("%s", outputBuffer.String())
-	}
-
-	// Test CDX 1.4 document
-	outputBuffer, err = innerTestLicenseList(t,
-		TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND,
-		FORMAT_CSV,
-		false)
-
-	if err != nil {
-		if !strings.Contains(err.Error(), MSG_OUTPUT_NO_LICENSES_FOUND) {
-			t.Errorf("ListLicenses(): did not include the message: `%s`", MSG_OUTPUT_NO_LICENSES_FOUND)
-			t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
-			t.Logf("%s", err.Error())
-		}
-	}
-
-	s = outputBuffer.String()
-	if !strings.Contains(s, MSG_OUTPUT_NO_LICENSES_FOUND) {
-		t.Errorf("ListLicenses(): did not include the message: `%s`", MSG_OUTPUT_NO_LICENSES_FOUND)
-		t.Logf("%s", outputBuffer.String())
-	}
+func TestLicenseListSummaryCdx13Csv(t *testing.T) {
+	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3, FORMAT_CSV, true)
+	lti.ResultLineCount = 19 // title and data rows
+	innerTestLicenseList(t, lti)
 }
 
-func TestLicenseListTextSummaryCdx14NoneFound(t *testing.T) {
-	outputBuffer, err := innerTestLicenseList(t,
-		TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND,
-		FORMAT_JSON,
-		true)
+func TestLicenseListTextSummaryCdx14ContainsUndefined(t *testing.T) {
 
-	if err != nil {
-		t.Errorf("%s: input file: %s", err.Error(), utils.GlobalFlags.InputFile)
-	}
-
-	// verify there is a (warning) message present when no licenses are found
-	s := outputBuffer.String()
-	if !strings.Contains(s, MSG_OUTPUT_NO_LICENSES_FOUND) {
-		t.Errorf("ListLicenses(): did not include the message: `%s`", MSG_OUTPUT_NO_LICENSES_FOUND)
-		t.Logf("%s", outputBuffer.String())
-	}
+	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND, FORMAT_DEFAULT, true)
+	lti.ResultContains = POLICY_UNDEFINED
+	lti.ResultLineCount = 4 // 2 title, 2 with UNDEFINED
+	innerTestLicenseList(t, lti)
 }
 
 func TestLicenseListPolicyCdx14InvalidLicenseId(t *testing.T) {
@@ -296,16 +373,10 @@ func TestLicenseListPolicyCdx14InvalidLicenseId(t *testing.T) {
 	TEST_LICENSE_TYPE := "id"
 	TEST_LICENSE_ID_OR_NAME := "foo"
 
-	output, err := innerTestLicenseList(t,
-		TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_ID,
-		FORMAT_TEXT,
-		true)
+	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_ID, FORMAT_TEXT, true)
+	outputBuffer, _ := innerTestLicenseList(t, lti)
 
-	if err != nil {
-		t.Error(err)
-	}
-
-	matched := listOutputContainsLicense(output, TEST_POLICY, TEST_LICENSE_TYPE, TEST_LICENSE_ID_OR_NAME)
+	matched := listOutputContainsLicense(outputBuffer, TEST_POLICY, TEST_LICENSE_TYPE, TEST_LICENSE_ID_OR_NAME)
 	if !matched {
 		t.Errorf("ListLicenses(): did not include license policy `%s`, type `%s`, name `%s`\n",
 			TEST_POLICY, TEST_LICENSE_TYPE, TEST_LICENSE_ID_OR_NAME)
@@ -317,22 +388,43 @@ func TestLicenseListPolicyCdx14InvalidLicenseName(t *testing.T) {
 	TEST_LICENSE_TYPE := "name"
 	TEST_LICENSE_ID_OR_NAME := "bar"
 
-	output, err := innerTestLicenseList(t,
-		TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_NAME,
-		FORMAT_TEXT,
-		true)
+	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_NAME, FORMAT_TEXT, true)
+	outputBuffer, _ := innerTestLicenseList(t, lti)
 
-	if err != nil {
-		t.Error(err)
-	}
-
-	matched := listOutputContainsLicense(output, TEST_POLICY, TEST_LICENSE_TYPE, TEST_LICENSE_ID_OR_NAME)
+	matched := listOutputContainsLicense(outputBuffer, TEST_POLICY, TEST_LICENSE_TYPE, TEST_LICENSE_ID_OR_NAME)
 	if !matched {
 		t.Errorf("ListLicenses(): did not include license policy `%s`, type `%s`, name `%s`\n",
 			TEST_POLICY, TEST_LICENSE_TYPE, TEST_LICENSE_ID_OR_NAME)
 	}
 }
 
+//---------------------------
+// Where filter tests
+//---------------------------
+func TestLicenseListSummaryTextCdx13WhereUsageNeedsReview(t *testing.T) {
+	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3, FORMAT_TEXT, true)
+	lti.WhereClause = "usage-policy=needs-review"
+	lti.ResultLineCount = 8 // title and data rows
+	innerTestLicenseList(t, lti)
+}
+
+func TestLicenseListSummaryTextCdx13WhereUsageUndefined(t *testing.T) {
+	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3, FORMAT_TEXT, true)
+	lti.WhereClause = "usage-policy=UNDEFINED"
+	lti.ResultLineCount = 4 // title and data rows
+	innerTestLicenseList(t, lti)
+}
+
+func TestLicenseListSummaryTextCdx13WhereLicenseTypeName(t *testing.T) {
+	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3, FORMAT_TEXT, true)
+	lti.WhereClause = "license-type=name"
+	lti.ResultLineCount = 8 // title and data rows
+	innerTestLicenseList(t, lti)
+}
+
+//---------------------------
+// Custom policy file tests
+//---------------------------
 func TestLicenseListPolicyCdx14CustomPolicy(t *testing.T) {
 	TEST_POLICY := POLICY_ALLOW
 	TEST_LICENSE_TYPE := "expression"
@@ -341,30 +433,15 @@ func TestLicenseListPolicyCdx14CustomPolicy(t *testing.T) {
 	// Load a custom policy file ONLY for the specific unit test
 	loadHashCustomPolicyFile(TEST_CUSTOM_POLICY_1)
 
-	output, err := innerTestLicenseList(t,
-		TEST_LICENSE_LIST_TEXT_CDX_1_4_CUSTOM_POLICY_1,
-		FORMAT_TEXT,
-		true)
+	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_TEXT_CDX_1_4_CUSTOM_POLICY_1, FORMAT_TEXT, true)
+	outputBuffer, _ := innerTestLicenseList(t, lti)
 
-	// MUST!!! restore default policy file to default for all other tests
-	loadHashCustomPolicyFile(utils.GlobalFlags.ConfigLicensePolicyFile)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	matched := listOutputContainsLicense(output, TEST_POLICY, TEST_LICENSE_TYPE, TEST_LICENSE_ID_OR_NAME)
+	matched := listOutputContainsLicense(outputBuffer, TEST_POLICY, TEST_LICENSE_TYPE, TEST_LICENSE_ID_OR_NAME)
 	if !matched {
 		t.Errorf("LicenseList(): did not include license policy `%s`, type `%s`, name `%s`\n",
 			TEST_POLICY, TEST_LICENSE_TYPE, TEST_LICENSE_ID_OR_NAME)
 	}
-}
 
-// Make sure we can List all components in an SBOM, including those in hierarchical compositions
-// TODO: Actually verify one or more of the hierarchical comps. appear in list results
-// func TestValidateCustomCompositionHierarchicalComponentList(t *testing.T) {
-// 	innerCustomValidateError(t,
-// 		TEST_CUSTOM_CDX_1_4_COMPOSITION_HIERARCHICAL_COMPONENTS,
-// 		SCHEMA_VARIANT_NONE,
-// 		nil)
-// }
+	// !!! IMPORTANT !!! restore default policy file to default for all other tests
+	loadHashCustomPolicyFile(utils.GlobalFlags.ConfigLicensePolicyFile)
+}

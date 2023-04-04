@@ -48,7 +48,7 @@ type CommandFlags struct {
 	OutputSbomFormat string
 
 	// License flags
-	//LicensePolicyConfigFile string
+	LicenseFlags LicenseCommandFlags
 
 	// Validate (local) flags
 	ForcedJsonSchemaFile    string
@@ -63,6 +63,13 @@ type CommandFlags struct {
 
 	// Log indent
 	LogOutputIndentCallstack bool
+}
+
+type LicenseCommandFlags struct {
+	Summary   bool
+	Policy    string
+	NoLicense bool
+	NoPolicy  bool
 }
 
 type CustomValidationFlags struct {

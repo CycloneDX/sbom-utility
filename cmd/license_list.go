@@ -36,26 +36,54 @@ import (
 // TODO: Support a new --sort <column> flag
 const (
 	FLAG_LICENSE_SUMMARY = "summary"
-	FLAG_LICENSE_POLICY  = "policy"
+	FLAG_LICENSE_EXCLUDE = "exclude"
+	FLAG_LICENSE_POLICY  = "policy" // policy-match, policy-filter, etc.
 )
 
 // License list command flag help messages
 const (
 	FLAG_LICENSE_LIST_OUTPUT_FORMAT_HELP = "format output using the specified format type"
 	FLAG_LICENSE_LIST_SUMMARY_HELP       = "summarize licenses and component references in table format (see --format flag help for supported types)"
-	FLAG_LICENSE_LIST_POLICY_HELP        = "include policy evaluation in summary listing"
+	FLAG_LICENSE_LIST_EXCLUDE_HELP       = "exclude policy column from summary listing"
+	FLAG_LICENSE_LIST_POLICY_HELP        = "filter license summary by usage policy (i.e., allow|deny|needs-review|UNDEFINED)"
 )
 
 // License list command informational messages
 const (
-	MSG_OUTPUT_NO_LICENSES_FOUND  = "[WARN] no licenses found in SBOM document"
-	MSG_OUTPUT_NO_SCHEMAS_FOUND   = "[WARN] no schemas found in configuration (i.e., \"config.json\")"
-	MSG_OUTPUT_NO_RESOURCES_FOUND = "[WARN] no matching resources found for query"
+	MSG_OUTPUT_NO_LICENSES_FOUND            = "No licenses found in BOM document"
+	MSG_OUTPUT_NO_LICENSES_ONLY_NOASSERTION = "No valid licenses found in BOM document (only licenses marked NOASSERTION)"
+	MSG_OUTPUT_NO_SCHEMAS_FOUND             = "[WARN] no schemas found in configuration (i.e., \"config.json\")"
+	MSG_OUTPUT_NO_RESOURCES_FOUND           = "[WARN] no matching resources found for query"
 )
 
+//"Type", "ID/Name/Expression", "Component(s)", "BOM ref.", "Document location"
+// filter keys
 const (
-	LICENSE_LIST_TITLE_ROW_SEPARATOR = "-"
+	LICENSE_FILTER_KEY_USAGE_POLICY  = "usage-policy"
+	LICENSE_FILTER_KEY_LICENSE_TYPE  = "license-type"
+	LICENSE_FILTER_KEY_LICENSE       = "license"
+	LICENSE_FILTER_KEY_RESOURCE_NAME = "resource-name"
+	LICENSE_FILTER_KEY_BOM_REF       = "bom-ref"
+	LICENSE_FILTER_KEY_BOM_LOCATION  = "bom-location"
 )
+
+var LICENSE_SUMMARY_TITLES = []string{
+	LICENSE_FILTER_KEY_USAGE_POLICY,
+	LICENSE_FILTER_KEY_LICENSE_TYPE,
+	LICENSE_FILTER_KEY_LICENSE,
+	LICENSE_FILTER_KEY_RESOURCE_NAME,
+	LICENSE_FILTER_KEY_BOM_REF,
+	LICENSE_FILTER_KEY_BOM_LOCATION,
+}
+
+var VALID_LICENSE_FILTER_KEYS = []string{
+	LICENSE_FILTER_KEY_USAGE_POLICY,
+	LICENSE_FILTER_KEY_LICENSE_TYPE,
+	LICENSE_FILTER_KEY_LICENSE,
+	LICENSE_FILTER_KEY_RESOURCE_NAME,
+	LICENSE_FILTER_KEY_BOM_REF,
+	LICENSE_FILTER_KEY_BOM_LOCATION,
+}
 
 // Command help formatting
 var LICENSE_LIST_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
@@ -66,8 +94,6 @@ var LICENSE_LIST_SUMMARY_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_SUMMAR
 	" (default: txt)"
 
 // Title row names for formatted lists (reports)
-var LICENSE_LIST_TITLE_POLICY = []string{"Policy"}
-var LICENSE_LIST_TITLES_SUMMARY = []string{"Type", "ID/Name/Expression", "Component(s)", "BOM ref.", "Document location"}
 var LICENSE_LIST_TITLES_LICENSE_CHOICE = []string{"License.Id", "License.Name", "License.Url", "Expression", "License.Text.ContentType", "License.Text.Encoding", "License.Text.Content"}
 
 // WARNING: Cobra will not recognize a subcommand if its `command.Use` is not a single
@@ -75,19 +101,34 @@ var LICENSE_LIST_TITLES_LICENSE_CHOICE = []string{"License.Id", "License.Name", 
 func NewCommandList() *cobra.Command {
 	var command = new(cobra.Command)
 	command.Use = CMD_USAGE_LICENSE_LIST
-	command.Short = "List licenses found in SBOM input file"
-	command.Long = "List licenses found in SBOM input file"
+	command.Short = "List licenses found in the BOM input file"
+	command.Long = "List licenses and associated policies found in the BOM input file"
 	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", "",
 		FLAG_LICENSE_LIST_OUTPUT_FORMAT_HELP+
 			LICENSE_LIST_SUPPORTED_FORMATS+
 			LICENSE_LIST_SUMMARY_SUPPORTED_FORMATS)
-	command.Flags().Bool(FLAG_LICENSE_SUMMARY, false, FLAG_LICENSE_LIST_SUMMARY_HELP)
-	command.Flags().Bool(FLAG_LICENSE_POLICY, false, FLAG_LICENSE_LIST_POLICY_HELP)
+	command.Flags().BoolVarP(
+		&utils.GlobalFlags.LicenseFlags.Summary,
+		FLAG_LICENSE_SUMMARY, "", false,
+		FLAG_LICENSE_LIST_SUMMARY_HELP)
+	command.Flags().StringVarP(
+		&utils.GlobalFlags.LicenseFlags.Policy,
+		FLAG_LICENSE_POLICY, "", "",
+		FLAG_LICENSE_LIST_POLICY_HELP)
+	command.Flags().StringP(FLAG_REPORT_WHERE, "", "", FLAG_REPORT_WHERE_HELP)
 	command.RunE = listCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		if len(args) != 0 {
 			return getLogger().Errorf("Too many arguments provided: %v", args)
 		}
+
+		// Validate command line flag combinations
+		// TODO: document this flag relationship more clearly
+		bSummary := utils.GlobalFlags.LicenseFlags.Summary
+		if utils.GlobalFlags.LicenseFlags.Policy != "" && !bSummary {
+			return getLogger().Errorf("`%s` flag not valid without `%s` flag", FLAG_LICENSE_POLICY, FLAG_LICENSE_SUMMARY)
+		}
+
 		// Test for required flags (parameters)
 		err = preRunTestForInputFile(cmd, args)
 		return
@@ -95,6 +136,7 @@ func NewCommandList() *cobra.Command {
 	return (command)
 }
 
+// Assure all errors are logged
 func processLicenseListResults(err error) {
 	if err != nil {
 		getLogger().Error(err)
@@ -102,10 +144,13 @@ func processLicenseListResults(err error) {
 }
 
 // NOTE: parm. licenseKeys is actually a string slice
-func isEmptyLicenseList(licenseKeys []interface{}) (empty bool) {
-	if len(licenseKeys) == 0 ||
-		(len(licenseKeys) == 1 && licenseKeys[0].(string) == LICENSE_NONE) {
+func checkLicenseListEmptyOrNoAssertionOnly(licenseKeys []interface{}) (empty bool) {
+	if len(licenseKeys) == 0 {
 		empty = true
+		getLogger().Warningf("%s\n", MSG_OUTPUT_NO_LICENSES_FOUND)
+	} else if len(licenseKeys) == 1 && licenseKeys[0].(string) == LICENSE_NONE {
+		empty = true
+		getLogger().Warningf("%s\n", MSG_OUTPUT_NO_LICENSES_ONLY_NOASSERTION)
 	}
 	return
 }
@@ -117,32 +162,29 @@ func listCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	getLogger().Enter(args)
 	defer getLogger().Exit()
 
-	// Validate command line flag combinations
-	bSummary, _ := cmd.Flags().GetBool(FLAG_LICENSE_SUMMARY)
-	bPolicy, _ := cmd.Flags().GetBool(FLAG_LICENSE_POLICY)
-
-	// TODO: document this flag relationship more clearly
-	if bPolicy && !bSummary {
-		return getLogger().Errorf("`%s` flag not valid without `%s` flag", FLAG_LICENSE_POLICY, FLAG_LICENSE_SUMMARY)
-	}
-
 	// Create output writer
 	outputFile, writer, err := createOutputFile(utils.GlobalFlags.OutputFile)
 
-	if err == nil {
-		err = ListLicenses(writer, utils.GlobalFlags.OutputFormat, bSummary)
-	}
+	// use function closure to assure consistent error output based upon error type
+	defer func() {
+		// always close the output file
+		if outputFile != nil {
+			err = outputFile.Close()
+			getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.OutputFile)
+		}
+	}()
 
-	// always close the output file
-	if outputFile != nil {
-		outputFile.Close()
-		getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.OutputFile)
+	// process filters supplied on the --where command flag
+	whereFilters, err := processWhereFlag(cmd)
+
+	if err == nil {
+		err = ListLicenses(writer, utils.GlobalFlags.OutputFormat, utils.GlobalFlags.LicenseFlags.Summary, whereFilters)
 	}
 
 	return
 }
 
-func ListLicenses(output io.Writer, format string, summary bool) (err error) {
+func ListLicenses(output io.Writer, format string, summary bool, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -161,9 +203,9 @@ func ListLicenses(output io.Writer, format string, summary bool) (err error) {
 		return
 	}
 
-	// Hash all licenses within input file
+	// Find an hash all licenses within input BOM file
 	getLogger().Infof("Scanning document for licenses...")
-	err = findDocumentLicenses(document)
+	err = loadDocumentLicenses(document, whereFilters)
 
 	if err != nil {
 		return
@@ -176,7 +218,7 @@ func ListLicenses(output io.Writer, format string, summary bool) (err error) {
 			format = FORMAT_TEXT
 		}
 
-		// TODO surface errors returned from "DisplayXXX" functionss
+		// TODO surface errors returned from "DisplayXXX" functions
 		getLogger().Infof("Outputting summary (`%s` format)...", format)
 		switch format {
 		case FORMAT_TEXT:
@@ -232,7 +274,9 @@ func DisplayLicenseListJson(output io.Writer) {
 
 		for _, iInfo := range arrLicenseInfo {
 			licenseInfo = iInfo.(LicenseInfo)
-			lc = append(lc, licenseInfo.LicenseChoice)
+			if licenseInfo.LicenseChoiceTypeValue != LC_TYPE_INVALID {
+				lc = append(lc, licenseInfo.LicenseChoice)
+			}
 		}
 	}
 	json, _ := log.FormatInterfaceAsJson(lc)
@@ -253,44 +297,41 @@ func DisplayLicenseListCSV(output io.Writer) (err error) {
 	defer w.Flush()
 
 	// Emit title row
-	titles, _ := createTitleRows(nil, LICENSE_LIST_TITLES_LICENSE_CHOICE)
-	if err = w.Write(titles); err != nil {
-		return getLogger().Errorf("error writing to output (%v): %s", titles, err)
+	if err = w.Write(LICENSE_LIST_TITLES_LICENSE_CHOICE); err != nil {
+		return getLogger().Errorf("error writing to output (%v): %s", LICENSE_LIST_TITLES_LICENSE_CHOICE, err)
 	}
 
 	// Emit warning (confirmation) message if no licenses found in document
 	licenseKeys := licenseMap.KeySet()
 
-	if isEmptyLicenseList(licenseKeys) {
-		currentRow = append(currentRow, MSG_OUTPUT_NO_LICENSES_FOUND)
-		if err = w.Write(currentRow); err != nil {
-			return getLogger().Errorf("error writing to output (%v): %s", currentRow, err)
-		}
-		return fmt.Errorf(currentRow[0])
-	}
+	// Emit no license or assertion-only warning into output
+	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
 
 	for _, licenseName := range licenseKeys {
 		arrLicenseInfo, _ := licenseMap.Get(licenseName)
 
 		for _, iInfo := range arrLicenseInfo {
-			licenseInfo = iInfo.(LicenseInfo)
-			lc := licenseInfo.LicenseChoice
-
 			// reset line after each iteration
 			currentRow = nil
+			licenseInfo = iInfo.(LicenseInfo)
 
-			// Each row will contain every field of a CDX LicenseChoice object
-			currentRow = append(currentRow,
-				lc.License.Id,
-				lc.License.Name,
-				lc.License.Url,
-				lc.Expression,
-				lc.License.Text.ContentType,
-				lc.License.Text.Encoding,
-				lc.License.Text.Content)
+			if licenseInfo.LicenseChoiceTypeValue != LC_TYPE_INVALID {
 
-			if errWrite := w.Write(currentRow); errWrite != nil {
-				return getLogger().Errorf("error writing to output (%v): %s", currentRow, err)
+				lc := licenseInfo.LicenseChoice
+
+				// Each row will contain every field of a CDX LicenseChoice object
+				currentRow = append(currentRow,
+					lc.License.Id,
+					lc.License.Name,
+					lc.License.Url,
+					lc.Expression,
+					lc.License.Text.ContentType,
+					lc.License.Text.Encoding,
+					lc.License.Text.Content)
+
+				if errWrite := w.Write(currentRow); errWrite != nil {
+					return getLogger().Errorf("error writing to output (%v): %s", currentRow, err)
+				}
 			}
 		}
 	}
@@ -305,22 +346,18 @@ func DisplayLicenseListMarkdown(output io.Writer) {
 	var licenseInfo LicenseInfo
 
 	// create title row
-	titles, _ := createTitleRows(LICENSE_LIST_TITLES_LICENSE_CHOICE, nil)
-	titleRow := createMarkdownRow(titles)
+	titleRow := createMarkdownRow(LICENSE_LIST_TITLES_LICENSE_CHOICE)
 	fmt.Fprintf(output, "%s\n", titleRow)
 
-	alignments := createMarkdownColumnAlignment(titles)
+	alignments := createMarkdownColumnAlignment(LICENSE_LIST_TITLES_LICENSE_CHOICE)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(output, "%s\n", alignmentRow)
 
 	// Display a warning messing in the actual output and return (short-circuit)
 	licenseKeys := licenseMap.KeySet()
 
-	// Emit no license warning into output
-	if isEmptyLicenseList(licenseKeys) {
-		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_LICENSES_FOUND)
-		return
-	}
+	// Emit no license or assertion-only warning into output
+	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
 
 	var line []string
 	var lineRow string
@@ -330,30 +367,32 @@ func DisplayLicenseListMarkdown(output io.Writer) {
 		arrLicenseInfo, _ := licenseMap.Get(licenseName)
 
 		for _, iInfo := range arrLicenseInfo {
-			licenseInfo = iInfo.(LicenseInfo)
-			lc := licenseInfo.LicenseChoice
-
 			// Each row will contain every field of a CDX LicenseChoice object
 			line = nil
-			content = lc.License.Text.Content
+			licenseInfo = iInfo.(LicenseInfo)
 
-			// Truncate encoded content
-			if content != "" {
-				content = fmt.Sprintf("%s (truncated from %v) ...", content[0:8], len(content))
+			if licenseInfo.LicenseChoiceTypeValue != LC_TYPE_INVALID {
+				lc := licenseInfo.LicenseChoice
+				content = lc.License.Text.Content
+
+				// Truncate encoded content
+				if content != "" {
+					content = fmt.Sprintf("%s (truncated from %v) ...", content[0:8], len(content))
+				}
+
+				// Format line and write to output
+				line = append(line,
+					lc.License.Id,
+					lc.License.Name,
+					lc.License.Url,
+					lc.Expression,
+					lc.License.Text.ContentType,
+					lc.License.Text.Encoding,
+					content)
+
+				lineRow = createMarkdownRow(line)
+				fmt.Fprintf(output, "%s\n", lineRow)
 			}
-
-			// Format line and write to output
-			line = append(line,
-				lc.License.Id,
-				lc.License.Name,
-				lc.License.Url,
-				lc.Expression,
-				lc.License.Text.ContentType,
-				lc.License.Text.Encoding,
-				content)
-
-			lineRow = createMarkdownRow(line)
-			fmt.Fprintf(output, "%s\n", lineRow)
 
 		}
 	}
@@ -377,20 +416,17 @@ func DisplayLicenseListSummaryText(output io.Writer) {
 	var licenseInfo LicenseInfo
 
 	// create title row and underline row from slices of optional and compulsory titles
-	titles, underlines := createTitleRows(LICENSE_LIST_TITLE_POLICY, LICENSE_LIST_TITLES_SUMMARY)
+	underlines := createTitleTextSeparators(LICENSE_SUMMARY_TITLES)
 
 	// Add tabs between column titles for the tabWRiter
-	fmt.Fprintf(w, "%s\n", strings.Join(titles, "\t"))
+	fmt.Fprintf(w, "%s\n", strings.Join(LICENSE_SUMMARY_TITLES, "\t"))
 	fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
 	// Display a warning missing in the actual output and return (short-circuit)
 	licenseKeys := licenseMap.KeySet()
 
-	// Emit no license warning into output
-	if isEmptyLicenseList(licenseKeys) {
-		fmt.Fprintf(w, "%s\n", MSG_OUTPUT_NO_LICENSES_FOUND)
-		return
-	}
+	// Emit no license or assertion-only warning into output
+	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
 
 	sort.Slice(licenseKeys, func(i, j int) bool {
 		return licenseKeys[i].(string) < licenseKeys[j].(string)
@@ -404,12 +440,13 @@ func DisplayLicenseListSummaryText(output io.Writer) {
 
 			// Format line and write to output
 			fmt.Fprintf(w, "%s\t%v\t%s\t%s\t%s\t%s\n",
-				licenseInfo.Policy.UsagePolicy,
-				LC_TYPE_NAMES[licenseInfo.LicenseChoiceType],
+				licenseInfo.UsagePolicy,
+				licenseInfo.LicenseChoiceType,
 				licenseName,
-				licenseInfo.EntityName,
-				licenseInfo.EntityRef,
-				CDX_LICENSE_LOCATION_NAMES[licenseInfo.LicenseLocation])
+				licenseInfo.ResourceName,
+				licenseInfo.BomRef,
+				licenseInfo.BomLocation,
+			)
 		}
 	}
 }
@@ -429,26 +466,18 @@ func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
 	var currentRow []string
 	var licenseInfo LicenseInfo
 
-	// create title row and underline row from slices of optional and compulsory titles
-	titles, _ := createTitleRows(LICENSE_LIST_TITLE_POLICY, LICENSE_LIST_TITLES_SUMMARY)
-
+	// create title row and underline row
 	// TODO: Make policy column optional
-	if errWrite := w.Write(titles); errWrite != nil {
-		err = getLogger().Errorf("error writing to output (%v): %s", titles, errWrite)
+	if errWrite := w.Write(LICENSE_SUMMARY_TITLES); errWrite != nil {
+		err = getLogger().Errorf("error writing to output (%v): %s", LICENSE_SUMMARY_TITLES, errWrite)
 		return
 	}
 
 	// retrieve all hashed licenses (keys) found in the document and verify we have ones to process
 	licenseKeys := licenseMap.KeySet()
 
-	// Emit no license warning into output
-	if isEmptyLicenseList(licenseKeys) {
-		currentRow := []string{MSG_OUTPUT_NO_LICENSES_FOUND}
-		if err = w.Write(currentRow); err != nil {
-			return getLogger().Errorf("error writing to output (%v): %s", currentRow, err)
-		}
-		return fmt.Errorf(currentRow[0])
-	}
+	// Emit no license or assertion-only warning into output
+	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
 
 	// output the each license entry as a row
 	for _, licenseName := range licenseKeys {
@@ -471,11 +500,12 @@ func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
 			// which is automatically done by the CSV writer
 			currentRow = append(currentRow,
 				licenseInfo.Policy.UsagePolicy,
-				LC_TYPE_NAMES[licenseInfo.LicenseChoiceType],
+				licenseInfo.LicenseChoiceType, //LC_TYPE_NAMES[licenseInfo.LicenseChoiceTypeValue],
 				licenseName.(string),
-				licenseInfo.EntityName,
-				licenseInfo.EntityRef,
-				CDX_LICENSE_LOCATION_NAMES[licenseInfo.LicenseLocation])
+				licenseInfo.ResourceName,
+				licenseInfo.BomRef,
+				licenseInfo.BomLocation, //CDX_LICENSE_LOCATION_NAMES[licenseInfo.BomLocationValue]
+			)
 
 			if errWrite := w.Write(currentRow); errWrite != nil {
 				err = getLogger().Errorf("csvWriter.Write(): %w", errWrite)
@@ -497,22 +527,18 @@ func DisplayLicenseListSummaryMarkdown(output io.Writer) {
 	var licenseInfo LicenseInfo
 
 	// create title row
-	titles, _ := createTitleRows(LICENSE_LIST_TITLE_POLICY, LICENSE_LIST_TITLES_SUMMARY)
-	titleRow := createMarkdownRow(titles)
+	titleRow := createMarkdownRow(LICENSE_SUMMARY_TITLES)
 	fmt.Fprintf(output, "%s\n", titleRow)
 
-	alignments := createMarkdownColumnAlignment(titles)
+	alignments := createMarkdownColumnAlignment(LICENSE_SUMMARY_TITLES)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(output, "%s\n", alignmentRow)
 
 	// Display a warning messing in the actual output and return (short-circuit)
 	licenseKeys := licenseMap.KeySet()
 
-	// Emit no license warning into output
-	if isEmptyLicenseList(licenseKeys) {
-		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_LICENSES_FOUND)
-		return
-	}
+	// Emit no license or assertion-only warning into output
+	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
 
 	var line []string
 	var lineRow string
@@ -529,11 +555,12 @@ func DisplayLicenseListSummaryMarkdown(output io.Writer) {
 			// Format line and write to output
 			line = append(line,
 				licenseInfo.Policy.UsagePolicy,
-				LC_TYPE_NAMES[licenseInfo.LicenseChoiceType],
+				licenseInfo.LicenseChoiceType, // LC_TYPE_NAMES[licenseInfo.LicenseChoiceTypeValue],
 				licenseName.(string),
-				licenseInfo.EntityName,
-				licenseInfo.EntityRef,
-				CDX_LICENSE_LOCATION_NAMES[licenseInfo.LicenseLocation])
+				licenseInfo.ResourceName,
+				licenseInfo.BomRef,
+				licenseInfo.BomLocation, // CDX_LICENSE_LOCATION_NAMES[licenseInfo.BomLocationValue]
+			)
 
 			lineRow = createMarkdownRow(line)
 			fmt.Fprintf(output, "%s\n", lineRow)

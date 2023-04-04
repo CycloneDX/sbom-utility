@@ -7,8 +7,8 @@
     "timestamp": "2022-07-07T21:29:32Z",
     "tools": [
       {
-        "vendor": "IBM",
-        "name": "IBM Cloud Continuous Delivery - Code Risk Analyzer",
+        "vendor": "Foo",
+        "name": "Bar",
         "version": "0.1.21"
       }
     ],

@@ -38,7 +38,7 @@ const (
 
 // default ResourceTestInfo struct values
 const (
-	VTI_DEFAULT_LINE_COUNT = -1
+	RTI_DEFAULT_LINE_COUNT = -1
 )
 
 type ResourceTestInfo struct {
@@ -72,7 +72,7 @@ func NewResourceTestInfo(inputFile string, format string, resourceType string,
 }
 
 func NewResourceTestInfoBasic(inputFile string, format string, resourceType string, expectedError error) *ResourceTestInfo {
-	return NewResourceTestInfo(inputFile, format, resourceType, "", "", VTI_DEFAULT_LINE_COUNT, expectedError)
+	return NewResourceTestInfo(inputFile, format, resourceType, "", "", RTI_DEFAULT_LINE_COUNT, expectedError)
 }
 
 // -------------------------------------------
@@ -112,7 +112,7 @@ func innerTestResourceList(t *testing.T, testInfo *ResourceTestInfo) (outputBuff
 	if testInfo.ExpectedError != nil {
 		// NOTE: err = nil will also fail if error was expected
 		if !ErrorTypesMatch(err, testInfo.ExpectedError) {
-			t.Errorf("expected error: %T, actual error: %T", &fs.PathError{}, err)
+			t.Errorf("expected error: %T, actual error: %T", testInfo.ExpectedError, err)
 		}
 		// Always return the expected error
 		return
@@ -121,6 +121,7 @@ func innerTestResourceList(t *testing.T, testInfo *ResourceTestInfo) (outputBuff
 	// Unexpected error: return immediately/do not test output/results
 	if err != nil {
 		t.Errorf("test failed: %s: detail: %s ", testInfo, err.Error())
+		return
 	}
 
 	// TEST: Output contains string(s)
@@ -141,7 +142,7 @@ func innerTestResourceList(t *testing.T, testInfo *ResourceTestInfo) (outputBuff
 	}
 
 	// TEST: Line Count
-	if testInfo.ResultLineCount != VTI_DEFAULT_LINE_COUNT {
+	if testInfo.ResultLineCount != RTI_DEFAULT_LINE_COUNT {
 		if outputResults == "" {
 			outputResults = outputBuffer.String()
 		}
