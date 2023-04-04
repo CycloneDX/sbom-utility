@@ -528,7 +528,7 @@ component  Library A  1.0.0    pkg:lib/libraryA@1.0.0
 You can verify which formats and schemas are available for validation by using the `schema` command:
 
 ```bash
-./sbom-utility schema
+./sbom-utility schema list
 ```
 
 ```bash
@@ -545,6 +545,8 @@ SPDX v2.3                     SPDX       SPDX-2.3  (latest)       schema/spdx/2.
 SPDX v2.2.2                   SPDX       SPDX-2.2  (latest)       schema/spdx/2.2.2/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.2/schemas/spdx-schema.json
 SPDX v2.2.1                   SPDX       SPDX-2.2  (2.2.1)        schema/spdx/2.2.1/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json
 ```
+
+**Note** The command will default to the `list` subcommand if omitted.
 
 #### Adding schemas
 
