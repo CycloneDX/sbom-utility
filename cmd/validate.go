@@ -40,7 +40,7 @@ const (
 const (
 	FLAG_SCHEMA_FORCE          = "force"
 	FLAG_SCHEMA_VARIANT        = "variant"
-	FLAG_CUSTOM_VALIDATION     = "custom"
+	FLAG_CUSTOM_VALIDATION     = "custom" // TODO
 	MSG_SCHEMA_FORCE           = "force specified schema file for validation; overrides inferred schema"
 	MSG_SCHEMA_VARIANT         = "select named schema variant (e.g., \"strict\"); variant must be declared in configuration file (i.e., \"config.json\")"
 	MSG_FLAG_CUSTOM_VALIDATION = "perform custom validation using custom configuration settings (i.e., \"custom.json\")"
@@ -60,8 +60,8 @@ func NewCommandValidate() *cobra.Command {
 	// NOTE: `RunE` function takes precedent over `Run` (anonymous) function if both provided
 	var command = new(cobra.Command)
 	command.Use = CMD_USAGE_VALIDATE
-	command.Short = "Validate input file against its declared SBOM schema"
-	command.Long = "Validate input file against its declared SBOM schema, if detectable and supported."
+	command.Short = "Validate input file against its declared BOM schema"
+	command.Long = "Validate input file against its declared BOM schema, if detectable and supported."
 	command.RunE = validateCmdImpl
 
 	command.PreRunE = func(cmd *cobra.Command, args []string) error {

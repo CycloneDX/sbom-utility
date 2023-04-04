@@ -48,12 +48,12 @@ const (
 // WARNING!!! The ".Use" field of a Cobra command MUST have the first word be the actual command
 // otherwise, the command will NOT be found by the Cobra framework. This is poor code assumption is NOT documented.
 const (
-	CMD_USAGE_VALIDATE           = CMD_VALIDATE + " -i input_file" + " [--force schema_file]"
+	CMD_USAGE_VALIDATE           = CMD_VALIDATE + " -i input_file" + " [--variant variant_name]" + " [ --force schema_file]"
 	CMD_USAGE_QUERY              = CMD_QUERY + " -i input_filename [--select * | field1[,fieldN]] [--from [key1[.keyN]] [--where key=regex[,...]]"
-	CMD_USAGE_LICENSE_LIST       = SUBCOMMAND_LICENSE_LIST + " -i input_file [[--summary] [--policy allow|deny|needs-review|UNDEFINED]] [--format json|txt|csv|md]"
+	CMD_USAGE_LICENSE_LIST       = SUBCOMMAND_LICENSE_LIST + " -i input_file [[--summary] [--format json|txt|csv|md]"
 	CMD_USAGE_LICENSE_POLICY     = SUBCOMMAND_LICENSE_POLICY + " -i input_file [--format json|txt|csv|md]"
-	CMD_USAGE_RESOURCE_LIST      = CMD_RESOURCE + " -i input_file [--type component|service] [--where key=regex[,...]] [--format json|txt|csv|md]"
-	CMD_USAGE_SCHEMA_LIST        = CMD_SCHEMA + " [--format json|txt|csv|md] [-o output_filename]"
+	CMD_USAGE_RESOURCE_LIST      = CMD_RESOURCE + " -i input_file [--type component|service] [--where key=regex[,...]] [--format json|txt|csv|md] [-o output_filename]"
+	CMD_USAGE_SCHEMA_LIST        = CMD_SCHEMA + " [--format txt|csv|md]"
 	CMD_USAGE_VULNERABILITY_LIST = CMD_VULNERABILITY + " " + SUBCOMMAND_VULNERABILITY_LIST + " -i input_file [--format json|txt|csv|md]"
 )
 

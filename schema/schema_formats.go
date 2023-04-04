@@ -35,7 +35,7 @@ const (
 )
 
 const (
-	SCHEMA_VARIANT_LATEST = "latest"
+	SCHEMA_VARIANT_LATEST = "(latest)"
 )
 
 const (
