@@ -97,7 +97,7 @@ Currently, the utility supports the following commands:
 
 #### Exit codes
 
-All commands, such as `validate`, also return a numeric exit code (i.e., a POSIX exit code)  for use in automated processing where `0` indicates success and a non-zero value indicates failure of some kind designated by the number.
+All commands, such as `validate`, also return a numeric exit code (i.e., a POSIX exit code) for use in automated processing where `0` indicates success and a non-zero value indicates failure of some kind designated by the number.
 
 For example, in bash, you can use the following command after running the utility to see the last exit code:
 
@@ -713,21 +713,31 @@ A specific command-level help listing is also available. For example, you can ac
 
 ---
 
-#### Functional priorities
-
-The utility additionally prioritizes commands that help provide insight into contents of the SBOM to search for and report on missing (i.e., completeness) or specific data requirements (e.g.,   organization or customer-specific requirements).  In general, the goal of these prioritized commands is to support data verification for many of the primary SBOM use cases as identified by the CycloneDX community (see https://cyclonedx.org/use-cases/).  Functional development has focused on those use cases that verify inventory (resource identity), legal compliance (e.g., license), and security analysis (e.g., vulnerability) which are foundational to any SBOM.
-
----
-
 ### Design considerations
+
+#### Memory safety
 
 The utility itself is written in `Go` to advantage the language's built-in typing enforcement and memory safe features and its ability to be compiled for a wide range of target platforms and architectures.
 
+#### Consistent output
+
 The utility also is designed to produce output formats (e.g., JSON) and handle exit codes consistently to make it immediately useful standalone or as part of automated Continuous Integration (CI) tool chains for downstream use or inspection.
+
+#### Security and integrity focus
 
 Further commands and reports are planned that prioritize use cases that enable greater insight and analysis of the legal, security and compliance data captured in the SBOM such as component **provenance** and **signage** (e.g., verifying resource identities by hashes or fingerprints).
 
-In the future, we envision additional kinds of SBOMs (e.g., Hardware, Machine Learning (ML), Function-as-a-Service (Serverless), etc.) with each again having different data requirements and levels of maturity which will increase the need for domain-specific validation.  Specifically, this utility intends to support the work of the [OWASP Software Component Verification Standard (SCVS)](https://owasp.org/www-project-software-component-verification-standard/) which is defining a BOM Maturity Model (BMM).
+In addition, inclusion of **Continuous Integration and Delivery (CI/CD)** or "build integrity" information around the BOM component is anticipated as part of the CycloneDX Formulation work which will require features for workflow insights.
+
+#### Functional priorities
+
+The utility additionally prioritizes commands that help provide insight into contents of the BOM to search for and report on missing (i.e., completeness) or specific data requirements (e.g., organization or customer-specific requirements).
+
+In general, the goal of these prioritized commands is to support data verification for many of the primary BOM use cases as identified by the CycloneDX community (see https://cyclonedx.org/use-cases/).  Functional development has focused on those use cases that verify inventory (resource identity), legal compliance (e.g., license), and security analysis (e.g., vulnerability) which are foundational to any SBOM.
+
+#### Support all BOM formats
+
+In the future, we envision support for additional kinds of BOMs (e.g., Hardware (HBOM), Machine Learning (MLBOM), etc.) with each again having different data requirements and levels of maturity which will increase the need for domain-specific validation.  Specifically, this utility intends to support the work of the [OWASP Software Component Verification Standard (SCVS)](https://owasp.org/www-project-software-component-verification-standard/) which is defining a BOM Maturity Model (BMM).
 
 ---
 

@@ -66,7 +66,7 @@ var SCHEMA_LIST_TITLES = []string{
 
 func NewCommandSchema() *cobra.Command {
 	var command = new(cobra.Command)
-	command.Use = "schema"
+	command.Use = CMD_USAGE_SCHEMA_LIST // "schema"
 	command.Short = "View supported SBOM schemas"
 	command.Long = fmt.Sprintf("View built-in SBOM schemas supported by the utility. The default command produces a list based upon `%s`.", DEFAULT_SCHEMA_CONFIG)
 	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
@@ -78,9 +78,15 @@ func NewCommandSchema() *cobra.Command {
 			return getLogger().Errorf("Too many arguments provided: %v", args)
 		}
 
-		// Make sure subcommand is known
-		if !preRunTestForSubcommand(command, VALID_SUBCOMMANDS_SCHEMA, args[0]) {
-			return getLogger().Errorf("Subcommand provided is not valid: `%v`", args[0])
+		// Make sure subcommand is known/valid
+		if len(args) == 1 {
+			if !preRunTestForSubcommand(command, VALID_SUBCOMMANDS_SCHEMA, args[0]) {
+				return getLogger().Errorf("Subcommand provided is not valid: `%v`", args[0])
+			}
+		}
+
+		if len(args) == 0 {
+			getLogger().Tracef("No subcommands provided; defaulting to: `%s` subcommand", SUBCOMMAND_SCHEMA_LIST)
 		}
 		return
 	}
