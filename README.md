@@ -901,7 +901,7 @@ The will produce a binary named `sbom-utility` with version set to `latest` in t
 
 ```bash
 $ ls
--rwxr-xr-x   1 Matt  staff  11501122 Jan 24 08:29 sbom-utility
+-rwxr-xr-x   1 User1  staff  11501122 Jan 24 08:29 sbom-utility
 ```
 
 ```bash
@@ -932,15 +932,15 @@ This project was developed using VSCode and can be seamlessly loaded as a projec
 In order to see global variables while debugging a specific configuration, you can add the `"showGlobalVariables": true` to it within your `launch.json` config. file:
 
 ```json
-        {
-            "showGlobalVariables": true,
-            "name": "Test name",
-            "type": "go",
-            "request": "launch",
-            "mode": "debug",
-            "program": "main.go",
-            "args": ["validate", "-i", "test/cyclonedx/cdx-1-3-min-required.json","-t"]
-        },
+{
+    "showGlobalVariables": true,
+    "name": "Test name",
+    "type": "go",
+    "request": "launch",
+    "mode": "debug",
+    "program": "main.go",
+    "args": ["validate", "-i", "test/cyclonedx/cdx-1-3-min-required.json","-t"]
+},
 ```
 
 or add it globally to the `settings.json` file:
@@ -1031,28 +1031,30 @@ The utility uses the [`config.json`](./config.json) file to lookup supported for
 
 ```json
 {
-            "canonicalName": "SPDX",
-            "propertyKeyFormat": "SPDXID",
-            "propertyKeyVersion": "spdxVersion",
-            "propertyValueFormat": "SPDXRef-DOCUMENT",
-            "schemas": [
-                {
-                   ...
-                }
-            ]
+  "canonicalName": "SPDX",
+  "propertyKeyFormat": "SPDXID",
+  "propertyKeyVersion": "spdxVersion",
+  "propertyValueFormat": "SPDXRef-DOCUMENT",
+  "schemas": [
+      {
+          ...
+      }
+  ]
    ...
 }
 ```
 
 The value for `propertyKeyFormat` should be the exact name of key field that would appear in the JSON SBOM itself which can be used to confirm it is indeed a format match.  In addition, the corresponding value to match for that key should be declared in the `propertyValueFormat` value.
 
-The fields `canonicalName`, `propertyKeyFormat`, `propertyKeyVersion`, and `propertyValueFormat` are required. The `format` object **MUST** have at least one valid `schema` object. The `schema` object appears as follows:
+The fields `canonicalName`, `propertyKeyFormat`, `propertyKeyVersion`, and `propertyValueFormat` are required. The `format` object **MUST** have at least one valid `schema` object.
+
+An example `schema` object for the canonical SPDX v2.3 (default, no variant) schema appears as follows:
 
 ```json
 {
   {
       "version": "SPDX-2.3",
-      "variant": "",  // None
+      "variant": "",
       "name": "SPDX v2.3",
       "file": "schema/spdx/2.3/spdx-schema.json",
       "development": "https://github.com/spdx/spdx-spec/blob/development/v2.3/schemas/spdx-schema.json",
