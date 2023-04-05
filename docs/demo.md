@@ -616,7 +616,6 @@ needs-review  name          UFL           ACME Application  pkg:app/sample@1.0.0
 
 ---
 
-
 ### `vulnerability` command
 
 This command will extract basic vulnerability report data from an SBOM that has a "vulnerabilities" list or from a standalone VEX in CycloneDX format. It includes the ability to filter reports data by applying regex to any of the named column data.

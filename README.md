@@ -265,29 +265,6 @@ Use the `--format` flag on the `license list` or `license policy` subcommands to
 - **list** with `--summary` flag : txt (default), csv, md
 - **policy**:  txt (default), csv, md
 
-##### Output flag
-
-Use the `-o <filename>` (or its long form `--output-file`) flag to send the (formatted) output to a file.
-
-For example, output a license summary for an SBOM to a file named `output.txt`:
-
-```bash
-./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json -o output.txt --summary
-```
-
-```bash
-[INFO] Loading license policy config file: `license.json`...
-[INFO] Creating output file: `output.txt`...
-[INFO] Attempting to load and unmarshal file `test/cyclonedx/cdx-1-3-license-list.json`...
-[INFO] Successfully unmarshalled data from: `test/cyclonedx/cdx-1-3-license-list.json`
-[INFO] Determining file's SBOM format and version...
-[INFO] Determined SBOM format, version (variant): `CycloneDX`, `1.3` (latest)
-[INFO] Matching SBOM schema (for validation): schema/cyclonedx/1.3/bom-1.3.schema.json
-[INFO] Scanning document for licenses...
-[INFO] Outputting summary (`txt` format)...
-[INFO] Closed output file: `output.txt`
-```
-
 ---
 
 
@@ -343,17 +320,12 @@ This subcommand will emit a list of all licenses found in and SBOM (defaults to 
 
 Use the `--summary` flag on the `license list` command to produce a summary report in `txt` (default) format as well as policy determination based upon the `license.json` declarations.
 
-##### Summary policy column
+###### Example: list summary
 
-The values for the `policy` column are derived from the `license.json` policy configuration file which the utility looks for in the execution root directory.
-
-- A policy of `UNDEFINED` indicates that `license.json` provided no entry that matched the declared license (`id` or `name`) in the SBOM.
-- License expressions (e.g., `(MIT or GPL-2.0)`) with one term resolving to `UNDEFINED` and the the other term having a concrete policy will resolve to the "optimistic" policy for `OR` expressions and the "pessimistic" policy for `AND` expressions.  In addition, a warning of this resolution is emitted.
-
-###### Text format example (default)
+This example shows the default text output from using the summary flag:
 
 ```bash
-./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary
+./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --quiet
 ```
 
 ```bash
@@ -379,10 +351,17 @@ UNDEFINED     invalid       NOASSERTION                           Bar           
 needs-review  name          UFL                                   ACME Application   pkg:app/sample@1.0.0                metadata.component
 ```
 
-###### CSV format example
+- **Note**
+  - **Usage policy** column values are derived from the `license.json` policy configuration file.
+    - A `usage policy` value of `UNDEFINED` indicates that `license.json` provided no entry that matched the declared license (`id` or `name`) in the SBOM.
+  - **License expressions** (e.g., `(MIT or GPL-2.0)`) with one term resolving to `UNDEFINED` and the the other term having a concrete policy will resolve to the "optimistic" policy for `OR` expressions and the "pessimistic" policy for `AND` expressions.  In addition, a warning of this resolution is emitted.
+
+###### Example: list summary in CSV format
+
+This example shows the using the summary flag, but using the format flag to produce CSV output:
 
 ```bash
-./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --quiet --format csv
+./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --quiet --format csv --quiet
 ```
 
 ```bash
@@ -407,14 +386,14 @@ needs-review,id,GPL-2.0-only,Library C,pkg:lib/libraryC@1.0.0,components
 allow,name,BSD,Library J,pkg:lib/libraryJ@1.0.0,components
 ```
 
-#### Where flag filtering
+###### Example: list summary with where filter
 
 The list command results can be filtered using the `--where` flag using the column names in the report. These include `usage-policy`, `license-type`, `license`, `resource-name`, `bom-ref` and `bom-location`.
 
 The following example shows filtering of component licenses using the `license-type` column where the license was described as a `name` value:
 
 ```bash
-./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --where license-type=name
+./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --where license-type=name --quiet
 ```
 
 ```bash
@@ -431,7 +410,7 @@ needs-review  name          UFL       ACME Application  pkg:app/sample@1.0.0    
 In another example, the list is filtered by the `usage-policy` where the value is `needs-review`:
 
 ```bash
-./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --where usage-policy=needs-review
+./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --where usage-policy=needs-review --quiet
 ```
 
 ```bash
@@ -449,10 +428,10 @@ needs-review  name          UFL           ACME Application  pkg:app/sample@1.0.0
 
 #### `policy` subcommand
 
-To view a report listing the contents of the current policy file (i.e., `license.json`) which contains an encoding of known software and data licenses by SPDX ID and license family along with a configurable usage policy (i.e., "allow", "deny" or "needs-review") use:
+To view a report listing the contents of the current policy file (i.e., [`license.json`](https://github.com/CycloneDX/sbom-utility/blob/main/license.json)) which contains an encoding of known software and data licenses by SPDX ID and license family along with a configurable usage policy (i.e., `"allow"`, `"deny"` or `"needs-review"`) use:
 
 ```bash
-./sbom-utility license policy
+./sbom-utility license policy --quiet
 ```
 
 ```bash
