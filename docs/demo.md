@@ -56,13 +56,15 @@ SPDX v2.2.1                   SPDX       SPDX-2.2  2.2.1        schema/spdx/2.2.
 
 ## Persistent flags and codes
 
-These demo examples show flags that apply to any command that produces a list or report as well as exit codes from all commands.
+The following examples show flags that apply to any command that produces a list or report as well as exit codes from all commands.
 
 ### Quiet flag
 
-By default, the utility outputs informational and processing text as well as any results of the command to `stdout`.  If you wish to only see the command results (JSON) or report (tables) you can run any command in "quiet mode" by simply supplying the `-q` or `--quiet` flag.
+By default, the utility outputs informational and processing text as well as any results of the command to `stdout`.  If you wish to only see the command results (JSON) or report (tables) you can run any command in "quiet mode" by simply supplying the `--quiet` or its short-form `-q` flag.
 
-Use the `--quiet` or `-q` flag on the `schema` command to turn off or "quiet" any informational output to the display:
+#### Example: quiet flag
+
+This example shows the `--quiet` flag being used on the `schema` command to turn off or "quiet" any informational output so that only the result table is displayed.
 
 ```bash
 ./sbom-utility schema --quiet
@@ -95,8 +97,9 @@ All `list` commands support the `--format` flag with the following values:
 
 Some commands, which can output lists of JSON objects, also support JSON format using the `json` value.
 
+#### Example: format flag
 
-Use the `--format` flag on the `schema` command to output in markdown:
+This example uses the `--format` flag on the `schema` command to output in markdown:
 
 ```bash
 ./sbom-utility schema --format md -q
@@ -123,7 +126,9 @@ Use the `--format` flag on the `schema` command to output in markdown:
 
 All commands support the `-o <filename>` (or its long form `--output-file`) flag to send formatted output to a file.
 
-Use the `schema` command to output to a file named `output.txt` with format set to `csv`:
+#### Example: output flag
+
+This example uses the `schema` command to output to a file named `output.txt` with format set to `csv`:
 
 ```bash
 ./sbom-utility schema --format csv -o output.csv
@@ -157,17 +162,21 @@ SPDX v2.2.1,SPDX,SPDX-2.2,2.2.1,schema/spdx/2.2.1/spdx-schema.json,https://raw.g
 
 All commands return a numeric exit code (i.e., a POSIX exit code) for use in automated processing where `0` indicates success and a non-zero value indicates failure of some kind designated by the number.
 
-The SBOM Utility always returns one of these 3 codes to accomodate logic in BASH (shell) scripting:
+The SBOM Utility always returns one of these 3 codes to accommodate logic in BASH (shell) scripting:
 
 - `0`= no error (valid)
 - `1`= application error
 - `2`= validation error
 
-Let's check the last example's exit code:
+#### Example: exit code
+
+This example uses the `schema` list command to verify its exit code:
 
 ```bash
-./sbom-utility schema --format csv
+./sbom-utility schema list
 ```
+
+verify the exit code:
 
 ```bash
 echo $?
@@ -175,7 +184,7 @@ echo $?
 
 which returns `0` (zero) or "no error":
 
-```
+```bash
 0
 ```
 
@@ -435,7 +444,7 @@ component  Library NoLicense  1.0.0    pkg:lib/libraryNoLicense@1.0.0
 
 - **Note**: Using the `--where type=component` flag is equivalent to using the `--type component` flag which is provided as a convenience.
 
-##### Example: `list` resouces with matching `name` using the `--where` flag
+##### Example: `list` resources with matching `name` using the `--where` flag
 
 This example uses the `where` filter on the `name` field. In this case we supply an exact "startswith" regex. for the `name` filter.
 
@@ -443,7 +452,7 @@ This example uses the `where` filter on the `name` field. In this case we supply
 ./sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --where "name=Library A" --quiet
 ```
 
-```
+```bash
 type       name       version  bom-ref
 ----       ----       -------  -------
 component  Library A  1.0.0    pkg:lib/libraryA@1.0.0
@@ -456,7 +465,6 @@ component  Library A  1.0.0    pkg:lib/libraryA@1.0.0
 ### `license` command
 
 This command is used to aggregate and summarize software, hardware and data license information included in the SBOM. It also displays license usage policies for resources based upon concluded by SPDX license identifier, license family or logical license expressions as defined in he current policy file (i.e., `license.json`).
-
 
 #### `policy` subcommand
 

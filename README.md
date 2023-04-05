@@ -2,17 +2,30 @@
 
 # sbom-utility
 
-This utility is designed to be an API platform used primarily to **validate CycloneDX or SPDX SBOMs** (encoded in JSON format) against versioned JSON schemas as published by their respective organizations or custom variants provided by organizations that have stricter requirements.
+This utility was designed to be an API platform used initially to **validate CycloneDX or SPDX Software Bills-of-Materials (BOMs)** against versioned JSON schemas as published by their communities or custom variant schemas provided by companies and organizations that have stricter requirements.
 
-However, the utility seeks to provide a rich set of commands in support of [BOM use cases](#cyclonedx-use-cases) for insight, in the form of filterable reports, into key BOM data elements reflected in the names of their respective commands. The full list of supported commands, with links to their full descriptions, syntax and example:
+However, the utility now includes a rich set of commands, listed below, that can be used to create filterable reports and extract data from BOMs that enables verification of information that supports [BOM use cases](#cyclonedx-use-cases) and end-user requirements.
 
-- [license](#license) with [list](#list-subcommand) and [policy](#policy-subcommand) subcommands
-- [query](#query)
-- [resource](#resource)
-- [schema](#schema)
-- [vulnerability](#vulnerability)
-- [validate](#validate)
-- [help](#help)
+## Command Overview
+
+The utility supports the following commands:
+
+- **[license](#license)**
+  - **[policy](#policy-subcommand)** - lists software and data license information and associated license usage policies as defined in the configurable `license.json` file.
+  - **[list](#list-subcommand)** produce listings or summarized reports of license data contained in a BOM along with license "usage policy" determinations using the policies declared in the `license.json` file.
+
+- **[query](#query)** produce data listings or custom reports from BOM data using SQL-style query statements (i.e., `--select <data fields> --from <BOM object> --where <field=regex>`).
+
+- **[resource](#resource)** produce filterable listings or summarized reports of resources, including components and services, from BOM data.
+
+- **[schema](#schema)** lists the "built-in" set of schema formats, versions and variants supported by the `validation` command.
+  - Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file (see the `schema` command's [adding schemas](#adding-schemas) section).
+
+- **[validate](#validate)** enables validation of SBOMs against their declared format (e.g., SPDX, CycloneDX) and version (e.g., "2.2", "1.4", etc.) using their JSON schemas.
+  - Derivative, "customized" schemas can be referenced using the `--variant` flag (e.g., industry or company-specific schemas).
+  - You can override an BOM's default version using the `--force` flag (e.g., test an SBOM output against a newer specification version).
+
+- **[vulnerability](#vulnerability)** produce filterable listings or summarized reports of vulnerabilities from BOM data (i.e., CycloneDX Vulnerability Exploitability eXchange (VEX)) data or independently stored CycloneDX Vulnerability Disclosure Report (VDR) data.
 
 ---
 
@@ -21,9 +34,19 @@ However, the utility seeks to provide a rich set of commands in support of [BOM 
 - [Installation](#installation)
 - [Running](#running)
 - [Commands](#commands)
-  - [Overview](#overview)
-  - [Exit codes](#exit-codes)
-  - [Quiet mode](#quiet-mode)
+  - [Persistent flags and codes](#persistent-flags-and-codes)
+    - [quiet flag](#quiet-flag): with `--quiet` or `-q`
+    - [format flag](#format-flag): with `--format`
+    - [output flag](#output-flag): with `--output` or `-o`
+    - [exit codes](#exit-codes): `0` == no error, `1` == app.
+  - [license](#license)
+    - [list](#list-subcommand) subcommand
+    - [policy](#policy-subcommand) subcommand
+  - [query](#query)
+  - [resource](#resource)
+  - [schema](#schema)
+  - [vulnerability](#vulnerability)
+  - [validate](#validate)
 - [Design considerations](#design-considerations)
 - [Development](#development)
   - [Prerequisites](#prerequisites)
@@ -47,7 +70,7 @@ However, the utility seeks to provide a rich set of commands in support of [BOM 
 
 Download and decompress the correct archive file (i.e., `.tar` for Unix/Linux systems and `.zip` for Windows) for your target system's architecture and operating system from the releases page within this repository.
 
-- https://github.com/CycloneDX/sbom-utility/releases
+- [https://github.com/CycloneDX/sbom-utility/releases](https://github.com/CycloneDX/sbom-utility/releases)
 
 The archive will contain the following files:
 
@@ -74,47 +97,153 @@ On MacOS, the utility is not a registered Apple application and may warn you tha
 
 ---
 
-### Commands
+## Commands
 
-#### Overview
+This section contains full descriptions of each supported command along with examples of how to use them with their respective flags.
 
-Currently, the utility supports the following commands:
+- [license](#license)
+  - [list](#list-subcommand) subcommand
+  - [policy](#policy-subcommand) subcommand
+- [query](#query)
+- [resource](#resource)
+- [schema](#schema)
+- [vulnerability](#vulnerability)
+- [validate](#validate)
+- [help](#help)
 
-- **[license](#license)** used to produce listings or summarized reports on license data contained in a BOM.  Reports can be produced in many human-readable formats (e.g., text, csv, markdown) or extracted listings in `json` format. Furthermore, the license command is able to apply configurable "usage policies" for the licenses identified in the reports.
+### Persistent flags and codes
 
-- **[query](#query)** is geared towards an SBOM format-aware (CycloneDX-only for now), SQL-style query that could be used to generate customized reports/views into the SBOM data for any use case when other resource-specific commands are not provided or fall short.
+The following examples show flags that apply to any command that produces a list or report as well as exit codes from all commands.
 
-- **[resource](#resource)** provides views on the SBOM's inventory or resources including components and services with the ability to filter by common, required fields such as name, version and bom-ref using regular expressions (regex).
+#### Quiet flag
 
-- **[schema](#schema)** lists the "built-in" set of schema formats, versions and variants supported by the `validation` command.
-  - Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file (see the `schema` command's [adding schemas](#adding-schemas) section).
+By default, the utility outputs informational and processing text as well as any results of the command to `stdout`.  If you wish to only see the command results (JSON) or report (tables) you can run any command in "quiet mode" by simply supplying the `--quiet` or its short-form `-q` flag.
 
-- **[validate](#validate)** enables validation of SBOMs against their declared format (e.g., SPDX, CycloneDX) and version (e.g., "2.2", "1.4", etc.) using their JSON schemas.
-  - Derivative, "customized" schemas can be referenced using the `--variant` flag (e.g., industry or company-specific schemas).
-  - You can override an BOM's default version using the `--force` flag (e.g., test an SBOM output against a newer specification version).
+##### Example: quiet flag
 
-- **[vulnerability](#vulnerability)** command is able to produce a filterable summary of vulnerabilities (containing high-level information of interest) from an SBOM's or independent CycloneDX Vulnerability Exploitability eXchange (VEX) file's declared vulnerability list.
+This example shows the `--quiet` flag being used on the `schema` command to turn off or "quiet" any informational output so that only the result table is displayed.
+
+```bash
+./sbom-utility schema --quiet
+```
+
+```bash
+Name                          Format     Version   Variant      File (local)                                     URL (remote)
+----                          ------     -------   -------      ------------                                     ------------
+CycloneDX v1.5 (development)  CycloneDX  1.5       development  schema/cyclonedx/1.5/bom-1.5-dev.schema.json     https://raw.githubusercontent.com/CycloneDX/specification/v1.5-dev/schema/bom-1.5.schema.json
+CycloneDX v1.4 (custom)       CycloneDX  1.4       custom       schema/test/bom-1.4-custom.schema.json
+CycloneDX v1.4                CycloneDX  1.4       (latest)     schema/cyclonedx/1.4/bom-1.4.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json
+CycloneDX v1.3 (strict)       CycloneDX  1.3       strict       schema/cyclonedx/1.3/bom-1.3-strict.schema.json  https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3-strict.schema.json
+CycloneDX v1.3 (custom)       CycloneDX  1.3       custom       schema/test/bom-1.3-custom.schema.json
+CycloneDX v1.3                CycloneDX  1.3       (latest)     schema/cyclonedx/1.3/bom-1.3.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3.schema.json
+CycloneDX v1.2 (strict)       CycloneDX  1.2       strict       schema/cyclonedx/1.2/bom-1.2-strict.schema.json  https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2-strict.schema.json
+CycloneDX v1.2                CycloneDX  1.2       (latest)     schema/cyclonedx/1.2/bom-1.2.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2.schema.json
+SPDX v2.3.1 (development)     SPDX       SPDX-2.3  development  schema/spdx/2.3.1/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3.1/schemas/spdx-schema.json
+SPDX v2.3                     SPDX       SPDX-2.3  (latest)     schema/spdx/2.3/spdx-schema.json                 https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3/schemas/spdx-schema.json
+SPDX v2.2.2                   SPDX       SPDX-2.2  (latest)     schema/spdx/2.2.2/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.2/schemas/spdx-schema.json
+SPDX v2.2.1                   SPDX       SPDX-2.2  2.2.1        schema/spdx/2.2.1/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json
+```
+
+#### Format flag
+
+All `list` commands support the `--format` flag with the following values:
+
+- `txt`: text (tabbed tables)
+- `csv`: Comma Separated Value (CSV), e.g., for spreadsheets
+- `md`: Markdown, e.g., for GitHub
+
+Some commands, which can output lists of JSON objects, also support JSON format using the `json` value.
+
+##### Example: format flag
+
+This example uses the `--format` flag on the `schema` command to output in markdown:
+
+```bash
+./sbom-utility schema --format md -q
+```
+
+```md
+|Name|Format|Version|Variant|File (local)|URL (remote)|
+|:--|:--|:--|:--|:--|:--|
+|CycloneDX v1.5 (development)|CycloneDX|1.5|development|schema/cyclonedx/1.5/bom-1.5-dev.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/v1.5-dev/schema/bom-1.5.schema.json|
+|CycloneDX v1.4 (custom)|CycloneDX|1.4|custom|schema/test/bom-1.4-custom.schema.json||
+|CycloneDX v1.4|CycloneDX|1.4|(latest)|schema/cyclonedx/1.4/bom-1.4.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json|
+|CycloneDX v1.3 (strict)|CycloneDX|1.3|strict|schema/cyclonedx/1.3/bom-1.3-strict.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3-strict.schema.json|
+|CycloneDX v1.3 (custom)|CycloneDX|1.3|custom|schema/test/bom-1.3-custom.schema.json||
+|CycloneDX v1.3|CycloneDX|1.3|(latest)|schema/cyclonedx/1.3/bom-1.3.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3.schema.json|
+|CycloneDX v1.2 (strict)|CycloneDX|1.2|strict|schema/cyclonedx/1.2/bom-1.2-strict.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2-strict.schema.json|
+|CycloneDX v1.2|CycloneDX|1.2|(latest)|schema/cyclonedx/1.2/bom-1.2.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2.schema.json|
+|SPDX v2.3.1 (development)|SPDX|SPDX-2.3|development|schema/spdx/2.3.1/spdx-schema.json|https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3.1/schemas/spdx-schema.json|
+|SPDX v2.3|SPDX|SPDX-2.3|(latest)|schema/spdx/2.3/spdx-schema.json|https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3/schemas/spdx-schema.json|
+|SPDX v2.2.2|SPDX|SPDX-2.2|(latest)|schema/spdx/2.2.2/spdx-schema.json|https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.2/schemas/spdx-schema.json|
+|SPDX v2.2.1|SPDX|SPDX-2.2|2.2.1|schema/spdx/2.2.1/spdx-schema.json|https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json|
+```
+
+#### Output flag
+
+All commands support the `-o <filename>` (or its long form `--output-file`) flag to send formatted output to a file.
+
+##### Example: output flag
+
+This example uses the `schema` command to output to a file named `output.txt` with format set to `csv`:
+
+```bash
+./sbom-utility schema --format csv -o output.csv
+```
+
+Verify the contents of `output.csv` contain CSV formatted output:
+
+```bash
+cat output.csv
+```
+
+```csv
+Name,Format,Version,Variant,File (local),URL (remote)
+CycloneDX v1.5 (development),CycloneDX,1.5,development,schema/cyclonedx/1.5/bom-1.5-dev.schema.json,https://raw.githubusercontent.com/CycloneDX/specification/v1.5-dev/schema/bom-1.5.schema.json
+CycloneDX v1.4 (custom),CycloneDX,1.4,custom,schema/test/bom-1.4-custom.schema.json,
+CycloneDX v1.4,CycloneDX,1.4,(latest),schema/cyclonedx/1.4/bom-1.4.schema.json,https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json
+CycloneDX v1.3 (strict),CycloneDX,1.3,strict,schema/cyclonedx/1.3/bom-1.3-strict.schema.json,https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3-strict.schema.json
+CycloneDX v1.3 (custom),CycloneDX,1.3,custom,schema/test/bom-1.3-custom.schema.json,
+CycloneDX v1.3,CycloneDX,1.3,(latest),schema/cyclonedx/1.3/bom-1.3.schema.json,https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3.schema.json
+CycloneDX v1.2 (strict),CycloneDX,1.2,strict,schema/cyclonedx/1.2/bom-1.2-strict.schema.json,https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2-strict.schema.json
+CycloneDX v1.2,CycloneDX,1.2,(latest),schema/cyclonedx/1.2/bom-1.2.schema.json,https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2.schema.json
+SPDX v2.3.1 (development),SPDX,SPDX-2.3,development,schema/spdx/2.3.1/spdx-schema.json,https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3.1/schemas/spdx-schema.json
+SPDX v2.3,SPDX,SPDX-2.3,(latest),schema/spdx/2.3/spdx-schema.json,https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3/schemas/spdx-schema.json
+SPDX v2.2.2,SPDX,SPDX-2.2,(latest),schema/spdx/2.2.2/spdx-schema.json,https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.2/schemas/spdx-schema.json
+SPDX v2.2.1,SPDX,SPDX-2.2,2.2.1,schema/spdx/2.2.1/spdx-schema.json,https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json
+```
+
+- You can verify that `output.csv` loads within a spreadsheet app like MS Excel.
 
 #### Exit codes
 
-All commands, such as `validate`, also return a numeric exit code (i.e., a POSIX exit code) for use in automated processing where `0` indicates success and a non-zero value indicates failure of some kind designated by the number.
+All commands return a numeric exit code (i.e., a POSIX exit code) for use in automated processing where `0` indicates success and a non-zero value indicates failure of some kind designated by the number.
 
-For example, in bash, you can use the following command after running the utility to see the last exit code:
-
-```bash
-$ echo $?
-2
-```
-
-which returns one of the following exit code values:
+The SBOM Utility always returns one of these 3 codes to accommodate logic in BASH (shell) scripting:
 
 - `0`= no error (valid)
 - `1`= application error
 - `2`= validation error
 
-#### Quiet mode
+##### Example: exit code
 
-By default, the utility outputs informational and processing text as well as any results of the command to `stdout`.  If you wish to only see the command results (JSON) or report (tables) you can run any command in "quiet mode" by simply supplying the `-q` or `--quiet` flag.
+This example uses the `schema` list command to verify its exit code:
+
+```bash
+./sbom-utility schema list
+```
+
+verify the exit code:
+
+```bash
+echo $?
+```
+
+which returns `0` (zero) or "no error":
+
+```bash
+0
+```
 
 ---
 
@@ -160,6 +289,7 @@ For example, output a license summary for an SBOM to a file named `output.txt`:
 ```
 
 ---
+
 
 #### `list` subcommand
 
