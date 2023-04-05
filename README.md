@@ -446,9 +446,9 @@ allow         Apache           Apache-2.0            Apache License 2.0    APPRO
 ...
 ```
 
-##### Notes
-
-- The policies the utility uses are defined in the `license.json` file which can be edited to add your organization's specific allow or deny-style license policies and notations.
+- **Note**:
+  - Currently, the default `license.json` file does not contain an entry for the complete SPDX 3.2 license templates. An issue [12](https://github.com/CycloneDX/sbom-utility/issues/12) is open to add parity.
+  - Annotations can be defined within the `license.json` file and one or more assigned each license entry.
 
 ---
 
@@ -749,8 +749,37 @@ If you run the sample command above, you would see several "custom" schema error
 exit status 2
 ```
 
-Specifically, the output shows a first schema error indicating the failing JSON object; in this case, the CycloneDX property object with a `name` field with the value  `"urn:example.com:disclaimer"`. The second error indicates the property's `value` field SHOULD have had a constant value of `"This SBOM is current as of the date it was generated and is subject to change."` (as was required by the custom schema's regex). However, it was found to have only a partial match of `"This SBOM is current as of the date it was generated."`.
+##### Why validation failed
 
+The output shows a first schema error indicating the failing JSON object; in this case,
+- the CycloneDX `metadata.properties` field, which is a list of `property` objects.
+- Found that a property with a `name` field with the value  `"urn:example.com:disclaimer"` had an incorrect `value`.
+  - the `value` field SHOULD have had a constant value of `"This SBOM is current as of the date it was generated and is subject to change."` (as was required by the custom schema's regex).
+  - However, it was found to have only a partial match of `"This SBOM is current as of the date it was generated."`.
+
+##### Details of the schema error
+
+Use the `--debug` or `-d` flag to see all schema error details:
+
+```bash
+./sbom-utility validate -i test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json --variant custom -d
+```
+
+The details include the full context of the failing `metadata.properties` object which also includes a `"urn:example.com:classification"` property:
+
+```bash
+	3. Type: [number_all_of], Field: [metadata.properties], Description: [Must validate all the schemas (allOf)]
+	Failing object: [[
+	  {
+	    "name": "urn:example.com:disclaimer",
+	    "value": "This SBOM is current as of the date it was generated."
+	  },
+	  {
+	    "name": "urn:example.com:classification",
+	    "value": "This SBOM is Confidential Information. Do not distribute."
+	  }
+	]]
+```
 ---
 
 ### Vulnerability

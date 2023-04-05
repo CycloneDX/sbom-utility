@@ -198,11 +198,11 @@ This command will parse standardized SBOMs and validate it against its declared 
 
 Validate SPDX's "example 1" SBOM example (i.e., [`examples/spdx/example1/example1.json`](https://github.com/CycloneDX/sbom-utility/blob/main/examples/spdx/example1/example1.json)) by passing in its relative filename on the `--input` or `-i` flag:
 
-```
+```bash
 ./sbom-utility validate --input-file examples/spdx/example1/example1.json
 ```
 
-```
+```bash
 Welcome to the sbom-utility! Version `latest` (sbom-utility) (darwin/arm64)
 ===========================================================================
 [INFO] Loading license policy config file: `license.json`...
@@ -248,7 +248,7 @@ Validate the CycloneDX "juice shop" SBOM example (i.e., [`examples/cyclonedx/BOM
 echo $?
 ```
 
-```
+```bash
 0  // no error (valid)
 ```
 
@@ -281,7 +281,7 @@ Try it with the flag:
 
 as you can see, the `schema/test/bom-1.4-custom.schema.json` schema variant was used:
 
-```
+```bash
 [INFO] Determined SBOM format, version (variant): `CycloneDX`, `1.4` custom
 [INFO] Matching SBOM schema (for validation): schema/test/bom-1.4-custom.schema.json
 [INFO] Loading schema `schema/test/bom-1.4-custom.schema.json`...
@@ -300,7 +300,7 @@ Let us use the `--variant custom` flag and explore a schema failure against anot
 
 If you run the sample command above, you would see several "custom" schema errors resulting in an invalid SBOM determination (i.e., `exit status 2`):
 
-```text
+```bash
 [INFO] Determined SBOM format, version (variant): `CycloneDX`, `1.4` (custom)
 [INFO] Matching SBOM schema (for validation): schema/test/bom-1.4-custom.schema.json
 [INFO] Loading schema `schema/test/bom-1.4-custom.schema.json`...
@@ -343,7 +343,7 @@ The output shows a first schema error indicating the failing JSON object; in thi
   - the `value` field SHOULD have had a constant value of `"This SBOM is current as of the date it was generated and is subject to change."` (as was required by the custom schema's regex).
   - However, it was found to have only a partial match of `"This SBOM is current as of the date it was generated."`.
 
-#####  Details of the schema error
+##### Details of the schema error
 
 Use the `--debug` or `-d` flag to see all schema error details:
 
