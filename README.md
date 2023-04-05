@@ -2,7 +2,7 @@
 
 # sbom-utility
 
-This utility was designed to be an API platform used initially to **validate CycloneDX or SPDX Software Bills-of-Materials (BOMs)** against versioned JSON schemas as published by their communities as well as  derivative, customized variants provided by companies and organizations that have stricter compliance requirements.
+This utility was designed to be an API platform used initially to **validate CycloneDX or SPDX Software Bills-of-Materials (BOMs)** against versioned JSON schemas, as published by their respective communities, as well as customized schema variants provided by companies or organizations that have stricter BOM compliance requirements.
 
 The utility has now grown to include a rich set of commands, listed below, that can be used to create filterable reports and extract data from BOMs that enables verification of information supporting [BOM use cases](#cyclonedx-use-cases) or any custom security and compliance requirements.
 
