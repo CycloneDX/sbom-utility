@@ -270,8 +270,8 @@ func TestLicensePolicyList(t *testing.T) {
 
 	// Skip over list entries titles and separator rows in
 	// TODO: actually test all titles are present (in a dyn. loop)
-	if value := values[0]; !strings.Contains(value, LICENSE_POLICY_SUMMARY_TITLES[0]) {
-		t.Errorf("DisplayLicensePolicies(): returned entry: %s; expected it to contain: `%s`", value, LICENSE_POLICY_SUMMARY_TITLES[0])
+	if value := values[0]; !strings.Contains(value, POLICY_LIST_TITLES[0]) {
+		t.Errorf("DisplayLicensePolicies(): returned entry: %s; expected it to contain: `%s`", value, POLICY_LIST_TITLES[0])
 	}
 
 	if value := values[1]; !strings.Contains(value, REPORT_LIST_TITLE_ROW_SEPARATOR) {
@@ -551,4 +551,10 @@ func TestLicensePolicyMatchByFamilyNameBadExpression(t *testing.T) {
 	} else {
 		getLogger().Tracef("FindPolicyByFamilyName(): contains expression: %s, policy: %s, ", NAME, value)
 	}
+}
+
+func TestLicensePolicyListText(t *testing.T) {
+	var buffer bytes.Buffer
+	writer := bufio.NewWriter(&buffer)
+	ListPolicies(writer)
 }

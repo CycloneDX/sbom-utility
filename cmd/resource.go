@@ -38,13 +38,22 @@ const (
 
 var VALID_SUBCOMMANDS_RESOURCE = []string{SUBCOMMAND_RESOURCE_LIST}
 
-var RESOURCE_LIST_TITLES = []string{
+// filter keys
+const (
+	RESOURCE_FILTER_KEY_TYPE    = "type"
+	RESOURCE_FILTER_KEY_NAME    = "name"
+	RESOURCE_FILTER_KEY_VERSION = "version"
+	RESOURCE_FILTER_KEY_BOMREF  = "bom-ref"
+)
+
+var VALID_RESOURCE_FILTER_KEYS = []string{
 	RESOURCE_FILTER_KEY_TYPE,
 	RESOURCE_FILTER_KEY_NAME,
 	RESOURCE_FILTER_KEY_VERSION,
 	RESOURCE_FILTER_KEY_BOMREF,
 }
-var VALID_RESOURCE_WHERE_FILTER_KEYS = []string{
+
+var RESOURCE_LIST_TITLES = []string{
 	RESOURCE_FILTER_KEY_TYPE,
 	RESOURCE_FILTER_KEY_NAME,
 	RESOURCE_FILTER_KEY_VERSION,
@@ -55,6 +64,10 @@ var VALID_RESOURCE_WHERE_FILTER_KEYS = []string{
 const (
 	FLAG_RESOURCE_TYPE      = "type"
 	FLAG_RESOURCE_TYPE_HELP = "filter output by resource type (i.e., component | service"
+)
+
+const (
+	MSG_OUTPUT_NO_RESOURCES_FOUND = "[WARN] no matching resources found for query"
 )
 
 // Command help formatting
@@ -73,21 +86,6 @@ const (
 )
 
 var VALID_RESOURCE_TYPES = []string{RESOURCE_TYPE_DEFAULT, RESOURCE_TYPE_COMPONENT, RESOURCE_TYPE_SERVICE}
-
-// filter keys
-const (
-	RESOURCE_FILTER_KEY_TYPE    = "type"
-	RESOURCE_FILTER_KEY_NAME    = "name"
-	RESOURCE_FILTER_KEY_VERSION = "version"
-	RESOURCE_FILTER_KEY_BOMREF  = "bom-ref"
-)
-
-var VALID_RESOURCE_FILTER_KEYS = []string{
-	RESOURCE_FILTER_KEY_TYPE,
-	RESOURCE_FILTER_KEY_NAME,
-	RESOURCE_FILTER_KEY_VERSION,
-	RESOURCE_FILTER_KEY_BOMREF,
-}
 
 // TODO: need to strip `-` from `bom-ref` for where filter
 type ResourceInfo struct {

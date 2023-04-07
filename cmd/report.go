@@ -18,6 +18,7 @@
 package cmd
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -50,6 +51,18 @@ const (
 	MD_ALIGN_CENTER     = "-:-"
 	MD_ALIGN_RIGHT      = "--:"
 )
+
+// Helper function in case displayed table columns become too wide
+func truncateString(value string, maxLength int, showDetail bool) string {
+	length := len(value)
+	if length > maxLength {
+		value = value[:maxLength]
+		if showDetail {
+			value = fmt.Sprintf("%s (%v/%v)", value, maxLength, length)
+		}
+	}
+	return value
+}
 
 func createMarkdownColumnAlignment(titles []string) (alignment []string) {
 	for range titles {

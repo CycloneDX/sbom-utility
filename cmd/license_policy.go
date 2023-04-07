@@ -31,17 +31,52 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var VALID_SUBCOMMANDS_POLICY = []string{SUBCOMMAND_RESOURCE_LIST}
+
+// filter keys
+const (
+	POLICY_FILTER_KEY_USAGE_POLICY = "usage-policy"
+	POLICY_FILTER_KEY_FAMILY       = "family"
+	POLICY_FILTER_KEY_SPDX_ID      = "spdx-id"
+	POLICY_FILTER_KEY_NAME         = "name"
+	POLICY_FILTER_KEY_ANNOTATIONS  = "annotations"
+	POLICY_FILTER_KEY_ALIASES      = "aliases"
+	POLICY_FILTER_KEY_NOTES        = "notes"
+)
+
+var POLICY_LIST_TITLES = []string{
+	POLICY_FILTER_KEY_USAGE_POLICY,
+	POLICY_FILTER_KEY_FAMILY,
+	POLICY_FILTER_KEY_SPDX_ID,
+	POLICY_FILTER_KEY_NAME,
+	POLICY_FILTER_KEY_ANNOTATIONS,
+	POLICY_FILTER_KEY_ALIASES,
+	POLICY_FILTER_KEY_NOTES,
+}
+var VALID_POLICY_WHERE_FILTER_KEYS = []string{
+	POLICY_FILTER_KEY_USAGE_POLICY,
+	POLICY_FILTER_KEY_FAMILY,
+	POLICY_FILTER_KEY_SPDX_ID,
+	POLICY_FILTER_KEY_NAME,
+	POLICY_FILTER_KEY_ANNOTATIONS,
+	POLICY_FILTER_KEY_ALIASES,
+	POLICY_FILTER_KEY_NOTES,
+}
+
 // Subcommand flags
 const (
 	FLAG_POLICY_OUTPUT_FORMAT_HELP = "format output using the specified type"
 )
 
+// License list policy command informational messages
+// TODO Use only for Warning messages
+const (
+	MSG_OUTPUT_NO_POLICIES_FOUND = "no license policies found in BOM document"
+)
+
 // Command help formatting
 var LICENSE_POLICY_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{FORMAT_TEXT, FORMAT_CSV, FORMAT_MARKDOWN}, ", ")
-
-// Titles for lists
-var LICENSE_POLICY_SUMMARY_TITLES = []string{"Policy", "Family", "SPDX ID", "Name", "Annotations", "Notes"}
 
 // WARNING: Cobra will not recognize a subcommand if its `command.Use` is not a single
 // word string that matches one of the `command.ValidArgs` set on the parent command
@@ -276,14 +311,6 @@ func searchForLicenseFamilyName(licenseName string) (found bool, familyName stri
 	return
 }
 
-// Helper function in case displayed table columns become too wide
-func truncateString(value string, maxLength int) string {
-	if len(value) > maxLength {
-		value = value[:maxLength]
-	}
-	return value
-}
-
 // Display all license policies including those with SPDX IDs and those
 // only with "family" names which is reflected in the contents of the
 // hashmap keyed on family names.
@@ -304,10 +331,10 @@ func DisplayLicensePoliciesTabbedText(output io.Writer) (err error) {
 	w.Init(output, 8, 2, 2, ' ', 0)
 
 	// create underline row from slices of optional and compulsory titles
-	underlines := createTitleTextSeparators(LICENSE_POLICY_SUMMARY_TITLES)
+	underlines := createTitleTextSeparators(POLICY_LIST_TITLES)
 
 	// Add tabs between column titles for the tabWRiter
-	fmt.Fprintf(w, "%s\n", strings.Join(LICENSE_POLICY_SUMMARY_TITLES, "\t"))
+	fmt.Fprintf(w, "%s\n", strings.Join(POLICY_LIST_TITLES, "\t"))
 	fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
 	// NOTE: the "family" name hashmap SHOULD have all policy entries (i.e., with/without SPDX IDs)
@@ -330,13 +357,21 @@ func DisplayLicensePoliciesTabbedText(output io.Writer) (err error) {
 
 		for _, value := range values {
 			policy := value.(LicensePolicy)
-			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n",
-				policy.UsagePolicy,
-				truncateString(policy.Family, 15),
-				truncateString(policy.Id, 20),
-				truncateString(policy.Name, 20),
-				truncateString(strings.Join(policy.AnnotationRefs, ", "), 32),
-				truncateString(strings.Join(policy.Notes, ", "), 32))
+
+			lines := wrapOutputLines(policy.UsagePolicy, policy.Family, policy.Id, policy.Name,
+				policy.Aliases, policy.AnnotationRefs, policy.Notes)
+
+			for i, _ := range lines {
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+					truncateString(lines[i][0], 16, true), // usage-policy
+					truncateString(lines[i][1], 20, true), // family
+					truncateString(lines[i][2], 20, true), // id
+					truncateString(lines[i][3], 20, true), // name
+					truncateString(lines[i][4], 24, true), // alias
+					truncateString(lines[i][5], 24, true), // annotation
+					truncateString(lines[i][6], 24, true), // note
+				)
+			}
 		}
 	}
 	return
@@ -351,8 +386,8 @@ func DisplayLicensePoliciesCSV(output io.Writer) (err error) {
 	w := csv.NewWriter(output)
 	defer w.Flush()
 
-	if err = w.Write(LICENSE_POLICY_SUMMARY_TITLES); err != nil {
-		return getLogger().Errorf("error writing to output (%v): %s", LICENSE_POLICY_SUMMARY_TITLES, err)
+	if err = w.Write(POLICY_LIST_TITLES); err != nil {
+		return getLogger().Errorf("error writing to output (%v): %s", POLICY_LIST_TITLES, err)
 	}
 
 	// NOTE: the "family" name hashmap SHOULD have all policy entries (i.e., with/without SPDX IDs)
@@ -364,9 +399,10 @@ func DisplayLicensePoliciesCSV(output io.Writer) (err error) {
 	keyNames := familyNameMap.KeySet()
 
 	// Emit no schemas found warning into output
+	// TODO Use only for Warning messages, do not emit in output table
 	if len(keyNames) == 0 {
-		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_LICENSES_FOUND)
-		return fmt.Errorf(MSG_OUTPUT_NO_LICENSES_FOUND)
+		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_POLICIES_FOUND)
+		return fmt.Errorf(MSG_OUTPUT_NO_POLICIES_FOUND)
 	}
 
 	// Sort entries by family name
@@ -388,7 +424,9 @@ func DisplayLicensePoliciesCSV(output io.Writer) (err error) {
 				policy.Id,
 				policy.Name,
 				strings.Join(policy.AnnotationRefs, ", "),
-				strings.Join(policy.Notes, ", "))
+				strings.Join(policy.Aliases, ", "),
+				strings.Join(policy.Notes, ", "),
+			)
 
 			if err = w.Write(line); err != nil {
 				getLogger().Errorf("csv.Write: %w", err)
@@ -404,10 +442,10 @@ func DisplayLicensePoliciesMarkdown(output io.Writer) (err error) {
 	defer getLogger().Exit()
 
 	// create title row
-	titleRow := createMarkdownRow(LICENSE_POLICY_SUMMARY_TITLES)
+	titleRow := createMarkdownRow(POLICY_LIST_TITLES)
 	fmt.Fprintf(output, "%s\n", titleRow)
 
-	alignments := createMarkdownColumnAlignment(LICENSE_POLICY_SUMMARY_TITLES)
+	alignments := createMarkdownColumnAlignment(POLICY_LIST_TITLES)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(output, "%s\n", alignmentRow)
 
@@ -422,9 +460,10 @@ func DisplayLicensePoliciesMarkdown(output io.Writer) (err error) {
 	keyNames := familyNameMap.KeySet()
 
 	// Emit no schemas found warning into output
+	// TODO Use only for Warning messages, do not emit in output table
 	if len(keyNames) == 0 {
-		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_LICENSES_FOUND)
-		return fmt.Errorf(MSG_OUTPUT_NO_LICENSES_FOUND)
+		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_POLICIES_FOUND)
+		return fmt.Errorf(MSG_OUTPUT_NO_POLICIES_FOUND)
 	}
 
 	// Sort entries by family name
@@ -449,17 +488,91 @@ func DisplayLicensePoliciesMarkdown(output io.Writer) (err error) {
 
 			// reset loop variables for new assignments
 			line = nil
-
 			line = append(line, policy.UsagePolicy,
 				policy.Family,
 				policy.Id,
 				policy.Name,
 				strings.Join(policy.AnnotationRefs, ", "),
-				strings.Join(policy.Notes, ", "))
+				strings.Join(policy.Aliases, ", "),
+				strings.Join(policy.Notes, ", "),
+			)
 
 			lineRow = createMarkdownRow(line)
 			fmt.Fprintf(output, "%s\n", lineRow)
 		}
 	}
 	return
+}
+
+func wrapOutputLines(usage string,
+	family string, id string, name string,
+	aliases []string,
+	annotations []string,
+	notes []string) [][]string {
+
+	// calculate column dimension needed as max of slice sizes
+	var numRows = len(aliases)
+
+	if numRows < len(annotations) {
+		numRows = len(annotations)
+	}
+
+	if numRows < len(notes) {
+		numRows = len(notes)
+	}
+
+	// if numRows > 1 {
+	// 	fmt.Printf("numRows: %v", numRows)
+	// }
+
+	var alias string
+	var annotation string
+	var note string
+
+	lines := make([][]string, numRows)
+
+	for i, line := range lines {
+
+		line = make([]string, 7)
+		lines[i] = line
+
+		if i < len(aliases) {
+			alias = aliases[i]
+		} else {
+			alias = ""
+		}
+
+		if i < len(annotations) {
+			annotation = annotations[i]
+		} else {
+			annotation = ""
+		}
+
+		if i < len(notes) {
+			note = notes[i]
+		} else {
+			note = ""
+		}
+
+		if i == 0 {
+			line[0] = usage
+			line[1] = family
+			line[2] = id
+			line[3] = name
+			line[4] = alias
+			line[5] = annotation
+			line[6] = note
+		} else {
+			line[4] = alias
+			line[5] = annotation
+			line[6] = note
+		}
+		//fmt.Printf("lines[%d]: %v", i, line)
+	}
+
+	// if len(lines) > 1 {
+	// 	fmt.Printf("lines: %v", lines)
+	// }
+
+	return lines
 }

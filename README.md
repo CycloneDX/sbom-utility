@@ -811,7 +811,7 @@ Currently, all `vulnerability list` command results are sorted by vulnerability 
 ```
 
 ```bash
-id              bom-ref  source-name  source-url                                      created                   published                 updated                   rejected  description
+id              bom-ref  source-name source-url                                      created                   published                 updated                   rejected  description
 --              -------  ----------  -----------                                      -------                   ---------                 -------                   --------  -----------
 CVE-2020-25649           NVD         https://nvd.nist.gov/vuln/detail/CVE-2020-25649  2020-12-03T00:00:00.000Z  2020-12-03T00:00:00.000Z  2023-02-02T00:00:00.000Z            com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection.
 CVE-2022-42003           NVD         https://nvd.nist.gov/vuln/detail/CVE-2022-42003  2022-10-02T00:00:00.000Z  2022-10-02T00:00:00.000Z  2022-10-02T00:00:00.000Z            In FasterXML jackson-databind before 2.14.0-rc1, resource exhaustion can occur because of a lack of a check in primitive value deserializers to avoid deep wrapper array nesting, when the UNWRAP_SINGLE_VALUE_ARRAYS feature is enabled.
@@ -825,7 +825,7 @@ CVE-2022-42004           NVD         https://nvd.nist.gov/vuln/detail/CVE-2022-4
 ```
 
 ```bash
-id              bom-ref  source-name  source-url                                      created                   published                 updated                   rejected  description
+id              bom-ref  source-name source-url                                      created                   published                 updated                   rejected  description
 --              -------  ----------  -----------                                      -------                   ---------                 -------                   --------  -----------
 CVE-2020-25649           NVD         https://nvd.nist.gov/vuln/detail/CVE-2020-25649  2020-12-03T00:00:00.000Z  2020-12-03T00:00:00.000Z  2023-02-02T00:00:00.000Z            com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection.
 ```

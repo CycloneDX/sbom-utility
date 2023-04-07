@@ -36,24 +36,21 @@ import (
 // TODO: Support a new --sort <column> flag
 const (
 	FLAG_LICENSE_SUMMARY = "summary"
-	FLAG_LICENSE_EXCLUDE = "exclude"
-	FLAG_LICENSE_POLICY  = "policy" // policy-match, policy-filter, etc.
+	FLAG_LICENSE_EXCLUDE = "exclude" // TODO
 )
 
 // License list command flag help messages
 const (
 	FLAG_LICENSE_LIST_OUTPUT_FORMAT_HELP = "format output using the specified format type"
 	FLAG_LICENSE_LIST_SUMMARY_HELP       = "summarize licenses and component references in table format (see --format flag help for supported types)"
-	FLAG_LICENSE_LIST_EXCLUDE_HELP       = "exclude policy column from summary listing"
+	FLAG_LICENSE_LIST_EXCLUDE_HELP       = "exclude policy column from summary listing" // TODO
 	FLAG_LICENSE_LIST_POLICY_HELP        = "filter license summary by usage policy (i.e., allow|deny|needs-review|UNDEFINED)"
 )
 
 // License list command informational messages
 const (
-	MSG_OUTPUT_NO_LICENSES_FOUND            = "No licenses found in BOM document"
-	MSG_OUTPUT_NO_LICENSES_ONLY_NOASSERTION = "No valid licenses found in BOM document (only licenses marked NOASSERTION)"
-	MSG_OUTPUT_NO_SCHEMAS_FOUND             = "[WARN] no schemas found in configuration (i.e., \"config.json\")"
-	MSG_OUTPUT_NO_RESOURCES_FOUND           = "[WARN] no matching resources found for query"
+	MSG_OUTPUT_NO_LICENSES_FOUND            = "no licenses found in BOM document"
+	MSG_OUTPUT_NO_LICENSES_ONLY_NOASSERTION = "no valid licenses found in BOM document (only licenses marked NOASSERTION)"
 )
 
 //"Type", "ID/Name/Expression", "Component(s)", "BOM ref.", "Document location"
@@ -111,22 +108,15 @@ func NewCommandList() *cobra.Command {
 		&utils.GlobalFlags.LicenseFlags.Summary,
 		FLAG_LICENSE_SUMMARY, "", false,
 		FLAG_LICENSE_LIST_SUMMARY_HELP)
-	command.Flags().StringVarP(
-		&utils.GlobalFlags.LicenseFlags.Policy,
-		FLAG_LICENSE_POLICY, "", "",
-		FLAG_LICENSE_LIST_POLICY_HELP)
+	// command.Flags().StringVarP(
+	// 	&utils.GlobalFlags.LicenseFlags.Policy,
+	// 	FLAG_LICENSE_POLICY, "", "",
+	// 	FLAG_LICENSE_LIST_POLICY_HELP)
 	command.Flags().StringP(FLAG_REPORT_WHERE, "", "", FLAG_REPORT_WHERE_HELP)
 	command.RunE = listCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		if len(args) != 0 {
 			return getLogger().Errorf("Too many arguments provided: %v", args)
-		}
-
-		// Validate command line flag combinations
-		// TODO: document this flag relationship more clearly
-		bSummary := utils.GlobalFlags.LicenseFlags.Summary
-		if utils.GlobalFlags.LicenseFlags.Policy != "" && !bSummary {
-			return getLogger().Errorf("`%s` flag not valid without `%s` flag", FLAG_LICENSE_POLICY, FLAG_LICENSE_SUMMARY)
 		}
 
 		// Test for required flags (parameters)
