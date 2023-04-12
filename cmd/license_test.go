@@ -49,6 +49,7 @@ const (
 )
 
 type LicenseTestInfo struct {
+	PolicyFile              string // Note: if not filled in, uses default file: DEFAULT_LICENSE_POLICIES
 	InputFile               string
 	Format                  string
 	WhereClause             string
@@ -57,27 +58,28 @@ type LicenseTestInfo struct {
 	ResultContainsValue     string
 	ResultExpectedAtLineNum int
 	ResultExpectedLineCount int
-	Summary                 bool
+	ListSummary             bool
+	ListLineWrap            bool
 	ValidateJson            bool
 }
 
 // Stringer interface for ResourceTestInfo (just display subset of key values)
 func (lti *LicenseTestInfo) String() string {
 	return fmt.Sprintf("InputFile: `%s`, Format: `%s`, WhereClause: `%s`, Summary: `%v`",
-		lti.InputFile, lti.Format, lti.WhereClause, lti.Summary)
+		lti.InputFile, lti.Format, lti.WhereClause, lti.ListSummary)
 }
 
 func NewLicenseTestInfo(inputFile string, format string, whereClause string, summary bool, validateJson bool,
-	resultContains string, resultLines int, expectedError error) *LicenseTestInfo {
+	resultContainsValue string, expectedLines int, expectedError error) *LicenseTestInfo {
 
 	var lti = new(LicenseTestInfo)
 	lti.InputFile = inputFile
 	lti.Format = format
 	lti.WhereClause = whereClause
-	lti.ResultContainsValue = resultContains
-	lti.ResultExpectedLineCount = resultLines
+	lti.ResultContainsValue = resultContainsValue
+	lti.ResultExpectedLineCount = expectedLines
 	lti.ExpectedError = expectedError
-	lti.Summary = summary
+	lti.ListSummary = summary
 	lti.ValidateJson = validateJson
 	return lti
 }
@@ -99,8 +101,8 @@ func innerTestLicenseListBuffered(t *testing.T, testInfo *LicenseTestInfo, where
 	// Use a test input SBOM formatted in SPDX
 	utils.GlobalFlags.InputFile = testInfo.InputFile
 
-	// TODO support passing in []WhereFilter
-	err = ListLicenses(outputWriter, testInfo.Format, testInfo.Summary, whereFilters)
+	// Invoke the actual List command (API)
+	err = ListLicenses(outputWriter, testInfo.Format, testInfo.ListSummary, whereFilters)
 
 	return
 }
@@ -154,7 +156,7 @@ func innerTestLicenseList(t *testing.T, testInfo *LicenseTestInfo) (outputBuffer
 		}
 	}
 
-	// TEST: Line Count
+	// TEST: Expected Line Count
 	if testInfo.ResultExpectedLineCount != LTI_DEFAULT_LINE_COUNT {
 		if outputResults == "" {
 			outputResults = outputBuffer.String()
@@ -186,17 +188,6 @@ func innerTestLicenseList(t *testing.T, testInfo *LicenseTestInfo) (outputBuffer
 		}
 	}
 
-	return
-}
-
-func loadHashCustomPolicyFile(policyFile string) (err error) {
-	err = licensePolicyConfig.innerLoadLicensePolicies(policyFile)
-	if err != nil {
-		return
-	}
-	// Note: the HashLicensePolicies function creates new id and name hashmaps
-	// therefore there is no need to clear them
-	err = licensePolicyConfig.innerHashLicensePolicies()
 	return
 }
 
@@ -424,9 +415,6 @@ func TestLicenseListSummaryTextCdx13WhereLicenseTypeName(t *testing.T) {
 	innerTestLicenseList(t, lti)
 }
 
-//---------------------------
-// Custom policy file tests
-//---------------------------
 func TestLicenseListPolicyCdx14CustomPolicy(t *testing.T) {
 	TEST_POLICY := POLICY_ALLOW
 	TEST_LICENSE_TYPE := "expression"

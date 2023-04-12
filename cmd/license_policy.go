@@ -87,6 +87,7 @@ func NewCommandPolicy() *cobra.Command {
 	command.Long = "List caller-supplied, \"allow/deny\"-style policies associated with known software, hardware or data licenses"
 	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
 		FLAG_POLICY_OUTPUT_FORMAT_HELP+LICENSE_POLICY_SUPPORTED_FORMATS)
+	command.Flags().StringP(FLAG_REPORT_WHERE, "", "", FLAG_REPORT_WHERE_HELP)
 	command.RunE = policyCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		if len(args) != 0 {
@@ -104,22 +105,43 @@ func policyCmdImpl(cmd *cobra.Command, args []string) (err error) {
 
 	outputFile, writer, err := createOutputFile(utils.GlobalFlags.OutputFile)
 
-	if err == nil {
-		err = ListPolicies(writer)
-	}
+	// use function closure to assure consistent error output based upon error type
+	defer func() {
+		// always close the output file
+		if outputFile != nil {
+			err = outputFile.Close()
+			getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.OutputFile)
+		}
+	}()
 
-	// always close the output file
-	if outputFile != nil {
-		outputFile.Close()
-		getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.OutputFile)
+	// process filters supplied on the --where command flag
+	whereFilters, err := processWhereFlag(cmd)
+
+	if err == nil {
+		// TODO support where filters
+		err = ListLicensePolicies(writer, whereFilters)
 	}
 
 	return
 }
 
-func ListPolicies(writer io.Writer) (err error) {
+// Assure all errors are logged
+func processLicensePolicyListResults(err error) {
+	if err != nil {
+		getLogger().Error(err)
+	}
+}
+
+func ListLicensePolicies(writer io.Writer, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
+
+	// use function closure to assure consistent error output based upon error type
+	defer func() {
+		if err != nil {
+			processLicensePolicyListResults(err)
+		}
+	}()
 
 	// default output (writer) to standard out
 	switch utils.GlobalFlags.OutputFormat {
@@ -337,6 +359,7 @@ func DisplayLicensePoliciesTabbedText(output io.Writer) (err error) {
 	fmt.Fprintf(w, "%s\n", strings.Join(POLICY_LIST_TITLES, "\t"))
 	fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
+	// TODO support where filters
 	// NOTE: the "family" name hashmap SHOULD have all policy entries (i.e., with/without SPDX IDs)
 	licenseFamilyNameMap, err = licensePolicyConfig.GetFamilyNameMap()
 
@@ -358,19 +381,31 @@ func DisplayLicensePoliciesTabbedText(output io.Writer) (err error) {
 		for _, value := range values {
 			policy := value.(LicensePolicy)
 
-			lines := wrapOutputLines(policy.UsagePolicy, policy.Family, policy.Id, policy.Name,
-				policy.Aliases, policy.AnnotationRefs, policy.Notes)
+			if utils.GlobalFlags.LicenseFlags.ListLineWrap {
+				lines := wrapOutputLines(policy.UsagePolicy, policy.Family, policy.Id, policy.Name,
+					policy.Aliases, policy.AnnotationRefs, policy.Notes)
 
-			for _, line := range lines {
+				for _, line := range lines {
 
+					fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+						truncateString(line[0], 16, true), // usage-policy
+						truncateString(line[1], 20, true), // family
+						truncateString(line[2], 20, true), // id
+						truncateString(line[3], 20, true), // name
+						truncateString(line[4], 24, true), // annotation
+						truncateString(line[5], 24, true), // alias
+						truncateString(line[6], 24, true), // note
+					)
+				}
+			} else {
 				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
-					truncateString(line[0], 16, true), // usage-policy
-					truncateString(line[1], 20, true), // family
-					truncateString(line[2], 20, true), // id
-					truncateString(line[3], 20, true), // name
-					truncateString(line[4], 24, true), // alias
-					truncateString(line[5], 24, true), // annotation
-					truncateString(line[6], 24, true), // note
+					truncateString(policy.UsagePolicy, 16, true),                       // usage-policy
+					truncateString(policy.Family, 20, true),                            // family
+					truncateString(policy.Id, 20, true),                                // id
+					truncateString(policy.Name, 20, true),                              // name
+					truncateString(strings.Join(policy.AnnotationRefs, ","), 24, true), // annotation
+					truncateString(strings.Join(policy.Aliases, ","), 24, true),        // alias
+					truncateString(strings.Join(policy.Notes, ","), 24, true),          // note
 				)
 			}
 		}
@@ -391,6 +426,7 @@ func DisplayLicensePoliciesCSV(output io.Writer) (err error) {
 		return getLogger().Errorf("error writing to output (%v): %s", POLICY_LIST_TITLES, err)
 	}
 
+	// TODO support where filters
 	// NOTE: the "family" name hashmap SHOULD have all policy entries (i.e., with/without SPDX IDs)
 	familyNameMap, errHashMap := licensePolicyConfig.GetFamilyNameMap()
 
@@ -450,6 +486,7 @@ func DisplayLicensePoliciesMarkdown(output io.Writer) (err error) {
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(output, "%s\n", alignmentRow)
 
+	// TODO support where filters
 	// NOTE: the "family" name hashmap SHOULD have all policy entries (i.e., with/without SPDX IDs)
 	familyNameMap, errHashMap := licensePolicyConfig.GetFamilyNameMap()
 
@@ -558,12 +595,12 @@ func wrapOutputLines(usage string,
 			line[1] = family
 			line[2] = id
 			line[3] = name
-			line[4] = alias
-			line[5] = annotation
+			line[4] = annotation
+			line[5] = alias
 			line[6] = note
 		} else {
-			line[4] = alias
-			line[5] = annotation
+			line[4] = annotation
+			line[5] = alias
 			line[6] = note
 		}
 	}
