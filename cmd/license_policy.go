@@ -530,9 +530,9 @@ func wrapOutputLines(usage string,
 
 	lines := make([][]string, numRows)
 
-	for i, line := range lines {
+	for i := range lines {
 		// create line slice sized to number of columns
-		line = make([]string, 7)
+		line := make([]string, 7)
 		lines[i] = line
 
 		if i < len(aliases) {
