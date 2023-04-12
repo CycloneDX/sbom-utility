@@ -553,7 +553,7 @@ func TestLicensePolicyMatchByFamilyNameBadExpression(t *testing.T) {
 	}
 }
 
-func TestLicensePolicyListText(t *testing.T) {
+func TestLicensePolicyListTextFirstEntry0BSD(t *testing.T) {
 	var buffer bytes.Buffer
 	writer := bufio.NewWriter(&buffer)
 	ListPolicies(writer)

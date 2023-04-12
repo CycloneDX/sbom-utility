@@ -361,15 +361,16 @@ func DisplayLicensePoliciesTabbedText(output io.Writer) (err error) {
 			lines := wrapOutputLines(policy.UsagePolicy, policy.Family, policy.Id, policy.Name,
 				policy.Aliases, policy.AnnotationRefs, policy.Notes)
 
-			for i, _ := range lines {
+			for _, line := range lines {
+
 				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
-					truncateString(lines[i][0], 16, true), // usage-policy
-					truncateString(lines[i][1], 20, true), // family
-					truncateString(lines[i][2], 20, true), // id
-					truncateString(lines[i][3], 20, true), // name
-					truncateString(lines[i][4], 24, true), // alias
-					truncateString(lines[i][5], 24, true), // annotation
-					truncateString(lines[i][6], 24, true), // note
+					truncateString(line[0], 16, true), // usage-policy
+					truncateString(line[1], 20, true), // family
+					truncateString(line[2], 20, true), // id
+					truncateString(line[3], 20, true), // name
+					truncateString(line[4], 24, true), // alias
+					truncateString(line[5], 24, true), // annotation
+					truncateString(line[6], 24, true), // note
 				)
 			}
 		}
@@ -530,7 +531,7 @@ func wrapOutputLines(usage string,
 	lines := make([][]string, numRows)
 
 	for i, line := range lines {
-
+		// create line slice sized to number of columns
 		line = make([]string, 7)
 		lines[i] = line
 

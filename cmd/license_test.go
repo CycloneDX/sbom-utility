@@ -49,14 +49,16 @@ const (
 )
 
 type LicenseTestInfo struct {
-	InputFile       string
-	Format          string
-	WhereClause     string
-	ExpectedError   error
-	ResultContains  string
-	ResultLineCount int
-	Summary         bool
-	ValidateJson    bool
+	InputFile               string
+	Format                  string
+	WhereClause             string
+	ExpectedError           error
+	ResultContainsValues    []string
+	ResultContainsValue     string
+	ResultExpectedAtLineNum int
+	ResultExpectedLineCount int
+	Summary                 bool
+	ValidateJson            bool
 }
 
 // Stringer interface for ResourceTestInfo (just display subset of key values)
@@ -72,8 +74,8 @@ func NewLicenseTestInfo(inputFile string, format string, whereClause string, sum
 	lti.InputFile = inputFile
 	lti.Format = format
 	lti.WhereClause = whereClause
-	lti.ResultContains = resultContains
-	lti.ResultLineCount = resultLines
+	lti.ResultContainsValue = resultContains
+	lti.ResultExpectedLineCount = resultLines
 	lti.ExpectedError = expectedError
 	lti.Summary = summary
 	lti.ValidateJson = validateJson
@@ -138,12 +140,12 @@ func innerTestLicenseList(t *testing.T, testInfo *LicenseTestInfo) (outputBuffer
 	// TEST: Output contains string(s)
 	// TODO: Support []string
 	var outputResults string
-	if testInfo.ResultContains != "" {
+	if testInfo.ResultContainsValue != "" {
 		outputResults = outputBuffer.String()
 		getLogger().Debugf("output: \"%s\"", outputResults)
 
-		if !strings.Contains(outputResults, testInfo.ResultContains) {
-			err = getLogger().Errorf("output did not contain expected value: `%s`", testInfo.ResultContains)
+		if !strings.Contains(outputResults, testInfo.ResultContainsValue) {
+			err = getLogger().Errorf("output did not contain expected value: `%s`", testInfo.ResultContainsValue)
 			t.Errorf("%s: input file: `%s`, where clause: `%s`",
 				err.Error(),
 				testInfo.InputFile,
@@ -153,13 +155,13 @@ func innerTestLicenseList(t *testing.T, testInfo *LicenseTestInfo) (outputBuffer
 	}
 
 	// TEST: Line Count
-	if testInfo.ResultLineCount != LTI_DEFAULT_LINE_COUNT {
+	if testInfo.ResultExpectedLineCount != LTI_DEFAULT_LINE_COUNT {
 		if outputResults == "" {
 			outputResults = outputBuffer.String()
 		}
 		outputLineCount := strings.Count(outputResults, "\n")
-		if outputLineCount != testInfo.ResultLineCount {
-			err = getLogger().Errorf("output did not contain expected line count: %v/%v (expected/actual)", testInfo.ResultLineCount, outputLineCount)
+		if outputLineCount != testInfo.ResultExpectedLineCount {
+			err = getLogger().Errorf("output did not contain expected line count: %v/%v (expected/actual)", testInfo.ResultExpectedLineCount, outputLineCount)
 			t.Errorf("%s: input file: `%s`, where clause: `%s`: \n%s",
 				err.Error(),
 				testInfo.InputFile,
@@ -294,46 +296,46 @@ func TestLicenseListFormatUnsupportedSPDX2(t *testing.T) {
 func TestLicenseListCdx13JsonNoneFound(t *testing.T) {
 	// Test CDX 1.3 document
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3_NONE_FOUND, FORMAT_JSON, false)
-	lti.ResultLineCount = 1 // null (valid json)
+	lti.ResultExpectedLineCount = 1 // null (valid json)
 	innerTestLicenseList(t, lti)
 }
 func TestLicenseListCdx14JsonNoneFound(t *testing.T) {
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND, FORMAT_JSON, false)
-	lti.ResultLineCount = 1 // null (valid json)
+	lti.ResultExpectedLineCount = 1 // null (valid json)
 	innerTestLicenseList(t, lti)
 }
 
 func TestLicenseListCdx13CsvNoneFound(t *testing.T) {
 	// Test CDX 1.3 document
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3_NONE_FOUND, FORMAT_CSV, false)
-	lti.ResultLineCount = 1 // title only
+	lti.ResultExpectedLineCount = 1 // title only
 	innerTestLicenseList(t, lti)
 }
 
 func TestLicenseListCdx14CsvNoneFound(t *testing.T) {
 	// Test CDX 1.4 document
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND, FORMAT_CSV, false)
-	lti.ResultLineCount = 1 // title only
+	lti.ResultExpectedLineCount = 1 // title only
 	innerTestLicenseList(t, lti)
 }
 
 func TestLicenseListCdx13MarkdownNoneFound(t *testing.T) {
 	// Test CDX 1.3 document
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3_NONE_FOUND, FORMAT_MARKDOWN, false)
-	lti.ResultLineCount = 2 // title and separator rows
+	lti.ResultExpectedLineCount = 2 // title and separator rows
 	innerTestLicenseList(t, lti)
 }
 
 func TestLicenseListCdx14MarkdownNoneFound(t *testing.T) {
 	// Test CDX 1.4 document
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND, FORMAT_MARKDOWN, false)
-	lti.ResultLineCount = 2 // title and separator rows
+	lti.ResultExpectedLineCount = 2 // title and separator rows
 	innerTestLicenseList(t, lti)
 }
 
 func TestLicenseListCdx13Json(t *testing.T) {
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3, FORMAT_JSON, false)
-	lti.ResultLineCount = 210 // array of LicenseChoice JSON objects
+	lti.ResultExpectedLineCount = 210 // array of LicenseChoice JSON objects
 	innerTestLicenseList(t, lti)
 }
 
@@ -344,27 +346,27 @@ func TestLicenseListCdx13Json(t *testing.T) {
 // Assure listing (report) works with summary flag (i.e., format: "txt")
 func TestLicenseListSummaryCdx13Text(t *testing.T) {
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3, FORMAT_TEXT, true)
-	lti.ResultLineCount = 20 // title, separator and data rows
+	lti.ResultExpectedLineCount = 20 // title, separator and data rows
 	innerTestLicenseList(t, lti)
 }
 
 func TestLicenseListSummaryCdx13Markdown(t *testing.T) {
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3, FORMAT_MARKDOWN, true)
-	lti.ResultLineCount = 20 // title, separator and data rows
+	lti.ResultExpectedLineCount = 20 // title, separator and data rows
 	innerTestLicenseList(t, lti)
 }
 
 func TestLicenseListSummaryCdx13Csv(t *testing.T) {
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3, FORMAT_CSV, true)
-	lti.ResultLineCount = 19 // title and data rows
+	lti.ResultExpectedLineCount = 19 // title and data rows
 	innerTestLicenseList(t, lti)
 }
 
 func TestLicenseListTextSummaryCdx14ContainsUndefined(t *testing.T) {
 
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND, FORMAT_DEFAULT, true)
-	lti.ResultContains = POLICY_UNDEFINED
-	lti.ResultLineCount = 4 // 2 title, 2 with UNDEFINED
+	lti.ResultContainsValue = POLICY_UNDEFINED
+	lti.ResultExpectedLineCount = 4 // 2 title, 2 with UNDEFINED
 	innerTestLicenseList(t, lti)
 }
 
@@ -404,21 +406,21 @@ func TestLicenseListPolicyCdx14InvalidLicenseName(t *testing.T) {
 func TestLicenseListSummaryTextCdx13WhereUsageNeedsReview(t *testing.T) {
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3, FORMAT_TEXT, true)
 	lti.WhereClause = "usage-policy=needs-review"
-	lti.ResultLineCount = 8 // title and data rows
+	lti.ResultExpectedLineCount = 8 // title and data rows
 	innerTestLicenseList(t, lti)
 }
 
 func TestLicenseListSummaryTextCdx13WhereUsageUndefined(t *testing.T) {
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3, FORMAT_TEXT, true)
 	lti.WhereClause = "usage-policy=UNDEFINED"
-	lti.ResultLineCount = 4 // title and data rows
+	lti.ResultExpectedLineCount = 4 // title and data rows
 	innerTestLicenseList(t, lti)
 }
 
 func TestLicenseListSummaryTextCdx13WhereLicenseTypeName(t *testing.T) {
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3, FORMAT_TEXT, true)
 	lti.WhereClause = "license-type=name"
-	lti.ResultLineCount = 8 // title and data rows
+	lti.ResultExpectedLineCount = 8 // title and data rows
 	innerTestLicenseList(t, lti)
 }
 
