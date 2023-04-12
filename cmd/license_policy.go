@@ -504,6 +504,8 @@ func DisplayLicensePoliciesMarkdown(output io.Writer) (err error) {
 	return
 }
 
+// TODO make a generic function that takes interface{} and checks type for either string or []string
+// and processes wrap accordingly dependent on type (i.e., wrap only on []string)
 func wrapOutputLines(usage string,
 	family string, id string, name string,
 	aliases []string,
@@ -520,10 +522,6 @@ func wrapOutputLines(usage string,
 	if numRows < len(notes) {
 		numRows = len(notes)
 	}
-
-	// if numRows > 1 {
-	// 	fmt.Printf("numRows: %v", numRows)
-	// }
 
 	var alias string
 	var annotation string
@@ -567,12 +565,7 @@ func wrapOutputLines(usage string,
 			line[5] = annotation
 			line[6] = note
 		}
-		//fmt.Printf("lines[%d]: %v", i, line)
 	}
-
-	// if len(lines) > 1 {
-	// 	fmt.Printf("lines: %v", lines)
-	// }
 
 	return lines
 }

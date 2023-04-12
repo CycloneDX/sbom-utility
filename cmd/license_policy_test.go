@@ -156,7 +156,7 @@ func TestLicensePolicyMatchByIdAllow(t *testing.T) {
 	if value != EXPECTED_POLICY {
 		t.Errorf("FindPolicyBySpdxId(): id: %s, returned: %v; expected: %v", ID, value, EXPECTED_POLICY)
 	} else {
-		getLogger().Tracef("FindPolicyBySpdxId(): id: %s (%s), policy: %s, ", ID, policy.Name, value)
+		getLogger().Tracef("FindPolicyBySpdxId(): id: %s (%s), policy: %s\n", ID, policy.Name, value)
 	}
 }
 
@@ -169,7 +169,7 @@ func TestLicensePolicyMatchByIdDeny(t *testing.T) {
 	if value != EXPECTED_POLICY {
 		t.Errorf("FindPolicyBySpdxId(): id: %s, returned: %v; expected: %v", ID, value, EXPECTED_POLICY)
 	} else {
-		getLogger().Tracef("FindPolicyBySpdxId(): id: %s (%s), policy: %s, ", ID, policy.Name, value)
+		getLogger().Tracef("FindPolicyBySpdxId(): id: %s (%s), policy: %s\n", ID, policy.Name, value)
 	}
 }
 
@@ -182,7 +182,7 @@ func TestLicensePolicyMatchByIdFailureEmpty(t *testing.T) {
 	if value != EXPECTED_POLICY {
 		t.Errorf("FindPolicyBySpdxId(): id: %s, returned: %v; expected: %v", ID, value, EXPECTED_POLICY)
 	} else {
-		getLogger().Tracef("FindPolicyBySpdxId(): id: %s (%s), policy: %s, ", ID, policy.Name, value)
+		getLogger().Tracef("FindPolicyBySpdxId(): id: %s (%s), policy: %s\n", ID, policy.Name, value)
 	}
 }
 
@@ -195,7 +195,7 @@ func TestLicensePolicyMatchByIdFailureFoo(t *testing.T) {
 	if value != EXPECTED_POLICY {
 		t.Errorf("FindPolicyBySpdxId(): id: %s, returned: %v; expected: %v", ID, value, EXPECTED_POLICY)
 	} else {
-		getLogger().Tracef("FindPolicyBySpdxId(): id: %s (%s), policy: %s, ", ID, policy.Name, value)
+		getLogger().Tracef("FindPolicyBySpdxId(): id: %s (%s), policy: %s\n", ID, policy.Name, value)
 	}
 }
 
@@ -216,7 +216,7 @@ func TestLicensePolicyMatchByExpFailureInvalidRightExp(t *testing.T) {
 	if resolvedPolicy != EXPECTED_POLICY {
 		t.Errorf("FindPolicyBySpdxId(): expression: %s, returned: %v; expected: %v", EXP, resolvedPolicy, EXPECTED_POLICY)
 	} else {
-		getLogger().Tracef("FindPolicyBySpdxId(): id: %s, policy: %s, ", EXP, resolvedPolicy)
+		getLogger().Tracef("FindPolicyBySpdxId(): id: %s, policy: %s\n", EXP, resolvedPolicy)
 	}
 }
 
@@ -237,7 +237,7 @@ func TestLicensePolicyMatchByExpFailureInvalidLeftExp(t *testing.T) {
 	if resolvedPolicy != EXPECTED_POLICY {
 		t.Errorf("FindPolicyBySpdxId(): expression: %s, returned: %v; expected: %v", EXP, resolvedPolicy, EXPECTED_POLICY)
 	} else {
-		getLogger().Tracef("FindPolicyBySpdxId(): id: %s, policy: %s, ", EXP, resolvedPolicy)
+		getLogger().Tracef("FindPolicyBySpdxId(): id: %s, policy: %s\n", EXP, resolvedPolicy)
 	}
 }
 
@@ -527,7 +527,7 @@ func TestLicensePolicyMatchByFamilyNameBadExpression(t *testing.T) {
 	if value != EXPECTED_POLICY {
 		t.Errorf("FindPolicyByFamilyName(): contains expression: %s, returned: %v; expected: %v", NAME, value, EXPECTED_POLICY)
 	} else {
-		getLogger().Tracef("FindPolicyByFamilyName(): contains expression: %s, policy: %s, ", NAME, value)
+		getLogger().Tracef("FindPolicyByFamilyName(): contains expression: %s, policy: %s\n", NAME, value)
 	}
 
 	// Assure AND appearance results in UNDEFINED
@@ -538,7 +538,7 @@ func TestLicensePolicyMatchByFamilyNameBadExpression(t *testing.T) {
 	if value != EXPECTED_POLICY {
 		t.Errorf("FindPolicyByFamilyName(): contains expression: %s, returned: %v; expected: %v", NAME, value, EXPECTED_POLICY)
 	} else {
-		getLogger().Tracef("FindPolicyByFamilyName(): contains expression: %s, policy: %s, ", NAME, value)
+		getLogger().Tracef("FindPolicyByFamilyName(): contains expression: %s, policy: %s\n", NAME, value)
 	}
 
 	// Assure WITH appearance results in UNDEFINED
@@ -549,7 +549,7 @@ func TestLicensePolicyMatchByFamilyNameBadExpression(t *testing.T) {
 	if value != EXPECTED_POLICY {
 		t.Errorf("FindPolicyByFamilyName(): contains expression: %s, returned: %v; expected: %v", NAME, value, EXPECTED_POLICY)
 	} else {
-		getLogger().Tracef("FindPolicyByFamilyName(): contains expression: %s, policy: %s, ", NAME, value)
+		getLogger().Tracef("FindPolicyByFamilyName(): contains expression: %s, policy: %s\n", NAME, value)
 	}
 }
 
@@ -557,4 +557,13 @@ func TestLicensePolicyListText(t *testing.T) {
 	var buffer bytes.Buffer
 	writer := bufio.NewWriter(&buffer)
 	ListPolicies(writer)
+	VALUES := []string{"0BSD"}
+	LINE := 2
+
+	i, contains := lineContainsValues(buffer, LINE, VALUES...)
+	if !contains {
+		t.Errorf("policy file does not contain expected values: %v", VALUES)
+	} else {
+		getLogger().Tracef("policy file contains values: %v on line: %v\n", VALUES, i)
+	}
 }
