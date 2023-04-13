@@ -450,6 +450,12 @@ allow         Apache           Apache-2.0            Apache License 2.0    APPRO
   - Currently, the default `license.json` file does not contain an entry for the complete SPDX 3.2 license templates. An issue [12](https://github.com/CycloneDX/sbom-utility/issues/12) is open to add parity.
   - Annotations can be defined within the `license.json` file and one or more assigned each license entry.
 
+##### Wrap flag
+
+Use the `--wrap` flag to toggle the wrapping of text within columns of the license policy report output using the values `true` or `false`. The default value is `false`.
+
+###### Example: list summary
+
 ---
 
 ### Query
