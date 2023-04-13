@@ -20,7 +20,6 @@ package cmd
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"strings"
 	"testing"
 
@@ -577,7 +576,8 @@ func TestLicensePolicyList(t *testing.T) {
 	// verify entries (by default sorted by license family name) are correct
 	listing := outputBuffer.String()
 	values := strings.Split(listing, "\n")
-	fmt.Printf("values: %v", strings.Join(values, "\n"))
+	// Debug list output:
+	// getLogger().Debugf("values: %v", strings.Join(values, "\n"))
 
 	// Skip over list entries titles and separator rows in
 	// TODO: actually test all titles are present (in a dyn. loop)

@@ -33,6 +33,12 @@ import (
 
 var VALID_SUBCOMMANDS_POLICY = []string{SUBCOMMAND_RESOURCE_LIST}
 
+// Subcommand flags
+// TODO: Support a new --sort <column> flag
+const (
+	FLAG_POLICY_REPORT_LINE_WRAP = "wrap"
+)
+
 // filter keys
 const (
 	POLICY_FILTER_KEY_USAGE_POLICY = "usage-policy"
@@ -65,7 +71,8 @@ var VALID_POLICY_WHERE_FILTER_KEYS = []string{
 
 // Subcommand flags
 const (
-	FLAG_POLICY_OUTPUT_FORMAT_HELP = "format output using the specified type"
+	FLAG_POLICY_OUTPUT_FORMAT_HELP    = "format output using the specified type"
+	FLAG_POLICY_REPORT_LINE_WRAP_HELP = "toggles the wrapping of text within report column output (default: false)"
 )
 
 // License list policy command informational messages
@@ -88,6 +95,10 @@ func NewCommandPolicy() *cobra.Command {
 	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
 		FLAG_POLICY_OUTPUT_FORMAT_HELP+LICENSE_POLICY_SUPPORTED_FORMATS)
 	command.Flags().StringP(FLAG_REPORT_WHERE, "", "", FLAG_REPORT_WHERE_HELP)
+	command.Flags().BoolVarP(
+		&utils.GlobalFlags.LicenseFlags.ListLineWrap,
+		FLAG_POLICY_REPORT_LINE_WRAP, "", false,
+		FLAG_POLICY_REPORT_LINE_WRAP_HELP)
 	command.RunE = policyCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		if len(args) != 0 {
