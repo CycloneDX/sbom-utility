@@ -450,7 +450,7 @@ allow         Apache                        Apache-2.0                    Apache
 - **Note**:
   - Currently, the default `license.json` file does not contain an entry for the complete SPDX 3.2 license templates. An issue [12](https://github.com/CycloneDX/sbom-utility/issues/12) is open to add parity.
   - Annotations can be defined within the `license.json` file and one or more assigned each license entry.
-  - Column data is, by default, truncated in `txt` format views only. In these cases, the number of characters shown out of the total available will be displayed at the point of truncation (e.g., `(24/26` would indicate 24 out of 26b characters were displayed).
+  - Column data is, by default, truncated in `txt` format views only. In these cases, the number of characters shown out of the total available will be displayed at the point of truncation (e.g., seeing `(24/26)` in a column would indicate 24 out of 26b characters were displayed).
 
 ##### Wrap flag
 
