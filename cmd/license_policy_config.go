@@ -81,6 +81,18 @@ type LicenseComplianceConfig struct {
 	licenseIdMap         *slicemultimap.MultiMap
 }
 
+func (config *LicenseComplianceConfig) Reset() {
+	config.policyConfigFile = DEFAULT_LICENSE_POLICIES
+	config.PolicyList = nil
+	config.Annotations = nil
+	if config.licenseFamilyNameMap != nil {
+		config.licenseFamilyNameMap.Clear()
+	}
+	if config.licenseIdMap != nil {
+		config.licenseIdMap.Clear()
+	}
+}
+
 func (config *LicenseComplianceConfig) Debug() {
 	fmt.Printf(">> policyConfigFile: %s\n", config.policyConfigFile)
 	fmt.Printf(">> PolicyList (length): %v\n", len(config.PolicyList))
@@ -117,6 +129,9 @@ func (config *LicenseComplianceConfig) LoadLicensePolicies(filename string) (err
 func (config *LicenseComplianceConfig) innerLoadLicensePolicies(filename string) (err error) {
 	getLogger().Enter(filename)
 	defer getLogger().Exit()
+
+	// Always reset the config
+	config.Reset()
 
 	// locate the license policy file
 	config.policyConfigFile, err = utils.FindVerifyConfigFileAbsPath(getLogger(), filename)
