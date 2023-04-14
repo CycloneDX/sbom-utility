@@ -73,6 +73,7 @@ func innerTestLicensePolicyListCustomAndBuffered(t *testing.T, testInfo *License
 	// ensure all data is written to buffer before further validation
 	defer outputWriter.Flush()
 
+	// Load and hash the specified license policy file ONLY FOR THIS TEST!
 	if testInfo.PolicyFile != "" && testInfo.PolicyFile != DEFAULT_LICENSE_POLICIES {
 		// !!! IMPORTANT !!! restore default policy file to default for all other tests
 		loadHashCustomPolicyFile(testInfo.PolicyFile)
@@ -85,6 +86,7 @@ func innerTestLicensePolicyListCustomAndBuffered(t *testing.T, testInfo *License
 	// Invoke the actual List command (API)
 	err = ListLicensePolicies(outputWriter, whereFilters)
 
+	// Restore default license policy file for subsequent tests
 	if testInfo.PolicyFile != "" && testInfo.PolicyFile != DEFAULT_LICENSE_POLICIES {
 		// !!! IMPORTANT !!! restore default policy file to default for all other tests
 		loadHashCustomPolicyFile(DEFAULT_LICENSE_POLICIES)
@@ -143,13 +145,14 @@ func innerTestLicensePolicyList(t *testing.T, testInfo *LicenseTestInfo) (output
 	}
 
 	// TEST: Line contains a set of string values
+	// TODO: support any number of row/values in test info. structure
 	if len(testInfo.ResultContainsValues) > 0 {
 		matchFoundLine, matchFound := lineContainsValues(outputBuffer, testInfo.ResultExpectedAtLineNum, testInfo.ResultContainsValues...)
 		if !matchFound {
-			t.Errorf("policy file does not contain expected values: %v", testInfo.ResultContainsValues)
+			t.Errorf("policy file does not contain expected values: `%v` at line: %v\n", testInfo.ResultContainsValues, testInfo.ResultExpectedAtLineNum)
 			return
 		} else {
-			getLogger().Tracef("policy file contains expected values: %v on line: %v\n", testInfo.ResultContainsValues, matchFoundLine)
+			getLogger().Tracef("policy file contains expected values: `%v` at line: %v\n", testInfo.ResultContainsValues, matchFoundLine)
 		}
 	}
 
@@ -550,58 +553,63 @@ func TestLicensePolicyFamilyUsagePolicyConflict(t *testing.T) {
 }
 
 func TestLicensePolicyList(t *testing.T) {
-	// Set the license (policy) configuration to our test file and load it
-	err := loadHashCustomPolicyFile(POLICY_FILE_GOOD_BAD_MAYBE)
 
-	// Note: the conflict is only encountered on the "hash"; load only loads what policies are defined in the config.
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
+	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
+	// Assure all titles appear in output
+	lti.ResultContainsValues = POLICY_LIST_TITLES
+	lti.ResultExpectedAtLineNum = 0
+
+	outputBuffer, err := innerTestLicensePolicyList(t, lti)
+
 	if err != nil {
 		t.Errorf(err.Error())
+		return
 	}
 
-	// Declare an output outputBuffer/outputWriter to use used during tests
-	var outputBuffer bytes.Buffer
-	var outputWriter = bufio.NewWriter(&outputBuffer)
-
-	// Test the actual list function
-	errDisplay := DisplayLicensePoliciesTabbedText(outputWriter)
-	if errDisplay != nil {
-		t.Errorf(errDisplay.Error())
+	// test for sep. row
+	TEST_LINE_NUM := 1
+	TEST_VALUES := []string{REPORT_LIST_TITLE_ROW_SEPARATOR}
+	matchFoundLine, matchFound := lineContainsValues(outputBuffer, TEST_LINE_NUM, TEST_VALUES...)
+	if !matchFound {
+		t.Errorf("policy file does not contain expected values: `%v` at line: %v\n", TEST_VALUES, TEST_LINE_NUM)
+		return
+	} else {
+		getLogger().Tracef("policy file contains expected values: `%v` at line: %v\n", TEST_VALUES, matchFoundLine)
 	}
 
-	// The list routine uses other "writers" and flushes them
-	// we must flush our "backing" writer (in this case to our byte buffer)
-	// BEFORE testing the buffer contents
-	outputWriter.Flush()
-
-	// verify entries (by default sorted by license family name) are correct
-	listing := outputBuffer.String()
-	values := strings.Split(listing, "\n")
-	// Debug list output:
-	// getLogger().Debugf("values: %v", strings.Join(values, "\n"))
-
-	// Skip over list entries titles and separator rows in
-	// TODO: actually test all titles are present (in a dyn. loop)
-	if value := values[0]; !strings.Contains(value, POLICY_LIST_TITLES[0]) {
-		t.Errorf("DisplayLicensePolicies(): returned entry: %s; expected it to contain: `%s`", value, POLICY_LIST_TITLES[0])
+	// Assure "bad" policy has usage "deny"
+	TEST_LINE_NUM = 2
+	TEST_VALUES = []string{LICENSE_ID_BAD, POLICY_DENY}
+	matchFoundLine, matchFound = lineContainsValues(outputBuffer, TEST_LINE_NUM, TEST_VALUES...)
+	if !matchFound {
+		t.Errorf("policy file does not contain expected values: `%v` at line: %v\n", TEST_VALUES, TEST_LINE_NUM)
+		return
+	} else {
+		getLogger().Tracef("policy file contains expected values: `%v` at line: %v\n", TEST_VALUES, matchFoundLine)
 	}
 
-	if value := values[1]; !strings.Contains(value, REPORT_LIST_TITLE_ROW_SEPARATOR) {
-		t.Errorf("DisplayLicensePolicies(): returned entry: %s; expected it to contain: `%s`", value, REPORT_LIST_TITLE_ROW_SEPARATOR)
+	// Assure "good" policy has usage "allow"
+	TEST_LINE_NUM = 3
+	TEST_VALUES = []string{LICENSE_ID_GOOD, POLICY_ALLOW}
+	matchFoundLine, matchFound = lineContainsValues(outputBuffer, TEST_LINE_NUM, TEST_VALUES...)
+	if !matchFound {
+		t.Errorf("policy file does not contain expected values: `%v` at line: %v\n", TEST_VALUES, TEST_LINE_NUM)
+		return
+	} else {
+		getLogger().Tracef("policy file contains expected values: `%v` at line: %v\n", TEST_VALUES, matchFoundLine)
 	}
 
-	// validate policy rows listing (i.e., indexes 0 and 1)
-	if value := values[2]; !strings.Contains(value, LICENSE_ID_BAD) || !strings.Contains(value, POLICY_DENY) {
-		t.Errorf("DisplayLicensePolicies(): returned entry: %s; expected ID and policy: `%s`, `%s`", value, LICENSE_ID_BAD, POLICY_DENY)
+	// Assure "maybe" policy has usage "needs-review"
+	TEST_LINE_NUM = 4
+	TEST_VALUES = []string{LICENSE_ID_MAYBE, POLICY_NEEDS_REVIEW}
+	matchFoundLine, matchFound = lineContainsValues(outputBuffer, TEST_LINE_NUM, TEST_VALUES...)
+	if !matchFound {
+		t.Errorf("policy file does not contain expected values: `%v` at line: %v\n", TEST_VALUES, TEST_LINE_NUM)
+		return
+	} else {
+		getLogger().Tracef("policy file contains expected values: `%v` at line: %v\n", TEST_VALUES, matchFoundLine)
 	}
-	if value := values[3]; !strings.Contains(value, LICENSE_ID_GOOD) || !strings.Contains(value, POLICY_ALLOW) {
-		t.Errorf("DisplayLicensePolicies(): returned entry: %s; expected ID and policy: `%s`, `%s`", value, LICENSE_ID_GOOD, POLICY_ALLOW)
-	}
-	if value := values[4]; !strings.Contains(value, LICENSE_ID_MAYBE) || !strings.Contains(value, POLICY_NEEDS_REVIEW) {
-		t.Errorf("DisplayLicensePolicies(): returned entry: %s; expected ID and policy: `%s`, `%s`", value, LICENSE_ID_MAYBE, POLICY_NEEDS_REVIEW)
-	}
-
-	// !!! IMPORTANT !!! restore default policy file to default for all other tests
-	loadHashCustomPolicyFile(utils.GlobalFlags.ConfigLicensePolicyFile)
 }
 
 //------------------------------------------------------
