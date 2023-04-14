@@ -129,7 +129,6 @@ func policyCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	whereFilters, err := processWhereFlag(cmd)
 
 	if err == nil {
-		// TODO support where filters
 		err = ListLicensePolicies(writer, whereFilters)
 	}
 
@@ -153,6 +152,18 @@ func ListLicensePolicies(writer io.Writer, whereFilters []WhereFilter) (err erro
 			processLicensePolicyListResults(err)
 		}
 	}()
+
+	if len(whereFilters) > 0 {
+		// Always use a new filtered hashmap for each filtered list request
+		licensePolicyConfig.filteredFamilyNameMap = slicemultimap.New()
+		licensePolicyConfig.filteredHashLicensePolicies(whereFilters)
+	} else {
+		licensePolicyConfig.filteredFamilyNameMap, err = licensePolicyConfig.GetFamilyNameMap()
+	}
+
+	if err != nil {
+		return
+	}
 
 	// default output (writer) to standard out
 	switch utils.GlobalFlags.OutputFormat {
@@ -372,8 +383,9 @@ func DisplayLicensePoliciesTabbedText(output io.Writer) (err error) {
 
 	// TODO support where filters
 	// NOTE: the "family" name hashmap SHOULD have all policy entries (i.e., with/without SPDX IDs)
-	licenseFamilyNameMap, err = licensePolicyConfig.GetFamilyNameMap()
+	//licenseFamilyNameMap, err = licensePolicyConfig.GetFamilyNameMap()
 
+	licenseFamilyNameMap = licensePolicyConfig.filteredFamilyNameMap
 	if err != nil {
 		return
 	}

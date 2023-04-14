@@ -72,13 +72,14 @@ type LicensePolicy struct {
 }
 
 type LicenseComplianceConfig struct {
-	PolicyList           []LicensePolicy   `json:"policies"`
-	Annotations          map[string]string `json:"annotations"`
-	policyConfigFile     string
-	loadOnce             sync.Once
-	hashOnce             sync.Once
-	licenseFamilyNameMap *slicemultimap.MultiMap
-	licenseIdMap         *slicemultimap.MultiMap
+	PolicyList            []LicensePolicy   `json:"policies"`
+	Annotations           map[string]string `json:"annotations"`
+	policyConfigFile      string
+	loadOnce              sync.Once
+	hashOnce              sync.Once
+	licenseFamilyNameMap  *slicemultimap.MultiMap
+	licenseIdMap          *slicemultimap.MultiMap
+	filteredFamilyNameMap *slicemultimap.MultiMap
 }
 
 func (config *LicenseComplianceConfig) Reset() {
@@ -271,6 +272,47 @@ func (config *LicenseComplianceConfig) hashChildPolicies(policy LicensePolicy) (
 		if err != nil {
 			return
 		}
+	}
+
+	return
+}
+
+func (config *LicenseComplianceConfig) filteredHashLicensePolicies(whereFilters []WhereFilter) (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit(err)
+
+	for _, policy := range config.PolicyList {
+		err = config.filteredHashLicensePolicy(policy, whereFilters)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+// Hash a CDX Component and recursively those of any "nested" components
+// TODO we should WARN if version is not a valid semver (e.g., examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json)
+func (config *LicenseComplianceConfig) filteredHashLicensePolicy(policy LicensePolicy, whereFilters []WhereFilter) (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit(err)
+
+	var match bool = true
+	var mapPolicy map[string]interface{}
+
+	if len(whereFilters) > 0 {
+		mapPolicy, err = utils.ConvertStructToMap(policy)
+		if err != nil {
+			return
+		}
+
+		match, err = whereFilterMatch(mapPolicy, whereFilters)
+		if err != nil {
+			return
+		}
+	}
+
+	if match {
+		config.filteredFamilyNameMap.Put(policy.Family, policy)
 	}
 
 	return
