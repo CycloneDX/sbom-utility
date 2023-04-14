@@ -385,6 +385,8 @@ func DisplayLicensePoliciesTabbedText(output io.Writer) (err error) {
 	})
 
 	// output each license policy entry as a line (by sorted key)
+	var lines [][]string
+
 	for _, key := range keyNames {
 		values, match := licenseFamilyNameMap.Get(key)
 		getLogger().Tracef("%v (%t)", values, match)
@@ -392,12 +394,20 @@ func DisplayLicensePoliciesTabbedText(output io.Writer) (err error) {
 		for _, value := range values {
 			policy := value.(LicensePolicy)
 
+			// Wrap all column text (i.e. flag `--wrap=true`)
 			if utils.GlobalFlags.LicenseFlags.ListLineWrap {
-				lines := wrapOutputLines(policy.UsagePolicy, policy.Family, policy.Id, policy.Name,
-					policy.Aliases, policy.AnnotationRefs, policy.Notes)
+				lines, err = wrapTableRowText(24, ";",
+					policy.UsagePolicy,
+					policy.Family,
+					policy.Id,
+					policy.Name,
+					policy.AnnotationRefs,
+					policy.Aliases,
+					policy.Notes,
+				)
 
+				// TODO: make truncate length configurable
 				for _, line := range lines {
-
 					fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
 						truncateString(line[0], 16, true), // usage-policy
 						truncateString(line[1], 20, true), // family
@@ -408,7 +418,9 @@ func DisplayLicensePoliciesTabbedText(output io.Writer) (err error) {
 						truncateString(line[6], 24, true), // note
 					)
 				}
+
 			} else {
+				// No wrapping needed
 				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
 					truncateString(policy.UsagePolicy, 16, true),                       // usage-policy
 					truncateString(policy.Family, 20, true),                            // family
@@ -551,70 +563,4 @@ func DisplayLicensePoliciesMarkdown(output io.Writer) (err error) {
 		}
 	}
 	return
-}
-
-// TODO make a generic function that takes interface{} and checks type for either string or []string
-// and processes wrap accordingly dependent on type (i.e., wrap only on []string)
-func wrapOutputLines(usage string,
-	family string, id string, name string,
-	aliases []string,
-	annotations []string,
-	notes []string) [][]string {
-
-	// calculate column dimension needed as max of slice sizes
-	var numRows = len(aliases)
-
-	if numRows < len(annotations) {
-		numRows = len(annotations)
-	}
-
-	if numRows < len(notes) {
-		numRows = len(notes)
-	}
-
-	var alias string
-	var annotation string
-	var note string
-
-	lines := make([][]string, numRows)
-
-	for i := range lines {
-		// create line slice sized to number of columns
-		line := make([]string, 7)
-		lines[i] = line
-
-		if i < len(aliases) {
-			alias = aliases[i]
-		} else {
-			alias = ""
-		}
-
-		if i < len(annotations) {
-			annotation = annotations[i]
-		} else {
-			annotation = ""
-		}
-
-		if i < len(notes) {
-			note = notes[i]
-		} else {
-			note = ""
-		}
-
-		if i == 0 {
-			line[0] = usage
-			line[1] = family
-			line[2] = id
-			line[3] = name
-			line[4] = annotation
-			line[5] = alias
-			line[6] = note
-		} else {
-			line[4] = annotation
-			line[5] = alias
-			line[6] = note
-		}
-	}
-
-	return lines
 }

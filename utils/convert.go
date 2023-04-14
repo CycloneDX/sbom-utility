@@ -58,6 +58,8 @@ func ConvertAnyToAny(values ...interface{}) {
 	for index, value := range values {
 		fmt.Printf("value[%d] (%T): %+v\n", index, value, value)
 		switch t := value.(type) {
+		case nil:
+			fmt.Println("Type is nil.")
 		case int:
 		case uint:
 		case int32:
@@ -69,8 +71,6 @@ func ConvertAnyToAny(values ...interface{}) {
 			fmt.Println("Type is a float:", t)
 		case string:
 			fmt.Println("Type is a string:", t)
-		case nil:
-			fmt.Println("Type is nil.")
 		case bool:
 			fmt.Println("Type is a bool:", t)
 		default:

@@ -146,3 +146,60 @@ func retrieveWhereFilters(whereValues string) (whereFilters []WhereFilter, err e
 	}
 	return
 }
+
+// A generic function that takes variadic "column" data (for a single row) as an interface{}
+// of either string or []string types and, if needed, "wraps" the single row data into multiple
+// text rows according to parameterized constraints.
+// NOTE: Currently, only wraps []string values
+// TODO: Also wrap on "maxChar" (per column) limit
+func wrapTableRowText(maxChars int, joinChar string, columns ...interface{}) (tableData [][]string, err error) {
+
+	// Assure separator char is set and ONLY a single character
+	if joinChar == "" || len(joinChar) > 1 {
+		joinChar = ","
+	}
+
+	// calculate column dimension needed as max of slice sizes
+	numColumns := len(columns)
+
+	// Allocate a 1 row table
+	tableData = make([][]string, 1)
+
+	// Allocate the first row of the multi-row "table"
+	var numRowsAllocated int = 1
+	rowData := make([]string, numColumns)
+	tableData[0] = rowData
+
+	// for each column inspect its data and "wrap" as needed
+	// TODO: wrap on macChars using spaces; for now, just support list output
+	for iCol, column := range columns {
+		switch data := column.(type) {
+		case string:
+			// for now, a straightforward copy for string types
+			rowData[iCol] = column.(string)
+		case []string:
+			entries := column.([]string)
+			numRowsNeeded := len(entries)
+
+			// If needed, allocate and append new rows
+			if numRowsNeeded > numRowsAllocated {
+				// as long as we need more rows allocated
+				for ; numRowsAllocated < numRowsNeeded; numRowsAllocated++ {
+					rowData = make([]string, numColumns)
+					tableData = append(tableData, rowData)
+				}
+				getLogger().Debugf("tableData: (%v)", tableData)
+			}
+
+			// Add the multi-line data to appropriate row in the table
+			for i := 0; i < numRowsNeeded; i++ {
+				tableData[i][iCol] = entries[i]
+			}
+			//getLogger().Debugf("tableData: (%v)", tableData)
+		default:
+			err = getLogger().Errorf("Unexpected type for report data: (%T): %v", data, data)
+		}
+	}
+
+	return
+}
