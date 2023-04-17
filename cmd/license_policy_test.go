@@ -34,8 +34,8 @@ const (
 // Alternative license policy files for testing
 const (
 	POLICY_FILE_GOOD_BAD_MAYBE = "test/policy/license-policy-license-expression-test-data.json"
-	// TODO: to confirm this conflict is caught at has time AND
-	// TODO: to confirm this conflict is caught as part of "license list" command
+	// TODO: to confirm this conflict is caught as part of "license policy" command
+	// TODO: to confirm this conflict is caught as part of "license list" command (with AND/OR as well)
 	POLICY_FILE_FAMILY_NAME_USAGE_CONFLICT = "test/policy/license-policy-family-name-usage-conflict.json"
 )
 

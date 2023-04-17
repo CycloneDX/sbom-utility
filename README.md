@@ -454,9 +454,27 @@ allow         Apache                        Apache-2.0                    Apache
 
 ##### Wrap flag
 
-Use the `--wrap` flag to toggle the wrapping of text within columns of the license policy report output using the values `true` or `false`. The default value is `false`.
+Use the `--wrap` flag to toggle the wrapping of text within columns of the license policy report (`txt` format only) output using the values `true` or `false`. The default value is `false`.
 
-###### Example: list summary
+##### Where flag
+
+The list command results can be filtered using the `--where` flag using the column names in the report. These include `usage-policy`, `family`, `id`, `name`, `annotations` and `notes`.
+
+###### Example: policy with where filter
+
+The following example shows filtering of  license policies using the `id` column:
+
+```bash
+./sbom-utility license policy --where id=Apache
+```
+
+```bash
+usage-policy  family  id          name                annotations  aliases                            notes
+------------  ------  --          ----                -----------  -------                            -----
+allow         Apache  Apache-1.0  Apache v1.0         APPROVED
+allow         Apache  Apache-1.1  Apache v1.1         APPROVED                                        This license has been su (24/54)
+allow         Apache  Apache-2.0  Apache License 2.0  APPROVED     Apache License, Version  (24/105)
+```
 
 ---
 
