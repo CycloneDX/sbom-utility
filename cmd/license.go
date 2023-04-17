@@ -94,7 +94,7 @@ func ClearGlobalLicenseData() {
 }
 
 func HashLicenseInfo(key string, licenseInfo LicenseInfo, whereFilters []WhereFilter) {
-	// Append to slice
+	// Find license usage policy by either license Id, Name or Expression
 	policy, err := FindPolicy(licenseInfo)
 
 	if err != nil {
@@ -173,8 +173,6 @@ func loadDocumentLicenses(document *schema.Sbom, whereFilters []WhereFilter) (er
 
 	// NOTE: DEBUG: use this to debug license policy hashmaps have appropriate # of entries
 	//licensePolicyConfig.Debug()
-
-	// TODO Support processing of []WhereFilter
 
 	// At this time, fail SPDX format SBOMs as "unsupported" (for "any" format)
 	if !document.FormatInfo.IsCycloneDx() {

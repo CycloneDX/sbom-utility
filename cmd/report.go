@@ -18,6 +18,8 @@
 package cmd
 
 import (
+	"bytes"
+	"fmt"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -50,6 +52,50 @@ const (
 	MD_ALIGN_CENTER     = "-:-"
 	MD_ALIGN_RIGHT      = "--:"
 )
+
+// Helper function in case displayed table columns become too wide
+func truncateString(value string, maxLength int, showDetail bool) string {
+	length := len(value)
+	if length > maxLength {
+		value = value[:maxLength]
+		if showDetail {
+			value = fmt.Sprintf("%s (%v/%v)", value, maxLength, length)
+		}
+	}
+	return value
+}
+
+const REPORT_LINE_CONTAINS_ANY = -1
+
+func lineContainsValues(buffer bytes.Buffer, lineNum int, values ...string) (int, bool) {
+	lines := strings.Split(buffer.String(), "\n")
+	getLogger().Tracef("output: %s", lines)
+	//var lineContainsValue bool = false
+
+	for curLineNum, line := range lines {
+
+		// if ths is a line we need to test
+		if lineNum == REPORT_LINE_CONTAINS_ANY || curLineNum == lineNum {
+			// test that all values occur in the current line
+			for iValue, value := range values {
+				if !strings.Contains(line, value) {
+					// if we failed to match all values on the specified line return failure
+					if curLineNum == lineNum {
+						return curLineNum, false
+					}
+					// else, keep checking next line
+					break
+				}
+
+				// If this is the last value to test for, then all values have matched
+				if iValue+1 == len(values) {
+					return curLineNum, true
+				}
+			}
+		}
+	}
+	return REPORT_LINE_CONTAINS_ANY, false
+}
 
 func createMarkdownColumnAlignment(titles []string) (alignment []string) {
 	for range titles {
@@ -98,5 +144,63 @@ func retrieveWhereFilters(whereValues string) (whereFilters []WhereFilter, err e
 			whereFilters = append(whereFilters, *filter)
 		}
 	}
+	return
+}
+
+// A generic function that takes variadic "column" data (for a single row) as an interface{}
+// of either string or []string types and, if needed, "wraps" the single row data into multiple
+// text rows according to parameterized constraints.
+// NOTE: Currently, only wraps []string values
+// TODO: Also wrap on "maxChar" (per column) limit
+func wrapTableRowText(maxChars int, joinChar string, columns ...interface{}) (tableData [][]string, err error) {
+
+	// Assure separator char is set and ONLY a single character
+	// TODO
+	// if joinChar == "" || len(joinChar) > 1 {
+	// 	joinChar = ","
+	// }
+
+	// calculate column dimension needed as max of slice sizes
+	numColumns := len(columns)
+
+	// Allocate a 1 row table
+	tableData = make([][]string, 1)
+
+	// Allocate the first row of the multi-row "table"
+	var numRowsAllocated int = 1
+	rowData := make([]string, numColumns)
+	tableData[0] = rowData
+
+	// for each column inspect its data and "wrap" as needed
+	// TODO: wrap on macChars using spaces; for now, just support list output
+	for iCol, column := range columns {
+		switch data := column.(type) {
+		case string:
+			// for now, a straightforward copy for string types
+			rowData[iCol] = column.(string)
+		case []string:
+			entries := column.([]string)
+			numRowsNeeded := len(entries)
+
+			// If needed, allocate and append new rows
+			if numRowsNeeded > numRowsAllocated {
+				// as long as we need more rows allocated
+				for ; numRowsAllocated < numRowsNeeded; numRowsAllocated++ {
+					rowData = make([]string, numColumns)
+					tableData = append(tableData, rowData)
+				}
+				getLogger().Debugf("tableData: (%v)", tableData)
+			}
+
+			// Add the multi-line data to appropriate row in the table
+			for i := 0; i < numRowsNeeded; i++ {
+				tableData[i][iCol] = entries[i]
+			}
+			//getLogger().Debugf("tableData: (%v)", tableData)
+		default:
+			err = getLogger().Errorf("Unexpected type for report data: (%T): %v", data, data)
+		}
+	}
+
 	return
 }

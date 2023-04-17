@@ -558,7 +558,7 @@ func whereFilterMatch(mapObject map[string]interface{}, whereFilters []WhereFilt
 
 		key = filter.key
 		value, present := mapObject[key]
-		getLogger().Tracef("testing object map[%s]: `%v`", key, value)
+		getLogger().Debugf("testing object map[%s]: `%v`", key, value)
 
 		if !present {
 			match = false

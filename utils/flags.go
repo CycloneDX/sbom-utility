@@ -66,10 +66,8 @@ type CommandFlags struct {
 }
 
 type LicenseCommandFlags struct {
-	Summary   bool
-	Policy    string
-	NoLicense bool
-	NoPolicy  bool
+	Summary      bool
+	ListLineWrap bool
 }
 
 type CustomValidationFlags struct {

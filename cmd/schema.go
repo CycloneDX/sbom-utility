@@ -34,6 +34,10 @@ const (
 	SUBCOMMAND_SCHEMA_LIST = "list"
 )
 
+const (
+	MSG_OUTPUT_NO_SCHEMAS_FOUND = "[WARN] no schemas found in configuration (i.e., \"config.json\")"
+)
+
 var VALID_SUBCOMMANDS_SCHEMA = []string{SUBCOMMAND_SCHEMA_LIST}
 
 // Subcommand flags

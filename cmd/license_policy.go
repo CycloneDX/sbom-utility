@@ -31,17 +31,66 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var VALID_SUBCOMMANDS_POLICY = []string{SUBCOMMAND_RESOURCE_LIST}
+
+// Subcommand flags
+// TODO: Support a new --sort <column> flag
+const (
+	FLAG_POLICY_REPORT_LINE_WRAP = "wrap"
+)
+
+// filter keys
+const (
+	POLICY_FILTER_KEY_USAGE_POLICY = "usage-policy"
+	POLICY_FILTER_KEY_FAMILY       = "family"
+	POLICY_FILTER_KEY_SPDX_ID      = "id"
+	POLICY_FILTER_KEY_NAME         = "name"
+	POLICY_FILTER_KEY_ANNOTATIONS  = "annotations"
+	POLICY_FILTER_KEY_ALIASES      = "aliases"
+	POLICY_FILTER_KEY_NOTES        = "notes"
+)
+
+var POLICY_LIST_TITLES = []string{
+	POLICY_FILTER_KEY_USAGE_POLICY,
+	POLICY_FILTER_KEY_FAMILY,
+	POLICY_FILTER_KEY_SPDX_ID,
+	POLICY_FILTER_KEY_NAME,
+	POLICY_FILTER_KEY_ANNOTATIONS,
+	POLICY_FILTER_KEY_ALIASES,
+	POLICY_FILTER_KEY_NOTES,
+}
+var VALID_POLICY_WHERE_FILTER_KEYS = []string{
+	POLICY_FILTER_KEY_USAGE_POLICY,
+	POLICY_FILTER_KEY_FAMILY,
+	POLICY_FILTER_KEY_SPDX_ID,
+	POLICY_FILTER_KEY_NAME,
+	POLICY_FILTER_KEY_ANNOTATIONS,
+	POLICY_FILTER_KEY_ALIASES,
+	POLICY_FILTER_KEY_NOTES,
+}
+
+// TODO: remove if we always map the old field names to new ones
+// var PROPERTY_MAP_FIELD_TITLE_TO_JSON_KEY = map[string]string{
+// 	"usage-policy": "usagePolicy",
+// 	"spdx-id":      "id",
+// 	"annotations":  "annotationRefs",
+// }
+
 // Subcommand flags
 const (
-	FLAG_POLICY_OUTPUT_FORMAT_HELP = "format output using the specified type"
+	FLAG_POLICY_OUTPUT_FORMAT_HELP    = "format output using the specified type"
+	FLAG_POLICY_REPORT_LINE_WRAP_HELP = "toggles the wrapping of text within report column output (default: false)"
+)
+
+// License list policy command informational messages
+// TODO Use only for Warning messages
+const (
+	MSG_OUTPUT_NO_POLICIES_FOUND = "no license policies found in BOM document"
 )
 
 // Command help formatting
 var LICENSE_POLICY_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{FORMAT_TEXT, FORMAT_CSV, FORMAT_MARKDOWN}, ", ")
-
-// Titles for lists
-var LICENSE_POLICY_SUMMARY_TITLES = []string{"Policy", "Family", "SPDX ID", "Name", "Annotations", "Notes"}
 
 // WARNING: Cobra will not recognize a subcommand if its `command.Use` is not a single
 // word string that matches one of the `command.ValidArgs` set on the parent command
@@ -52,6 +101,11 @@ func NewCommandPolicy() *cobra.Command {
 	command.Long = "List caller-supplied, \"allow/deny\"-style policies associated with known software, hardware or data licenses"
 	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
 		FLAG_POLICY_OUTPUT_FORMAT_HELP+LICENSE_POLICY_SUPPORTED_FORMATS)
+	command.Flags().StringP(FLAG_REPORT_WHERE, "", "", FLAG_REPORT_WHERE_HELP)
+	command.Flags().BoolVarP(
+		&utils.GlobalFlags.LicenseFlags.ListLineWrap,
+		FLAG_POLICY_REPORT_LINE_WRAP, "", false,
+		FLAG_POLICY_REPORT_LINE_WRAP_HELP)
 	command.RunE = policyCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		if len(args) != 0 {
@@ -69,39 +123,68 @@ func policyCmdImpl(cmd *cobra.Command, args []string) (err error) {
 
 	outputFile, writer, err := createOutputFile(utils.GlobalFlags.OutputFile)
 
-	if err == nil {
-		err = ListPolicies(writer)
-	}
+	// use function closure to assure consistent error output based upon error type
+	defer func() {
+		// always close the output file
+		if outputFile != nil {
+			err = outputFile.Close()
+			getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.OutputFile)
+		}
+	}()
 
-	// always close the output file
-	if outputFile != nil {
-		outputFile.Close()
-		getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.OutputFile)
+	// process filters supplied on the --where command flag
+	whereFilters, err := processWhereFlag(cmd)
+
+	if err == nil {
+		err = ListLicensePolicies(writer, whereFilters)
 	}
 
 	return
 }
 
-func ListPolicies(writer io.Writer) (err error) {
+// Assure all errors are logged
+func processLicensePolicyListResults(err error) {
+	if err != nil {
+		getLogger().Error(err)
+	}
+}
+
+func ListLicensePolicies(writer io.Writer, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
+
+	// use function closure to assure consistent error output based upon error type
+	defer func() {
+		if err != nil {
+			processLicensePolicyListResults(err)
+		}
+	}()
+
+	// Retrieve the subset of policies that match the where filters
+	// NOTE: This has the side-effect of mapping alt. policy field name values
+	var filteredMap *slicemultimap.MultiMap
+	filteredMap, err = licensePolicyConfig.GetFilteredFamilyNameMap(whereFilters)
+
+	if err != nil {
+		return
+	}
 
 	// default output (writer) to standard out
 	switch utils.GlobalFlags.OutputFormat {
 	case FORMAT_DEFAULT:
 		// defaults to text if no explicit `--format` parameter
-		err = DisplayLicensePoliciesTabbedText(writer)
+		err = DisplayLicensePoliciesTabbedText(writer, filteredMap)
 	case FORMAT_TEXT:
-		err = DisplayLicensePoliciesTabbedText(writer)
+		err = DisplayLicensePoliciesTabbedText(writer, filteredMap)
 	case FORMAT_CSV:
-		err = DisplayLicensePoliciesCSV(writer)
+		err = DisplayLicensePoliciesCSV(writer, filteredMap)
 	case FORMAT_MARKDOWN:
-		err = DisplayLicensePoliciesMarkdown(writer)
+		err = DisplayLicensePoliciesMarkdown(writer, filteredMap)
 	default:
 		// default to text format for anything else
 		getLogger().Warningf("Unsupported format: `%s`; using default format.",
 			utils.GlobalFlags.OutputFormat)
-		err = DisplayLicensePoliciesTabbedText(writer)
+		err = DisplayLicensePoliciesTabbedText(writer, filteredMap)
 	}
 	return
 }
@@ -113,6 +196,7 @@ func FindPolicyBySpdxId(id string) (policyValue string, matchedPolicy LicensePol
 	var matched bool
 	var arrPolicies []interface{}
 
+	// Note: this will cause all policy hashmaps to be initialized (created), if it has not bee
 	licensePolicyIdMap, err := licensePolicyConfig.GetLicenseIdMap()
 
 	if err != nil {
@@ -160,6 +244,7 @@ func FindPolicyByFamilyName(name string) (policyValue string, matchedPolicy Lice
 		return
 	}
 
+	// Note: this will cause all policy hashmaps to be initialized (created), if it has not been
 	familyNameMap, _ := licensePolicyConfig.GetFamilyNameMap()
 
 	// See if any of the policy family keys contain the family name
@@ -276,25 +361,15 @@ func searchForLicenseFamilyName(licenseName string) (found bool, familyName stri
 	return
 }
 
-// Helper function in case displayed table columns become too wide
-func truncateString(value string, maxLength int) string {
-	if len(value) > maxLength {
-		value = value[:maxLength]
-	}
-	return value
-}
-
 // Display all license policies including those with SPDX IDs and those
 // only with "family" names which is reflected in the contents of the
 // hashmap keyed on family names.
 // NOTE: assumes all entries in the policy config file MUST have family names
 // TODO: Allow caller to pass flag to truncate or not (perhaps with value)
 // TODO: Add a --no-title flag to skip title output
-func DisplayLicensePoliciesTabbedText(output io.Writer) (err error) {
+func DisplayLicensePoliciesTabbedText(output io.Writer, filteredPolicyMap *slicemultimap.MultiMap) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
-
-	var licenseFamilyNameMap *slicemultimap.MultiMap
 
 	// initialize tabwriter
 	w := new(tabwriter.Writer)
@@ -304,46 +379,72 @@ func DisplayLicensePoliciesTabbedText(output io.Writer) (err error) {
 	w.Init(output, 8, 2, 2, ' ', 0)
 
 	// create underline row from slices of optional and compulsory titles
-	underlines := createTitleTextSeparators(LICENSE_POLICY_SUMMARY_TITLES)
+	underlines := createTitleTextSeparators(POLICY_LIST_TITLES)
 
 	// Add tabs between column titles for the tabWRiter
-	fmt.Fprintf(w, "%s\n", strings.Join(LICENSE_POLICY_SUMMARY_TITLES, "\t"))
+	fmt.Fprintf(w, "%s\n", strings.Join(POLICY_LIST_TITLES, "\t"))
 	fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
-	// NOTE: the "family" name hashmap SHOULD have all policy entries (i.e., with/without SPDX IDs)
-	licenseFamilyNameMap, err = licensePolicyConfig.GetFamilyNameMap()
-
-	if err != nil {
-		return
-	}
-
-	// Sort entries for listing by family name (keys)
-	keyNames := licenseFamilyNameMap.KeySet()
+	// Sort entries for listing by family name keys
+	keyNames := filteredPolicyMap.KeySet()
 	sort.Slice(keyNames, func(i, j int) bool {
 		return keyNames[i].(string) < keyNames[j].(string)
 	})
 
 	// output each license policy entry as a line (by sorted key)
+	var lines [][]string
+
 	for _, key := range keyNames {
-		values, match := licenseFamilyNameMap.Get(key)
+		values, match := filteredPolicyMap.Get(key)
 		getLogger().Tracef("%v (%t)", values, match)
 
 		for _, value := range values {
 			policy := value.(LicensePolicy)
-			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n",
-				policy.UsagePolicy,
-				truncateString(policy.Family, 15),
-				truncateString(policy.Id, 20),
-				truncateString(policy.Name, 20),
-				truncateString(strings.Join(policy.AnnotationRefs, ", "), 32),
-				truncateString(strings.Join(policy.Notes, ", "), 32))
+
+			// Wrap all column text (i.e. flag `--wrap=true`)
+			if utils.GlobalFlags.LicenseFlags.ListLineWrap {
+				lines, err = wrapTableRowText(24, ",",
+					policy.UsagePolicy,
+					policy.Family,
+					policy.Id,
+					policy.Name,
+					policy.AnnotationRefs,
+					policy.Aliases,
+					policy.Notes,
+				)
+
+				// TODO: make truncate length configurable
+				for _, line := range lines {
+					fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+						truncateString(line[0], 16, true), // usage-policy
+						truncateString(line[1], 20, true), // family
+						truncateString(line[2], 20, true), // id
+						truncateString(line[3], 20, true), // name
+						truncateString(line[4], 24, true), // annotation
+						truncateString(line[5], 24, true), // alias
+						truncateString(line[6], 24, true), // note
+					)
+				}
+
+			} else {
+				// No wrapping needed
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+					truncateString(policy.UsagePolicy, 16, true),                       // usage-policy
+					truncateString(policy.Family, 20, true),                            // family
+					truncateString(policy.Id, 20, true),                                // id
+					truncateString(policy.Name, 20, true),                              // name
+					truncateString(strings.Join(policy.AnnotationRefs, ","), 24, true), // annotation
+					truncateString(strings.Join(policy.Aliases, ","), 24, true),        // alias
+					truncateString(strings.Join(policy.Notes, ","), 24, true),          // note
+				)
+			}
 		}
 	}
 	return
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplayLicensePoliciesCSV(output io.Writer) (err error) {
+func DisplayLicensePoliciesCSV(output io.Writer, filteredPolicyMap *slicemultimap.MultiMap) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -351,22 +452,18 @@ func DisplayLicensePoliciesCSV(output io.Writer) (err error) {
 	w := csv.NewWriter(output)
 	defer w.Flush()
 
-	if err = w.Write(LICENSE_POLICY_SUMMARY_TITLES); err != nil {
-		return getLogger().Errorf("error writing to output (%v): %s", LICENSE_POLICY_SUMMARY_TITLES, err)
+	if err = w.Write(POLICY_LIST_TITLES); err != nil {
+		return getLogger().Errorf("error writing to output (%v): %s", POLICY_LIST_TITLES, err)
 	}
 
-	// NOTE: the "family" name hashmap SHOULD have all policy entries (i.e., with/without SPDX IDs)
-	familyNameMap, errHashMap := licensePolicyConfig.GetFamilyNameMap()
-
-	if errHashMap != nil {
-		return
-	}
-	keyNames := familyNameMap.KeySet()
+	// Retrieve keys for policies to list
+	keyNames := filteredPolicyMap.KeySet()
 
 	// Emit no schemas found warning into output
+	// TODO Use only for Warning messages, do not emit in output table
 	if len(keyNames) == 0 {
-		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_LICENSES_FOUND)
-		return fmt.Errorf(MSG_OUTPUT_NO_LICENSES_FOUND)
+		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_POLICIES_FOUND)
+		return fmt.Errorf(MSG_OUTPUT_NO_POLICIES_FOUND)
 	}
 
 	// Sort entries by family name
@@ -376,7 +473,7 @@ func DisplayLicensePoliciesCSV(output io.Writer) (err error) {
 
 	var line []string
 	for _, key := range keyNames {
-		values, match := familyNameMap.Get(key)
+		values, match := filteredPolicyMap.Get(key)
 		getLogger().Tracef("%v (%t)", values, match)
 
 		for _, value := range values {
@@ -388,7 +485,9 @@ func DisplayLicensePoliciesCSV(output io.Writer) (err error) {
 				policy.Id,
 				policy.Name,
 				strings.Join(policy.AnnotationRefs, ", "),
-				strings.Join(policy.Notes, ", "))
+				strings.Join(policy.Aliases, ", "),
+				strings.Join(policy.Notes, ", "),
+			)
 
 			if err = w.Write(line); err != nil {
 				getLogger().Errorf("csv.Write: %w", err)
@@ -399,32 +498,27 @@ func DisplayLicensePoliciesCSV(output io.Writer) (err error) {
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplayLicensePoliciesMarkdown(output io.Writer) (err error) {
+func DisplayLicensePoliciesMarkdown(output io.Writer, filteredPolicyMap *slicemultimap.MultiMap) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	// create title row
-	titleRow := createMarkdownRow(LICENSE_POLICY_SUMMARY_TITLES)
+	titleRow := createMarkdownRow(POLICY_LIST_TITLES)
 	fmt.Fprintf(output, "%s\n", titleRow)
 
-	alignments := createMarkdownColumnAlignment(LICENSE_POLICY_SUMMARY_TITLES)
+	alignments := createMarkdownColumnAlignment(POLICY_LIST_TITLES)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(output, "%s\n", alignmentRow)
 
-	// NOTE: the "family" name hashmap SHOULD have all policy entries (i.e., with/without SPDX IDs)
-	familyNameMap, errHashMap := licensePolicyConfig.GetFamilyNameMap()
-
-	if errHashMap != nil {
-		return errHashMap
-	}
+	// Retrieve keys for policies to list
+	keyNames := filteredPolicyMap.KeySet()
 
 	// Display a warning messing in the actual output and return (short-circuit)
-	keyNames := familyNameMap.KeySet()
-
 	// Emit no schemas found warning into output
+	// TODO Use only for Warning messages, do not emit in output table
 	if len(keyNames) == 0 {
-		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_LICENSES_FOUND)
-		return fmt.Errorf(MSG_OUTPUT_NO_LICENSES_FOUND)
+		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_POLICIES_FOUND)
+		return fmt.Errorf(MSG_OUTPUT_NO_POLICIES_FOUND)
 	}
 
 	// Sort entries by family name
@@ -436,7 +530,7 @@ func DisplayLicensePoliciesMarkdown(output io.Writer) (err error) {
 	var lineRow string
 
 	for _, key := range keyNames {
-		values, match := familyNameMap.Get(key)
+		values, match := filteredPolicyMap.Get(key)
 		getLogger().Tracef("%v (%t)", values, match)
 
 		for _, value := range values {
@@ -449,13 +543,14 @@ func DisplayLicensePoliciesMarkdown(output io.Writer) (err error) {
 
 			// reset loop variables for new assignments
 			line = nil
-
 			line = append(line, policy.UsagePolicy,
 				policy.Family,
 				policy.Id,
 				policy.Name,
 				strings.Join(policy.AnnotationRefs, ", "),
-				strings.Join(policy.Notes, ", "))
+				strings.Join(policy.Aliases, ", "),
+				strings.Join(policy.Notes, ", "),
+			)
 
 			lineRow = createMarkdownRow(line)
 			fmt.Fprintf(output, "%s\n", lineRow)

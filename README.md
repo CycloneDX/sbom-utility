@@ -435,20 +435,42 @@ To view a report listing the contents of the current policy file (i.e., [`licens
 ```
 
 ```bash
-Policy        Family           SPDX ID               Name                  Annotations
-------        ------           -------               ----                  -----------
-allow         0BSD             0BSD                  BSD Zero Clause Lice  APPROVED
-allow         AFL              AFL-3.0               Academic Free Licens  APPROVED
-needs-review  AGPL             AGPL-3.0-or-later     Affero General Publi  NEEDS-APPROVAL
-needs-review  APSL             APSL-2.0              Apple Public Source   NEEDS-APPROVAL
-allow         Adobe            Adobe-2006            Adobe Systems Incorp  APPROVED
-allow         Apache           Apache-2.0            Apache License 2.0    APPROVED
+usage-policy  family                        spdx-id                       name                          annotations                       aliases                            notes
+------------  ------                        -------                       ----                          -----------                       -------                            -----
+allow         0BSD                          0BSD                          BSD Zero Clause Lice (20/23)  APPROVED                          Free Public License 1.0. (24/25)
+needs-review  ADSL                          ADSL                          Amazon Digital Servi (20/31)  NEEDS-APPROVAL
+allow         AFL                           AFL-1.1                       Academic Free Licens (20/26)  APPROVED
+needs-review  AGPL                          AGPL-1.0                      Affero General Publi (20/34)  NEEDS-APPROVAL,AGPL-WARN (24/38)
+needs-review  APSL                          APSL-1.0                      Apple Public Source  (20/27)  NEEDS-APPROVAL
+allow         Adobe                         Adobe-2006                    Adobe Systems Incorp (20/56)  APPROVED
+allow         Apache                        Apache-2.0                    Apache License 2.0            APPROVED                          Apache License, Version  (24/105)
 ...
 ```
 
 - **Note**:
   - Currently, the default `license.json` file does not contain an entry for the complete SPDX 3.2 license templates. An issue [12](https://github.com/CycloneDX/sbom-utility/issues/12) is open to add parity.
   - Annotations can be defined within the `license.json` file and one or more assigned each license entry.
+  - Column data is, by default, truncated in `txt` format views only. In these cases, the number of characters shown out of the total available will be displayed at the point of truncation (e.g., seeing `(24/26)` in a column would indicate 24 out of 26b characters were displayed).
+
+##### Wrap flag
+
+Use the `--wrap` flag to toggle the wrapping of text within columns of the license policy report (`txt` format only) output using the values `true` or `false`. The default value is `false`.
+
+###### Example: policy with where filter
+
+The following example shows filtering of  license policies using the `id` column:
+
+```bash
+./sbom-utility license policy --where id=Apache
+```
+
+```bash
+usage-policy  family  id          name                annotations  aliases                            notes
+------------  ------  --          ----                -----------  -------                            -----
+allow         Apache  Apache-1.0  Apache v1.0         APPROVED
+allow         Apache  Apache-1.1  Apache v1.1         APPROVED                                        This license has been su (24/54)
+allow         Apache  Apache-2.0  Apache License 2.0  APPROVED     Apache License, Version  (24/105)
+```
 
 ---
 
@@ -811,7 +833,7 @@ Currently, all `vulnerability list` command results are sorted by vulnerability 
 ```
 
 ```bash
-id              bom-ref  source-name  source-url                                      created                   published                 updated                   rejected  description
+id              bom-ref  source-name source-url                                      created                   published                 updated                   rejected  description
 --              -------  ----------  -----------                                      -------                   ---------                 -------                   --------  -----------
 CVE-2020-25649           NVD         https://nvd.nist.gov/vuln/detail/CVE-2020-25649  2020-12-03T00:00:00.000Z  2020-12-03T00:00:00.000Z  2023-02-02T00:00:00.000Z            com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection.
 CVE-2022-42003           NVD         https://nvd.nist.gov/vuln/detail/CVE-2022-42003  2022-10-02T00:00:00.000Z  2022-10-02T00:00:00.000Z  2022-10-02T00:00:00.000Z            In FasterXML jackson-databind before 2.14.0-rc1, resource exhaustion can occur because of a lack of a check in primitive value deserializers to avoid deep wrapper array nesting, when the UNWRAP_SINGLE_VALUE_ARRAYS feature is enabled.
@@ -825,7 +847,7 @@ CVE-2022-42004           NVD         https://nvd.nist.gov/vuln/detail/CVE-2022-4
 ```
 
 ```bash
-id              bom-ref  source-name  source-url                                      created                   published                 updated                   rejected  description
+id              bom-ref  source-name source-url                                      created                   published                 updated                   rejected  description
 --              -------  ----------  -----------                                      -------                   ---------                 -------                   --------  -----------
 CVE-2020-25649           NVD         https://nvd.nist.gov/vuln/detail/CVE-2020-25649  2020-12-03T00:00:00.000Z  2020-12-03T00:00:00.000Z  2023-02-02T00:00:00.000Z            com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection.
 ```

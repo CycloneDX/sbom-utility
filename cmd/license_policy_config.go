@@ -47,7 +47,7 @@ var ALL_USAGE_POLICIES = []string{POLICY_ALLOW, POLICY_DENY, POLICY_NEEDS_REVIEW
 // alphanum, "-", and "." characters and disallows empty strings
 // TODO:
 // - First and last chars are not "-" or "."
-// - Enforce reasonable min/.max length.
+// - Enforce reasonable min/max lengths
 //   In theory, we can check overall length with positive lookahead
 //   (e.g., min 3 max 128):  (?=.{3,128}$)
 //   However, this does not appear to be supported in `regexp` package
@@ -69,24 +69,42 @@ type LicensePolicy struct {
 	Notes          []string `json:"notes"`
 	Urls           []string `json:"urls"`
 	AnnotationRefs []string `json:"annotationRefs"`
+
+	// Alternative field names for --where searches
+	AltUsagePolicy    string `json:"usage-policy"`
+	AltAnnotationRefs string `json:"annotations"`
+	AltSPDXId         string `json:"spdx-id"`
 }
 
 type LicenseComplianceConfig struct {
-	PolicyList           []LicensePolicy   `json:"policies"`
-	Annotations          map[string]string `json:"annotations"`
-	policyConfigFile     string
-	loadOnce             sync.Once
-	hashOnce             sync.Once
-	licenseFamilyNameMap *slicemultimap.MultiMap
-	licenseIdMap         *slicemultimap.MultiMap
+	PolicyList            []LicensePolicy   `json:"policies"`
+	Annotations           map[string]string `json:"annotations"`
+	policyConfigFile      string
+	loadOnce              sync.Once
+	hashOnce              sync.Once
+	licenseFamilyNameMap  *slicemultimap.MultiMap
+	licenseIdMap          *slicemultimap.MultiMap
+	filteredFamilyNameMap *slicemultimap.MultiMap
 }
 
-func (config *LicenseComplianceConfig) Debug() {
-	fmt.Printf(">> policyConfigFile: %s\n", config.policyConfigFile)
-	fmt.Printf(">> PolicyList (length): %v\n", len(config.PolicyList))
-	fmt.Printf(">> licenseFamilyNameMap.Keys\n() (length): %v\n", len(config.licenseFamilyNameMap.Keys()))
-	fmt.Printf(">> licenseIdMap.Keys\n() (length): %v\n", len(config.licenseIdMap.Keys()))
+func (config *LicenseComplianceConfig) Reset() {
+	config.policyConfigFile = DEFAULT_LICENSE_POLICIES
+	config.PolicyList = nil
+	config.Annotations = nil
+	if config.licenseFamilyNameMap != nil {
+		config.licenseFamilyNameMap.Clear()
+	}
+	if config.licenseIdMap != nil {
+		config.licenseIdMap.Clear()
+	}
 }
+
+// func (config *LicenseComplianceConfig) Debug() {
+// 	fmt.Printf(">> policyConfigFile: %s\n", config.policyConfigFile)
+// 	fmt.Printf(">> PolicyList (length): %v\n", len(config.PolicyList))
+// 	fmt.Printf(">> licenseFamilyNameMap.Keys\n() (length): %v\n", len(config.licenseFamilyNameMap.Keys()))
+// 	fmt.Printf(">> licenseIdMap.Keys\n() (length): %v\n", len(config.licenseIdMap.Keys()))
+// }
 
 func (config *LicenseComplianceConfig) GetFamilyNameMap() (hashmap *slicemultimap.MultiMap, err error) {
 	if config.licenseFamilyNameMap == nil {
@@ -100,6 +118,23 @@ func (config *LicenseComplianceConfig) GetLicenseIdMap() (hashmap *slicemultimap
 		err = config.HashLicensePolicies()
 	}
 	return config.licenseIdMap, err
+}
+
+func (config *LicenseComplianceConfig) GetFilteredFamilyNameMap(whereFilters []WhereFilter) (hashmap *slicemultimap.MultiMap, err error) {
+	// NOTE: This call is necessary as this will cause all `licensePolicyConfig.PolicyList`
+	// entries to have alternative field names to be mapped (e.g., `usagePolicy` -> `usage-policy`)
+	config.filteredFamilyNameMap, err = config.GetFamilyNameMap()
+
+	if err != nil {
+		return
+	}
+
+	if len(whereFilters) > 0 {
+		// Always use a new filtered hashmap for each filtered list request
+		licensePolicyConfig.filteredFamilyNameMap = slicemultimap.New()
+		err = licensePolicyConfig.filteredHashLicensePolicies(whereFilters)
+	}
+	return config.filteredFamilyNameMap, err
 }
 
 func (config *LicenseComplianceConfig) LoadLicensePolicies(filename string) (err error) {
@@ -117,6 +152,9 @@ func (config *LicenseComplianceConfig) LoadLicensePolicies(filename string) (err
 func (config *LicenseComplianceConfig) innerLoadLicensePolicies(filename string) (err error) {
 	getLogger().Enter(filename)
 	defer getLogger().Exit()
+
+	// Always reset the config if a new policy file is loaded
+	config.Reset()
 
 	// locate the license policy file
 	config.policyConfigFile, err = utils.FindVerifyConfigFileAbsPath(getLogger(), filename)
@@ -164,7 +202,23 @@ func (config *LicenseComplianceConfig) innerHashLicensePolicies() (err error) {
 	config.licenseFamilyNameMap = slicemultimap.New()
 	config.licenseIdMap = slicemultimap.New()
 
-	for _, policy := range config.PolicyList {
+	for i, policy := range config.PolicyList {
+
+		// Map old JSON key names to new key names (as they appear as titles in report columns)
+
+		// TODO: use pointer only to has, do not use local copy
+		// Update local copy that is hashed
+		policy.AltSPDXId = policy.Id
+		policy.AltUsagePolicy = policy.UsagePolicy
+		policy.AltAnnotationRefs = strings.Join(policy.AnnotationRefs, ",")
+		getLogger().Tracef("\n >>> HASHING!!!: id: `%s`, spdx-id: `%s`\n", policy.Id, policy.AltSPDXId)
+		// Update the original entries on configuration
+		config.PolicyList[i].AltSPDXId = policy.Id
+		config.PolicyList[i].AltUsagePolicy = policy.UsagePolicy
+		config.PolicyList[i].AltAnnotationRefs = strings.Join(policy.AnnotationRefs, ",")
+		getLogger().Tracef("\n >>> Original!!!: id: `%s`, spdx-id: `%s`\n", config.PolicyList[i].Id, config.PolicyList[i].AltSPDXId)
+
+		// Actually hash the policy
 		err = config.hashPolicy(policy)
 		if err != nil {
 			err = fmt.Errorf("unable to hash policy: %v", policy)
@@ -261,6 +315,49 @@ func (config *LicenseComplianceConfig) hashChildPolicies(policy LicensePolicy) (
 	return
 }
 
+func (config *LicenseComplianceConfig) filteredHashLicensePolicies(whereFilters []WhereFilter) (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit(err)
+
+	// NOTE: original []PolicyList includes values for both deprecated and current fields
+	// So that filtered "queries" will work regardless (for backwards compatibility)
+	for _, policy := range config.PolicyList {
+		err = config.filteredHashLicensePolicy(policy, whereFilters)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+// Hash a CDX Component and recursively those of any "nested" components
+// TODO we should WARN if version is not a valid semver (e.g., examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json)
+func (config *LicenseComplianceConfig) filteredHashLicensePolicy(policy LicensePolicy, whereFilters []WhereFilter) (err error) {
+	var match bool = true
+	var mapPolicy map[string]interface{}
+
+	// See if the policy matches where filters criteria
+	if len(whereFilters) > 0 {
+		mapPolicy, err = utils.ConvertStructToMap(policy)
+		if err != nil {
+			return
+		}
+
+		match, err = whereFilterMatch(mapPolicy, whereFilters)
+		if err != nil {
+			return
+		}
+	}
+
+	// Hash policy if it matched where filters
+	if match {
+		getLogger().Debugf("Matched: Hashing Policy: id: %s, family: %s", policy.Id, policy.Family)
+		config.filteredFamilyNameMap.Put(policy.Family, policy)
+	}
+
+	return
+}
+
 //------------------------------------------------
 // CDX LicenseChoice "helper" functions
 //------------------------------------------------
@@ -336,7 +433,7 @@ func IsValidPolicyEntry(policy LicensePolicy) bool {
 
 	if policy.Id == "" {
 		if len(policy.Children) < 1 {
-			getLogger().Tracef("Family (policy): `%s`. Has no children (SPDX IDs) listed.", policy.Family)
+			getLogger().Debugf("Family (policy): `%s`. Has no children (SPDX IDs) listed.", policy.Family)
 		}
 		// Test to make sure "family" entries (i.e. policy.Id == "") have valid "children" (SPDX IDs)
 		for _, childId := range policy.Children {
