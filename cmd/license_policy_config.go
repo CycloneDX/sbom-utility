@@ -132,7 +132,7 @@ func (config *LicenseComplianceConfig) GetFilteredFamilyNameMap(whereFilters []W
 	if len(whereFilters) > 0 {
 		// Always use a new filtered hashmap for each filtered list request
 		licensePolicyConfig.filteredFamilyNameMap = slicemultimap.New()
-		licensePolicyConfig.filteredHashLicensePolicies(whereFilters)
+		err = licensePolicyConfig.filteredHashLicensePolicies(whereFilters)
 	}
 	return config.filteredFamilyNameMap, err
 }
