@@ -155,9 +155,10 @@ func retrieveWhereFilters(whereValues string) (whereFilters []WhereFilter, err e
 func wrapTableRowText(maxChars int, joinChar string, columns ...interface{}) (tableData [][]string, err error) {
 
 	// Assure separator char is set and ONLY a single character
-	if joinChar == "" || len(joinChar) > 1 {
-		joinChar = ","
-	}
+	// TODO
+	// if joinChar == "" || len(joinChar) > 1 {
+	// 	joinChar = ","
+	// }
 
 	// calculate column dimension needed as max of slice sizes
 	numColumns := len(columns)
