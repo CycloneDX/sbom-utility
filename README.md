@@ -456,10 +456,6 @@ allow         Apache                        Apache-2.0                    Apache
 
 Use the `--wrap` flag to toggle the wrapping of text within columns of the license policy report (`txt` format only) output using the values `true` or `false`. The default value is `false`.
 
-##### Where flag
-
-The list command results can be filtered using the `--where` flag using the column names in the report. These include `usage-policy`, `family`, `id`, `name`, `annotations` and `notes`.
-
 ###### Example: policy with where filter
 
 The following example shows filtering of  license policies using the `id` column:
