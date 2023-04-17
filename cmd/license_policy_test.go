@@ -771,3 +771,19 @@ func TestLicensePolicyListWhereTestUsagePolicyNeedsReview(t *testing.T) {
 	lti.ResultExpectedLineCount = 3
 	innerTestLicensePolicyList(t, lti)
 }
+
+func TestLicensePolicyListCSVWhereTestUsagePolicyAllow(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_CSV, true)
+	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
+	lti.WhereClause = "usage-policy=allow"
+	lti.ResultExpectedLineCount = 2
+	innerTestLicensePolicyList(t, lti)
+}
+
+func TestLicensePolicyListMarkdownWhereTestUsagePolicyAllow(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_MARKDOWN, true)
+	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
+	lti.WhereClause = "usage-policy=allow"
+	lti.ResultExpectedLineCount = 3
+	innerTestLicensePolicyList(t, lti)
+}

@@ -160,20 +160,6 @@ func ListLicensePolicies(writer io.Writer, whereFilters []WhereFilter) (err erro
 		}
 	}()
 
-	// // NOTE: This call is necessary as this will cause all `licensePolicyConfig.PolicyList`
-	// // entries to have alternative field names to be mapped (e.g., `usagePolicy` -> `usage-policy`)
-	// licensePolicyConfig.filteredFamilyNameMap, err = licensePolicyConfig.GetFamilyNameMap()
-
-	// if err != nil {
-	// 	return
-	// }
-
-	// if len(whereFilters) > 0 {
-	// 	// Always use a new filtered hashmap for each filtered list request
-	// 	licensePolicyConfig.filteredFamilyNameMap = slicemultimap.New()
-	// 	licensePolicyConfig.filteredHashLicensePolicies(whereFilters)
-	// }
-
 	// Retrieve the subset of policies that match the where filters
 	// NOTE: This has the side-effect of mapping alt. policy field name values
 	var filteredMap *slicemultimap.MultiMap
@@ -191,9 +177,9 @@ func ListLicensePolicies(writer io.Writer, whereFilters []WhereFilter) (err erro
 	case FORMAT_TEXT:
 		err = DisplayLicensePoliciesTabbedText(writer, filteredMap)
 	case FORMAT_CSV:
-		err = DisplayLicensePoliciesCSV(writer)
+		err = DisplayLicensePoliciesCSV(writer, filteredMap)
 	case FORMAT_MARKDOWN:
-		err = DisplayLicensePoliciesMarkdown(writer)
+		err = DisplayLicensePoliciesMarkdown(writer, filteredMap)
 	default:
 		// default to text format for anything else
 		getLogger().Warningf("Unsupported format: `%s`; using default format.",
@@ -399,12 +385,6 @@ func DisplayLicensePoliciesTabbedText(output io.Writer, filteredPolicyMap *slice
 	fmt.Fprintf(w, "%s\n", strings.Join(POLICY_LIST_TITLES, "\t"))
 	fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
-	// // Filter policies using --where clause
-	// filteredPolicyFamilyNameMap = licensePolicyConfig.filteredFamilyNameMap
-	// if err != nil {
-	// 	return
-	// }
-
 	// Sort entries for listing by family name keys
 	keyNames := filteredPolicyMap.KeySet()
 	sort.Slice(keyNames, func(i, j int) bool {
@@ -423,7 +403,7 @@ func DisplayLicensePoliciesTabbedText(output io.Writer, filteredPolicyMap *slice
 
 			// Wrap all column text (i.e. flag `--wrap=true`)
 			if utils.GlobalFlags.LicenseFlags.ListLineWrap {
-				lines, err = wrapTableRowText(24, ";",
+				lines, err = wrapTableRowText(24, ",",
 					policy.UsagePolicy,
 					policy.Family,
 					policy.Id,
@@ -464,7 +444,7 @@ func DisplayLicensePoliciesTabbedText(output io.Writer, filteredPolicyMap *slice
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplayLicensePoliciesCSV(output io.Writer) (err error) {
+func DisplayLicensePoliciesCSV(output io.Writer, filteredPolicyMap *slicemultimap.MultiMap) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -476,14 +456,8 @@ func DisplayLicensePoliciesCSV(output io.Writer) (err error) {
 		return getLogger().Errorf("error writing to output (%v): %s", POLICY_LIST_TITLES, err)
 	}
 
-	// TODO support where filters
-	// NOTE: the "family" name hashmap SHOULD have all policy entries (i.e., with/without SPDX IDs)
-	familyNameMap, errHashMap := licensePolicyConfig.GetFamilyNameMap()
-
-	if errHashMap != nil {
-		return
-	}
-	keyNames := familyNameMap.KeySet()
+	// Retrieve keys for policies to list
+	keyNames := filteredPolicyMap.KeySet()
 
 	// Emit no schemas found warning into output
 	// TODO Use only for Warning messages, do not emit in output table
@@ -499,7 +473,7 @@ func DisplayLicensePoliciesCSV(output io.Writer) (err error) {
 
 	var line []string
 	for _, key := range keyNames {
-		values, match := familyNameMap.Get(key)
+		values, match := filteredPolicyMap.Get(key)
 		getLogger().Tracef("%v (%t)", values, match)
 
 		for _, value := range values {
@@ -524,7 +498,7 @@ func DisplayLicensePoliciesCSV(output io.Writer) (err error) {
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplayLicensePoliciesMarkdown(output io.Writer) (err error) {
+func DisplayLicensePoliciesMarkdown(output io.Writer, filteredPolicyMap *slicemultimap.MultiMap) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -536,17 +510,10 @@ func DisplayLicensePoliciesMarkdown(output io.Writer) (err error) {
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(output, "%s\n", alignmentRow)
 
-	// TODO support where filters
-	// NOTE: the "family" name hashmap SHOULD have all policy entries (i.e., with/without SPDX IDs)
-	familyNameMap, errHashMap := licensePolicyConfig.GetFamilyNameMap()
-
-	if errHashMap != nil {
-		return errHashMap
-	}
+	// Retrieve keys for policies to list
+	keyNames := filteredPolicyMap.KeySet()
 
 	// Display a warning messing in the actual output and return (short-circuit)
-	keyNames := familyNameMap.KeySet()
-
 	// Emit no schemas found warning into output
 	// TODO Use only for Warning messages, do not emit in output table
 	if len(keyNames) == 0 {
@@ -563,7 +530,7 @@ func DisplayLicensePoliciesMarkdown(output io.Writer) (err error) {
 	var lineRow string
 
 	for _, key := range keyNames {
-		values, match := familyNameMap.Get(key)
+		values, match := filteredPolicyMap.Get(key)
 		getLogger().Tracef("%v (%t)", values, match)
 
 		for _, value := range values {
