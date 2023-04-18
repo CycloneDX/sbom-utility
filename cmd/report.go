@@ -70,22 +70,23 @@ const REGEX_ISO_8601 = "[0-9]{4}-[0-9]{2}-[0-9]{2}T([0-9]{2}:){2}[0-9]{2}[+|-][0
 const ISO8601_TIME_SEPARATOR = 'T'
 
 // Validates a complete Date-Time ISO8601 timestamp
-func validateISO8601TimestampISO8601DateTime(timestamp string) (valid bool) {
+// TODO verify it works for data, date-time, date-time-timezone formats
+// func validateISO8601TimestampISO8601DateTime(timestamp string) (valid bool) {
 
-	regex, errCompile := compileRegex(REGEX_ISO_8601)
+// 	regex, errCompile := compileRegex(REGEX_ISO_8601)
 
-	if errCompile != nil {
-		return false
-	}
+// 	if errCompile != nil {
+// 		return false
+// 	}
 
-	// Test that the field value matches the regex supplied in the current filter
-	// Note: the regex compilation is performed during command param. processing
-	if match := regex.Match([]byte(timestamp)); match {
-		return true
-	}
+// 	// Test that the field value matches the regex supplied in the current filter
+// 	// Note: the regex compilation is performed during command param. processing
+// 	if match := regex.Match([]byte(timestamp)); match {
+// 		return true
+// 	}
 
-	return false
-}
+// 	return false
+// }
 
 // TODO we SHOULD normalize the timestamp to Z (0)
 func truncateTimeStampISO8601Date(fullTimestamp string) (date string, err error) {
