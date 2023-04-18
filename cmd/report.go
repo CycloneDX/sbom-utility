@@ -90,6 +90,12 @@ func validateISO8601TimestampISO8601DateTime(timestamp string) (valid bool) {
 // TODO we SHOULD normalize the timestamp to Z (0)
 func truncateTimeStampISO8601Date(fullTimestamp string) (date string, err error) {
 
+	// TODO validate timestamp regex for yyy-mm-dd (minimum format)
+	if fullTimestamp == "" || len(fullTimestamp) == 10 {
+		date = fullTimestamp
+		return
+	}
+
 	iSep := strings.IndexByte(fullTimestamp, ISO8601_TIME_SEPARATOR)
 
 	if iSep == -1 {

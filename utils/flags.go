@@ -50,6 +50,9 @@ type CommandFlags struct {
 	// License flags
 	LicenseFlags LicenseCommandFlags
 
+	// Vulnerability flags
+	VulnerabilityFlags VulnerabilityCommandFlags
+
 	// Validate (local) flags
 	ForcedJsonSchemaFile    string
 	Variant                 string
@@ -68,6 +71,10 @@ type CommandFlags struct {
 type LicenseCommandFlags struct {
 	Summary      bool
 	ListLineWrap bool
+}
+
+type VulnerabilityCommandFlags struct {
+	Summary bool
 }
 
 type CustomValidationFlags struct {

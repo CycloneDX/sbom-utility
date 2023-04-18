@@ -41,7 +41,7 @@ const (
 // License list command flag help messages
 const (
 	FLAG_LICENSE_LIST_OUTPUT_FORMAT_HELP = "format output using the specified format type"
-	FLAG_LICENSE_LIST_SUMMARY_HELP       = "summarize licenses and component references in table format (see --format flag help for supported types)"
+	FLAG_LICENSE_LIST_SUMMARY_HELP       = "summarize licenses and component references when listing in supported formats"
 )
 
 // License list command informational messages
