@@ -237,7 +237,7 @@ func ListResources(output io.Writer, format string, resourceType string, whereFi
 		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_JSON)
-		DisplayVulnListText(output)
+		DisplayResourceListText(output)
 	}
 
 	return

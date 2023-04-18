@@ -161,13 +161,13 @@ func listCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	whereFilters, err := processWhereFlag(cmd)
 
 	if err == nil {
-		err = ListLicenses(writer, utils.GlobalFlags.OutputFormat, utils.GlobalFlags.LicenseFlags.Summary, whereFilters)
+		err = ListLicenses(writer, utils.GlobalFlags.OutputFormat, whereFilters, utils.GlobalFlags.LicenseFlags.Summary)
 	}
 
 	return
 }
 
-func ListLicenses(output io.Writer, format string, summary bool, whereFilters []WhereFilter) (err error) {
+func ListLicenses(output io.Writer, format string, whereFilters []WhereFilter, summary bool) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 

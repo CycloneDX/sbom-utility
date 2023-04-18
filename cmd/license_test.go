@@ -102,7 +102,7 @@ func innerTestLicenseListBuffered(t *testing.T, testInfo *LicenseTestInfo, where
 	utils.GlobalFlags.InputFile = testInfo.InputFile
 
 	// Invoke the actual List command (API)
-	err = ListLicenses(outputWriter, testInfo.Format, testInfo.ListSummary, whereFilters)
+	err = ListLicenses(outputWriter, testInfo.Format, whereFilters, testInfo.ListSummary)
 
 	return
 }
