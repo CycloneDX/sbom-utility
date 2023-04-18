@@ -65,6 +65,43 @@ func truncateString(value string, maxLength int, showDetail bool) string {
 	return value
 }
 
+// Currently, truncate
+const REGEX_ISO_8601 = "[0-9]{4}-[0-9]{2}-[0-9]{2}T([0-9]{2}:){2}[0-9]{2}[+|-][0-9]{2}:[0-9]{2}"
+const ISO8601_TIME_SEPARATOR = 'T'
+
+// Validates a complete Date-Time ISO8601 timestamp
+func validateISO8601TimestampISO8601DateTime(timestamp string) (valid bool) {
+
+	regex, errCompile := compileRegex(REGEX_ISO_8601)
+
+	if errCompile != nil {
+		return false
+	}
+
+	// Test that the field value matches the regex supplied in the current filter
+	// Note: the regex compilation is performed during command param. processing
+	if match := regex.Match([]byte(timestamp)); match {
+		return true
+	}
+
+	return false
+}
+
+// TODO we SHOULD normalize the timestamp to Z (0)
+func truncateTimeStampISO8601Date(fullTimestamp string) (date string, err error) {
+
+	iSep := strings.IndexByte(fullTimestamp, ISO8601_TIME_SEPARATOR)
+
+	if iSep == -1 {
+		err = getLogger().Errorf("invalid ISO 8601 timestamp: `%s`\n", fullTimestamp)
+		return
+	}
+
+	date = fullTimestamp[:iSep]
+
+	return
+}
+
 const REPORT_LINE_CONTAINS_ANY = -1
 
 func lineContainsValues(buffer bytes.Buffer, lineNum int, values ...string) (int, bool) {
