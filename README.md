@@ -435,15 +435,15 @@ To view a report listing the contents of the current policy file (i.e., [`licens
 ```
 
 ```bash
-usage-policy  family                        spdx-id                       name                          annotations                       aliases                            notes
-------------  ------                        -------                       ----                          -----------                       -------                            -----
-allow         0BSD                          0BSD                          BSD Zero Clause Lice (20/23)  APPROVED                          Free Public License 1.0. (24/25)
-needs-review  ADSL                          ADSL                          Amazon Digital Servi (20/31)  NEEDS-APPROVAL
-allow         AFL                           AFL-1.1                       Academic Free Licens (20/26)  APPROVED
-needs-review  AGPL                          AGPL-1.0                      Affero General Publi (20/34)  NEEDS-APPROVAL,AGPL-WARN (24/38)
-needs-review  APSL                          APSL-1.0                      Apple Public Source  (20/27)  NEEDS-APPROVAL
-allow         Adobe                         Adobe-2006                    Adobe Systems Incorp (20/56)  APPROVED
-allow         Apache                        Apache-2.0                    Apache License 2.0            APPROVED                          Apache License, Version  (24/105)
+usage-policy  family     id            name                          annotations                       aliases                            notes
+------------  ------     -------       ----                          -----------                       -------                            -----
+allow         0BSD       0BSD          BSD Zero Clause Lice (20/23)  APPROVED                          Free Public License 1.0. (24/25)
+needs-review  ADSL       ADSL          Amazon Digital Servi (20/31)  NEEDS-APPROVAL
+allow         AFL        AFL-1.1       Academic Free Licens (20/26)  APPROVED
+needs-review  AGPL       AGPL-1.0      Affero General Publi (20/34)  NEEDS-APPROVAL,AGPL-WARN (24/38)
+needs-review  APSL       APSL-1.0      Apple Public Source  (20/27)  NEEDS-APPROVAL
+allow         Adobe      Adobe-2006    Adobe Systems Incorp (20/56)  APPROVED
+allow         Apache     Apache-2.0    Apache License 2.0            APPROVED                          Apache License, Version  (24/105)
 ...
 ```
 
