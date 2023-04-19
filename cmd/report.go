@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -264,8 +265,116 @@ func wrapTableRowText(maxChars int, joinChar string, columns ...interface{}) (ta
 			}
 			//getLogger().Debugf("tableData: (%v)", tableData)
 		default:
-			err = getLogger().Errorf("Unexpected type for report data: (%T): %v", data, data)
+			err = getLogger().Errorf("Unexpected type for report data: type: `%T`, value: `%v`", data, data)
 		}
+	}
+
+	return
+}
+
+// Flag constants
+const REPORT_SUMMARY_DATA = true
+const REPORT_REPLACE_LINE_FEEDS = true
+
+type ColumnFormatData struct {
+	DataKey               string // Note: data key is the column label (where possible)
+	DefaultTruncateLength int    // truncate data when `--format txt`
+	IsSummaryData         bool   // include in `--summary` reports
+	ReplaceLineFeeds      bool   // replace line feeds with spaces (e.g., for multi-line descriptions)
+}
+
+func prepareReportTitleData(formatData []ColumnFormatData, summarizedReport bool) (titleData []string, separatorData []string) {
+
+	var underline string
+
+	for _, columnData := range formatData {
+
+		// if the report we are preparing is a summarized one (i.e., --summary true)
+		// we will skip appending column data not marked to be included in a summary report
+		if summarizedReport && !columnData.IsSummaryData {
+			continue
+		}
+		titleData = append(titleData, columnData.DataKey)
+
+		underline = strings.Repeat(REPORT_LIST_TITLE_ROW_SEPARATOR, len(columnData.DataKey))
+		separatorData = append(separatorData, underline)
+	}
+
+	return
+}
+
+func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, summarizedReport bool) (lineData []string, err error) {
+
+	var mapStruct map[string]interface{}
+	var data interface{}
+	var dataFound bool
+	var sliceString []string
+	var joinedData string
+
+	mapStruct, err = utils.ConvertStructToMap(structIn)
+
+	for _, columnData := range formatData {
+
+		// reset local vars
+		sliceString = nil
+
+		// if the report we are preparing is a summarized one (i.e., --summary true)
+		// we will skip appending column data not marked to be included in a summary report
+		if summarizedReport && !columnData.IsSummaryData {
+			continue
+		}
+
+		data, dataFound = mapStruct[columnData.DataKey]
+
+		if !dataFound {
+			err = getLogger().Errorf("data not found in structure: key: `%s`", columnData.DataKey)
+			return
+		}
+
+		switch typedData := data.(type) {
+		case string:
+			if columnData.ReplaceLineFeeds {
+				// replace line feeds with spaces in description
+				if typedData != "" {
+					// For tabbed text tables, replace line feeds with spaces
+					typedData = strings.ReplaceAll(typedData, "\n", " ")
+				}
+			}
+			lineData = append(lineData, typedData)
+		case []interface{}:
+
+			for _, value := range typedData {
+				sliceString = append(sliceString, value.(string))
+			}
+
+			joinedData = strings.Join(sliceString, ",")
+
+			// replace line feeds with spaces in description
+			if columnData.ReplaceLineFeeds {
+				if joinedData != "" {
+					// For tabbed text tables, replace line feeds with spaces
+					joinedData = strings.ReplaceAll(joinedData, "\n", " ")
+				}
+			}
+			lineData = append(lineData, joinedData)
+		case []string:
+			// join the data
+			joinedData = strings.Join(typedData, ",")
+
+			if columnData.ReplaceLineFeeds {
+				// replace line feeds with spaces in description
+				if joinedData != "" {
+					// For tabbed text tables, replace line feeds with spaces
+					joinedData = strings.ReplaceAll(joinedData, "\n", " ")
+				}
+			}
+			lineData = append(lineData, joinedData)
+		case nil:
+			lineData = append(lineData, "")
+		default:
+			err = getLogger().Errorf("Unexpected type for report data: type: `%T`, value: `%v`", data, data)
+		}
+
 	}
 
 	return
