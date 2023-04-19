@@ -279,6 +279,11 @@ func wrapTableRowText(maxChars int, joinChar string, columns ...interface{}) (ta
 const REPORT_SUMMARY_DATA = true
 const REPORT_REPLACE_LINE_FEEDS = true
 
+// TODO: Support additional flags to:
+// - show number of chars shown vs. available when truncated (e.g., (x/y))
+// - provide "empty" value to display in column (e.g., "none" or "UNDEFINED")
+// - inform how to "summarize" (e.g., show-first-only) data if data type is a slice (e.g., []string)
+//   NOTE: if only a subset of entries are shown on a summary, an indication of (x) entries could be shown as well
 type ColumnFormatData struct {
 	DataKey               string // Note: data key is the column label (where possible)
 	DefaultTruncateLength int    // truncate data when `--format txt`
@@ -350,7 +355,8 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 				sliceString = append(sliceString, value.(string))
 			}
 
-			joinedData = strings.Join(sliceString, ",")
+			// separate each entry with a comma (and space for readability)
+			joinedData = strings.Join(sliceString, ", ")
 
 			// replace line feeds with spaces in description
 			if columnData.ReplaceLineFeeds {
@@ -359,10 +365,21 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 					joinedData = strings.ReplaceAll(joinedData, "\n", " ")
 				}
 			}
+
+			if summarizedReport {
+				if len(sliceString) > 0 {
+					lineData = append(lineData, sliceString[0])
+				} else {
+					lineData = append(lineData, "")
+				}
+				continue
+			}
+
 			lineData = append(lineData, joinedData)
+
 		case []string:
-			// join the data
-			joinedData = strings.Join(typedData, ",")
+			// separate each entry with a comma (and space for readability)
+			joinedData = strings.Join(typedData, ", ")
 
 			if columnData.ReplaceLineFeeds {
 				// replace line feeds with spaces in description
@@ -371,6 +388,16 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 					joinedData = strings.ReplaceAll(joinedData, "\n", " ")
 				}
 			}
+
+			if summarizedReport {
+				if len(sliceString) > 0 {
+					lineData = append(lineData, sliceString[0])
+				} else {
+					lineData = append(lineData, "")
+				}
+				continue
+			}
+
 			lineData = append(lineData, joinedData)
 		case nil:
 			lineData = append(lineData, "")
