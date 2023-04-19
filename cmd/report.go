@@ -351,6 +351,7 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 			lineData = append(lineData, typedData)
 		case []interface{}:
 
+			// convert to []string
 			for _, value := range typedData {
 				sliceString = append(sliceString, value.(string))
 			}
