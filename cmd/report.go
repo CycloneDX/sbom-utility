@@ -93,6 +93,9 @@ func validateISO8601TimestampISO8601DateTime(timestamp string, regex string) (va
 // TODO we SHOULD normalize the timestamp to Z (0)
 func truncateTimeStampISO8601Date(fullTimestamp string) (date string, err error) {
 
+	// default to returning the original value
+	date = fullTimestamp
+
 	// TODO validate timestamp regex for yyy-mm-dd (minimum format)
 	if fullTimestamp == "" {
 		return
@@ -101,10 +104,11 @@ func truncateTimeStampISO8601Date(fullTimestamp string) (date string, err error)
 	// if it appears to be date-only already, validate it
 	if len(fullTimestamp) == 10 {
 		if validateISO8601TimestampISO8601DateTime(fullTimestamp, REGEX_ISO_8601_DATE) {
-			date = fullTimestamp
+			// return the (now validated) value passed in
 			return
 		} else {
 			err = getLogger().Errorf("invalid ISO 8601 timestamp: `%s`\n", fullTimestamp)
+			// return what we were given
 			return
 		}
 	}
@@ -115,7 +119,6 @@ func truncateTimeStampISO8601Date(fullTimestamp string) (date string, err error)
 	if iSep == -1 {
 		err = getLogger().Errorf("invalid ISO 8601 timestamp: `%s`\n", fullTimestamp)
 		// return what we were given
-		date = fullTimestamp
 		return
 	}
 
