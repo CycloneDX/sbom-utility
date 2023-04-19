@@ -66,45 +66,67 @@ func truncateString(value string, maxLength int, showDetail bool) string {
 }
 
 // Currently, truncate
-const REGEX_ISO_8601 = "[0-9]{4}-[0-9]{2}-[0-9]{2}T([0-9]{2}:){2}[0-9]{2}[+|-][0-9]{2}:[0-9]{2}"
+const REGEX_ISO_8601_DATE_TIME = "[0-9]{4}-[0-9]{2}-[0-9]{2}T([0-9]{2}:){2}[0-9]{2}[+|-][0-9]{2}:[0-9]{2}"
+const REGEX_ISO_8601_DATE = "[0-9]{4}-[0-9]{2}-[0-9]{2}"
 const ISO8601_TIME_SEPARATOR = 'T'
 
 // Validates a complete Date-Time ISO8601 timestamp
 // TODO verify it works for data, date-time, date-time-timezone formats
-// func validateISO8601TimestampISO8601DateTime(timestamp string) (valid bool) {
+func validateISO8601TimestampISO8601DateTime(timestamp string, regex string) (valid bool) {
 
-// 	regex, errCompile := compileRegex(REGEX_ISO_8601)
+	compiledRegEx, errCompile := compileRegex(regex)
 
-// 	if errCompile != nil {
-// 		return false
-// 	}
+	if errCompile != nil {
+		return false
+	}
 
-// 	// Test that the field value matches the regex supplied in the current filter
-// 	// Note: the regex compilation is performed during command param. processing
-// 	if match := regex.Match([]byte(timestamp)); match {
-// 		return true
-// 	}
+	// Test that the field value matches the regex supplied in the current filter
+	// Note: the regex compilation is performed during command param. processing
+	if match := compiledRegEx.Match([]byte(timestamp)); match {
+		return true
+	}
 
-// 	return false
-// }
+	return false
+}
 
 // TODO we SHOULD normalize the timestamp to Z (0)
 func truncateTimeStampISO8601Date(fullTimestamp string) (date string, err error) {
 
 	// TODO validate timestamp regex for yyy-mm-dd (minimum format)
-	if fullTimestamp == "" || len(fullTimestamp) == 10 {
-		date = fullTimestamp
+	if fullTimestamp == "" {
 		return
 	}
 
+	// if it appears to be date-only already, validate it
+	if len(fullTimestamp) == 10 {
+		if validateISO8601TimestampISO8601DateTime(fullTimestamp, REGEX_ISO_8601_DATE) {
+			date = fullTimestamp
+			return
+		} else {
+			err = getLogger().Errorf("invalid ISO 8601 timestamp: `%s`\n", fullTimestamp)
+			return
+		}
+	}
+
+	// Assume timestamp is date-time format; find where the date portion separator appears
 	iSep := strings.IndexByte(fullTimestamp, ISO8601_TIME_SEPARATOR)
 
 	if iSep == -1 {
 		err = getLogger().Errorf("invalid ISO 8601 timestamp: `%s`\n", fullTimestamp)
+		// return what we were given
+		date = fullTimestamp
 		return
 	}
 
+	// Slice out the date portion and validate what should be just the date portion
 	date = fullTimestamp[:iSep]
+
+	if !validateISO8601TimestampISO8601DateTime(date, REGEX_ISO_8601_DATE) {
+		err = getLogger().Errorf("invalid ISO 8601 timestamp: `%s`\n", fullTimestamp)
+		// return what we were given
+		date = fullTimestamp
+		return
+	}
 
 	return
 }
