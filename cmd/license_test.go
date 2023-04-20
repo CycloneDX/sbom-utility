@@ -21,7 +21,6 @@ import (
 	"bufio"
 	"bytes"
 	"io/fs"
-	"strings"
 	"testing"
 
 	"github.com/CycloneDX/sbom-utility/schema"
@@ -116,21 +115,6 @@ func innerTestLicenseList(t *testing.T, testInfo *LicenseTestInfo) (outputBuffer
 	err = innerRunCommonListResultTests(t, &testInfo.CommonTestInfo, outputBuffer, err)
 
 	return
-}
-
-func listOutputContainsLicense(buffer bytes.Buffer, policy string, licenseType string, licenseId string) bool {
-	lines := strings.Split(buffer.String(), "\n")
-	getLogger().Tracef("output: %s", lines)
-
-	for lineNum, line := range lines {
-		if strings.Contains(line, policy) &&
-			strings.Contains(line, licenseType) &&
-			strings.Contains(line, licenseId) {
-			getLogger().Debugf("matched (#%v): line: %s", lineNum, line)
-			return true
-		}
-	}
-	return false
 }
 
 // ----------------------------------------
