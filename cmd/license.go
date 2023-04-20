@@ -56,6 +56,12 @@ const (
 	LC_LOC_SERVICES
 )
 
+const (
+	LC_VALUE_ID         = "id"
+	LC_VALUE_NAME       = "name"
+	LC_VALUE_EXPRESSION = "expression"
+)
+
 var CDX_LICENSE_LOCATION_NAMES = map[int]string{
 	LC_LOC_UNKNOWN:            "unknown",
 	LC_LOC_METADATA_COMPONENT: "metadata.component",

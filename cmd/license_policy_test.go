@@ -20,7 +20,6 @@ package cmd
 import (
 	"bufio"
 	"bytes"
-	"strings"
 	"testing"
 
 	"github.com/CycloneDX/sbom-utility/utils"
@@ -51,7 +50,8 @@ const (
 // -------------------------------------------
 
 func NewLicensePolicyTestInfoBasic(format string, wrapLines bool) *LicenseTestInfo {
-	lti := NewLicenseTestInfo("", format, "", false, false, "", LTI_DEFAULT_LINE_COUNT, nil)
+	//lti := NewLicenseTestInfo("", format, "", false, false, "", LTI_DEFAULT_LINE_COUNT, nil)
+	lti := NewLicenseTestInfoBasic("", format, TI_LIST_SUMMARY_FALSE)
 	lti.ListLineWrap = wrapLines
 	return lti
 }
@@ -81,7 +81,7 @@ func innerTestLicensePolicyListCustomAndBuffered(t *testing.T, testInfo *License
 
 	// Use the test data to set the BOM input file and output format
 	utils.GlobalFlags.InputFile = testInfo.InputFile
-	utils.GlobalFlags.OutputFormat = testInfo.Format
+	utils.GlobalFlags.OutputFormat = testInfo.ListFormat
 
 	// Invoke the actual List command (API)
 	err = ListLicensePolicies(outputWriter, whereFilters)
@@ -97,96 +97,17 @@ func innerTestLicensePolicyListCustomAndBuffered(t *testing.T, testInfo *License
 
 func innerTestLicensePolicyList(t *testing.T, testInfo *LicenseTestInfo) (outputBuffer bytes.Buffer, err error) {
 
-	// Prepare WHERE filters from where clause
-	var whereFilters []WhereFilter = nil
-	if testInfo.WhereClause != "" {
-		whereFilters, err = retrieveWhereFilters(testInfo.WhereClause)
-		if err != nil {
-			getLogger().Error(err)
-			t.Errorf("test failed: %s: detail: %s ", testInfo, err.Error())
-			return
-		}
+	// Parse out --where filters and exit out if error detected
+	whereFilters, err := prepareWhereFilters(t, &testInfo.CommonTestInfo)
+	if err != nil {
+		return
 	}
 
 	// Perform the test with buffered output
 	outputBuffer, err = innerTestLicensePolicyListCustomAndBuffered(t, testInfo, whereFilters)
 
-	// TEST: Expected error matches actual error
-	if testInfo.ExpectedError != nil {
-		// NOTE: err = nil will also fail if error was expected
-		if !ErrorTypesMatch(err, testInfo.ExpectedError) {
-			t.Errorf("expected error: %T, actual error: %T", testInfo.ExpectedError, err)
-		}
-		// Always return the expected error
-		return
-	}
-
-	// Unexpected error: return immediately/do not test output/results
-	if err != nil {
-		t.Errorf("test failed: %s: detail: %s ", testInfo, err.Error())
-		return
-	}
-
-	// TEST: Output contains string(s)
-	// TODO: Support []string
-	var outputResults string
-	if testInfo.ResultContainsValue != "" {
-		outputResults = outputBuffer.String()
-		getLogger().Debugf("output: \"%s\"", outputResults)
-
-		if !strings.Contains(outputResults, testInfo.ResultContainsValue) {
-			err = getLogger().Errorf("output did not contain expected value: `%s`", testInfo.ResultContainsValue)
-			t.Errorf("%s: input file: `%s`, where clause: `%s`",
-				err.Error(),
-				testInfo.InputFile,
-				testInfo.WhereClause)
-			return
-		}
-	}
-
-	// TEST: Line contains a set of string values
-	// TODO: support any number of row/values in test info. structure
-	if len(testInfo.ResultContainsValues) > 0 {
-		matchFoundLine, matchFound := lineContainsValues(outputBuffer, testInfo.ResultExpectedAtLineNum, testInfo.ResultContainsValues...)
-		if !matchFound {
-			t.Errorf("policy file does not contain expected values: `%v` at line: %v\n", testInfo.ResultContainsValues, testInfo.ResultExpectedAtLineNum)
-			return
-		} else {
-			getLogger().Tracef("policy file contains expected values: `%v` at line: %v\n", testInfo.ResultContainsValues, matchFoundLine)
-		}
-	}
-
-	// TEST: Expected Line Count
-	if testInfo.ResultExpectedLineCount != LTI_DEFAULT_LINE_COUNT {
-		if outputResults == "" {
-			outputResults = outputBuffer.String()
-		}
-		outputLineCount := strings.Count(outputResults, "\n")
-		if outputLineCount != testInfo.ResultExpectedLineCount {
-			err = getLogger().Errorf("output did not contain expected line count: %v/%v (expected/actual)", testInfo.ResultExpectedLineCount, outputLineCount)
-			t.Errorf("%s: input file: `%s`, where clause: `%s`: \n%s",
-				err.Error(),
-				testInfo.InputFile,
-				testInfo.WhereClause,
-				outputResults,
-			)
-			return
-		}
-	}
-
-	// TEST: valid JSON if format JSON
-	// TODO the marshalled bytes is an array of CDX LicenseChoice (struct)
-	// TODO: add general validation for CSV and Markdown formats
-	if testInfo.ValidateJson {
-		if testInfo.Format == FORMAT_JSON {
-			// Use Marshal to test for validity
-			if !utils.IsValidJsonRaw(outputBuffer.Bytes()) {
-				t.Errorf("output did not contain valid JSON")
-				t.Logf("%s", outputBuffer.String())
-				return
-			}
-		}
-	}
+	// Run all common tests against "result" values in the CommonTestInfo struct
+	err = innerRunCommonListResultTests(t, &testInfo.CommonTestInfo, outputBuffer, err)
 
 	return
 }

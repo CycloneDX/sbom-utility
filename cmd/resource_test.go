@@ -22,7 +22,6 @@ import (
 	"bytes"
 	"fmt"
 	"io/fs"
-	"strings"
 	"testing"
 
 	"github.com/CycloneDX/sbom-utility/schema"
@@ -36,43 +35,35 @@ const (
 	TEST_RESOURCE_LIST_CDX_1_4_SAAS_1     = "examples/cyclonedx/SaaSBOM/apigateway-microservices-datastores/bom.json"
 )
 
-// default ResourceTestInfo struct values
-const (
-	RTI_DEFAULT_LINE_COUNT = -1
-)
-
 type ResourceTestInfo struct {
-	InputFile       string
-	Format          string
-	ResourceType    string
-	WhereClause     string
-	ExpectedError   error
-	ResultContains  string
-	ResultLineCount int
+	CommonTestInfo
+	ResourceType string
 }
 
-// Stringer interface for ResourceTestInfo (just display subset of key values)
-func (rti *ResourceTestInfo) String() string {
-	return fmt.Sprintf("InputFile: `%s`, Format: `%s`, ResourceType: `%s`, WhereClause: `%s`",
-		rti.InputFile, rti.Format, rti.ResourceType, rti.WhereClause)
+func (ti *ResourceTestInfo) String() string {
+	pParent := &ti.CommonTestInfo
+	return fmt.Sprintf("%s, %s", pParent.String(), ti.ResourceType)
 }
 
-func NewResourceTestInfo(inputFile string, format string, resourceType string,
-	whereClause string, resultContains string, resultLines int, expectedError error) *ResourceTestInfo {
+func NewResourceTestInfo(inputFile string, listFormat string, listSummary bool, whereClause string,
+	resultContainsValue string, resultContainsValues []string,
+	resultExpectedLineCount int, resultExpectedError error, resourceType string) *ResourceTestInfo {
 
-	var rti = new(ResourceTestInfo)
-	rti.InputFile = inputFile
-	rti.Format = format
-	rti.ResourceType = resourceType
-	rti.WhereClause = whereClause
-	rti.ResultContains = resultContains
-	rti.ResultLineCount = resultLines
-	rti.ExpectedError = expectedError
-	return rti
+	var ti = new(ResourceTestInfo)
+	var pCommon = &ti.CommonTestInfo
+	// initialize common fields
+	pCommon.Init(inputFile, listFormat, listSummary, whereClause,
+		resultContainsValue, resultContainsValues, resultExpectedLineCount, resultExpectedError)
+	// Initialize resource-unique fields
+	ti.ResourceType = resourceType
+	return ti
 }
 
-func NewResourceTestInfoBasic(inputFile string, format string, resourceType string, expectedError error) *ResourceTestInfo {
-	return NewResourceTestInfo(inputFile, format, resourceType, "", "", RTI_DEFAULT_LINE_COUNT, expectedError)
+func NewResourceTestInfoBasic(inputFile string, listFormat string, resultExpectedError error, resourceType string) *ResourceTestInfo {
+	var ti = new(ResourceTestInfo)
+	var pCommon = &ti.CommonTestInfo
+	pCommon.InitBasic(inputFile, listFormat, resultExpectedError)
+	return ti
 }
 
 // -------------------------------------------
@@ -84,22 +75,17 @@ func innerBufferedTestResourceList(t *testing.T, testInfo *ResourceTestInfo, whe
 	// ensure all data is written to buffer before further validation
 	defer outputWriter.Flush()
 
-	err = ListResources(outputWriter, testInfo.Format, testInfo.ResourceType, whereFilters)
+	err = ListResources(outputWriter, testInfo.ListFormat, testInfo.ResourceType, whereFilters)
 	return
 }
 
 func innerTestResourceList(t *testing.T, testInfo *ResourceTestInfo) (outputBuffer bytes.Buffer, basicTestInfo string, err error) {
 	getLogger().Tracef("TestInfo: %s", testInfo)
 
-	// Prepare WHERE filters from where clause
-	var whereFilters []WhereFilter = nil
-	if testInfo.WhereClause != "" {
-		whereFilters, err = retrieveWhereFilters(testInfo.WhereClause)
-		if err != nil {
-			getLogger().Error(err)
-			t.Errorf("test failed: %s: detail: %s ", basicTestInfo, err.Error())
-			return
-		}
+	// Parse out --where filters and exit out if error detected
+	whereFilters, err := prepareWhereFilters(t, &testInfo.CommonTestInfo)
+	if err != nil {
+		return
 	}
 
 	// The command looks for the input filename in global flags struct
@@ -108,54 +94,8 @@ func innerTestResourceList(t *testing.T, testInfo *ResourceTestInfo) (outputBuff
 	// invoke resource list command with a byte buffer
 	outputBuffer, err = innerBufferedTestResourceList(t, testInfo, whereFilters)
 
-	// TEST: Expected error matches actual error
-	if testInfo.ExpectedError != nil {
-		// NOTE: err = nil will also fail if error was expected
-		if !ErrorTypesMatch(err, testInfo.ExpectedError) {
-			t.Errorf("expected error: %T, actual error: %T", testInfo.ExpectedError, err)
-		}
-		// Always return the expected error
-		return
-	}
-
-	// Unexpected error: return immediately/do not test output/results
-	if err != nil {
-		t.Errorf("test failed: %s: detail: %s ", testInfo, err.Error())
-		return
-	}
-
-	// TEST: Output contains string(s)
-	// TODO: Support []string
-	var outputResults string
-	if testInfo.ResultContains != "" {
-		outputResults = outputBuffer.String()
-		getLogger().Debugf("output: \"%s\"", outputResults)
-
-		if !strings.Contains(outputResults, testInfo.ResultContains) {
-			err = getLogger().Errorf("output did not contain expected value: `%s`", testInfo.ResultContains)
-			t.Errorf("%s: input file: `%s`, where clause: `%s`",
-				err.Error(),
-				testInfo.InputFile,
-				testInfo.WhereClause)
-			return
-		}
-	}
-
-	// TEST: Line Count
-	if testInfo.ResultLineCount != RTI_DEFAULT_LINE_COUNT {
-		if outputResults == "" {
-			outputResults = outputBuffer.String()
-		}
-		outputLineCount := strings.Count(outputResults, "\n")
-		if outputLineCount != testInfo.ResultLineCount {
-			err = getLogger().Errorf("output did not contain expected line count: %v/%v (expected/actual)", testInfo.ResultLineCount, outputLineCount)
-			t.Errorf("%s: input file: `%s`, where clause: `%s`",
-				err.Error(),
-				testInfo.InputFile,
-				testInfo.WhereClause)
-			return
-		}
-	}
+	// Run all common tests against "result" values in the CommonTestInfo struct
+	err = innerRunCommonListResultTests(t, &testInfo.CommonTestInfo, outputBuffer, err)
 
 	return
 }
@@ -168,8 +108,9 @@ func TestResourceListInvalidInputFileLoad(t *testing.T) {
 	rti := NewResourceTestInfoBasic(
 		TEST_INPUT_FILE_NON_EXISTENT,
 		FORMAT_DEFAULT,
+		&fs.PathError{},
 		RESOURCE_TYPE_DEFAULT,
-		&fs.PathError{})
+	)
 
 	// verify correct error is returned
 	innerTestResourceList(t, rti)
@@ -182,8 +123,9 @@ func TestResourceListFormatUnsupportedSPDXMinReq(t *testing.T) {
 	rti := NewResourceTestInfoBasic(
 		TEST_SPDX_2_2_MIN_REQUIRED,
 		FORMAT_DEFAULT,
+		&schema.UnsupportedFormatError{},
 		RESOURCE_TYPE_DEFAULT,
-		&schema.UnsupportedFormatError{})
+	)
 
 	// verify correct error is returned
 	innerTestResourceList(t, rti)
@@ -193,8 +135,9 @@ func TestResourceListFormatUnsupportedSPDX22(t *testing.T) {
 	rti := NewResourceTestInfoBasic(
 		TEST_SPDX_2_2_EXAMPLE_1,
 		FORMAT_DEFAULT,
+		&schema.UnsupportedFormatError{},
 		RESOURCE_TYPE_DEFAULT,
-		&schema.UnsupportedFormatError{})
+	)
 
 	// verify correct error is returned
 	innerTestResourceList(t, rti)
@@ -208,11 +151,12 @@ func TestResourceListTextCdx14NoServicesFound(t *testing.T) {
 	rti := NewResourceTestInfoBasic(
 		TEST_RESOURCE_LIST_CDX_1_3_NONE_FOUND,
 		FORMAT_TEXT,
+		nil, // no error
 		RESOURCE_TYPE_SERVICE,
-		nil)
+	)
 
 	// verify there is a (warning) message present when no resources are found
-	rti.ResultContains = MSG_OUTPUT_NO_RESOURCES_FOUND
+	rti.ResultContainsValue = MSG_OUTPUT_NO_RESOURCES_FOUND
 	innerTestResourceList(t, rti)
 }
 
@@ -225,8 +169,9 @@ func TestResourceListTextCdx13(t *testing.T) {
 	rti := NewResourceTestInfoBasic(
 		TEST_RESOURCE_LIST_CDX_1_3,
 		FORMAT_TEXT,
+		nil, // no error
 		RESOURCE_TYPE_DEFAULT,
-		nil)
+	)
 
 	innerTestResourceList(t, rti)
 }
@@ -236,8 +181,9 @@ func TestResourceListTextCdx14SaaS(t *testing.T) {
 	rti := NewResourceTestInfoBasic(
 		TEST_RESOURCE_LIST_CDX_1_4_SAAS_1,
 		FORMAT_TEXT,
+		nil, // no error
 		RESOURCE_TYPE_COMPONENT,
-		nil)
+	)
 
 	innerTestResourceList(t, rti)
 }
@@ -251,14 +197,20 @@ func TestResourceListTextCdx13WhereClauseAndResultsByNameStartswith(t *testing.T
 	TEST_OUTPUT_CONTAINS := "Library A"
 	TEST_OUTPUT_LINES := 3
 
+	// NewResourceTestInfo(inputFile string, listFormat string, listSummary bool, whereClause string,
+	// 	resultContainsValue string, resultContainsValues []string,
+	// 	resultExpectedLineCount int, resultExpectedError error, resourceType string)
 	rti := NewResourceTestInfo(
 		TEST_RESOURCE_LIST_CDX_1_3,
 		FORMAT_TEXT,
-		RESOURCE_TYPE_COMPONENT,
+		TI_LIST_SUMMARY_FALSE,
 		TEST_INPUT_WHERE_CLAUSE,
 		TEST_OUTPUT_CONTAINS,
+		nil,
 		TEST_OUTPUT_LINES,
-		nil)
+		nil,
+		RESOURCE_TYPE_COMPONENT,
+	)
 
 	innerTestResourceList(t, rti)
 }
@@ -271,11 +223,14 @@ func TestResourceListTextCdx13WhereClauseAndResultsByNameContains(t *testing.T) 
 	rti := NewResourceTestInfo(
 		TEST_RESOURCE_LIST_CDX_1_3,
 		FORMAT_TEXT,
-		RESOURCE_TYPE_COMPONENT,
+		TI_LIST_SUMMARY_FALSE,
 		TEST_INPUT_WHERE_CLAUSE,
 		TEST_OUTPUT_CONTAINS,
+		nil,
 		TEST_OUTPUT_LINES,
-		nil)
+		nil,
+		RESOURCE_TYPE_COMPONENT,
+	)
 
 	innerTestResourceList(t, rti)
 }
@@ -288,11 +243,14 @@ func TestResourceListTextCdx13WhereClauseAndResultsBomRefContains(t *testing.T) 
 	rti := NewResourceTestInfo(
 		TEST_RESOURCE_LIST_CDX_1_3,
 		FORMAT_TEXT,
-		RESOURCE_TYPE_COMPONENT,
+		TI_LIST_SUMMARY_FALSE,
 		TEST_INPUT_WHERE_CLAUSE,
 		TEST_OUTPUT_CONTAINS,
+		nil,
 		TEST_OUTPUT_LINES,
-		nil)
+		nil,
+		RESOURCE_TYPE_COMPONENT,
+	)
 
 	innerTestResourceList(t, rti)
 }
@@ -305,11 +263,14 @@ func TestResourceListTextCdx13WhereClauseAndResultsVersionStartswith(t *testing.
 	rti := NewResourceTestInfo(
 		TEST_RESOURCE_LIST_CDX_1_3,
 		FORMAT_TEXT,
-		RESOURCE_TYPE_COMPONENT,
+		TI_LIST_SUMMARY_FALSE,
 		TEST_INPUT_WHERE_CLAUSE,
 		TEST_OUTPUT_CONTAINS,
+		nil,
 		TEST_OUTPUT_LINES,
-		nil)
+		nil,
+		RESOURCE_TYPE_COMPONENT,
+	)
 
 	innerTestResourceList(t, rti)
 }
@@ -322,11 +283,14 @@ func TestResourceListTextCdx13WhereClauseAndResultsNone(t *testing.T) {
 	rti := NewResourceTestInfo(
 		TEST_RESOURCE_LIST_CDX_1_3,
 		FORMAT_TEXT,
-		RESOURCE_TYPE_SERVICE,
+		TI_LIST_SUMMARY_FALSE,
 		TEST_INPUT_WHERE_CLAUSE,
 		TEST_OUTPUT_CONTAINS,
+		nil,
 		TEST_OUTPUT_LINES,
-		nil)
+		nil,
+		RESOURCE_TYPE_SERVICE,
+	)
 
 	// THere are no services that meet the where filter criteria
 	// check for warning message in output

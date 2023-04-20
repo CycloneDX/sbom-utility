@@ -287,6 +287,7 @@ const REPORT_REPLACE_LINE_FEEDS = true
 type ColumnFormatData struct {
 	DataKey               string // Note: data key is the column label (where possible)
 	DefaultTruncateLength int    // truncate data when `--format txt`
+	EmptyValue            string // text display if column data is empty
 	IsSummaryData         bool   // include in `--summary` reports
 	ReplaceLineFeeds      bool   // replace line feeds with spaces (e.g., for multi-line descriptions)
 }
@@ -341,16 +342,15 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 
 		switch typedData := data.(type) {
 		case string:
-			if columnData.ReplaceLineFeeds {
-				// replace line feeds with spaces in description
-				if typedData != "" {
+			// replace line feeds with spaces in description
+			if typedData != "" {
+				if columnData.ReplaceLineFeeds {
 					// For tabbed text tables, replace line feeds with spaces
 					typedData = strings.ReplaceAll(typedData, "\n", " ")
 				}
 			}
 			lineData = append(lineData, typedData)
 		case []interface{}:
-
 			// convert to []string
 			for _, value := range typedData {
 				sliceString = append(sliceString, value.(string))
@@ -359,32 +359,9 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 			// separate each entry with a comma (and space for readability)
 			joinedData = strings.Join(sliceString, ", ")
 
-			// replace line feeds with spaces in description
-			if columnData.ReplaceLineFeeds {
-				if joinedData != "" {
-					// For tabbed text tables, replace line feeds with spaces
-					joinedData = strings.ReplaceAll(joinedData, "\n", " ")
-				}
-			}
-
-			if summarizedReport {
-				if len(sliceString) > 0 {
-					lineData = append(lineData, sliceString[0])
-				} else {
-					lineData = append(lineData, "")
-				}
-				continue
-			}
-
-			lineData = append(lineData, joinedData)
-
-		case []string:
-			// separate each entry with a comma (and space for readability)
-			joinedData = strings.Join(typedData, ", ")
-
-			if columnData.ReplaceLineFeeds {
+			if joinedData != "" {
 				// replace line feeds with spaces in description
-				if joinedData != "" {
+				if columnData.ReplaceLineFeeds {
 					// For tabbed text tables, replace line feeds with spaces
 					joinedData = strings.ReplaceAll(joinedData, "\n", " ")
 				}
@@ -393,15 +370,14 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 			if summarizedReport {
 				if len(sliceString) > 0 {
 					lineData = append(lineData, sliceString[0])
-				} else {
-					lineData = append(lineData, "")
 				}
 				continue
 			}
 
 			lineData = append(lineData, joinedData)
 		case nil:
-			lineData = append(lineData, "")
+			getLogger().Warningf("nil value for column: `%v`", columnData.DataKey)
+			lineData = append(lineData, columnData.EmptyValue)
 		default:
 			err = getLogger().Errorf("Unexpected type for report data: type: `%T`, value: `%v`", data, data)
 		}
