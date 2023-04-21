@@ -33,8 +33,9 @@ const (
 	TEST_LICENSE_LIST_CDX_1_3_NONE_FOUND = "test/cyclonedx/cdx-1-3-license-list-none-found.json"
 	TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND = "test/cyclonedx/cdx-1-4-license-list-none-found.json"
 
-	TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_ID   = "test/cyclonedx/cdx-1-4-license-policy-invalid-spdx-id.json"
-	TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_NAME = "test/cyclonedx/cdx-1-4-license-policy-invalid-license-name.json"
+	TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_ID    = "test/cyclonedx/cdx-1-4-license-policy-invalid-spdx-id.json"
+	TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_NAME  = "test/cyclonedx/cdx-1-4-license-policy-invalid-license-name.json"
+	TEST_LICENSE_LIST_CDX_1_4_LICENSE_EXPRESSION_IN_NAME = "test/cyclonedx/cdx-1-4-license-expression-in-name.json"
 
 	// Test custom license policy (with license expression)
 	TEST_CUSTOM_POLICY_1                           = "test/policy/license-policy-expression-outer-parens.policy.json"
@@ -58,15 +59,14 @@ func (ti *LicenseTestInfo) String() string {
 }
 
 func NewLicenseTestInfo(inputFile string, listFormat string, listSummary bool, whereClause string,
-	resultContainsValue string, resultContainsValues []string,
-	resultExpectedLineCount int, resultExpectedError error,
+	resultContainsValues []string, resultExpectedLineCount int, resultExpectedError error,
 	listLineWrap bool, policyFile string) *LicenseTestInfo {
 
 	var ti = new(LicenseTestInfo)
 	var pCommon = &ti.CommonTestInfo
 	// initialize common fields
 	pCommon.Init(inputFile, listFormat, listSummary, whereClause,
-		resultContainsValue, resultContainsValues, resultExpectedLineCount, resultExpectedError)
+		resultContainsValues, resultExpectedLineCount, resultExpectedError)
 	// Initialize resource-unique fields
 	ti.ListLineWrap = listLineWrap
 	ti.PolicyFile = policyFile
@@ -265,26 +265,26 @@ func TestLicenseListSummaryCdx13Csv(t *testing.T) {
 }
 
 func TestLicenseListTextSummaryCdx14ContainsUndefined(t *testing.T) {
-
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND, FORMAT_DEFAULT, true)
-	lti.ResultContainsValue = POLICY_UNDEFINED
 	lti.ResultExpectedLineCount = 4 // 2 title, 2 with UNDEFINED
+	lti.ResultLineContainsValues = []string{POLICY_UNDEFINED, LC_TYPE_NAMES[LC_LOC_UNKNOWN], LICENSE_NONE, "package-lock.json"}
+	lti.ResultLineContainsValuesAtLineNum = 3
 	innerTestLicenseList(t, lti)
 }
 
 func TestLicenseListPolicyCdx14InvalidLicenseId(t *testing.T) {
 	TEST_LICENSE_ID_OR_NAME := "foo"
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_ID, FORMAT_TEXT, true)
-	lti.ResultContainsValues = []string{POLICY_UNDEFINED, LC_VALUE_ID, TEST_LICENSE_ID_OR_NAME}
-	lti.ResultExpectedAtLineNum = 3
+	lti.ResultLineContainsValues = []string{POLICY_UNDEFINED, LC_VALUE_ID, TEST_LICENSE_ID_OR_NAME}
+	lti.ResultLineContainsValuesAtLineNum = 3
 	innerTestLicenseList(t, lti)
 }
 
 func TestLicenseListPolicyCdx14InvalidLicenseName(t *testing.T) {
 	TEST_LICENSE_ID_OR_NAME := "bar"
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_NAME, FORMAT_TEXT, true)
-	lti.ResultContainsValues = []string{POLICY_UNDEFINED, LC_VALUE_NAME, TEST_LICENSE_ID_OR_NAME}
-	lti.ResultExpectedAtLineNum = 3
+	lti.ResultLineContainsValues = []string{POLICY_UNDEFINED, LC_VALUE_NAME, TEST_LICENSE_ID_OR_NAME}
+	lti.ResultLineContainsValuesAtLineNum = 3
 	innerTestLicenseList(t, lti)
 }
 
@@ -312,12 +312,23 @@ func TestLicenseListSummaryTextCdx13WhereLicenseTypeName(t *testing.T) {
 	innerTestLicenseList(t, lti)
 }
 
+func TestLicenseListSummaryTextCdx14LicenseExpInName(t *testing.T) {
+	lti := NewLicenseTestInfoBasic(
+		TEST_LICENSE_LIST_CDX_1_4_LICENSE_EXPRESSION_IN_NAME,
+		FORMAT_TEXT, true)
+	lti.WhereClause = "license-type=name"
+	lti.ResultLineContainsValues = []string{POLICY_UNDEFINED, "BSD-3-Clause OR MIT"}
+	lti.ResultLineContainsValuesAtLineNum = 3
+	lti.ResultExpectedLineCount = 4 // title and data rows
+	innerTestLicenseList(t, lti)
+}
+
 func TestLicenseListPolicyCdx14CustomPolicy(t *testing.T) {
 	TEST_LICENSE_ID_OR_NAME := "(MIT OR CC0-1.0)"
 
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_TEXT_CDX_1_4_CUSTOM_POLICY_1, FORMAT_TEXT, true)
-	lti.ResultContainsValues = []string{POLICY_ALLOW, LC_VALUE_EXPRESSION, TEST_LICENSE_ID_OR_NAME}
-	lti.ResultExpectedAtLineNum = 2
+	lti.ResultLineContainsValues = []string{POLICY_ALLOW, LC_VALUE_EXPRESSION, TEST_LICENSE_ID_OR_NAME}
+	lti.ResultLineContainsValuesAtLineNum = 2
 
 	// Load a custom policy file ONLY for the specific unit test
 	loadHashCustomPolicyFile(TEST_CUSTOM_POLICY_1)

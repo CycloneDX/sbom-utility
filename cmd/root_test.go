@@ -52,25 +52,23 @@ var TestLogLevelTrace = flag.Bool(FLAG_TRACE, false, "")
 var TestLogQuiet = flag.Bool(FLAG_QUIET_MODE, false, "")
 
 type CommonTestInfo struct {
-	InputFile               string
-	ListFormat              string
-	ListSummary             bool
-	WhereClause             string
-	ResultExpectedError     error
-	ResultExpectedLineCount int
-	ResultExpectedAtLineNum int
-	ResultContainsValues    []string
-	ResultContainsValue     string
+	InputFile                         string
+	ListFormat                        string
+	ListSummary                       bool
+	WhereClause                       string
+	ResultExpectedError               error
+	ResultExpectedLineCount           int
+	ResultLineContainsValuesAtLineNum int
+	ResultLineContainsValues          []string
 }
 
 // default (empty) TestInfo struct values
 const (
-	TI_LIST_SUMMARY_FALSE            = false
-	TI_LIST_LINE_WRAP                = false
-	TI_DEFAULT_WHERE_CLAUSE          = ""
-	TI_DEFAULT_LINE_COUNT            = -1
-	TI_DEFAULT_RESULT_CONTAINS_VALUE = ""
-	TI_DEFAULT_POLICY_FILE           = ""
+	TI_LIST_SUMMARY_FALSE   = false
+	TI_LIST_LINE_WRAP       = false
+	TI_DEFAULT_WHERE_CLAUSE = ""
+	TI_DEFAULT_LINE_COUNT   = -1
+	TI_DEFAULT_POLICY_FILE  = ""
 )
 
 // Stringer interface for ResourceTestInfo (just display subset of key values)
@@ -80,13 +78,11 @@ func (ti *CommonTestInfo) String() string {
 }
 
 func (ti *CommonTestInfo) Init(inputFile string, listFormat string, listSummary bool, whereClause string,
-	resultContainsValue string, resultContainsValues []string,
-	resultExpectedLineCount int, resultExpectedError error) *CommonTestInfo {
+	resultContainsValues []string, resultExpectedLineCount int, resultExpectedError error) *CommonTestInfo {
 	ti.InputFile = inputFile
 	ti.ListFormat = listFormat
 	ti.ListSummary = listSummary
 	ti.WhereClause = whereClause
-	ti.ResultContainsValue = resultContainsValue
 	ti.ResultExpectedLineCount = resultExpectedLineCount
 	ti.ResultExpectedError = resultExpectedError
 	return ti
@@ -94,7 +90,7 @@ func (ti *CommonTestInfo) Init(inputFile string, listFormat string, listSummary 
 
 func (ti *CommonTestInfo) InitBasic(inputFile string, format string, expectedError error) *CommonTestInfo {
 	ti.Init(inputFile, format, TI_LIST_SUMMARY_FALSE, TI_DEFAULT_WHERE_CLAUSE,
-		TI_DEFAULT_RESULT_CONTAINS_VALUE, nil, TI_DEFAULT_LINE_COUNT, expectedError)
+		nil, TI_DEFAULT_LINE_COUNT, expectedError)
 	return ti
 }
 
@@ -232,43 +228,21 @@ func innerRunCommonListResultTests(t *testing.T, testInfo *CommonTestInfo, outpu
 		return
 	}
 
-	// TEST: Output contains string(s)
-	// TODO: Support []string
-	var outputResults string
-	if testInfo.ResultContainsValue != "" {
-		outputResults = outputBuffer.String()
-		getLogger().Debugf("output: \"%s\"", outputResults)
-
-		if !strings.Contains(outputResults, testInfo.ResultContainsValue) {
-			foo = getLogger().Errorf("output did not contain expected value: `%s`", testInfo.ResultContainsValue)
-			t.Errorf("%s: input file: `%s`, where clause: `%s`, results: `%s`",
-				foo.Error(),
-				testInfo.InputFile,
-				testInfo.WhereClause,
-				outputResults,
-			)
-			return
-		}
-		// TODO: getLogger().Tracef("success")
-	}
-
 	// TEST: Line contains a set of string values
 	// TODO: support any number of row/values in test info. structure
-	if len(testInfo.ResultContainsValues) > 0 {
-		matchFoundLine, matchFound := lineContainsValues(outputBuffer, testInfo.ResultExpectedAtLineNum, testInfo.ResultContainsValues...)
+	if len(testInfo.ResultLineContainsValues) > 0 {
+		matchFoundLine, matchFound := lineContainsValues(outputBuffer, testInfo.ResultLineContainsValuesAtLineNum, testInfo.ResultLineContainsValues...)
 		if !matchFound {
-			foo = getLogger().Errorf("output does not contain expected values: `%v` at line: %v\n", testInfo.ResultContainsValues, testInfo.ResultExpectedAtLineNum)
+			foo = getLogger().Errorf("output does not contain expected values: `%v` at line: %v\n", testInfo.ResultLineContainsValues, testInfo.ResultLineContainsValuesAtLineNum)
 			t.Error(foo.Error())
 			return
 		}
-		getLogger().Tracef("output contains expected values: `%v` at line: %v\n", testInfo.ResultContainsValues, matchFoundLine)
+		getLogger().Tracef("output contains expected values: `%v` at line: %v\n", testInfo.ResultLineContainsValues, matchFoundLine)
 	}
 
 	// TEST: Line Count
 	if testInfo.ResultExpectedLineCount != TI_DEFAULT_LINE_COUNT {
-		if outputResults == "" {
-			outputResults = outputBuffer.String()
-		}
+		outputResults := outputBuffer.String()
 		outputLineCount := strings.Count(outputResults, "\n")
 		if outputLineCount != testInfo.ResultExpectedLineCount {
 			foo = getLogger().Errorf("output did not contain expected line count: %v/%v (expected/actual)", testInfo.ResultExpectedLineCount, outputLineCount)
@@ -278,6 +252,7 @@ func innerRunCommonListResultTests(t *testing.T, testInfo *CommonTestInfo, outpu
 				testInfo.WhereClause)
 			return
 		}
+		getLogger().Tracef("success: output contained expected line count: %v", testInfo.ResultExpectedLineCount)
 	}
 
 	// TEST: valid JSON if format JSON
@@ -285,11 +260,12 @@ func innerRunCommonListResultTests(t *testing.T, testInfo *CommonTestInfo, outpu
 	if testInfo.ListFormat == FORMAT_JSON {
 		// Use Marshal to test for validity
 		if !utils.IsValidJsonRaw(outputBuffer.Bytes()) {
-			foo = getLogger().Errorf("output did not contain valid JSON")
+			foo = getLogger().Errorf("output did not contain valid format data; expected: `%s`", FORMAT_JSON)
 			t.Error(foo.Error())
 			t.Logf("%s", outputBuffer.String())
 			return
 		}
+		getLogger().Tracef("success: validated output format: `%s`", FORMAT_JSON)
 	}
 
 	// TODO: add general validation for CSV and Markdown formats

@@ -46,14 +46,13 @@ func (ti *ResourceTestInfo) String() string {
 }
 
 func NewResourceTestInfo(inputFile string, listFormat string, listSummary bool, whereClause string,
-	resultContainsValue string, resultContainsValues []string,
-	resultExpectedLineCount int, resultExpectedError error, resourceType string) *ResourceTestInfo {
+	resultContainsValues []string, resultExpectedLineCount int, resultExpectedError error, resourceType string) *ResourceTestInfo {
 
 	var ti = new(ResourceTestInfo)
 	var pCommon = &ti.CommonTestInfo
 	// initialize common fields
 	pCommon.Init(inputFile, listFormat, listSummary, whereClause,
-		resultContainsValue, resultContainsValues, resultExpectedLineCount, resultExpectedError)
+		resultContainsValues, resultExpectedLineCount, resultExpectedError)
 	// Initialize resource-unique fields
 	ti.ResourceType = resourceType
 	return ti
@@ -156,7 +155,8 @@ func TestResourceListTextCdx14NoServicesFound(t *testing.T) {
 	)
 
 	// verify there is a (warning) message present when no resources are found
-	rti.ResultContainsValue = MSG_OUTPUT_NO_RESOURCES_FOUND
+	rti.ResultLineContainsValues = []string{MSG_OUTPUT_NO_RESOURCES_FOUND}
+	rti.ResultLineContainsValuesAtLineNum = 2
 	innerTestResourceList(t, rti)
 }
 
@@ -194,30 +194,26 @@ func TestResourceListTextCdx14SaaS(t *testing.T) {
 
 func TestResourceListTextCdx13WhereClauseAndResultsByNameStartswith(t *testing.T) {
 	TEST_INPUT_WHERE_CLAUSE := "name=Library A"
-	TEST_OUTPUT_CONTAINS := "Library A"
+	TEST_OUTPUT_CONTAINS := []string{"Library A"}
 	TEST_OUTPUT_LINES := 3
-
-	// NewResourceTestInfo(inputFile string, listFormat string, listSummary bool, whereClause string,
-	// 	resultContainsValue string, resultContainsValues []string,
-	// 	resultExpectedLineCount int, resultExpectedError error, resourceType string)
 	rti := NewResourceTestInfo(
 		TEST_RESOURCE_LIST_CDX_1_3,
 		FORMAT_TEXT,
 		TI_LIST_SUMMARY_FALSE,
 		TEST_INPUT_WHERE_CLAUSE,
-		TEST_OUTPUT_CONTAINS,
 		nil,
 		TEST_OUTPUT_LINES,
 		nil,
 		RESOURCE_TYPE_COMPONENT,
 	)
-
+	rti.ResultLineContainsValues = TEST_OUTPUT_CONTAINS
+	rti.ResultLineContainsValuesAtLineNum = -1
 	innerTestResourceList(t, rti)
 }
 
 func TestResourceListTextCdx13WhereClauseAndResultsByNameContains(t *testing.T) {
 	TEST_INPUT_WHERE_CLAUSE := "name=^.*\\sF.*$"
-	TEST_OUTPUT_CONTAINS := "Library F"
+	TEST_OUTPUT_CONTAINS := []string{"Library F"}
 	TEST_OUTPUT_LINES := 3
 
 	rti := NewResourceTestInfo(
@@ -225,19 +221,19 @@ func TestResourceListTextCdx13WhereClauseAndResultsByNameContains(t *testing.T) 
 		FORMAT_TEXT,
 		TI_LIST_SUMMARY_FALSE,
 		TEST_INPUT_WHERE_CLAUSE,
-		TEST_OUTPUT_CONTAINS,
 		nil,
 		TEST_OUTPUT_LINES,
 		nil,
 		RESOURCE_TYPE_COMPONENT,
 	)
-
+	rti.ResultLineContainsValues = TEST_OUTPUT_CONTAINS
+	rti.ResultLineContainsValuesAtLineNum = -1
 	innerTestResourceList(t, rti)
 }
 
 func TestResourceListTextCdx13WhereClauseAndResultsBomRefContains(t *testing.T) {
 	TEST_INPUT_WHERE_CLAUSE := "bom-ref=^.*library.*$"
-	TEST_OUTPUT_CONTAINS := "pkg:lib/libraryE@1.0.0"
+	TEST_OUTPUT_CONTAINS := []string{"pkg:lib/libraryE@1.0.0"}
 	TEST_OUTPUT_LINES := 12
 
 	rti := NewResourceTestInfo(
@@ -245,19 +241,19 @@ func TestResourceListTextCdx13WhereClauseAndResultsBomRefContains(t *testing.T) 
 		FORMAT_TEXT,
 		TI_LIST_SUMMARY_FALSE,
 		TEST_INPUT_WHERE_CLAUSE,
-		TEST_OUTPUT_CONTAINS,
 		nil,
 		TEST_OUTPUT_LINES,
 		nil,
 		RESOURCE_TYPE_COMPONENT,
 	)
-
+	rti.ResultLineContainsValues = TEST_OUTPUT_CONTAINS
+	rti.ResultLineContainsValuesAtLineNum = -1
 	innerTestResourceList(t, rti)
 }
 
 func TestResourceListTextCdx13WhereClauseAndResultsVersionStartswith(t *testing.T) {
 	TEST_INPUT_WHERE_CLAUSE := "version=2.0"
-	TEST_OUTPUT_CONTAINS := "ACME Application"
+	TEST_OUTPUT_CONTAINS := []string{"ACME Application"}
 	TEST_OUTPUT_LINES := 3
 
 	rti := NewResourceTestInfo(
@@ -265,19 +261,19 @@ func TestResourceListTextCdx13WhereClauseAndResultsVersionStartswith(t *testing.
 		FORMAT_TEXT,
 		TI_LIST_SUMMARY_FALSE,
 		TEST_INPUT_WHERE_CLAUSE,
-		TEST_OUTPUT_CONTAINS,
 		nil,
 		TEST_OUTPUT_LINES,
 		nil,
 		RESOURCE_TYPE_COMPONENT,
 	)
-
+	rti.ResultLineContainsValues = TEST_OUTPUT_CONTAINS
+	rti.ResultLineContainsValuesAtLineNum = -1
 	innerTestResourceList(t, rti)
 }
 
 func TestResourceListTextCdx13WhereClauseAndResultsNone(t *testing.T) {
 	TEST_INPUT_WHERE_CLAUSE := "version=2.0"
-	TEST_OUTPUT_CONTAINS := MSG_OUTPUT_NO_RESOURCES_FOUND
+	TEST_OUTPUT_CONTAINS := []string{MSG_OUTPUT_NO_RESOURCES_FOUND}
 	TEST_OUTPUT_LINES := 3
 
 	rti := NewResourceTestInfo(
@@ -285,12 +281,13 @@ func TestResourceListTextCdx13WhereClauseAndResultsNone(t *testing.T) {
 		FORMAT_TEXT,
 		TI_LIST_SUMMARY_FALSE,
 		TEST_INPUT_WHERE_CLAUSE,
-		TEST_OUTPUT_CONTAINS,
 		nil,
 		TEST_OUTPUT_LINES,
 		nil,
 		RESOURCE_TYPE_SERVICE,
 	)
+	rti.ResultLineContainsValues = TEST_OUTPUT_CONTAINS
+	rti.ResultLineContainsValuesAtLineNum = -1
 
 	// THere are no services that meet the where filter criteria
 	// check for warning message in output

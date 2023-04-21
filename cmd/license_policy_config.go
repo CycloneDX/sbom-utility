@@ -206,22 +206,18 @@ func (config *LicenseComplianceConfig) innerHashLicensePolicies() (err error) {
 
 		// Map old JSON key names to new key names (as they appear as titles in report columns)
 
-		// TODO: use pointer only to has, do not use local copy
-		// Update local copy that is hashed
-		policy.AltSPDXId = policy.Id
-		policy.AltUsagePolicy = policy.UsagePolicy
-		policy.AltAnnotationRefs = strings.Join(policy.AnnotationRefs, ",")
-		getLogger().Tracef("\n >>> HASHING!!!: id: `%s`, spdx-id: `%s`\n", policy.Id, policy.AltSPDXId)
-		// Update the original entries on configuration
+		// Update the original entries in the []PolicyList stored in the global LicenseComplianceConfig
+		getLogger().Debugf("Mapping: `Id`: `%s` to `spdx-id`: `%s`\n", policy.Id, policy.AltSPDXId)
 		config.PolicyList[i].AltSPDXId = policy.Id
+		getLogger().Debugf("Mapping: `UsagePolicy`: `%s` to `usage-policy`: `%s`\n", policy.Id, policy.AltSPDXId)
 		config.PolicyList[i].AltUsagePolicy = policy.UsagePolicy
+		getLogger().Debugf("Mapping: `AnnotationRefs`: `%s` to `annotations`: `%s`\n", policy.Id, policy.AltSPDXId)
 		config.PolicyList[i].AltAnnotationRefs = strings.Join(policy.AnnotationRefs, ",")
-		getLogger().Tracef("\n >>> Original!!!: id: `%s`, spdx-id: `%s`\n", config.PolicyList[i].Id, config.PolicyList[i].AltSPDXId)
 
 		// Actually hash the policy
-		err = config.hashPolicy(policy)
+		err = config.hashPolicy(config.PolicyList[i])
 		if err != nil {
-			err = fmt.Errorf("unable to hash policy: %v", policy)
+			err = fmt.Errorf("unable to hash policy: %v", config.PolicyList[i])
 			return
 		}
 	}

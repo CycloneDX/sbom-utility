@@ -97,9 +97,10 @@ func parseExpression(rawExpression string) (ce *CompoundExpression, err error) {
 	return ce, err
 }
 
-// NOTE: This expression parser does not account for multiple (>1) conjunctions
-// within a compound expression; however, this has not been endorsed by
-// the specification or any known examples
+// NOTE: This expression parser MAY NOT account for multiple (>1) conjunctions
+// within a compound expression (e.g., Foo OR Bar AND Bqu) as this has not been endorsed
+// by the specification or any known examples.  However, we have put in place some
+// tests that shows the parser still works in these cases.
 func parseCompoundExpression(expression *CompoundExpression, tokens []string, index int) (i int, err error) {
 	getLogger().Enter("expression:", expression)
 	defer getLogger().Exit()
