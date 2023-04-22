@@ -94,7 +94,7 @@ func innerTestResourceList(t *testing.T, testInfo *ResourceTestInfo) (outputBuff
 	outputBuffer, err = innerBufferedTestResourceList(t, testInfo, whereFilters)
 
 	// Run all common tests against "result" values in the CommonTestInfo struct
-	err = innerRunCommonListResultTests(t, &testInfo.CommonTestInfo, outputBuffer, err)
+	err = innerRunReportResultTests(t, &testInfo.CommonTestInfo, outputBuffer, err)
 
 	return
 }

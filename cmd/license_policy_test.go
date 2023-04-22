@@ -107,7 +107,7 @@ func innerTestLicensePolicyList(t *testing.T, testInfo *LicenseTestInfo) (output
 	outputBuffer, err = innerTestLicensePolicyListCustomAndBuffered(t, testInfo, whereFilters)
 
 	// Run all common tests against "result" values in the CommonTestInfo struct
-	err = innerRunCommonListResultTests(t, &testInfo.CommonTestInfo, outputBuffer, err)
+	err = innerRunReportResultTests(t, &testInfo.CommonTestInfo, outputBuffer, err)
 
 	return
 }

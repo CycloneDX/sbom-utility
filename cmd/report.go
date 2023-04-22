@@ -18,7 +18,6 @@
 package cmd
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 
@@ -135,38 +134,6 @@ func truncateTimeStampISO8601Date(fullTimestamp string) (date string, err error)
 	return
 }
 
-const REPORT_LINE_CONTAINS_ANY = -1
-
-func lineContainsValues(buffer bytes.Buffer, lineNum int, values ...string) (int, bool) {
-	lines := strings.Split(buffer.String(), "\n")
-	getLogger().Tracef("output: %s", lines)
-	//var lineContainsValue bool = false
-
-	for curLineNum, line := range lines {
-
-		// if ths is a line we need to test
-		if lineNum == REPORT_LINE_CONTAINS_ANY || curLineNum == lineNum {
-			// test that all values occur in the current line
-			for iValue, value := range values {
-				if !strings.Contains(line, value) {
-					// if we failed to match all values on the specified line return failure
-					if curLineNum == lineNum {
-						return curLineNum, false
-					}
-					// else, keep checking next line
-					break
-				}
-
-				// If this is the last value to test for, then all values have matched
-				if iValue+1 == len(values) {
-					return curLineNum, true
-				}
-			}
-		}
-	}
-	return REPORT_LINE_CONTAINS_ANY, false
-}
-
 func createMarkdownColumnAlignment(titles []string) (alignment []string) {
 	for range titles {
 		alignment = append(alignment, MD_ALIGN_LEFT)
@@ -275,9 +242,10 @@ func wrapTableRowText(maxChars int, joinChar string, columns ...interface{}) (ta
 	return
 }
 
-// Flag constants
-const REPORT_SUMMARY_DATA = true
-const REPORT_REPLACE_LINE_FEEDS = true
+// Report column data values
+const REPORT_SUMMARY_DATA_TRUE = true
+const REPORT_REPLACE_LINE_FEEDS_TRUE = true
+const DEFAULT_COLUMN_TRUNCATE_LENGTH = -1
 
 // TODO: Support additional flags to:
 // - show number of chars shown vs. available when truncated (e.g., (x/y))
@@ -287,7 +255,6 @@ const REPORT_REPLACE_LINE_FEEDS = true
 type ColumnFormatData struct {
 	DataKey               string // Note: data key is the column label (where possible)
 	DefaultTruncateLength int    // truncate data when `--format txt`
-	EmptyValue            string // text display if column data is empty
 	IsSummaryData         bool   // include in `--summary` reports
 	ReplaceLineFeeds      bool   // replace line feeds with spaces (e.g., for multi-line descriptions)
 }
@@ -377,7 +344,7 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 			lineData = append(lineData, joinedData)
 		case nil:
 			getLogger().Warningf("nil value for column: `%v`", columnData.DataKey)
-			lineData = append(lineData, columnData.EmptyValue)
+			lineData = append(lineData, "nil")
 		default:
 			err = getLogger().Errorf("Unexpected type for report data: type: `%T`, value: `%v`", data, data)
 		}
