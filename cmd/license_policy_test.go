@@ -784,3 +784,23 @@ func TestLicensePolicyListWhereUsagePolicyDeny(t *testing.T) {
 	lti.ResultExpectedLineCount = 5
 	innerTestLicensePolicyList(t, lti)
 }
+
+func TestLicensePolicyListWhereAnnotationNeedsIPApproval(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
+	lti.WhereClause = "annotations=NEEDS-IP"
+	lti.ResultExpectedLineCount = 17
+	// sanity (spot) check row values
+	lti.ResultLineContainsValuesAtLineNum = 2
+	lti.ResultLineContainsValues = []string{"BSD-2-Clause", POLICY_NEEDS_REVIEW}
+	innerTestLicensePolicyList(t, lti)
+}
+
+func TestLicensePolicyListWhereAnnotation0BSDNeedsIPApproval(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
+	lti.WhereClause = "annotations=NEEDS-IP,id=BSD-4"
+	lti.ResultExpectedLineCount = 6
+	// sanity (spot) check row values
+	lti.ResultLineContainsValuesAtLineNum = 2
+	lti.ResultLineContainsValues = []string{"BSD-4-Clause", POLICY_NEEDS_REVIEW}
+	innerTestLicensePolicyList(t, lti)
+}

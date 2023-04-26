@@ -54,7 +54,7 @@ func innerRunReportResultTests(t *testing.T, testInfo *CommonTestInfo, outputBuf
 	if len(testInfo.ResultLineContainsValues) > 0 {
 		matchFoundLine, matchFound := lineContainsValues(outputBuffer, testInfo.ResultLineContainsValuesAtLineNum, testInfo.ResultLineContainsValues...)
 		if !matchFound {
-			foo = getLogger().Errorf("output does not contain expected values: `%v` at line: %v\n", testInfo.ResultLineContainsValues, testInfo.ResultLineContainsValuesAtLineNum)
+			foo = getLogger().Errorf("output does not contain expected values: `%v` at line: %v\n", strings.Join(testInfo.ResultLineContainsValues, ","), testInfo.ResultLineContainsValuesAtLineNum)
 			t.Error(foo.Error())
 			return
 		}
