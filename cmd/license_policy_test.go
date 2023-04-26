@@ -804,3 +804,20 @@ func TestLicensePolicyListWhereAnnotation0BSDNeedsIPApproval(t *testing.T) {
 	lti.ResultLineContainsValues = []string{"BSD-4-Clause", POLICY_NEEDS_REVIEW}
 	innerTestLicensePolicyList(t, lti)
 }
+
+func TestLicensePolicyListWhereFamilyApache(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
+	lti.WhereClause = "family=Apache"
+	lti.ResultExpectedLineCount = 5
+	// sanity (spot) check row values
+	lti.ResultLineContainsValuesAtLineNum = 2
+	lti.ResultLineContainsValues = []string{"Apache v1.0", POLICY_ALLOW}
+	innerTestLicensePolicyList(t, lti)
+}
+
+func TestLicensePolicyListWhereAliases(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
+	lti.WhereClause = "aliases=Apache"
+	lti.ResultExpectedLineCount = 3
+	innerTestLicensePolicyList(t, lti)
+}
