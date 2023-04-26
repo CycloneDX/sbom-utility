@@ -692,19 +692,83 @@ func TestLicensePolicyMatchByFamilyNameBadExpression(t *testing.T) {
 	}
 }
 
-//--------------------------------------------------------------
-// Policy "list" with --where tests (using default policy file)
-//--------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Test --wrap flag
+// i.e., wraps policy (lines) where mult. URLs, Notes or Annotations are found
+//-----------------------------------------------------------------------------
 
-func TestLicensePolicyListBasicTextNoWrap(t *testing.T) {
+func TestLicensePolicyListBasicTextWrapFalse(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
 	lti.ResultExpectedLineCount = 250 // title and data rows
 	// Verify first data row has expected values
-	// TODO spot check MORE row values
+	// sanity (spot) check row values
 	lti.ResultLineContainsValuesAtLineNum = 2
 	lti.ResultLineContainsValues = []string{"0BSD", POLICY_ALLOW}
 	innerTestLicensePolicyList(t, lti)
 }
+
+func TestLicensePolicyListTextWrapTrue(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
+	lti.ResultExpectedLineCount = 402 // title and data rows
+	utils.GlobalFlags.LicenseFlags.ListLineWrap = true
+	// sanity (spot) check row values
+	lti.ResultLineContainsValuesAtLineNum = 2
+	lti.ResultLineContainsValues = []string{"0BSD", POLICY_ALLOW}
+	innerTestLicensePolicyList(t, lti)
+}
+
+//--------------------------------------------------------------
+//  --where tests (using custom good|bad|maybe policy file)
+//--------------------------------------------------------------
+
+// Test using custom policy file with just 3 entries: good|bad|maybe
+func TestLicensePolicyListWhereTestUsagePolicyAllow(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
+	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
+	lti.WhereClause = "usage-policy=allow"
+	lti.ResultExpectedLineCount = 3
+	innerTestLicensePolicyList(t, lti)
+}
+
+// Test using custom policy file with just 3 entries: good|bad|maybe
+func TestLicensePolicyListWhereTestUsagePolicyDeny(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
+	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
+	lti.WhereClause = "usage-policy=deny"
+	lti.ResultExpectedLineCount = 3
+	innerTestLicensePolicyList(t, lti)
+}
+
+// Test using custom policy file with just 3 entries: good|bad|maybe
+func TestLicensePolicyListWhereTestUsagePolicyNeedsReview(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
+	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
+	lti.WhereClause = "usage-policy=needs-review"
+	lti.ResultExpectedLineCount = 3
+	innerTestLicensePolicyList(t, lti)
+}
+
+// Test using custom policy file with just 3 entries: good|bad|maybe
+func TestLicensePolicyListCSVWhereTestUsagePolicyAllow(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_CSV, true)
+	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
+	lti.WhereClause = "usage-policy=allow"
+	lti.ResultExpectedLineCount = 2
+	innerTestLicensePolicyList(t, lti)
+}
+
+// Test using custom policy file with just 3 entries: good|bad|maybe
+func TestLicensePolicyListMarkdownWhereTestUsagePolicyAllow(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_MARKDOWN, true)
+	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
+	lti.WhereClause = "usage-policy=allow"
+	lti.ResultExpectedLineCount = 3
+	innerTestLicensePolicyList(t, lti)
+}
+
+//--------------------------------------------------------------
+//  --where tests (using default policy file)
+//--------------------------------------------------------------
 
 func TestLicensePolicyListTextBasicWhereId0BSD(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
@@ -714,57 +778,9 @@ func TestLicensePolicyListTextBasicWhereId0BSD(t *testing.T) {
 	innerTestLicensePolicyList(t, lti)
 }
 
-func TestLicensePolicyListTextWrap(t *testing.T) {
-	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
-	lti.ResultExpectedLineCount = 402 // title and data rows
-	utils.GlobalFlags.LicenseFlags.ListLineWrap = true
-	// TODO spot check row values
-	innerTestLicensePolicyList(t, lti)
-}
-
 func TestLicensePolicyListWhereUsagePolicyDeny(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
 	lti.WhereClause = "usage-policy=deny"
 	lti.ResultExpectedLineCount = 5
-	innerTestLicensePolicyList(t, lti)
-}
-
-func TestLicensePolicyListWhereTestUsagePolicyAllow(t *testing.T) {
-	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
-	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
-	lti.WhereClause = "usage-policy=allow"
-	lti.ResultExpectedLineCount = 3
-	innerTestLicensePolicyList(t, lti)
-}
-
-func TestLicensePolicyListWhereTestUsagePolicyDeny(t *testing.T) {
-	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
-	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
-	lti.WhereClause = "usage-policy=deny"
-	lti.ResultExpectedLineCount = 3
-	innerTestLicensePolicyList(t, lti)
-}
-
-func TestLicensePolicyListWhereTestUsagePolicyNeedsReview(t *testing.T) {
-	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
-	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
-	lti.WhereClause = "usage-policy=needs-review"
-	lti.ResultExpectedLineCount = 3
-	innerTestLicensePolicyList(t, lti)
-}
-
-func TestLicensePolicyListCSVWhereTestUsagePolicyAllow(t *testing.T) {
-	lti := NewLicensePolicyTestInfoBasic(FORMAT_CSV, true)
-	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
-	lti.WhereClause = "usage-policy=allow"
-	lti.ResultExpectedLineCount = 2
-	innerTestLicensePolicyList(t, lti)
-}
-
-func TestLicensePolicyListMarkdownWhereTestUsagePolicyAllow(t *testing.T) {
-	lti := NewLicensePolicyTestInfoBasic(FORMAT_MARKDOWN, true)
-	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
-	lti.WhereClause = "usage-policy=allow"
-	lti.ResultExpectedLineCount = 3
 	innerTestLicensePolicyList(t, lti)
 }
