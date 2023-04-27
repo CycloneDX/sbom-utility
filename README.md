@@ -817,7 +817,7 @@ Use the `--format` flag on the to choose one of the supported output formats:
 
 #### Result sorting
 
-Currently, all `vulnerability list` command results are sorted by vulnerability `id` then by `created` date.
+Currently, all `vulnerability list` command results are sorted by vulnerability `id` (descending) then by `created` date.
 
 #### Vulnerability Examples
 
@@ -830,11 +830,11 @@ The `list` subcommand provides a complete view of most top-level, vulnerability 
 ```
 
 ```bash
-id              bom-ref  source-name source-url                                      created                   published                 updated                   rejected  description
---              -------  ----------  -----------                                      -------                   ---------                 -------                   --------  -----------
-CVE-2020-25649           NVD         https://nvd.nist.gov/vuln/detail/CVE-2020-25649  2020-12-03T00:00:00.000Z  2020-12-03T00:00:00.000Z  2023-02-02T00:00:00.000Z            com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection.
-CVE-2022-42003           NVD         https://nvd.nist.gov/vuln/detail/CVE-2022-42003  2022-10-02T00:00:00.000Z  2022-10-02T00:00:00.000Z  2022-10-02T00:00:00.000Z            In FasterXML jackson-databind before 2.14.0-rc1, resource exhaustion can occur because of a lack of a check in primitive value deserializers to avoid deep wrapper array nesting, when the UNWRAP_SINGLE_VALUE_ARRAYS feature is enabled.
-CVE-2022-42004           NVD         https://nvd.nist.gov/vuln/detail/CVE-2022-42004  2022-10-02T00:00:00.000Z  2022-10-02T00:00:00.000Z  2022-10-02T00:00:00.000Z            In FasterXML jackson-databind before 2.13.4, resource exhaustion can occur because of a lack of a check in BeanDeserializer._deserializeFromArray to prevent use of deeply nested arrays.
+id              bom-ref  cwe-ids  cvss-severity                                                source-name  source-url                                       published   updated     created     rejected  analysis-state  analysis-justification  description
+--              -------  -------  -------------                                                -----------  ----------                                       ---------   -------     -------     --------  --------------  ----------------------  -----------
+CVE-2022-42004           502      CVSSv31: 7.5 (high)                                          NVD          https://nvd.nist.gov/vuln/detail/CVE-2022-42004  2022-10-02  2022-10-02  2022-10-02            UNDEFINED       UNDEFINED               In FasterXML jackson-databind before 2.13.4, resource exhaustion can occur because of a lack of a check in BeanDeserializer._deserializeFromArray to prevent use of deeply nested arrays. An application is vulnerable only with certain customized choices for deserialization.
+CVE-2022-42003           502      CVSSv31: 7.5 (high)                                          NVD          https://nvd.nist.gov/vuln/detail/CVE-2022-42003  2022-10-02  2022-10-02  2022-10-02            UNDEFINED       UNDEFINED               In FasterXML jackson-databind before 2.14.0-rc1, resource exhaustion can occur because of a lack of a check in primitive value deserializers to avoid deep wrapper array nesting, when the UNWRAP_SINGLE_VALUE_ARRAYS feature is enabled. Additional fix version in 2.13.4.1 and 2.12.17.1
+CVE-2020-25649           611      CVSSv31: 7.5 (high), CVSSv31: 8.2 (high), CVSSv31: 0 (none)  NVD          https://nvd.nist.gov/vuln/detail/CVE-2020-25649  2020-12-03  2023-02-02  2020-12-03            not_affected    code_not_reachable      com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.
 ```
 
 ##### Summary flag
@@ -852,9 +852,9 @@ This example shows the default text output from using the `--summary` flag:
 ```bash
 id              cvss-severity        source-name  published   description
 --              -------------        -----------  ---------   -----------
-CVE-2020-25649  CVSSv31: 7.5 (high)  NVD          2020-12-03  com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.
-CVE-2022-42003  CVSSv31: 7.5 (high)  NVD          2022-10-02  In FasterXML jackson-databind before 2.14.0-rc1, resource exhaustion can occur because of a lack of a check in primitive value deserializers to avoid deep wrapper array nesting, when the UNWRAP_SINGLE_VALUE_ARRAYS feature is enabled. Additional fix version in 2.13.4.1 and 2.12.17.1
 CVE-2022-42004  CVSSv31: 7.5 (high)  NVD          2022-10-02  In FasterXML jackson-databind before 2.13.4, resource exhaustion can occur because of a lack of a check in BeanDeserializer._deserializeFromArray to prevent use of deeply nested arrays. An application is vulnerable only with certain customized choices for deserialization.
+CVE-2022-42003  CVSSv31: 7.5 (high)  NVD          2022-10-02  In FasterXML jackson-databind before 2.14.0-rc1, resource exhaustion can occur because of a lack of a check in primitive value deserializers to avoid deep wrapper array nesting, when the UNWRAP_SINGLE_VALUE_ARRAYS feature is enabled. Additional fix version in 2.13.4.1 and 2.12.17.1
+CVE-2020-25649  CVSSv31: 7.5 (high)  NVD          2020-12-03  com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.
 ```
 
 #### Where flag filtering

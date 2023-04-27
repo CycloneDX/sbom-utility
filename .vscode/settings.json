@@ -75,5 +75,8 @@
             "usecases",
             "VULN",
             "Warningf"
-      ]
+      ],
+      "files.watcherExclude": {
+            "**/target": true
+      }
 }
