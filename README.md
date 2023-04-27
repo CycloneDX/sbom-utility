@@ -267,7 +267,6 @@ Use the `--format` flag on the `license list` or `license policy` subcommands to
 
 ---
 
-
 #### `list` subcommand
 
 This subcommand will emit a list of all licenses found in and SBOM (defaults to `json` format):
@@ -451,6 +450,7 @@ allow         Apache     Apache-2.0    Apache License 2.0            APPROVED   
   - Currently, the default `license.json` file does not contain an entry for the complete SPDX 3.2 license templates. An issue [12](https://github.com/CycloneDX/sbom-utility/issues/12) is open to add parity.
   - Annotations can be defined within the `license.json` file and one or more assigned each license entry.
   - Column data is, by default, truncated in `txt` format views only. In these cases, the number of characters shown out of the total available will be displayed at the point of truncation (e.g., seeing `(24/26)` in a column would indicate 24 out of 26b characters were displayed).
+  - For backwards compatibility, the `--where` filter supports the key `spdx-id` as an alias for `id`.
 
 ##### Wrap flag
 
@@ -802,17 +802,12 @@ The details include the full context of the failing `metadata.properties` object
 	  }
 	]]
 ```
+
 ---
 
 ### Vulnerability
 
 This command will extract basic vulnerability report data from an SBOM that has a "vulnerabilities" list or from a standalone VEX in CycloneDX format. It includes the ability to filter reports data by applying regex to any of the named column data.
-
-**Note**: More column data and flags to filter results are planned.
-
-#### Where flag filtering
-
-In addition a `where` filter flag can be supplied to only include results where values match supplied regex.  Supported keys for the `where` filter include the following column names in the report (i.e., `id`, `bom-ref`, `source-name`, `source-url`, `created`, `published`, `updated`, `rejected` and `description`).
 
 #### Format flag
 
@@ -826,7 +821,9 @@ Currently, all `vulnerability list` command results are sorted by vulnerability 
 
 #### Vulnerability Examples
 
-##### Simple list
+##### Vulnerability list
+
+The `list` subcommand provides a complete view of most top-level, vulnerability fields.
 
 ```bash
 ./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --quiet
@@ -840,16 +837,54 @@ CVE-2022-42003           NVD         https://nvd.nist.gov/vuln/detail/CVE-2022-4
 CVE-2022-42004           NVD         https://nvd.nist.gov/vuln/detail/CVE-2022-42004  2022-10-02T00:00:00.000Z  2022-10-02T00:00:00.000Z  2022-10-02T00:00:00.000Z            In FasterXML jackson-databind before 2.13.4, resource exhaustion can occur because of a lack of a check in BeanDeserializer._deserializeFromArray to prevent use of deeply nested arrays.
 ```
 
-##### Simple list with where filter
+##### Summary flag
+
+Use the `--summary` flag on the `vulnerability list` command to produce a summary report in `txt` format in order to get a more readable of view of just the most interesting fields.
+
+###### Example: list summary
+
+This example shows the default text output from using the `--summary` flag:
 
 ```bash
-./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --where id=2020 --quiet
+./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --quiet --summary
 ```
 
 ```bash
-id              bom-ref  source-name source-url                                      created                   published                 updated                   rejected  description
---              -------  ----------  -----------                                      -------                   ---------                 -------                   --------  -----------
-CVE-2020-25649           NVD         https://nvd.nist.gov/vuln/detail/CVE-2020-25649  2020-12-03T00:00:00.000Z  2020-12-03T00:00:00.000Z  2023-02-02T00:00:00.000Z            com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection.
+id              cvss-severity        source-name  published   description
+--              -------------        -----------  ---------   -----------
+CVE-2020-25649  CVSSv31: 7.5 (high)  NVD          2020-12-03  com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.
+CVE-2022-42003  CVSSv31: 7.5 (high)  NVD          2022-10-02  In FasterXML jackson-databind before 2.14.0-rc1, resource exhaustion can occur because of a lack of a check in primitive value deserializers to avoid deep wrapper array nesting, when the UNWRAP_SINGLE_VALUE_ARRAYS feature is enabled. Additional fix version in 2.13.4.1 and 2.12.17.1
+CVE-2022-42004  CVSSv31: 7.5 (high)  NVD          2022-10-02  In FasterXML jackson-databind before 2.13.4, resource exhaustion can occur because of a lack of a check in BeanDeserializer._deserializeFromArray to prevent use of deeply nested arrays. An application is vulnerable only with certain customized choices for deserialization.
+```
+
+#### Where flag filtering
+
+In addition a `--where` filter flag can be supplied to only include results where values match supplied regex using any column title as a keys.
+
+##### Simple list with where filters
+
+Filter based on `description`:
+
+```bash
+./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --quiet --where description=XXE
+```
+
+```bash
+id              bom-ref  cwe-ids  cvss-severity                                                source-name  source-url                                       published   updated     created     rejected  analysis-state  analysis-justification  description
+--              -------  -------  -------------                                                -----------  ----------                                       ---------   -------     -------     --------  --------------  ----------------------  -----------
+CVE-2020-25649           611      CVSSv31: 7.5 (high), CVSSv31: 8.2 (high), CVSSv31: 0 (none)  NVD          https://nvd.nist.gov/vuln/detail/CVE-2020-25649  2020-12-03  2023-02-02  2020-12-03            not_affected    code_not_reachable      com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.
+```
+
+Filter based on `analysis-state`:
+
+```bash
+./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --quiet --where analysis-state=not_affected
+```
+
+```bash
+id              bom-ref  cwe-ids  cvss-severity                                                source-name  source-url                                       published   updated     created     rejected  analysis-state  analysis-justification  description
+--              -------  -------  -------------                                                -----------  ----------                                       ---------   -------     -------     --------  --------------  ----------------------  -----------
+CVE-2020-25649           611      CVSSv31: 7.5 (high), CVSSv31: 8.2 (high), CVSSv31: 0 (none)  NVD          https://nvd.nist.gov/vuln/detail/CVE-2020-25649  2020-12-03  2023-02-02  2020-12-03            not_affected    code_not_reachable      com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.
 ```
 
 ---
