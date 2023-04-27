@@ -34,8 +34,8 @@ The utility supports the following commands:
 - [Installation](#installation)
 - [Running](#running)
 - [Commands](#commands)
-  - [Common flags](#common-flags)
   - [Exit codes](#exit-codes): `0` == no error, `1` == app.
+  - [Helpful flags](#helpful-flags)
   - [license](#license)
     - [list](#license-list-subcommand) subcommand
     - [policy](#license-policy-subcommand) subcommand
@@ -96,7 +96,7 @@ On MacOS, the utility is not a registered Apple application and may warn you tha
 
 ## Commands
 
-This section contains descriptions of all commands with examples that show them being used with various flags.  These include:
+This section describes how all commands generate consistent [exit codes](#exit-codes) along with some of the most [helpful flags](#helpful-flags) supported by most commands that produce list-style reports. It also provides detailed descriptions of all commands with examples that show them being used with various flags.  For convenience the commands sections are linked here:
 
 - [license](#license)
   - [list](#license-list-subcommand) subcommand
@@ -108,9 +108,37 @@ This section contains descriptions of all commands with examples that show them 
 - [validate](#validate)
 - [help](#help)
 
-Additionally, we describe some of the most helpful [common flags](#common-flags) used across most commands as well how the utility generates [exit codes](#exit-codes).
+### Exit codes
 
-### Common flags
+All commands return a numeric exit code (i.e., a POSIX exit code) for use in automated processing where `0` indicates success and a non-zero value indicates failure of some kind designated by the number.
+
+The SBOM Utility always returns one of these 3 codes to accommodate logic in BASH (shell) scripting:
+
+- `0`= no error (valid)
+- `1`= application error
+- `2`= validation error
+
+#### Example: exit code
+
+This example uses the `schema` list command to verify its exit code:
+
+```bash
+./sbom-utility schema list
+```
+
+verify the exit code:
+
+```bash
+echo $?
+```
+
+which returns `0` (zero) or "no error":
+
+```bash
+0
+```
+
+### Helpful flags
 
 This section describes some of the important command line flags that apply to most commands that produce list or report output.  :
 
@@ -216,36 +244,6 @@ All commands that output list-style reports support the `--where`  flag. It can 
 Multiple key-value (i.e., column-title=regex) pairs can be provided on the same `--where` filter flag using commas.
 
 Syntax: `[--where key=regex[,...]]`
-
-#### Exit codes
-
-All commands return a numeric exit code (i.e., a POSIX exit code) for use in automated processing where `0` indicates success and a non-zero value indicates failure of some kind designated by the number.
-
-The SBOM Utility always returns one of these 3 codes to accommodate logic in BASH (shell) scripting:
-
-- `0`= no error (valid)
-- `1`= application error
-- `2`= validation error
-
-##### Example: exit code
-
-This example uses the `schema` list command to verify its exit code:
-
-```bash
-./sbom-utility schema list
-```
-
-verify the exit code:
-
-```bash
-echo $?
-```
-
-which returns `0` (zero) or "no error":
-
-```bash
-0
-```
 
 ---
 
