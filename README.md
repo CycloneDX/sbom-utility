@@ -117,7 +117,7 @@ This section describes some of the important command line flags that apply to mo
 - [format flag](#format-flag): with `--format`
 - [quiet flag](#quiet-flag): with `--quiet` or `-q`
 - [output flag](#output-flag): with `--output` or `-o`
-- [where flag](#where-flag-filtering): with `--output` or `-o`
+- [where flag](#where-flag-output-filtering): with `--output` or `-o`
 
 #### Format flag
 
@@ -207,7 +207,7 @@ SPDX v2.2.2,SPDX,SPDX-2.2,(latest),schema/spdx/2.2.2/spdx-schema.json,https://ra
 SPDX v2.2.1,SPDX,SPDX-2.2,2.2.1,schema/spdx/2.2.1/spdx-schema.json,https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json
 ```
 
-- You can verify that `output.csv` loads within a spreadsheet app like MS Excel.
+- **Note**: You can verify that `output.csv` loads within a spreadsheet app like MS Excel.
 
 #### Where flag (output filtering)
 
@@ -256,30 +256,26 @@ This command is used to aggregate and summarize software, hardware and data lice
 The `license` command supports the following subcommands:
 
 - [list](#license-list-subcommand) - list or create a summarized report of licenses found in input SBOM.
-  - [list with --summary flag](#license---summary-flag) - As full license information can be very large, a summary view is often most useful.
+  - [list with --summary flag](#license-list---summary-flag) - As full license information can be very large, a summary view is often most useful.
 - [policy](#license-policy-subcommand) - list user configured license policies by SPDX license ID, family name and other filters.
-
-#### Supported formats
-
-This command supports the `--format` flag with any of the following values:
-
-- **list** subcommand: `json` (default), `csv`, `md`
-  - with `--summary` flag: `txt` (default), `csv`, `md`
-- **policy** subcommand: `txt` (default), `csv`, `md`
-
-#### Result sorting
-
-Default sorting for the `license` command varies by subcommand and `--summary` flag presence.
-
-- `license list` subcommand: results are not sorted.
-  - with `--summary` flag: results are sorted by license key which can be one of license `id` (SPDX ID), `name` or `expression`.
-- `license policy` subcommand: results are sorted by policy `family`.
 
 ---
 
 ### License `list` subcommand
 
 The `list` subcommand produces JSON output which contains an array of CycloneDX `LicenseChoice` data objects found in the BOM input file without component association.  `LicenseChoice` data, in general, may provide license information using registered SPDX IDs, license expressions (of SPDX IDs) or license names (not necessarily registered by SPDX).  License data may also include base64-encoded license or legal text that was used to determine a license's SPDX ID or name.
+
+#### License list supported formats
+
+This command supports the `--format` flag with any of the following values:
+
+- `json` (default), `csv`, `md`
+  - using the `--summary` flag: `txt` (default), `csv`, `md`
+
+#### License list result sorting
+
+- Results are not sorted for base `license list` subcommand.
+  - using the  `--summary` flag: results are sorted by license key which can be one of license `id` (SPDX ID), `name` or `expression`.
 
 #### License list flags
 
@@ -413,6 +409,16 @@ needs-review  name          UFL           ACME Application  pkg:app/sample@1.0.0
 
 To view a report listing the contents of the current policy file (i.e., [`license.json`](https://github.com/CycloneDX/sbom-utility/blob/main/license.json)) which contains an encoding of known software and data licenses by SPDX ID and license family along with a configurable usage policy (i.e., `"allow"`, `"deny"` or `"needs-review"`).
 
+#### License policy supported formats
+
+This command supports the `--format` flag with any of the following values:
+
+- `txt` (default), `csv`, `md`
+
+#### License policy result sorting
+
+- Results are sorted by license policy `family`.
+
 #### License policy flags
 
 ##### Wrap flag
@@ -507,11 +513,15 @@ If the result set is an array, the array entries can be reduced by applying the 
 
 **Note**: All `query` command results are returned as valid JSON documents.  This includes a `null` value for empty result sets.
 
-#### Supported formats
+#### Query supported formats
 
 The `query` command only supports JSON output.
 
-#### Query Examples
+#### Query result sorting
+
+The `query` command does not support output results.
+
+#### Query examples
 
 ##### Example: Select a JSON object
 
@@ -608,15 +618,17 @@ The `resource` command is geared toward inspecting various resources types and t
 
 Primarily, the command is used to generate lists of resources, by type, that are included in a CycloneDX SBOM by invoking `resource list`.
 
-#### Supported formats
+#### Resource Supported formats
 
 This command supports the `--format` flag with any of the following values:
 
 - `txt` (default), `csv`, `md`
 
-#### Result sorting
+#### Resource result sorting
 
 Currently, all `resource list` command results are sorted by resource `type` then by resource `name` (required field).
+
+#### Resource Examples
 
 #### Example: resource list
 
@@ -642,7 +654,7 @@ service    Bar                         service:example.com/myservices/bar
 service    Foo                         service:example.com/myservices/foo
 ```
 
-##### Example: list by `--type` service
+##### Example: resource list using `--type service`
 
 This example uses the `type` flag to specific `service`.  The other valid type is `component`.  Future versions of CycloneDX schema will include more resource types such as "ml" (machine learning) or "tool".
 
@@ -657,7 +669,7 @@ service  Bar              service:example.com/myservices/bar
 service  Foo              service:example.com/myservices/foo
 ```
 
-##### Example: list with name match
+##### Example: list with `name` regex match
 
 This example uses the `where` filter on the `name` field. In this case we supply an exact "startswith" regex. for the `name` filter.
 
@@ -683,11 +695,17 @@ You can verify which formats, schemas, versions and variants are available for v
 
 - **Note**: The `schema` command will default to the `list` subcommand if omitted.
 
-#### Supported formats
+#### Schema supported formats
 
 This command supports the `--format` flag with any of the following values:
 
 - `txt` (default), `csv`, `md`
+
+#### Schema result sorting
+
+- Currently, results appear as they are listed in the policy configuration file (e.g., `license.json`).
+
+#### Schema examples
 
 ##### Example: schema list
 
@@ -724,14 +742,15 @@ If you wish to have the new schema *embedded in the executable*, simply add it t
 
 This command will parse standardized SBOMs and validate it against its declared format and version (e.g., SPDX 2.2, CycloneDX 1.4). Custom  variants of standard JSON schemas can be used for validation by supplying the `--variant` name as a flag. Explicit JSON schemas can be specified using the `--force` flag.
 
-##### Notes
+#### Validate supported schemas
 
-- Use the [schema](#schema) command to list supported schemas formats, versions and variants.
-- Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file.
+Use the [schema](#schema) command to list supported schemas formats, versions and variants.
+
+Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file. See [adding schemas](#adding-schemas).
 
 #### Validation Examples
 
-##### Example: Using inferred format and schema
+##### Example: Validate using inferred format and schema
 
 Validating the "juice shop" SBOM (CycloneDX 1.2) example provided in this repository.
 
@@ -759,7 +778,7 @@ $ echo $?
 0  // no error (valid)
 ```
 
-#### Example: Using "custom" schema variants
+#### Example: Validate using "custom" schema variants
 
 The validation command will use the declared format and version found within the SBOM JSON file itself to lookup the default (latest) matching schema version (as declared in`config.json`; however, if variants of that same schema (same format and version) are declared, they can be requested via the `--variant` command line flag:
 
@@ -836,19 +855,19 @@ The details include the full context of the failing `metadata.properties` object
 
 This command will extract basic vulnerability report data from an SBOM that has a "vulnerabilities" list or from a standalone VEX in CycloneDX format. It includes the ability to filter reports data by applying regex to any of the named column data.
 
-#### Format flag
+#### Vulnerability supported formats
 
 Use the `--format` flag on the to choose one of the supported output formats:
 
 - txt (default), csv, md
 
-#### Result sorting
+#### Vulnerability result sorting
 
 Currently, all `vulnerability list` command results are sorted by vulnerability `id` (descending) then by `created` date (descending).
 
 #### Vulnerability Examples
 
-##### Vulnerability list
+##### Example: Vulnerability list
 
 The `list` subcommand provides a complete view of most top-level, vulnerability fields.
 
@@ -864,11 +883,7 @@ CVE-2022-42003           502      CVSSv31: 7.5 (high)                           
 CVE-2020-25649           611      CVSSv31: 7.5 (high), CVSSv31: 8.2 (high), CVSSv31: 0 (none)  NVD          https://nvd.nist.gov/vuln/detail/CVE-2020-25649  2020-12-03  2023-02-02  2020-12-03            not_affected    code_not_reachable      com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.
 ```
 
-##### Summary flag
-
-Use the `--summary` flag on the `vulnerability list` command to produce a summary report in `txt` format in order to get a more readable view of just the most interesting fields.
-
-###### Example: list summary
+###### Example: Vulnerability list summary
 
 This example shows the default text output from using the `--summary` flag:
 
@@ -884,13 +899,7 @@ CVE-2022-42003  CVSSv31: 7.5 (high)  NVD          2022-10-02  In FasterXML jacks
 CVE-2020-25649  CVSSv31: 7.5 (high)  NVD          2020-12-03  com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.
 ```
 
-#### Where flag filtering
-
-In addition a `--where` filter flag can be supplied to only include results where values match supplied regex using any column title as a keys.
-
-##### Example: list with `--where` filters
-
-Filter based on `description`:
+##### Example: Vulnerability list with `--where` filter with `description` key
 
 ```bash
 ./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --quiet --where description=XXE
@@ -902,7 +911,7 @@ id              bom-ref  cwe-ids  cvss-severity                                 
 CVE-2020-25649           611      CVSSv31: 7.5 (high), CVSSv31: 8.2 (high), CVSSv31: 0 (none)  NVD          https://nvd.nist.gov/vuln/detail/CVE-2020-25649  2020-12-03  2023-02-02  2020-12-03            not_affected    code_not_reachable      com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.
 ```
 
-Filter based on `analysis-state`:
+##### Example: Vulnerability list with `--where` filter with `analysis-state` key
 
 ```bash
 ./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --quiet --where analysis-state=not_affected
