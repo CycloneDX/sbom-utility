@@ -839,7 +839,7 @@ CVE-2022-42004           NVD         https://nvd.nist.gov/vuln/detail/CVE-2022-4
 
 ##### Summary flag
 
-Use the `--summary` flag on the `vulnerability list` command to produce a summary report in `txt` format in order to get a more readable of view of just the most interesting fields.
+Use the `--summary` flag on the `vulnerability list` command to produce a summary report in `txt` format in order to get a more readable view of just the most interesting fields.
 
 ###### Example: list summary
 
@@ -1050,8 +1050,6 @@ The fields `canonicalName`, `propertyKeyFormat`, `propertyKeyVersion`, and `prop
   - **Note** If the schema exists under the `resources` directory, it will automatically be embedded in in the executable binary when built using `go build` which includes using the project's `Makefile`.
 - Assure **only one** `schema` object entry for a given format and version has the value `latest` set to `true`.  This latest schema will be used when the SBOM being validated does not have a clear version declared **or** used with the `--force latest` flag.
 - If you have a customized or "variant" version of a schema (with the same format and version values) you wish to use for validation (e.g., a `corporate`or `staging` version with added requirements or for testing an unreleased version), you can create an entry that has the same `version` as another entry, but also declare its `variant` name *(non-empty value)*.  This value can be supplied on the commend line with the `--variant <variant name>` flag to force the validator to use it instead of the default *(empty variant value)*.
-
-
 
 ---
 
