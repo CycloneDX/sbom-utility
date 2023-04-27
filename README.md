@@ -817,7 +817,7 @@ Use the `--format` flag on the to choose one of the supported output formats:
 
 #### Result sorting
 
-Currently, all `vulnerability list` command results are sorted by vulnerability `id` (descending) then by `created` date.
+Currently, all `vulnerability list` command results are sorted by vulnerability `id` (descending) then by `created` date (descending).
 
 #### Vulnerability Examples
 
