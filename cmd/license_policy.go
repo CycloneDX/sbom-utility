@@ -31,7 +31,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var VALID_SUBCOMMANDS_POLICY = []string{SUBCOMMAND_RESOURCE_LIST}
+const (
+	SUBCOMMAND_POLICY_LIST = "list"
+)
+
+var VALID_SUBCOMMANDS_POLICY = []string{SUBCOMMAND_POLICY_LIST}
 
 // Subcommand flags
 // TODO: Support a new --sort <column> flag
@@ -108,9 +112,22 @@ func NewCommandPolicy() *cobra.Command {
 		FLAG_POLICY_REPORT_LINE_WRAP_HELP)
 	command.RunE = policyCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
-		if len(args) != 0 {
+		// the command requires at least 1 valid subcommand (argument)
+		if len(args) > 1 {
 			return getLogger().Errorf("Too many arguments provided: %v", args)
 		}
+
+		// Make sure (optional) subcommand is known/valid
+		if len(args) == 1 {
+			if !preRunTestForSubcommand(command, VALID_SUBCOMMANDS_POLICY, args[0]) {
+				return getLogger().Errorf("Subcommand provided is not valid: `%v`", args[0])
+			}
+		}
+
+		if len(args) == 0 {
+			getLogger().Tracef("No subcommands provided; defaulting to: `%s` subcommand", SUBCOMMAND_SCHEMA_LIST)
+		}
+
 		return
 	}
 	return command
