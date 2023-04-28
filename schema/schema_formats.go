@@ -82,7 +82,7 @@ type FormatSchemaInstance struct {
 	Url         string `json:"url"`
 	Default     bool   `json:"default"`
 	Variant     string `json:"variant"`
-	Format      string // value set from parent FormatSchema's `CanonicalName`
+	Format      string `json:"format"` // value set from parent FormatSchema's `CanonicalName`
 }
 
 // Representation of SBOM format
