@@ -166,7 +166,7 @@ This example uses the `--format` flag on the `schema` command to output in markd
 ```
 
 ```md
-|Name|Format|Version|Variant|File (local)|URL (remote)|
+|name|format|version|variant|file (local)|url (remote)|
 |:--|:--|:--|:--|:--|:--|
 |CycloneDX v1.5 (development)|CycloneDX|1.5|development|schema/cyclonedx/1.5/bom-1.5-dev.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/v1.5-dev/schema/bom-1.5.schema.json|
 |CycloneDX v1.4|CycloneDX|1.4|(latest)|schema/cyclonedx/1.4/bom-1.4.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json|
@@ -193,7 +193,7 @@ This example shows the `--quiet` flag being used on the `schema` command to turn
 ```
 
 ```bash
-Name                          Format     Version   Variant      File (local)                                     URL (remote)
+name                          format     version   variant      file (local)                                     url (remote)
 ----                          ------     -------   -------      ------------                                     ------------
 CycloneDX v1.5 (development)  CycloneDX  1.5       development  schema/cyclonedx/1.5/bom-1.5-dev.schema.json     https://raw.githubusercontent.com/CycloneDX/specification/v1.5-dev/schema/bom-1.5.schema.json
 CycloneDX v1.4                CycloneDX  1.4       (latest)     schema/cyclonedx/1.4/bom-1.4.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json
@@ -708,7 +708,7 @@ This command supports the `--format` flag with any of the following values:
 ##### Example: schema list
 
 ```bash
-Name                          Format     Version   Variant      File (local)                                     URL (remote)
+name                          format     version   variant      file (local)                                     url (remote)
 ----                          ------     -------   -------      ------------                                     ------------
 CycloneDX v1.5 (development)  CycloneDX  1.5       development  schema/cyclonedx/1.5/bom-1.5-dev.schema.json     https://raw.githubusercontent.com/CycloneDX/specification/v1.5-dev/schema/bom-1.5.schema.json
 CycloneDX v1.4                CycloneDX  1.4       (latest)     schema/cyclonedx/1.4/bom-1.4.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json
