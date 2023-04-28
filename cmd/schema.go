@@ -190,7 +190,6 @@ func SortFormatSchemaInstances(filteredSchemas []schema.FormatSchemaInstance) []
 	})
 
 	return filteredSchemas
-
 }
 
 func ListSchemas(writer io.Writer, whereFilters []WhereFilter) (err error) {

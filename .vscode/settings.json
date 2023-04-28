@@ -42,6 +42,7 @@
             "LDFLAGS",
             "losslessly",
             "MLBOM",
+            "multimap",
             "myservices",
             "NOASSERTION",
             "NTIA",
