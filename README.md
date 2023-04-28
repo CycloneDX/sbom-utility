@@ -701,7 +701,7 @@ This command supports the `--format` flag with any of the following values:
 
 #### Schema result sorting
 
-- Currently, results appear as they are listed in the policy configuration file (e.g., `license.json`).
+- Results are sorted by `format` (ascending), `version` (descending) and `schema` (descending)
 
 #### Schema examples
 
