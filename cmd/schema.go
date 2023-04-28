@@ -46,23 +46,13 @@ const (
 )
 
 const (
-	SCHEMA_DATA_KEY_KEY_NAME        = "name"         // summary
-	SCHEMA_DATA_KEY_KEY_FORMAT      = "format"       // summary
-	SCHEMA_DATA_KEY_KEY_VERSION     = "version"      // summary
-	SCHEMA_DATA_KEY_KEY_VARIANT     = "variant"      // summary
-	SCHEMA_DATA_KEY_KEY_FILE        = "file (local)" // summary
-	SCHEMA_DATA_KEY_KEY_SOURCE      = "url (remote)" // summary
-	SCHEMA_DATA_KEY_KEY_DEVELOPMENT = "development"  // Unused (for now)
+	SCHEMA_DATA_KEY_KEY_NAME    = "name"    // summary
+	SCHEMA_DATA_KEY_KEY_FORMAT  = "format"  // summary
+	SCHEMA_DATA_KEY_KEY_VERSION = "version" // summary
+	SCHEMA_DATA_KEY_KEY_VARIANT = "variant" // summary
+	SCHEMA_DATA_KEY_KEY_FILE    = "file"    // summary
+	SCHEMA_DATA_KEY_KEY_SOURCE  = "url"     // summary
 )
-
-// var SCHEMA_LIST_TITLES = []string{
-// 	SCHEMA_DATA_KEY_KEY_NAME,
-// 	SCHEMA_DATA_KEY_KEY_FORMAT,
-// 	SCHEMA_DATA_KEY_KEY_VERSION,
-// 	SCHEMA_DATA_KEY_KEY_VARIANT,
-// 	SCHEMA_DATA_KEY_KEY_FILE,
-// 	SCHEMA_DATA_KEY_KEY_SOURCE,
-// }
 
 // NOTE: columns will be output in order they are listed here:
 var SCHEMA_LIST_ROW_DATA = []ColumnFormatData{
@@ -85,6 +75,7 @@ func NewCommandSchema() *cobra.Command {
 	command.Long = fmt.Sprintf("View built-in SBOM schemas supported by the utility. The default command produces a list based upon `%s`.", DEFAULT_SCHEMA_CONFIG)
 	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
 		FLAG_SCHEMA_OUTPUT_FORMAT_HELP+SCHEMA_LIST_SUPPORTED_FORMATS)
+	command.Flags().StringP(FLAG_REPORT_WHERE, "", "", FLAG_REPORT_WHERE_HELP)
 	command.RunE = schemaCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 
@@ -139,32 +130,104 @@ func schemaCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	return
 }
 
+func flattenFormatSchemas(sliceFormatSchemas []schema.FormatSchema) (flattenedFormatSchemas []schema.FormatSchemaInstance) {
+
+	for _, format := range sliceFormatSchemas {
+		for _, schema := range format.Schemas {
+			schema.Format = format.CanonicalName
+			flattenedFormatSchemas = append(flattenedFormatSchemas, schema)
+		}
+	}
+	return
+}
+
+func filterFormatSchemas(whereFilters []WhereFilter) (filteredFormats []schema.FormatSchemaInstance, err error) {
+	getLogger().Enter()
+	defer getLogger().Exit(err)
+
+	// Get format array
+	sliceFormats := (schema.SupportedFormatConfig).Formats
+
+	// flatten structs
+	sliceSchemas := flattenFormatSchemas(sliceFormats)
+
+	for _, schema := range sliceSchemas {
+
+		var match bool = true
+
+		if len(whereFilters) > 0 {
+			mapFormat, _ := utils.ConvertStructToMap(schema)
+			match, _ = whereFilterMatch(mapFormat, whereFilters)
+		}
+
+		if match {
+			filteredFormats = append(filteredFormats, schema)
+
+			getLogger().Tracef("append: %s\n",
+				schema.Name)
+		}
+
+	}
+
+	return
+}
+
+func SortFormatSchemaInstances(filteredSchemas []schema.FormatSchemaInstance) []schema.FormatSchemaInstance {
+	// Sort by Format, Version, Variant
+	sort.Slice(filteredSchemas, func(i, j int) bool {
+		schema1 := filteredSchemas[i]
+		schema2 := filteredSchemas[j]
+
+		if schema1.Format != schema2.Format {
+			return schema1.Format < schema2.Format
+		}
+
+		if schema1.Version != schema2.Version {
+			return schema1.Version > schema2.Version
+		}
+
+		return schema1.Variant < schema2.Variant
+	})
+
+	return filteredSchemas
+
+}
+
 func ListSchemas(writer io.Writer, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
+
+	// Hash all filtered list of schemas within input file
+	getLogger().Infof("Scanning document for vulnerabilities...")
+	var filteredSchemas []schema.FormatSchemaInstance
+	filteredSchemas, err = filterFormatSchemas(whereFilters)
+
+	if err != nil {
+		return
+	}
 
 	// default output (writer) to standard out
 	switch utils.GlobalFlags.OutputFormat {
 	case FORMAT_DEFAULT:
 		// defaults to text if no explicit `--format` parameter
-		err = DisplaySchemasTabbedText(writer)
+		err = DisplaySchemasTabbedText(writer, filteredSchemas)
 	case FORMAT_TEXT:
-		err = DisplaySchemasTabbedText(writer)
+		err = DisplaySchemasTabbedText(writer, filteredSchemas)
 	case FORMAT_CSV:
-		err = DisplaySchemasCSV(writer)
+		err = DisplaySchemasCSV(writer, filteredSchemas)
 	case FORMAT_MARKDOWN:
-		err = DisplaySchemasMarkdown(writer)
+		err = DisplaySchemasMarkdown(writer, filteredSchemas)
 	default:
 		// default to text format for anything else
 		getLogger().Warningf("Unsupported format: `%s`; using default format.",
 			utils.GlobalFlags.OutputFormat)
-		err = DisplaySchemasTabbedText(writer)
+		err = DisplaySchemasTabbedText(writer, filteredSchemas)
 	}
 	return
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplaySchemasTabbedText(output io.Writer) (err error) {
+func DisplaySchemasTabbedText(output io.Writer, filteredSchemas []schema.FormatSchemaInstance) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -173,68 +236,44 @@ func DisplaySchemasTabbedText(output io.Writer) (err error) {
 
 	// min-width, tab-width, padding, pad-char, flags
 	w.Init(output, 8, 2, 2, ' ', 0)
-
 	defer w.Flush()
 
-	// Get format array
-	aFormats := (schema.SupportedFormatConfig).Formats
-
-	if len(aFormats) > 0 {
-		var formatName string
-
-		// Sort by Format name
-		sort.Slice(aFormats, func(i, j int) bool {
-			format1 := aFormats[i]
-			format2 := aFormats[j]
-			return format1.CanonicalName < format2.CanonicalName
-		})
-
-		// create title row and underline row from slices of optional and compulsory titles
-		titles, underlines := prepareReportTitleData(SCHEMA_LIST_ROW_DATA, false)
-
-		// Create title row and add tabs between column titles for the tabWRiter
-		//underlines := createTitleTextSeparators(SCHEMA_LIST_TITLES)
-		fmt.Fprintf(w, "%s\n", strings.Join(titles, "\t"))
-		fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
-
-		for _, format := range aFormats {
-			formatName = format.CanonicalName
-
-			// Get schema array
-			aSchemas := format.Schemas
-
-			if len(aSchemas) > 0 {
-
-				sort.Slice(aSchemas, func(i, j int) bool {
-					schema1 := aSchemas[i]
-					schema2 := aSchemas[j]
-					return schema1.Name > schema2.Name
-				})
-
-				for _, currentSchema := range format.Schemas {
-					fmt.Fprintf(w, "%v\t%s\t%s\t%s\t%s\t%s\n",
-						currentSchema.Name,
-						formatName,
-						currentSchema.Version,
-						schema.FormatSchemaVariant(currentSchema.Variant),
-						currentSchema.File,
-						currentSchema.Url,
-					)
-				}
-			} else {
-				getLogger().Warningf("No supported schemas for format `%s`.\n", formatName)
-			}
-		}
-	} else {
-		getLogger().Warningf("No supported built-in formats found in `%s`.\n", DEFAULT_SCHEMA_CONFIG)
+	// Emit no schemas found warning into output
+	if len(filteredSchemas) == 0 {
+		getLogger().Warningf("No supported built-in schemas found in `%s`.\n", DEFAULT_SCHEMA_CONFIG)
+		return
 	}
 
+	// create title row and underline row from slices of optional and compulsory titles
+	titles, underlines := prepareReportTitleData(SCHEMA_LIST_ROW_DATA, false)
+
+	// Create title row and add tabs between column titles for the tabWRiter
+	fmt.Fprintf(w, "%s\n", strings.Join(titles, "\t"))
+	fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
+
+	// Sort by Format, Version, Variant
+	filteredSchemas = SortFormatSchemaInstances(filteredSchemas)
+
+	// Emit rows
+	for _, schemaInstance := range filteredSchemas {
+
+		fmt.Fprintf(w, "%v\t%s\t%s\t%s\t%s\t%s\n",
+			schemaInstance.Name,
+			schemaInstance.Format,
+			schemaInstance.Version,
+			schema.FormatSchemaVariant(schemaInstance.Variant),
+			schemaInstance.File,
+			schemaInstance.Url,
+		)
+	}
+
+	// Always end on a newline
 	fmt.Fprintln(w, "")
 	return nil
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplaySchemasMarkdown(output io.Writer) (err error) {
+func DisplaySchemasMarkdown(output io.Writer, filteredSchemas []schema.FormatSchemaInstance) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -247,65 +286,40 @@ func DisplaySchemasMarkdown(output io.Writer) (err error) {
 	fmt.Fprintf(output, "%s\n", alignmentRow)
 
 	// Emit no schemas found warning into output
-	if len(schema.SupportedFormatConfig.Formats) == 0 {
+	if len(filteredSchemas) == 0 {
 		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_SCHEMAS_FOUND)
 		return fmt.Errorf(MSG_OUTPUT_NO_SCHEMAS_FOUND)
 	}
 
 	var line []string
 	var lineRow string
-	var formatName string
 
-	// Get format array
-	aFormats := (schema.SupportedFormatConfig).Formats
+	// Sort by Format, Version, Variant
+	filteredSchemas = SortFormatSchemaInstances(filteredSchemas)
 
-	// Sort by Format name
-	sort.Slice(aFormats, func(i, j int) bool {
-		format1 := aFormats[i]
-		format2 := aFormats[j]
-		return format1.CanonicalName < format2.CanonicalName
-	})
+	// Emit rows
+	for _, schemaInstance := range filteredSchemas {
 
-	for _, format := range aFormats {
-		formatName = format.CanonicalName
+		// reset current line
+		line = nil
 
-		// Get schema array
-		aSchemas := format.Schemas
+		line = append(line,
+			schemaInstance.Name,
+			schemaInstance.Format,
+			schemaInstance.Version,
+			schema.FormatSchemaVariant(schemaInstance.Variant),
+			schemaInstance.File,
+			schemaInstance.Url,
+		)
 
-		sort.Slice(aSchemas, func(i, j int) bool {
-			schema1 := aSchemas[i]
-			schema2 := aSchemas[j]
-			return schema1.Name > schema2.Name
-		})
-
-		if len(aSchemas) > 0 {
-			for _, currentSchema := range format.Schemas {
-
-				// reset current line
-				line = nil
-
-				line = append(line,
-					currentSchema.Name,
-					formatName,
-					currentSchema.Version,
-					schema.FormatSchemaVariant(currentSchema.Variant),
-					currentSchema.File,
-					currentSchema.Url,
-				)
-
-				lineRow = createMarkdownRow(line)
-				fmt.Fprintf(output, "%s\n", lineRow)
-			}
-		} else {
-			getLogger().Warningf("No supported schemas for format `%s`.\n", formatName)
-		}
+		lineRow = createMarkdownRow(line)
+		fmt.Fprintf(output, "%s\n", lineRow)
 	}
-
 	return
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplaySchemasCSV(output io.Writer) (err error) {
+func DisplaySchemasCSV(output io.Writer, filteredSchemas []schema.FormatSchemaInstance) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -321,7 +335,7 @@ func DisplaySchemasCSV(output io.Writer) (err error) {
 	}
 
 	// Emit no schemas found warning into output
-	if len(schema.SupportedFormatConfig.Formats) == 0 {
+	if len(filteredSchemas) == 0 {
 		currentRow := []string{MSG_OUTPUT_NO_SCHEMAS_FOUND}
 		if err = w.Write(currentRow); err != nil {
 			return getLogger().Errorf("error writing to output (%v): %s", currentRow, err)
@@ -330,47 +344,25 @@ func DisplaySchemasCSV(output io.Writer) (err error) {
 	}
 
 	var line []string
-	var formatName string
 
-	// Get format array
-	aFormats := (schema.SupportedFormatConfig).Formats
+	// Sort by Format, Version, Variant
+	filteredSchemas = SortFormatSchemaInstances(filteredSchemas)
 
-	// Sort by Format name
-	sort.Slice(aFormats, func(i, j int) bool {
-		format1 := aFormats[i]
-		format2 := aFormats[j]
-		return format1.CanonicalName < format2.CanonicalName
-	})
+	// Emit rows
+	for _, schemaInstance := range filteredSchemas {
 
-	for _, format := range aFormats {
-		formatName = format.CanonicalName
+		line = nil
+		line = append(line,
+			schemaInstance.Name,
+			schemaInstance.Format,
+			schemaInstance.Version,
+			schema.FormatSchemaVariant(schemaInstance.Variant),
+			schemaInstance.File,
+			schemaInstance.Url,
+		)
 
-		// Get schema array
-		aSchemas := format.Schemas
-
-		sort.Slice(aSchemas, func(i, j int) bool {
-			schema1 := aSchemas[i]
-			schema2 := aSchemas[j]
-			return schema1.Name > schema2.Name
-		})
-
-		if len(aSchemas) > 0 {
-			for _, currentSchema := range aSchemas {
-
-				line = nil
-				line = append(line,
-					currentSchema.Name,
-					formatName,
-					currentSchema.Version,
-					schema.FormatSchemaVariant(currentSchema.Variant),
-					currentSchema.File,
-					currentSchema.Url,
-				)
-
-				if err = w.Write(line); err != nil {
-					return getLogger().Errorf("error writing to output (%v): %s", line, err)
-				}
-			}
+		if err = w.Write(line); err != nil {
+			return getLogger().Errorf("error writing to output (%v): %s", line, err)
 		}
 	}
 

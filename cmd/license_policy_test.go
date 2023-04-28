@@ -77,7 +77,6 @@ func innerTestLicensePolicyListCustomAndBuffered(t *testing.T, testInfo *License
 	// Load and hash the specified license policy file ONLY FOR THIS TEST!
 	if testInfo.PolicyFile != "" && testInfo.PolicyFile != DEFAULT_LICENSE_POLICIES {
 		// !!! IMPORTANT !!! restore default policy file to default for all other tests
-		fmt.Println("!!!! Setting custom policy file")
 		loadHashCustomPolicyFile(testInfo.PolicyFile)
 	}
 
@@ -95,7 +94,6 @@ func innerTestLicensePolicyListCustomAndBuffered(t *testing.T, testInfo *License
 	// Restore default license policy file for subsequent tests
 	if testInfo.PolicyFile != "" && testInfo.PolicyFile != DEFAULT_LICENSE_POLICIES {
 		// !!! IMPORTANT !!! restore default policy file to default for all other tests
-		fmt.Println("!!!! Restoring default policy file")
 		loadHashCustomPolicyFile(DEFAULT_LICENSE_POLICIES)
 	}
 

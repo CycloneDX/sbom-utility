@@ -61,6 +61,20 @@ type CommonTestInfo struct {
 	ResultLineContainsValues          []string
 }
 
+func NewCommonTestInfo() *CommonTestInfo {
+	var ti = new(CommonTestInfo)
+	return ti
+}
+
+func NewCommonTestInfoBasic(inputFile string, whereClause string, listFormat string, listSummary bool) *CommonTestInfo {
+	var ti = NewCommonTestInfo()
+	ti.InputFile = inputFile
+	ti.WhereClause = whereClause
+	ti.ListFormat = listFormat
+	ti.ListSummary = listSummary
+	return ti
+}
+
 // default (empty) TestInfo struct values
 const (
 	TI_LIST_SUMMARY_FALSE   = false

@@ -75,13 +75,14 @@ func getLogger() *log.MiniLogger {
 // e.g.,    key string
 // where key: SchemaKey{ID_CYCLONEDX, VERSION_CYCLONEDX_1_3, false},
 type FormatSchemaInstance struct {
-	Version     string `json:"version"`
 	Name        string `json:"name"`
+	Version     string `json:"version"`
 	Development string `json:"development"`
 	File        string `json:"file"`
 	Url         string `json:"url"`
 	Default     bool   `json:"default"`
 	Variant     string `json:"variant"`
+	Format      string // value set from parent FormatSchema's `CanonicalName`
 }
 
 // Representation of SBOM format

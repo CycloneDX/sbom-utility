@@ -19,7 +19,6 @@ package cmd
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 	"testing"
 
@@ -68,7 +67,6 @@ func innerRunReportResultTests(t *testing.T, testInfo *CommonTestInfo, outputBuf
 		outputLineCount := strings.Count(outputResults, "\n")
 		if outputLineCount != testInfo.ResultExpectedLineCount {
 			err = getLogger().Errorf("output did not contain expected line count: %v/%v (expected/actual)", testInfo.ResultExpectedLineCount, outputLineCount)
-			fmt.Printf(">>> %v", outputResults)
 			t.Errorf("%s: format: `%s`, summary: `%v`, where clause: `%s`",
 				err.Error(),
 				testInfo.ListFormat,
