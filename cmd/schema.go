@@ -87,6 +87,9 @@ func NewCommandSchema() *cobra.Command {
 		FLAG_SCHEMA_OUTPUT_FORMAT_HELP+SCHEMA_LIST_SUPPORTED_FORMATS)
 	command.RunE = schemaCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
+
+		// TODO: pre-validate if --where keys are valid for this command
+
 		// the command requires at least 1 valid subcommand (argument)
 		if len(args) > 1 {
 			return getLogger().Errorf("Too many arguments provided: %v", args)
@@ -111,22 +114,32 @@ func schemaCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
+	// Create output writer
 	outputFile, writer, err := createOutputFile(utils.GlobalFlags.OutputFile)
+	getLogger().Tracef("outputFile: `%v`; writer: `%v`", outputFile, writer)
 
-	if err == nil {
-		err = ListSchemas(writer)
+	// use function closure to assure consistent error output based upon error type
+	defer func() {
+		// always close the output file
+		if outputFile != nil {
+			err = outputFile.Close()
+			getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.OutputFile)
+		}
+	}()
+
+	// process filters supplied on the --where command flag
+	whereFilters, err := processWhereFlag(cmd)
+
+	if err != nil {
+		return
 	}
 
-	// always close the output file
-	if outputFile != nil {
-		outputFile.Close()
-		getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.OutputFile)
-	}
+	err = ListSchemas(writer, whereFilters)
 
 	return
 }
 
-func ListSchemas(writer io.Writer) (err error) {
+func ListSchemas(writer io.Writer, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
