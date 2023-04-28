@@ -273,7 +273,7 @@ This command supports the `--format` flag with any of the following values:
 #### License list result sorting
 
 - Results are not sorted for base `license list` subcommand.
-  - using the  `--summary` flag: results are sorted by license key which can be one of license `id` (SPDX ID), `name` or `expression`.
+  - using the  `--summary` flag: results are sorted (ascending) by license key which can be one of license `id` (SPDX ID), `name` or `expression`.
 
 #### License list flags
 
@@ -701,7 +701,7 @@ This command supports the `--format` flag with any of the following values:
 
 #### Schema result sorting
 
-- Results are sorted by `format` (ascending), `version` (descending) and `schema` (descending)
+- Formatted results are sorted by `format` (ascending), `version` (descending) and `schema` (descending)
 
 #### Schema examples
 
@@ -861,7 +861,8 @@ Use the `--format` flag on the to choose one of the supported output formats:
 
 #### Vulnerability result sorting
 
-Currently, all `vulnerability list` command results are sorted by vulnerability `id` (descending) then by `created` date (descending).
+- `txt`, `csv` and `md` formatted results are sorted by vulnerability `id` (descending) then by `created` date (descending).
+- `json` results are not sorted
 
 #### Vulnerability Examples
 

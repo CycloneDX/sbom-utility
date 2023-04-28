@@ -172,7 +172,7 @@ func filterFormatSchemas(whereFilters []WhereFilter) (filteredFormats []schema.F
 	return
 }
 
-func SortFormatSchemaInstances(filteredSchemas []schema.FormatSchemaInstance) []schema.FormatSchemaInstance {
+func sortFormatSchemaInstances(filteredSchemas []schema.FormatSchemaInstance) []schema.FormatSchemaInstance {
 	// Sort by Format, Version, Variant
 	sort.Slice(filteredSchemas, func(i, j int) bool {
 		schema1 := filteredSchemas[i]
@@ -251,7 +251,7 @@ func DisplaySchemasTabbedText(output io.Writer, filteredSchemas []schema.FormatS
 	fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
 	// Sort by Format, Version, Variant
-	filteredSchemas = SortFormatSchemaInstances(filteredSchemas)
+	filteredSchemas = sortFormatSchemaInstances(filteredSchemas)
 
 	// Emit rows
 	for _, schemaInstance := range filteredSchemas {
@@ -294,7 +294,7 @@ func DisplaySchemasMarkdown(output io.Writer, filteredSchemas []schema.FormatSch
 	var lineRow string
 
 	// Sort by Format, Version, Variant
-	filteredSchemas = SortFormatSchemaInstances(filteredSchemas)
+	filteredSchemas = sortFormatSchemaInstances(filteredSchemas)
 
 	// Emit rows
 	for _, schemaInstance := range filteredSchemas {
@@ -345,7 +345,7 @@ func DisplaySchemasCSV(output io.Writer, filteredSchemas []schema.FormatSchemaIn
 	var line []string
 
 	// Sort by Format, Version, Variant
-	filteredSchemas = SortFormatSchemaInstances(filteredSchemas)
+	filteredSchemas = sortFormatSchemaInstances(filteredSchemas)
 
 	// Emit rows
 	for _, schemaInstance := range filteredSchemas {

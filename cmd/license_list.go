@@ -142,6 +142,13 @@ func processLicenseListResults(err error) {
 	}
 }
 
+func sortLicenseKeys(licenseKeys []interface{}) {
+	// Sort by license key (i.e., one of `id`, `name` or `expression`)
+	sort.Slice(licenseKeys, func(i, j int) bool {
+		return licenseKeys[i].(string) < licenseKeys[j].(string)
+	})
+}
+
 // NOTE: parm. licenseKeys is actually a string slice
 func checkLicenseListEmptyOrNoAssertionOnly(licenseKeys []interface{}) (empty bool) {
 	if len(licenseKeys) == 0 {
@@ -427,9 +434,8 @@ func DisplayLicenseListSummaryText(output io.Writer) {
 	// Emit no license or assertion-only warning into output
 	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
 
-	sort.Slice(licenseKeys, func(i, j int) bool {
-		return licenseKeys[i].(string) < licenseKeys[j].(string)
-	})
+	// Sort license using identifying key (i.e., `id`, `name` or `expression`)
+	sortLicenseKeys(licenseKeys)
 
 	for _, licenseName := range licenseKeys {
 		arrLicenseInfo, _ := licenseMap.Get(licenseName)
@@ -477,6 +483,9 @@ func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
 
 	// Emit no license or assertion-only warning into output
 	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
+
+	// Sort license using identifying key (i.e., `id`, `name` or `expression`)
+	sortLicenseKeys(licenseKeys)
 
 	// output the each license entry as a row
 	for _, licenseName := range licenseKeys {
@@ -538,6 +547,9 @@ func DisplayLicenseListSummaryMarkdown(output io.Writer) {
 
 	// Emit no license or assertion-only warning into output
 	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
+
+	// Sort license using identifying key (i.e., `id`, `name` or `expression`)
+	sortLicenseKeys(licenseKeys)
 
 	var line []string
 	var lineRow string
