@@ -45,28 +45,38 @@ const (
 	FLAG_SCHEMA_OUTPUT_FORMAT_HELP = "format output using the specified type"
 )
 
+const (
+	SCHEMA_DATA_KEY_KEY_NAME        = "name"         // summary
+	SCHEMA_DATA_KEY_KEY_FORMAT      = "format"       // summary
+	SCHEMA_DATA_KEY_KEY_VERSION     = "version"      // summary
+	SCHEMA_DATA_KEY_KEY_VARIANT     = "variant"      // summary
+	SCHEMA_DATA_KEY_KEY_FILE        = "file (local)" // summary
+	SCHEMA_DATA_KEY_KEY_SOURCE      = "url (remote)" // summary
+	SCHEMA_DATA_KEY_KEY_DEVELOPMENT = "development"  // Unused (for now)
+)
+
+// var SCHEMA_LIST_TITLES = []string{
+// 	SCHEMA_DATA_KEY_KEY_NAME,
+// 	SCHEMA_DATA_KEY_KEY_FORMAT,
+// 	SCHEMA_DATA_KEY_KEY_VERSION,
+// 	SCHEMA_DATA_KEY_KEY_VARIANT,
+// 	SCHEMA_DATA_KEY_KEY_FILE,
+// 	SCHEMA_DATA_KEY_KEY_SOURCE,
+// }
+
+// NOTE: columns will be output in order they are listed here:
+var SCHEMA_LIST_ROW_DATA = []ColumnFormatData{
+	{SCHEMA_DATA_KEY_KEY_NAME, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{SCHEMA_DATA_KEY_KEY_FORMAT, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{SCHEMA_DATA_KEY_KEY_VERSION, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{SCHEMA_DATA_KEY_KEY_VARIANT, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{SCHEMA_DATA_KEY_KEY_FILE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{SCHEMA_DATA_KEY_KEY_SOURCE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+}
+
 // Command help formatting
 var SCHEMA_LIST_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{FORMAT_TEXT, FORMAT_CSV, FORMAT_MARKDOWN}, ", ")
-
-const (
-	SCHEMA_FILTER_KEY_NAME        = "Name"
-	SCHEMA_FILTER_KEY_FORMAT      = "Format"
-	SCHEMA_FILTER_KEY_VERSION     = "Version"
-	SCHEMA_FILTER_KEY_VARIANT     = "Variant"
-	SCHEMA_FILTER_KEY_FILE        = "File (local)"
-	SCHEMA_FILTER_KEY_SOURCE      = "URL (remote)"
-	SCHEMA_FILTER_KEY_DEVELOPMENT = "Development" // Unused (for now)
-)
-
-var SCHEMA_LIST_TITLES = []string{
-	SCHEMA_FILTER_KEY_NAME,
-	SCHEMA_FILTER_KEY_FORMAT,
-	SCHEMA_FILTER_KEY_VERSION,
-	SCHEMA_FILTER_KEY_VARIANT,
-	SCHEMA_FILTER_KEY_FILE,
-	SCHEMA_FILTER_KEY_SOURCE,
-}
 
 func NewCommandSchema() *cobra.Command {
 	var command = new(cobra.Command)
@@ -166,9 +176,12 @@ func DisplaySchemasTabbedText(output io.Writer) (err error) {
 			return format1.CanonicalName < format2.CanonicalName
 		})
 
+		// create title row and underline row from slices of optional and compulsory titles
+		titles, underlines := prepareReportTitleData(SCHEMA_LIST_ROW_DATA, false)
+
 		// Create title row and add tabs between column titles for the tabWRiter
-		underlines := createTitleTextSeparators(SCHEMA_LIST_TITLES)
-		fmt.Fprintf(w, "%s\n", strings.Join(SCHEMA_LIST_TITLES, "\t"))
+		//underlines := createTitleTextSeparators(SCHEMA_LIST_TITLES)
+		fmt.Fprintf(w, "%s\n", strings.Join(titles, "\t"))
 		fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
 		for _, format := range aFormats {
@@ -212,12 +225,12 @@ func DisplaySchemasMarkdown(output io.Writer) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	// create title row
-	titleRow := createMarkdownRow(SCHEMA_LIST_TITLES)
-	fmt.Fprintf(output, "%s\n", titleRow)
-
-	alignments := createMarkdownColumnAlignment(SCHEMA_LIST_TITLES)
+	// create title row and alignment row from slices of optional and compulsory titles
+	titles, _ := prepareReportTitleData(SCHEMA_LIST_ROW_DATA, false)
+	titleRow := createMarkdownRow(titles)
+	alignments := createMarkdownColumnAlignment(titles)
 	alignmentRow := createMarkdownRow(alignments)
+	fmt.Fprintf(output, "%s\n", titleRow)
 	fmt.Fprintf(output, "%s\n", alignmentRow)
 
 	// Emit no schemas found warning into output
@@ -287,8 +300,11 @@ func DisplaySchemasCSV(output io.Writer) (err error) {
 	w := csv.NewWriter(output)
 	defer w.Flush()
 
-	if err = w.Write(SCHEMA_LIST_TITLES); err != nil {
-		return getLogger().Errorf("error writing to output (%v): %s", SCHEMA_LIST_TITLES, err)
+	// create title row from slices of optional and compulsory titles
+	titles, _ := prepareReportTitleData(SCHEMA_LIST_ROW_DATA, false)
+
+	if err = w.Write(titles); err != nil {
+		return getLogger().Errorf("error writing to output (%v): %s", titles, err)
 	}
 
 	// Emit no schemas found warning into output

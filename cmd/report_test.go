@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -27,15 +28,15 @@ import (
 
 const REPORT_LINE_CONTAINS_ANY = -1
 
-func innerRunReportResultTests(t *testing.T, testInfo *CommonTestInfo, outputBuffer bytes.Buffer, outputError error) (foo error) {
+func innerRunReportResultTests(t *testing.T, testInfo *CommonTestInfo, outputBuffer bytes.Buffer, outputError error) (err error) {
 	getLogger().Tracef("TestInfo: %s", testInfo)
 
 	// TEST: Expected error matches actual error
 	if testInfo.ResultExpectedError != nil {
 		// NOTE: err = nil will also fail if error was expected
 		if !ErrorTypesMatch(outputError, testInfo.ResultExpectedError) {
-			foo = getLogger().Errorf("expected error: %T, actual error: %T", testInfo.ResultExpectedError, outputError)
-			t.Error(foo.Error())
+			err = getLogger().Errorf("expected error: %T, actual error: %T", testInfo.ResultExpectedError, outputError)
+			t.Error(err.Error())
 		}
 		// TODO: getLogger().Tracef("success")
 		// Always return (with the actual error); as subsequent tests are rendered invalid
@@ -44,8 +45,8 @@ func innerRunReportResultTests(t *testing.T, testInfo *CommonTestInfo, outputBuf
 
 	// TEST: Unexpected error: return immediately/do not test output/results
 	if outputError != nil {
-		foo = getLogger().Errorf("test failed: %s: detail: %s ", testInfo, outputError.Error())
-		t.Error(foo.Error())
+		err = getLogger().Errorf("test failed: %s: detail: %s ", testInfo, outputError.Error())
+		t.Error(err.Error())
 		return
 	}
 
@@ -54,8 +55,8 @@ func innerRunReportResultTests(t *testing.T, testInfo *CommonTestInfo, outputBuf
 	if len(testInfo.ResultLineContainsValues) > 0 {
 		matchFoundLine, matchFound := lineContainsValues(outputBuffer, testInfo.ResultLineContainsValuesAtLineNum, testInfo.ResultLineContainsValues...)
 		if !matchFound {
-			foo = getLogger().Errorf("output does not contain expected values: `%v` at line: %v\n", strings.Join(testInfo.ResultLineContainsValues, ","), testInfo.ResultLineContainsValuesAtLineNum)
-			t.Error(foo.Error())
+			err = getLogger().Errorf("output does not contain expected values: `%v` at line: %v\n", strings.Join(testInfo.ResultLineContainsValues, ","), testInfo.ResultLineContainsValuesAtLineNum)
+			t.Error(err.Error())
 			return
 		}
 		getLogger().Tracef("output contains expected values: `%v` at line: %v\n", testInfo.ResultLineContainsValues, matchFoundLine)
@@ -66,10 +67,12 @@ func innerRunReportResultTests(t *testing.T, testInfo *CommonTestInfo, outputBuf
 		outputResults := outputBuffer.String()
 		outputLineCount := strings.Count(outputResults, "\n")
 		if outputLineCount != testInfo.ResultExpectedLineCount {
-			foo = getLogger().Errorf("output did not contain expected line count: %v/%v (expected/actual)", testInfo.ResultExpectedLineCount, outputLineCount)
-			t.Errorf("%s: input file: `%s`, where clause: `%s`",
-				foo.Error(),
-				testInfo.InputFile,
+			err = getLogger().Errorf("output did not contain expected line count: %v/%v (expected/actual)", testInfo.ResultExpectedLineCount, outputLineCount)
+			fmt.Printf(">>> %v", outputResults)
+			t.Errorf("%s: format: `%s`, summary: `%v`, where clause: `%s`",
+				err.Error(),
+				testInfo.ListFormat,
+				testInfo.ListSummary,
 				testInfo.WhereClause)
 			return
 		}
@@ -81,8 +84,8 @@ func innerRunReportResultTests(t *testing.T, testInfo *CommonTestInfo, outputBuf
 	if testInfo.ListFormat == FORMAT_JSON {
 		// Use Marshal to test for validity
 		if !utils.IsValidJsonRaw(outputBuffer.Bytes()) {
-			foo = getLogger().Errorf("output did not contain valid format data; expected: `%s`", FORMAT_JSON)
-			t.Error(foo.Error())
+			err = getLogger().Errorf("output did not contain valid format data; expected: `%s`", FORMAT_JSON)
+			t.Error(err.Error())
 			t.Logf("%s", outputBuffer.String())
 			return
 		}
