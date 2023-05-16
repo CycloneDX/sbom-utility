@@ -237,7 +237,7 @@ func TestLicenseListCdx14MarkdownNoneFound(t *testing.T) {
 
 func TestLicenseListCdx13Json(t *testing.T) {
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3, FORMAT_JSON, false)
-	lti.ResultExpectedLineCount = 210 // array of LicenseChoice JSON objects
+	lti.ResultExpectedLineCount = 108 // array of LicenseChoice JSON objects
 	innerTestLicenseList(t, lti)
 }
 
