@@ -322,7 +322,7 @@ func FormatSchemaErrors(errs []gojsonschema.ResultError) string {
 			// TODO: provide flag to allow users to "turn on", by default we do NOT want this
 			// as this slows down processing on SBOMs with large numbers of errors
 			formattedValue, _ := log.FormatInterfaceAsColorizedJson(resultError.Value())
-			//formattedValue = log.AddTabs(formattedValue)
+			formattedValue = log.AddTabs(formattedValue)
 			//formattedValue := fmt.Sprintf("%v", resultError.Value())
 			failingObject = fmt.Sprintf("\n\tFailing object: [%v]", formattedValue)
 
