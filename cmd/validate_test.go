@@ -217,3 +217,10 @@ func TestValidateForceCustomSchemaCdxSchemaOlder(t *testing.T) {
 		SCHEMA_VARIANT_NONE,
 		nil)
 }
+
+func TestValidateSyntaxErrorCdx14AdHoc2(t *testing.T) {
+	innerValidateError(t,
+		"sample_co_May16.json",
+		SCHEMA_VARIANT_NONE,
+		nil)
+}

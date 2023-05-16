@@ -299,6 +299,8 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 func FormatSchemaErrors(errs []gojsonschema.ResultError) string {
 	var sb strings.Builder
 
+	const MAX_ERRORS = 10
+
 	lenErrs := len(errs)
 	if lenErrs > 0 {
 		var description, failingObject string
@@ -337,6 +339,13 @@ func FormatSchemaErrors(errs []gojsonschema.ResultError) string {
 				failingObject)
 
 			sb.WriteString(schemaErrorText)
+
+			// short-circuit if we have too many errors
+			if i == MAX_ERRORS {
+				// notify users more errors exist
+				sb.WriteString(fmt.Sprintf("Too many errors. Showing (%v/%v) errors.", i, len(errs)))
+				break
+			}
 		}
 	}
 	return sb.String()
