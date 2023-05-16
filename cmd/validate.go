@@ -42,14 +42,17 @@ const (
 	FLAG_SCHEMA_VARIANT        = "variant"
 	FLAG_CUSTOM_VALIDATION     = "custom"   // TODO: endorse when no longer experimental
 	FLAG_ERR_COLORIZE          = "colorize" // default: true (for historical reasons)
+	FLAG_ERR_LIMIT             = "limit"
 	MSG_SCHEMA_FORCE           = "force specified schema file for validation; overrides inferred schema"
 	MSG_SCHEMA_VARIANT         = "select named schema variant (e.g., \"strict\"); variant must be declared in configuration file (i.e., \"config.json\")"
 	MSG_FLAG_CUSTOM_VALIDATION = "perform custom validation using custom configuration settings (i.e., \"custom.json\")"
+	MSG_FLAG_ERR_COLORIZE      = "Colorize formatted error output"
+	MSG_FLAG_ERR_LIMIT         = "Limit number of errors output"
 )
 
 // limits
 const (
-	DEFAULT_MAX_ERRORS              = 10
+	DEFAULT_MAX_ERROR_LIMIT         = 10
 	DEFAULT_MAX_ERR_DESCRIPTION_LEN = 128
 )
 
@@ -83,7 +86,8 @@ func initCommandValidate(command *cobra.Command) {
 	// Optional schema "variant" of inferred schema (e.g, "strict")
 	command.Flags().StringVarP(&utils.GlobalFlags.Variant, FLAG_SCHEMA_VARIANT, "", "", MSG_SCHEMA_VARIANT)
 	command.Flags().BoolVarP(&utils.GlobalFlags.CustomValidation, FLAG_CUSTOM_VALIDATION, "", false, MSG_FLAG_CUSTOM_VALIDATION)
-	command.Flags().BoolVarP(&utils.GlobalFlags.ValidateFlags.ColorizeJsonErrors, FLAG_ERR_COLORIZE, "", true, "Colorize error output")
+	command.Flags().BoolVarP(&utils.GlobalFlags.ValidateFlags.ColorizeJsonErrors, FLAG_ERR_COLORIZE, "", true, MSG_FLAG_ERR_COLORIZE)
+	command.Flags().IntVarP(&utils.GlobalFlags.ValidateFlags.MaxNumErrors, FLAG_ERR_LIMIT, "", DEFAULT_MAX_ERROR_LIMIT, MSG_FLAG_ERR_LIMIT)
 }
 
 func validateCmdImpl(cmd *cobra.Command, args []string) error {
@@ -304,6 +308,7 @@ func FormatSchemaErrors(errs []gojsonschema.ResultError) string {
 
 	lenErrs := len(errs)
 	if lenErrs > 0 {
+		errLimit := utils.GlobalFlags.ValidateFlags.MaxNumErrors
 		colorize := utils.GlobalFlags.ValidateFlags.ColorizeJsonErrors
 		var formattedValue string
 		var description string
@@ -311,6 +316,16 @@ func FormatSchemaErrors(errs []gojsonschema.ResultError) string {
 
 		sb.WriteString(fmt.Sprintf("\n(%d) Schema errors detected (use `--debug` for more details):", lenErrs))
 		for i, resultError := range errs {
+
+			// short-circuit if we have too many errors
+			if i == errLimit {
+				// notify users more errors exist
+				msg := fmt.Sprintf("Too many errors. Showing (%v/%v) errors.", i, len(errs))
+				getLogger().Infof("%s", msg)
+				// always include limit message in discrete output (i.e., not turned off by --quiet flag)
+				sb.WriteString("\n" + msg)
+				break
+			}
 
 			// Some descriptions include very long enums; in those cases,
 			// truncate to a reasonable length using an intelligent separator
@@ -348,15 +363,6 @@ func FormatSchemaErrors(errs []gojsonschema.ResultError) string {
 				failingObject)
 
 			sb.WriteString(schemaErrorText)
-
-			// short-circuit if we have too many errors
-			if i == DEFAULT_MAX_ERRORS {
-				// notify users more errors exist
-				msg := fmt.Sprintf("Too many errors. Showing (%v/%v) errors.", i, len(errs))
-				getLogger().Infof("%s", msg)
-				sb.WriteString("\n" + msg)
-				break
-			}
 
 			// TODO: leave commented out as we do not want to slow processing...
 			//getLogger().Debugf("processing error (%v): type: `%s`", i, resultError.Type())
