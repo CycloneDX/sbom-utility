@@ -113,127 +113,127 @@ type CDXComponent struct {
 // TODO: v1.2 "licenses" used to be an anon. type until v1.3 intro. the `LicenseChoice` def.
 // validate a v1.2 SBOM wit the anon. type parses properly
 type CDXService struct {
-	BomRef             string                  `json:"bom-ref"`
-	Provider           CDXOrganizationalEntity `json:"provider"`
-	Group              string                  `json:"group"`
-	Name               string                  `json:"name"`
-	Version            string                  `json:"version"`
-	Description        string                  `json:"description"`
-	Endpoints          []string                `json:"endpoints"`
-	Authenticated      bool                    `json:"authenticated"`
-	XTrustBoundary     bool                    `json:"x-trust-boundary"`
-	Data               []CDXDataClassification `json:"data"`
-	Licenses           []CDXLicenseChoice      `json:"licenses"`
-	ExternalReferences []CDXExternalReference  `json:"externalReferences"`
-	Services           []CDXService            `json:"services"`
-	Properties         []CDXProperty           `json:"properties"`   // v1.3: added
-	ReleaseNotes       []CDXReleaseNotes       `json:"releaseNotes"` // v1.4: added
-	Signature          CDXSignature            `json:"signature"`    // v1.4: added
+	BomRef             string                  `json:"bom-ref,omitempty"`
+	Provider           CDXOrganizationalEntity `json:"provider,omitempty"`
+	Group              string                  `json:"group,omitempty"`
+	Name               string                  `json:"name,omitempty"`
+	Version            string                  `json:"version,omitempty"`
+	Description        string                  `json:"description,omitempty"`
+	Endpoints          []string                `json:"endpoints,omitempty"`
+	Authenticated      bool                    `json:"authenticated,omitempty"`
+	XTrustBoundary     bool                    `json:"x-trust-boundary,omitempty"`
+	Data               []CDXDataClassification `json:"data,omitempty"`
+	Licenses           []CDXLicenseChoice      `json:"licenses,omitempty"`
+	ExternalReferences []CDXExternalReference  `json:"externalReferences,omitempty"`
+	Services           []CDXService            `json:"services,omitempty"`
+	Properties         []CDXProperty           `json:"properties,omitempty"`   // v1.3: added
+	ReleaseNotes       []CDXReleaseNotes       `json:"releaseNotes,omitempty"` // v1.4: added
+	Signature          CDXSignature            `json:"signature,omitempty"`    // v1.4: added
 }
 
 // v1.2: existed as an anon. type in the "component" type defn.
 // The "Notes" (plural) should likely be multiple strings or text annotations
 // TODO: create top-level defn. for "pedigree" anon. type
 type CDXPedigree struct {
-	Ancestors   []CDXComponent `json:"ancestors"`
-	Descendants []CDXComponent `json:"descendants"`
-	Variants    []CDXComponent `json:"variants"`
-	Commits     []CDXCommit    `json:"commits"`
-	Patches     []CDXPatch     `json:"patches"`
-	Notes       string         `json:"notes"`
+	Ancestors   []CDXComponent `json:"ancestors,omitempty"`
+	Descendants []CDXComponent `json:"descendants,omitempty"`
+	Variants    []CDXComponent `json:"variants,omitempty"`
+	Commits     []CDXCommit    `json:"commits,omitempty"`
+	Patches     []CDXPatch     `json:"patches,omitempty"`
+	Notes       string         `json:"notes,omitempty"`
 }
 
 // v1.2: existed
 // v1.4: added "externalReferences"
 type CDXTool struct {
-	Vendor             string                 `json:"vendor"`
-	Name               string                 `json:"name"`
-	Version            string                 `json:"version"`
-	Hashes             []CDXHash              `json:"hashes"`
-	ExternalReferences []CDXExternalReference `json:"externalReferences"` // v1.4: added
+	Vendor             string                 `json:"vendor,omitempty"`
+	Name               string                 `json:"name,omitempty"`
+	Version            string                 `json:"version,omitempty"`
+	Hashes             []CDXHash              `json:"hashes,omitempty"`
+	ExternalReferences []CDXExternalReference `json:"externalReferences,omitempty"` // v1.4: added
 }
 
 // v1.2: existed
 type CDXOrganizationalEntity struct {
-	Name    string                     `json:"name"`
-	Url     []string                   `json:"url"`
-	Contact []CDXOrganizationalContact `json:"contact"`
+	Name    string                     `json:"name,omitempty"`
+	Url     []string                   `json:"url,omitempty"`
+	Contact []CDXOrganizationalContact `json:"contact,omitempty"`
 }
 
 // v1.2: existed
 type CDXOrganizationalContact struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Phone string `json:"phone"`
+	Name  string `json:"name,omitempty"`
+	Email string `json:"email,omitempty"`
+	Phone string `json:"phone,omitempty"`
 }
 
 // v1.2: existed
 // v1.4: deprecated
 type CDXSwid struct {
-	TagId      string        `json:"tagId"`
-	Name       string        `json:"name"`
-	Version    string        `json:"version"`
-	TagVersion int           `json:"tagVersion"`
-	Patch      bool          `json:"patch"`
-	Text       CDXAttachment `json:"attachment"`
-	Url        string        `json:"url"`
+	TagId      string        `json:"tagId,omitempty"`
+	Name       string        `json:"name,omitempty"`
+	Version    string        `json:"version,omitempty"`
+	TagVersion int           `json:"tagVersion,omitempty"`
+	Patch      bool          `json:"patch,omitempty"`
+	Text       CDXAttachment `json:"attachment,omitempty"`
+	Url        string        `json:"url,omitempty"`
 }
 
 // v1.2: existed
 type CDXAttachment struct {
-	ContentType string `json:"contentType"`
-	Encoding    string `json:"encoding"`
-	Content     string `json:"content"`
+	ContentType string `json:"contentType,omitempty"`
+	Encoding    string `json:"encoding,omitempty"`
+	Content     string `json:"content,omitempty"`
 }
 
 // v1.2: existed
 // Note: "alg" is of type "hash-alg" which is a constrained `string` type
 // Note: "content" is of type "hash-content" which is a constrained `string` type
 type CDXHash struct {
-	Alg     string `json:"alg"`
-	Content string `json:"content"`
+	Alg     string `json:"alg,omitempty"`
+	Content string `json:"content,omitempty"`
 }
 
 // v1.2: was an anon. type
 // v1.3: created
 // Note: "oneOf": ["license", "expression"] is required
 type CDXLicenseChoice struct {
-	License    CDXLicense `json:"license"`
-	Expression string     `json:"expression"`
+	License    CDXLicense `json:"license,omitempty"`
+	Expression string     `json:"expression,omitempty"`
 }
 
 // v1.2: was an anon. type
 // v1.3: created
 // Note: "oneOf": ["id", "name"] is required
 type CDXLicense struct {
-	Id   string        `json:"id"`
-	Name string        `json:"name"`
-	Text CDXAttachment `json:"text"`
-	Url  string        `json:"url"`
+	Id   string        `json:"id,omitempty"`
+	Name string        `json:"name,omitempty"`
+	Text CDXAttachment `json:"text,omitempty"`
+	Url  string        `json:"url,omitempty"`
 }
 
 // v1.2: existed
 // TODO: GitHub PRs MAY have more than 1 commit (committer); CDX needs to account for this
 type CDXCommit struct {
-	Uid       string                `json:"uid"`
-	Url       string                `json:"url"`
-	Message   string                `json:"message"`
-	Author    CDXIdentifiableAction `json:"author"`
-	Committer CDXIdentifiableAction `json:"committer"`
+	Uid       string                `json:"uid,omitempty"`
+	Url       string                `json:"url,omitempty"`
+	Message   string                `json:"message,omitempty"`
+	Author    CDXIdentifiableAction `json:"author,omitempty"`
+	Committer CDXIdentifiableAction `json:"committer,omitempty"`
 }
 
 // v1.2: existed
 type CDXPatch struct {
-	Type     string     `json:"type"`
-	Diff     CDXDiff    `json:"diff"`
-	Resolves []CDXIssue `json:"resolves"`
+	Type     string     `json:"type,omitempty"`
+	Diff     CDXDiff    `json:"diff,omitempty"`
+	Resolves []CDXIssue `json:"resolves,omitempty"`
 }
 
 // v1.2: existed
 // v1.3 "url" type changed from `string` (with constraints) to an "iri-reference"
 type CDXDiff struct {
-	Text CDXAttachment `json:"text"`
-	Url  string        `json:"url"` // v1.3: type changed to "iri-reference"
+	Text CDXAttachment `json:"text,omitempty"`
+	Url  string        `json:"url,omitempty"` // v1.3: type changed to "iri-reference"
 }
 
 // v1.2: existed
@@ -242,19 +242,19 @@ type CDXDiff struct {
 // Not sure how a parser will treat this... perhaps as an `interface{}`?
 // v1.3: fixed to be []string
 type CDXIssue struct {
-	Type        string    `json:"type"`
-	Id          string    `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Source      CDXSource `json:"source"`
-	References  []string  `json:"references"` // v1.3: added missing `string` type
+	Type        string    `json:"type,omitempty"`
+	Id          string    `json:"id,omitempty"`
+	Name        string    `json:"name,omitempty"`
+	Description string    `json:"description,omitempty"`
+	Source      CDXSource `json:"source,omitempty"`
+	References  []string  `json:"references,omitempty"` // v1.3: added missing `string` type
 }
 
 // v1.2: existed as anon. type
 // Note: this is an anonymous type defined within "issue" defn. (i.e., "CDXIssue")
 type CDXSource struct {
-	Name string `json:"name"`
-	Url  string `json:"url"`
+	Name string `json:"name,omitempty"`
+	Url  string `json:"url,omitempty"`
 }
 
 // v1.2: existed
@@ -262,44 +262,44 @@ type CDXSource struct {
 // other fields to OrganizationalContact (or similar)
 // TODO: should have "signage" information (e.g., evidence, public key)
 type CDXIdentifiableAction struct {
-	Timestamp string `json:"timestamp"`
-	Name      string `json:"name"`
-	Email     string `json:"email"`
+	Timestamp string `json:"timestamp,omitempty"`
+	Name      string `json:"name,omitempty"`
+	Email     string `json:"email,omitempty"`
 }
 
 // v1.2: existed
 // v1.3: added "hashes"
 // v1.4: `Type` field: added value "release-notes" to enum.
 type CDXExternalReference struct {
-	Url     string    `json:"url"`
-	Comment string    `json:"comment"`
-	Type    string    `json:"type"`
-	Hashes  []CDXHash `json:"hashes"` // v1.3: added
+	Url     string    `json:"url,omitempty"`
+	Comment string    `json:"comment,omitempty"`
+	Type    string    `json:"type,omitempty"`
+	Hashes  []CDXHash `json:"hashes,omitempty"` // v1.3: added
 }
 
 // v1.2: existed
 // v1.4: "ref" and "dependsOn" became type "refType" which is a constrained `string`
 type CDXDependency struct {
-	Ref       string   `json:"ref"`
-	DependsOn []string `json:"dependsOn"`
+	Ref       string   `json:"ref,omitempty"`
+	DependsOn []string `json:"dependsOn,omitempty"`
 }
 
 // v1.2: existed
 // Note: "flow" is of type "dataFlow" which is a constrained `string` type
 type CDXDataClassification struct {
-	Flow           string `json:"flow"`
-	Classification string `json:"classification"`
+	Flow           string `json:"flow,omitempty"`
+	Classification string `json:"classification,omitempty"`
 }
 
 // v1.3: created "copyright" defn.
 type CDXCopyright struct {
-	Text string
+	Text string `json:"text,omitempty"`
 }
 
 // v1.3: created "componentEvidence" defn.
 type CDXComponentEvidence struct {
-	Licenses  []CDXLicense
-	Copyright []CDXCopyright
+	Licenses  []CDXLicense   `json:"licenses,omitempty"`
+	Copyright []CDXCopyright `json:"copyright,omitempty"`
 }
 
 // v1.3: created "compositions" defn.
@@ -307,46 +307,46 @@ type CDXComponentEvidence struct {
 // Note: "aggregate" is type `aggregateType` which is a constrained string
 // TODO: Should not be plural
 type CDXCompositions struct {
-	Aggregate    string       `json:"aggregate"`
-	Assemblies   []string     `json:"assemblies"`
-	Dependencies []string     `json:"dependencies"`
-	Signature    CDXSignature `json:"signature"` // v1.4: added
+	Aggregate    string       `json:"aggregate,omitempty"`
+	Assemblies   []string     `json:"assemblies,omitempty"`
+	Dependencies []string     `json:"dependencies,omitempty"`
+	Signature    CDXSignature `json:"signature,omitempty"` // v1.4: added
 }
 
 // v1.3: created "property" defn.
 type CDXProperty struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
+	Name  string `json:"name,omitempty,omitempty"`
+	Value string `json:"value,omitempty,omitempty"`
 }
 
 // v1.4: created "note" defn.
 // Note: "locale" is of type "localeType" which is a constrained `string`
 type CDXNote struct {
-	Locale string        `json:"locale"`
-	Text   CDXAttachment `json:"attachment"`
+	Locale string        `json:"locale,omitempty"`
+	Text   CDXAttachment `json:"attachment,omitempty"`
 }
 
 // v1.4: created "releaseNotes" defn.
 // TODO: should be singular "releaseNote"
 type CDXReleaseNotes struct {
-	Type          string        `json:"type"`
-	Title         string        `json:"title"`
-	FeaturedImage string        `json:"featuredImage"`
-	SocialImage   string        `json:"socialImage"`
-	Description   string        `json:"description"`
-	Timestamp     string        `json:"timestamp"`
-	Aliases       []string      `json:"aliases"`
-	Tags          []string      `json:"tags"`
-	Resolves      []CDXIssue    `json:"resolves"`
-	Notes         []CDXNote     `json:"notes"`
-	Properties    []CDXProperty `json:"properties"`
+	Type          string        `json:"type,omitempty"`
+	Title         string        `json:"title,omitempty"`
+	FeaturedImage string        `json:"featuredImage,omitempty"`
+	SocialImage   string        `json:"socialImage,omitempty"`
+	Description   string        `json:"description,omitempty"`
+	Timestamp     string        `json:"timestamp,omitempty"`
+	Aliases       []string      `json:"aliases,omitempty"`
+	Tags          []string      `json:"tags,omitempty"`
+	Resolves      []CDXIssue    `json:"resolves,omitempty"`
+	Notes         []CDXNote     `json:"notes,omitempty"`
+	Properties    []CDXProperty `json:"properties,omitempty"`
 }
 
 // v1.4: created "releaseNotes" defn.
 // Note: "url" is of type "iri-reference"
 type CDXAdvisory struct {
-	Title string `json:"title"`
-	Url   string `json:"url"`
+	Title string `json:"title,omitempty"`
+	Url   string `json:"url,omitempty"`
 }
 
 // v1.4: created "rating" defn.
@@ -354,54 +354,54 @@ type CDXAdvisory struct {
 // Note: "severity" is of type "severity" which is a constrained `string`
 // Note: "method" is of type "scoreMethod" which is a constrained `string`
 type CDXRating struct {
-	Source        CDXVulnerabilitySource `json:"source"`
-	Score         float64                `json:"score"`
-	Severity      string                 `json:"severity"`
-	Method        string                 `json:"method"`
-	Vector        string                 `json:"vector"`
-	Justification string                 `json:"justification"`
+	Source        CDXVulnerabilitySource `json:"source,omitempty"`
+	Score         float64                `json:"score,omitempty"`
+	Severity      string                 `json:"severity,omitempty"`
+	Method        string                 `json:"method,omitempty"`
+	Vector        string                 `json:"vector,omitempty"`
+	Justification string                 `json:"justification,omitempty"`
 }
 
 // v1.4: created "vulnerabilitySource" defn.
 // Note: "url" is of type "string" (and not an "iri-reference")
 // TODO: "url" SHOULD be an "iri-reference"
 type CDXVulnerabilitySource struct {
-	Url  string `json:"url"`
-	Name string `json:"name"`
+	Url  string `json:"url,omitempty"`
+	Name string `json:"name,omitempty"`
 }
 
 // v1.4: created "vulnerability" defn.
 // Note: "bom-ref" is a "ref-type" which is a constrained `string`
 // Note: "cwes" is a array of "cwe" which is a constrained `int`
 type CDXVulnerability struct {
-	BomRef string                 `json:"bom-ref"`
-	Id     string                 `json:"id"`
-	Source CDXVulnerabilitySource `json:"source"`
+	BomRef string                 `json:"bom-ref,omitempty"`
+	Id     string                 `json:"id,omitempty"`
+	Source CDXVulnerabilitySource `json:"source,omitempty"`
 	// TODO: References []CDXReference `json:"references"` // an anon. type
-	Ratings        []CDXRating   `json:"ratings"`
-	Cwes           []int         `json:"cwes"`
-	Description    string        `json:"description"`
-	Detail         string        `json:"detail"`
-	Recommendation string        `json:"recommendation"`
-	Advisories     []CDXAdvisory `json:"advisories"`
-	Created        string        `json:"created"`
-	Published      string        `json:"published"`
-	Updated        string        `json:"updated"`
-	Credits        CDXCredit     `json:"credits"` // anon. type
-	Tools          []CDXTool     `json:"tools"`
-	Analysis       CDXAnalysis   `json:"analysis"` // anon. type
-	Affects        []CDXAffect   `json:"affects"`  // anon. type
-	Properties     []CDXProperty `json:"properties"`
+	Ratings        []CDXRating   `json:"ratings,omitempty"`
+	Cwes           []int         `json:"cwes,omitempty"`
+	Description    string        `json:"description,omitempty"`
+	Detail         string        `json:"detail,omitempty"`
+	Recommendation string        `json:"recommendation,omitempty"`
+	Advisories     []CDXAdvisory `json:"advisories,omitempty"`
+	Created        string        `json:"created,omitempty"`
+	Published      string        `json:"published,omitempty"`
+	Updated        string        `json:"updated,omitempty"`
+	Credits        CDXCredit     `json:"credits,omitempty"` // anon. type
+	Tools          []CDXTool     `json:"tools,omitempty"`
+	Analysis       CDXAnalysis   `json:"analysis,omitempty"` // anon. type
+	Affects        []CDXAffect   `json:"affects,omitempty"`  // anon. type
+	Properties     []CDXProperty `json:"properties,omitempty"`
 	// v1.5 properties follow
-	Rejected string `json:"rejected"` // v1.5: added
+	Rejected string `json:"rejected,omitempty"` // v1.5: added
 }
 
 // v1.4: created "credit" defn. to represent the in-line, anon. type
 // found in the "vulnerability" type defn.
 // TODO: create top-level defn. for "credit" anon. type
 type CDXCredit struct {
-	Organizations []CDXOrganizationalEntity  `json:"organizations"`
-	Individuals   []CDXOrganizationalContact `json:"individuals"`
+	Organizations []CDXOrganizationalEntity  `json:"organizations,omitempty"`
+	Individuals   []CDXOrganizationalContact `json:"individuals,omitempty"`
 }
 
 // v1.4: created "analysis" def. to represent an in-line, anon. type
@@ -411,17 +411,17 @@ type CDXCredit struct {
 // TODO: create top-level defn. for "analysis" anon. type
 // TODO: "response" is also "in-lined" as a constrained enum. of `string`, but SHOULD be declared at top-level
 type CDXAnalysis struct {
-	State         string   `json:"state"`
-	Justification string   `json:"justification"`
-	Response      []string `json:"response"` // anon. type
-	Detail        string   `json:"detail"`
+	State         string   `json:"state,omitempty"`
+	Justification string   `json:"justification,omitempty"`
+	Response      []string `json:"response,omitempty"` // anon. type
+	Detail        string   `json:"detail,omitempty"`
 }
 
 // v1.4: created "analysis" def. to represent an in-line, anon. type
 // Note: This anon. "type" ONLY includes a single array of another in-line type
 // TODO: create top-level defn. for "affect" anon. type
 type CDXAffect struct {
-	Versions []CDXVersionRange `json:"versions"` // anon. type
+	Versions []CDXVersionRange `json:"versions,omitempty"` // anon. type
 }
 
 // v1.4: created "version" def. to represent an in-line, anon. type
@@ -431,15 +431,15 @@ type CDXAffect struct {
 // this concept SHOULD APPLY to all free-form text entries (e.g., descriptive text)
 // TODO: create top-level defn. for "versions" (a.k.a. "versionRange") anon. type (name TBD)
 type CDXVersionRange struct {
-	Version string `json:"version"`
-	Range   string `json:"range"`
-	Status  string `json:"status"`
+	Version string `json:"version,omitempty"`
+	Range   string `json:"range,omitempty"`
+	Status  string `json:"status,omitempty"`
 }
 
 // TODO: implement JSF schema
 // https://github.com/CycloneDX/specification/blob/master/schema/jsf-0.82.schema.json
 type CDXSignature struct {
-	KeyType string `json:"keyType"`
+	KeyType string `json:"keyType,omitempty"`
 }
 
 // --------------------------------------
