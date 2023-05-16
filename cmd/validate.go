@@ -298,7 +298,7 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 func FormatSchemaErrors(errs []gojsonschema.ResultError) string {
 	var sb strings.Builder
 
-	const MAX_ERRORS = 100
+	const MAX_ERRORS = 10
 
 	lenErrs := len(errs)
 	if lenErrs > 0 {
@@ -353,7 +353,9 @@ func FormatSchemaErrors(errs []gojsonschema.ResultError) string {
 				sb.WriteString("\n" + msg)
 				break
 			}
-			getLogger().Debugf("processing error (%v): type: `%s`", i, resultError.Type())
+			fmt.Printf(".")
+			// TODO: leave commented out as we do not want to slow processing...
+			//getLogger().Debugf("processing error (%v): type: `%s`", i, resultError.Type())
 		}
 	}
 	return sb.String()
