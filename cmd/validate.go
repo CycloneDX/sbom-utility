@@ -40,9 +40,9 @@ const (
 const (
 	FLAG_SCHEMA_FORCE          = "force"
 	FLAG_SCHEMA_VARIANT        = "variant"
-	FLAG_CUSTOM_VALIDATION     = "custom"   // TODO: endorse when no longer experimental
-	FLAG_ERR_COLORIZE          = "colorize" // default: true (for historical reasons)
-	FLAG_ERR_LIMIT             = "limit"
+	FLAG_CUSTOM_VALIDATION     = "custom"         // TODO: endorse when no longer experimental
+	FLAG_ERR_COLORIZE          = "error-colorize" // default: true (for historical reasons)
+	FLAG_ERR_LIMIT             = "error-limit"
 	MSG_SCHEMA_FORCE           = "force specified schema file for validation; overrides inferred schema"
 	MSG_SCHEMA_VARIANT         = "select named schema variant (e.g., \"strict\"); variant must be declared in configuration file (i.e., \"config.json\")"
 	MSG_FLAG_CUSTOM_VALIDATION = "perform custom validation using custom configuration settings (i.e., \"custom.json\")"
