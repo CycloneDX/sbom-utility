@@ -18,10 +18,10 @@
 package cmd
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 
+	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -65,36 +65,73 @@ func truncateString(value string, maxLength int, showDetail bool) string {
 	return value
 }
 
-const REPORT_LINE_CONTAINS_ANY = -1
+// Currently, truncate
+const REGEX_ISO_8601_DATE_TIME = "[0-9]{4}-[0-9]{2}-[0-9]{2}T([0-9]{2}:){2}[0-9]{2}[+|-][0-9]{2}:[0-9]{2}"
+const REGEX_ISO_8601_DATE = "[0-9]{4}-[0-9]{2}-[0-9]{2}"
+const ISO8601_TIME_SEPARATOR = 'T'
 
-func lineContainsValues(buffer bytes.Buffer, lineNum int, values ...string) (int, bool) {
-	lines := strings.Split(buffer.String(), "\n")
-	getLogger().Tracef("output: %s", lines)
-	//var lineContainsValue bool = false
+// Validates a complete Date-Time ISO8601 timestamp
+// TODO verify it works for data, date-time, date-time-timezone formats
+func validateISO8601TimestampISO8601DateTime(timestamp string, regex string) (valid bool) {
 
-	for curLineNum, line := range lines {
+	compiledRegEx, errCompile := compileRegex(regex)
 
-		// if ths is a line we need to test
-		if lineNum == REPORT_LINE_CONTAINS_ANY || curLineNum == lineNum {
-			// test that all values occur in the current line
-			for iValue, value := range values {
-				if !strings.Contains(line, value) {
-					// if we failed to match all values on the specified line return failure
-					if curLineNum == lineNum {
-						return curLineNum, false
-					}
-					// else, keep checking next line
-					break
-				}
+	if errCompile != nil {
+		return false
+	}
 
-				// If this is the last value to test for, then all values have matched
-				if iValue+1 == len(values) {
-					return curLineNum, true
-				}
-			}
+	// Test that the field value matches the regex supplied in the current filter
+	// Note: the regex compilation is performed during command param. processing
+	if match := compiledRegEx.Match([]byte(timestamp)); match {
+		return true
+	}
+
+	return false
+}
+
+// TODO we SHOULD normalize the timestamp to Z (0)
+func truncateTimeStampISO8601Date(fullTimestamp string) (date string, err error) {
+
+	// default to returning the original value
+	date = fullTimestamp
+
+	// TODO validate timestamp regex for yyy-mm-dd (minimum format)
+	if fullTimestamp == "" {
+		return
+	}
+
+	// if it appears to be date-only already, validate it
+	if len(fullTimestamp) == 10 {
+		if validateISO8601TimestampISO8601DateTime(fullTimestamp, REGEX_ISO_8601_DATE) {
+			// return the (now validated) value passed in
+			return
+		} else {
+			err = getLogger().Errorf("invalid ISO 8601 timestamp: `%s`\n", fullTimestamp)
+			// return what we were given
+			return
 		}
 	}
-	return REPORT_LINE_CONTAINS_ANY, false
+
+	// Assume timestamp is date-time format; find where the date portion separator appears
+	iSep := strings.IndexByte(fullTimestamp, ISO8601_TIME_SEPARATOR)
+
+	if iSep == -1 {
+		err = getLogger().Errorf("invalid ISO 8601 timestamp: `%s`\n", fullTimestamp)
+		// return what we were given
+		return
+	}
+
+	// Slice out the date portion and validate what should be just the date portion
+	date = fullTimestamp[:iSep]
+
+	if !validateISO8601TimestampISO8601DateTime(date, REGEX_ISO_8601_DATE) {
+		err = getLogger().Errorf("invalid ISO 8601 timestamp: `%s`\n", fullTimestamp)
+		// return what we were given
+		date = fullTimestamp
+		return
+	}
+
+	return
 }
 
 func createMarkdownColumnAlignment(titles []string) (alignment []string) {
@@ -198,8 +235,120 @@ func wrapTableRowText(maxChars int, joinChar string, columns ...interface{}) (ta
 			}
 			//getLogger().Debugf("tableData: (%v)", tableData)
 		default:
-			err = getLogger().Errorf("Unexpected type for report data: (%T): %v", data, data)
+			err = getLogger().Errorf("Unexpected type for report data: type: `%T`, value: `%v`", data, data)
 		}
+	}
+
+	return
+}
+
+// Report column data values
+const REPORT_SUMMARY_DATA_TRUE = true
+const REPORT_REPLACE_LINE_FEEDS_TRUE = true
+const DEFAULT_COLUMN_TRUNCATE_LENGTH = -1
+
+// TODO: Support additional flags to:
+// - show number of chars shown vs. available when truncated (e.g., (x/y))
+// - provide "empty" value to display in column (e.g., "none" or "UNDEFINED")
+// - inform how to "summarize" (e.g., show-first-only) data if data type is a slice (e.g., []string)
+//   NOTE: if only a subset of entries are shown on a summary, an indication of (x) entries could be shown as well
+type ColumnFormatData struct {
+	DataKey               string // Note: data key is the column label (where possible)
+	DefaultTruncateLength int    // truncate data when `--format txt`
+	IsSummaryData         bool   // include in `--summary` reports
+	ReplaceLineFeeds      bool   // replace line feeds with spaces (e.g., for multi-line descriptions)
+}
+
+func prepareReportTitleData(formatData []ColumnFormatData, summarizedReport bool) (titleData []string, separatorData []string) {
+
+	var underline string
+
+	for _, columnData := range formatData {
+
+		// if the report we are preparing is a summarized one (i.e., --summary true)
+		// we will skip appending column data not marked to be included in a summary report
+		if summarizedReport && !columnData.IsSummaryData {
+			continue
+		}
+		titleData = append(titleData, columnData.DataKey)
+
+		underline = strings.Repeat(REPORT_LIST_TITLE_ROW_SEPARATOR, len(columnData.DataKey))
+		separatorData = append(separatorData, underline)
+	}
+
+	return
+}
+
+func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, summarizedReport bool) (lineData []string, err error) {
+
+	var mapStruct map[string]interface{}
+	var data interface{}
+	var dataFound bool
+	var sliceString []string
+	var joinedData string
+
+	mapStruct, err = utils.ConvertStructToMap(structIn)
+
+	for _, columnData := range formatData {
+
+		// reset local vars
+		sliceString = nil
+
+		// if the report we are preparing is a summarized one (i.e., --summary true)
+		// we will skip appending column data not marked to be included in a summary report
+		if summarizedReport && !columnData.IsSummaryData {
+			continue
+		}
+
+		data, dataFound = mapStruct[columnData.DataKey]
+
+		if !dataFound {
+			err = getLogger().Errorf("data not found in structure: key: `%s`", columnData.DataKey)
+			return
+		}
+
+		switch typedData := data.(type) {
+		case string:
+			// replace line feeds with spaces in description
+			if typedData != "" {
+				if columnData.ReplaceLineFeeds {
+					// For tabbed text tables, replace line feeds with spaces
+					typedData = strings.ReplaceAll(typedData, "\n", " ")
+				}
+			}
+			lineData = append(lineData, typedData)
+		case []interface{}:
+			// convert to []string
+			for _, value := range typedData {
+				sliceString = append(sliceString, value.(string))
+			}
+
+			// separate each entry with a comma (and space for readability)
+			joinedData = strings.Join(sliceString, ", ")
+
+			if joinedData != "" {
+				// replace line feeds with spaces in description
+				if columnData.ReplaceLineFeeds {
+					// For tabbed text tables, replace line feeds with spaces
+					joinedData = strings.ReplaceAll(joinedData, "\n", " ")
+				}
+			}
+
+			if summarizedReport {
+				if len(sliceString) > 0 {
+					lineData = append(lineData, sliceString[0])
+				}
+				continue
+			}
+
+			lineData = append(lineData, joinedData)
+		case nil:
+			getLogger().Warningf("nil value for column: `%v`", columnData.DataKey)
+			lineData = append(lineData, "nil")
+		default:
+			err = getLogger().Errorf("Unexpected type for report data: type: `%T`, value: `%v`", data, data)
+		}
+
 	}
 
 	return

@@ -569,6 +569,12 @@ func whereFilterMatch(mapObject map[string]interface{}, whereFilters []WhereFilt
 		// Reset the encoder'a byte buffer on each iteration and
 		// convert the value (an interface{}) to []byte we can use on regex. eval.
 		buf.Reset()
+
+		// Do not encode nil pointer values; replace with empty string
+		if value == nil {
+			value = ""
+		}
+
 		err = enc.Encode(value)
 
 		if err != nil {

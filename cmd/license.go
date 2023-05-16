@@ -48,12 +48,21 @@ const (
 	LC_TYPE_EXPRESSION
 )
 
+// Declare a fixed-sized array for LC type names
+var LC_TYPE_NAMES = [...]string{"invalid", "id", "name", "expression"}
+
 const (
 	LC_LOC_UNKNOWN = iota
 	LC_LOC_METADATA_COMPONENT
 	LC_LOC_METADATA
 	LC_LOC_COMPONENTS
 	LC_LOC_SERVICES
+)
+
+const (
+	LC_VALUE_ID         = "id"
+	LC_VALUE_NAME       = "name"
+	LC_VALUE_EXPRESSION = "expression"
 )
 
 var CDX_LICENSE_LOCATION_NAMES = map[int]string{
@@ -63,9 +72,6 @@ var CDX_LICENSE_LOCATION_NAMES = map[int]string{
 	LC_LOC_COMPONENTS:         "components",
 	LC_LOC_SERVICES:           "services",
 }
-
-// Declare a fixed-sized array for LC type names
-var LC_TYPE_NAMES = [...]string{"invalid", "id", "name", "expression"}
 
 // Note: the "License" property is used as hashmap key
 type LicenseInfo struct {

@@ -41,7 +41,7 @@ const (
 // License list command flag help messages
 const (
 	FLAG_LICENSE_LIST_OUTPUT_FORMAT_HELP = "format output using the specified format type"
-	FLAG_LICENSE_LIST_SUMMARY_HELP       = "summarize licenses and component references in table format (see --format flag help for supported types)"
+	FLAG_LICENSE_LIST_SUMMARY_HELP       = "summarize licenses and component references when listing in supported formats"
 )
 
 // License list command informational messages
@@ -60,6 +60,22 @@ const (
 	LICENSE_FILTER_KEY_BOM_REF       = "bom-ref"
 	LICENSE_FILTER_KEY_BOM_LOCATION  = "bom-location"
 )
+
+// lc.License.Id,
+// lc.License.Name,
+// lc.License.Url,
+// lc.Expression,
+// lc.License.Text.ContentType,
+// lc.License.Text.Encoding,
+// lc.License.Text.Content)
+var LICENSE_LIST_ROW_DATA = []ColumnFormatData{
+	{LICENSE_FILTER_KEY_USAGE_POLICY, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{LICENSE_FILTER_KEY_LICENSE_TYPE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{LICENSE_FILTER_KEY_LICENSE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{LICENSE_FILTER_KEY_RESOURCE_NAME, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{LICENSE_FILTER_KEY_BOM_REF, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{LICENSE_FILTER_KEY_BOM_LOCATION, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+}
 
 var LICENSE_SUMMARY_TITLES = []string{
 	LICENSE_FILTER_KEY_USAGE_POLICY,
@@ -126,6 +142,13 @@ func processLicenseListResults(err error) {
 	}
 }
 
+func sortLicenseKeys(licenseKeys []interface{}) {
+	// Sort by license key (i.e., one of `id`, `name` or `expression`)
+	sort.Slice(licenseKeys, func(i, j int) bool {
+		return licenseKeys[i].(string) < licenseKeys[j].(string)
+	})
+}
+
 // NOTE: parm. licenseKeys is actually a string slice
 func checkLicenseListEmptyOrNoAssertionOnly(licenseKeys []interface{}) (empty bool) {
 	if len(licenseKeys) == 0 {
@@ -161,13 +184,13 @@ func listCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	whereFilters, err := processWhereFlag(cmd)
 
 	if err == nil {
-		err = ListLicenses(writer, utils.GlobalFlags.OutputFormat, utils.GlobalFlags.LicenseFlags.Summary, whereFilters)
+		err = ListLicenses(writer, utils.GlobalFlags.OutputFormat, whereFilters, utils.GlobalFlags.LicenseFlags.Summary)
 	}
 
 	return
 }
 
-func ListLicenses(output io.Writer, format string, summary bool, whereFilters []WhereFilter) (err error) {
+func ListLicenses(output io.Writer, format string, whereFilters []WhereFilter, summary bool) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -411,9 +434,8 @@ func DisplayLicenseListSummaryText(output io.Writer) {
 	// Emit no license or assertion-only warning into output
 	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
 
-	sort.Slice(licenseKeys, func(i, j int) bool {
-		return licenseKeys[i].(string) < licenseKeys[j].(string)
-	})
+	// Sort license using identifying key (i.e., `id`, `name` or `expression`)
+	sortLicenseKeys(licenseKeys)
 
 	for _, licenseName := range licenseKeys {
 		arrLicenseInfo, _ := licenseMap.Get(licenseName)
@@ -461,6 +483,9 @@ func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
 
 	// Emit no license or assertion-only warning into output
 	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
+
+	// Sort license using identifying key (i.e., `id`, `name` or `expression`)
+	sortLicenseKeys(licenseKeys)
 
 	// output the each license entry as a row
 	for _, licenseName := range licenseKeys {
@@ -522,6 +547,9 @@ func DisplayLicenseListSummaryMarkdown(output io.Writer) {
 
 	// Emit no license or assertion-only warning into output
 	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
+
+	// Sort license using identifying key (i.e., `id`, `name` or `expression`)
+	sortLicenseKeys(licenseKeys)
 
 	var line []string
 	var lineRow string

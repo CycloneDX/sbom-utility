@@ -20,9 +20,10 @@ package cmd
 import (
 	"bufio"
 	"bytes"
-	"strings"
+	"fmt"
 	"testing"
 
+	"github.com/CycloneDX/sbom-utility/log"
 	"github.com/CycloneDX/sbom-utility/utils"
 )
 
@@ -50,9 +51,9 @@ const (
 // license test helper functions
 // -------------------------------------------
 
-func NewLicensePolicyTestInfoBasic(format string, wrapLines bool) *LicenseTestInfo {
-	lti := NewLicenseTestInfo("", format, "", false, false, "", LTI_DEFAULT_LINE_COUNT, nil)
-	lti.ListLineWrap = wrapLines
+func NewLicensePolicyTestInfoBasic(format string, listLineWrap bool) *LicenseTestInfo {
+	lti := NewLicenseTestInfoBasic("", format, TI_LIST_SUMMARY_FALSE)
+	lti.ListLineWrap = listLineWrap
 	return lti
 }
 
@@ -81,7 +82,11 @@ func innerTestLicensePolicyListCustomAndBuffered(t *testing.T, testInfo *License
 
 	// Use the test data to set the BOM input file and output format
 	utils.GlobalFlags.InputFile = testInfo.InputFile
-	utils.GlobalFlags.OutputFormat = testInfo.Format
+	utils.GlobalFlags.OutputFormat = testInfo.ListFormat
+
+	// TODO: pass GlobalConfig to every Command to allow per-instance changes for tests
+	// !!! IMPORTANT MUST explicitly set the global value for every single test
+	utils.GlobalFlags.LicenseFlags.ListLineWrap = testInfo.ListLineWrap
 
 	// Invoke the actual List command (API)
 	err = ListLicensePolicies(outputWriter, whereFilters)
@@ -97,96 +102,17 @@ func innerTestLicensePolicyListCustomAndBuffered(t *testing.T, testInfo *License
 
 func innerTestLicensePolicyList(t *testing.T, testInfo *LicenseTestInfo) (outputBuffer bytes.Buffer, err error) {
 
-	// Prepare WHERE filters from where clause
-	var whereFilters []WhereFilter = nil
-	if testInfo.WhereClause != "" {
-		whereFilters, err = retrieveWhereFilters(testInfo.WhereClause)
-		if err != nil {
-			getLogger().Error(err)
-			t.Errorf("test failed: %s: detail: %s ", testInfo, err.Error())
-			return
-		}
+	// Parse out --where filters and exit out if error detected
+	whereFilters, err := prepareWhereFilters(t, &testInfo.CommonTestInfo)
+	if err != nil {
+		return
 	}
 
 	// Perform the test with buffered output
 	outputBuffer, err = innerTestLicensePolicyListCustomAndBuffered(t, testInfo, whereFilters)
 
-	// TEST: Expected error matches actual error
-	if testInfo.ExpectedError != nil {
-		// NOTE: err = nil will also fail if error was expected
-		if !ErrorTypesMatch(err, testInfo.ExpectedError) {
-			t.Errorf("expected error: %T, actual error: %T", testInfo.ExpectedError, err)
-		}
-		// Always return the expected error
-		return
-	}
-
-	// Unexpected error: return immediately/do not test output/results
-	if err != nil {
-		t.Errorf("test failed: %s: detail: %s ", testInfo, err.Error())
-		return
-	}
-
-	// TEST: Output contains string(s)
-	// TODO: Support []string
-	var outputResults string
-	if testInfo.ResultContainsValue != "" {
-		outputResults = outputBuffer.String()
-		getLogger().Debugf("output: \"%s\"", outputResults)
-
-		if !strings.Contains(outputResults, testInfo.ResultContainsValue) {
-			err = getLogger().Errorf("output did not contain expected value: `%s`", testInfo.ResultContainsValue)
-			t.Errorf("%s: input file: `%s`, where clause: `%s`",
-				err.Error(),
-				testInfo.InputFile,
-				testInfo.WhereClause)
-			return
-		}
-	}
-
-	// TEST: Line contains a set of string values
-	// TODO: support any number of row/values in test info. structure
-	if len(testInfo.ResultContainsValues) > 0 {
-		matchFoundLine, matchFound := lineContainsValues(outputBuffer, testInfo.ResultExpectedAtLineNum, testInfo.ResultContainsValues...)
-		if !matchFound {
-			t.Errorf("policy file does not contain expected values: `%v` at line: %v\n", testInfo.ResultContainsValues, testInfo.ResultExpectedAtLineNum)
-			return
-		} else {
-			getLogger().Tracef("policy file contains expected values: `%v` at line: %v\n", testInfo.ResultContainsValues, matchFoundLine)
-		}
-	}
-
-	// TEST: Expected Line Count
-	if testInfo.ResultExpectedLineCount != LTI_DEFAULT_LINE_COUNT {
-		if outputResults == "" {
-			outputResults = outputBuffer.String()
-		}
-		outputLineCount := strings.Count(outputResults, "\n")
-		if outputLineCount != testInfo.ResultExpectedLineCount {
-			err = getLogger().Errorf("output did not contain expected line count: %v/%v (expected/actual)", testInfo.ResultExpectedLineCount, outputLineCount)
-			t.Errorf("%s: input file: `%s`, where clause: `%s`: \n%s",
-				err.Error(),
-				testInfo.InputFile,
-				testInfo.WhereClause,
-				outputResults,
-			)
-			return
-		}
-	}
-
-	// TEST: valid JSON if format JSON
-	// TODO the marshalled bytes is an array of CDX LicenseChoice (struct)
-	// TODO: add general validation for CSV and Markdown formats
-	if testInfo.ValidateJson {
-		if testInfo.Format == FORMAT_JSON {
-			// Use Marshal to test for validity
-			if !utils.IsValidJsonRaw(outputBuffer.Bytes()) {
-				t.Errorf("output did not contain valid JSON")
-				t.Logf("%s", outputBuffer.String())
-				return
-			}
-		}
-	}
+	// Run all common tests against "result" values in the CommonTestInfo struct
+	err = innerRunReportResultTests(t, &testInfo.CommonTestInfo, outputBuffer, err)
 
 	return
 }
@@ -332,6 +258,67 @@ func TestLicensePolicyMatchByExpFailureInvalidLeftExp(t *testing.T) {
 
 	getLogger().Tracef("Parsed expression:\n%v", expressionTree)
 	resolvedPolicy := expressionTree.CompoundUsagePolicy
+
+	if resolvedPolicy != EXPECTED_POLICY {
+		t.Errorf("FindPolicyBySpdxId(): expression: %s, returned: %v; expected: %v", EXP, resolvedPolicy, EXPECTED_POLICY)
+	} else {
+		getLogger().Tracef("FindPolicyBySpdxId(): id: %s, policy: %s\n", EXP, resolvedPolicy)
+	}
+}
+
+func TestLicensePolicyExpressionBSD3OrMIT(t *testing.T) {
+
+	EXP := "BSD-3-Clause OR MIT"
+	EXPECTED_POLICY := POLICY_ALLOW
+
+	expressionTree, err := parseExpression(EXP)
+
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	getLogger().Tracef("Parsed expression:\n%v", expressionTree)
+	resolvedPolicy := expressionTree.CompoundUsagePolicy
+
+	if resolvedPolicy != EXPECTED_POLICY {
+		t.Errorf("FindPolicyBySpdxId(): expression: %s, returned: %v; expected: %v", EXP, resolvedPolicy, EXPECTED_POLICY)
+	} else {
+		getLogger().Tracef("FindPolicyBySpdxId(): id: %s, policy: %s\n", EXP, resolvedPolicy)
+	}
+}
+
+// NOTE: we need more tests that verify support of multiple conjunctions without
+// parenthetical groups
+func TestLicensePolicyExpressionMultipleConjunctions(t *testing.T) {
+	EXP := "BSD-3-Clause OR MIT AND GPL"
+	EXPECTED_POLICY := POLICY_UNDEFINED
+
+	expressionTree, err := parseExpression(EXP)
+
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	getLogger().Tracef("Parsed expression:\n%v", expressionTree)
+	resolvedPolicy := expressionTree.CompoundUsagePolicy
+
+	if resolvedPolicy != EXPECTED_POLICY {
+		t.Errorf("FindPolicyBySpdxId(): expression: %s, returned: %v; expected: %v", EXP, resolvedPolicy, EXPECTED_POLICY)
+	} else {
+		getLogger().Tracef("FindPolicyBySpdxId(): id: %s, policy: %s\n", EXP, resolvedPolicy)
+	}
+
+	EXP = "BSD-3-Clause OR MIT OR GPL"
+	EXPECTED_POLICY = POLICY_ALLOW
+
+	expressionTree, err = parseExpression(EXP)
+
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	getLogger().Tracef("Parsed expression:\n%v", expressionTree)
+	resolvedPolicy = expressionTree.CompoundUsagePolicy
 
 	if resolvedPolicy != EXPECTED_POLICY {
 		t.Errorf("FindPolicyBySpdxId(): expression: %s, returned: %v; expected: %v", EXP, resolvedPolicy, EXPECTED_POLICY)
@@ -552,12 +539,12 @@ func TestLicensePolicyFamilyUsagePolicyConflict(t *testing.T) {
 	loadHashCustomPolicyFile(utils.GlobalFlags.ConfigLicensePolicyFile)
 }
 
-func TestLicensePolicyListGoodBadMaybe(t *testing.T) {
+func TestLicensePolicyCustomListGoodBadMaybe(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
 	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
 	// Assure all titles appear in output
-	lti.ResultContainsValues = POLICY_LIST_TITLES
-	lti.ResultExpectedAtLineNum = 0
+	lti.ResultLineContainsValues = POLICY_LIST_TITLES
+	lti.ResultLineContainsValuesAtLineNum = 0
 
 	outputBuffer, err := innerTestLicensePolicyList(t, lti)
 
@@ -710,80 +697,139 @@ func TestLicensePolicyMatchByFamilyNameBadExpression(t *testing.T) {
 	}
 }
 
-//---------------------------------------------------------
-// Policy "list" command tests (using default policy file)
-//---------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Test --wrap flag
+// i.e., wraps policy (lines) where mult. URLs, Notes or Annotations are found
+//-----------------------------------------------------------------------------
 
-func TestLicensePolicyListTextBasic(t *testing.T) {
+func TestLicensePolicyListWrapFalse(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
-	lti.WhereClause = "id=0B"
-	lti.ResultExpectedLineCount = 3
-	innerTestLicensePolicyList(t, lti)
-}
-
-func TestLicensePolicyListTextNoWrap(t *testing.T) {
-	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
 	lti.ResultExpectedLineCount = 250 // title and data rows
-	innerTestLicensePolicyList(t, lti)
-
 	// Verify first data row has expected values
-	lti.ResultExpectedAtLineNum = 2
-	lti.ResultContainsValues = []string{"0BSD", POLICY_ALLOW}
-
-	// TODO spot check MORE row values
+	// sanity (spot) check row values
+	lti.ResultLineContainsValuesAtLineNum = 2
+	lti.ResultLineContainsValues = []string{"0BSD", POLICY_ALLOW}
+	innerTestLicensePolicyList(t, lti)
 }
 
-func TestLicensePolicyListTextWrap(t *testing.T) {
+func TestLicensePolicyListWrapTrue(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
 	lti.ResultExpectedLineCount = 402 // title and data rows
-	utils.GlobalFlags.LicenseFlags.ListLineWrap = true
-	innerTestLicensePolicyList(t, lti)
-	// TODO spot check row values
-}
-
-func TestLicensePolicyListWhereUsagePolicyDeny(t *testing.T) {
-	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
-	lti.WhereClause = "usage-policy=deny"
-	lti.ResultExpectedLineCount = 5
+	// sanity (spot) check row values
+	lti.ResultLineContainsValuesAtLineNum = 2
+	lti.ResultLineContainsValues = []string{"0BSD", POLICY_ALLOW}
 	innerTestLicensePolicyList(t, lti)
 }
 
-func TestLicensePolicyListWhereTestUsagePolicyAllow(t *testing.T) {
-	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
+//--------------------------------------------------------------
+//  --where tests (using custom good|bad|maybe policy file)
+//--------------------------------------------------------------
+
+// Test using custom policy file with just 3 entries: good|bad|maybe
+func TestLicensePolicyCustomListWhereTestUsagePolicyAllow(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
 	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
 	lti.WhereClause = "usage-policy=allow"
 	lti.ResultExpectedLineCount = 3
 	innerTestLicensePolicyList(t, lti)
 }
 
-func TestLicensePolicyListWhereTestUsagePolicyDeny(t *testing.T) {
-	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
+// Test using custom policy file with just 3 entries: good|bad|maybe
+func TestLicensePolicyListCustomWhereTestUsagePolicyDeny(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
 	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
 	lti.WhereClause = "usage-policy=deny"
 	lti.ResultExpectedLineCount = 3
 	innerTestLicensePolicyList(t, lti)
 }
 
-func TestLicensePolicyListWhereTestUsagePolicyNeedsReview(t *testing.T) {
-	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
+// Test using custom policy file with just 3 entries: good|bad|maybe
+func TestLicensePolicyListCustomWhereTestUsagePolicyNeedsReview(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
 	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
 	lti.WhereClause = "usage-policy=needs-review"
 	lti.ResultExpectedLineCount = 3
 	innerTestLicensePolicyList(t, lti)
 }
 
-func TestLicensePolicyListCSVWhereTestUsagePolicyAllow(t *testing.T) {
-	lti := NewLicensePolicyTestInfoBasic(FORMAT_CSV, true)
+// Test using custom policy file with just 3 entries: good|bad|maybe
+func TestLicensePolicyListCustomCSVWhereTestUsagePolicyAllow(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_CSV, false)
 	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
 	lti.WhereClause = "usage-policy=allow"
 	lti.ResultExpectedLineCount = 2
 	innerTestLicensePolicyList(t, lti)
 }
 
-func TestLicensePolicyListMarkdownWhereTestUsagePolicyAllow(t *testing.T) {
-	lti := NewLicensePolicyTestInfoBasic(FORMAT_MARKDOWN, true)
+// Test using custom policy file with just 3 entries: good|bad|maybe
+func TestLicensePolicyListCustomMarkdownWhereTestUsagePolicyAllow(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_MARKDOWN, false)
 	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
 	lti.WhereClause = "usage-policy=allow"
+	lti.ResultExpectedLineCount = 3
+	innerTestLicensePolicyList(t, lti)
+}
+
+//--------------------------------------------------------------
+//  --where tests (using default policy file)
+//--------------------------------------------------------------
+
+func TestLicensePolicyListTextWhereId0BSD(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
+	lti.WhereClause = "id=0B"
+	lti.ResultLineContainsValuesAtLineNum = 3
+	lti.ResultExpectedLineCount = 3
+	innerTestLicensePolicyList(t, lti)
+}
+
+func TestLicensePolicyListWhereUsagePolicyDeny(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
+	lti.WhereClause = "usage-policy=deny"
+	lti.ResultExpectedLineCount = 5
+	innerTestLicensePolicyList(t, lti)
+}
+
+func TestLicensePolicyListWhereAnnotationNeedsIPApproval(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
+	lti.WhereClause = "annotations=NEEDS-IP"
+	lti.ResultExpectedLineCount = 17
+	// sanity (spot) check row values
+	lti.ResultLineContainsValuesAtLineNum = 2
+	lti.ResultLineContainsValues = []string{"BSD-2-Clause", POLICY_NEEDS_REVIEW}
+	_, err := innerTestLicensePolicyList(t, lti)
+	if err != nil {
+		s, _ := log.FormatStruct(lti)
+		fmt.Printf(">>> %s\n", s)
+	}
+}
+
+func TestLicensePolicyListWhereAnnotation0BSDNeedsIPApproval(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
+	lti.WhereClause = "annotations=NEEDS-IP,id=BSD-4"
+	lti.ResultExpectedLineCount = 6
+	// sanity (spot) check row values
+	lti.ResultLineContainsValuesAtLineNum = 2
+	lti.ResultLineContainsValues = []string{"BSD-4-Clause", POLICY_NEEDS_REVIEW}
+	_, err := innerTestLicensePolicyList(t, lti)
+	if err != nil {
+		s, _ := log.FormatStruct(lti)
+		fmt.Printf(">>> %s\n", s)
+	}
+}
+
+func TestLicensePolicyListWhereFamilyApache(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
+	lti.WhereClause = "family=Apache"
+	lti.ResultExpectedLineCount = 5
+	// sanity (spot) check row values
+	lti.ResultLineContainsValuesAtLineNum = 2
+	lti.ResultLineContainsValues = []string{"Apache v1.0", POLICY_ALLOW}
+	innerTestLicensePolicyList(t, lti)
+}
+
+func TestLicensePolicyListWhereAliases(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
+	lti.WhereClause = "aliases=Apache"
 	lti.ResultExpectedLineCount = 3
 	innerTestLicensePolicyList(t, lti)
 }

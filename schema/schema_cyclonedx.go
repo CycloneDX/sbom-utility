@@ -354,12 +354,12 @@ type CDXAdvisory struct {
 // Note: "severity" is of type "severity" which is a constrained `string`
 // Note: "method" is of type "scoreMethod" which is a constrained `string`
 type CDXRating struct {
-	// TODO: Source CDXVulnerabilitySource `json:"source"`
-	Score         float64 `json:"score"`
-	Severity      string  `json:"severity"`
-	Method        string  `json:"method"`
-	Vector        string  `json:"vector"`
-	Justification string  `json:"justification"`
+	Source        CDXVulnerabilitySource `json:"source"`
+	Score         float64                `json:"score"`
+	Severity      string                 `json:"severity"`
+	Method        string                 `json:"method"`
+	Vector        string                 `json:"vector"`
+	Justification string                 `json:"justification"`
 }
 
 // v1.4: created "vulnerabilitySource" defn.

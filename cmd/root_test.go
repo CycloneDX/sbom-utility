@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"strings"
 	"sync"
@@ -48,6 +49,63 @@ var initTestInfra sync.Once
 var TestLogLevelDebug = flag.Bool(FLAG_DEBUG, false, "")
 var TestLogLevelTrace = flag.Bool(FLAG_TRACE, false, "")
 var TestLogQuiet = flag.Bool(FLAG_QUIET_MODE, false, "")
+
+type CommonTestInfo struct {
+	InputFile                         string
+	ListFormat                        string
+	ListSummary                       bool
+	WhereClause                       string
+	ResultExpectedError               error
+	ResultExpectedLineCount           int
+	ResultLineContainsValuesAtLineNum int
+	ResultLineContainsValues          []string
+}
+
+func NewCommonTestInfo() *CommonTestInfo {
+	var ti = new(CommonTestInfo)
+	return ti
+}
+
+func NewCommonTestInfoBasic(inputFile string, whereClause string, listFormat string, listSummary bool) *CommonTestInfo {
+	var ti = NewCommonTestInfo()
+	ti.InputFile = inputFile
+	ti.WhereClause = whereClause
+	ti.ListFormat = listFormat
+	ti.ListSummary = listSummary
+	return ti
+}
+
+// default (empty) TestInfo struct values
+const (
+	TI_LIST_SUMMARY_FALSE   = false
+	TI_LIST_LINE_WRAP       = false
+	TI_DEFAULT_WHERE_CLAUSE = ""
+	TI_DEFAULT_LINE_COUNT   = -1
+	TI_DEFAULT_POLICY_FILE  = ""
+)
+
+// Stringer interface for ResourceTestInfo (just display subset of key values)
+func (ti *CommonTestInfo) String() string {
+	return fmt.Sprintf("InputFile: `%s`, Format: `%s`, WhereClause: `%s`, ListSummary: `%v`",
+		ti.InputFile, ti.ListFormat, ti.WhereClause, ti.ListSummary)
+}
+
+func (ti *CommonTestInfo) Init(inputFile string, listFormat string, listSummary bool, whereClause string,
+	resultContainsValues []string, resultExpectedLineCount int, resultExpectedError error) *CommonTestInfo {
+	ti.InputFile = inputFile
+	ti.ListFormat = listFormat
+	ti.ListSummary = listSummary
+	ti.WhereClause = whereClause
+	ti.ResultExpectedLineCount = resultExpectedLineCount
+	ti.ResultExpectedError = resultExpectedError
+	return ti
+}
+
+func (ti *CommonTestInfo) InitBasic(inputFile string, format string, expectedError error) *CommonTestInfo {
+	ti.Init(inputFile, format, TI_LIST_SUMMARY_FALSE, TI_DEFAULT_WHERE_CLAUSE,
+		nil, TI_DEFAULT_LINE_COUNT, expectedError)
+	return ti
+}
 
 func TestMain(m *testing.M) {
 	// Note: getLogger(): if it is creating the logger, will also
@@ -131,6 +189,7 @@ func initTestApplicationDirectories() (err error) {
 }
 
 // Helper functions
+// TODO seek to use same function for evaluating error and messages as we do for other commands
 func EvaluateErrorAndKeyPhrases(t *testing.T, err error, messages []string) (matched bool) {
 	matched = true
 	if err == nil {
@@ -143,6 +202,18 @@ func EvaluateErrorAndKeyPhrases(t *testing.T, err error, messages []string) (mat
 				matched = false
 				t.Errorf("expected string: `%s` not found in error message: `%s`", substring, err.Error())
 			}
+		}
+	}
+	return
+}
+
+func prepareWhereFilters(t *testing.T, testInfo *CommonTestInfo) (whereFilters []WhereFilter, err error) {
+
+	if testInfo.WhereClause != "" {
+		whereFilters, err = retrieveWhereFilters(testInfo.WhereClause)
+		if err != nil {
+			t.Errorf("test failed: %s: detail: %s ", testInfo.String(), err.Error())
+			return
 		}
 	}
 	return

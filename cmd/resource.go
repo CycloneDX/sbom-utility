@@ -119,17 +119,20 @@ func NewCommandResource() *cobra.Command {
 	command.RunE = resourceCmdImpl
 	command.ValidArgs = VALID_SUBCOMMANDS_RESOURCE
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
-		// the resource command requires at least 1 valid subcommand (argument)
-		getLogger().Tracef("args: %v\n", args)
-		if len(args) == 0 {
-			return getLogger().Errorf("Missing required argument(s).")
-		} else if len(args) > 1 {
+		// the command requires at least 1 valid subcommand (argument)
+		if len(args) > 1 {
 			return getLogger().Errorf("Too many arguments provided: %v", args)
 		}
 
-		// Make sure subcommand is known
-		if !preRunTestForSubcommand(command, VALID_SUBCOMMANDS_RESOURCE, args[0]) {
-			return getLogger().Errorf("Subcommand provided is not valid: `%v`", args[0])
+		// Make sure (optional) subcommand is known/valid
+		if len(args) == 1 {
+			if !preRunTestForSubcommand(command, VALID_SUBCOMMANDS_RESOURCE, args[0]) {
+				return getLogger().Errorf("Subcommand provided is not valid: `%v`", args[0])
+			}
+		}
+
+		if len(args) == 0 {
+			getLogger().Tracef("No subcommands provided; defaulting to: `%s` subcommand", SUBCOMMAND_SCHEMA_LIST)
 		}
 
 		// Test for required flags (parameters)
@@ -237,7 +240,7 @@ func ListResources(output io.Writer, format string, resourceType string, whereFi
 		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_JSON)
-		DisplayVulnListText(output)
+		DisplayResourceListText(output)
 	}
 
 	return
