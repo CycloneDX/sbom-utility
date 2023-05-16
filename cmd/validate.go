@@ -344,7 +344,7 @@ func FormatSchemaErrors(errs []gojsonschema.ResultError) string {
 			if i == MAX_ERRORS {
 				// notify users more errors exist
 				msg := fmt.Sprintf("Too many errors. Showing (%v/%v) errors.", i, len(errs))
-				getLogger().Infof("%s/n", msg)
+				getLogger().Infof("%s", msg)
 				sb.WriteString(msg)
 				break
 			}
