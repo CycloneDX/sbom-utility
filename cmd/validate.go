@@ -23,6 +23,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/CycloneDX/sbom-utility/log"
 	"github.com/CycloneDX/sbom-utility/resources"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
@@ -314,18 +315,15 @@ func FormatSchemaErrors(errs []gojsonschema.ResultError) string {
 			// truncate output unless debug flag is used
 			if !utils.GlobalFlags.Debug &&
 				len(description) > DEFAULT_TRUNCATE_LENGTH {
-				// Use the new "Cut" method when v18 of go supported
-				// TODO: description, _, _ = strings.Cut(description, ":")
-				//description = description[:strings.IndexByte(description, ':')+1]
 				description, _, _ = strings.Cut(description, ":")
 				description = description + " ... (truncated)"
 			}
 
 			// TODO: provide flag to allow users to "turn on", by default we do NOT want this
 			// as this slows down processing on SBOMs with large numbers of errors
-			//formattedValue, _ := log.FormatInterfaceAsColorizedJson(resultError.Value())
+			formattedValue, _ := log.FormatInterfaceAsColorizedJson(resultError.Value())
 			//formattedValue = log.AddTabs(formattedValue)
-			formattedValue := fmt.Sprintf("%v", resultError.Value())
+			//formattedValue := fmt.Sprintf("%v", resultError.Value())
 			failingObject = fmt.Sprintf("\n\tFailing object: [%v]", formattedValue)
 
 			// truncate output unless debug flag is used
@@ -353,7 +351,7 @@ func FormatSchemaErrors(errs []gojsonschema.ResultError) string {
 				sb.WriteString("\n" + msg)
 				break
 			}
-			fmt.Printf(".")
+
 			// TODO: leave commented out as we do not want to slow processing...
 			//getLogger().Debugf("processing error (%v): type: `%s`", i, resultError.Type())
 		}
