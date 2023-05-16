@@ -57,6 +57,7 @@ type CommandFlags struct {
 	ForcedJsonSchemaFile    string
 	Variant                 string
 	ValidateProperties      bool
+	ValidateFlags           ValidateCommandFlags
 	CustomValidation        bool
 	CustomValidationOptions CustomValidationFlags
 
@@ -71,6 +72,12 @@ type CommandFlags struct {
 type LicenseCommandFlags struct {
 	Summary      bool
 	ListLineWrap bool
+}
+
+type ValidateCommandFlags struct {
+	MaxNumErrors              int
+	MaxErrorDescriptionLength int
+	ColorizeJsonErrors        bool
 }
 
 type VulnerabilityCommandFlags struct {

@@ -40,7 +40,8 @@ const (
 const (
 	FLAG_SCHEMA_FORCE          = "force"
 	FLAG_SCHEMA_VARIANT        = "variant"
-	FLAG_CUSTOM_VALIDATION     = "custom" // TODO
+	FLAG_CUSTOM_VALIDATION     = "custom"   // TODO: endorse when no longer experimental
+	FLAG_ERR_COLORIZE          = "colorize" // default: true (for historical reasons)
 	MSG_SCHEMA_FORCE           = "force specified schema file for validation; overrides inferred schema"
 	MSG_SCHEMA_VARIANT         = "select named schema variant (e.g., \"strict\"); variant must be declared in configuration file (i.e., \"config.json\")"
 	MSG_FLAG_CUSTOM_VALIDATION = "perform custom validation using custom configuration settings (i.e., \"custom.json\")"
@@ -48,7 +49,8 @@ const (
 
 // limits
 const (
-	DEFAULT_TRUNCATE_LENGTH = 128
+	DEFAULT_MAX_ERRORS              = 10
+	DEFAULT_MAX_ERR_DESCRIPTION_LEN = 128
 )
 
 // Protocol
@@ -81,6 +83,7 @@ func initCommandValidate(command *cobra.Command) {
 	// Optional schema "variant" of inferred schema (e.g, "strict")
 	command.Flags().StringVarP(&utils.GlobalFlags.Variant, FLAG_SCHEMA_VARIANT, "", "", MSG_SCHEMA_VARIANT)
 	command.Flags().BoolVarP(&utils.GlobalFlags.CustomValidation, FLAG_CUSTOM_VALIDATION, "", false, MSG_FLAG_CUSTOM_VALIDATION)
+	command.Flags().BoolVarP(&utils.GlobalFlags.ValidateFlags.ColorizeJsonErrors, FLAG_ERR_COLORIZE, "", true, "Colorize error output")
 }
 
 func validateCmdImpl(cmd *cobra.Command, args []string) error {
@@ -299,10 +302,10 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 func FormatSchemaErrors(errs []gojsonschema.ResultError) string {
 	var sb strings.Builder
 
-	const MAX_ERRORS = 10
-
 	lenErrs := len(errs)
 	if lenErrs > 0 {
+		colorize := utils.GlobalFlags.ValidateFlags.ColorizeJsonErrors
+		var formattedValue string
 		var description string
 		var failingObject string
 
@@ -314,22 +317,25 @@ func FormatSchemaErrors(errs []gojsonschema.ResultError) string {
 			description = resultError.Description()
 			// truncate output unless debug flag is used
 			if !utils.GlobalFlags.Debug &&
-				len(description) > DEFAULT_TRUNCATE_LENGTH {
+				len(description) > DEFAULT_MAX_ERR_DESCRIPTION_LEN {
 				description, _, _ = strings.Cut(description, ":")
 				description = description + " ... (truncated)"
 			}
 
 			// TODO: provide flag to allow users to "turn on", by default we do NOT want this
 			// as this slows down processing on SBOMs with large numbers of errors
-			formattedValue, _ := log.FormatInterfaceAsColorizedJson(resultError.Value())
+			if colorize {
+				formattedValue, _ = log.FormatInterfaceAsColorizedJson(resultError.Value())
+			}
+			// Indent error detail output in logs
 			formattedValue = log.AddTabs(formattedValue)
-			//formattedValue := fmt.Sprintf("%v", resultError.Value())
+			// NOTE: if we do not colorize or indent we could simply do this:
 			failingObject = fmt.Sprintf("\n\tFailing object: [%v]", formattedValue)
 
 			// truncate output unless debug flag is used
 			if !utils.GlobalFlags.Debug &&
-				len(failingObject) > DEFAULT_TRUNCATE_LENGTH {
-				failingObject = failingObject[:DEFAULT_TRUNCATE_LENGTH]
+				len(failingObject) > DEFAULT_MAX_ERR_DESCRIPTION_LEN {
+				failingObject = failingObject[:DEFAULT_MAX_ERR_DESCRIPTION_LEN]
 				failingObject = failingObject + " ... (truncated)"
 			}
 
@@ -344,7 +350,7 @@ func FormatSchemaErrors(errs []gojsonschema.ResultError) string {
 			sb.WriteString(schemaErrorText)
 
 			// short-circuit if we have too many errors
-			if i == MAX_ERRORS {
+			if i == DEFAULT_MAX_ERRORS {
 				// notify users more errors exist
 				msg := fmt.Sprintf("Too many errors. Showing (%v/%v) errors.", i, len(errs))
 				getLogger().Infof("%s", msg)
