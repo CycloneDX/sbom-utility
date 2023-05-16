@@ -23,7 +23,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/CycloneDX/sbom-utility/log"
 	"github.com/CycloneDX/sbom-utility/resources"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
@@ -299,11 +298,12 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 func FormatSchemaErrors(errs []gojsonschema.ResultError) string {
 	var sb strings.Builder
 
-	const MAX_ERRORS = 10
+	const MAX_ERRORS = 100
 
 	lenErrs := len(errs)
 	if lenErrs > 0 {
-		var description, failingObject string
+		var description string
+		var failingObject string
 
 		sb.WriteString(fmt.Sprintf("\n(%d) Schema errors detected (use `--debug` for more details):", lenErrs))
 		for i, resultError := range errs {
@@ -315,14 +315,19 @@ func FormatSchemaErrors(errs []gojsonschema.ResultError) string {
 			if !utils.GlobalFlags.Debug &&
 				len(description) > DEFAULT_TRUNCATE_LENGTH {
 				// Use the new "Cut" method when v18 of go supported
-				//description, _, _ = strings.Cut(description, ":")
-				description = description[:strings.IndexByte(description, ':')+1]
+				// TODO: description, _, _ = strings.Cut(description, ":")
+				//description = description[:strings.IndexByte(description, ':')+1]
+				description, _, _ = strings.Cut(description, ":")
 				description = description + " ... (truncated)"
 			}
 
-			formattedValue, _ := log.FormatInterfaceAsColorizedJson(resultError.Value())
-			formattedValue = log.AddTabs(formattedValue)
+			// TODO: provide flag to allow users to "turn on", by default we do NOT want this
+			// as this slows down processing on SBOMs with large numbers of errors
+			//formattedValue, _ := log.FormatInterfaceAsColorizedJson(resultError.Value())
+			//formattedValue = log.AddTabs(formattedValue)
+			formattedValue := fmt.Sprintf("%v", resultError.Value())
 			failingObject = fmt.Sprintf("\n\tFailing object: [%v]", formattedValue)
+
 			// truncate output unless debug flag is used
 			if !utils.GlobalFlags.Debug &&
 				len(failingObject) > DEFAULT_TRUNCATE_LENGTH {
@@ -345,9 +350,10 @@ func FormatSchemaErrors(errs []gojsonschema.ResultError) string {
 				// notify users more errors exist
 				msg := fmt.Sprintf("Too many errors. Showing (%v/%v) errors.", i, len(errs))
 				getLogger().Infof("%s", msg)
-				sb.WriteString(msg)
+				sb.WriteString("\n" + msg)
 				break
 			}
+			getLogger().Debugf("processing error (%v): type: `%s`", i, resultError.Type())
 		}
 	}
 	return sb.String()
