@@ -315,8 +315,8 @@ type CDXCompositions struct {
 
 // v1.3: created "property" defn.
 type CDXProperty struct {
-	Name  string `json:"name,omitempty,omitempty"`
-	Value string `json:"value,omitempty,omitempty"`
+	Name  string `json:"name,omitempty"`
+	Value string `json:"value,omitempty"`
 }
 
 // v1.4: created "note" defn.
