@@ -41,6 +41,7 @@
             "lastname",
             "LDFLAGS",
             "losslessly",
+            "marshallers",
             "MLBOM",
             "multimap",
             "myservices",
