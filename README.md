@@ -140,12 +140,14 @@ which returns `0` (zero) or "no error":
 
 ### Helpful flags
 
-This section describes some of the important command line flags that apply to most commands that produce list or report output.  :
+This section describes some of the important command line flags that apply to most commands that produce `list` or report styled output support (e.g., `schema`, `license`, `vulnerability`, etc.).
 
 - [format flag](#format-flag): with `--format`
 - [quiet flag](#quiet-flag): with `--quiet` or `-q`
 - [output flag](#output-flag): with `--output` or `-o`
 - [where flag](#where-flag-output-filtering): with `--output` or `-o`
+
+**Note**: The `validate` command is not a reporting command and ignores the `format`, `where` and `output` flags.
 
 #### Format flag
 
@@ -616,7 +618,7 @@ The `resource` command is geared toward inspecting various resources types and t
 
 Primarily, the command is used to generate lists of resources, by type, that are included in a CycloneDX SBOM by invoking `resource list`.
 
-#### Resource Supported formats
+#### Resource supported output formats
 
 This command supports the `--format` flag with any of the following values:
 
@@ -693,7 +695,7 @@ You can verify which formats, schemas, versions and variants are available for v
 
 - **Note**: The `schema` command will default to the `list` subcommand if omitted.
 
-#### Schema supported formats
+#### Schema supported output formats
 
 This command supports the `--format` flag with any of the following values:
 
@@ -746,7 +748,19 @@ Use the [schema](#schema) command to list supported schemas formats, versions an
 
 Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file. See [adding schemas](#adding-schemas).
 
-#### Validation Examples
+#### Validate flags
+
+The following flags can be used to improve performance when formatting error output results:
+
+##### `--err-limit` flag
+
+Use the `--err-limit x` flag to reduce the formatted error result output to the first `x` errors.  By default, only the first 10 errors are output with an informational messaging indicate `x/y` errors were shown.
+
+##### `--err-colorize` flag
+
+Use the `--err-colorize=true|false` flag to not add color formatting to error result output.  By default, formatted error output is colorized to help with human readability; for automated use, it can be turned off.
+
+#### Validate Examples
 
 ##### Example: Validate using inferred format and schema
 
@@ -853,7 +867,7 @@ The details include the full context of the failing `metadata.properties` object
 
 This command will extract basic vulnerability report data from an SBOM that has a "vulnerabilities" list or from a standalone VEX in CycloneDX format. It includes the ability to filter reports data by applying regex to any of the named column data.
 
-#### Vulnerability supported formats
+#### Vulnerability supported output formats
 
 Use the `--format` flag on the to choose one of the supported output formats:
 
@@ -1046,7 +1060,6 @@ or add it globally to the `settings.json` file:
 
 **Note**: *The `showGlobalVariables` setting was only recently disabled as the default in VSCode as a stop-gap measure due to performance (loading) problems under Windows.*
 
-
 #### Adding SBOM formats, schema versions and variants
 
 The utility uses the [`config.json`](./config.json) file to lookup supported formats and their associated versioned schemas.  To add another SBOM format simply add another entry to the `format` array in the root of the document:
@@ -1114,7 +1127,7 @@ An ad-hoc list of featured "TODOs" geared at making the tool more accessible, ex
 
 ### Supporting new SBOM formats and schema versions
 
-The utility uses the [`config.json`](./config.json) file to lookup supported formats and their associated versioned schemas.  To add another SBOM format simply add another entry to the `format` array in the root of the document:
+The utility uses the [`config.json`](./config.json) file to lookup supported BOM formats and their associated versioned schemas.  To add another SBOM format simply add another entry to the `format` array in the root of the document:
 
 ```json
 {

@@ -46,8 +46,8 @@ const (
 	MSG_SCHEMA_FORCE           = "force specified schema file for validation; overrides inferred schema"
 	MSG_SCHEMA_VARIANT         = "select named schema variant (e.g., \"strict\"); variant must be declared in configuration file (i.e., \"config.json\")"
 	MSG_FLAG_CUSTOM_VALIDATION = "perform custom validation using custom configuration settings (i.e., \"custom.json\")"
-	MSG_FLAG_ERR_COLORIZE      = "Colorize formatted error output"
-	MSG_FLAG_ERR_LIMIT         = "Limit number of errors output"
+	MSG_FLAG_ERR_COLORIZE      = "Colorize formatted error output (true|false); default true"
+	MSG_FLAG_ERR_LIMIT         = "Limit number of errors output (integer); default 10"
 )
 
 // limits
