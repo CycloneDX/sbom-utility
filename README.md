@@ -754,7 +754,7 @@ The following flags can be used to improve performance when formatting error out
 
 ##### `--error-limit` flag
 
-Use the `--error-limit x` flag to reduce the formatted error result output to the first `x` errors.  By default, only the first 10 errors are output with an informational messaging indicate `x/y` errors were shown.
+Use the `--error-limit x` flag to reduce the formatted error result output to the first `x` errors.  By default, only the first 10 errors are output with an informational messaging indicating `x/y` errors were shown.
 
 ##### `--error-colorize` flag
 
