@@ -49,7 +49,7 @@ type CDXBom struct {
 	Compositions []CDXCompositions `json:"compositions,omitempty"`
 	// v1.4 added "vulnerabilities", "signature"
 	Vulnerabilities []CDXVulnerability `json:"vulnerabilities,omitempty"`
-	// TODO: Signature CDXSignature `json:"signature,omitempty"`
+	// TODO: Issue #23: Signature CDXSignature `json:"signature,omitempty"`
 }
 
 // v1.2: existed
