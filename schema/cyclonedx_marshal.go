@@ -26,7 +26,7 @@ import (
 // ------------------------
 
 // recreate a representation of the struct, but only include values in map that are not empty
-func (value *CDXLicenseChoice) MarshalJSON() ([]byte, error) {
+func (value *CDXLicenseChoice) MarshalJSON() (bytes []byte, err error) {
 	temp := map[string]interface{}{}
 	if value.Expression != "" {
 		temp["expression"] = value.Expression
@@ -35,18 +35,26 @@ func (value *CDXLicenseChoice) MarshalJSON() ([]byte, error) {
 	// if the child struct is not "empty" we need to encode it as a map so to leverage the built-in
 	// handling of the json encoding package
 	if value.License != (CDXLicense{}) {
-		// Marshal assumes a pointer
-		bLicense, _ := json.Marshal(&value.License)
-		m := make(map[string]string)
-		json.Unmarshal(bLicense, &m)
+		var bData []byte
+		bData, err = json.Marshal(&value.License)
+		if err != nil {
+			return
+		}
+
+		m := make(map[string]interface{})
+		err = json.Unmarshal(bData, &m)
+		if err != nil {
+			getLogger().Warningf("Unmarshal error: %s", err)
+			return
+		}
 		temp["license"] = m
 	}
-	// reuse built-in json encoder
+	// reuse built-in json encoder, which accepts a map primitive
 	return json.Marshal(temp)
 }
 
 // recreate a representation of the struct, but only include values in map that are not empty
-func (value *CDXLicense) MarshalJSON() ([]byte, error) {
+func (value *CDXLicense) MarshalJSON() (bytes []byte, err error) {
 	temp := map[string]interface{}{}
 	if value.Id != "" {
 		temp["id"] = value.Id
@@ -63,13 +71,21 @@ func (value *CDXLicense) MarshalJSON() ([]byte, error) {
 	// if the child struct is not "empty" we need to encode it as a map so to leverage the built-in
 	// handling of the json encoding package
 	if value.Text != (CDXAttachment{}) {
-		// Marshal assumes a pointer
-		bText, _ := json.Marshal(&value.Text)
-		m := make(map[string]string)
-		json.Unmarshal(bText, &m)
+		var bData []byte
+		bData, err = json.Marshal(&value.Text)
+		if err != nil {
+			return
+		}
+
+		m := make(map[string]interface{})
+		err = json.Unmarshal(bData, &m)
+		if err != nil {
+			getLogger().Warningf("Unmarshal error: %s", err)
+			return
+		}
 		temp["text"] = m
 	}
-	// reuse built-in json encoder
+	// reuse built-in json encoder, which accepts a map primitive
 	return json.Marshal(temp)
 }
 
@@ -87,6 +103,6 @@ func (value *CDXAttachment) MarshalJSON() ([]byte, error) {
 	if value.Content != "" {
 		temp["content"] = value.Content
 	}
-	// reuse built-in json encoder
+	// reuse built-in json encoder, which accepts a map primitive
 	return json.Marshal(temp)
 }
