@@ -28,6 +28,8 @@ const (
 	KEY_LICENSES   = "licenses"
 )
 
+// Note: CycloneDX v1.2, 1.3, 1.4 schema properties are currently supported
+
 // For convenience, we provide named vars. for testing for zero-length (empty) structs
 var EMPTY_CDXLicense = CDXLicense{}
 
