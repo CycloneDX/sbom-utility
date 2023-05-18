@@ -1246,14 +1246,6 @@
                   "notes": [""]
             },
             {
-                  "id": "OFL-1.1",
-                  "name": "SIL Open Font License 1.1",
-                  "family": "OFL",
-                  "annotationRefs": ["NEEDS-APPROVAL"],
-                  "usagePolicy": "needs-review",
-                  "notes": [""]
-            },
-            {
                   "id": "OFL-1.0",
                   "family": "OFL",
                   "name": "SIL Open Font License 1.0",

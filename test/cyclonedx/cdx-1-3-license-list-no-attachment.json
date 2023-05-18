@@ -1,0 +1,52 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.3",
+  "version": 1,
+  "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7e0",
+  "metadata": {
+    "component": {
+      "type": "application",
+      "bom-ref": "pkg:app/sample@1.0.0",
+      "purl": "pkg:app/sample@1.0.0",
+      "name": "ACME Application",
+      "version": "2.0.0",
+      "description": "ACME sample application",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        },
+        {
+          "license": {
+            "name": "UFL"
+          }
+        },
+        {
+          "expression": "Apache-2.0 AND (MIT OR BSD-2-Clause)"
+        },
+        {
+          "license": {
+            "name": "Apache 2 variant",
+            "text": {
+              "contentType": "text/plain",
+              "encoding": "base64",
+              "content": "CiAgICAgICAgICAgICA..."
+            },
+            "url": "https://www.apache.org/licenses/LICENSE-2.0-variant.txt"
+          }
+        },
+        {
+          "license": {
+            "name": "Apache 2 variant 2",
+            "text": {
+              "encoding": "base64",
+              "content": "B0aGUgTGljZW5zZS4=..."
+            },
+            "url": "https://www.apache.org/licenses/LICENSE-2.0-variant-2.txt"
+          }
+        }
+      ]
+    }
+  }
+}

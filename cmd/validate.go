@@ -40,15 +40,20 @@ const (
 const (
 	FLAG_SCHEMA_FORCE          = "force"
 	FLAG_SCHEMA_VARIANT        = "variant"
-	FLAG_CUSTOM_VALIDATION     = "custom" // TODO
+	FLAG_CUSTOM_VALIDATION     = "custom"         // TODO: document when no longer experimental
+	FLAG_ERR_COLORIZE          = "error-colorize" // default: true (for historical reasons)
+	FLAG_ERR_LIMIT             = "error-limit"
 	MSG_SCHEMA_FORCE           = "force specified schema file for validation; overrides inferred schema"
 	MSG_SCHEMA_VARIANT         = "select named schema variant (e.g., \"strict\"); variant must be declared in configuration file (i.e., \"config.json\")"
 	MSG_FLAG_CUSTOM_VALIDATION = "perform custom validation using custom configuration settings (i.e., \"custom.json\")"
+	MSG_FLAG_ERR_COLORIZE      = "Colorize formatted error output (true|false); default true"
+	MSG_FLAG_ERR_LIMIT         = "Limit number of errors output (integer); default 10"
 )
 
 // limits
 const (
-	DEFAULT_TRUNCATE_LENGTH = 128
+	DEFAULT_MAX_ERROR_LIMIT         = 10
+	DEFAULT_MAX_ERR_DESCRIPTION_LEN = 128
 )
 
 // Protocol
@@ -65,6 +70,13 @@ func NewCommandValidate() *cobra.Command {
 	command.RunE = validateCmdImpl
 
 	command.PreRunE = func(cmd *cobra.Command, args []string) error {
+
+		// This command can be called with this persistent flag, but does not make sense...
+		inputFile := utils.GlobalFlags.InputFile
+		if inputFile != "" {
+			getLogger().Warningf("Invalid flag for command: `%s` (`%s`). Ignoring...", FLAG_FILENAME_OUTPUT, FLAG_FILENAME_OUTPUT_SHORT)
+		}
+
 		return preRunTestForInputFile(cmd, args)
 	}
 	initCommandValidate(command)
@@ -77,10 +89,12 @@ func initCommandValidate(command *cobra.Command) {
 	defer getLogger().Exit()
 
 	// Force a schema file to use for validation (override inferred schema)
-	command.Flags().StringVarP(&utils.GlobalFlags.ForcedJsonSchemaFile, FLAG_SCHEMA_FORCE, "", "", MSG_SCHEMA_FORCE)
+	command.Flags().StringVarP(&utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile, FLAG_SCHEMA_FORCE, "", "", MSG_SCHEMA_FORCE)
 	// Optional schema "variant" of inferred schema (e.g, "strict")
 	command.Flags().StringVarP(&utils.GlobalFlags.Variant, FLAG_SCHEMA_VARIANT, "", "", MSG_SCHEMA_VARIANT)
 	command.Flags().BoolVarP(&utils.GlobalFlags.CustomValidation, FLAG_CUSTOM_VALIDATION, "", false, MSG_FLAG_CUSTOM_VALIDATION)
+	command.Flags().BoolVarP(&utils.GlobalFlags.ValidateFlags.ColorizeJsonErrors, FLAG_ERR_COLORIZE, "", true, MSG_FLAG_ERR_COLORIZE)
+	command.Flags().IntVarP(&utils.GlobalFlags.ValidateFlags.MaxNumErrors, FLAG_ERR_LIMIT, "", DEFAULT_MAX_ERROR_LIMIT, MSG_FLAG_ERR_LIMIT)
 }
 
 func validateCmdImpl(cmd *cobra.Command, args []string) error {
@@ -90,7 +104,7 @@ func validateCmdImpl(cmd *cobra.Command, args []string) error {
 	// invoke validate and consistently manage exit messages and codes
 	isValid, _, _, err := Validate()
 
-	// Note: all invalid SBOMs (fail schema validation) SHOULD result in an
+	// Note: all invalid SBOMs (that fail schema validation) SHOULD result in an
 	// InvalidSBOMError()
 	if err != nil {
 		if IsInvalidSBOMError(err) {
@@ -182,10 +196,11 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 	// If caller "forced" a specific schema file (version), load it instead of
 	// any SchemaInfo found in config.json
 	// TODO: support remote schema load (via URL) with a flag (default should always be local file for security)
-	if utils.GlobalFlags.ForcedJsonSchemaFile != "" {
-		getLogger().Infof("Validating document using forced schema (i.e., `--force %s`)", utils.GlobalFlags.ForcedJsonSchemaFile)
+	forcedSchemaFile := utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile
+	if forcedSchemaFile != "" {
+		getLogger().Infof("Validating document using forced schema (i.e., `--force %s`)", forcedSchemaFile)
 		//schemaName = document.SchemaInfo.File
-		schemaName = "file://" + utils.GlobalFlags.ForcedJsonSchemaFile
+		schemaName = "file://" + forcedSchemaFile
 		getLogger().Infof("Loading schema `%s`...", schemaName)
 		schemaLoader = gojsonschema.NewReferenceLoader(schemaName)
 	} else {
@@ -301,30 +316,49 @@ func FormatSchemaErrors(errs []gojsonschema.ResultError) string {
 
 	lenErrs := len(errs)
 	if lenErrs > 0 {
-		var description, failingObject string
+		errLimit := utils.GlobalFlags.ValidateFlags.MaxNumErrors
+		colorize := utils.GlobalFlags.ValidateFlags.ColorizeJsonErrors
+		var formattedValue string
+		var description string
+		var failingObject string
 
 		sb.WriteString(fmt.Sprintf("\n(%d) Schema errors detected (use `--debug` for more details):", lenErrs))
 		for i, resultError := range errs {
+
+			// short-circuit if we have too many errors
+			if i == errLimit {
+				// notify users more errors exist
+				msg := fmt.Sprintf("Too many errors. Showing (%v/%v) errors.", i, len(errs))
+				getLogger().Infof("%s", msg)
+				// always include limit message in discrete output (i.e., not turned off by --quiet flag)
+				sb.WriteString("\n" + msg)
+				break
+			}
 
 			// Some descriptions include very long enums; in those cases,
 			// truncate to a reasonable length using an intelligent separator
 			description = resultError.Description()
 			// truncate output unless debug flag is used
 			if !utils.GlobalFlags.Debug &&
-				len(description) > DEFAULT_TRUNCATE_LENGTH {
-				// Use the new "Cut" method when v18 of go supported
-				//description, _, _ = strings.Cut(description, ":")
-				description = description[:strings.IndexByte(description, ':')+1]
+				len(description) > DEFAULT_MAX_ERR_DESCRIPTION_LEN {
+				description, _, _ = strings.Cut(description, ":")
 				description = description + " ... (truncated)"
 			}
 
-			formattedValue, _ := log.FormatInterfaceAsColorizedJson(resultError.Value())
+			// TODO: provide flag to allow users to "turn on", by default we do NOT want this
+			// as this slows down processing on SBOMs with large numbers of errors
+			if colorize {
+				formattedValue, _ = log.FormatInterfaceAsColorizedJson(resultError.Value())
+			}
+			// Indent error detail output in logs
 			formattedValue = log.AddTabs(formattedValue)
+			// NOTE: if we do not colorize or indent we could simply do this:
 			failingObject = fmt.Sprintf("\n\tFailing object: [%v]", formattedValue)
+
 			// truncate output unless debug flag is used
 			if !utils.GlobalFlags.Debug &&
-				len(failingObject) > DEFAULT_TRUNCATE_LENGTH {
-				failingObject = failingObject[:DEFAULT_TRUNCATE_LENGTH]
+				len(failingObject) > DEFAULT_MAX_ERR_DESCRIPTION_LEN {
+				failingObject = failingObject[:DEFAULT_MAX_ERR_DESCRIPTION_LEN]
 				failingObject = failingObject + " ... (truncated)"
 			}
 
@@ -337,6 +371,9 @@ func FormatSchemaErrors(errs []gojsonschema.ResultError) string {
 				failingObject)
 
 			sb.WriteString(schemaErrorText)
+
+			// TODO: leave commented out as we do not want to slow processing...
+			//getLogger().Debugf("processing error (%v): type: `%s`", i, resultError.Type())
 		}
 	}
 	return sb.String()

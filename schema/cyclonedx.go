@@ -28,6 +28,8 @@ const (
 	KEY_LICENSES   = "licenses"
 )
 
+// Note: CycloneDX v1.2, 1.3, 1.4 schema properties are currently supported
+
 // For convenience, we provide named vars. for testing for zero-length (empty) structs
 var EMPTY_CDXLicense = CDXLicense{}
 
@@ -44,10 +46,10 @@ type CDXBom struct {
 	Dependencies       []CDXDependency        `json:"dependencies,omitempty"`
 	ExternalReferences []CDXExternalReference `json:"externalReferences,omitempty"`
 	// v1.3 added "compositions"
-	Compositions []CDXCompositions `json:"compositions,omitempty"`
+	Compositions []CDXCompositions `json:"compositions,omitempty" cdx:"v1.3"`
 	// v1.4 added "vulnerabilities", "signature"
-	Vulnerabilities []CDXVulnerability `json:"vulnerabilities,omitempty"`
-	// TODO: Signature CDXSignature `json:"signature,omitempty"`
+	Vulnerabilities []CDXVulnerability `json:"vulnerabilities,omitempty" cdx:"v1.4"`
+	// TODO: Issue #23: Signature CDXSignature `json:"signature,omitempty"`
 }
 
 // v1.2: existed

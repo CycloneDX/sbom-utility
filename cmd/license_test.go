@@ -237,7 +237,7 @@ func TestLicenseListCdx14MarkdownNoneFound(t *testing.T) {
 
 func TestLicenseListCdx13Json(t *testing.T) {
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3, FORMAT_JSON, false)
-	lti.ResultExpectedLineCount = 108 // array of LicenseChoice JSON objects
+	lti.ResultExpectedLineCount = 92 // array of LicenseChoice JSON objects
 	innerTestLicenseList(t, lti)
 }
 
@@ -337,4 +337,14 @@ func TestLicenseListPolicyCdx14CustomPolicy(t *testing.T) {
 
 	// !!! IMPORTANT !!! restore default policy file to default for all other tests
 	loadHashCustomPolicyFile(utils.GlobalFlags.ConfigLicensePolicyFile)
+}
+
+// Test custom marshal of CDXLicense (empty CDXAttachment)
+
+func TestLicenseListCdx13JsonEmptyAttachment(t *testing.T) {
+	lti := NewLicenseTestInfoBasic(
+		"test/cyclonedx/cdx-1-3-license-list-no-attachment.json",
+		FORMAT_JSON,
+		false)
+	innerTestLicenseList(t, lti)
 }

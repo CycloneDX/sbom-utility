@@ -44,7 +44,7 @@ type CommandFlags struct {
 	Trace            bool // trace logging
 	Debug            bool // debug logging
 	InputFile        string
-	OutputFile       string
+	OutputFile       string // Note: not used by `validate` command, which emits a warning if supplied
 	OutputSbomFormat string
 
 	// License flags
@@ -54,9 +54,9 @@ type CommandFlags struct {
 	VulnerabilityFlags VulnerabilityCommandFlags
 
 	// Validate (local) flags
-	ForcedJsonSchemaFile    string
 	Variant                 string
 	ValidateProperties      bool
+	ValidateFlags           ValidateCommandFlags
 	CustomValidation        bool
 	CustomValidationOptions CustomValidationFlags
 
@@ -71,6 +71,13 @@ type CommandFlags struct {
 type LicenseCommandFlags struct {
 	Summary      bool
 	ListLineWrap bool
+}
+
+type ValidateCommandFlags struct {
+	ForcedJsonSchemaFile      string
+	MaxNumErrors              int
+	MaxErrorDescriptionLength int
+	ColorizeJsonErrors        bool
 }
 
 type VulnerabilityCommandFlags struct {
