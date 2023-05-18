@@ -40,7 +40,7 @@ const (
 const (
 	FLAG_SCHEMA_FORCE          = "force"
 	FLAG_SCHEMA_VARIANT        = "variant"
-	FLAG_CUSTOM_VALIDATION     = "custom"         // TODO: endorse when no longer experimental
+	FLAG_CUSTOM_VALIDATION     = "custom"         // TODO: document when no longer experimental
 	FLAG_ERR_COLORIZE          = "error-colorize" // default: true (for historical reasons)
 	FLAG_ERR_LIMIT             = "error-limit"
 	MSG_SCHEMA_FORCE           = "force specified schema file for validation; overrides inferred schema"
