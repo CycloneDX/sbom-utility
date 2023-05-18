@@ -212,6 +212,55 @@ type CDXLicense struct {
 	Url  string        `json:"url,omitempty"`
 }
 
+// Custom marshaller
+
+func (value *CDXLicense) MarshalJSON() ([]byte, error) {
+
+	text := value.Text
+	pText := &value.Text
+	temp := map[string]interface{}{}
+
+	if value.Id != "" {
+		temp["id"] = value.Id
+	}
+
+	if value.Name != "" {
+		temp["name"] = value.Name
+	}
+
+	if value.Url != "" {
+		temp["url"] = value.Url
+	}
+
+	if text != (CDXAttachment{}) {
+		bText, _ := json.Marshal(pText)
+		m := make(map[string]string)
+		json.Unmarshal(bText, &m)
+		temp["text"] = m
+	}
+
+	return json.Marshal(temp)
+}
+
+func (value *CDXAttachment) MarshalJSON() ([]byte, error) {
+
+	temp := map[string]interface{}{}
+
+	if value.ContentType != "" {
+		temp["contentType"] = value.ContentType
+	}
+
+	if value.Encoding != "" {
+		temp["encoding"] = value.Encoding
+	}
+
+	if value.Content != "" {
+		temp["content"] = value.Content
+	}
+
+	return json.Marshal(temp)
+}
+
 // v1.2: existed
 // TODO: GitHub PRs MAY have more than 1 commit (committer); CDX needs to account for this
 type CDXCommit struct {

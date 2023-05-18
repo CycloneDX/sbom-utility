@@ -193,7 +193,7 @@ func TestValidateSyntaxErrorCdx13Test2(t *testing.T) {
 
 // Force validation against a "custom" schema with compatible format (CDX) and version (1.3)
 func TestValidateForceCustomSchemaCdx13(t *testing.T) {
-	utils.GlobalFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_3_CUSTOM
+	utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_3_CUSTOM
 	innerValidateError(t,
 		TEST_CDX_1_3_MATURITY_BASE,
 		SCHEMA_VARIANT_NONE,
@@ -202,7 +202,7 @@ func TestValidateForceCustomSchemaCdx13(t *testing.T) {
 
 // Force validation against a "custom" schema with compatible format (CDX) and version (1.4)
 func TestValidateForceCustomSchemaCdx14(t *testing.T) {
-	utils.GlobalFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_4_CUSTOM
+	utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_4_CUSTOM
 	innerValidateError(t,
 		TEST_CDX_1_4_MATURITY_BASE,
 		SCHEMA_VARIANT_NONE,
@@ -211,7 +211,7 @@ func TestValidateForceCustomSchemaCdx14(t *testing.T) {
 
 // Force validation using schema with compatible format, but older version than the SBOM version
 func TestValidateForceCustomSchemaCdxSchemaOlder(t *testing.T) {
-	utils.GlobalFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_3_CUSTOM
+	utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_3_CUSTOM
 	innerValidateError(t,
 		TEST_CDX_1_4_MATURITY_BASE,
 		SCHEMA_VARIANT_NONE,

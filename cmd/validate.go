@@ -70,6 +70,13 @@ func NewCommandValidate() *cobra.Command {
 	command.RunE = validateCmdImpl
 
 	command.PreRunE = func(cmd *cobra.Command, args []string) error {
+
+		// This command can be called with this persistent flag, but does not make sense...
+		inputFile := utils.GlobalFlags.InputFile
+		if inputFile != "" {
+			getLogger().Warningf("Invalid flag for command: `%s` (`%s`). Ignoring...", FLAG_FILENAME_OUTPUT, FLAG_FILENAME_OUTPUT_SHORT)
+		}
+
 		return preRunTestForInputFile(cmd, args)
 	}
 	initCommandValidate(command)
@@ -82,7 +89,7 @@ func initCommandValidate(command *cobra.Command) {
 	defer getLogger().Exit()
 
 	// Force a schema file to use for validation (override inferred schema)
-	command.Flags().StringVarP(&utils.GlobalFlags.ForcedJsonSchemaFile, FLAG_SCHEMA_FORCE, "", "", MSG_SCHEMA_FORCE)
+	command.Flags().StringVarP(&utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile, FLAG_SCHEMA_FORCE, "", "", MSG_SCHEMA_FORCE)
 	// Optional schema "variant" of inferred schema (e.g, "strict")
 	command.Flags().StringVarP(&utils.GlobalFlags.Variant, FLAG_SCHEMA_VARIANT, "", "", MSG_SCHEMA_VARIANT)
 	command.Flags().BoolVarP(&utils.GlobalFlags.CustomValidation, FLAG_CUSTOM_VALIDATION, "", false, MSG_FLAG_CUSTOM_VALIDATION)
@@ -97,7 +104,7 @@ func validateCmdImpl(cmd *cobra.Command, args []string) error {
 	// invoke validate and consistently manage exit messages and codes
 	isValid, _, _, err := Validate()
 
-	// Note: all invalid SBOMs (fail schema validation) SHOULD result in an
+	// Note: all invalid SBOMs (that fail schema validation) SHOULD result in an
 	// InvalidSBOMError()
 	if err != nil {
 		if IsInvalidSBOMError(err) {
@@ -189,10 +196,11 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 	// If caller "forced" a specific schema file (version), load it instead of
 	// any SchemaInfo found in config.json
 	// TODO: support remote schema load (via URL) with a flag (default should always be local file for security)
-	if utils.GlobalFlags.ForcedJsonSchemaFile != "" {
-		getLogger().Infof("Validating document using forced schema (i.e., `--force %s`)", utils.GlobalFlags.ForcedJsonSchemaFile)
+	forcedSchemaFile := utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile
+	if forcedSchemaFile != "" {
+		getLogger().Infof("Validating document using forced schema (i.e., `--force %s`)", forcedSchemaFile)
 		//schemaName = document.SchemaInfo.File
-		schemaName = "file://" + utils.GlobalFlags.ForcedJsonSchemaFile
+		schemaName = "file://" + forcedSchemaFile
 		getLogger().Infof("Loading schema `%s`...", schemaName)
 		schemaLoader = gojsonschema.NewReferenceLoader(schemaName)
 	} else {

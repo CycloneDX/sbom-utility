@@ -61,13 +61,6 @@ const (
 	LICENSE_FILTER_KEY_BOM_LOCATION  = "bom-location"
 )
 
-// lc.License.Id,
-// lc.License.Name,
-// lc.License.Url,
-// lc.Expression,
-// lc.License.Text.ContentType,
-// lc.License.Text.Encoding,
-// lc.License.Text.Content)
 var LICENSE_LIST_ROW_DATA = []ColumnFormatData{
 	{LICENSE_FILTER_KEY_USAGE_POLICY, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
 	{LICENSE_FILTER_KEY_LICENSE_TYPE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
