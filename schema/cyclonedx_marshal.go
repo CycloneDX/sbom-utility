@@ -21,12 +21,17 @@ import (
 	"encoding/json"
 )
 
-// ------------------------
+// --------------------------------------------------------------------------------
 // Custom marshallers
-// ------------------------
+// --------------------------------------------------------------------------------
+// Note:
+// - Custom marshallers do NOT take into account validity of struct fields
+//   according to schema constraints (i.e., "OneOf", "AnyOf").  This means
+//   all struct fields are marshalled regardless of such constraints.
+// --------------------------------------------------------------------------------
 
 // recreate a representation of the struct, but only include values in map that are not empty
-func (value *CDXLicenseChoice) MarshalJSON() (bytes []byte, err error) {
+func (value *CDXLicenseChoice) MarshalJSON1() (bytes []byte, err error) {
 	temp := map[string]interface{}{}
 	if value.Expression != "" {
 		temp["expression"] = value.Expression
@@ -50,6 +55,45 @@ func (value *CDXLicenseChoice) MarshalJSON() (bytes []byte, err error) {
 		temp["license"] = m
 	}
 	// reuse built-in json encoder, which accepts a map primitive
+	return json.Marshal(temp)
+}
+
+func (value *CDXLicenseChoice) MarshalJSON() (marshalled []byte, err error) {
+	temp := map[string]interface{}{}
+	if value.Expression != "" {
+		temp["expression"] = value.Expression
+	}
+
+	//var intermediate []byte
+	if value.License != (CDXLicense{}) {
+		// /bLicense, _ := json.Marshal(&value.License)
+		temp["license"] = &value.License
+	}
+	// intermediate, _ = json.Marshal(temp)
+	// fmt.Printf("marshalled: %s", intermediate)
+
+	// if value.License != (CDXLicense{}) {
+	// 	var bData []byte
+	// 	bData, err = json.Marshal(&value.License)
+	// 	if err != nil {
+	// 		return
+	// 	}
+
+	// 	m := make(map[string]interface{})
+	// 	err = json.Unmarshal(bData, &m)
+	// 	if err != nil {
+	// 		getLogger().Warningf("Unmarshal error: %s", err)
+	// 		return
+	// 	}
+	// 	temp["license"] = m
+	// }
+	// // reuse built-in json encoder, which accepts a map primitive
+	// marshalled, _ = json.Marshal(temp)
+
+	// if !bytes.Equal(marshalled, intermediate) {
+	// 	fmt.Printf("marshalled: %s\nintermediate: %s\n", marshalled, intermediate)
+	// }
+
 	return json.Marshal(temp)
 }
 

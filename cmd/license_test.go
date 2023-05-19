@@ -346,5 +346,8 @@ func TestLicenseListCdx13JsonEmptyAttachment(t *testing.T) {
 		"test/cyclonedx/cdx-1-3-license-list-no-attachment.json",
 		FORMAT_JSON,
 		false)
+	lti.ResultExpectedLineCount = 36
+	lti.ResultLineContainsValues = []string{"\"content\": \"CiAgICAgICAgICAgICA...\""}
+	lti.ResultLineContainsValuesAtLineNum = -1 // JSON Hashmaps in Go are not ordered
 	innerTestLicenseList(t, lti)
 }
