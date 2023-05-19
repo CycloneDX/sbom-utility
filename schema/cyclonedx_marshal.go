@@ -37,6 +37,7 @@ import (
 // --------------------------------------------------------------------------------
 
 var ENCODED_EMPTY_STRUCT = []byte("{}")
+var ENCODED_EMPTY_SLICE_OF_STRUCT = []byte("[{}]")
 
 // --------------------------
 // CDXLicenseChoice structs
@@ -161,22 +162,29 @@ func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
 		temp["updated"] = value.Updated
 	}
 
-	// Source CDXVulnerabilitySource `json:"source,omitempty"`
+	// CDXVulnerabilitySource
 	if value.Source != (CDXVulnerabilitySource{}) {
 		temp["source"] = &value.Source
 	}
 
-	// Credits CDXCredit `json:"credits,omitempty"` // anon. type
+	// CDXCredit (anon. type)
 	testEmpty, _ := json.Marshal(&value.Credits)
 	if !bytes.Equal(testEmpty, ENCODED_EMPTY_STRUCT) {
 		temp["credits"] = &value.Credits
 	}
 
-	// Analysis CDXAnalysis `json:"analysis,omitempty"` // anon. type
-	// TODO: WARNING: This simple compare will not work if child struct has []string
+	// CDXAnalysis (anon. type)
 	testEmpty, _ = json.Marshal(&value.Analysis)
 	if !bytes.Equal(testEmpty, ENCODED_EMPTY_STRUCT) {
 		temp["analysis"] = &value.Analysis
+	}
+
+	// CDXAffects
+	if len(value.Affects) > 0 {
+		testEmpty, _ = json.Marshal(&value.Affects)
+		if !bytes.Equal(testEmpty, ENCODED_EMPTY_SLICE_OF_STRUCT) {
+			temp["affects"] = &value.Affects
+		}
 	}
 
 	if len(value.References) > 0 {
@@ -197,10 +205,6 @@ func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
 
 	if len(value.Tools) > 0 {
 		temp["tools"] = &value.Tools
-	}
-
-	if len(value.Affects) > 0 {
-		temp["affects"] = &value.Affects
 	}
 
 	if len(value.Properties) > 0 {
@@ -247,6 +251,18 @@ func (value *CDXCredit) MarshalJSON() ([]byte, error) {
 	}
 	if len(value.Organizations) > 0 {
 		temp["organizations"] = &value.Organizations
+	}
+	if len(temp) == 0 {
+		return ENCODED_EMPTY_STRUCT, nil
+	}
+	// reuse built-in json encoder, which accepts a map primitive
+	return json.Marshal(temp)
+}
+
+func (value *CDXAffect) MarshalJSON() ([]byte, error) {
+	temp := map[string]interface{}{}
+	if len(value.Versions) > 0 {
+		temp["versions"] = &value.Versions
 	}
 	if len(temp) == 0 {
 		return ENCODED_EMPTY_STRUCT, nil
