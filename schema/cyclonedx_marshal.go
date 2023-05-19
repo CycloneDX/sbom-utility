@@ -167,7 +167,6 @@ func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
 	}
 
 	// Credits CDXCredit `json:"credits,omitempty"` // anon. type
-	// TODO: WARNING: This simple compare will not work if child struct has slices
 	testEmpty, _ := json.Marshal(&value.Credits)
 	if !bytes.Equal(testEmpty, ENCODED_EMPTY_STRUCT) {
 		temp["credits"] = &value.Credits
@@ -175,7 +174,10 @@ func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
 
 	// Analysis CDXAnalysis `json:"analysis,omitempty"` // anon. type
 	// TODO: WARNING: This simple compare will not work if child struct has []string
-	temp["analysis"] = &value.Analysis
+	testEmpty, _ = json.Marshal(&value.Analysis)
+	if !bytes.Equal(testEmpty, ENCODED_EMPTY_STRUCT) {
+		temp["analysis"] = &value.Analysis
+	}
 
 	if len(value.References) > 0 {
 		temp["references"] = &value.References
