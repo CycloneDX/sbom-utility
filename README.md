@@ -96,7 +96,7 @@ On MacOS, the utility is not a registered Apple application and may warn you tha
 
 ## Commands
 
-This section provides detailed descriptions of all commands, their flags with examples. First we will cover how all commands generate consistent [exit codes](#exit-codes) along with some of the  [persistent flags](#persistent-flags) supported by most commands.
+This section provides detailed descriptions of all commands, their flags and examples. First we will cover how all commands generate consistent [exit codes](#exit-codes) and describe some of the  [persistent flags](#persistent-flags) supported by most commands.
 
 For convenience, links to each command's section are here:
 

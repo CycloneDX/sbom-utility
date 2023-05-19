@@ -214,21 +214,41 @@ func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
 	return json.Marshal(temp)
 }
 
+func (value *CDXReference) MarshalJSON() ([]byte, error) {
+	temp := map[string]interface{}{}
+	if len(value.Id) > 0 {
+		temp["id"] = &value.Id
+	}
+	if value.Source != (CDXVulnerabilitySource{}) {
+		temp["source"] = &value.Source
+	}
+	// reuse built-in json encoder, which accepts a map primitive
+	return json.Marshal(temp)
+}
+
+func (value *CDXVulnerabilitySource) MarshalJSON() ([]byte, error) {
+	temp := map[string]interface{}{}
+	if len(value.Url) > 0 {
+		temp["url"] = &value.Url
+	}
+	if len(value.Name) > 0 {
+		temp["name"] = &value.Name
+	}
+	// reuse built-in json encoder, which accepts a map primitive
+	return json.Marshal(temp)
+}
+
 func (value *CDXCredit) MarshalJSON() ([]byte, error) {
 	temp := map[string]interface{}{}
-
 	if len(value.Individuals) > 0 {
 		temp["individuals"] = &value.Individuals
 	}
-
 	if len(value.Organizations) > 0 {
 		temp["organizations"] = &value.Organizations
 	}
-
 	if len(temp) == 0 {
 		return ENCODED_EMPTY_STRUCT, nil
 	}
-
 	// reuse built-in json encoder, which accepts a map primitive
 	return json.Marshal(temp)
 }
