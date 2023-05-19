@@ -96,7 +96,9 @@ On MacOS, the utility is not a registered Apple application and may warn you tha
 
 ## Commands
 
-This section describes how all commands generate consistent [exit codes](#exit-codes) along with some of the most [helpful flags](#helpful-flags) supported by most commands that produce list-style reports. It also provides detailed descriptions of all commands with examples that show them being used with various flags.  For convenience the commands sections are linked here:
+This section provides detailed descriptions of all commands, their flags with examples. First we will cover how all commands generate consistent [exit codes](#exit-codes) along with some of the  [persistent flags](#persistent-flags) supported by most commands.
+
+For convenience, links to each command's section are here:
 
 - [license](#license)
   - [list](#license-list-subcommand) subcommand
@@ -138,20 +140,20 @@ which returns `0` (zero) or "no error":
 0
 ```
 
-### Helpful flags
+### Persistent flags
 
-This section describes some of the important command line flags that apply to most commands that produce `list` or report styled output support (e.g., `schema`, `license`, `vulnerability`, etc.).
+This section describes some of the important command line flags that apply to most commands that have a `list` subcommand for generating columnar, report-styled output (e.g., `schema`, `license`, `vulnerability`, etc.).
 
 - [format flag](#format-flag): with `--format`
 - [quiet flag](#quiet-flag): with `--quiet` or `-q`
 - [output flag](#output-flag): with `--output` or `-o`
 - [where flag](#where-flag-output-filtering): with `--output` or `-o`
 
-**Note**: The `validate` command is not a reporting command and ignores the `format`, `where` and `output` flags.
+**Note**: The `validate` command does not have a `list` subcommand and ignores the `format`, `where` and `output` flags.
 
 #### Format flag
 
-All `list` commands support the `--format` flag with the following values:
+All `list` subcommands support the `--format` flag with the following values:
 
 - `txt`: text (tabbed tables)
 - `csv`: Comma Separated Value (CSV), e.g., for spreadsheets
@@ -184,7 +186,7 @@ This example uses the `--format` flag on the `schema` command to output in markd
 
 #### Quiet flag
 
-By default, the utility outputs informational and processing text as well as any results of the command to `stdout`.  If you wish to only see the command results (JSON) or report (tables) you can run any command in "quiet mode" by simply supplying the `--quiet` or its short-form `-q` flag.
+All commands support the `--quiet` flag. By default, the utility outputs informational (INFO), warning (WARNING) and error (ERROR) text along with the  actual command results to `stdout`.  If you wish to only see the command results (JSON) or report (tables) you can run any command in "quiet mode" by simply supplying the `--quiet` or its short-form `-q` flag.
 
 ##### Example: `--quiet` flag
 
@@ -209,9 +211,9 @@ SPDX v2.2.1                   SPDX       SPDX-2.2  2.2.1        schema/spdx/2.2.
 
 #### Output flag
 
-All commands support the `-o <filename>` (or its long form `--output-file`) flag to send formatted output to a file.
+All `list` subcommands support the `--output-file <filename>` flag (or its short-form `-o <filename>`) to send formatted output to a file.
 
-##### Example: `--output` flag
+##### Example: `--output-file` flag
 
 This example uses the `schema` command to output to a file named `output.txt` with format set to `csv`:
 
@@ -241,11 +243,13 @@ SPDX v2.2.1,SPDX,SPDX-2.2,2.2.1,schema/spdx/2.2.1/spdx-schema.json,https://raw.g
 
 #### Where flag (output filtering)
 
-All commands that output list-style reports support the `--where`  flag. It can be used to filter output based upon matches to regular expressions (regex) by using the output list's column titles as keys.
+All `list` subcommands support the `--where`  flag. It can be used to filter output results based upon matches to regular expressions (regex) by using the output list's column titles as keys.
 
 Multiple key-value (i.e., column-title=regex) pairs can be provided on the same `--where` filter flag using commas.
 
 Syntax: `[--where key=regex[,...]]`
+
+See each command's section for contextual examples of the `--where` flag filter usage.
 
 ---
 

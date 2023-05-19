@@ -340,7 +340,6 @@ func TestLicenseListPolicyCdx14CustomPolicy(t *testing.T) {
 }
 
 // Test custom marshal of CDXLicense (empty CDXAttachment)
-
 func TestLicenseListCdx13JsonEmptyAttachment(t *testing.T) {
 	lti := NewLicenseTestInfoBasic(
 		"test/cyclonedx/cdx-1-3-license-list-no-attachment.json",

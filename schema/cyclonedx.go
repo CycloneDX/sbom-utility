@@ -376,26 +376,32 @@ type CDXVulnerabilitySource struct {
 // Note: "bom-ref" is a "ref-type" which is a constrained `string`
 // Note: "cwes" is a array of "cwe" which is a constrained `int`
 type CDXVulnerability struct {
-	BomRef string                 `json:"bom-ref,omitempty"`
-	Id     string                 `json:"id,omitempty"`
-	Source CDXVulnerabilitySource `json:"source,omitempty"`
-	// TODO: References []CDXReference `json:"references"` // an anon. type
-	Ratings        []CDXRating   `json:"ratings,omitempty"`
-	Cwes           []int         `json:"cwes,omitempty"`
-	Description    string        `json:"description,omitempty"`
-	Detail         string        `json:"detail,omitempty"`
-	Recommendation string        `json:"recommendation,omitempty"`
-	Advisories     []CDXAdvisory `json:"advisories,omitempty"`
-	Created        string        `json:"created,omitempty"`
-	Published      string        `json:"published,omitempty"`
-	Updated        string        `json:"updated,omitempty"`
-	Credits        CDXCredit     `json:"credits,omitempty"` // anon. type
-	Tools          []CDXTool     `json:"tools,omitempty"`
-	Analysis       CDXAnalysis   `json:"analysis,omitempty"` // anon. type
-	Affects        []CDXAffect   `json:"affects,omitempty"`  // anon. type
-	Properties     []CDXProperty `json:"properties,omitempty"`
+	BomRef         string                 `json:"bom-ref,omitempty"`
+	Id             string                 `json:"id,omitempty"`
+	Source         CDXVulnerabilitySource `json:"source,omitempty"`
+	References     []CDXReference         `json:"references"` // an anon. type
+	Ratings        []CDXRating            `json:"ratings,omitempty"`
+	Cwes           []int                  `json:"cwes,omitempty"`
+	Description    string                 `json:"description,omitempty"`
+	Detail         string                 `json:"detail,omitempty"`
+	Recommendation string                 `json:"recommendation,omitempty"`
+	Advisories     []CDXAdvisory          `json:"advisories,omitempty"`
+	Created        string                 `json:"created,omitempty"`
+	Published      string                 `json:"published,omitempty"`
+	Updated        string                 `json:"updated,omitempty"`
+	Credits        CDXCredit              `json:"credits,omitempty"` // anon. type
+	Tools          []CDXTool              `json:"tools,omitempty"`
+	Analysis       CDXAnalysis            `json:"analysis,omitempty"` // anon. type
+	Affects        []CDXAffect            `json:"affects,omitempty"`  // anon. type
+	Properties     []CDXProperty          `json:"properties,omitempty"`
 	// v1.5 properties follow
 	Rejected string `json:"rejected,omitempty"` // v1.5: added
+}
+
+// v1.4 This is an anonymous type used in CDXVulnerability
+type CDXReference struct {
+	Id     string                 `json:"id,omitempty"`
+	Source CDXVulnerabilitySource `json:"source,omitempty"`
 }
 
 // v1.4: created "credit" defn. to represent the in-line, anon. type

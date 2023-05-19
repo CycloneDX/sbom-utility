@@ -18,19 +18,29 @@
 package schema
 
 import (
+	"bytes"
 	"encoding/json"
 )
 
 // --------------------------------------------------------------------------------
 // Custom marshallers
 // --------------------------------------------------------------------------------
+// Objective:
+// - Recreate a representation of the struct, but only include values in map
+//   that are not empty.  Custom marshallers are needed as Golang does not
+//   check if child structs are empty or not.  This is because they themselves
+//   are complex types that do not have a a single empty value (e.g., ["", 0,], etc.).
 // Note:
 // - Custom marshallers do NOT take into account validity of struct fields
 //   according to schema constraints (i.e., "OneOf", "AnyOf").  This means
 //   all struct fields are marshalled regardless of such constraints.
 // --------------------------------------------------------------------------------
 
-// recreate a representation of the struct, but only include values in map that are not empty
+var ENCODED_EMPTY_STRUCT = []byte("{}")
+
+// --------------------------
+// CDXLicenseChoice structs
+// --------------------------
 func (value *CDXLicenseChoice) MarshalJSON1() (bytes []byte, err error) {
 	temp := map[string]interface{}{}
 	if value.Expression != "" {
@@ -107,6 +117,118 @@ func (value *CDXAttachment) MarshalJSON() ([]byte, error) {
 	if value.Content != "" {
 		temp["content"] = value.Content
 	}
+	// reuse built-in json encoder, which accepts a map primitive
+	return json.Marshal(temp)
+}
+
+// --------------------------
+// CDXVulnerability structs
+// --------------------------
+
+// recreate a representation of the struct, but only include values in map that are not empty
+func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
+	temp := map[string]interface{}{}
+
+	if value.BomRef != "" {
+		temp["bom-ref"] = value.BomRef
+	}
+
+	if value.Id != "" {
+		temp["id"] = value.Id
+	}
+
+	if value.Description != "" {
+		temp["description"] = value.Description
+	}
+
+	if value.Detail != "" {
+		temp["detail"] = value.Detail
+	}
+
+	if value.Recommendation != "" {
+		temp["recommendation"] = value.Recommendation
+	}
+
+	if value.Created != "" {
+		temp["created"] = value.Created
+	}
+
+	if value.Published != "" {
+		temp["published"] = value.Published
+	}
+
+	if value.Updated != "" {
+		temp["updated"] = value.Updated
+	}
+
+	// Source CDXVulnerabilitySource `json:"source,omitempty"`
+	if value.Source != (CDXVulnerabilitySource{}) {
+		temp["source"] = &value.Source
+	}
+
+	// Credits CDXCredit `json:"credits,omitempty"` // anon. type
+	// TODO: WARNING: This simple compare will not work if child struct has slices
+	testEmpty, _ := json.Marshal(&value.Credits)
+	if !bytes.Equal(testEmpty, ENCODED_EMPTY_STRUCT) {
+		temp["credits"] = &value.Credits
+	}
+
+	// Analysis CDXAnalysis `json:"analysis,omitempty"` // anon. type
+	// TODO: WARNING: This simple compare will not work if child struct has []string
+	temp["analysis"] = &value.Analysis
+
+	if len(value.References) > 0 {
+		temp["references"] = &value.References
+	}
+
+	if len(value.Ratings) > 0 {
+		temp["ratings"] = &value.Ratings
+	}
+
+	if len(value.Advisories) > 0 {
+		temp["advisories"] = &value.Advisories
+	}
+
+	if len(value.Cwes) > 0 {
+		temp["cwes"] = &value.Cwes
+	}
+
+	if len(value.Tools) > 0 {
+		temp["tools"] = &value.Tools
+	}
+
+	if len(value.Affects) > 0 {
+		temp["affects"] = &value.Affects
+	}
+
+	if len(value.Properties) > 0 {
+		temp["properties"] = &value.Properties
+	}
+
+	// v1.5 properties follow
+	if value.Rejected != "" {
+		temp["rejected"] = value.Rejected
+	}
+
+	// reuse built-in json encoder, which accepts a map primitive
+	return json.Marshal(temp)
+}
+
+func (value *CDXCredit) MarshalJSON() ([]byte, error) {
+	temp := map[string]interface{}{}
+
+	if len(value.Individuals) > 0 {
+		temp["individuals"] = &value.Individuals
+	}
+
+	if len(value.Organizations) > 0 {
+		temp["organizations"] = &value.Organizations
+	}
+
+	if len(temp) == 0 {
+		return ENCODED_EMPTY_STRUCT, nil
+	}
+
 	// reuse built-in json encoder, which accepts a map primitive
 	return json.Marshal(temp)
 }
