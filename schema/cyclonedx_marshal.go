@@ -64,35 +64,9 @@ func (value *CDXLicenseChoice) MarshalJSON() (marshalled []byte, err error) {
 		temp["expression"] = value.Expression
 	}
 
-	//var intermediate []byte
 	if value.License != (CDXLicense{}) {
-		// /bLicense, _ := json.Marshal(&value.License)
 		temp["license"] = &value.License
 	}
-	// intermediate, _ = json.Marshal(temp)
-	// fmt.Printf("marshalled: %s", intermediate)
-
-	// if value.License != (CDXLicense{}) {
-	// 	var bData []byte
-	// 	bData, err = json.Marshal(&value.License)
-	// 	if err != nil {
-	// 		return
-	// 	}
-
-	// 	m := make(map[string]interface{})
-	// 	err = json.Unmarshal(bData, &m)
-	// 	if err != nil {
-	// 		getLogger().Warningf("Unmarshal error: %s", err)
-	// 		return
-	// 	}
-	// 	temp["license"] = m
-	// }
-	// // reuse built-in json encoder, which accepts a map primitive
-	// marshalled, _ = json.Marshal(temp)
-
-	// if !bytes.Equal(marshalled, intermediate) {
-	// 	fmt.Printf("marshalled: %s\nintermediate: %s\n", marshalled, intermediate)
-	// }
 
 	return json.Marshal(temp)
 }
@@ -112,24 +86,10 @@ func (value *CDXLicense) MarshalJSON() (bytes []byte, err error) {
 		temp["url"] = value.Url
 	}
 
-	// if the child struct is not "empty" we need to encode it as a map so to leverage the built-in
-	// handling of the json encoding package
 	if value.Text != (CDXAttachment{}) {
-		var bData []byte
-		bData, err = json.Marshal(&value.Text)
-		if err != nil {
-			return
-		}
-
-		m := make(map[string]interface{})
-		err = json.Unmarshal(bData, &m)
-		if err != nil {
-			getLogger().Warningf("Unmarshal error: %s", err)
-			return
-		}
-		temp["text"] = m
+		temp["text"] = &value.Text
 	}
-	// reuse built-in json encoder, which accepts a map primitive
+
 	return json.Marshal(temp)
 }
 
