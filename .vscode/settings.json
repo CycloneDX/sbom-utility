@@ -12,6 +12,7 @@
             "CDLA",
             "cdxschema",
             "Classpath",
+            "Classworlds",
             "codes",
             "cwes",
             "CYCLONEDX",
@@ -37,6 +38,7 @@
             "Infof",
             "Infozip",
             "Jaxen",
+            "JDBM",
             "JDOM",
             "jwangsadinata",
             "LARAVEL",
@@ -79,7 +81,8 @@
             "unmarshals",
             "usecases",
             "VULN",
-            "Warningf"
+            "Warningf",
+            "Zope"
       ],
       "files.watcherExclude": {
             "**/target": true

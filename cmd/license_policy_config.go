@@ -61,6 +61,8 @@ var spdxIdRegexp *regexp.Regexp
 
 type LicensePolicy struct {
 	Id             string   `json:"id"`
+	Reference      string   `json:"reference"`
+	OsiApproved    bool     `json:"osi"`
 	Family         string   `json:"family"`
 	Name           string   `json:"name"`
 	UsagePolicy    string   `json:"usagePolicy"`
