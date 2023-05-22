@@ -280,114 +280,129 @@
                   "id": "Artistic-1.0",
                   "name": "Artistic License 1.0",
                   "family": "Artistic",
-                  "reference": "",
-                  "osi": false,
+                  "reference": "https://spdx.org/licenses/Artistic-1.0.html",
+                  "osi": true,
                   "fsf": false,
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
-                  "notes": [""]
+                  "notes": [""],
+                  "urls": ["https://opensource.org/licenses/Artistic-1.0"]
             },
             {
                   "id": "Artistic-1.0-cl8",
                   "name": "Artistic License 1.0 w/clause 8",
                   "family": "Artistic",
-                  "reference": "",
+                  "reference": "https://spdx.org/licenses/Artistic-1.0-cl8.html",
                   "osi": false,
                   "fsf": false,
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
-                  "notes": [""]
+                  "notes": [""],
+                  "urls": ["https://opensource.org/licenses/Artistic-1.0"]
             },
             {
                   "id": "Artistic-1.0-Perl",
                   "name": "Artistic License 1.0 (Perl)",
                   "family": "Artistic",
-                  "reference": "",
-                  "osi": false,
+                  "reference": "https://spdx.org/licenses/Artistic-1.0-Perl.html",
+                  "osi": true,
                   "fsf": false,
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
-                  "notes": [""]
+                  "notes": [""],
+                  "urls": ["https://opensource.org/licenses/Artistic-1.0"]
             },
             {
                   "id": "Artistic-2.0",
                   "name": "Artistic License 2.0",
                   "family": "Artistic",
-                  "reference": "",
-                  "osi": false,
-                  "fsf": false,
+                  "reference": "https://spdx.org/licenses/Artistic-2.0.html",
+                  "osi": true,
+                  "fsf": true,
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
-                  "notes": [""]
+                  "notes": [""],
+                  "urls": [
+                        "http://www.perlfoundation.org/artistic_license_2_0",
+                        "https://www.perlfoundation.org/artistic-license-20.html",
+                        "https://opensource.org/licenses/artistic-license-2.0"
+                  ]
             },
             {
                   "id": "Beerware",
                   "name": "Beerware License",
                   "family": "Beerware",
-                  "reference": "",
+                  "reference": "https://spdx.org/licenses/Beerware.html",
                   "osi": false,
                   "fsf": false,
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
-                  "notes": [""]
+                  "notes": [""],
+                  "urls": [
+                        "https://fedoraproject.org/wiki/Licensing/Beerware",
+                        "https://people.freebsd.org/~phk/"
+                      ]
             },
             {
                   "id": "BSD-1-Clause",
                   "name": "BSD 1-Clause License",
                   "family": "BSD",
-                  "reference": "",
-                  "osi": false,
+                  "reference": "https://spdx.org/licenses/BSD-1-Clause.html",
+                  "osi": true,
                   "fsf": false,
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
-                  "notes": [""]
+                  "notes": [""],
+                  "urls": ["https://svnweb.freebsd.org/base/head/include/ifaddrs.h?revision\u003d326823"]
             },
             {
                   "id": "BSD-2-Clause",
                   "name": "BSD 2-Clause \"Simplified\" License",
                   "family": "BSD",
-                  "reference": "",
-                  "osi": false,
-                  "fsf": false,
+                  "reference": "https://spdx.org/licenses/BSD-2-Clause.html",
+                  "osi": true,
+                  "fsf": true,
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
                   "aliases":["2-clause BSDL"],
-                  "notes": [""]
+                  "notes": [""],
+                  "urls": ["https://opensource.org/licenses/BSD-2-Clause"]
             },
             {
                   "id": "BSD-2-Clause-FreeBSD",
                   "name": "BSD 2-Clause FreeBSD License",
                   "family": "BSD",
-                  "reference": "",
+                  "reference": "https://spdx.org/licenses/BSD-2-Clause-FreeBSD.html",
                   "osi": false,
-                  "fsf": false,
+                  "fsf": true,
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED", "DEPRECATED"],
                   "notes": [""],
-                  "urls":["https://spdx.org/licenses/BSD-2-Clause-FreeBSD.html"]
+                  "urls":["http://www.freebsd.org/copyright/freebsd-license.html"]
             },
             {
                   "id": "BSD-2-Clause-NetBSD",
                   "name": "BSD 2-Clause NetBSD License",
                   "family": "BSD",
-                  "reference": "",
+                  "reference": "https://spdx.org/licenses/BSD-2-Clause-NetBSD.html",
                   "osi": false,
-                  "fsf": false,
+                  "fsf": true,
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED", "DEPRECATED"],
                   "notes": [""],
-                  "urls":["https://spdx.org/licenses/BSD-2-Clause-NetBSD.html"]
+                  "urls":["http://www.netbsd.org/about/redistribution.html#default"]
             },
             {
                   "id": "BSD-2-Clause-Patent",
                   "name": "BSD-2-Clause Plus Patent License",
                   "family": "BSD-2-Clause-Plus-Patent-License",
-                  "reference": "",
-                  "osi": false,
+                  "reference": "https://spdx.org/licenses/BSD-2-Clause-Patent.html",
+                  "osi": true,
                   "fsf": false,
                   "usagePolicy": "needs-review",
                   "annotationRefs": ["NEEDS-APPROVAL", "NEEDS-IP-LEGAL-REVIEW"],
-                  "notes": [""]
+                  "notes": [""],
+                  "urls": ["https://opensource.org/licenses/BSDplusPatent"]
             },
             {
                   "id": "BSD-2-Clause-Views",
