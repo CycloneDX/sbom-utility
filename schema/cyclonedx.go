@@ -17,11 +17,6 @@
 
 package schema
 
-import (
-	"encoding/json"
-	"reflect"
-)
-
 const (
 	KEY_METADATA   = "metadata"
 	KEY_COMPONENTS = "components"
@@ -49,7 +44,7 @@ type CDXBom struct {
 	Compositions []CDXCompositions `json:"compositions,omitempty" cdx:"v1.3"`
 	// v1.4 added "vulnerabilities", "signature"
 	Vulnerabilities []CDXVulnerability `json:"vulnerabilities,omitempty" cdx:"v1.4"`
-	// TODO: Issue #23: Signature CDXSignature `json:"signature,omitempty"`
+	// TODO: Issue #27: Signature CDXSignature `json:"signature,omitempty"`
 }
 
 // v1.2: existed
@@ -376,26 +371,32 @@ type CDXVulnerabilitySource struct {
 // Note: "bom-ref" is a "ref-type" which is a constrained `string`
 // Note: "cwes" is a array of "cwe" which is a constrained `int`
 type CDXVulnerability struct {
-	BomRef string                 `json:"bom-ref,omitempty"`
-	Id     string                 `json:"id,omitempty"`
-	Source CDXVulnerabilitySource `json:"source,omitempty"`
-	// TODO: References []CDXReference `json:"references"` // an anon. type
-	Ratings        []CDXRating   `json:"ratings,omitempty"`
-	Cwes           []int         `json:"cwes,omitempty"`
-	Description    string        `json:"description,omitempty"`
-	Detail         string        `json:"detail,omitempty"`
-	Recommendation string        `json:"recommendation,omitempty"`
-	Advisories     []CDXAdvisory `json:"advisories,omitempty"`
-	Created        string        `json:"created,omitempty"`
-	Published      string        `json:"published,omitempty"`
-	Updated        string        `json:"updated,omitempty"`
-	Credits        CDXCredit     `json:"credits,omitempty"` // anon. type
-	Tools          []CDXTool     `json:"tools,omitempty"`
-	Analysis       CDXAnalysis   `json:"analysis,omitempty"` // anon. type
-	Affects        []CDXAffect   `json:"affects,omitempty"`  // anon. type
-	Properties     []CDXProperty `json:"properties,omitempty"`
+	BomRef         string                 `json:"bom-ref,omitempty"`
+	Id             string                 `json:"id,omitempty"`
+	Source         CDXVulnerabilitySource `json:"source,omitempty"`
+	References     []CDXReference         `json:"references"` // an anon. type
+	Ratings        []CDXRating            `json:"ratings,omitempty"`
+	Cwes           []int                  `json:"cwes,omitempty"`
+	Description    string                 `json:"description,omitempty"`
+	Detail         string                 `json:"detail,omitempty"`
+	Recommendation string                 `json:"recommendation,omitempty"`
+	Advisories     []CDXAdvisory          `json:"advisories,omitempty"`
+	Created        string                 `json:"created,omitempty"`
+	Published      string                 `json:"published,omitempty"`
+	Updated        string                 `json:"updated,omitempty"`
+	Credits        CDXCredit              `json:"credits,omitempty"` // anon. type
+	Tools          []CDXTool              `json:"tools,omitempty"`
+	Analysis       CDXAnalysis            `json:"analysis,omitempty"` // anon. type
+	Affects        []CDXAffect            `json:"affects,omitempty"`  // anon. type
+	Properties     []CDXProperty          `json:"properties,omitempty"`
 	// v1.5 properties follow
 	Rejected string `json:"rejected,omitempty"` // v1.5: added
+}
+
+// v1.4 This is an anonymous type used in CDXVulnerability
+type CDXReference struct {
+	Id     string                 `json:"id,omitempty"`
+	Source CDXVulnerabilitySource `json:"source,omitempty"`
 }
 
 // v1.4: created "credit" defn. to represent the in-line, anon. type
@@ -442,168 +443,4 @@ type CDXVersionRange struct {
 // https://github.com/CycloneDX/specification/blob/master/schema/jsf-0.82.schema.json
 type CDXSignature struct {
 	KeyType string `json:"keyType,omitempty"`
-}
-
-// --------------------------------------
-// UnMarshal from JSON
-// --------------------------------------
-
-func UnMarshalDocument(data interface{}) (*CDXBom, error) {
-	getLogger().Enter()
-	defer getLogger().Exit()
-
-	// we need to marshal the data to normalize it to a []byte
-	jsonString, errMarshal := json.Marshal(data)
-
-	if errMarshal != nil {
-		return nil, errMarshal
-	}
-
-	// optimistically, prepare the receiving structure and unmarshal
-	var bom CDXBom
-	errUnmarshal := json.Unmarshal(jsonString, &bom)
-
-	if errUnmarshal != nil {
-		getLogger().Warningf("unmarshal failed: %v", errUnmarshal)
-	}
-
-	//getLogger().Tracef("\n%s", getLogger().FormatStruct(lc))
-	return &bom, errUnmarshal
-}
-
-func UnMarshalMetadata(data interface{}) (CDXMetadata, error) {
-	getLogger().Enter()
-	defer getLogger().Exit()
-
-	// we need to marshal the data to normalize it to a []byte
-	jsonString, errMarshal := json.Marshal(data)
-
-	if errMarshal != nil {
-		return CDXMetadata{}, errMarshal
-	}
-
-	// optimistically, prepare the receiving structure and unmarshal
-	metadata := CDXMetadata{}
-	errUnmarshal := json.Unmarshal(jsonString, &metadata)
-
-	if errUnmarshal != nil {
-		getLogger().Warningf("unmarshal failed: %v", errUnmarshal)
-	}
-
-	//getLogger().Tracef("\n%s", getLogger().FormatStruct(lc))
-	return metadata, errUnmarshal
-}
-
-func UnMarshalLicenseChoice(data interface{}) (CDXLicenseChoice, error) {
-	getLogger().Enter()
-	defer getLogger().Exit()
-
-	// we need to marshal the data to normalize it to a []byte
-	jsonString, errMarshal := json.Marshal(data)
-
-	if errMarshal != nil {
-		return CDXLicenseChoice{}, errMarshal
-	}
-
-	// optimistically, prepare the receiving structure and unmarshal
-	lc := CDXLicenseChoice{}
-	errUnmarshal := json.Unmarshal(jsonString, &lc)
-
-	if errUnmarshal != nil {
-		getLogger().Warningf("unmarshal failed: %v", errUnmarshal)
-	}
-
-	//getLogger().Tracef("\n%s", getLogger().FormatStruct(lc))
-	return lc, errUnmarshal
-}
-
-func UnMarshalComponent(data interface{}) (CDXComponent, error) {
-	getLogger().Enter()
-	defer getLogger().Exit()
-
-	// we need to marshal the data to normalize it to a []byte
-	jsonString, errMarshal := json.Marshal(data)
-
-	if errMarshal != nil {
-		return CDXComponent{}, errMarshal
-	}
-
-	// optimistically, prepare the receiving structure
-	// and unmarshal
-	component := CDXComponent{}
-	errUnmarshal := json.Unmarshal(jsonString, &component)
-
-	if errUnmarshal != nil {
-		getLogger().Warningf("unmarshal failed: %v", errUnmarshal)
-	}
-
-	//getLogger().Tracef("\n%s", getLogger().FormatStruct(component))
-	return component, errUnmarshal
-}
-
-func UnMarshalComponents(data interface{}) ([]CDXComponent, error) {
-	getLogger().Enter()
-	defer getLogger().Exit()
-
-	var components []CDXComponent
-
-	// we need to marshal the data to normalize it to a []byte
-	jsonString, errMarshal := json.Marshal(data)
-	if errMarshal != nil {
-		return components, errMarshal
-	}
-
-	// unmarshal into custom structure
-	errUnmarshal := json.Unmarshal(jsonString, &components)
-	if errUnmarshal != nil {
-		getLogger().Warningf("unmarshal failed: %v", errUnmarshal)
-	}
-
-	return components, errUnmarshal
-}
-
-func UnMarshalProperties(data interface{}) (properties []CDXProperty, err error) {
-	getLogger().Enter()
-	defer getLogger().Exit()
-
-	// we need to marshal the data to normalize it to a []byte
-	jsonString, err := json.Marshal(data)
-	if err != nil {
-		return
-	}
-
-	// unmarshal into custom structure
-	err = json.Unmarshal(jsonString, &properties)
-	if err != nil {
-		getLogger().Warningf("unmarshal failed: %v", err)
-	}
-
-	return
-}
-
-func UnMarshalProperty(data interface{}) (property CDXProperty, err error) {
-	getLogger().Enter()
-	defer getLogger().Exit()
-
-	// we need to marshal the data to normalize it to a []byte
-	jsonString, err := json.Marshal(data)
-	if err != nil {
-		return
-	}
-
-	// unmarshal into custom structure
-	err = json.Unmarshal(jsonString, &property)
-	if err != nil {
-		getLogger().Warningf("unmarshal failed: %v", err)
-	}
-
-	return
-}
-
-// --------------------------------------
-// Utils
-// --------------------------------------
-
-func (property *CDXProperty) Equals(testProperty CDXProperty) bool {
-	return reflect.DeepEqual(*property, testProperty)
 }
