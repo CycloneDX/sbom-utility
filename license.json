@@ -725,12 +725,15 @@
                   "id": "CC0-1.0",
                   "name": "Creative Commons Zero v1.0 Universal",
                   "family": "CC0",
-                  "reference": "",
+                  "reference": "https://spdx.org/licenses/CC0-1.0.html",
                   "osi": false,
-                  "fsf": false,
+                  "fsf": true,
                   "usagePolicy": "allow",
                   "annotationRefs": ["APPROVED"],
-                  "notes": [""]
+                  "notes": [""],
+                  "urls": [
+                        "https://creativecommons.org/publicdomain/zero/1.0/legalcode"
+                  ]
             },
             {
                   "id": "",
@@ -751,8 +754,42 @@
                         "CC-BY-3.0-AT",
                         "CC-BY-3.0-DE",
                         "CC-BY-3.0-NL",
-                        "CC-BY-3.0-US",
-                        "CC-BY-4.0"
+                        "CC-BY-3.0-US"
+                  ],
+                  "urls": [
+                        "https://spdx.org/licenses/CC-BY-1.0.html",
+                        "https://creativecommons.org/licenses/by/1.0/legalcode",
+                        "https://spdx.org/licenses/CC-BY-2.0.html",
+                        "https://creativecommons.org/licenses/by/2.0/legalcode",
+                        "https://spdx.org/licenses/CC-BY-2.5.html",
+                        "https://creativecommons.org/licenses/by/2.5/legalcode",
+                        "https://spdx.org/licenses/CC-BY-2.5-AU.html",
+                        "https://creativecommons.org/licenses/by/2.5/au/legalcode",
+                        "https://spdx.org/licenses/CC-BY-3.0.html",
+                        "https://creativecommons.org/licenses/by/3.0/legalcode",
+                        "https://spdx.org/licenses/CC-BY-3.0-AT.html",
+                        "https://creativecommons.org/licenses/by/3.0/at/legalcode",
+                        "https://spdx.org/licenses/CC-BY-3.0-DE.html",
+                        "https://creativecommons.org/licenses/by/3.0/de/legalcode",
+                        "https://spdx.org/licenses/CC-BY-3.0-NL.html",
+                        "https://creativecommons.org/licenses/by/3.0/nl/legalcode",
+                        "https://spdx.org/licenses/CC-BY-3.0-US.html",
+                        "https://creativecommons.org/licenses/by/3.0/us/legalcode"
+
+                  ]
+            },
+            {
+                  "id": "CC-BY-4.0",
+                  "name": "Creative Commons Attribution",
+                  "family": "CC-BY",
+                  "reference": "https://spdx.org/licenses/CC-BY-4.0.html",
+                  "osi": false,
+                  "fsf": true,
+                  "usagePolicy": "allow",
+                  "annotationRefs": [ "APPROVED", "CC-BY-SAAS", "CC-BY-ON-PREM"],
+                  "notes": [""],
+                  "urls": [
+                        "https://creativecommons.org/licenses/by/4.0/legalcode"
                   ]
             },
             {
