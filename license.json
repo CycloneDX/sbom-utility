@@ -2168,33 +2168,10 @@
             ]
         },
         {
-            "id": "",
-            "name": "Spencer License",
-            "family": "Spencer",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
-            "usagePolicy": "allow",
-            "annotationRefs": [
-                "APPROVED"
-            ],
-            "notes": [
-                "Sometimes identified by the invalid SPDX ID \"Harry-Spencer\""
-            ],
-            "children": [
-                "Spencer-94",
-                "Spencer-99"
-            ],
-            "urls": [
-                "https://spdx.org/licenses/Spencer-94.html",
-                "https://spdx.org/licenses/Spencer-99.html"
-            ]
-        },
-        {
             "id": "Hippocratic-2.1",
             "name": "Hippocratic License 2.1",
             "family": "Hippocratic",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/Hippocratic-2.1.html",
             "osi": false,
             "fsf": false,
             "usagePolicy": "needs-review",
@@ -2202,37 +2179,40 @@
                 "NEEDS-APPROVAL"
             ],
             "urls": [
-                "https://spdx.org/licenses/Hippocratic-2.1.html"
+                "https://firstdonoharm.dev/version/2/1/license.html",
+                "https://github.com/EthicalSource/hippocratic-license/blob/58c0e646d64ff6fbee275bfe2b9492f914e3ab2a/LICENSE.txt"
             ]
         },
         {
             "id": "IJG",
             "name": "Independent JPEG Group License",
             "family": "IJG",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/IJG.html",
             "osi": false,
-            "fsf": false,
+            "fsf": true,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
             "urls": [
-                "https://spdx.org/licenses/IJG.html"
+                "http://dev.w3.org/cvsweb/Amaya/libjpeg/Attic/README?rev\u003d1.2"
             ]
         },
         {
             "id": "ISC",
             "name": "ISC License",
             "family": "ISC",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "reference": "https://spdx.org/licenses/ISC.html",
+            "osi": true,
+            "fsf": true,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
             "urls": [
-                "https://spdx.org/licenses/ISC.html"
+                "https://www.isc.org/licenses/",
+                "https://www.isc.org/downloads/software-support-policy/isc-license/",
+                "https://opensource.org/licenses/ISC"
             ]
         },
         {
@@ -2275,7 +2255,7 @@
             "id": "JSON",
             "name": "JSON License",
             "family": "JSON",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/JSON.html",
             "osi": false,
             "fsf": false,
             "usagePolicy": "needs-review",
@@ -2283,32 +2263,32 @@
                 "NEEDS-APPROVAL"
             ],
             "urls": [
-                "https://spdx.org/licenses/JSON.html"
+                "http://www.json.org/license.html"
             ]
         },
         {
             "id": "LGPL-2.0",
             "name": "GNU Library General Public License v2 only",
-            "family": "LGPL",
-            "reference": "",
-            "osi": false,
+            "family": "LGPL-2.0",
+            "reference": "https://spdx.org/licenses/LGPL-2.0.html",
+            "osi": true,
             "fsf": false,
+            "deprecated": true,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL",
-                "LGPL-LINK-WARNING",
-                "DEPRECATED"
+                "LGPL-LINK-WARNING"
             ],
             "urls": [
-                "https://spdx.org/licenses/LGPL-2.0.html"
+                "https://www.gnu.org/licenses/old-licenses/lgpl-2.0-standalone.html"
             ]
         },
         {
             "id": "LGPL-2.0-only",
             "name": "GNU Library General Public License v2 only",
-            "family": "LGPL",
-            "reference": "",
-            "osi": false,
+            "family": "LGPL-2.0",
+            "reference": "https://spdx.org/licenses/LGPL-2.0-only.html",
+            "osi": true,
             "fsf": false,
             "usagePolicy": "needs-review",
             "annotationRefs": [
@@ -2316,15 +2296,15 @@
                 "LGPL-LINK-WARNING"
             ],
             "urls": [
-                "https://spdx.org/licenses/LGPL-2.0-only.html"
+                "https://www.gnu.org/licenses/old-licenses/lgpl-2.0-standalone.html"
             ]
         },
         {
             "id": "LGPL-2.0-or-later",
             "name": "GNU Library General Public License v2 or later",
-            "family": "LGPL",
-            "reference": "",
-            "osi": false,
+            "family": "LGPL-2.0",
+            "reference": "https://spdx.org/licenses/LGPL-2.0-or-later.html",
+            "osi": true,
             "fsf": false,
             "usagePolicy": "needs-review",
             "annotationRefs": [
@@ -2332,16 +2312,17 @@
                 "LGPL-LINK-WARNING"
             ],
             "urls": [
-                "https://spdx.org/licenses/LGPL-2.0-or-later.html"
+                "https://www.gnu.org/licenses/old-licenses/lgpl-2.0-standalone.html"
             ]
         },
         {
             "id": "LGPL-2.1",
             "name": "GNU Lesser General Public License v2.1 only",
-            "family": "LGPL",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "family": "LGPL-2.1",
+            "reference": "https://spdx.org/licenses/LGPL-2.1.html",
+            "osi": true,
+            "fsf": true,
+            "deprecated": true,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL",
@@ -2349,224 +2330,338 @@
                 "DEPRECATED"
             ],
             "urls": [
-                "https://spdx.org/licenses/LGPL-2.1.html"
+                "https://www.gnu.org/licenses/old-licenses/lgpl-2.1-standalone.html",
+                "https://opensource.org/licenses/LGPL-2.1"
             ]
         },
         {
             "id": "LGPL-2.1-only",
             "name": "GNU Lesser General Public License v2.1 only",
-            "family": "LGPL",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "family": "LGPL-2.1",
+            "reference": "https://spdx.org/licenses/LGPL-2.1-only.html",
+            "osi": true,
+            "fsf": true,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL",
                 "LGPL-LINK-WARNING"
             ],
             "urls": [
-                "https://spdx.org/licenses/LGPL-2.1-only.html"
+                "https://www.gnu.org/licenses/old-licenses/lgpl-2.1-standalone.html",
+                "https://opensource.org/licenses/LGPL-2.1"
             ]
         },
         {
             "id": "LGPL-2.1-or-later",
             "name": "GNU Lesser General Public License v2.1 or later",
-            "family": "LGPL",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "family": "LGPL-2.1",
+            "reference": "https://spdx.org/licenses/LGPL-2.1-or-later.html",
+            "osi": true,
+            "fsf": true,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL",
                 "LGPL-LINK-WARNING"
             ],
             "urls": [
-                "https://spdx.org/licenses/LGPL-2.1-or-later.html"
+                "https://www.gnu.org/licenses/old-licenses/lgpl-2.1-standalone.html",
+                "https://opensource.org/licenses/LGPL-2.1"
             ]
         },
         {
             "id": "LGPL-3.0",
             "name": "GNU Lesser General Public License v3.0 only",
-            "family": "LGPL",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "family": "LGPL-3.0",
+            "reference": "https://spdx.org/licenses/LGPL-3.0.html",
+            "osi": true,
+            "fsf": true,
+            "deprecated": true,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL",
-                "LGPL-LINK-WARNING",
-                "DEPRECATED"
+                "LGPL-LINK-WARNING"
             ],
             "urls": [
-                "https://spdx.org/licenses/LGPL-3.0"
+                "https://www.gnu.org/licenses/lgpl-3.0-standalone.html",
+                "https://www.gnu.org/licenses/lgpl+gpl-3.0.txt",
+                "https://opensource.org/licenses/LGPL-3.0"
             ]
         },
         {
             "id": "LGPL-3.0-only",
             "name": "GNU Lesser General Public License v3.0 only",
-            "family": "LGPL",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "family": "LGPL-3.0",
+            "reference": "https://spdx.org/licenses/LGPL-3.0-only.html",
+            "osi": true,
+            "fsf": true,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL",
                 "LGPL-LINK-WARNING"
             ],
             "urls": [
-                "https://spdx.org/licenses/LGPL-3.0-only.html"
+                "https://www.gnu.org/licenses/lgpl-3.0-standalone.html",
+                "https://www.gnu.org/licenses/lgpl+gpl-3.0.txt",
+                "https://opensource.org/licenses/LGPL-3.0"
             ]
         },
         {
             "id": "LGPL-3.0-or-later",
             "name": "GNU Lesser General Public License v3.0 or later",
-            "family": "LGPL",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "family": "LGPL-3.0",
+            "reference": "https://spdx.org/licenses/LGPL-3.0-or-later.html",
+            "osi": true,
+            "fsf": true,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL",
                 "LGPL-LINK-WARNING"
             ],
             "urls": [
-                "https://spdx.org/licenses/LGPL-3.0-or-later.html"
+                "https://www.gnu.org/licenses/lgpl-3.0-standalone.html",
+                "https://www.gnu.org/licenses/lgpl+gpl-3.0.txt",
+                "https://opensource.org/licenses/LGPL-3.0"
             ]
         },
         {
             "id": "MIT",
             "name": "MIT License",
             "family": "MIT",
-            "reference": "",
-            "osi": false,
+            "reference": "https://spdx.org/licenses/MIT.html",
+            "osi": true,
+            "fsf": true,
+            "usagePolicy": "allow",
+            "notes":["None of the licenses: `MIT-iOS`, `MIT-1.0`, `MIT-1.0` or `MIT-1.0` have SPDX IDs"],
+            "annotationRefs": [
+                "APPROVED"
+            ],
+            "urls": [
+                "https://opensource.org/licenses/MIT"
+            ]
+        },
+        {
+            "id": "MIT-0",
+            "name": "MIT No Attribution",
+            "family": "MIT",
+            "reference": "https://spdx.org/licenses/MIT-0.html",
+            "osi": true,
             "fsf": false,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
+            "urls": [
+                "https://github.com/aws/mit-0",
+                "https://romanrm.net/mit-zero",
+                "https://github.com/awsdocs/aws-cloud9-user-guide/blob/master/LICENSE-SAMPLECODE"
+            ]
+        },
+        {
+            "id": "MIT-advertising",
+            "name": "Enlightenment License (e16)",
+            "family": "MIT",
+            "reference": "https://spdx.org/licenses/MIT-advertising.html",
+            "osi": false,
+            "fsf": false,
+            "usagePolicy": "allow",
+            "notes":["Should review as osiApproved is `false`"],
+            "annotationRefs": [
+                "APPROVED"
+            ],
+            "urls": [
+                "https://fedoraproject.org/wiki/Licensing/MIT_With_Advertising"
+            ]
+        },
+        {
+            "id": "MIT-CMU",
+            "name": "CMU License",
+            "family": "MIT",
+            "reference": "https://spdx.org/licenses/MIT-CMU.html",
+            "osi": false,
+            "fsf": false,
+            "usagePolicy": "allow",
+            "notes":["Should review as osiApproved is `false`"],
+            "annotationRefs": [
+                "APPROVED"
+            ],
+            "urls": [
+                "https://fedoraproject.org/wiki/Licensing:MIT?rd\u003dLicensing/MIT#CMU_Style",
+                "https://github.com/python-pillow/Pillow/blob/fffb426092c8db24a5f4b6df243a8a3c01fb63cd/LICENSE"
+            ]
+        },
+        {
+            "id": "MIT-enna",
+            "name": "enna License",
+            "family": "MIT",
+            "reference": "https://spdx.org/licenses/MIT-enna.html",
+            "osi": false,
+            "fsf": false,
+            "usagePolicy": "allow",
+            "notes":["Should review as osiApproved is `false`"],
+            "annotationRefs": [
+                "APPROVED"
+            ],
+            "urls": [
+                "https://fedoraproject.org/wiki/Licensing/MIT#enna"
+            ]
+        },
+        {
+            "id": "MIT-feh",
+            "name": "feh License",
+            "family": "MIT",
+            "reference": "https://spdx.org/licenses/MIT-feh.html",
+            "osi": false,
+            "fsf": false,
+            "usagePolicy": "allow",
+            "notes":["Should review as osiApproved is `false`"],
+            "annotationRefs": [
+                "APPROVED"
+            ],
+            "urls": [
+                "https://fedoraproject.org/wiki/Licensing/MIT#feh"
+            ]
+        },
+        {
+            "id": "",
+            "name": "MIT-equivalent",
+            "family": "MIT-equivalent",
+            "reference": "",
+            "osi": false,
+            "fsf": false,
+            "usagePolicy": "allow",
+            "annotationRefs": [
+                "APPROVED", "NO-SPDX"
+            ],
+            "notes": ["Should have URLs to examples of each equivalent license."],
             "children": [
-                "MIT-0",
-                "MIT-CMU",
-                "MIT-advertising",
-                "MIT-enna",
-                "MIT-feh",
                 "MIT-iOS",
                 "MIT-1.0",
                 "MIT-1.1",
                 "MIT-2.0"
             ],
             "urls": [
-                "https://spdx.org/licenses/MIT.html"
+                "https://opensource.org/licenses/MIT"
             ]
         },
         {
             "id": "MPL-1.0",
             "name": "Mozilla Public License 1.0",
             "family": "MPL",
-            "reference": "",
-            "osi": false,
+            "reference": "https://spdx.org/licenses/MPL-1.0.html",
+            "osi": true,
             "fsf": false,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                ""
+            "urls": [
+                "http://www.mozilla.org/MPL/MPL-1.0.html",
+                "https://opensource.org/licenses/MPL-1.0"
             ]
         },
         {
             "id": "MPL-1.1",
             "name": "Mozilla Public License 1.1",
             "family": "MPL",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "reference": "https://spdx.org/licenses/MPL-1.1.html",
+            "osi": true,
+            "fsf": true,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                ""
+            "urls": [
+                "http://www.mozilla.org/MPL/MPL-1.1.html",
+                "https://opensource.org/licenses/MPL-1.1"
             ]
         },
         {
             "id": "MPL-2.0",
             "name": "Mozilla Public License 2.0",
             "family": "MPL",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "reference": "https://spdx.org/licenses/MPL-2.0.html",
+            "osi": true,
+            "fsf": true,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                ""
+            "urls": [
+                "https://www.mozilla.org/MPL/2.0/",
+                "https://opensource.org/licenses/MPL-2.0"
             ]
         },
         {
             "id": "MPL-2.0-no-copyleft-exception",
             "name": "Mozilla Public License 2.0 (no copyleft exception)",
             "family": "MPL-2.0-no-copyleft-exception",
-            "reference": "",
-            "osi": false,
+            "reference": "https://spdx.org/licenses/MPL-2.0-no-copyleft-exception.html",
+            "osi": true,
             "fsf": false,
             "usagePolicy": "needs-review",
             "annotationRefs": [
-                "NEEDS-APPROVAL"
+                "NEEDS-APPROVAL", "NEEDS-IP-LEGAL-REVIEW"
             ],
-            "notes": [
-                "Needs License Review"
+            "urls": [
+                "https://www.mozilla.org/MPL/2.0/",
+                "https://opensource.org/licenses/MPL-2.0"
             ]
         },
         {
             "id": "MS-LPL",
             "name": "Microsoft Limited Public License",
             "family": "MS-LPL",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/MS-LPL.html",
             "osi": false,
             "fsf": false,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL"
             ],
-            "notes": [
-                ""
+            "urls": [
+                "https://www.openhub.net/licenses/mslpl",
+                "https://github.com/gabegundy/atlserver/blob/master/License.txt",
+                "https://en.wikipedia.org/wiki/Shared_Source_Initiative#Microsoft_Limited_Public_License_(Ms-LPL)"
             ]
         },
         {
             "id": "MS-PL",
             "name": "Microsoft Public License",
             "family": "MS-PL",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "reference": "https://spdx.org/licenses/MS-PL.html",
+            "osi": true,
+            "fsf": true,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                ""
+            "urls": [
+                "http://www.microsoft.com/opensource/licenses.mspx",
+                "https://opensource.org/licenses/MS-PL"
             ]
         },
         {
             "id": "MS-RL",
             "name": "Microsoft Reciprocal License",
             "family": "MS-RL",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "reference": "https://spdx.org/licenses/MS-RL.html",
+            "osi": true,
+            "fsf": true,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL",
                 "NEEDS-IP-LEGAL-REVIEW"
+            ]     ,
+            "urls": [
+                "http://www.microsoft.com/opensource/licenses.mspx",
+                "https://opensource.org/licenses/MS-RL"
             ]
         },
         {
             "id": "NAIST-2003",
             "name": "Nara Institute of Science and Technology License (2003)",
             "family": "NAIST",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/NAIST-2003.html",
             "osi": false,
             "fsf": false,
             "usagePolicy": "allow",
@@ -2574,22 +2669,23 @@
                 "APPROVED"
             ],
             "urls": [
-                "https://spdx.org/licenses/NAIST-2003.html"
+                "https://enterprise.dejacode.com/licenses/public/naist-2003/#license-text",
+                "https://github.com/nodejs/node/blob/4a19cc8947b1bba2b2d27816ec3d0edf9b28e503/LICENSE#L343"
             ]
         },
         {
             "id": "Net-SNMP",
             "name": "Net-SNMP License",
             "family": "Net",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/Net-SNMP.html",
             "osi": false,
             "fsf": false,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                ""
+            "urls": [
+                "http://net-snmp.sourceforge.net/about/license.html"
             ]
         },
         {
@@ -2605,14 +2701,37 @@
                 "NO-SPDX"
             ],
             "notes": [
-                ""
+                "npm is released under the Artistic License 2.0 (see URL).",
+                "npm client is published under the MIT license (see URL).",
+                "This entry may be invalid if a variant cannot be referenced.",
+                "Should have a URL link to the canonical example of the license text."
+            ],
+            "urls":[
+                "https://docs.npmjs.com/policies/npm-license",
+                "https://www.npmjs.com/package/npm-client"
             ]
         },
         {
             "id": "OFL-1.0",
             "name": "SIL Open Font License 1.0",
             "family": "OFL-1.0",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/OFL-1.0.html",
+            "osi": false,
+            "fsf": true,
+            "annotationRefs": [
+                "NEEDS-APPROVAL",
+                "NEEDS-IP-LEGAL-REVIEW"
+            ],
+            "usagePolicy": "needs-review",
+            "urls":[
+                "http://scripts.sil.org/cms/scripts/page.php?item_id\u003dOFL10_web"
+            ]
+        },
+        {
+            "id": "OFL-1.0-no-RFN",
+            "name": "SIL Open Font License 1.0 with no Reserved Font Name",
+            "family": "OFL-1.0",
+            "reference": "https://spdx.org/licenses/OFL-1.0-no-RFN.html",
             "osi": false,
             "fsf": false,
             "annotationRefs": [
@@ -2620,148 +2739,174 @@
                 "NEEDS-IP-LEGAL-REVIEW"
             ],
             "usagePolicy": "needs-review",
-            "notes": [
-                "Needs IP legal determination for variants"
+            "urls":[
+                "http://scripts.sil.org/cms/scripts/page.php?item_id\u003dOFL10_web"
+            ]
+        },
+        {
+            "id": "OFL-1.0-RFN",
+            "name": "SIL Open Font License 1.0 with Reserved Font Name",
+            "family": "OFL-1.0",
+            "reference": "https://spdx.org/licenses/OFL-1.0-RFN.html",
+            "osi": false,
+            "fsf": false,
+            "annotationRefs": [
+                "NEEDS-APPROVAL",
+                "NEEDS-IP-LEGAL-REVIEW"
             ],
-            "children": [
-                "OFL-1.0",
-                "OFL-1.0-no-RFN",
-                "OFL-1.0-RFN"
+            "usagePolicy": "needs-review",
+            "urls":[
+                "http://scripts.sil.org/cms/scripts/page.php?item_id\u003dOFL10_web"
             ]
         },
         {
             "id": "OFL-1.1",
             "name": "SIL Open Font License 1.1",
             "family": "OFL-1.1",
-            "reference": "",
-            "osi": false,
+            "reference": "https://spdx.org/licenses/OFL-1.1.html",
+            "osi": true,
+            "fsf": true,
+            "annotationRefs": [
+                "NEEDS-APPROVAL",
+                "NEEDS-IP-LEGAL-REVIEW"
+            ],
+            "usagePolicy": "needs-review",
+            "urls":[
+                "http://scripts.sil.org/cms/scripts/page.php?item_id\u003dOFL_web",
+                "https://opensource.org/licenses/OFL-1.1"
+            ]
+        },
+        {
+            "id": "OFL-1.1-no-RFN",
+            "name": "SIL Open Font License 1.1 with no Reserved Font Name",
+            "family": "OFL-1.1",
+            "reference": "https://spdx.org/licenses/OFL-1.1.html",
+            "osi": true,
             "fsf": false,
             "annotationRefs": [
                 "NEEDS-APPROVAL",
                 "NEEDS-IP-LEGAL-REVIEW"
             ],
             "usagePolicy": "needs-review",
-            "notes": [
-                "Needs IP legal determination for variants"
+            "urls":[
+                "http://scripts.sil.org/cms/scripts/page.php?item_id\u003dOFL_web",
+                "https://opensource.org/licenses/OFL-1.1"
+            ]
+        },
+        {
+            "id": "OFL-1.1-RFN",
+            "name": "SIL Open Font License 1.1 with Reserved Font Name",
+            "family": "OFL-1.1",
+            "reference": "https://spdx.org/licenses/OFL-1.1-RFN.html",
+            "osi": true,
+            "fsf": false,
+            "annotationRefs": [
+                "NEEDS-APPROVAL",
+                "NEEDS-IP-LEGAL-REVIEW"
             ],
-            "children": [
-                "OFL-1.1-no-RFN",
-                "OFL-1.1-RFN"
+            "usagePolicy": "needs-review",
+            "urls":[
+                "http://scripts.sil.org/cms/scripts/page.php?item_id\u003dOFL_web",
+                "https://opensource.org/licenses/OFL-1.1"
             ]
         },
         {
             "id": "OpenSSL",
             "name": "OpenSSL License",
             "family": "OpenSSL",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/OpenSSL.html",
             "osi": false,
-            "fsf": false,
+            "fsf": true,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                ""
+            "urls": [
+                "http://www.openssl.org/source/license.html"
             ]
         },
         {
             "id": "PHP-3.0",
             "name": "PHP License v3.0",
             "family": "PHP",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "reference": "https://spdx.org/licenses/PHP-3.0.html",
+            "osi": true,
+            "fsf": true,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                ""
+            "urls": [
+                "http://www.php.net/license/3_0.txt",
+                "https://opensource.org/licenses/PHP-3.0"
             ]
         },
         {
             "id": "PHP-3.01",
             "name": "PHP License v3.01",
             "family": "PHP",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "reference": "https://spdx.org/licenses/PHP-3.01.html",
+            "osi": true,
+            "fsf": true,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                ""
+            "urls": [
+                "http://www.php.net/license/3_01.txt"
             ]
         },
         {
             "id": "Plexus",
             "name": "Plexus_Classworlds",
             "family": "Plexus",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/Plexus.html",
             "osi": false,
             "fsf": false,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                ""
+            "urls": [
+                "https://fedoraproject.org/wiki/Licensing/Plexus_Classworlds_License"
             ]
         },
         {
             "id": "PostgreSQL",
             "name": "PostgreSQL License",
             "family": "PostgreSQL",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
-            "usagePolicy": "allow",
-            "annotationRefs": [
-                "APPROVED"
-            ],
-            "notes": [
-                ""
-            ]
-        },
-        {
-            "id": "Python-2.0",
-            "name": "Python License 2.0",
-            "family": "Python-2.0",
-            "reference": "",
-            "osi": false,
+            "reference": "https://spdx.org/licenses/PostgreSQL.html",
+            "osi": true,
             "fsf": false,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
             "urls": [
-                "https://spdx.org/licenses/Python-2.0.html"
+                "http://www.postgresql.org/about/licence",
+                "https://opensource.org/licenses/PostgreSQL"
             ]
         },
         {
             "id": "Python-2.0",
             "name": "Python License 2.0",
             "family": "Python-2.0",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "reference": "https://spdx.org/licenses/Python-2.0.html",
+            "osi": true,
+            "fsf": true,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                "Confirm this license that was approved by IP legal as linked"
-            ],
             "urls": [
-                "https://spdx.org/licenses/Python-2.0.html"
+                "https://opensource.org/licenses/Python-2.0"
             ]
         },
         {
             "id": "Python-2.0.1",
             "name": "Python License 2.0.1",
             "family": "Python-2.0.1",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/Python-2.0.1.html",
             "osi": false,
             "fsf": false,
             "usagePolicy": "needs-review",
@@ -2770,14 +2915,16 @@
                 "NEEDS-IP-LEGAL-REVIEW"
             ],
             "urls": [
-                "https://spdx.org/licenses/Python-2.0.1.html"
+                "https://www.python.org/download/releases/2.0.1/license/",
+                "https://docs.python.org/3/license.html",
+                "https://github.com/python/cpython/blob/main/LICENSE"
             ]
         },
         {
             "id": "RSA-MD",
             "name": "RSA Message-Digest License",
             "family": "RSA",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/RSA-MD.html",
             "osi": false,
             "fsf": false,
             "usagePolicy": "allow",
@@ -2785,29 +2932,29 @@
                 "APPROVED"
             ],
             "urls": [
-                "https://spdx.org/licenses/RSA-MD.html"
+                "http://www.faqs.org/rfcs/rfc1321.html"
             ]
         },
         {
             "id": "Ruby",
             "name": "Ruby License",
             "family": "Ruby",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/Ruby.html",
             "osi": false,
-            "fsf": false,
+            "fsf": true,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
             "urls": [
-                "https://spdx.org/licenses/Ruby.html"
+                "http://www.ruby-lang.org/en/LICENSE.txt"
             ]
         },
         {
             "id": "SCEA",
             "name": "SCEA Shared Source License",
             "family": "SCEA",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/SCEA.html",
             "osi": false,
             "fsf": false,
             "usagePolicy": "needs-review",
@@ -2815,14 +2962,30 @@
                 "NEEDS-APPROVAL"
             ],
             "urls": [
-                "https://spdx.org/licenses/SCEA.html"
+                "http://research.scea.com/scea_shared_source_license.html"
             ]
         },
         {
             "id": "SISSL",
             "name": "Sun Industry Standards Source License v1.1",
             "family": "SISSL",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/SISSL.html",
+            "osi": true,
+            "fsf": true,
+            "usagePolicy": "allow",
+            "annotationRefs": [
+                "APPROVED"
+            ],
+            "urls": [
+                "http://www.openoffice.org/licenses/sissl_license.html",
+                "https://opensource.org/licenses/SISSL"
+            ]
+        },
+        {
+            "id": "SISSL-1.2",
+            "name": "Sun Industry Standards Source License v1.2",
+            "family": "SISSL",
+            "reference": "https://spdx.org/licenses/SISSL-1.2.html",
             "osi": false,
             "fsf": false,
             "usagePolicy": "allow",
@@ -2830,14 +2993,72 @@
                 "APPROVED"
             ],
             "urls": [
-                "https://spdx.org/licenses/SISSL.html"
+                "http://gridscheduler.sourceforge.net/Gridengine_SISSL_license.html"
+            ]
+        },
+        {
+            "id": "Spencer-86",
+            "name": "Spencer License 86",
+            "family": "Spencer",
+            "reference": "https://spdx.org/licenses/Spencer-86.html",
+            "osi": false,
+            "fsf": false,
+            "usagePolicy": "allow",
+            "annotationRefs": [
+                "APPROVED"
+            ],
+            "notes": [
+                "Sometimes identified by the invalid SPDX ID \"Harry-Spencer\""
+            ],
+            "urls": [
+                "https://spdx.org/licenses/Spencer-86.html",
+                "https://fedoraproject.org/wiki/Licensing/Henry_Spencer_Reg-Ex_Library_License"
+            ]
+        },
+        {
+            "id": "Spencer-94",
+            "name": "Spencer License 94",
+            "family": "Spencer",
+            "reference": "https://spdx.org/licenses/Spencer-94.html",
+            "osi": false,
+            "fsf": false,
+            "usagePolicy": "allow",
+            "annotationRefs": [
+                "APPROVED"
+            ],
+            "notes": [
+                "Sometimes identified by the invalid SPDX ID \"Harry-Spencer\""
+            ],
+            "urls": [
+                "https://spdx.org/licenses/Spencer-94.html",
+                "https://fedoraproject.org/wiki/Licensing/Henry_Spencer_Reg-Ex_Library_License",
+                "https://metacpan.org/release/KNOK/File-MMagic-1.30/source/COPYING#L28"
+            ]
+        },
+        {
+            "id": "Spencer-99",
+            "name": "Spencer License 99",
+            "family": "Spencer",
+            "reference": "https://spdx.org/licenses/Spencer-99.html",
+            "osi": false,
+            "fsf": false,
+            "usagePolicy": "allow",
+            "annotationRefs": [
+                "APPROVED"
+            ],
+            "notes": [
+                "Sometimes identified by the invalid SPDX ID \"Harry-Spencer\""
+            ],
+            "urls": [
+                "https://spdx.org/licenses/Spencer-99.html",
+                "http://www.opensource.apple.com/source/tcl/tcl-5/tcl/generic/regfronts.c"
             ]
         },
         {
             "id": "SSPL-1.0",
             "name": "Server Side Public License, v 1",
             "family": "SSPL",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/SSPL-1.0.html",
             "osi": false,
             "fsf": false,
             "usagePolicy": "needs-review",
@@ -2845,22 +3066,7 @@
                 "NEEDS-APPROVAL"
             ],
             "urls": [
-                "https://spdx.org/licenses/SSPL-1.0.html"
-            ]
-        },
-        {
-            "id": "SISSL-1.2",
-            "name": "Sun Industry Standards Source License v1.2",
-            "family": "SISSL",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
-            "usagePolicy": "allow",
-            "annotationRefs": [
-                "APPROVED"
-            ],
-            "urls": [
-                "https://spdx.org/licenses/SISSL-1.2.html"
+                "https://www.mongodb.com/licensing/server-side-public-license"
             ]
         },
         {
@@ -2886,7 +3092,7 @@
             "id": "Unicode-DFS-2015",
             "name": "Unicode License Agreement - Data Files and Software (2015)",
             "family": "Unicode",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/Unicode-DFS-2015.html",
             "osi": false,
             "fsf": false,
             "usagePolicy": "allow",
@@ -2894,29 +3100,31 @@
                 "APPROVED"
             ],
             "urls": [
-                "https://spdx.org/licenses/Unicode-DFS-2015.html"
+                "https://web.archive.org/web/20151224134844/http://unicode.org/copyright.html"
             ]
         },
         {
             "id": "Unicode-DFS-2016",
             "name": "Unicode License Agreement - Data Files and Software (2016)",
             "family": "Unicode",
-            "reference": "",
-            "osi": false,
+            "reference": "https://spdx.org/licenses/Unicode-DFS-2016.html",
+            "osi": true,
             "fsf": false,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
             "urls": [
-                "https://spdx.org/licenses/Unicode-DFS-2016.html"
+                "https://www.unicode.org/license.txt",
+                "http://web.archive.org/web/20160823201924/http://www.unicode.org/copyright.html#License",
+                "http://www.unicode.org/copyright.html"
             ]
         },
         {
             "id": "Unicode-TOU",
             "name": "Unicode Terms of Use",
             "family": "Unicode",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/Unicode-TOU.html",
             "osi": false,
             "fsf": false,
             "usagePolicy": "allow",
@@ -2924,63 +3132,66 @@
                 "APPROVED"
             ],
             "urls": [
-                "https://spdx.org/licenses/Unicode-TOU.html"
+                "http://web.archive.org/web/20140704074106/http://www.unicode.org/copyright.html",
+                "http://www.unicode.org/copyright.html"
             ]
         },
         {
-            "id": "",
-            "name": "Unix-crypt",
-            "family": "Unix-crypt",
-            "reference": "",
+            "id": "UnixCrypt",
+            "name": "UnixCrypt License",
+            "family": "UnixCrypt",
+            "reference": "https://spdx.org/licenses/UnixCrypt.html",
             "osi": false,
             "fsf": false,
             "usagePolicy": "allow",
             "annotationRefs": [
-                "APPROVED",
-                "NO-SPDX"
+                "APPROVED"
             ],
             "notes": [
-                "BSD 3-Clause \"New\" or \"Revised\" License"
+                "Similar to the BSD 3-Clause \"New\" or \"Revised\" License"
             ],
             "urls": [
-                "https://github.com/mogest/unix-crypt/blob/master/LICENSE"
+                "https://foss.heptapod.net/python-libs/passlib/-/blob/branch/stable/LICENSE#L70",
+                "https://opensource.apple.com/source/JBoss/JBoss-737/jboss-all/jetty/src/main/org/mortbay/util/UnixCrypt.java.auto.html",
+                "https://archive.eclipse.org/jetty/8.0.1.v20110908/xref/org/eclipse/jetty/http/security/UnixCrypt.html"
             ]
         },
         {
             "id": "Vim",
             "name": "Vim License",
             "family": "Vim",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/Vim.html",
             "osi": false,
-            "fsf": false,
+            "fsf": true,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL"
             ],
             "urls": [
-                "https://spdx.org/licenses/Vim.html"
+                "http://vimdoc.sourceforge.net/htmldoc/uganda.html"
             ]
         },
         {
             "id": "W3C",
             "name": "W3C Software Notice and License (2002-12-31)",
             "family": "W3C",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "reference": "https://spdx.org/licenses/W3C.html",
+            "osi": true,
+            "fsf": true,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
             "urls": [
-                "https://spdx.org/licenses/W3C.html"
+                "http://www.w3.org/Consortium/Legal/2002/copyright-software-20021231.html",
+                "https://opensource.org/licenses/W3C"
             ]
         },
         {
             "id": "W3C-19980720",
             "name": "W3C Software Notice and License (1998-07-20)",
             "family": "W3C",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/W3C-19980720.html",
             "osi": false,
             "fsf": false,
             "usagePolicy": "allow",
@@ -2988,14 +3199,14 @@
                 "APPROVED"
             ],
             "urls": [
-                "https://spdx.org/licenses/W3C-19980720.html"
+                "http://www.w3.org/Consortium/Legal/copyright-software-19980720.html"
             ]
         },
         {
             "id": "W3C-20150513",
             "name": "W3C Software Notice and Document License (2015-05-13)",
             "family": "W3C",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/W3C-20150513.html",
             "osi": false,
             "fsf": false,
             "usagePolicy": "allow",
@@ -3003,14 +3214,14 @@
                 "APPROVED"
             ],
             "urls": [
-                "https://spdx.org/licenses/W3C-20150513.html"
+                "https://www.w3.org/Consortium/Legal/2015/copyright-software-and-document"
             ]
         },
         {
             "id": "w3m",
             "name": "w3m License",
             "family": "w3m",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/w3m.html",
             "osi": false,
             "fsf": false,
             "usagePolicy": "needs-review",
@@ -3019,44 +3230,45 @@
                 "NEEDS-IP-LEGAL-REVIEW"
             ],
             "urls": [
-                "https://spdx.org/licenses/w3m.html"
+                "https://github.com/tats/w3m/blob/master/COPYING"
             ]
         },
         {
             "id": "WTFPL",
             "name": "Do What The F*ck You Want To Public License",
             "family": "WTFPL",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/WTFPL.html",
             "osi": false,
-            "fsf": false,
+            "fsf": true,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
             "urls": [
-                "https://spdx.org/licenses/WTFPL.html"
+                "http://www.wtfpl.net/about/",
+                "http://sam.zoy.org/wtfpl/COPYING"
             ]
         },
         {
             "id": "X11",
             "name": "X11 License",
             "family": "X11",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/X11.html",
             "osi": false,
-            "fsf": false,
+            "fsf": true,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
             "urls": [
-                "https://spdx.org/licenses/X11"
+                "http://www.xfree86.org/3.3.6/COPYRIGHT2.html#3"
             ]
         },
         {
             "id": "X11-distribute-modifications-variant",
             "name": "X11 License Distribution Modification Variant",
             "family": "X11",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/X11-distribute-modifications-variant.html",
             "osi": false,
             "fsf": false,
             "usagePolicy": "allow",
@@ -3064,59 +3276,60 @@
                 "APPROVED"
             ],
             "urls": [
-                "https://spdx.org/licenses/X11-distribute-modifications-variant.html"
+                "https://github.com/mirror/ncurses/blob/master/COPYING"
             ]
         },
         {
             "id": "Xnet",
             "name": "X.Net License",
             "family": "Xnet",
-            "reference": "",
-            "osi": false,
+            "reference": "https://spdx.org/licenses/Xnet.html",
+            "osi": true,
             "fsf": false,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                ""
+            "urls": [
+                "https://opensource.org/licenses/Xnet"
             ]
         },
         {
             "id": "Zend-2.0",
             "name": "Zend License v2.0",
             "family": "Zend",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/Zend-2.0.html",
             "osi": false,
-            "fsf": false,
+            "fsf": true,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                ""
+            "urls": [
+                "https://web.archive.org/web/20130517195954/http://www.zend.com/license/2_00.txt"
             ]
         },
         {
             "id": "Zlib",
             "name": "zlib License",
             "family": "Zlib",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "reference": "https://spdx.org/licenses/Zlib.html",
+            "osi": true,
+            "fsf": true,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
             "urls": [
-                "https://spdx.org/licenses/Zlib.html"
+                "http://www.zlib.net/zlib_license.html",
+                "https://opensource.org/licenses/Zlib"
             ]
         },
         {
             "id": "zlib-acknowledgement",
             "name": "zlib/libpng License with Acknowledgement",
             "family": "zlib",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/zlib-acknowledgement.html",
             "osi": false,
             "fsf": false,
             "usagePolicy": "allow",
@@ -3124,52 +3337,53 @@
                 "APPROVED"
             ],
             "urls": [
-                "https://spdx.org/licenses/zlib-acknowledgement.html"
+                "https://fedoraproject.org/wiki/Licensing/ZlibWithAcknowledgement"
             ]
         },
         {
             "id": "ZPL-1.1",
             "name": "Zope Public License 1.1",
             "family": "ZPL",
-            "reference": "",
+            "reference": "https://spdx.org/licenses/ZPL-1.1.html",
             "osi": false,
             "fsf": false,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                ""
+            "urls": [
+                "http://old.zope.org/Resources/License/ZPL-1.1"
             ]
         },
         {
             "id": "ZPL-2.0",
             "name": "Zope Public License 2.0",
             "family": "ZPL",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "reference": "https://spdx.org/licenses/ZPL-2.0.html",
+            "osi": true,
+            "fsf": true,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                ""
+            "urls": [
+                "http://old.zope.org/Resources/License/ZPL-2.0",
+                "https://opensource.org/licenses/ZPL-2.0"
             ]
         },
         {
             "id": "ZPL-2.1",
             "name": "Zope Public License 2.1",
             "family": "ZPL",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "reference": "https://spdx.org/licenses/ZPL-2.1.html",
+            "osi": true,
+            "fsf": true,
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                ""
+            "urls": [
+                "http://old.zope.org/Resources/ZPL/"
             ]
         }
     ],
