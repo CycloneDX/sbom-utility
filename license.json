@@ -1971,26 +1971,26 @@
         {
             "id": "GPL-1.0",
             "name": "GNU General Public License v1.0 only",
-            "family": "GPL",
-            "reference": "",
+            "family": "GPL-1.0",
+            "reference": "https://spdx.org/licenses/GPL-1.0.html",
             "osi": false,
             "fsf": false,
+            "deprecated": true,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL",
                 "GPL-LINK-WARNING",
-                "NEEDS-GPL-LEGAL-REVIEW",
-                "DEPRECATED"
+                "NEEDS-GPL-LEGAL-REVIEW"
             ],
             "urls": [
-                "https://spdx.org/licenses/GPL-1.0"
+                "https://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html"
             ]
         },
         {
             "id": "GPL-1.0-only",
             "name": "GNU General Public License v1.0 only",
-            "family": "GPL",
-            "reference": "",
+            "family": "GPL-1.0",
+            "reference": "https://spdx.org/licenses/GPL-1.0-only.html",
             "osi": false,
             "fsf": false,
             "usagePolicy": "needs-review",
@@ -2000,14 +2000,14 @@
                 "NEEDS-GPL-LEGAL-REVIEW"
             ],
             "urls": [
-                "https://spdx.org/licenses/GPL-1.0-only.html"
+                "https://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html"
             ]
         },
         {
             "id": "GPL-1.0-or-later",
             "name": "GNU General Public License v1.0 or later",
-            "family": "GPL",
-            "reference": "",
+            "family": "GPL-1.0",
+            "reference": "https://spdx.org/licenses/GPL-1.0-or-later.html",
             "osi": false,
             "fsf": false,
             "usagePolicy": "needs-review",
@@ -2017,34 +2017,35 @@
                 "NEEDS-GPL-LEGAL-REVIEW"
             ],
             "urls": [
-                "https://spdx.org/licenses/GPL-1.0-or-later.html"
+                "https://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html"
             ]
         },
         {
             "id": "GPL-2.0",
             "name": "GNU General Public License v2.0 only",
-            "family": "GPL",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "family": "GPL-2.0",
+            "reference": "https://spdx.org/licenses/GPL-2.0.html",
+            "osi": true,
+            "fsf": true,
+            "deprecated": true,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL",
                 "GPL-LINK-WARNING",
-                "NEEDS-GPL-LEGAL-REVIEW",
-                "DEPRECATED"
+                "NEEDS-GPL-LEGAL-REVIEW"
             ],
             "urls": [
-                "https://spdx.org/licenses/GPL-2.0"
+                "https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html",
+                "https://opensource.org/licenses/GPL-2.0"
             ]
         },
         {
             "id": "GPL-2.0-only",
             "name": "GNU General Public License v2.0 only",
-            "family": "GPL",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "family": "GPL-2.0",
+            "reference": "https://spdx.org/licenses/GPL-2.0-only.html",
+            "osi": true,
+            "fsf": true,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL",
@@ -2052,16 +2053,17 @@
                 "NEEDS-GPL-LEGAL-REVIEW"
             ],
             "urls": [
-                "https://spdx.org/licenses/GPL-2.0-only.html"
+                "https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html",
+                "https://opensource.org/licenses/GPL-2.0"
             ]
         },
         {
             "id": "GPL-2.0-or-later",
             "name": "GNU General Public License v2.0 or later",
-            "family": "GPL",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "family": "GPL-2.0",
+            "reference": "https://spdx.org/licenses/GPL-2.0-or-later.html",
+            "osi": true,
+            "fsf": true,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL",
@@ -2069,34 +2071,18 @@
                 "NEEDS-GPL-LEGAL-REVIEW"
             ],
             "urls": [
-                "https://spdx.org/licenses/GPL-2.0-or-later.html"
+                "https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html",
+                "https://opensource.org/licenses/GPL-2.0"
             ]
         },
         {
             "id": "GPL-3.0",
             "name": "GNU General Public License v3.0 only",
-            "family": "GPL",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
-            "usagePolicy": "needs-review",
-            "annotationRefs": [
-                "NEEDS-APPROVAL",
-                "GPL-LINK-WARNING",
-                "NEEDS-GPL-LEGAL-REVIEW",
-                "DEPRECATED"
-            ],
-            "urls": [
-                "https://spdx.org/licenses/GPL-3.0"
-            ]
-        },
-        {
-            "id": "GPL-3.0-only",
-            "name": "GNU General Public License v3.0 only",
-            "family": "GPL",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "family": "GPL-3.0",
+            "reference": "https://spdx.org/licenses/GPL-3.0.html",
+            "osi": true,
+            "fsf": true,
+            "deprecated": true,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL",
@@ -2104,16 +2090,35 @@
                 "NEEDS-GPL-LEGAL-REVIEW"
             ],
             "urls": [
-                "https://spdx.org/licenses/GPL-3.0-only.html"
+                "https://www.gnu.org/licenses/gpl-3.0-standalone.html",
+                "https://opensource.org/licenses/GPL-3.0"
+            ]
+        },
+        {
+            "id": "GPL-3.0-only",
+            "name": "GNU General Public License v3.0 only",
+            "family": "GPL-3.0",
+            "reference": "https://spdx.org/licenses/GPL-3.0-only.html",
+            "osi": true,
+            "fsf": true,
+            "usagePolicy": "needs-review",
+            "annotationRefs": [
+                "NEEDS-APPROVAL",
+                "GPL-LINK-WARNING",
+                "NEEDS-GPL-LEGAL-REVIEW"
+            ],
+            "urls": [
+                "https://www.gnu.org/licenses/gpl-3.0-standalone.html",
+                "https://opensource.org/licenses/GPL-3.0"
             ]
         },
         {
             "id": "GPL-3.0-or-later",
             "name": "GNU General Public License v3.0 or later",
             "family": "GPL",
-            "reference": "",
-            "osi": false,
-            "fsf": false,
+            "reference": "https://spdx.org/licenses/GPL-3.0-or-later.html",
+            "osi": true,
+            "fsf": true,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL",
@@ -2121,25 +2126,26 @@
                 "NEEDS-GPL-LEGAL-REVIEW"
             ],
             "urls": [
-                "https://spdx.org/licenses/GPL-3.0-or-later.html"
+                "https://www.gnu.org/licenses/gpl-3.0-standalone.html",
+                "https://opensource.org/licenses/GPL-3.0"
             ]
         },
         {
             "id": "GPL-3.0-with-GCC-exception",
             "name": "GNU General Public License (GPL) w/GCC Runtime Library exception",
-            "family": "GPL",
-            "reference": "",
-            "osi": false,
+            "family": "GPL-3.0",
+            "reference": "https://spdx.org/licenses/GPL-3.0-with-GCC-exception.html",
+            "osi": true,
             "fsf": false,
+            "deprecated": true,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL",
                 "GPL-LINK-WARNING",
-                "NEEDS-GPL-LEGAL-REVIEW",
-                "DEPRECATED"
+                "NEEDS-GPL-LEGAL-REVIEW"
             ],
             "urls": [
-                "https://spdx.org/licenses/GPL-3.0-with-GCC-exception.html"
+                "https://www.gnu.org/licenses/gcc-exception-3.1.html"
             ]
         },
         {
