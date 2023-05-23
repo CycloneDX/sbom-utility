@@ -23,6 +23,7 @@ import (
 	"io"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"text/tabwriter"
 
@@ -49,8 +50,12 @@ const (
 	POLICY_FILTER_KEY_FAMILY       = "family"
 	POLICY_FILTER_KEY_SPDX_ID      = "id"
 	POLICY_FILTER_KEY_NAME         = "name"
-	POLICY_FILTER_KEY_ANNOTATIONS  = "annotations"
+	POLICY_FILTER_KEY_OSI_APPROVED = "osi"
+	POLICY_FILTER_KEY_FSF_APPROVED = "fsf"
+	POLICY_FILTER_KEY_DEPRECATED   = "deprecated"
+	POLICY_FILTER_KEY_REFERENCE    = "reference"
 	POLICY_FILTER_KEY_ALIASES      = "aliases"
+	POLICY_FILTER_KEY_ANNOTATIONS  = "annotations"
 	POLICY_FILTER_KEY_NOTES        = "notes"
 )
 
@@ -59,8 +64,12 @@ var POLICY_LIST_TITLES = []string{
 	POLICY_FILTER_KEY_FAMILY,
 	POLICY_FILTER_KEY_SPDX_ID,
 	POLICY_FILTER_KEY_NAME,
-	POLICY_FILTER_KEY_ANNOTATIONS,
+	POLICY_FILTER_KEY_OSI_APPROVED,
+	POLICY_FILTER_KEY_FSF_APPROVED,
+	POLICY_FILTER_KEY_DEPRECATED,
+	POLICY_FILTER_KEY_REFERENCE,
 	POLICY_FILTER_KEY_ALIASES,
+	POLICY_FILTER_KEY_ANNOTATIONS,
 	POLICY_FILTER_KEY_NOTES,
 }
 var VALID_POLICY_WHERE_FILTER_KEYS = []string{
@@ -68,8 +77,12 @@ var VALID_POLICY_WHERE_FILTER_KEYS = []string{
 	POLICY_FILTER_KEY_FAMILY,
 	POLICY_FILTER_KEY_SPDX_ID,
 	POLICY_FILTER_KEY_NAME,
-	POLICY_FILTER_KEY_ANNOTATIONS,
+	POLICY_FILTER_KEY_OSI_APPROVED,
+	POLICY_FILTER_KEY_FSF_APPROVED,
+	POLICY_FILTER_KEY_DEPRECATED,
+	POLICY_FILTER_KEY_REFERENCE,
 	POLICY_FILTER_KEY_ALIASES,
+	POLICY_FILTER_KEY_ANNOTATIONS,
 	POLICY_FILTER_KEY_NOTES,
 }
 
@@ -425,33 +438,45 @@ func DisplayLicensePoliciesTabbedText(output io.Writer, filteredPolicyMap *slice
 					policy.Family,
 					policy.Id,
 					policy.Name,
-					policy.AnnotationRefs,
+					policy.IsOsiApproved,
+					policy.IsFsfLibre,
+					policy.IsDeprecated,
+					policy.Reference,
 					policy.Aliases,
+					policy.AnnotationRefs,
 					policy.Notes,
 				)
 
 				// TODO: make truncate length configurable
 				for _, line := range lines {
-					fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
-						truncateString(line[0], 16, true), // usage-policy
-						truncateString(line[1], 20, true), // family
-						truncateString(line[2], 20, true), // id
-						truncateString(line[3], 20, true), // name
-						truncateString(line[4], 24, true), // annotation
-						truncateString(line[5], 24, true), // alias
-						truncateString(line[6], 24, true), // note
+					fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+						truncateString(line[0], 16, true),  // usage-policy
+						truncateString(line[1], 20, true),  // family
+						truncateString(line[2], 20, true),  // id
+						truncateString(line[3], 20, true),  // name
+						line[4],                            // IsOSIApproved
+						line[5],                            // IsFsfLibre
+						line[6],                            // IsDeprecated
+						truncateString(line[7], 36, true),  // Reference,
+						truncateString(line[8], 24, true),  // alias
+						truncateString(line[9], 24, true),  // annotation
+						truncateString(line[10], 24, true), // note
 					)
 				}
 
 			} else {
 				// No wrapping needed
-				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
 					truncateString(policy.UsagePolicy, 16, true),                       // usage-policy
 					truncateString(policy.Family, 20, true),                            // family
 					truncateString(policy.Id, 20, true),                                // id
 					truncateString(policy.Name, 20, true),                              // name
-					truncateString(strings.Join(policy.AnnotationRefs, ","), 24, true), // annotation
+					strconv.FormatBool(policy.IsOsiApproved),                           // IsOSIApproved
+					strconv.FormatBool(policy.IsFsfLibre),                              // IsFsfLibre
+					strconv.FormatBool(policy.IsDeprecated),                            // IsDeprecated
+					truncateString(policy.Reference, 36, true),                         // Reference,
 					truncateString(strings.Join(policy.Aliases, ","), 24, true),        // alias
+					truncateString(strings.Join(policy.AnnotationRefs, ","), 24, true), // annotation
 					truncateString(strings.Join(policy.Notes, ","), 24, true),          // note
 				)
 			}
@@ -501,8 +526,12 @@ func DisplayLicensePoliciesCSV(output io.Writer, filteredPolicyMap *slicemultima
 				policy.Family,
 				policy.Id,
 				policy.Name,
-				strings.Join(policy.AnnotationRefs, ", "),
+				strconv.FormatBool(policy.IsOsiApproved),
+				strconv.FormatBool(policy.IsFsfLibre),
+				strconv.FormatBool(policy.IsDeprecated),
+				policy.Reference,
 				strings.Join(policy.Aliases, ", "),
+				strings.Join(policy.AnnotationRefs, ", "),
 				strings.Join(policy.Notes, ", "),
 			)
 
@@ -564,8 +593,12 @@ func DisplayLicensePoliciesMarkdown(output io.Writer, filteredPolicyMap *slicemu
 				policy.Family,
 				policy.Id,
 				policy.Name,
-				strings.Join(policy.AnnotationRefs, ", "),
+				strconv.FormatBool(policy.IsOsiApproved),
+				strconv.FormatBool(policy.IsFsfLibre),
+				strconv.FormatBool(policy.IsDeprecated),
+				policy.Reference,
 				strings.Join(policy.Aliases, ", "),
+				strings.Join(policy.AnnotationRefs, ", "),
 				strings.Join(policy.Notes, ", "),
 			)
 

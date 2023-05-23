@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/CycloneDX/sbom-utility/utils"
@@ -234,6 +235,8 @@ func wrapTableRowText(maxChars int, joinChar string, columns ...interface{}) (ta
 				tableData[i][iCol] = entries[i]
 			}
 			//getLogger().Debugf("tableData: (%v)", tableData)
+		case bool:
+			rowData[iCol] = strconv.FormatBool(column.(bool))
 		default:
 			err = getLogger().Errorf("Unexpected type for report data: type: `%T`, value: `%v`", data, data)
 		}
