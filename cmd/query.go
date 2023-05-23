@@ -576,10 +576,12 @@ func whereFilterMatch(mapObject map[string]interface{}, whereFilters []WhereFilt
 			value = ""
 		}
 
-		// Handle boolean data types in the map by converting them to strings
-		// TODO: support other types and use a switch statement
-		if b, ok := value.(bool); ok {
-			value = strconv.FormatBool(b)
+		// Handle non-string data types in the map by converting them to string
+		switch data := value.(type) {
+		case bool:
+			value = strconv.FormatBool(data)
+		case int:
+			value = strconv.Itoa(data)
 		}
 
 		err = enc.Encode(value)
