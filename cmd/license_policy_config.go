@@ -64,6 +64,7 @@ type LicensePolicy struct {
 	Reference      string   `json:"reference"`
 	IsOsiApproved  bool     `json:"osi"`
 	IsFsfLibre     bool     `json:"fsf"`
+	IsDeprecated   bool     `json:"deprecated"`
 	Family         string   `json:"family"`
 	Name           string   `json:"name"`
 	UsagePolicy    string   `json:"usagePolicy"`
