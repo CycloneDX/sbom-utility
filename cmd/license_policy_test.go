@@ -83,13 +83,14 @@ func innerTestLicensePolicyListCustomAndBuffered(t *testing.T, testInfo *License
 	// Use the test data to set the BOM input file and output format
 	utils.GlobalFlags.InputFile = testInfo.InputFile
 	utils.GlobalFlags.OutputFormat = testInfo.ListFormat
+	utils.GlobalFlags.LicenseFlags.Summary = testInfo.ListSummary
 
 	// TODO: pass GlobalConfig to every Command to allow per-instance changes for tests
 	// !!! IMPORTANT MUST explicitly set the global value for every single test
 	utils.GlobalFlags.LicenseFlags.ListLineWrap = testInfo.ListLineWrap
 
 	// Invoke the actual List command (API)
-	err = ListLicensePolicies(outputWriter, whereFilters)
+	err = ListLicensePolicies(outputWriter, whereFilters, utils.GlobalFlags.LicenseFlags)
 
 	// Restore default license policy file for subsequent tests
 	if testInfo.PolicyFile != "" && testInfo.PolicyFile != DEFAULT_LICENSE_POLICIES {
