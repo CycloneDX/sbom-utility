@@ -68,6 +68,7 @@ type CommandFlags struct {
 	LogOutputIndentCallstack bool
 }
 
+// NOTE: These flags are shared by both the list and policy subcommands
 type LicenseCommandFlags struct {
 	Summary      bool
 	ListLineWrap bool

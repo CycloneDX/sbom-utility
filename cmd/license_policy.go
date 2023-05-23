@@ -23,7 +23,6 @@ import (
 	"io"
 	"os"
 	"sort"
-	"strconv"
 	"strings"
 	"text/tabwriter"
 
@@ -34,6 +33,10 @@ import (
 
 const (
 	SUBCOMMAND_POLICY_LIST = "list"
+)
+
+const (
+	FLAG_LICENSE_POLICY_LIST_SUMMARY_HELP = "summarize licenses and policies when listing in supported formats"
 )
 
 var VALID_SUBCOMMANDS_POLICY = []string{SUBCOMMAND_POLICY_LIST}
@@ -59,31 +62,33 @@ const (
 	POLICY_FILTER_KEY_NOTES        = "notes"
 )
 
-var POLICY_LIST_TITLES = []string{
-	POLICY_FILTER_KEY_USAGE_POLICY,
-	POLICY_FILTER_KEY_FAMILY,
-	POLICY_FILTER_KEY_SPDX_ID,
-	POLICY_FILTER_KEY_NAME,
-	POLICY_FILTER_KEY_OSI_APPROVED,
-	POLICY_FILTER_KEY_FSF_APPROVED,
-	POLICY_FILTER_KEY_DEPRECATED,
-	POLICY_FILTER_KEY_REFERENCE,
-	POLICY_FILTER_KEY_ALIASES,
-	POLICY_FILTER_KEY_ANNOTATIONS,
-	POLICY_FILTER_KEY_NOTES,
-}
-var VALID_POLICY_WHERE_FILTER_KEYS = []string{
-	POLICY_FILTER_KEY_USAGE_POLICY,
-	POLICY_FILTER_KEY_FAMILY,
-	POLICY_FILTER_KEY_SPDX_ID,
-	POLICY_FILTER_KEY_NAME,
-	POLICY_FILTER_KEY_OSI_APPROVED,
-	POLICY_FILTER_KEY_FSF_APPROVED,
-	POLICY_FILTER_KEY_DEPRECATED,
-	POLICY_FILTER_KEY_REFERENCE,
-	POLICY_FILTER_KEY_ALIASES,
-	POLICY_FILTER_KEY_ANNOTATIONS,
-	POLICY_FILTER_KEY_NOTES,
+// var POLICY_LIST_TITLES = []string{
+// 	POLICY_FILTER_KEY_USAGE_POLICY,
+// 	POLICY_FILTER_KEY_FAMILY,
+// 	POLICY_FILTER_KEY_SPDX_ID,
+// 	POLICY_FILTER_KEY_NAME,
+// 	POLICY_FILTER_KEY_OSI_APPROVED,
+// 	POLICY_FILTER_KEY_FSF_APPROVED,
+// 	POLICY_FILTER_KEY_DEPRECATED,
+// 	POLICY_FILTER_KEY_REFERENCE,
+// 	POLICY_FILTER_KEY_ALIASES,
+// 	POLICY_FILTER_KEY_ANNOTATIONS,
+// 	POLICY_FILTER_KEY_NOTES,
+// }
+
+// Describe the column data and their attributes and constraints used for formatting
+var LICENSE_POLICY_LIST_ROW_DATA = []ColumnFormatData{
+	{POLICY_FILTER_KEY_USAGE_POLICY, 16, REPORT_SUMMARY_DATA_TRUE, false},
+	{POLICY_FILTER_KEY_FAMILY, 20, REPORT_SUMMARY_DATA_TRUE, false},
+	{POLICY_FILTER_KEY_SPDX_ID, 20, REPORT_SUMMARY_DATA_TRUE, false},
+	{POLICY_FILTER_KEY_NAME, 20, REPORT_SUMMARY_DATA_TRUE, false},
+	{POLICY_FILTER_KEY_OSI_APPROVED, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{POLICY_FILTER_KEY_FSF_APPROVED, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{POLICY_FILTER_KEY_DEPRECATED, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{POLICY_FILTER_KEY_REFERENCE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{POLICY_FILTER_KEY_ALIASES, 24, false, false},
+	{POLICY_FILTER_KEY_ANNOTATIONS, 24, false, false},
+	{POLICY_FILTER_KEY_NOTES, 24, false, false},
 }
 
 // TODO: remove if we always map the old field names to new ones
@@ -118,6 +123,10 @@ func NewCommandPolicy() *cobra.Command {
 	command.Long = "List caller-supplied, \"allow/deny\"-style policies associated with known software, hardware or data licenses"
 	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
 		FLAG_POLICY_OUTPUT_FORMAT_HELP+LICENSE_POLICY_SUPPORTED_FORMATS)
+	command.Flags().BoolVarP(
+		&utils.GlobalFlags.LicenseFlags.Summary, // re-use license flag
+		FLAG_LICENSE_SUMMARY, "", false,
+		FLAG_LICENSE_POLICY_LIST_SUMMARY_HELP)
 	command.Flags().StringP(FLAG_REPORT_WHERE, "", "", FLAG_REPORT_WHERE_HELP)
 	command.Flags().BoolVarP(
 		&utils.GlobalFlags.LicenseFlags.ListLineWrap,
@@ -163,10 +172,11 @@ func policyCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	}()
 
 	// process filters supplied on the --where command flag
+	// TODO: validate if where clauses reference valid column names (filter keys)
 	whereFilters, err := processWhereFlag(cmd)
 
 	if err == nil {
-		err = ListLicensePolicies(writer, whereFilters)
+		err = ListLicensePolicies(writer, whereFilters, utils.GlobalFlags.LicenseFlags)
 	}
 
 	return
@@ -179,7 +189,7 @@ func processLicensePolicyListResults(err error) {
 	}
 }
 
-func ListLicensePolicies(writer io.Writer, whereFilters []WhereFilter) (err error) {
+func ListLicensePolicies(writer io.Writer, whereFilters []WhereFilter, flags utils.LicenseCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -203,18 +213,18 @@ func ListLicensePolicies(writer io.Writer, whereFilters []WhereFilter) (err erro
 	switch utils.GlobalFlags.OutputFormat {
 	case FORMAT_DEFAULT:
 		// defaults to text if no explicit `--format` parameter
-		err = DisplayLicensePoliciesTabbedText(writer, filteredMap)
+		err = DisplayLicensePoliciesTabbedText(writer, filteredMap, flags)
 	case FORMAT_TEXT:
-		err = DisplayLicensePoliciesTabbedText(writer, filteredMap)
+		err = DisplayLicensePoliciesTabbedText(writer, filteredMap, flags)
 	case FORMAT_CSV:
-		err = DisplayLicensePoliciesCSV(writer, filteredMap)
+		err = DisplayLicensePoliciesCSV(writer, filteredMap, flags)
 	case FORMAT_MARKDOWN:
-		err = DisplayLicensePoliciesMarkdown(writer, filteredMap)
+		err = DisplayLicensePoliciesMarkdown(writer, filteredMap, flags)
 	default:
 		// default to text format for anything else
 		getLogger().Warningf("Unsupported format: `%s`; using default format.",
 			utils.GlobalFlags.OutputFormat)
-		err = DisplayLicensePoliciesTabbedText(writer, filteredMap)
+		err = DisplayLicensePoliciesTabbedText(writer, filteredMap, flags)
 	}
 	return
 }
@@ -397,7 +407,7 @@ func searchForLicenseFamilyName(licenseName string) (found bool, familyName stri
 // NOTE: assumes all entries in the policy config file MUST have family names
 // TODO: Allow caller to pass flag to truncate or not (perhaps with value)
 // TODO: Add a --no-title flag to skip title output
-func DisplayLicensePoliciesTabbedText(output io.Writer, filteredPolicyMap *slicemultimap.MultiMap) (err error) {
+func DisplayLicensePoliciesTabbedText(output io.Writer, filteredPolicyMap *slicemultimap.MultiMap, flags utils.LicenseCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -408,11 +418,11 @@ func DisplayLicensePoliciesTabbedText(output io.Writer, filteredPolicyMap *slice
 	// min-width, tab-width, padding, pad-char, flags
 	w.Init(output, 8, 2, 2, ' ', 0)
 
-	// create underline row from slices of optional and compulsory titles
-	underlines := createTitleTextSeparators(POLICY_LIST_TITLES)
+	// create title row and underline row from slices of optional and compulsory titles
+	titles, underlines := prepareReportTitleData(LICENSE_POLICY_LIST_ROW_DATA, flags.Summary)
 
 	// Add tabs between column titles for the tabWRiter
-	fmt.Fprintf(w, "%s\n", strings.Join(POLICY_LIST_TITLES, "\t"))
+	fmt.Fprintf(w, "%s\n", strings.Join(titles, "\t"))
 	fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
 	// Sort entries for listing by family name keys
@@ -423,16 +433,18 @@ func DisplayLicensePoliciesTabbedText(output io.Writer, filteredPolicyMap *slice
 
 	// output each license policy entry as a line (by sorted key)
 	var lines [][]string
+	var line []string
 
 	for _, key := range keyNames {
 		values, match := filteredPolicyMap.Get(key)
 		getLogger().Tracef("%v (%t)", values, match)
 
 		for _, value := range values {
-			policy := value.(LicensePolicy)
 
 			// Wrap all column text (i.e. flag `--wrap=true`)
 			if utils.GlobalFlags.LicenseFlags.ListLineWrap {
+				policy := value.(LicensePolicy)
+
 				lines, err = wrapTableRowText(24, ",",
 					policy.UsagePolicy,
 					policy.Family,
@@ -465,20 +477,14 @@ func DisplayLicensePoliciesTabbedText(output io.Writer, filteredPolicyMap *slice
 				}
 
 			} else {
-				// No wrapping needed
-				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
-					truncateString(policy.UsagePolicy, 16, true),                       // usage-policy
-					truncateString(policy.Family, 20, true),                            // family
-					truncateString(policy.Id, 20, true),                                // id
-					truncateString(policy.Name, 20, true),                              // name
-					strconv.FormatBool(policy.IsOsiApproved),                           // IsOSIApproved
-					strconv.FormatBool(policy.IsFsfLibre),                              // IsFsfLibre
-					strconv.FormatBool(policy.IsDeprecated),                            // IsDeprecated
-					truncateString(policy.Reference, 36, true),                         // Reference,
-					truncateString(strings.Join(policy.Aliases, ","), 24, true),        // alias
-					truncateString(strings.Join(policy.AnnotationRefs, ","), 24, true), // annotation
-					truncateString(strings.Join(policy.Notes, ","), 24, true),          // note
+				// TODO surface error data to top-level command
+				line, _ = prepareReportLineData(
+					value.(LicensePolicy),
+					LICENSE_POLICY_LIST_ROW_DATA,
+					flags.Summary,
 				)
+				fmt.Fprintf(w, "%s\n", strings.Join(line, "\t"))
+
 			}
 		}
 	}
@@ -486,7 +492,7 @@ func DisplayLicensePoliciesTabbedText(output io.Writer, filteredPolicyMap *slice
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplayLicensePoliciesCSV(output io.Writer, filteredPolicyMap *slicemultimap.MultiMap) (err error) {
+func DisplayLicensePoliciesCSV(output io.Writer, filteredPolicyMap *slicemultimap.MultiMap, flags utils.LicenseCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -494,8 +500,11 @@ func DisplayLicensePoliciesCSV(output io.Writer, filteredPolicyMap *slicemultima
 	w := csv.NewWriter(output)
 	defer w.Flush()
 
-	if err = w.Write(POLICY_LIST_TITLES); err != nil {
-		return getLogger().Errorf("error writing to output (%v): %s", POLICY_LIST_TITLES, err)
+	// Create title row data as []string
+	titles, _ := prepareReportTitleData(LICENSE_POLICY_LIST_ROW_DATA, flags.Summary)
+
+	if err = w.Write(titles); err != nil {
+		return getLogger().Errorf("error writing to output (%v): %s", titles, err)
 	}
 
 	// Retrieve keys for policies to list
@@ -519,24 +528,15 @@ func DisplayLicensePoliciesCSV(output io.Writer, filteredPolicyMap *slicemultima
 		getLogger().Tracef("%v (%t)", values, match)
 
 		for _, value := range values {
-			policy := value.(LicensePolicy)
-			line = nil
-			line = append(line,
-				policy.UsagePolicy,
-				policy.Family,
-				policy.Id,
-				policy.Name,
-				strconv.FormatBool(policy.IsOsiApproved),
-				strconv.FormatBool(policy.IsFsfLibre),
-				strconv.FormatBool(policy.IsDeprecated),
-				policy.Reference,
-				strings.Join(policy.Aliases, ", "),
-				strings.Join(policy.AnnotationRefs, ", "),
-				strings.Join(policy.Notes, ", "),
+			// TODO surface error data to top-level command
+			line, _ = prepareReportLineData(
+				value.(LicensePolicy),
+				LICENSE_POLICY_LIST_ROW_DATA,
+				flags.Summary,
 			)
 
 			if err = w.Write(line); err != nil {
-				getLogger().Errorf("csv.Write: %w", err)
+				err = getLogger().Errorf("csv.Write: %w", err)
 			}
 		}
 	}
@@ -544,15 +544,18 @@ func DisplayLicensePoliciesCSV(output io.Writer, filteredPolicyMap *slicemultima
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplayLicensePoliciesMarkdown(output io.Writer, filteredPolicyMap *slicemultimap.MultiMap) (err error) {
+func DisplayLicensePoliciesMarkdown(output io.Writer, filteredPolicyMap *slicemultimap.MultiMap, flags utils.LicenseCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
+	// Create title row data as []string
+	titles, _ := prepareReportTitleData(LICENSE_POLICY_LIST_ROW_DATA, flags.Summary)
+
 	// create title row
-	titleRow := createMarkdownRow(POLICY_LIST_TITLES)
+	titleRow := createMarkdownRow(titles)
 	fmt.Fprintf(output, "%s\n", titleRow)
 
-	alignments := createMarkdownColumnAlignment(POLICY_LIST_TITLES)
+	alignments := createMarkdownColumnAlignment(titles)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(output, "%s\n", alignmentRow)
 
@@ -580,28 +583,12 @@ func DisplayLicensePoliciesMarkdown(output io.Writer, filteredPolicyMap *slicemu
 		getLogger().Tracef("%v (%t)", values, match)
 
 		for _, value := range values {
-			policy, ok := value.(LicensePolicy)
-
-			if !ok {
-				getLogger().Errorf("%s", MSG_LICENSE_INVALID_POLICY)
-				os.Exit(ERROR_APPLICATION)
-			}
-
-			// reset loop variables for new assignments
-			line = nil
-			line = append(line, policy.UsagePolicy,
-				policy.Family,
-				policy.Id,
-				policy.Name,
-				strconv.FormatBool(policy.IsOsiApproved),
-				strconv.FormatBool(policy.IsFsfLibre),
-				strconv.FormatBool(policy.IsDeprecated),
-				policy.Reference,
-				strings.Join(policy.Aliases, ", "),
-				strings.Join(policy.AnnotationRefs, ", "),
-				strings.Join(policy.Notes, ", "),
+			// TODO surface error data to top-level command
+			line, _ = prepareReportLineData(
+				value.(LicensePolicy),
+				LICENSE_POLICY_LIST_ROW_DATA,
+				flags.Summary,
 			)
-
 			lineRow = createMarkdownRow(line)
 			fmt.Fprintf(output, "%s\n", lineRow)
 		}

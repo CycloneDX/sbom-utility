@@ -542,9 +542,6 @@ func TestLicensePolicyFamilyUsagePolicyConflict(t *testing.T) {
 func TestLicensePolicyCustomListGoodBadMaybe(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
 	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
-	// Assure all titles appear in output
-	lti.ResultLineContainsValues = POLICY_LIST_TITLES
-	lti.ResultLineContainsValuesAtLineNum = 0
 
 	outputBuffer, err := innerTestLicensePolicyList(t, lti)
 
