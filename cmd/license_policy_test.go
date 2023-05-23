@@ -699,7 +699,7 @@ func TestLicensePolicyMatchByFamilyNameBadExpression(t *testing.T) {
 
 //-----------------------------------------------------------------------------
 // Test --wrap flag
-// i.e., wraps policy (lines) where mult. URLs, Notes or Annotations are found
+// i.e., wraps policy (lines) where multiple URLs, Notes or Annotations are found
 //-----------------------------------------------------------------------------
 
 func TestLicensePolicyListWrapFalse(t *testing.T) {
