@@ -833,3 +833,10 @@ func TestLicensePolicyListWhereAliases(t *testing.T) {
 	lti.ResultExpectedLineCount = 3
 	innerTestLicensePolicyList(t, lti)
 }
+
+func TestLicensePolicyListWhereDeprecatedTrue(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
+	lti.WhereClause = "deprecated=true"
+	lti.ResultExpectedLineCount = 17 // 15 matches + 2 title rows
+	innerTestLicensePolicyList(t, lti)
+}

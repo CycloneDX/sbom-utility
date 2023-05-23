@@ -2410,7 +2410,6 @@
             "osi": true,
             "fsf": true,
             "usagePolicy": "allow",
-            "notes":["None of the licenses: `MIT-iOS`, `MIT-1.0`, `MIT-1.0` or `MIT-1.0` have SPDX IDs"],
             "annotationRefs": [
                 "APPROVED"
             ],
