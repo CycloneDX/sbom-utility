@@ -146,11 +146,11 @@
             "reference": "https://spdx.org/licenses/AGPL-1.0.html",
             "osi": false,
             "fsf": false,
+            "deprecated": true,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL",
-                "AGPL-WARNING",
-                "DEPRECATED"
+                "AGPL-WARNING"
             ],
             "urls": [
                 "http://www.affero.org/oagpl.html"
@@ -195,11 +195,11 @@
             "reference": "https://spdx.org/licenses/AGPL-3.0.html",
             "osi": true,
             "fsf": true,
+            "deprecated": true,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL",
-                "AGPL-WARNING",
-                "DEPRECATED"
+                "AGPL-WARNING"
             ],
             "urls": [
                 "https://www.gnu.org/licenses/agpl.txt",
@@ -493,10 +493,10 @@
             "reference": "https://spdx.org/licenses/BSD-2-Clause-FreeBSD.html",
             "osi": false,
             "fsf": true,
+            "deprecated": true,
             "usagePolicy": "allow",
             "annotationRefs": [
-                "APPROVED",
-                "DEPRECATED"
+                "APPROVED"
             ],
             "urls": [
                 "http://www.freebsd.org/copyright/freebsd-license.html"
@@ -509,10 +509,10 @@
             "reference": "https://spdx.org/licenses/BSD-2-Clause-NetBSD.html",
             "osi": false,
             "fsf": true,
+            "deprecated": true,
             "usagePolicy": "allow",
             "annotationRefs": [
-                "APPROVED",
-                "DEPRECATED"
+                "APPROVED"
             ],
             "urls": [
                 "http://www.netbsd.org/about/redistribution.html#default"
@@ -1623,8 +1623,7 @@
             "deprecated": true,
             "usagePolicy": "needs-review",
             "annotationRefs": [
-                "NEEDS-APPROVAL",
-                "DEPRECATED"
+                "NEEDS-APPROVAL"
             ],
             "urls": [
                 "https://www.gnu.org/licenses/old-licenses/fdl-1.1.txt"
@@ -1653,7 +1652,6 @@
             "reference":"https://spdx.org/licenses/GFDL-1.1-invariants-or-later.html",
             "osi": false,
             "fsf": false,
-            "deprecated": false,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL"
@@ -1669,7 +1667,6 @@
             "reference":"https://spdx.org/licenses/GFDL-1.1-no-invariants-only.html",
             "osi": false,
             "fsf": false,
-            "deprecated": false,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL"
@@ -1685,7 +1682,6 @@
             "reference": "https://spdx.org/licenses/GFDL-1.1-no-invariants-or-later.html",
             "osi": false,
             "fsf": false,
-            "deprecated": false,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL"
@@ -1701,7 +1697,6 @@
             "reference": "https://spdx.org/licenses/GFDL-1.1-only.html",
             "osi": false,
             "fsf": true,
-            "deprecated": false,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL"
@@ -1717,7 +1712,6 @@
             "reference": "https://spdx.org/licenses/GFDL-1.1-or-later.html",
             "osi": false,
             "fsf": true,
-            "deprecated": false,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL"
@@ -1736,8 +1730,7 @@
             "deprecated": true,
             "usagePolicy": "needs-review",
             "annotationRefs": [
-                "NEEDS-APPROVAL",
-                "DEPRECATED"
+                "NEEDS-APPROVAL"
             ],
             "urls": [
                 "https://www.gnu.org/licenses/old-licenses/fdl-1.2.txt"
@@ -1750,7 +1743,6 @@
             "reference": "https://spdx.org/licenses/GFDL-1.2-invariants-only.html",
             "osi": false,
             "fsf": false,
-            "deprecated": false,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL"
@@ -1766,7 +1758,6 @@
             "reference": "https://spdx.org/licenses/GFDL-1.2-invariants-or-later.html",
             "osi": false,
             "fsf": false,
-            "deprecated": false,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL"
@@ -1782,7 +1773,6 @@
             "reference": "https://spdx.org/licenses/GFDL-1.2-no-invariants-only.html",
             "osi": false,
             "fsf": false,
-            "deprecated": false,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL"
@@ -1798,7 +1788,6 @@
             "reference": "https://spdx.org/licenses/GFDL-1.2-no-invariants-or-later.html",
             "osi": false,
             "fsf": false,
-            "deprecated": false,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL"
@@ -1814,7 +1803,6 @@
             "reference": "https://spdx.org/licenses/GFDL-1.2-only.html",
             "osi": false,
             "fsf": true,
-            "deprecated": false,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL"
@@ -1830,7 +1818,6 @@
             "reference": "https://spdx.org/licenses/GFDL-1.2-or-later.html",
             "osi": false,
             "fsf": true,
-            "deprecated": false,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL"
@@ -1849,8 +1836,7 @@
             "deprecated": true,
             "usagePolicy": "needs-review",
             "annotationRefs": [
-                "NEEDS-APPROVAL",
-                "DEPRECATED"
+                "NEEDS-APPROVAL"
             ],
             "urls": [
                 "https://www.gnu.org/licenses/fdl-1.3.txt"
@@ -1863,7 +1849,6 @@
             "reference": "https://spdx.org/licenses/GFDL-1.3-invariants-only.html",
             "osi": false,
             "fsf": false,
-            "deprecated": false,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL"
@@ -1879,7 +1864,6 @@
             "reference": "https://spdx.org/licenses/GFDL-1.3-invariants-or-later.html",
             "osi": false,
             "fsf": false,
-            "deprecated": false,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL"
@@ -1895,7 +1879,6 @@
             "reference": "https://spdx.org/licenses/GFDL-1.3-no-invariants-only.html",
             "osi": false,
             "fsf": false,
-            "deprecated": false,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL"
@@ -1911,7 +1894,6 @@
             "reference": "https://spdx.org/licenses/GFDL-1.3-no-invariants-or-later.html",
             "osi": false,
             "fsf": false,
-            "deprecated": false,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL"
@@ -1927,7 +1909,6 @@
             "reference": "https://spdx.org/licenses/GFDL-1.3-only.html",
             "osi": false,
             "fsf": true,
-            "deprecated": false,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL"
@@ -1943,7 +1924,6 @@
             "reference": "https://spdx.org/licenses/GFDL-1.3-or-later.html",
             "osi": false,
             "fsf": true,
-            "deprecated": false,
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL"
@@ -2326,8 +2306,7 @@
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL",
-                "LGPL-LINK-WARNING",
-                "DEPRECATED"
+                "LGPL-LINK-WARNING"
             ],
             "urls": [
                 "https://www.gnu.org/licenses/old-licenses/lgpl-2.1-standalone.html",
@@ -3394,7 +3373,6 @@
         "NEEDS-APPROVAL": "Needs legal approval for product or service usage, ok for internal use.",
         "NEEDS-IP-LEGAL-REVIEW": "License needs review by IP legal team for usage determination",
         "NO-SPDX": "No SPDX ID exists for license.",
-        "DEPRECATED": "Deprecated SPDX ID",
         "AGPL-WARNING": "Can’t be linked in any way (no static or dynamic linking) to product code. Any interaction needs to be at arms length through the command line or other system level interaction. This will need your executive’s approval, so be sure to connect with your release manager or squad leader as soon as you identify the need to use this license.",
         "GPL-LINK-WARNING": "Can’t be linked in any way (no static or dynamic linking) to product code. Any interaction needs to be at arms length through the command line or other system level interaction. This will need your executive’s approval, so be sure to connect with your release manager or squad leader as soon as you identify the need to use this license.",
         "LGPL-LINK-WARNING": "Only dynamic linking is allowed to product code. This license needs management approval.",
