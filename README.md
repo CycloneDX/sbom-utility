@@ -4,7 +4,7 @@
 
 This utility was designed to be an API platform used initially to **validate CycloneDX** or **SPDX Software Bills-of-Materials (BOMs)** against versioned JSON schemas, as published by their respective communities, as well as customized schema variants provided by companies or organizations that have stricter BOM compliance requirements.
 
-The utility has now grown to include a rich set of commands, listed below, that can be used for create filterable reports via a SQL-like **query** capability. These commands can  extract data from BOMs that enables verification of information supporting [BOM use cases](#cyclonedx-use-cases) or any custom security and compliance requirements in various output formats
+The utility has now grown to include a rich set of commands, listed below, that can be used for create filtered reports in many formats (e.g., csv, md) using the utility's powerful, SQL-like **query** capability. These commands can  extract data from BOMs that enables verification of information supporting [BOM use cases](#cyclonedx-use-cases) or any custom security and compliance requirements.
 
 ## Command Overview
 
