@@ -48,8 +48,16 @@ const (
 	LC_TYPE_EXPRESSION
 )
 
-// Declare a fixed-sized array for LC type names
-var LC_TYPE_NAMES = [...]string{"invalid", "id", "name", "expression"}
+// LicenseChoice - corresponding (name) values for license choice types
+const (
+	LC_VALUE_INVALID    = "invalid"
+	LC_VALUE_ID         = "id"
+	LC_VALUE_NAME       = "name"
+	LC_VALUE_EXPRESSION = "expression"
+)
+
+// Declare a fixed-sized array for LC type name indexed lookup
+var LC_TYPE_NAMES = [...]string{LC_VALUE_INVALID, LC_VALUE_ID, LC_VALUE_NAME, LC_VALUE_EXPRESSION}
 
 const (
 	LC_LOC_UNKNOWN = iota
@@ -57,12 +65,6 @@ const (
 	LC_LOC_METADATA
 	LC_LOC_COMPONENTS
 	LC_LOC_SERVICES
-)
-
-const (
-	LC_VALUE_ID         = "id"
-	LC_VALUE_NAME       = "name"
-	LC_VALUE_EXPRESSION = "expression"
 )
 
 var CDX_LICENSE_LOCATION_NAMES = map[int]string{
@@ -75,18 +77,18 @@ var CDX_LICENSE_LOCATION_NAMES = map[int]string{
 
 // Note: the "License" property is used as hashmap key
 type LicenseInfo struct {
-	UsagePolicy            string `json:"usage-policy"`
-	LicenseChoiceTypeValue int    `json:"license-type-value"`
-	LicenseChoiceType      string `json:"license-type"`
-	License                string `json:"license"`
-	ResourceName           string `json:"resource-name"`
-	BomRef                 string `json:"bom-ref"`
-	BomLocationValue       int    `json:"bom-location-value"`
-	BomLocation            string `json:"bom-location"`
-	LicenseChoice          schema.CDXLicenseChoice
-	Policy                 LicensePolicy
-	Component              schema.CDXComponent
-	Service                schema.CDXService
+	UsagePolicy            string                  `json:"usage-policy"`
+	LicenseChoiceTypeValue int                     `json:"license-type-value"`
+	LicenseChoiceType      string                  `json:"license-type"`
+	License                string                  `json:"license"`
+	ResourceName           string                  `json:"resource-name"`
+	BomRef                 string                  `json:"bom-ref"`
+	BomLocationValue       int                     `json:"bom-location-value"`
+	BomLocation            string                  `json:"bom-location"`
+	LicenseChoice          schema.CDXLicenseChoice // Do not marshal
+	Policy                 LicensePolicy           // Do not marshal
+	Component              schema.CDXComponent     // Do not marshal
+	Service                schema.CDXService       // Do not marshal
 }
 
 // License hashmap
