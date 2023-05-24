@@ -234,6 +234,9 @@ func wrapTableRowText(maxChars int, joinChar string, columns ...interface{}) (ta
 			rowData[iCol] = strconv.FormatBool(data)
 		case int:
 			rowData[iCol] = strconv.Itoa(data)
+		case nil:
+			//getLogger().Tracef("nil value for column: `%v`", columnData.DataKey)
+			rowData[iCol] = REPORT_LIST_VALUE_NONE
 		default:
 			err = getLogger().Errorf("Unexpected type for report data: type: `%T`, value: `%v`", data, data)
 		}

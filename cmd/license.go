@@ -37,7 +37,7 @@ var VALID_SUBCOMMANDS_LICENSE = []string{SUBCOMMAND_LICENSE_LIST, SUBCOMMAND_LIC
 // License list default values
 const (
 	LICENSE_LIST_NOT_APPLICABLE = "N/A"
-	LICENSE_NONE                = "NOASSERTION"
+	LICENSE_NO_ASSERTION        = "NOASSERTION"
 )
 
 // LicenseChoice - Choice type
@@ -337,7 +337,7 @@ func hashComponentLicense(cdxComponent schema.CDXComponent, location int, whereF
 		licenseInfo.BomLocationValue = location
 		licenseInfo.ResourceName = cdxComponent.Name
 		licenseInfo.BomRef = cdxComponent.BomRef
-		HashLicenseInfo(LICENSE_NONE, licenseInfo, whereFilters)
+		HashLicenseInfo(LICENSE_NO_ASSERTION, licenseInfo, whereFilters)
 
 		getLogger().Warningf("%s: %s (name:`%s`, version: `%s`, package-url: `%s`)",
 			"No license found for component. bomRef",
@@ -392,7 +392,7 @@ func hashServiceLicense(cdxService schema.CDXService, location int, whereFilters
 		licenseInfo.BomLocationValue = location
 		licenseInfo.ResourceName = cdxService.Name
 		licenseInfo.BomRef = cdxService.BomRef
-		HashLicenseInfo(LICENSE_NONE, licenseInfo, whereFilters)
+		HashLicenseInfo(LICENSE_NO_ASSERTION, licenseInfo, whereFilters)
 
 		getLogger().Warningf("%s: %s (name: `%s`, version: `%s`)",
 			"No license found for service. bomRef",
