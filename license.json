@@ -27,7 +27,7 @@
             "fsf": false,
             "annotationRefs": [
                 "APPROVED",
-                "NO-SPDX"
+                "NO-SPDX-ID"
             ],
             "usagePolicy": "allow",
             "urls": [
@@ -46,7 +46,7 @@
                 "APPROVED"
             ],
             "urls": [
-                ""
+                "https://fedoraproject.org/wiki/Licensing/AdobeLicense"
             ]
         },
         {
@@ -61,7 +61,7 @@
                 "NEEDS-APPROVAL"
             ],
             "urls": [
-                ""
+                "https://fedoraproject.org/wiki/Licensing/AmazonDigitalServicesLicense"
             ]
         },
         {
@@ -75,8 +75,9 @@
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                ""
+            "urls": [
+                "http://opensource.linux-mirror.org/licenses/afl-1.1.txt",
+                "http://wayback.archive.org/web/20021004124254/http://www.opensource.org/licenses/academic.php"
             ]
         },
         {
@@ -90,8 +91,9 @@
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                ""
+            "urls": [
+                "http://opensource.linux-mirror.org/licenses/afl-1.2.txt",
+                "http://wayback.archive.org/web/20021204204652/http://www.opensource.org/licenses/academic.php"
             ]
         },
         {
@@ -105,8 +107,8 @@
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                ""
+            "urls": [
+                "http://wayback.archive.org/web/20060924134533/http://www.opensource.org/licenses/afl-2.0.txt"
             ]
         },
         {
@@ -120,8 +122,8 @@
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                ""
+            "urls": [
+                "http://opensource.linux-mirror.org/licenses/afl-2.1.txt"
             ]
         },
         {
@@ -135,8 +137,9 @@
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                ""
+            "urls": [
+                "http://www.rosenlaw.com/AFL3.0.htm",
+                "https://opensource.org/licenses/afl-3.0"
             ]
         },
         {
@@ -251,8 +254,8 @@
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                ""
+            "urls": [
+              "http://www.apache.org/licenses/LICENSE-1.0"
             ]
         },
         {
@@ -266,12 +269,12 @@
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                "This license has been superseded by Apache License 2.0"
-            ],
             "urls": [
                 "http://apache.org/licenses/LICENSE-1.1",
                 "https://opensource.org/licenses/Apache-1.1"
+            ],
+            "notes": [
+                "Superseded by Apache-2.0"
             ]
         },
         {
@@ -285,15 +288,15 @@
             "annotationRefs": [
                 "APPROVED"
             ],
+            "urls": [
+                "https://www.apache.org/licenses/LICENSE-2.0",
+                "https://opensource.org/licenses/Apache-2.0"
+            ],
             "aliases": [
                 "Apache License, Version 2.0",
                 "Apache License v. 2.0",
                 "Apache License Version 2.0",
                 "Apache Software License v2.0"
-            ],
-            "urls": [
-                "https://www.apache.org/licenses/LICENSE-2.0",
-                "https://opensource.org/licenses/Apache-2.0"
             ]
         },
         {
@@ -366,13 +369,13 @@
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED",
-                "NO-SPDX"
-            ],
-            "notes": [
-                "For Open Source Computer Vision Library"
+                "NO-SPDX-ID"
             ],
             "urls": [
                 "https://github.com/aptogo/FaceTracker/blob/master/OpenCV.framework/Headers/opencv/cv.hpp"
+            ],
+            "notes": [
+                "For Open Source Computer Vision Library"
             ]
         },
         {
@@ -479,11 +482,11 @@
             "annotationRefs": [
                 "APPROVED"
             ],
-            "aliases": [
-                "2-clause BSDL"
-            ],
             "urls": [
                 "https://opensource.org/licenses/BSD-2-Clause"
+            ],
+            "aliases": [
+                "2-clause BSDL"
             ]
         },
         {
@@ -563,14 +566,14 @@
             "annotationRefs": [
                 "APPROVED"
             ],
+            "urls": [
+                "https://opensource.org/licenses/BSD-3-Clause",
+                "https://www.eclipse.org/org/documents/edl-v10.php"
+            ],
             "aliases": [
                 "BSD 3-clause \"New\" License",
                 "New BSD License",
                 "Modified BSD License"
-            ],
-            "urls": [
-                "https://opensource.org/licenses/BSD-3-Clause",
-                "https://www.eclipse.org/org/documents/edl-v10.php"
             ]
         },
         {
@@ -834,7 +837,7 @@
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED",
-                "NO-SPDX"
+                "NO-SPDX-ID"
             ],
             "notes": [
                 "No SPDX IDs for 18 \"BSD-equivalent\" variants listed here:",
@@ -869,12 +872,12 @@
             "annotationRefs": [
                 "APPROVED"
             ],
-            "notes": [
-                "boost C++ libraries"
-            ],
             "urls": [
                 "http://www.boost.org/LICENSE_1_0.txt",
                 "https://opensource.org/licenses/BSL-1.0"
+            ],
+            "notes": [
+                "boost C++ libraries"
             ]
         },
         {
@@ -984,9 +987,6 @@
             "annotationRefs": [
                 "PROHIBITED"
             ],
-            "notes": [
-                "Needs IP legal determination for language-specific variants"
-            ],
             "children": [
                 "CC-BY-NC-1.0",
                 "CC-BY-NC-2.0",
@@ -1008,6 +1008,9 @@
                 "https://creativecommons.org/licenses/by-nc/3.0/de/legalcode",
                 "https://spdx.org/licenses/CC-BY-NC-4.0.html",
                 "https://creativecommons.org/licenses/by-nc/4.0/legalcode"
+            ],
+            "notes": [
+                "Needs IP legal determination for language-specific variants"
             ]
         },
         {
@@ -1020,9 +1023,6 @@
             "usagePolicy": "deny",
             "annotationRefs": [
                 "PROHIBITED"
-            ],
-            "notes": [
-                "Needs IP legal determination for language-specific variants"
             ],
             "children": [
                 "CC-BY-NC-ND-1.0",
@@ -1048,6 +1048,9 @@
                 "https://creativecommons.org/licenses/by-nc-nd/3.0/igo/legalcode",
                 "https://spdx.org/licenses/CC-BY-NC-ND-4.0.html",
                 "https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode"
+            ],
+            "notes": [
+                "Needs IP legal determination for language-specific variants"
             ]
         },
         {
@@ -1060,9 +1063,6 @@
             "usagePolicy": "deny",
             "annotationRefs": [
                 "PROHIBITED"
-            ],
-            "notes": [
-                "Needs IP legal determination for language-specific variants"
             ],
             "children": [
                 "CC-BY-NC-SA-1.0",
@@ -1097,6 +1097,9 @@
                 "https://creativecommons.org/licenses/by-nc-sa/3.0/igo/legalcode",
                 "https://spdx.org/licenses/CC-BY-NC-SA-4.0.html",
                 "https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode"
+            ],
+            "notes": [
+                "Needs IP legal determination for language-specific variants"
             ]
         },
         {
@@ -1109,9 +1112,6 @@
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL"
-            ],
-            "notes": [
-                "Needs IP legal determination for language-specific variants"
             ],
             "children": [
                 "CC-BY-ND-1.0",
@@ -1134,6 +1134,9 @@
                 "https://creativecommons.org/licenses/by-nd/3.0/de/legalcode",
                 "https://spdx.org/licenses/CC-BY-ND-4.0.html",
                 "https://creativecommons.org/licenses/by-nd/4.0/legalcode"
+            ],
+            "notes": [
+                "Needs IP legal determination for language-specific variants"
             ]
         },
         {
@@ -1146,10 +1149,6 @@
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL"
-            ],
-            "notes": [
-                "Needs IP legal determination for language-specific variants",
-                "This license requires separately licensed code and also includes copyleft terms."
             ],
             "children": [
                 "CC-BY-SA-1.0",
@@ -1181,6 +1180,10 @@
                 "https://creativecommons.org/licenses/by-sa/3.0/de/legalcode",
                 "https://spdx.org/licenses/CC-BY-SA-3.0-IGO.html",
                 "https://creativecommons.org/licenses/by-sa/3.0/igo/legalcode"
+            ],
+            "notes": [
+                "Needs IP legal determination for language-specific variants",
+                "This license requires separately licensed code and also includes copyleft terms."
             ]
         },
         {
@@ -1194,11 +1197,11 @@
             "annotationRefs": [
                 "NEEDS-APPROVAL"
             ],
-            "notes": [
-                "This license requires separately licensed code and also includes copyleft terms."
-            ],
             "urls": [
                 "https://creativecommons.org/licenses/by-sa/4.0/legalcode"
+            ],
+            "notes": [
+                "This license requires separately licensed code and also includes copyleft terms."
             ]
         },
         {
@@ -1212,11 +1215,11 @@
             "annotationRefs": [
                 "NEEDS-APPROVAL"
             ],
-            "notes": [
-                "The \"CC-PDDC\" family assures this license is not confused with other \"CC-\" licenses"
-            ],
             "urls": [
                 "https://creativecommons.org/licenses/publicdomain/"
+            ],
+            "notes": [
+                "The \"CC-PDDC\" family assures this license is not confused with other \"CC-\" licenses"
             ]
         },
         {
@@ -1327,13 +1330,13 @@
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED",
-                "NO-SPDX"
-            ],
-            "notes": [
-                "SPDX decided NOT to grant this license a license ID"
+                "NO-SPDX-ID"
             ],
             "urls": [
                 "https://github.com/spdx/license-list-XML/issues/902"
+            ],
+            "notes": [
+                "The SPDX community actively decided not to grant this license an SPDX ID"
             ]
         },
         {
@@ -1391,13 +1394,13 @@
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED",
-                "NO-SPDX"
-            ],
-            "notes": [
-                "The CWI license is the license applied to early releases of Hack"
+                "NO-SPDX-ID"
             ],
             "urls": [
                 "https://nethackwiki.com/wiki/CWI_license"
+            ],
+            "notes": [
+                "The CWI license was applied to early releases of Hack"
             ]
         },
         {
@@ -1453,9 +1456,6 @@
             "reference": "https://spdx.org/licenses/Elastic-2.0.html",
             "osi": false,
             "fsf": false,
-            "aliases": [
-                "ELv2"
-            ],
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL"
@@ -1463,6 +1463,9 @@
             "urls": [
                 "https://www.elastic.co/licensing/elastic-license",
                 "https://github.com/elastic/elasticsearch/blob/master/licenses/ELASTIC-LICENSE-2.0.txt"
+            ],
+            "aliases": [
+                "ELv2"
             ]
         },
         {
@@ -1491,7 +1494,7 @@
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED",
-                "NO-SPDX"
+                "NO-SPDX-ID"
             ],
             "notes": [
                 "An SPDX exists for EPL-1.0; however, custom scans identified a v1.1 variant not in SPDX"
@@ -1942,7 +1945,7 @@
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED",
-                "NO-SPDX"
+                "NO-SPDX-ID"
             ],
             "notes": [
                 "Recognizes additions to the Google BSD license"
@@ -1960,7 +1963,7 @@
             "annotationRefs": [
                 "NEEDS-APPROVAL",
                 "GPL-LINK-WARNING",
-                "NEEDS-GPL-LEGAL-REVIEW"
+                "NEEDS-LEGAL-REVIEW-GPL"
             ],
             "urls": [
                 "https://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html"
@@ -1977,7 +1980,7 @@
             "annotationRefs": [
                 "NEEDS-APPROVAL",
                 "GPL-LINK-WARNING",
-                "NEEDS-GPL-LEGAL-REVIEW"
+                "NEEDS-LEGAL-REVIEW-GPL"
             ],
             "urls": [
                 "https://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html"
@@ -1994,7 +1997,7 @@
             "annotationRefs": [
                 "NEEDS-APPROVAL",
                 "GPL-LINK-WARNING",
-                "NEEDS-GPL-LEGAL-REVIEW"
+                "NEEDS-LEGAL-REVIEW-GPL"
             ],
             "urls": [
                 "https://www.gnu.org/licenses/old-licenses/gpl-1.0-standalone.html"
@@ -2012,7 +2015,7 @@
             "annotationRefs": [
                 "NEEDS-APPROVAL",
                 "GPL-LINK-WARNING",
-                "NEEDS-GPL-LEGAL-REVIEW"
+                "NEEDS-LEGAL-REVIEW-GPL"
             ],
             "urls": [
                 "https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html",
@@ -2030,7 +2033,7 @@
             "annotationRefs": [
                 "NEEDS-APPROVAL",
                 "GPL-LINK-WARNING",
-                "NEEDS-GPL-LEGAL-REVIEW"
+                "NEEDS-LEGAL-REVIEW-GPL"
             ],
             "urls": [
                 "https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html",
@@ -2048,7 +2051,7 @@
             "annotationRefs": [
                 "NEEDS-APPROVAL",
                 "GPL-LINK-WARNING",
-                "NEEDS-GPL-LEGAL-REVIEW"
+                "NEEDS-LEGAL-REVIEW-GPL"
             ],
             "urls": [
                 "https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html",
@@ -2067,7 +2070,7 @@
             "annotationRefs": [
                 "NEEDS-APPROVAL",
                 "GPL-LINK-WARNING",
-                "NEEDS-GPL-LEGAL-REVIEW"
+                "NEEDS-LEGAL-REVIEW-GPL"
             ],
             "urls": [
                 "https://www.gnu.org/licenses/gpl-3.0-standalone.html",
@@ -2085,7 +2088,7 @@
             "annotationRefs": [
                 "NEEDS-APPROVAL",
                 "GPL-LINK-WARNING",
-                "NEEDS-GPL-LEGAL-REVIEW"
+                "NEEDS-LEGAL-REVIEW-GPL"
             ],
             "urls": [
                 "https://www.gnu.org/licenses/gpl-3.0-standalone.html",
@@ -2103,7 +2106,7 @@
             "annotationRefs": [
                 "NEEDS-APPROVAL",
                 "GPL-LINK-WARNING",
-                "NEEDS-GPL-LEGAL-REVIEW"
+                "NEEDS-LEGAL-REVIEW-GPL"
             ],
             "urls": [
                 "https://www.gnu.org/licenses/gpl-3.0-standalone.html",
@@ -2122,7 +2125,7 @@
             "annotationRefs": [
                 "NEEDS-APPROVAL",
                 "GPL-LINK-WARNING",
-                "NEEDS-GPL-LEGAL-REVIEW"
+                "NEEDS-LEGAL-REVIEW-GPL"
             ],
             "urls": [
                 "https://www.gnu.org/licenses/gcc-exception-3.1.html"
@@ -2138,7 +2141,7 @@
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED",
-                "NO-SPDX"
+                "NO-SPDX-ID"
             ],
             "notes": [
                 "Claims to be equivalent to an Apache-2.0 license"
@@ -2205,7 +2208,7 @@
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED",
-                "NO-SPDX"
+                "NO-SPDX-ID"
             ],
             "notes": [
                 "JDBM is a transactional persistence engine for Java"
@@ -2225,7 +2228,7 @@
             "usagePolicy": "allow",
             "annotationRefs": [
                 "APPROVED",
-                "NO-SPDX"
+                "NO-SPDX-ID"
             ],
             "urls": [
                 "http://www.jdom.org/docs/faq.html#a0030"
@@ -2508,9 +2511,8 @@
             "fsf": false,
             "usagePolicy": "allow",
             "annotationRefs": [
-                "APPROVED", "NO-SPDX"
+                "APPROVED", "NO-SPDX-ID"
             ],
-            "notes": ["Should have URLs to examples of each equivalent license."],
             "children": [
                 "MIT-iOS",
                 "MIT-1.0",
@@ -2519,6 +2521,9 @@
             ],
             "urls": [
                 "https://opensource.org/licenses/MIT"
+            ],
+            "notes": [
+                "Need URLs to examples of each equivalent license."
             ]
         },
         {
@@ -2676,7 +2681,7 @@
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL",
-                "NO-SPDX"
+                "NO-SPDX-ID"
             ],
             "notes": [
                 "npm is released under the Artistic License 2.0 (see URL).",
@@ -3057,7 +3062,7 @@
             "usagePolicy": "needs-review",
             "annotationRefs": [
                 "NEEDS-APPROVAL",
-                "NO-SPDX"
+                "NO-SPDX-ID"
             ],
             "notes": [
                 "This license requires separately licensed code."
@@ -3367,11 +3372,10 @@
     ],
     "annotations": {
         "APPROVED": "Approved for use according to license requirements",
-        "SELF-CERTIFY": "Self certification permitted",
         "PROHIBITED": "Prohibited",
         "NEEDS-APPROVAL": "Needs legal approval for product or service usage, ok for internal use.",
         "NEEDS-IP-LEGAL-REVIEW": "License needs review by IP legal team for usage determination",
-        "NO-SPDX": "No SPDX ID exists for license.",
+        "NO-SPDX-ID": "No SPDX ID exists for license.",
         "AGPL-WARNING": "Can’t be linked in any way (no static or dynamic linking) to product code. Any interaction needs to be at arms length through the command line or other system level interaction. This will need your executive’s approval, so be sure to connect with your release manager or squad leader as soon as you identify the need to use this license.",
         "GPL-LINK-WARNING": "Can’t be linked in any way (no static or dynamic linking) to product code. Any interaction needs to be at arms length through the command line or other system level interaction. This will need your executive’s approval, so be sure to connect with your release manager or squad leader as soon as you identify the need to use this license.",
         "LGPL-LINK-WARNING": "Only dynamic linking is allowed to product code. This license needs management approval.",
@@ -3380,6 +3384,6 @@
         "CDLA-PERMISSIVE": "The CDLA Sharing license is preferred for data contributions, but the CDLA permissive can also be approved.",
         "CDLA-SHARING": "This is the preferred license for data contributions, and is also acceptable for use in products and services.",
         "NEEDS-LEGAL-REVIEW-PII": "The legal review ensures privacy, personal information, and other aspects specific to data are reviewed.",
-        "NEEDS-GPL-LEGAL-REVIEW": "Needs legal review to assure GPL requirements are met."
+        "NEEDS-LEGAL-REVIEW-GPL": "Needs legal review to assure GPL requirements are met."
     }
 }

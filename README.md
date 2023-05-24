@@ -425,7 +425,11 @@ This command supports the `--format` flag with any of the following values:
 
 #### License policy flags
 
-##### Wrap flag
+##### list `--summary` flag
+
+Use the `--summary` flag on the `license policy list` command to produce a summary report with a reduced set of column data (i.e., `usage-policy`, `family`, `id`, `name`, `oci` (approved) `fsf` (approved), `deprecated`, and SPDX `reference` URL).
+
+##### list `--wrap` flag
 
 Use the `--wrap` flag to toggle the wrapping of text within columns of the license policy report (`txt` format only) output using the values `true` or `false`. The default value is `false`.
 
@@ -438,15 +442,15 @@ Use the `--wrap` flag to toggle the wrapping of text within columns of the licen
 ```
 
 ```bash
-usage-policy  family     id            name                          annotations                       aliases                            notes
-------------  ------     -------       ----                          -----------                       -------                            -----
-allow         0BSD       0BSD          BSD Zero Clause Lice (20/23)  APPROVED                          Free Public License 1.0. (24/25)
-needs-review  ADSL       ADSL          Amazon Digital Servi (20/31)  NEEDS-APPROVAL
-allow         AFL        AFL-1.1       Academic Free Licens (20/26)  APPROVED
-needs-review  AGPL       AGPL-1.0      Affero General Publi (20/34)  NEEDS-APPROVAL,AGPL-WARN (24/38)
-needs-review  APSL       APSL-1.0      Apple Public Source  (20/27)  NEEDS-APPROVAL
-allow         Adobe      Adobe-2006    Adobe Systems Incorp (20/56)  APPROVED
-allow         Apache     Apache-2.0    Apache License 2.0            APPROVED                          Apache License, Version  (24/105)
+usage-policy  family    id            name                                osi    fsf    deprecated  reference                                    aliases                      annotations                  notes
+------------  ------    --            ----                                ---    ---    ----------  ---------                                    -------                      -----------                  -----
+allow         0BSD      0BSD          BSD Zero Clause License             true   false  false       https://spdx.org/licenses/0BSD.html          Free Public License 1.0.0    APPROVED                     none
+needs-review  ADSL      ADSL          Amazon Digital Services License     false  false  false       https://spdx.org/licenses/ADSL.html          none                         NEEDS-APPROVAL               none
+allow         AFL       AFL-3.0       Academic Free License v3.0          true   true   false       https://spdx.org/licenses/AFL-3.0.html       none                         APPROVED                     none
+needs-review  AGPL      AGPL-1.0      Affero General Public License v1.0  false  false  true        https://spdx.org/licenses/AGPL-1.0.html      none                         NEEDS-APPROVAL,AGPL-WARNING  none
+allow         Adobe     Adobe-2006    Adobe Systems Incorporated CLA      false  false  false       https://spdx.org/licenses/Adobe-2006.html    none                         APPROVED                     none
+allow         Apache    Apache-2.0    Apache License 2.0                  true   true   false       https://spdx.org/licenses/Apache-2.0.html    Apache License, Version 2.0  APPROVED                     none
+allow         Artistic  Artistic-1.0  Artistic License 1.0                true   false  false       https://spdx.org/licenses/Artistic-1.0.html  none                         APPROVED                     none
 ...
 ```
 

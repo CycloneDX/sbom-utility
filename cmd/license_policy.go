@@ -62,6 +62,7 @@ const (
 	POLICY_FILTER_KEY_NOTES        = "notes"
 )
 
+// TODO use to pre-validate --where clause keys
 // var POLICY_LIST_TITLES = []string{
 // 	POLICY_FILTER_KEY_USAGE_POLICY,
 // 	POLICY_FILTER_KEY_FAMILY,
