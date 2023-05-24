@@ -147,7 +147,7 @@ func checkLicenseListEmptyOrNoAssertionOnly(licenseKeys []interface{}) (empty bo
 	if len(licenseKeys) == 0 {
 		empty = true
 		getLogger().Warningf("%s\n", MSG_OUTPUT_NO_LICENSES_FOUND)
-	} else if len(licenseKeys) == 1 && licenseKeys[0].(string) == LICENSE_NONE {
+	} else if len(licenseKeys) == 1 && licenseKeys[0].(string) == LICENSE_NO_ASSERTION {
 		empty = true
 		getLogger().Warningf("%s\n", MSG_OUTPUT_NO_LICENSES_ONLY_NOASSERTION)
 	}

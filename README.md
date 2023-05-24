@@ -2,9 +2,9 @@
 
 # sbom-utility
 
-This utility was designed to be an API platform used initially to **validate CycloneDX or SPDX Software Bills-of-Materials (BOMs)** against versioned JSON schemas, as published by their respective communities, as well as customized schema variants provided by companies or organizations that have stricter BOM compliance requirements.
+This utility was designed to be an API platform used initially to **validate CycloneDX** or **SPDX Software Bills-of-Materials (BOMs)** against versioned JSON schemas, as published by their respective communities, as well as customized schema variants provided by companies or organizations that have stricter BOM compliance requirements.
 
-The utility has now grown to include a rich set of commands, listed below, that can be used to create filterable reports and extract data from BOMs that enables verification of information supporting [BOM use cases](#cyclonedx-use-cases) or any custom security and compliance requirements.
+The utility has now grown to include a rich set of commands, listed below, that can be used for create filtered reports in many formats (e.g., csv, md) using the utility's powerful, SQL-like **query** capability. These commands can  extract data from BOMs that enables verification of information supporting [BOM use cases](#cyclonedx-use-cases) or any custom security and compliance requirements.
 
 ## Command Overview
 
@@ -22,10 +22,10 @@ The utility supports the following commands:
   - Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file (see the `schema` command's [adding schemas](#adding-schemas) section).
 
 - **[validate](#validate)** enables validation of SBOMs against their declared format (e.g., SPDX, CycloneDX) and version (e.g., "2.2", "1.4", etc.) using their JSON schemas.
-  - Derivative, "customized" schemas can be used for verification using the `--variant` flag (e.g., industry or company-specific schemas).
+  - Derivative, **"customized" schemas** can be used for verification using the `--variant` flag (e.g., industry or company-specific schemas).
   - You can override an BOM's declared BOM version using the `--force` flag (e.g., verify a BOM against a newer specification version).
 
-- **[vulnerability](#vulnerability)** produce filterable listings or summarized reports of vulnerabilities from BOM data (i.e., CycloneDX Vulnerability Exploitability eXchange (VEX)) data or independently stored CycloneDX Vulnerability Disclosure Report (VDR) data.
+- **[vulnerability](#vulnerability)** produce filterable listings or summarized reports of vulnerabilities from BOM data (i.e., CycloneDX Vulnerability Exploitability eXchange (**VEX**)) data or independently stored CycloneDX Vulnerability Disclosure Report (**VDR**) data.
 
 ---
 
@@ -425,7 +425,11 @@ This command supports the `--format` flag with any of the following values:
 
 #### License policy flags
 
-##### Wrap flag
+##### list `--summary` flag
+
+Use the `--summary` flag on the `license policy list` command to produce a summary report with a reduced set of column data (i.e., it includes only the following columns:  `usage-policy`, `family`, `id`, `name`, `oci` (approved) `fsf` (approved), `deprecated`, and SPDX `reference` URL).
+
+##### list `--wrap` flag
 
 Use the `--wrap` flag to toggle the wrapping of text within columns of the license policy report (`txt` format only) output using the values `true` or `false`. The default value is `false`.
 
@@ -438,15 +442,36 @@ Use the `--wrap` flag to toggle the wrapping of text within columns of the licen
 ```
 
 ```bash
-usage-policy  family     id            name                          annotations                       aliases                            notes
-------------  ------     -------       ----                          -----------                       -------                            -----
-allow         0BSD       0BSD          BSD Zero Clause Lice (20/23)  APPROVED                          Free Public License 1.0. (24/25)
-needs-review  ADSL       ADSL          Amazon Digital Servi (20/31)  NEEDS-APPROVAL
-allow         AFL        AFL-1.1       Academic Free Licens (20/26)  APPROVED
-needs-review  AGPL       AGPL-1.0      Affero General Publi (20/34)  NEEDS-APPROVAL,AGPL-WARN (24/38)
-needs-review  APSL       APSL-1.0      Apple Public Source  (20/27)  NEEDS-APPROVAL
-allow         Adobe      Adobe-2006    Adobe Systems Incorp (20/56)  APPROVED
-allow         Apache     Apache-2.0    Apache License 2.0            APPROVED                          Apache License, Version  (24/105)
+usage-policy  family    id            name                                osi    fsf    deprecated  reference                                    aliases                      annotations                  notes
+------------  ------    --            ----                                ---    ---    ----------  ---------                                    -------                      -----------                  -----
+allow         0BSD      0BSD          BSD Zero Clause License             true   false  false       https://spdx.org/licenses/0BSD.html          Free Public License 1.0.0    APPROVED                     none
+needs-review  ADSL      ADSL          Amazon Digital Services License     false  false  false       https://spdx.org/licenses/ADSL.html          none                         NEEDS-APPROVAL               none
+allow         AFL       AFL-3.0       Academic Free License v3.0          true   true   false       https://spdx.org/licenses/AFL-3.0.html       none                         APPROVED                     none
+needs-review  AGPL      AGPL-1.0      Affero General Public License v1.0  false  false  true        https://spdx.org/licenses/AGPL-1.0.html      none                         NEEDS-APPROVAL,AGPL-WARNING  none
+allow         Adobe     Adobe-2006    Adobe Systems Incorporated CLA      false  false  false       https://spdx.org/licenses/Adobe-2006.html    none                         APPROVED                     none
+allow         Apache    Apache-2.0    Apache License 2.0                  true   true   false       https://spdx.org/licenses/Apache-2.0.html    Apache License, Version 2.0  APPROVED                     none
+allow         Artistic  Artistic-1.0  Artistic License 1.0                true   false  false       https://spdx.org/licenses/Artistic-1.0.html  none                         APPROVED                     none
+...
+```
+
+###### Example: policy with `--summary` flag
+
+We can also apply the `--summary` flag to get a reduced set of columns that includes only the `usage-policy` along with the essential SDPX license information (e.g., no annotations or notes).
+
+```bash
+./sbom-utility license policy --summary --quiet
+```
+
+```bash
+usage-policy  family    id            name                                osi     fsf     deprecated  reference
+------------  ------    --            ----                                ---     ---     ----------  ---------
+allow         0BSD      0BSD          BSD Zero Clause License             true    false   false       https://spdx.org/licenses/0BSD.html
+needs-review  ADSL      ADSL          Amazon Digital Services License     false   false   false       https://spdx.org/licenses/ADSL.html
+allow         AFL       AFL-3.0       Academic Free License v3.0          true    true    false       https://spdx.org/licenses/AFL-3.0.html
+needs-review  AGPL      AGPL-1.0      Affero General Public License v1.0  false   false   true        https://spdx.org/licenses/AGPL-1.0.html
+allow         Adobe     Adobe-2006    Adobe Systems Incorporated CLA      false   false   false       https://spdx.org/licenses/Adobe-2006.html
+allow         Apache    Apache-2.0    Apache License 2.0                  true    true    false       https://spdx.org/licenses/Apache-2.0.html
+allow         Artistic  Artistic-1.0  Artistic License 1.0                true    true    false       https://spdx.org/licenses/Artistic-2.0.html
 ...
 ```
 
@@ -459,11 +484,12 @@ The following example shows filtering of  license policies using the `id` column
 ```
 
 ```bash
-usage-policy  family  id          name                annotations  aliases                            notes
-------------  ------  --          ----                -----------  -------                            -----
-allow         Apache  Apache-1.0  Apache v1.0         APPROVED
-allow         Apache  Apache-1.1  Apache v1.1         APPROVED                                        This license has been su (24/54)
-allow         Apache  Apache-2.0  Apache License 2.0  APPROVED     Apache License, Version  (24/105)
+usage-policy  family  id          name                osi     fsf     deprecated  reference                                  aliases         annotations  notes
+------------  ------  --          ----                ---     ---     ----------  ---------                                  -------         -----------  -----
+allow         Apache  Apache-1.0  Apache v1.0         false   true    false       https://spdx.org/licenses/Apache-1.0.html  none            APPROVED     none
+allow         Apache  Apache-1.1  Apache v1.1         true    true    false       https://spdx.org/licenses/Apache-1.1.html  none            APPROVED     Superseded by Apache-2.0
+allow         Apache  Apache-2.0  Apache License 2.0  true    true    false       https://spdx.org/licenses/Apache-2.0.html  Apache License  APPROVED     none
+
 ```
 
 ###### Example: policy with `--wrap` flag
@@ -473,25 +499,17 @@ allow         Apache  Apache-2.0  Apache License 2.0  APPROVED     Apache Licens
 ```
 
 ```bash
-usage-policy  family                        id                            name                          annotations             aliases                           notes
-------------  ------                        --                            ----                          -----------             -------                           -----
-allow         0BSD                          0BSD                          BSD Zero Clause Lice (20/23)  APPROVED                Free Public License 1.0. (24/25)
-needs-review  ADSL                          ADSL                          Amazon Digital Servi (20/31)  NEEDS-APPROVAL
-allow         AFL                           AFL-1.1                       Academic Free Licens (20/26)  APPROVED
-needs-review  AGPL                          AGPL-1.0                      Affero General Publi (20/34)  NEEDS-APPROVAL
-                                                                                                        AGPL-WARNING
-                                                                                                        DEPRECATED
-needs-review  APSL                                                        Apple Public Source  (20/27)  NEEDS-APPROVAL
-allow         Access-Grid-Toolkit- (20/34)                                Access Grid Toolkit  (20/34)  APPROVED
-                                                                                                        NO-SPDX
-allow         Adobe                         Adobe-2006                    Adobe Systems Incorp (20/56)  APPROVED
-allow         Apache                        Apache-2.0                    Apache License 2.0            APPROVED                Apache License, Version  (24/27)
-                                                                                                                                Apache License v. 2.0
-                                                                                                                                Apache License Version 2 (24/26)
-                                                                                                                                Apache Software License  (24/28)
-allow         Aptogo                                                      Aptogo                        APPROVED                                                  For Open Source Computer (24/39)
-                                                                                                        NO-SPDX
-allow         Artistic                      Artistic-1.0                  Artistic License 1.0          APPROVED
+usage-policy  family    id             name                          osi     fsf     deprecated  reference                                     aliases                           annotations             notes
+------------  ------    --             ----                          ---     ---     ----------  ---------                                     -------                           -----------             -----
+allow         0BSD      0BSD           BSD Zero Clause Lice (20/23)  true    false   false       https://spdx.org/licenses/0BSD.html           Free Public License 1.0. (24/25)  APPROVED                none
+needs-review  ADSL      ADSL           Amazon Digital Servi (20/31)  false   false   false       https://spdx.org/licenses/ADSL.html                                             NEEDS-APPROVAL          none
+allow         AFL       AFL-3.0        Academic Free Licens (20/26)  true    true    false       https://spdx.org/licenses/AFL-3.0.ht (36/38)                                    APPROVED                none
+needs-review  AGPL      AGPL-1.0       Affero General Publi (20/34)  false   false   true        https://spdx.org/licenses/AGPL-1.0.h (36/39)                                    NEEDS-APPROVAL          none
+                                                                                                                                                                                 AGPL-WARNING
+needs-review  APSL      APSL-2.0       Apple Public Source  (20/31)  true    true    false       https://spdx.org/licenses/APSL-2.0.h (36/39)                                    NEEDS-APPROVAL          none
+allow         Adobe     Adobe-2006     Adobe Systems Incorp (20/56)  false   false   false       https://spdx.org/licenses/Adobe-2006 (36/41)                                    APPROVED                none
+allow         Apache    Apache-2.0     Apache License 2.0            true    true    false       https://spdx.org/licenses/Apache-2.0 (36/41)  Apache License, Version  (24/27)  APPROVED                none
+allow         Artistic  Artistic-2.0   Artistic License 2.0          true    true    false       https://spdx.org/licenses/Artistic-2 (36/43)                                    APPROVED                none
 ...
 ```
 
@@ -499,8 +517,8 @@ allow         Artistic                      Artistic-1.0                  Artist
 
 - Currently, the default `license.json` file, used to derive the `usage-policy` data, does not contain entries for the entire set of SPDX 3.2 license templates.
   - An issue [12](https://github.com/CycloneDX/sbom-utility/issues/12) is open to add parity.
-- Annotations can be defined within the `license.json` file and one or more assigned each license entry.
-- Column data is, by default, truncated in `txt` format views only. In these cases, the number of characters shown out of the total available will be displayed at the point of truncation (e.g., seeing `(24/26)` in a column would indicate 24 out of 26b characters were displayed).
+- Annotations (tags) and notes can be defined within the `license.json` file and one or more assigned each license entry.
+<!-- - Column data is, by default, truncated in `txt` format views only. In these cases, the number of characters shown out of the total available will be displayed at the point of truncation (e.g., seeing `(24/26)` in a column would indicate 24 out of 26 characters were displayed). -->
 - For backwards compatibility, the `--where` filter supports the key `spdx-id` as an alias for `id`.
 
 ---

@@ -22,6 +22,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/CycloneDX/sbom-utility/schema"
@@ -573,6 +574,14 @@ func whereFilterMatch(mapObject map[string]interface{}, whereFilters []WhereFilt
 		// Do not encode nil pointer values; replace with empty string
 		if value == nil {
 			value = ""
+		}
+
+		// Handle non-string data types in the map by converting them to string
+		switch data := value.(type) {
+		case bool:
+			value = strconv.FormatBool(data)
+		case int:
+			value = strconv.Itoa(data)
 		}
 
 		err = enc.Encode(value)

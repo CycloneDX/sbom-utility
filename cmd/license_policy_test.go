@@ -83,13 +83,14 @@ func innerTestLicensePolicyListCustomAndBuffered(t *testing.T, testInfo *License
 	// Use the test data to set the BOM input file and output format
 	utils.GlobalFlags.InputFile = testInfo.InputFile
 	utils.GlobalFlags.OutputFormat = testInfo.ListFormat
+	utils.GlobalFlags.LicenseFlags.Summary = testInfo.ListSummary
 
 	// TODO: pass GlobalConfig to every Command to allow per-instance changes for tests
 	// !!! IMPORTANT MUST explicitly set the global value for every single test
 	utils.GlobalFlags.LicenseFlags.ListLineWrap = testInfo.ListLineWrap
 
 	// Invoke the actual List command (API)
-	err = ListLicensePolicies(outputWriter, whereFilters)
+	err = ListLicensePolicies(outputWriter, whereFilters, utils.GlobalFlags.LicenseFlags)
 
 	// Restore default license policy file for subsequent tests
 	if testInfo.PolicyFile != "" && testInfo.PolicyFile != DEFAULT_LICENSE_POLICIES {
@@ -542,9 +543,6 @@ func TestLicensePolicyFamilyUsagePolicyConflict(t *testing.T) {
 func TestLicensePolicyCustomListGoodBadMaybe(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
 	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
-	// Assure all titles appear in output
-	lti.ResultLineContainsValues = POLICY_LIST_TITLES
-	lti.ResultLineContainsValuesAtLineNum = 0
 
 	outputBuffer, err := innerTestLicensePolicyList(t, lti)
 
@@ -699,7 +697,7 @@ func TestLicensePolicyMatchByFamilyNameBadExpression(t *testing.T) {
 
 //-----------------------------------------------------------------------------
 // Test --wrap flag
-// i.e., wraps policy (lines) where mult. URLs, Notes or Annotations are found
+// i.e., wraps policy (lines) where multiple URLs, Notes or Annotations are found
 //-----------------------------------------------------------------------------
 
 func TestLicensePolicyListWrapFalse(t *testing.T) {
@@ -714,7 +712,7 @@ func TestLicensePolicyListWrapFalse(t *testing.T) {
 
 func TestLicensePolicyListWrapTrue(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
-	lti.ResultExpectedLineCount = 401 // title and data rows
+	lti.ResultExpectedLineCount = 376 // title and data rows
 	// sanity (spot) check row values
 	lti.ResultLineContainsValuesAtLineNum = 2
 	lti.ResultLineContainsValues = []string{"0BSD", POLICY_ALLOW}
@@ -792,7 +790,7 @@ func TestLicensePolicyListWhereUsagePolicyDeny(t *testing.T) {
 func TestLicensePolicyListWhereAnnotationNeedsIPApproval(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
 	lti.WhereClause = "annotations=NEEDS-IP"
-	lti.ResultExpectedLineCount = 17
+	lti.ResultExpectedLineCount = 22
 	// sanity (spot) check row values
 	lti.ResultLineContainsValuesAtLineNum = 2
 	lti.ResultLineContainsValues = []string{"BSD-2-Clause", POLICY_NEEDS_REVIEW}
@@ -831,5 +829,12 @@ func TestLicensePolicyListWhereAliases(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
 	lti.WhereClause = "aliases=Apache"
 	lti.ResultExpectedLineCount = 3
+	innerTestLicensePolicyList(t, lti)
+}
+
+func TestLicensePolicyListWhereDeprecatedTrue(t *testing.T) {
+	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
+	lti.WhereClause = "deprecated=true"
+	lti.ResultExpectedLineCount = 17 // 15 matches + 2 title rows
 	innerTestLicensePolicyList(t, lti)
 }

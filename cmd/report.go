@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/CycloneDX/sbom-utility/utils"
@@ -33,6 +34,7 @@ const (
 
 const (
 	REPORT_LIST_TITLE_ROW_SEPARATOR = "-"
+	REPORT_LIST_VALUE_NONE          = "none"
 )
 
 // Text report helpers
@@ -191,12 +193,6 @@ func retrieveWhereFilters(whereValues string) (whereFilters []WhereFilter, err e
 // TODO: Also wrap on "maxChar" (per column) limit
 func wrapTableRowText(maxChars int, joinChar string, columns ...interface{}) (tableData [][]string, err error) {
 
-	// Assure separator char is set and ONLY a single character
-	// TODO
-	// if joinChar == "" || len(joinChar) > 1 {
-	// 	joinChar = ","
-	// }
-
 	// calculate column dimension needed as max of slice sizes
 	numColumns := len(columns)
 
@@ -234,6 +230,13 @@ func wrapTableRowText(maxChars int, joinChar string, columns ...interface{}) (ta
 				tableData[i][iCol] = entries[i]
 			}
 			//getLogger().Debugf("tableData: (%v)", tableData)
+		case bool:
+			rowData[iCol] = strconv.FormatBool(data)
+		case int:
+			rowData[iCol] = strconv.Itoa(data)
+		case nil:
+			//getLogger().Tracef("nil value for column: `%v`", columnData.DataKey)
+			rowData[iCol] = REPORT_LIST_VALUE_NONE
 		default:
 			err = getLogger().Errorf("Unexpected type for report data: type: `%T`, value: `%v`", data, data)
 		}
@@ -317,6 +320,10 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 				}
 			}
 			lineData = append(lineData, typedData)
+		case bool:
+			lineData = append(lineData, strconv.FormatBool(typedData))
+		case int:
+			lineData = append(lineData, strconv.Itoa(typedData))
 		case []interface{}:
 			// convert to []string
 			for _, value := range typedData {
@@ -343,8 +350,8 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 
 			lineData = append(lineData, joinedData)
 		case nil:
-			getLogger().Warningf("nil value for column: `%v`", columnData.DataKey)
-			lineData = append(lineData, "nil")
+			//getLogger().Tracef("nil value for column: `%v`", columnData.DataKey)
+			lineData = append(lineData, REPORT_LIST_VALUE_NONE)
 		default:
 			err = getLogger().Errorf("Unexpected type for report data: type: `%T`, value: `%v`", data, data)
 		}

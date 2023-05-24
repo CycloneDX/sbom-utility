@@ -267,7 +267,7 @@ func TestLicenseListSummaryCdx13Csv(t *testing.T) {
 func TestLicenseListTextSummaryCdx14ContainsUndefined(t *testing.T) {
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND, FORMAT_DEFAULT, true)
 	lti.ResultExpectedLineCount = 4 // 2 title, 2 with UNDEFINED
-	lti.ResultLineContainsValues = []string{POLICY_UNDEFINED, LC_TYPE_NAMES[LC_LOC_UNKNOWN], LICENSE_NONE, "package-lock.json"}
+	lti.ResultLineContainsValues = []string{POLICY_UNDEFINED, LC_TYPE_NAMES[LC_LOC_UNKNOWN], LICENSE_NO_ASSERTION, "package-lock.json"}
 	lti.ResultLineContainsValuesAtLineNum = 3
 	innerTestLicenseList(t, lti)
 }
