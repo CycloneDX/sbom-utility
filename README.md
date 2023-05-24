@@ -545,9 +545,11 @@ The `query` command does not support output results.
 
 #### Query examples
 
-##### Example: Select a JSON object
+##### Example: Extract the top-level `component` information from an SBOM
 
-In this example, only the `--from` clause is needed to select an object.  The `--select` clause is omitted which is equivalent to using the "select all" wildcard character `*` which returns all fields and values from the object.
+This example effectively extracts the first-order package manifest from the SBOM.
+
+In this example, only the `--from` clause is needed to select an object.  The `--select` clause is omitted which is equivalent to using the "select all" wildcard character `*` which returns all fields and values from the `component` object.
 
 ```bash
 ./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from metadata.component
@@ -556,7 +558,7 @@ In this example, only the `--from` clause is needed to select an object.  The `-
 is equivalent to using the wildcard character (which may need to be enclosed in single or double quotes depending on your shell):
 
 ```bash
-./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --select '*' --from metadata.component
+./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --select '*' --from metadata.component --quiet
 ```
 
 ```json
@@ -586,9 +588,31 @@ is equivalent to using the wildcard character (which may need to be enclosed in 
   ...
 ```
 
-##### Example: Select fields from JSON object
+##### Example: Extract the `supplier` of the SBOM
 
-In this example, the `--from` clause references the  singleton JSON object `component` found under the top-level `metadata` object. It then reduces the resultant JSON object to only return the `name` and `value` fields and their values as requested on the `--select` clause.
+In this example, the `--from` clause references the top-level `metadata.supplier` object.
+
+```bash
+./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from metadata.supplier --quiet
+```
+
+```json
+{
+  "contact": [
+    {
+      "email": "distribution@example.com"
+    }
+  ],
+  "name": "Example Co. Distribution Dept.",
+  "url": [
+    "https://example.com/software/"
+  ]
+}
+```
+
+##### Example: Extract just the SBOM component's `name` and `version`
+
+In this example, the `--from` clause references the singleton JSON object `component` found under the top-level `metadata` object. It then reduces the resultant JSON object to only return the `name` and `value` fields and their values as requested on the `--select` clause.
 
 ```bash
 ./sbom-utility query --select name,version --from metadata.component -i examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json
