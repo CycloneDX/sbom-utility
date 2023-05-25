@@ -119,15 +119,24 @@ func diffCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	baseFilename := utils.GlobalFlags.InputFile
 	deltaFilename := utils.GlobalFlags.DiffFlags.DeltaFile
 
+	Diff(baseFilename, deltaFilename, format)
+
+	return
+}
+
+func Diff(baseFilename string, deltaFilename string, format string) (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
 	// Prepare your JSON string as `[]byte`, not `string`
-	aString, err := ioutil.ReadFile(baseFilename)
+	bBaseData, err := ioutil.ReadFile(baseFilename)
 	if err != nil {
 		fmt.Printf("Failed to open file '%s': %s\n", utils.GlobalFlags.InputFile, err.Error())
 		os.Exit(2)
 	}
 
 	// Another JSON string
-	bString, err := ioutil.ReadFile(deltaFilename)
+	bRevisedData, err := ioutil.ReadFile(deltaFilename)
 	if err != nil {
 		fmt.Printf("Failed to open file '%s': %s\n", utils.GlobalFlags.InputFile, err.Error())
 		os.Exit(2)
@@ -135,7 +144,7 @@ func diffCmdImpl(cmd *cobra.Command, args []string) (err error) {
 
 	// Then, compare them
 	differ := gojsondiff.New()
-	d, err := differ.Compare(aString, bString)
+	d, err := differ.Compare(bBaseData, bRevisedData)
 	if err != nil {
 		fmt.Printf("Failed to unmarshal file: %s\n", err.Error())
 		os.Exit(3)
@@ -149,29 +158,20 @@ func diffCmdImpl(cmd *cobra.Command, args []string) (err error) {
 		switch format {
 		case FORMAT_TEXT:
 			var aJson map[string]interface{}
-			json.Unmarshal(aString, &aJson)
+			json.Unmarshal(bBaseData, &aJson)
 
 			config := formatter.AsciiFormatterConfig{
 				ShowArrayIndex: true,
 				Coloring:       true, // TODO: use --colorize flag
 			}
-
 			formatter := formatter.NewAsciiFormatter(aJson, config)
-
 			diffString, err = formatter.Format(d)
-			if err != nil {
-				// No error can occur
-			}
 		case FORMAT_JSON:
 			formatter := formatter.NewDeltaFormatter()
 			diffString, err = formatter.Format(d)
-			if err != nil {
-				// No error can occur
-			}
 		default:
 			// Default to Text output for anything else (set as flag default)
-			getLogger().Warningf("Diff output format not supported for `%s` format.",
-				format, FORMAT_JSON)
+			getLogger().Warningf("Diff output format not supported for `%s` format.", format)
 		}
 
 		fmt.Print(diffString)
