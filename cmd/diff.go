@@ -60,41 +60,13 @@ func NewCommandDiff() *cobra.Command {
 
 	command.RunE = diffCmdImpl
 	//command.ValidArgs = VALID_SUBCOMMANDS_RESOURCE
-	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
-		// the command requires at least 1 valid subcommand (argument)
-		// if len(args) > 1 {
-		// 	return getLogger().Errorf("Too many arguments provided: %v", args)
-		// }
+	// command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
+	// 	// Test for required flags (parameters)
+	// 	//err = preRunTestForInputFile(cmd, args)
+	// 	fmt.Println("TODO: pre-run checks...")
 
-		// // Make sure (optional) subcommand is known/valid
-		// if len(args) == 1 {
-		// 	if !preRunTestForSubcommand(command, VALID_SUBCOMMANDS_RESOURCE, args[0]) {
-		// 		return getLogger().Errorf("Subcommand provided is not valid: `%v`", args[0])
-		// 	}
-		// }
-
-		// if len(args) == 0 {
-		// 	getLogger().Tracef("No subcommands provided; defaulting to: `%s` subcommand", SUBCOMMAND_SCHEMA_LIST)
-		// }
-
-		// This command can be called with this persistent flag, but does not make sense...
-		// inputFile := utils.GlobalFlags.InputFile
-		// if inputFile != "" {
-		// 	getLogger().Warningf("Invalid flag for command: `%s` (`%s`). Ignoring...", FLAG_FILENAME_OUTPUT, FLAG_FILENAME_OUTPUT_SHORT)
-		// }
-
-		// // This command can be called with this persistent flag, but does not make sense...
-		// inputFile2 := utils.GlobalFlags.DiffFlags.DeltaFile
-		// if inputFile2 != "" {
-		// 	getLogger().Warningf("Invalid flag for command: `%s` (`%s`). Ignoring...", FLAG_FILENAME_OUTPUT, FLAG_FILENAME_OUTPUT_SHORT)
-		// }
-
-		// Test for required flags (parameters)
-		//err = preRunTestForInputFile(cmd, args)
-		fmt.Println("TODO: pre-run checks...")
-
-		return
-	}
+	// 	return
+	// }
 	return command
 }
 

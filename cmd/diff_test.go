@@ -70,7 +70,6 @@ func innerDiffError(t *testing.T, baseFilename string, revisedFilename string, f
 }
 
 func TestDiffEqual(t *testing.T) {
-	utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_3_CUSTOM
 	innerDiffError(t,
 		TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE,
 		TEST_CDX_1_4_MATURITY_EXAMPLE_1_DELTA,
