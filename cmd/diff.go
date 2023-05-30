@@ -27,6 +27,7 @@ import (
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/spf13/cobra"
 	"github.com/yudai/gojsondiff"
+	diff "github.com/yudai/gojsondiff"
 	"github.com/yudai/gojsondiff/formatter"
 )
 
@@ -164,6 +165,51 @@ func Diff(flags utils.CommandFlags) (err error) {
 	var diffString string
 	if d.Modified() {
 
+		deltas := d.Deltas()
+
+		for _, delta := range deltas {
+			fmt.Printf("delta: %v\n", delta)
+
+			sim := delta.Similarity()
+			fmt.Printf("sim: %v\n", sim)
+
+			//var err error
+			//var deltaJson map[string]interface{}
+			//deltaJson = map[string]interface{}{}
+			switch pointer := delta.(type) {
+			case *diff.Object:
+				d := delta.(*diff.Object)
+				pObj := pointer
+				fmt.Printf("Object: %v, Position: %v, PostPosition: %v\n", pointer, d.Position.String(), d.PostPosition().String())
+				fmt.Printf("diff.Object: %v, Position: %v, PostDelta: %v\n", pObj, pObj.Position, pObj.PostPosition())
+				//deltaJson[d.Position.String()], err = f.formatObject(d.Deltas)
+			case *diff.Array:
+				pDeltas := pointer.Deltas
+				fmt.Printf("diff.Array: %v, Position: %v, PostDelta: %v, # Deltas: %v\n", d, pointer.Position, pointer.PostPosition(), len(pDeltas))
+				//deltaJson[d.Position.String()], err = f.formatArray(d.Deltas)
+			case *diff.Added:
+				d := delta.(*diff.Added)
+				fmt.Printf("Added: %v\n", d)
+				//deltaJson[d.PostPosition().String()] = []interface{}{d.Value}
+			case *diff.Modified:
+				d := delta.(*diff.Modified)
+				fmt.Printf("Modified: %v\n", d)
+				//deltaJson[d.PostPosition().String()] = []interface{}{d.OldValue, d.NewValue}
+			case *diff.TextDiff:
+				d := delta.(*diff.TextDiff)
+				fmt.Printf("TextDiff: %v\n", d)
+				//deltaJson[d.PostPosition().String()] = []interface{}{d.DiffString(), 0, DeltaTextDiff}
+			case *diff.Deleted:
+				d := delta.(*diff.Deleted)
+				fmt.Printf("Deleted: %v\n", d)
+				//deltaJson[d.PrePosition().String()] = []interface{}{d.Value, 0, DeltaDelete}
+			case *diff.Moved:
+				fmt.Println("Delta type 'Move' is not supported in objects")
+			default:
+				fmt.Printf("Unknown Delta type detected: %#v", delta)
+			}
+		}
+
 		getLogger().Infof("Outputting listing (`%s` format)...", format)
 		switch outputFormat {
 		case FORMAT_TEXT:
@@ -190,7 +236,9 @@ func Diff(flags utils.CommandFlags) (err error) {
 		fmt.Print(diffString)
 
 	} else {
-		fmt.Println("Not modified!")
+		getLogger().Infof("No deltas found. baseFilename: `%s`, revisedFilename=`%s` match.",
+			utils.GlobalFlags.InputFile,
+			utils.GlobalFlags.DiffFlags.RevisedFile)
 	}
 
 	return

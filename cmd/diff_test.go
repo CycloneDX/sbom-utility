@@ -60,7 +60,23 @@ func innerDiffError(t *testing.T, baseFilename string, revisedFilename string, f
 	return
 }
 
-func TestDiffEqual(t *testing.T) {
+func TestDiffCdx14MatureDeltaDefault(t *testing.T) {
+	innerDiffError(t,
+		TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE,
+		TEST_CDX_1_4_MATURITY_EXAMPLE_1_DELTA,
+		FORMAT_DEFAULT,
+		nil)
+}
+
+func TestDiffCdx14MatureDeltaText(t *testing.T) {
+	innerDiffError(t,
+		TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE,
+		TEST_CDX_1_4_MATURITY_EXAMPLE_1_DELTA,
+		FORMAT_TEXT,
+		nil)
+}
+
+func TestDiffCdx14MatureDeltaJson(t *testing.T) {
 	innerDiffError(t,
 		TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE,
 		TEST_CDX_1_4_MATURITY_EXAMPLE_1_DELTA,
