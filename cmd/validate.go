@@ -40,8 +40,7 @@ const (
 const (
 	FLAG_SCHEMA_FORCE          = "force"
 	FLAG_SCHEMA_VARIANT        = "variant"
-	FLAG_CUSTOM_VALIDATION     = "custom"         // TODO: document when no longer experimental
-	FLAG_ERR_COLORIZE          = "error-colorize" // default: true (for historical reasons)
+	FLAG_CUSTOM_VALIDATION     = "custom" // TODO: document when no longer experimental
 	FLAG_ERR_LIMIT             = "error-limit"
 	MSG_SCHEMA_FORCE           = "force specified schema file for validation; overrides inferred schema"
 	MSG_SCHEMA_VARIANT         = "select named schema variant (e.g., \"strict\"); variant must be declared in configuration file (i.e., \"config.json\")"
@@ -93,7 +92,8 @@ func initCommandValidate(command *cobra.Command) {
 	// Optional schema "variant" of inferred schema (e.g, "strict")
 	command.Flags().StringVarP(&utils.GlobalFlags.Variant, FLAG_SCHEMA_VARIANT, "", "", MSG_SCHEMA_VARIANT)
 	command.Flags().BoolVarP(&utils.GlobalFlags.CustomValidation, FLAG_CUSTOM_VALIDATION, "", false, MSG_FLAG_CUSTOM_VALIDATION)
-	command.Flags().BoolVarP(&utils.GlobalFlags.ValidateFlags.ColorizeJsonErrors, FLAG_ERR_COLORIZE, "", true, MSG_FLAG_ERR_COLORIZE)
+	// Colorize default: true (for historical reasons)
+	command.Flags().BoolVarP(&utils.GlobalFlags.ValidateFlags.ColorizeJsonErrors, FLAG_COLORIZE_OUTPUT, "", true, MSG_FLAG_ERR_COLORIZE)
 	command.Flags().IntVarP(&utils.GlobalFlags.ValidateFlags.MaxNumErrors, FLAG_ERR_LIMIT, "", DEFAULT_MAX_ERROR_LIMIT, MSG_FLAG_ERR_LIMIT)
 }
 

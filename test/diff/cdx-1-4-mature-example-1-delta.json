@@ -68,14 +68,6 @@
         {
           "name": "urn:example.com:identifier:product",
           "value": "71C22290D7DB11EBAA175CFD3E629A2A"
-        },
-        {
-          "name": "urn:example.com:identifier:distribution",
-          "value": "5737-I23"
-        },
-        {
-          "name": "new property",
-          "value": "some value"
         }
       ],
       "hashes": [
@@ -105,12 +97,12 @@
       },
       {
         "license": {
-          "id": "Apache-2.0"
+          "id": "GPL-3.0-only"
         }
       },
       {
         "license": {
-          "id": "GPL-3.0-only"
+          "id": "Apache-2.0"
         }
       },
       {

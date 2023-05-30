@@ -75,6 +75,7 @@ const (
 	FLAG_QUIET_MODE_SHORT         = "q"
 	FLAG_LOG_OUTPUT_INDENT        = "indent"
 	FLAG_FILE_OUTPUT_FORMAT       = "format"
+	FLAG_COLORIZE_OUTPUT          = "colorize"
 )
 
 const (

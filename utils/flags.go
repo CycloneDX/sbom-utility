@@ -73,8 +73,8 @@ type CommandFlags struct {
 
 // NOTE: These flags are shared by both the list and policy subcommands
 type DiffCommandFlags struct {
-	Colorize  bool
-	DeltaFile string
+	Colorize    bool
+	RevisedFile string
 }
 
 type LicenseCommandFlags struct {

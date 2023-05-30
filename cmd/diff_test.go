@@ -35,11 +35,15 @@ func innerDiffError(t *testing.T, baseFilename string, revisedFilename string, f
 	// Copy the test filename to the command line flags where the code looks for it
 	utils.GlobalFlags.OutputFormat = format
 	utils.GlobalFlags.InputFile = baseFilename
-	utils.GlobalFlags.DiffFlags.DeltaFile = revisedFilename
+	utils.GlobalFlags.DiffFlags.RevisedFile = revisedFilename
+	utils.GlobalFlags.DiffFlags.Colorize = true
 
-	Diff(baseFilename, revisedFilename, format)
+	actualError = Diff(utils.GlobalFlags)
 
-	//getLogger().Tracef("document: `%s`, isValid=`%t`, actualError=`%T`", document.GetFilename(), isValid, actualError)
+	getLogger().Tracef("baseFilename: `%s`, revisedFilename=`%s`, actualError=`%T`",
+		utils.GlobalFlags.InputFile,
+		utils.GlobalFlags.DiffFlags.RevisedFile,
+		actualError)
 
 	// Always compare actual against expected error (even if it is `nil`)
 	// if !ErrorTypesMatch(actualError, expectedError) {

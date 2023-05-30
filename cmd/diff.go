@@ -43,6 +43,7 @@ const (
 	FLAG_DIFF_FILENAME_REVISION       = "input-revision"
 	FLAG_DIFF_FILENAME_REVISION_SHORT = "r"
 	MSG_FLAG_INPUT_REVISION           = "input filename for the revised file to compare against the base file"
+	MSG_FLAG_DIFF_COLORIZE            = "Colorize diff text output (true|false); default true"
 )
 
 func NewCommandDiff() *cobra.Command {
@@ -52,12 +53,12 @@ func NewCommandDiff() *cobra.Command {
 	command.Long = "Report on differences between two BOM files using RFC 6902 format"
 	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
 		FLAG_DIFF_OUTPUT_FORMAT_HELP+DIFF_OUTPUT_SUPPORTED_FORMATS)
-	command.Flags().StringVarP(&utils.GlobalFlags.DiffFlags.DeltaFile,
+	command.Flags().StringVarP(&utils.GlobalFlags.DiffFlags.RevisedFile,
 		FLAG_DIFF_FILENAME_REVISION,
 		FLAG_DIFF_FILENAME_REVISION_SHORT,
 		"", // no default value (empty)
 		MSG_FLAG_INPUT_REVISION)
-
+	command.Flags().BoolVarP(&utils.GlobalFlags.DiffFlags.Colorize, FLAG_COLORIZE_OUTPUT, "", false, MSG_FLAG_DIFF_COLORIZE)
 	command.RunE = diffCmdImpl
 	//command.ValidArgs = VALID_SUBCOMMANDS_RESOURCE
 	// command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
@@ -87,18 +88,33 @@ func diffCmdImpl(cmd *cobra.Command, args []string) (err error) {
 		}
 	}()
 
-	format := utils.GlobalFlags.OutputFormat
-	baseFilename := utils.GlobalFlags.InputFile
-	deltaFilename := utils.GlobalFlags.DiffFlags.DeltaFile
-
-	Diff(baseFilename, deltaFilename, format)
+	Diff(utils.GlobalFlags)
 
 	return
 }
 
-func Diff(baseFilename string, deltaFilename string, format string) (err error) {
+func Diff(flags utils.CommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
+
+	// Create output writer
+	outputFile, output, err := createOutputFile(utils.GlobalFlags.OutputFile)
+
+	// use function closure to assure consistent error output based upon error type
+	defer func() {
+		// always close the output file
+		if outputFile != nil {
+			err = outputFile.Close()
+			getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.OutputFile)
+		}
+	}()
+
+	format := utils.GlobalFlags.OutputFormat
+	baseFilename := utils.GlobalFlags.InputFile
+	//outputFilename := utils.GlobalFlags.OutputFile
+	outputFormat := utils.GlobalFlags.OutputFormat
+	deltaFilename := utils.GlobalFlags.DiffFlags.RevisedFile
+	deltaColorize := utils.GlobalFlags.DiffFlags.Colorize
 
 	// Prepare your JSON string as `[]byte`, not `string`
 	bBaseData, err := ioutil.ReadFile(baseFilename)
@@ -127,20 +143,23 @@ func Diff(baseFilename string, deltaFilename string, format string) (err error) 
 	if d.Modified() {
 
 		getLogger().Infof("Outputting listing (`%s` format)...", format)
-		switch format {
+		switch outputFormat {
 		case FORMAT_TEXT:
 			var aJson map[string]interface{}
 			json.Unmarshal(bBaseData, &aJson)
 
 			config := formatter.AsciiFormatterConfig{
 				ShowArrayIndex: true,
-				Coloring:       true, // TODO: use --colorize flag
 			}
+			config.Coloring = deltaColorize
 			formatter := formatter.NewAsciiFormatter(aJson, config)
 			diffString, err = formatter.Format(d)
+			fmt.Fprintf(output, "%s", diffString)
 		case FORMAT_JSON:
 			formatter := formatter.NewDeltaFormatter()
 			diffString, err = formatter.Format(d)
+			// Note: JSON data files MUST ends in a newline s as this is a POSIX standard
+			fmt.Fprintf(output, "%s\n", diffString)
 		default:
 			// Default to Text output for anything else (set as flag default)
 			getLogger().Warningf("Diff output format not supported for `%s` format.", format)
