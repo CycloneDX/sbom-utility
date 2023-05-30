@@ -26,7 +26,6 @@ import (
 
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/spf13/cobra"
-	"github.com/yudai/gojsondiff"
 	diff "github.com/yudai/gojsondiff"
 	"github.com/yudai/gojsondiff/formatter"
 )
@@ -154,7 +153,7 @@ func Diff(flags utils.CommandFlags) (err error) {
 	}
 
 	// Then, compare them
-	differ := gojsondiff.New()
+	differ := diff.New()
 	d, err := differ.Compare(bBaseData, bRevisedData)
 	if err != nil {
 		fmt.Printf("Failed to unmarshal file: %s\n", err.Error())
@@ -173,23 +172,19 @@ func Diff(flags utils.CommandFlags) (err error) {
 			sim := delta.Similarity()
 			fmt.Printf("sim: %v\n", sim)
 
-			//var err error
-			//var deltaJson map[string]interface{}
-			//deltaJson = map[string]interface{}{}
 			switch pointer := delta.(type) {
 			case *diff.Object:
 				d := delta.(*diff.Object)
-				pObj := pointer
-				fmt.Printf("Object: %v, Position: %v, PostPosition: %v\n", pointer, d.Position.String(), d.PostPosition().String())
-				fmt.Printf("diff.Object: %v, Position: %v, PostDelta: %v\n", pObj, pObj.Position, pObj.PostPosition())
+				fmt.Printf("diff.Object: %v, PostPosition(): %v, # Deltas: %v\n", d, d.PostPosition(), len(d.Deltas))
+				fmt.Printf("diff.Object: %v, PostPosition(): %v, # Deltas: %v\n", pointer, pointer.PostPosition(), len(pointer.Deltas))
 				//deltaJson[d.Position.String()], err = f.formatObject(d.Deltas)
 			case *diff.Array:
-				pDeltas := pointer.Deltas
-				fmt.Printf("diff.Array: %v, Position: %v, PostDelta: %v, # Deltas: %v\n", d, pointer.Position, pointer.PostPosition(), len(pDeltas))
+				d := delta.(*diff.Array)
+				fmt.Printf("diff.Array: %v, PostPosition(): %v (Position: %s), # Deltas: %v\n", d, d.PostPosition(), d.Position, len(d.Deltas))
 				//deltaJson[d.Position.String()], err = f.formatArray(d.Deltas)
 			case *diff.Added:
 				d := delta.(*diff.Added)
-				fmt.Printf("Added: %v\n", d)
+				fmt.Printf("Added: %v, PostPosition(): %s (Position: %s)\n", d, d.PostPosition(), d.Position)
 				//deltaJson[d.PostPosition().String()] = []interface{}{d.Value}
 			case *diff.Modified:
 				d := delta.(*diff.Modified)
@@ -201,7 +196,7 @@ func Diff(flags utils.CommandFlags) (err error) {
 				//deltaJson[d.PostPosition().String()] = []interface{}{d.DiffString(), 0, DeltaTextDiff}
 			case *diff.Deleted:
 				d := delta.(*diff.Deleted)
-				fmt.Printf("Deleted: %v\n", d)
+				fmt.Printf("Deleted: %v, PrePosition(): %s, (Position: %s)\n", d, d.PrePosition(), d.Position)
 				//deltaJson[d.PrePosition().String()] = []interface{}{d.Value, 0, DeltaDelete}
 			case *diff.Moved:
 				fmt.Println("Delta type 'Move' is not supported in objects")
@@ -222,18 +217,16 @@ func Diff(flags utils.CommandFlags) (err error) {
 			config.Coloring = deltaColorize
 			formatter := formatter.NewAsciiFormatter(aJson, config)
 			diffString, err = formatter.Format(d)
-			fmt.Fprintf(output, "%s", diffString)
 		case FORMAT_JSON:
 			formatter := formatter.NewDeltaFormatter()
 			diffString, err = formatter.Format(d)
 			// Note: JSON data files MUST ends in a newline s as this is a POSIX standard
-			fmt.Fprintf(output, "%s\n", diffString)
 		default:
 			// Default to Text output for anything else (set as flag default)
 			getLogger().Warningf("Diff output format not supported for `%s` format.", format)
 		}
 
-		fmt.Print(diffString)
+		fmt.Fprintf(output, "%s\n", diffString)
 
 	} else {
 		getLogger().Infof("No deltas found. baseFilename: `%s`, revisedFilename=`%s` match.",
