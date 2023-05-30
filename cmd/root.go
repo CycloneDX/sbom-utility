@@ -52,7 +52,7 @@ const (
 	CMD_USAGE_DIFF               = CMD_DIFF + " --input-file <base_file> --input-revision <revised_file> [--format json|txt] [--colorize=true|false]"
 	CMD_USAGE_LICENSE_LIST       = SUBCOMMAND_LICENSE_LIST + " --input-file <input_file> [--summary] [--where key=regex[,...]] [--format json|txt|csv|md]"
 	CMD_USAGE_LICENSE_POLICY     = SUBCOMMAND_LICENSE_POLICY + " [--where key=regex[,...]] [--format txt|csv|md]"
-	CMD_USAGE_QUERY              = CMD_QUERY + " --input-file <input_filename> [--select * | field1[,fieldN]] [--from [key1[.keyN]] [--where key=regex[,...]]"
+	CMD_USAGE_QUERY              = CMD_QUERY + " --input-file <input_file> [--select * | field1[,fieldN]] [--from [key1[.keyN]] [--where key=regex[,...]]"
 	CMD_USAGE_RESOURCE_LIST      = CMD_RESOURCE + " --input-file <input_file> [--type component|service] [--where key=regex[,...]] [--format txt|csv|md]"
 	CMD_USAGE_SCHEMA_LIST        = CMD_SCHEMA + " [--where key=regex[,...]] [--format txt|csv|md]"
 	CMD_USAGE_VALIDATE           = CMD_VALIDATE + " --input-file <input_file> [--variant <variant_name>] [--error-limit <integer>] [--colorize=true|false] [--force schema_file]"
@@ -87,8 +87,8 @@ const (
 	MSG_FLAG_OUTPUT         = "output filename"
 	MSG_FLAG_LOG_QUIET      = "enable quiet logging mode (removes all information messages from console output); overrides other logging commands"
 	MSG_FLAG_LOG_INDENT     = "enable log indentation of functional callstack"
-	MSG_FLAG_CONFIG_SCHEMA  = "provide custom filename for the application schema configuration (i.e., overrides default `config.json`)"
-	MSG_FLAG_CONFIG_LICENSE = "provide custom filename for the application license policy configuration (i.e., overrides default `license.json`)"
+	MSG_FLAG_CONFIG_SCHEMA  = "provide custom application schema configuration file (i.e., overrides default `config.json`)"
+	MSG_FLAG_CONFIG_LICENSE = "provide custom application license policy configuration file (i.e., overrides default `license.json`)"
 )
 
 const (
