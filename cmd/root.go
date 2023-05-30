@@ -50,13 +50,13 @@ const (
 // otherwise, the command will NOT be found by the Cobra framework. This is poor code assumption is NOT documented.
 const (
 	CMD_USAGE_DIFF               = CMD_DIFF + " --input-file <base_file> --input-revision <revised_file> [--format json|txt] [--colorize=true|false]"
+	CMD_USAGE_LICENSE_LIST       = SUBCOMMAND_LICENSE_LIST + " --input-file <input_file> [--summary] [--where key=regex[,...]] [--format json|txt|csv|md]"
+	CMD_USAGE_LICENSE_POLICY     = SUBCOMMAND_LICENSE_POLICY + " [--where key=regex[,...]] [--format txt|csv|md]"
 	CMD_USAGE_QUERY              = CMD_QUERY + " --input-file <input_filename> [--select * | field1[,fieldN]] [--from [key1[.keyN]] [--where key=regex[,...]]"
 	CMD_USAGE_RESOURCE_LIST      = CMD_RESOURCE + " --input-file <input_file> [--type component|service] [--where key=regex[,...]] [--format txt|csv|md]"
 	CMD_USAGE_SCHEMA_LIST        = CMD_SCHEMA + " [--where key=regex[,...]] [--format txt|csv|md]"
 	CMD_USAGE_VALIDATE           = CMD_VALIDATE + " --input-file <input_file> [--variant <variant_name>] [--error-limit <integer>] [--colorize=true|false] [--force schema_file]"
 	CMD_USAGE_VULNERABILITY_LIST = CMD_VULNERABILITY + " " + SUBCOMMAND_VULNERABILITY_LIST + " --input-file <input_file> [--summary] [--where key=regex[,...]] [--format json|txt|csv|md]"
-	CMD_USAGE_LICENSE_LIST       = SUBCOMMAND_LICENSE_LIST + " --input-file <input_file> [--summary] [--where key=regex[,...]] [--format json|txt|csv|md]"
-	CMD_USAGE_LICENSE_POLICY     = SUBCOMMAND_LICENSE_POLICY + " [--format txt|csv|md] [--where key=regex[,...]]"
 )
 
 const (
