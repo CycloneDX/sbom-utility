@@ -18,6 +18,7 @@
 package cmd
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/CycloneDX/sbom-utility/utils"
@@ -46,29 +47,15 @@ func innerDiffError(t *testing.T, baseFilename string, revisedFilename string, f
 		actualError)
 
 	// Always compare actual against expected error (even if it is `nil`)
-	// if !ErrorTypesMatch(actualError, expectedError) {
-	// 	if len(schemaErrors) > 0 {
-	// 		getLogger().Debugf("schemaErrors=`%s`", schemaErrors)
-	// 	}
-
-	// 	switch t := actualError.(type) {
-	// 	default:
-	// 		fmt.Printf("unhandled error type: `%v`\n", t)
-	// 		fmt.Printf(">> value: `%v`\n", t)
-	// 		getLogger().Error(actualError)
-	// 	}
-	// 	t.Errorf("expected error type: `%T`, actual type: `%T`", expectedError, actualError)
-	// }
-
-	// ANY error returned from Validate() SHOULD mark the input file as "invalid"
-	// if actualError != nil && isValid {
-	// 	t.Errorf("Validate() returned error (`%T`); however, input file still valid (%t)", actualError, isValid)
-	// }
-
-	// // ALWAYS make sure the if error was NOT expected that input file is marked "valid"
-	// if expectedError == nil && !isValid {
-	// 	t.Errorf("Input file invalid (%t); expected valid (no error)", isValid)
-	// }
+	if !ErrorTypesMatch(actualError, expectedError) {
+		switch t := actualError.(type) {
+		default:
+			fmt.Printf("unhandled error type: `%v`\n", t)
+			fmt.Printf(">> value: `%v`\n", t)
+			getLogger().Error(actualError)
+		}
+		t.Errorf("expected error type: `%T`, actual type: `%T`", expectedError, actualError)
+	}
 
 	return
 }
