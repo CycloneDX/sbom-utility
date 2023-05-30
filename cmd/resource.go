@@ -63,7 +63,7 @@ var RESOURCE_LIST_TITLES = []string{
 // Flags. Reuse query flag values where possible
 const (
 	FLAG_RESOURCE_TYPE      = "type"
-	FLAG_RESOURCE_TYPE_HELP = "filter output by resource type (i.e., component | service"
+	FLAG_RESOURCE_TYPE_HELP = "filter output by resource type (i.e., component | service)"
 )
 
 const (
@@ -75,7 +75,7 @@ const (
 	FLAG_RESOURCE_OUTPUT_FORMAT_HELP = "format output using the specified type"
 )
 
-var RESOURCE_LIST_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
+var RESOURCE_LIST_OUTPUT_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{FORMAT_TEXT, FORMAT_CSV, FORMAT_MARKDOWN}, ", ")
 
 // resource types
@@ -113,7 +113,7 @@ func NewCommandResource() *cobra.Command {
 	command.Short = "Report on resources found in BOM input file"
 	command.Long = "Report on resources found in BOM input file"
 	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
-		FLAG_RESOURCE_OUTPUT_FORMAT_HELP+RESOURCE_LIST_SUPPORTED_FORMATS)
+		FLAG_RESOURCE_OUTPUT_FORMAT_HELP+RESOURCE_LIST_OUTPUT_SUPPORTED_FORMATS)
 	command.Flags().StringP(FLAG_RESOURCE_TYPE, "", RESOURCE_TYPE_DEFAULT, FLAG_RESOURCE_TYPE_HELP)
 	command.Flags().StringP(FLAG_REPORT_WHERE, "", "", FLAG_REPORT_WHERE_HELP)
 	command.RunE = resourceCmdImpl
@@ -239,7 +239,7 @@ func ListResources(output io.Writer, format string, resourceType string, whereFi
 	default:
 		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
-			format, FORMAT_JSON)
+			format, FORMAT_TEXT)
 		DisplayResourceListText(output)
 	}
 

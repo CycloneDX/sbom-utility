@@ -802,9 +802,9 @@ The following flags can be used to improve performance when formatting error out
 
 Use the `--error-limit x` flag to reduce the formatted error result output to the first `x` errors.  By default, only the first 10 errors are output with an informational messaging indicating `x/y` errors were shown.
 
-##### `--error-colorize` flag
+##### `--colorize` flag
 
-Use the `--error-colorize=true|false` flag to not add color formatting to error result output.  By default, formatted error output is colorized to help with human readability; for automated use, it can be turned off.
+Use the `--colorize=true|false` flag to add/remove color formatting to error result output.  By default, formatted error output is colorized to help with human readability; for automated use, it can be turned off.
 
 #### Validate Examples
 

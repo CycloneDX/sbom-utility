@@ -43,7 +43,7 @@ const (
 	FLAG_DIFF_FILENAME_REVISION       = "input-revision"
 	FLAG_DIFF_FILENAME_REVISION_SHORT = "r"
 	MSG_FLAG_INPUT_REVISION           = "input filename for the revised file to compare against the base file"
-	MSG_FLAG_DIFF_COLORIZE            = "Colorize diff text output (true|false); default true"
+	MSG_FLAG_DIFF_COLORIZE            = "Colorize diff text output (true|false); default false"
 )
 
 func NewCommandDiff() *cobra.Command {
@@ -60,15 +60,37 @@ func NewCommandDiff() *cobra.Command {
 		MSG_FLAG_INPUT_REVISION)
 	command.Flags().BoolVarP(&utils.GlobalFlags.DiffFlags.Colorize, FLAG_COLORIZE_OUTPUT, "", false, MSG_FLAG_DIFF_COLORIZE)
 	command.RunE = diffCmdImpl
-	//command.ValidArgs = VALID_SUBCOMMANDS_RESOURCE
-	// command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
-	// 	// Test for required flags (parameters)
-	// 	//err = preRunTestForInputFile(cmd, args)
-	// 	fmt.Println("TODO: pre-run checks...")
+	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
+		// Test for required flags (parameters)
+		err = preRunTestForFiles(cmd, args)
 
-	// 	return
-	// }
+		return
+	}
 	return command
+}
+
+func preRunTestForFiles(cmd *cobra.Command, args []string) error {
+	getLogger().Enter()
+	defer getLogger().Exit()
+	getLogger().Tracef("args: %v", args)
+
+	// Make sure the base (input) file is present and exists
+	baseFilename := utils.GlobalFlags.InputFile
+	if baseFilename == "" {
+		return getLogger().Errorf("Missing required argument(s): %s", FLAG_FILENAME_INPUT)
+	} else if _, err := os.Stat(baseFilename); err != nil {
+		return getLogger().Errorf("File not found: `%s`", baseFilename)
+	}
+
+	// Make sure the revision file is present and exists
+	revisedFilename := utils.GlobalFlags.DiffFlags.RevisedFile
+	if revisedFilename == "" {
+		return getLogger().Errorf("Missing required argument(s): %s", FLAG_DIFF_FILENAME_REVISION)
+	} else if _, err := os.Stat(revisedFilename); err != nil {
+		return getLogger().Errorf("File not found: `%s`", revisedFilename)
+	}
+
+	return nil
 }
 
 func diffCmdImpl(cmd *cobra.Command, args []string) (err error) {
