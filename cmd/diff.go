@@ -165,7 +165,7 @@ func Diff(flags utils.CommandFlags) (err error) {
 
 		// TODO: Enable only for debug
 		deltas := d.Deltas()
-		debugDeltas(deltas, "")
+		debugDeltas(deltas, ">>")
 
 		getLogger().Infof("Outputting listing (`%s` format)...", format)
 		switch outputFormat {
@@ -201,35 +201,37 @@ func Diff(flags utils.CommandFlags) (err error) {
 
 func debugDeltas(deltas []diff.Delta, indent string) (err error) {
 	for _, delta := range deltas {
-		getLogger().Infof("delta: %v\n", delta)
+		//fmt.Printf("delta: %v\n", delta)
+		//sim := delta.Similarity()
+		//fmt.Printf("sim: %v\n", sim)
 
-		sim := delta.Similarity()
-		getLogger().Infof("sim: %v\n", sim)
+		indent2 := indent + "...."
 
 		switch pointer := delta.(type) {
 		case *diff.Object:
-			getLogger().Infof("diff.Object: %v, PostPosition(): %v, # Deltas: %v\n", pointer, pointer.PostPosition(), len(pointer.Deltas))
-			getLogger().Infof("diff.Object: %v, PostPosition(): %v, # Deltas: %v\n", pointer, pointer.PostPosition(), len(pointer.Deltas))
+			fmt.Printf("%s[Object]: %v, PostPosition(): %v, # Deltas: %v\n", indent, pointer, pointer.PostPosition(), len(pointer.Deltas))
+			debugDeltas(pointer.Deltas, indent2)
 			//deltaJson[d.Position.String()], err = f.formatObject(d.Deltas)
 		case *diff.Array:
-			getLogger().Infof("diff.Array: %v, PostPosition(): %v (Position: %s), # Deltas: %v\n", pointer, pointer.PostPosition(), pointer.Position, len(pointer.Deltas))
+			fmt.Printf("%s[Array]: %v, PostPosition(): %v (Position: %s), # Deltas: %v\n", indent, pointer, pointer.PostPosition(), pointer.Position, len(pointer.Deltas))
+			debugDeltas(pointer.Deltas, indent2)
 			//deltaJson[d.Position.String()], err = f.formatArray(d.Deltas)
 		case *diff.Added:
-			getLogger().Infof("Added: %v, PostPosition(): %s (Position: %s)\n", pointer, pointer.PostPosition(), pointer.Position)
+			fmt.Printf("%s[Added]: %v, PostPosition(): %s (Position: %s)\n", indent, pointer, pointer.PostPosition(), pointer.Position)
 			//deltaJson[d.PostPosition().String()] = []interface{}{d.Value}
 		case *diff.Modified:
-			getLogger().Infof("Modified: %v\n", pointer)
+			fmt.Printf("%s[Modified]: %v\n", indent, pointer)
 			//deltaJson[d.PostPosition().String()] = []interface{}{d.OldValue, d.NewValue}
 		case *diff.TextDiff:
-			getLogger().Infof("TextDiff: %v\n", pointer)
+			fmt.Printf("%s[TextDiff]: %v\n", indent, pointer)
 			//deltaJson[d.PostPosition().String()] = []interface{}{d.DiffString(), 0, DeltaTextDiff}
 		case *diff.Deleted:
-			getLogger().Infof("Deleted: %v, PrePosition(): %s, (Position: %s)\n", pointer, pointer.PrePosition(), pointer.Position)
+			fmt.Printf("%s[Deleted]: %v, PrePosition(): %s, (Position: %s)\n", indent, pointer, pointer.PrePosition(), pointer.Position)
 			//deltaJson[d.PrePosition().String()] = []interface{}{d.Value, 0, DeltaDelete}
 		case *diff.Moved:
-			fmt.Println("Delta type 'Move' is not supported in objects")
+			fmt.Printf("%sDelta type 'Move' is not supported in objects\n", indent)
 		default:
-			getLogger().Infof("Unknown Delta type detected: %#v", delta)
+			fmt.Printf("%sUnknown Delta type detected: %#v\n", indent, delta)
 		}
 	}
 
