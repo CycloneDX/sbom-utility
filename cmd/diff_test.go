@@ -26,6 +26,10 @@ import (
 
 const (
 	TEST_CDX_1_4_MATURITY_EXAMPLE_1_DELTA = "test/diff/cdx-1-4-mature-example-1-delta.json"
+	TEST_ARRAY_ORDER_CHANGE_BASE          = "test/diff/json-array-order-change-base.json"
+	TEST_ARRAY_ORDER_CHANGE_DELTA         = "test/diff/json-array-order-change-delta.json"
+	TEST_ARRAY_ORDER_2_CHANGES_BASE       = "test/diff/json-array-order-2-changes-base.json"
+	TEST_ARRAY_ORDER_2_CHANGES_DELTA      = "test/diff/json-array-order-2-changes-delta.json"
 )
 
 // Tests basic validation and expected errors
@@ -80,6 +84,22 @@ func TestDiffCdx14MatureDeltaJson(t *testing.T) {
 	innerDiffError(t,
 		TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE,
 		TEST_CDX_1_4_MATURITY_EXAMPLE_1_DELTA,
+		FORMAT_JSON,
+		nil)
+}
+
+func TestDiffJsonArrayOrder1Change(t *testing.T) {
+	innerDiffError(t,
+		TEST_ARRAY_ORDER_CHANGE_BASE,
+		TEST_ARRAY_ORDER_CHANGE_DELTA,
+		FORMAT_JSON,
+		nil)
+}
+
+func TestDiffJsonArrayOrder2Changes(t *testing.T) {
+	innerDiffError(t,
+		TEST_ARRAY_ORDER_2_CHANGES_BASE,
+		TEST_ARRAY_ORDER_2_CHANGES_DELTA,
 		FORMAT_JSON,
 		nil)
 }
