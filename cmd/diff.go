@@ -25,9 +25,9 @@ import (
 	"strings"
 
 	"github.com/CycloneDX/sbom-utility/utils"
+	diff "github.com/mrutkows/go-jsondiff"
+	"github.com/mrutkows/go-jsondiff/formatter"
 	"github.com/spf13/cobra"
-	diff "github.com/yudai/gojsondiff"
-	"github.com/yudai/gojsondiff/formatter"
 )
 
 // Command help formatting
@@ -119,8 +119,16 @@ func Diff(flags utils.CommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
+	// create locals
+	format := utils.GlobalFlags.OutputFormat
+	baseFilename := utils.GlobalFlags.InputFile
+	outputFilename := utils.GlobalFlags.OutputFile
+	outputFormat := utils.GlobalFlags.OutputFormat
+	deltaFilename := utils.GlobalFlags.DiffFlags.RevisedFile
+	deltaColorize := utils.GlobalFlags.DiffFlags.Colorize
+
 	// Create output writer
-	outputFile, output, err := createOutputFile(utils.GlobalFlags.OutputFile)
+	outputFile, output, err := createOutputFile(outputFilename)
 
 	// use function closure to assure consistent error output based upon error type
 	defer func() {
@@ -131,24 +139,18 @@ func Diff(flags utils.CommandFlags) (err error) {
 		}
 	}()
 
-	format := utils.GlobalFlags.OutputFormat
-	baseFilename := utils.GlobalFlags.InputFile
-	//outputFilename := utils.GlobalFlags.OutputFile
-	outputFormat := utils.GlobalFlags.OutputFormat
-	deltaFilename := utils.GlobalFlags.DiffFlags.RevisedFile
-	deltaColorize := utils.GlobalFlags.DiffFlags.Colorize
-
-	// Prepare your JSON string as `[]byte`, not `string`
+	// JSON string as `[]byte`, not `string`
 	bBaseData, err := ioutil.ReadFile(baseFilename)
 	if err != nil {
 		fmt.Printf("Failed to open file '%s': %s\n", utils.GlobalFlags.InputFile, err.Error())
+		getLogger().Debugf("%v", bBaseData[:255])
 		os.Exit(2)
 	}
 
-	// Another JSON string
 	bRevisedData, err := ioutil.ReadFile(deltaFilename)
 	if err != nil {
 		fmt.Printf("Failed to open file '%s': %s\n", utils.GlobalFlags.InputFile, err.Error())
+		getLogger().Debugf("%v", bRevisedData[:255])
 		os.Exit(2)
 	}
 
@@ -174,29 +176,23 @@ func Diff(flags utils.CommandFlags) (err error) {
 
 			switch pointer := delta.(type) {
 			case *diff.Object:
-				d := delta.(*diff.Object)
-				fmt.Printf("diff.Object: %v, PostPosition(): %v, # Deltas: %v\n", d, d.PostPosition(), len(d.Deltas))
+				fmt.Printf("diff.Object: %v, PostPosition(): %v, # Deltas: %v\n", pointer, pointer.PostPosition(), len(pointer.Deltas))
 				fmt.Printf("diff.Object: %v, PostPosition(): %v, # Deltas: %v\n", pointer, pointer.PostPosition(), len(pointer.Deltas))
 				//deltaJson[d.Position.String()], err = f.formatObject(d.Deltas)
 			case *diff.Array:
-				d := delta.(*diff.Array)
-				fmt.Printf("diff.Array: %v, PostPosition(): %v (Position: %s), # Deltas: %v\n", d, d.PostPosition(), d.Position, len(d.Deltas))
+				fmt.Printf("diff.Array: %v, PostPosition(): %v (Position: %s), # Deltas: %v\n", pointer, pointer.PostPosition(), pointer.Position, len(pointer.Deltas))
 				//deltaJson[d.Position.String()], err = f.formatArray(d.Deltas)
 			case *diff.Added:
-				d := delta.(*diff.Added)
-				fmt.Printf("Added: %v, PostPosition(): %s (Position: %s)\n", d, d.PostPosition(), d.Position)
+				fmt.Printf("Added: %v, PostPosition(): %s (Position: %s)\n", pointer, pointer.PostPosition(), pointer.Position)
 				//deltaJson[d.PostPosition().String()] = []interface{}{d.Value}
 			case *diff.Modified:
-				d := delta.(*diff.Modified)
 				fmt.Printf("Modified: %v\n", d)
 				//deltaJson[d.PostPosition().String()] = []interface{}{d.OldValue, d.NewValue}
 			case *diff.TextDiff:
-				d := delta.(*diff.TextDiff)
 				fmt.Printf("TextDiff: %v\n", d)
 				//deltaJson[d.PostPosition().String()] = []interface{}{d.DiffString(), 0, DeltaTextDiff}
 			case *diff.Deleted:
-				d := delta.(*diff.Deleted)
-				fmt.Printf("Deleted: %v, PrePosition(): %s, (Position: %s)\n", d, d.PrePosition(), d.Position)
+				fmt.Printf("Deleted: %v, PrePosition(): %s, (Position: %s)\n", pointer, pointer.PrePosition(), pointer.Position)
 				//deltaJson[d.PrePosition().String()] = []interface{}{d.Value, 0, DeltaDelete}
 			case *diff.Moved:
 				fmt.Println("Delta type 'Move' is not supported in objects")
