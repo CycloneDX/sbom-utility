@@ -28,8 +28,15 @@ const (
 	TEST_CDX_1_4_MATURITY_EXAMPLE_1_DELTA = "test/diff/cdx-1-4-mature-example-1-delta.json"
 	TEST_ARRAY_ORDER_CHANGE_BASE          = "test/diff/json-array-order-change-base.json"
 	TEST_ARRAY_ORDER_CHANGE_DELTA         = "test/diff/json-array-order-change-delta.json"
-	TEST_ARRAY_ORDER_2_CHANGES_BASE       = "test/diff/json-array-order-2-changes-base.json"
-	TEST_ARRAY_ORDER_2_CHANGES_DELTA      = "test/diff/json-array-order-2-changes-delta.json"
+
+	TEST_ARRAY_ORDER_CHANGE_WITH_DELETE_BASE  = "test/diff/json-array-order-change-with-delete-base.json"
+	TEST_ARRAY_ORDER_CHANGE_WITH_DELETE_DELTA = "test/diff/json-array-order-change-with-delete-delta.json"
+
+	TEST_ARRAY_ORDER_CHANGE_WITH_ADD_BASE  = "test/diff/json-array-order-change-with-add-base.json"
+	TEST_ARRAY_ORDER_CHANGE_WITH_ADD_DELTA = "test/diff/json-array-order-change-with-add-delta.json"
+
+	TEST_ARRAY_ORDER_2_CHANGES_BASE  = "test/diff/json-array-order-2-changes-base.json"
+	TEST_ARRAY_ORDER_2_CHANGES_DELTA = "test/diff/json-array-order-2-changes-delta.json"
 )
 
 // Tests basic validation and expected errors
@@ -88,7 +95,15 @@ func TestDiffCdx14MatureDeltaJson(t *testing.T) {
 		nil)
 }
 
-func TestDiffJsonArrayOrder1Change(t *testing.T) {
+func TestDiffJsonArrayOrderMove2ObjectsFormatJson(t *testing.T) {
+	innerDiffError(t,
+		TEST_ARRAY_ORDER_2_CHANGES_BASE,
+		TEST_ARRAY_ORDER_2_CHANGES_DELTA,
+		FORMAT_JSON,
+		nil)
+}
+
+func TestDiffJsonArrayOrderMove1ObjectFormatJson(t *testing.T) {
 	innerDiffError(t,
 		TEST_ARRAY_ORDER_CHANGE_BASE,
 		TEST_ARRAY_ORDER_CHANGE_DELTA,
@@ -96,10 +111,26 @@ func TestDiffJsonArrayOrder1Change(t *testing.T) {
 		nil)
 }
 
-func TestDiffJsonArrayOrder2Changes(t *testing.T) {
+func TestDiffJsonArrayOrderMove1ObjectFormatText(t *testing.T) {
 	innerDiffError(t,
-		TEST_ARRAY_ORDER_2_CHANGES_BASE,
-		TEST_ARRAY_ORDER_2_CHANGES_DELTA,
-		FORMAT_JSON,
+		TEST_ARRAY_ORDER_CHANGE_BASE,
+		TEST_ARRAY_ORDER_CHANGE_DELTA,
+		FORMAT_TEXT,
+		nil)
+}
+
+func TestDiffJsonArrayOrderMove1ObjectWithDeleteFormatText(t *testing.T) {
+	innerDiffError(t,
+		TEST_ARRAY_ORDER_CHANGE_WITH_DELETE_BASE,
+		TEST_ARRAY_ORDER_CHANGE_WITH_DELETE_DELTA,
+		FORMAT_TEXT,
+		nil)
+}
+
+func TestDiffJsonArrayOrderMove1ObjectWithAddFormatText(t *testing.T) {
+	innerDiffError(t,
+		TEST_ARRAY_ORDER_CHANGE_WITH_ADD_BASE,
+		TEST_ARRAY_ORDER_CHANGE_WITH_ADD_DELTA,
+		FORMAT_TEXT,
 		nil)
 }

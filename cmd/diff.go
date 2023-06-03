@@ -209,31 +209,94 @@ func debugDeltas(deltas []diff.Delta, indent string) (err error) {
 
 		switch pointer := delta.(type) {
 		case *diff.Object:
-			fmt.Printf("%s[Object]: %v, PostPosition(): %v, # Deltas: %v\n", indent, pointer, pointer.PostPosition(), len(pointer.Deltas))
+			fmt.Printf("%s[Object](%v): PostPosition(): \"%v\", # Deltas: %v\n", indent, pointer.Similarity(), ColorizeBackgroundCyan(pointer.PostPosition().String()), len(pointer.Deltas))
 			debugDeltas(pointer.Deltas, indent2)
 			//deltaJson[d.Position.String()], err = f.formatObject(d.Deltas)
 		case *diff.Array:
-			fmt.Printf("%s[Array]: %v, PostPosition(): %v (Position: %s), # Deltas: %v\n", indent, pointer, pointer.PostPosition(), pointer.Position, len(pointer.Deltas))
+			fmt.Printf("%s[Array](%v): PostPosition(): \"%v\", # Deltas: %v\n", indent, pointer.Similarity(), ColorizeBackgroundCyan((pointer.PostPosition()).String()), len(pointer.Deltas))
 			debugDeltas(pointer.Deltas, indent2)
 			//deltaJson[d.Position.String()], err = f.formatArray(d.Deltas)
 		case *diff.Added:
-			fmt.Printf("%s[Added]: %v, PostPosition(): %s (Position: %s)\n", indent, pointer, pointer.PostPosition(), pointer.Position)
+			sValue := fmt.Sprintf("%v", pointer.Value)
+			fmt.Printf("%s[Added](%v): Value: \"%v\", PostPosition(): \"%v\"\n", indent, pointer.Similarity(), ColorizeBackgroundGreen(sValue), ColorizeBackgroundCyan((pointer.PostPosition()).String()))
 			//deltaJson[d.PostPosition().String()] = []interface{}{d.Value}
 		case *diff.Modified:
-			fmt.Printf("%s[Modified]: %v\n", indent, pointer)
+			fmt.Printf("%s[Modified](%v): PostPosition: \"%v\", OldValue: \"%v\", NewValue: \"%v\"\n", indent, pointer.Similarity(), ColorizeBackgroundCyan((pointer.PostPosition()).String()), ColorizeBackgroundRed((pointer.OldValue).(string)), ColorizeBackgroundGreen((pointer.NewValue).(string)))
 			//deltaJson[d.PostPosition().String()] = []interface{}{d.OldValue, d.NewValue}
 		case *diff.TextDiff:
-			fmt.Printf("%s[TextDiff]: %v\n", indent, pointer)
+			fmt.Printf("%s[TextDiff](%v): PostPosition: \"%v\", OldValue: \"%v\", NewValue: \"%v\"\n", indent, pointer.Similarity(), ColorizeBackgroundCyan((pointer.PostPosition()).String()), ColorizeBackgroundRed((pointer.OldValue).(string)), ColorizeBackgroundGreen((pointer.NewValue).(string)))
 			//deltaJson[d.PostPosition().String()] = []interface{}{d.DiffString(), 0, DeltaTextDiff}
 		case *diff.Deleted:
-			fmt.Printf("%s[Deleted]: %v, PrePosition(): %s, (Position: %s)\n", indent, pointer, pointer.PrePosition(), pointer.Position)
+			sValue := fmt.Sprintf("%v", pointer.Value)
+			fmt.Printf("%s[Deleted](%v): Value: \"%v\", PrePosition(): \"%v\"\n", indent, pointer.Similarity(), ColorizeBackgroundRed(sValue), ColorizeBackgroundCyan(pointer.PrePosition().String()))
 			//deltaJson[d.PrePosition().String()] = []interface{}{d.Value, 0, DeltaDelete}
 		case *diff.Moved:
-			fmt.Printf("%sDelta type 'Move' is not supported in objects\n", indent)
+			sValue := fmt.Sprintf("%v", pointer.Value)
+			fmt.Printf("%s[Moved](%v): Value: \"%v\", PrePosition(): \"%v\", PostPosition(): \"%v\"\n", indent, pointer.Similarity(), ColorizeBackgroundYellow(sValue), ColorizeBackgroundCyan(pointer.PrePosition().String()), ColorizeBackgroundCyan(pointer.PostPosition().String()))
+			fmt.Printf("%s[ERROR] 'Move' operation NOT supported for formatting objects\n", indent)
 		default:
-			fmt.Printf("%sUnknown Delta type detected: %#v\n", indent, delta)
+			fmt.Printf("%sUnknown Delta type detected: \"%T\"\n", indent, delta)
 		}
 	}
 
 	return
 }
+
+// Validate value (range)
+func Colorize(color string, text string) (colorizedText string) {
+	return color + text + Reset
+}
+
+func ColorizeBackgroundRed(text string) (colorizedText string) {
+	return BG_Red + text + Reset
+}
+
+func ColorizeBackgroundGreen(text string) (colorizedText string) {
+	return BG_Green + text + Reset
+}
+
+func ColorizeBackgroundYellow(text string) (colorizedText string) {
+	return BG_Yellow + text + Reset
+}
+
+func ColorizeBackgroundCyan(text string) (colorizedText string) {
+	return BG_Cyan + text + Reset
+}
+
+func ColorizeBackgroundBlue(text string) (colorizedText string) {
+	return BG_Blue + text + Reset
+}
+
+// See: https://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html
+const (
+	Reset         = "\033[0m"
+	FG_Red        = "\033[31m"
+	FG_Green      = "\033[32m"
+	FG_Yellow     = "\033[33m"
+	FG_Cyan       = "\033[36m"
+	FG_Gray       = "\033[37m"
+	FG_White      = "\033[97m"
+	FG_LightWhite = "\033[39m"
+	FG_Default    = FG_LightWhite // often default for terminal "white" foreground
+	BG_Red        = "\033[41m"
+	BG_Green      = "\033[42m"
+	BG_Yellow     = "\033[43m"
+	BG_Blue       = "\033[44m"
+	BG_Magenta    = "\033[45m"
+	BG_Cyan       = "\033[46m"
+	BG_White      = "\033[47m"
+	BG_Default    = "\033[49m"
+)
+
+// Background colors. basic background colors 40 - 47
+// const (
+// 	BgBlack Color = iota + 40
+// 	BgRed
+// 	BgGreen
+// 	BgYellow // BgBrown like yellow
+// 	BgBlue
+// 	BgMagenta
+// 	BgCyan
+// 	BgWhite
+// 	BgDefault Color = 49
+// )
