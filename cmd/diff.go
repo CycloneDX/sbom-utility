@@ -110,7 +110,7 @@ func diffCmdImpl(cmd *cobra.Command, args []string) (err error) {
 		}
 	}()
 
-	Diff(utils.GlobalFlags)
+	err = Diff(utils.GlobalFlags)
 
 	return
 }
@@ -140,38 +140,43 @@ func Diff(flags utils.CommandFlags) (err error) {
 	}()
 
 	// JSON string as `[]byte`, not `string`
+	getLogger().Infof("Reading file (--input-file): `%s` ...", baseFilename)
 	bBaseData, err := ioutil.ReadFile(baseFilename)
 	if err != nil {
 		getLogger().Debugf("%v", bBaseData[:255])
-		getLogger().Errorf("Failed to ReadFile '%s': %s\n", utils.GlobalFlags.InputFile, err.Error())
+		err = getLogger().Errorf("Failed to ReadFile '%s': %s\n", utils.GlobalFlags.InputFile, err.Error())
+		return
 	}
 
+	getLogger().Infof("Reading file (--input-revision): `%s` ...", deltaFilename)
 	bRevisedData, err := ioutil.ReadFile(deltaFilename)
 	if err != nil {
 		getLogger().Debugf("%v", bRevisedData[:255])
-		getLogger().Errorf("Failed to ReadFile '%s': %s\n", utils.GlobalFlags.InputFile, err.Error())
+		err = getLogger().Errorf("Failed to ReadFile '%s': %s\n", utils.GlobalFlags.InputFile, err.Error())
+		return
 	}
 
 	// Then, compare them
 	differ := diff.New()
+	getLogger().Infof("Comparing files: `%s` (base) to `%s` (revised) ...", baseFilename, deltaFilename)
 	d, err := differ.Compare(bBaseData, bRevisedData)
 	if err != nil {
-		getLogger().Errorf("Failed to Compare data: %s\n", err.Error())
+		err = getLogger().Errorf("Failed to Compare data: %s\n", err.Error())
 	}
 
 	// Output the result
 	var diffString string
 	if d.Modified() {
-
-		// TODO: Enable only for debug
-		//deltas := d.Deltas()
-		//debugDeltas(deltas, ">>")
-
 		getLogger().Infof("Outputting listing (`%s` format)...", format)
 		switch outputFormat {
 		case FORMAT_TEXT:
 			var aJson map[string]interface{}
-			json.Unmarshal(bBaseData, &aJson)
+			err = json.Unmarshal(bBaseData, &aJson)
+
+			if err != nil {
+				err = getLogger().Errorf("json.Unmarshal() failed '%s': %s\n", utils.GlobalFlags.InputFile, err.Error())
+				return
+			}
 
 			config := formatter.AsciiFormatterConfig{
 				ShowArrayIndex: true,
