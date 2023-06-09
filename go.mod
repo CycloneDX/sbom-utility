@@ -6,7 +6,7 @@ require (
 	github.com/fatih/color v1.15.0
 	github.com/hokaccha/go-prettyjson v0.0.0-20211117102719-0474bc63780f
 	github.com/jwangsadinata/go-multimap v0.0.0-20190620162914-c29f3d7f33b6
-	github.com/mrutkows/go-jsondiff v0.1.0
+	github.com/mrutkows/go-jsondiff v0.2.0
 	github.com/spf13/cobra v1.7.0
 	github.com/stretchr/testify v1.8.1
 	github.com/xeipuuv/gojsonschema v1.2.0
