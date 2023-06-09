@@ -164,8 +164,8 @@ func Diff(flags utils.CommandFlags) (err error) {
 	if d.Modified() {
 
 		// TODO: Enable only for debug
-		deltas := d.Deltas()
-		debugDeltas(deltas, ">>")
+		//deltas := d.Deltas()
+		//debugDeltas(deltas, ">>")
 
 		getLogger().Infof("Outputting listing (`%s` format)...", format)
 		switch outputFormat {

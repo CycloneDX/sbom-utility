@@ -35,6 +35,9 @@ const (
 	TEST_ARRAY_ORDER_CHANGE_WITH_ADD_BASE  = "test/diff/json-array-order-change-with-add-base.json"
 	TEST_ARRAY_ORDER_CHANGE_WITH_ADD_DELTA = "test/diff/json-array-order-change-with-add-delta.json"
 
+	TEST_ARRAY_ORDER_CHANGE_WITH_ADD_AND_DELETE_BASE  = "test/diff/json-array-order-change-with-add-and-delete-base.json"
+	TEST_ARRAY_ORDER_CHANGE_WITH_ADD_AND_DELETE_DELTA = "test/diff/json-array-order-change-with-add-and-delete-delta.json"
+
 	TEST_ARRAY_ORDER_2_CHANGES_BASE  = "test/diff/json-array-order-2-changes-base.json"
 	TEST_ARRAY_ORDER_2_CHANGES_DELTA = "test/diff/json-array-order-2-changes-delta.json"
 )
@@ -131,6 +134,14 @@ func TestDiffJsonArrayOrderMove1ObjectWithAddFormatText(t *testing.T) {
 	innerDiffError(t,
 		TEST_ARRAY_ORDER_CHANGE_WITH_ADD_BASE,
 		TEST_ARRAY_ORDER_CHANGE_WITH_ADD_DELTA,
+		FORMAT_TEXT,
+		nil)
+}
+
+func TestDiffJsonArrayOrderMove1ObjectWithAddAndDeleteFormatText(t *testing.T) {
+	innerDiffError(t,
+		TEST_ARRAY_ORDER_CHANGE_WITH_ADD_AND_DELETE_BASE,
+		TEST_ARRAY_ORDER_CHANGE_WITH_ADD_AND_DELETE_DELTA,
 		FORMAT_TEXT,
 		nil)
 }

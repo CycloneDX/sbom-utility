@@ -34,16 +34,18 @@ The utility supports the following commands:
 - [Installation](#installation)
 - [Running](#running)
 - [Commands](#commands)
-  - [Exit codes](#exit-codes): `0` == no error, `1` == app.
-  - [Helpful flags](#helpful-flags)
-  - [license](#license)
-    - [list](#license-list-subcommand) subcommand
-    - [policy](#license-policy-subcommand) subcommand
-  - [query](#query)
-  - [resource](#resource)
-  - [schema](#schema)
-  - [vulnerability](#vulnerability)
-  - [validate](#validate)
+  - [General information](#general-command-information)
+    - [Exit codes](#exit-codes): (e.g., `0`: none, `1`: application, `2`: validation)
+    - [Persistent flags](#persistent-flags) (e.g., `--format`, `--quiet`, `--where`)
+  - [`license` command](#license)
+    - [list](#license-list-subcommand) subcommand: lists all license information found in the BOM
+    - [policy](#license-policy-subcommand) subcommand: lists configurable license usage policies
+  - [`query` command](#query): extract JSON objects and fields from a BOM using SQL-like queries
+  - [`resource` command](#resource): list resource information by type (e.g., components, services)
+  - [`schema` command](#schema): list supported BOM formats, versions, variants
+  - [`validate` command](#validate): BOM against declared or required schema
+  - [`vulnerability` command](#vulnerability): lists vulnerability summary information included in the BOM or VEX
+  - [`diff` command](#diff): *experimental*: shows the delta between two BOM versions
 - [Design considerations](#design-considerations)
 - [Development](#development)
   - [Prerequisites](#prerequisites)
@@ -110,7 +112,9 @@ For convenience, links to each command's section are here:
 - [validate](#validate)
 - [help](#help)
 
-### Exit codes
+### General command information
+
+#### Exit codes
 
 All commands return a numeric exit code (i.e., a POSIX exit code) for use in automated processing where `0` indicates success and a non-zero value indicates failure of some kind designated by the number.
 
@@ -120,7 +124,7 @@ The SBOM Utility always returns one of these 3 codes to accommodate logic in BAS
 - `1`= application error
 - `2`= validation error
 
-#### Example: exit code
+##### Example: exit code
 
 This example uses the `schema` list command to verify its exit code:
 
@@ -984,6 +988,60 @@ CVE-2020-25649           611      CVSSv31: 7.5 (high), CVSSv31: 8.2 (high), CVSS
 
 ---
 
+### Diff
+
+This *experimental* command will compare two BOMs and return the delta (or "diff") in JSON (diff-patch format) or text.
+
+**Notes**
+
+- This command is undergoing analysis and tests which are exposing some underlying issues around "moved" objects in dependent diff-patch packages that may not be fixable and have no alternatives.
+  - *Specifically, the means by which "moved" objects are assigned "similarity" scores appears flawed in the case of JSON.*
+  - *Additionally, some of the underlying code relies upon Go maps which do not preserve key ordering.*
+
+#### Diff supported output formats
+
+Use the `--format` flag on the to choose one of the supported output formats:
+
+- txt (default), json
+
+#### Diff Examples
+
+##### Example: Add, delete and modify
+
+```bash
+./sbom-utility diff -i test/diff/json-array-order-change-with-add-and-delete-base.json -r test/diff/json-array-order-change-with-add-and-delete-delta.json --quiet --format txt --colorize=true
+```
+
+```bash
+ {
+   "licenses": [
+     0: {
+       "license": {
+-        "id": "Apache-1.0"
++        "id": "GPL-2.0"
+       }
+     },
+-+    2=>1: {
+-+      "license": {
+-+        "id": "GPL-3.0-only"
+-+      }
+-+    },
+     2: {
+       "license": {
+         "id": "GPL-3.0-only"
+       }
+     },
+     3: {
+       "license": {
+         "id": "MIT"
+       }
+     }
+   ]
+ }
+```
+
+---
+
 ### Help
 
 The utility supports the `help` command for the root command as well as any supported commands
@@ -1253,7 +1311,7 @@ go test github.com/CycloneDX/sbom-utility/cmd -v --quiet
 run an individual test within the `cmd` package:
 
 ```bash
-go test github.com/CycloneDX/sbom-utility/cmd -v -run TestCdx13MinRequiredBasic
+go test github.com/CycloneDX/sbom-utility/cmd -v -run TestValidateCdx14MinRequiredBasic
 ```
 
 #### Debugging go tests
