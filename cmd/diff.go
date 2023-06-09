@@ -105,7 +105,10 @@ func diffCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	defer func() {
 		// always close the output file
 		if outputFile != nil {
-			outputFile.Close()
+			err = outputFile.Close()
+			if err != nil {
+				return
+			}
 			getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.OutputFile)
 		}
 	}()
@@ -141,16 +144,16 @@ func Diff(flags utils.CommandFlags) (err error) {
 
 	// JSON string as `[]byte`, not `string`
 	getLogger().Infof("Reading file (--input-file): `%s` ...", baseFilename)
-	bBaseData, err := ioutil.ReadFile(baseFilename)
-	if err != nil {
+	bBaseData, errReadBase := ioutil.ReadFile(baseFilename)
+	if errReadBase != nil {
 		getLogger().Debugf("%v", bBaseData[:255])
 		err = getLogger().Errorf("Failed to ReadFile '%s': %s\n", utils.GlobalFlags.InputFile, err.Error())
 		return
 	}
 
 	getLogger().Infof("Reading file (--input-revision): `%s` ...", deltaFilename)
-	bRevisedData, err := ioutil.ReadFile(deltaFilename)
-	if err != nil {
+	bRevisedData, errReadDelta := ioutil.ReadFile(deltaFilename)
+	if errReadDelta != nil {
 		getLogger().Debugf("%v", bRevisedData[:255])
 		err = getLogger().Errorf("Failed to ReadFile '%s': %s\n", utils.GlobalFlags.InputFile, err.Error())
 		return
