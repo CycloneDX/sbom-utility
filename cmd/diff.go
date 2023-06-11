@@ -149,6 +149,7 @@ func Diff(flags utils.CommandFlags) (err error) {
 		return
 	}
 	getLogger().Infof("Reading file (--input-file): `%s` ...", baseFilename)
+	// #nosec G304
 	bBaseData, errReadBase := ioutil.ReadFile(baseFilename)
 	if errReadBase != nil {
 		getLogger().Debugf("%v", bBaseData[:255])
@@ -161,6 +162,7 @@ func Diff(flags utils.CommandFlags) (err error) {
 		return
 	}
 	getLogger().Infof("Reading file (--input-revision): `%s` ...", deltaFilename)
+	// #nosec G304
 	bRevisedData, errReadDelta := ioutil.ReadFile(deltaFilename)
 	if errReadDelta != nil {
 		getLogger().Debugf("%v", bRevisedData[:255])
