@@ -144,7 +144,10 @@ func Diff(flags utils.CommandFlags) (err error) {
 	}()
 
 	// JSON string as `[]byte`, not `string`
-	baseFilename = filepath.Clean(baseFilename)
+	baseFilename, err = filepath.Abs(baseFilename)
+	if err != nil {
+		return
+	}
 	getLogger().Infof("Reading file (--input-file): `%s` ...", baseFilename)
 	bBaseData, errReadBase := ioutil.ReadFile(baseFilename)
 	if errReadBase != nil {
@@ -153,7 +156,10 @@ func Diff(flags utils.CommandFlags) (err error) {
 		return
 	}
 
-	deltaFilename = filepath.Clean(deltaFilename)
+	deltaFilename, err = filepath.Abs(deltaFilename)
+	if err != nil {
+		return
+	}
 	getLogger().Infof("Reading file (--input-revision): `%s` ...", deltaFilename)
 	bRevisedData, errReadDelta := ioutil.ReadFile(deltaFilename)
 	if errReadDelta != nil {
