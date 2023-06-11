@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/CycloneDX/sbom-utility/utils"
@@ -143,6 +144,7 @@ func Diff(flags utils.CommandFlags) (err error) {
 	}()
 
 	// JSON string as `[]byte`, not `string`
+	baseFilename = filepath.Clean(baseFilename)
 	getLogger().Infof("Reading file (--input-file): `%s` ...", baseFilename)
 	bBaseData, errReadBase := ioutil.ReadFile(baseFilename)
 	if errReadBase != nil {
@@ -151,6 +153,7 @@ func Diff(flags utils.CommandFlags) (err error) {
 		return
 	}
 
+	deltaFilename = filepath.Clean(deltaFilename)
 	getLogger().Infof("Reading file (--input-revision): `%s` ...", deltaFilename)
 	bRevisedData, errReadDelta := ioutil.ReadFile(deltaFilename)
 	if errReadDelta != nil {
