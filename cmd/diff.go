@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/CycloneDX/sbom-utility/utils"
@@ -142,27 +143,18 @@ func Diff(flags utils.CommandFlags) (err error) {
 		}
 	}()
 
-	// #nosec G304
-	// baseFilename, err = filepath.Abs(baseFilename)
-	// if err != nil {
-	// 	return
-	// }
 	getLogger().Infof("Reading file (--input-file): `%s` ...", baseFilename)
-	// #nosec G304
-	bBaseData, errReadBase := ioutil.ReadFile(baseFilename)
+	// #nosec G304 (suppress warning)
+	bBaseData, errReadBase := ioutil.ReadFile(filepath.Clean(baseFilename))
 	if errReadBase != nil {
 		getLogger().Debugf("%v", bBaseData[:255])
 		err = getLogger().Errorf("Failed to ReadFile '%s': %s\n", utils.GlobalFlags.InputFile, err.Error())
 		return
 	}
 
-	// deltaFilename, err = filepath.Abs(deltaFilename)
-	// if err != nil {
-	// 	return
-	// }
 	getLogger().Infof("Reading file (--input-revision): `%s` ...", deltaFilename)
-	// #nosec G304
-	bRevisedData, errReadDelta := ioutil.ReadFile(deltaFilename)
+	// #nosec G304 (suppress warning)
+	bRevisedData, errReadDelta := ioutil.ReadFile(filepath.Clean(deltaFilename))
 	if errReadDelta != nil {
 		getLogger().Debugf("%v", bRevisedData[:255])
 		err = getLogger().Errorf("Failed to ReadFile '%s': %s\n", utils.GlobalFlags.InputFile, err.Error())
@@ -216,92 +208,3 @@ func Diff(flags utils.CommandFlags) (err error) {
 
 	return
 }
-
-// func debugDeltas(deltas []diff.Delta, indent string) (err error) {
-// 	for _, delta := range deltas {
-// 		//fmt.Printf("delta: %v\n", delta)
-// 		//sim := delta.Similarity()
-// 		//fmt.Printf("sim: %v\n", sim)
-//
-// 		indent2 := indent + "...."
-//
-// 		switch pointer := delta.(type) {
-// 		case *diff.Object:
-// 			fmt.Printf("%s[Object](%v): PostPosition(): \"%v\", # Deltas: %v\n", indent, pointer.Similarity(), ColorizeBackgroundCyan(pointer.PostPosition().String()), len(pointer.Deltas))
-// 			debugDeltas(pointer.Deltas, indent2)
-// 			//deltaJson[d.Position.String()], err = f.formatObject(d.Deltas)
-// 		case *diff.Array:
-// 			fmt.Printf("%s[Array](%v): PostPosition(): \"%v\", # Deltas: %v\n", indent, pointer.Similarity(), ColorizeBackgroundCyan((pointer.PostPosition()).String()), len(pointer.Deltas))
-// 			debugDeltas(pointer.Deltas, indent2)
-// 			//deltaJson[d.Position.String()], err = f.formatArray(d.Deltas)
-// 		case *diff.Added:
-// 			sValue := fmt.Sprintf("%v", pointer.Value)
-// 			fmt.Printf("%s[Added](%v): Value: \"%v\", PostPosition(): \"%v\"\n", indent, pointer.Similarity(), ColorizeBackgroundGreen(sValue), ColorizeBackgroundCyan((pointer.PostPosition()).String()))
-// 			//deltaJson[d.PostPosition().String()] = []interface{}{d.Value}
-// 		case *diff.Modified:
-// 			fmt.Printf("%s[Modified](%v): PostPosition: \"%v\", OldValue: \"%v\", NewValue: \"%v\"\n", indent, pointer.Similarity(), ColorizeBackgroundCyan((pointer.PostPosition()).String()), ColorizeBackgroundRed((pointer.OldValue).(string)), ColorizeBackgroundGreen((pointer.NewValue).(string)))
-// 			//deltaJson[d.PostPosition().String()] = []interface{}{d.OldValue, d.NewValue}
-// 		case *diff.TextDiff:
-// 			fmt.Printf("%s[TextDiff](%v): PostPosition: \"%v\", OldValue: \"%v\", NewValue: \"%v\"\n", indent, pointer.Similarity(), ColorizeBackgroundCyan((pointer.PostPosition()).String()), ColorizeBackgroundRed((pointer.OldValue).(string)), ColorizeBackgroundGreen((pointer.NewValue).(string)))
-// 			//deltaJson[d.PostPosition().String()] = []interface{}{d.DiffString(), 0, DeltaTextDiff}
-// 		case *diff.Deleted:
-// 			sValue := fmt.Sprintf("%v", pointer.Value)
-// 			fmt.Printf("%s[Deleted](%v): Value: \"%v\", PrePosition(): \"%v\"\n", indent, pointer.Similarity(), ColorizeBackgroundRed(sValue), ColorizeBackgroundCyan(pointer.PrePosition().String()))
-// 			//deltaJson[d.PrePosition().String()] = []interface{}{d.Value, 0, DeltaDelete}
-// 		case *diff.Moved:
-// 			sValue := fmt.Sprintf("%v", pointer.Value)
-// 			fmt.Printf("%s[Moved](%v): Value: \"%v\", PrePosition(): \"%v\", PostPosition(): \"%v\"\n", indent, pointer.Similarity(), ColorizeBackgroundYellow(sValue), ColorizeBackgroundCyan(pointer.PrePosition().String()), ColorizeBackgroundCyan(pointer.PostPosition().String()))
-// 			fmt.Printf("%s[ERROR] 'Move' operation NOT supported for formatting objects\n", indent)
-// 		default:
-// 			fmt.Printf("%sUnknown Delta type detected: \"%T\"\n", indent, delta)
-// 		}
-// 	}
-//
-// 	return
-// }
-
-// Validate value (range)
-// func Colorize(color string, text string) (colorizedText string) {
-// 	return color + text + Reset
-// }
-
-// func ColorizeBackgroundRed(text string) (colorizedText string) {
-// 	return BG_Red + text + Reset
-// }
-
-// func ColorizeBackgroundGreen(text string) (colorizedText string) {
-// 	return BG_Green + text + Reset
-// }
-
-// func ColorizeBackgroundYellow(text string) (colorizedText string) {
-// 	return BG_Yellow + text + Reset
-// }
-
-// func ColorizeBackgroundCyan(text string) (colorizedText string) {
-// 	return BG_Cyan + text + Reset
-// }
-
-// func ColorizeBackgroundBlue(text string) (colorizedText string) {
-// 	return BG_Blue + text + Reset
-// }
-
-// // See: https://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html
-// const (
-// 	Reset         = "\033[0m"
-// 	FG_Red        = "\033[31m"
-// 	FG_Green      = "\033[32m"
-// 	FG_Yellow     = "\033[33m"
-// 	FG_Cyan       = "\033[36m"
-// 	FG_Gray       = "\033[37m"
-// 	FG_White      = "\033[97m"
-// 	FG_LightWhite = "\033[39m"
-// 	FG_Default    = FG_LightWhite // often default for terminal "white" foreground
-// 	BG_Red        = "\033[41m"
-// 	BG_Green      = "\033[42m"
-// 	BG_Yellow     = "\033[43m"
-// 	BG_Blue       = "\033[44m"
-// 	BG_Magenta    = "\033[45m"
-// 	BG_Cyan       = "\033[46m"
-// 	BG_White      = "\033[47m"
-// 	BG_Default    = "\033[49m"
-// )
