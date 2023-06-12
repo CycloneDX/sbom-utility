@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/CycloneDX/sbom-utility/utils"
@@ -143,11 +142,11 @@ func Diff(flags utils.CommandFlags) (err error) {
 		}
 	}()
 
-	// JSON string as `[]byte`, not `string`
-	baseFilename, err = filepath.Abs(baseFilename)
-	if err != nil {
-		return
-	}
+	// #nosec G304
+	// baseFilename, err = filepath.Abs(baseFilename)
+	// if err != nil {
+	// 	return
+	// }
 	getLogger().Infof("Reading file (--input-file): `%s` ...", baseFilename)
 	// #nosec G304
 	bBaseData, errReadBase := ioutil.ReadFile(baseFilename)
@@ -157,10 +156,10 @@ func Diff(flags utils.CommandFlags) (err error) {
 		return
 	}
 
-	deltaFilename, err = filepath.Abs(deltaFilename)
-	if err != nil {
-		return
-	}
+	// deltaFilename, err = filepath.Abs(deltaFilename)
+	// if err != nil {
+	// 	return
+	// }
 	getLogger().Infof("Reading file (--input-revision): `%s` ...", deltaFilename)
 	// #nosec G304
 	bRevisedData, errReadDelta := ioutil.ReadFile(deltaFilename)
@@ -170,7 +169,7 @@ func Diff(flags utils.CommandFlags) (err error) {
 		return
 	}
 
-	// Then, compare them
+	// Compare the base with the revision
 	differ := diff.New()
 	getLogger().Infof("Comparing files: `%s` (base) to `%s` (revised) ...", baseFilename, deltaFilename)
 	d, err := differ.Compare(bBaseData, bRevisedData)
@@ -201,7 +200,7 @@ func Diff(flags utils.CommandFlags) (err error) {
 		case FORMAT_JSON:
 			formatter := formatter.NewDeltaFormatter()
 			diffString, err = formatter.Format(d)
-			// Note: JSON data files MUST ends in a newline s as this is a POSIX standard
+			// Note: JSON data files MUST ends in a newline as this is a POSIX standard
 		default:
 			// Default to Text output for anything else (set as flag default)
 			getLogger().Warningf("Diff output format not supported for `%s` format.", format)
