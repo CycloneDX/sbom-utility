@@ -1092,7 +1092,7 @@ In the future, we envision support for additional kinds of BOMs (e.g., Hardware 
 
 #### Prerequisites
 
-- Go v1.18 or higher: see [https://go.dev/doc/install](https://go.dev/doc/install)
+- Go v1.20.1 or higher: see [https://go.dev/doc/install](https://go.dev/doc/install)
 - `git` client: see [https://git-scm.com/downloads](https://git-scm.com/downloads)
 
 #### Building
