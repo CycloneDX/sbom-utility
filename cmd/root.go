@@ -36,25 +36,27 @@ var licensePolicyConfig *LicenseComplianceConfig
 
 // top-level commands
 const (
-	CMD_VERSION       = "version"
-	CMD_VALIDATE      = "validate"
+	CMD_DIFF          = "diff"
 	CMD_LICENSE       = "license"
 	CMD_QUERY         = "query"
 	CMD_RESOURCE      = "resource"
 	CMD_SCHEMA        = "schema"
+	CMD_VALIDATE      = "validate"
+	CMD_VERSION       = "version"
 	CMD_VULNERABILITY = "vulnerability"
 )
 
 // WARNING!!! The ".Use" field of a Cobra command MUST have the first word be the actual command
 // otherwise, the command will NOT be found by the Cobra framework. This is poor code assumption is NOT documented.
 const (
-	CMD_USAGE_VALIDATE           = CMD_VALIDATE + " -i input_file" + " [--variant variant_name]" + " [ --force schema_file]"
-	CMD_USAGE_QUERY              = CMD_QUERY + " -i input_filename [--select * | field1[,fieldN]] [--from [key1[.keyN]] [--where key=regex[,...]]"
-	CMD_USAGE_LICENSE_LIST       = SUBCOMMAND_LICENSE_LIST + " -i input_file [[--summary] [--format json|txt|csv|md]"
-	CMD_USAGE_LICENSE_POLICY     = SUBCOMMAND_LICENSE_POLICY + " [--format txt|csv|md] [--wrap=true|false]"
-	CMD_USAGE_RESOURCE_LIST      = CMD_RESOURCE + " -i input_file [--type component|service] [--where key=regex[,...]] [--format json|txt|csv|md] [-o output_filename]"
-	CMD_USAGE_SCHEMA_LIST        = CMD_SCHEMA + " [--format txt|csv|md]"
-	CMD_USAGE_VULNERABILITY_LIST = CMD_VULNERABILITY + " " + SUBCOMMAND_VULNERABILITY_LIST + " -i input_file [--format json|txt|csv|md]"
+	CMD_USAGE_DIFF               = CMD_DIFF + " --input-file <base_file> --input-revision <revised_file> [--format json|txt] [--colorize=true|false]"
+	CMD_USAGE_LICENSE_LIST       = SUBCOMMAND_LICENSE_LIST + " --input-file <input_file> [--summary] [--where key=regex[,...]] [--format json|txt|csv|md]"
+	CMD_USAGE_LICENSE_POLICY     = SUBCOMMAND_LICENSE_POLICY + " [--where key=regex[,...]] [--format txt|csv|md]"
+	CMD_USAGE_QUERY              = CMD_QUERY + " --input-file <input_file> [--select * | field1[,fieldN]] [--from [key1[.keyN]] [--where key=regex[,...]]"
+	CMD_USAGE_RESOURCE_LIST      = CMD_RESOURCE + " --input-file <input_file> [--type component|service] [--where key=regex[,...]] [--format txt|csv|md]"
+	CMD_USAGE_SCHEMA_LIST        = CMD_SCHEMA + " [--where key=regex[,...]] [--format txt|csv|md]"
+	CMD_USAGE_VALIDATE           = CMD_VALIDATE + " --input-file <input_file> [--variant <variant_name>] [--error-limit <integer>] [--colorize=true|false] [--force schema_file]"
+	CMD_USAGE_VULNERABILITY_LIST = CMD_VULNERABILITY + " " + SUBCOMMAND_VULNERABILITY_LIST + " --input-file <input_file> [--summary] [--where key=regex[,...]] [--format json|txt|csv|md]"
 )
 
 const (
@@ -73,10 +75,11 @@ const (
 	FLAG_QUIET_MODE_SHORT         = "q"
 	FLAG_LOG_OUTPUT_INDENT        = "indent"
 	FLAG_FILE_OUTPUT_FORMAT       = "format"
+	FLAG_COLORIZE_OUTPUT          = "colorize"
 )
 
 const (
-	MSG_APP_NAME            = "Software Bill-of-Materials (SBOM) utility."
+	MSG_APP_NAME            = "Bill-of-Materials (BOM) utility."
 	MSG_APP_DESCRIPTION     = "This utility serves as centralized command line interface into various Software Bill-of-Materials (SBOM) helper utilities."
 	MSG_FLAG_TRACE          = "enable trace logging"
 	MSG_FLAG_DEBUG          = "enable debug logging"
@@ -84,8 +87,8 @@ const (
 	MSG_FLAG_OUTPUT         = "output filename"
 	MSG_FLAG_LOG_QUIET      = "enable quiet logging mode (removes all information messages from console output); overrides other logging commands"
 	MSG_FLAG_LOG_INDENT     = "enable log indentation of functional callstack"
-	MSG_FLAG_CONFIG_SCHEMA  = "provide custom location and/or filename for application schema configuration (i.e., replaces default `config.json`)"
-	MSG_FLAG_CONFIG_LICENSE = "provide custom location and/or filename for application license policy configuration (i.e., replaces default `license.json`)"
+	MSG_FLAG_CONFIG_SCHEMA  = "provide custom application schema configuration file (i.e., overrides default `config.json`)"
+	MSG_FLAG_CONFIG_LICENSE = "provide custom application license policy configuration file (i.e., overrides default `license.json`)"
 )
 
 const (
@@ -172,6 +175,7 @@ func init() {
 	rootCmd.AddCommand(NewCommandQuery())
 	rootCmd.AddCommand(NewCommandResource())
 	rootCmd.AddCommand(NewCommandVulnerability())
+	rootCmd.AddCommand(NewCommandDiff())
 
 	// Add license command its subcommands
 	licenseCmd := NewCommandLicense()

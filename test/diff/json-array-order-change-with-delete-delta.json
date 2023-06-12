@@ -1,0 +1,19 @@
+{
+  "licenses": [
+    {
+      "license": {
+        "id": "Apache-1.0"
+      }
+    },
+    {
+      "license": {
+        "id": "GPL-3.0-only"
+      }
+    },
+    {
+      "license": {
+        "id": "MIT"
+      }
+    }
+  ]
+}

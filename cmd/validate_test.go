@@ -40,8 +40,8 @@ const (
 
 // Mature SBOMs used to test various schemas and queries
 const (
-	TEST_CDX_1_3_MATURITY_BASE = "test/cyclonedx/cdx-1-3-mature-example-1.json"
-	TEST_CDX_1_4_MATURITY_BASE = "test/cyclonedx/cdx-1-4-mature-example-1.json"
+	TEST_CDX_1_3_MATURITY_EXAMPLE_1_BASE = "test/cyclonedx/cdx-1-3-mature-example-1.json"
+	TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE = "test/cyclonedx/cdx-1-4-mature-example-1.json"
 )
 
 // Tests basic validation and expected errors
@@ -195,7 +195,7 @@ func TestValidateSyntaxErrorCdx13Test2(t *testing.T) {
 func TestValidateForceCustomSchemaCdx13(t *testing.T) {
 	utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_3_CUSTOM
 	innerValidateError(t,
-		TEST_CDX_1_3_MATURITY_BASE,
+		TEST_CDX_1_3_MATURITY_EXAMPLE_1_BASE,
 		SCHEMA_VARIANT_NONE,
 		nil)
 }
@@ -204,7 +204,7 @@ func TestValidateForceCustomSchemaCdx13(t *testing.T) {
 func TestValidateForceCustomSchemaCdx14(t *testing.T) {
 	utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_4_CUSTOM
 	innerValidateError(t,
-		TEST_CDX_1_4_MATURITY_BASE,
+		TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE,
 		SCHEMA_VARIANT_NONE,
 		nil)
 }
@@ -213,7 +213,7 @@ func TestValidateForceCustomSchemaCdx14(t *testing.T) {
 func TestValidateForceCustomSchemaCdxSchemaOlder(t *testing.T) {
 	utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_3_CUSTOM
 	innerValidateError(t,
-		TEST_CDX_1_4_MATURITY_BASE,
+		TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE,
 		SCHEMA_VARIANT_NONE,
 		nil)
 }

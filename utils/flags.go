@@ -47,6 +47,9 @@ type CommandFlags struct {
 	OutputFile       string // Note: not used by `validate` command, which emits a warning if supplied
 	OutputSbomFormat string
 
+	// Diff flags
+	DiffFlags DiffCommandFlags
+
 	// License flags
 	LicenseFlags LicenseCommandFlags
 
@@ -69,6 +72,11 @@ type CommandFlags struct {
 }
 
 // NOTE: These flags are shared by both the list and policy subcommands
+type DiffCommandFlags struct {
+	Colorize    bool
+	RevisedFile string
+}
+
 type LicenseCommandFlags struct {
 	Summary      bool
 	ListLineWrap bool
