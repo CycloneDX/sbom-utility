@@ -63,86 +63,86 @@ const (
 )
 
 func TestValidateExampleCdx14UseCaseAssembly(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_ASSEMBLY, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_ASSEMBLY, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 func TestValidateExampleCdx14UseCaseAuthenticityJsf(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_AUTHENTICITY_JSF, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_AUTHENTICITY_JSF, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 func TestValidateExampleCdx14UseCaseComponentKnownVulnerabilities(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_COMP_KNOWN_VULN, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_COMP_KNOWN_VULN, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 func TestValidateExampleCdx14UseCaseCompositionAndCompleteness(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_COMPOSITION_COMPLETENESS, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_COMPOSITION_COMPLETENESS, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 func TestValidateExampleCdx14UseCaseDependencyGraph(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_DEP_GRAPH, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_DEP_GRAPH, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 func TestValidateExampleCdx14UseCaseExternalReferences(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_EXT_REFS, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_EXT_REFS, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 func TestValidateExampleCdx14UseCaseIntegrityVerification(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_INTEGRITY_VERIFICATION, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_INTEGRITY_VERIFICATION, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 func TestValidateExampleCdx14UseCaseInventory(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_INVENTORY, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_INVENTORY, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 func TestValidateExampleCdx14UseCaseLicenseCompliance(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_LICENSE_COMPLIANCE, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_LICENSE_COMPLIANCE, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 func TestValidateExampleCdx14UseCaseOpenChainConformance(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_OPENCHAIN_CONFORMANCE, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_OPENCHAIN_CONFORMANCE, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 func TestValidateExampleCdx14UseCasePackageEvaluation(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_PKG_EVALUATION, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_PKG_EVALUATION, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 func TestValidateExampleCdx14UseCasePackagingDistribution(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_PKG_DIST, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_PKG_DIST, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 func TestValidateExampleCdx14UseCasePedigree(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_PEDIGREE, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_PEDIGREE, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 func TestValidateExampleCdx14UseCaseProvenance(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_PROVENANCE, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_PROVENANCE, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 func TestValidateExampleCdx14UseCaseSecurityAdvisories(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_SEC_ADVISORIES, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_SEC_ADVISORIES, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 func TestValidateExampleCdx14UseCaseServiceDefinition(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_SVC_DEFN, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_SVC_DEFN, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 func TestValidateExampleCdx14UseCaseVulnerabilityExploitation(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_VULN_EXPLOITATION, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_VULN_EXPLOITATION, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 func TestValidateExampleCdx14UseCaseVulnerabilityRemediation(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_VULN_REMEDIATION, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_VULN_REMEDIATION, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 // CycloneDX - Examples
 func TestValidateExampleBomCdx12NpmJuiceShop(t *testing.T) {
-	innerValidateError(t, TEST_CDX_1_2_EXAMPLE_BOM_NPM_JUICE_SHOP, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_CDX_1_2_EXAMPLE_BOM_NPM_JUICE_SHOP, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 func TestValidateExampleBomCdx13Laravel(t *testing.T) {
-	innerValidateError(t, TEST_CDX_1_3_EXAMPLE_BOM_LARAVEL, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_CDX_1_3_EXAMPLE_BOM_LARAVEL, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 func TestValidateExampleSaaSBomCdx14ApiGatewayDatastores(t *testing.T) {
-	innerValidateError(t, TEST_CDX_1_4_EXAMPLE_SAASBOM_APIGW_MS_DATASTORES, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_CDX_1_4_EXAMPLE_SAASBOM_APIGW_MS_DATASTORES, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }

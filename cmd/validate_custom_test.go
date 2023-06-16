@@ -58,7 +58,7 @@ const (
 
 func innerCustomValidateError(t *testing.T, filename string, variant string, innerError error) (document *schema.Sbom, schemaErrors []gojsonschema.ResultError, actualError error) {
 	utils.GlobalFlags.CustomValidation = true
-	document, schemaErrors, actualError = innerValidateError(t, filename, variant, innerError)
+	document, schemaErrors, actualError = innerValidateError(t, filename, variant, FORMAT_TEXT, innerError)
 	utils.GlobalFlags.CustomValidation = false
 	return
 }
@@ -103,6 +103,7 @@ func TestValidateCustomCdx14MetadataPropsMissingDisclaimer(t *testing.T) {
 	document, results, _ := innerValidateError(t,
 		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_MISSING,
 		SCHEMA_VARIANT_CUSTOM,
+		FORMAT_TEXT,
 		&InvalidSBOMError{})
 	getLogger().Debugf("filename: `%s`, results:\n%v", document.GetFilename(), results)
 }
@@ -111,6 +112,7 @@ func TestValidateCustomCdx14MetadataPropsMissingClassification(t *testing.T) {
 	document, results, _ := innerValidateError(t,
 		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_MISSING,
 		SCHEMA_VARIANT_CUSTOM,
+		FORMAT_TEXT,
 		&InvalidSBOMError{})
 	getLogger().Debugf("filename: `%s`, results:\n%v", document.GetFilename(), results)
 }

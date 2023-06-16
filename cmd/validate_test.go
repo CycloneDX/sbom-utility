@@ -44,8 +44,12 @@ const (
 	TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE = "test/cyclonedx/cdx-1-4-mature-example-1.json"
 )
 
+const (
+	TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE = "test/validation/cdx-1-4-validate-err-components-unique-items-1.json"
+)
+
 // Tests basic validation and expected errors
-func innerValidateError(t *testing.T, filename string, variant string, expectedError error) (document *schema.Sbom, schemaErrors []gojsonschema.ResultError, actualError error) {
+func innerValidateError(t *testing.T, filename string, variant string, format string, expectedError error) (document *schema.Sbom, schemaErrors []gojsonschema.ResultError, actualError error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -53,6 +57,8 @@ func innerValidateError(t *testing.T, filename string, variant string, expectedE
 	utils.GlobalFlags.InputFile = filename
 	// Set the schema variant where the command line flag would
 	utils.GlobalFlags.Variant = variant
+	// Set the err result format
+	utils.GlobalFlags.OutputFormat = format
 
 	// Invoke the actual validate function
 	var isValid bool
@@ -93,7 +99,7 @@ func innerValidateInvalidSBOMInnerError(t *testing.T, filename string, variant s
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	document, schemaErrors, actualError = innerValidateError(t, filename, variant, &InvalidSBOMError{})
+	document, schemaErrors, actualError = innerValidateError(t, filename, variant, FORMAT_TEXT, &InvalidSBOMError{})
 
 	invalidSBOMError, ok := actualError.(*InvalidSBOMError)
 
@@ -109,7 +115,7 @@ func innerValidateInvalidSBOMInnerError(t *testing.T, filename string, variant s
 // It also tests that the syntax error occurred at the expected line number and character offset
 func innerValidateSyntaxError(t *testing.T, filename string, variant string, expectedLineNum int, expectedCharNum int) (document *schema.Sbom, actualError error) {
 
-	document, _, actualError = innerValidateError(t, filename, variant, &json.SyntaxError{})
+	document, _, actualError = innerValidateError(t, filename, variant, FORMAT_TEXT, &json.SyntaxError{})
 	syntaxError, ok := actualError.(*json.SyntaxError)
 
 	if !ok {
@@ -136,6 +142,7 @@ func innerTestSchemaErrorAndErrorResults(t *testing.T,
 	document, results, _ := innerValidateError(t,
 		filename,
 		variant,
+		FORMAT_TEXT,
 		&InvalidSBOMError{})
 	getLogger().Debugf("filename: `%s`, results:\n%v", document.GetFilename(), results)
 
@@ -160,6 +167,7 @@ func TestValidateInvalidInputFileLoad(t *testing.T) {
 	innerValidateError(t,
 		TEST_INPUT_FILE_NON_EXISTENT,
 		SCHEMA_VARIANT_NONE,
+		FORMAT_TEXT,
 		&fs.PathError{})
 }
 
@@ -197,6 +205,7 @@ func TestValidateForceCustomSchemaCdx13(t *testing.T) {
 	innerValidateError(t,
 		TEST_CDX_1_3_MATURITY_EXAMPLE_1_BASE,
 		SCHEMA_VARIANT_NONE,
+		FORMAT_TEXT,
 		nil)
 }
 
@@ -206,6 +215,7 @@ func TestValidateForceCustomSchemaCdx14(t *testing.T) {
 	innerValidateError(t,
 		TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE,
 		SCHEMA_VARIANT_NONE,
+		FORMAT_TEXT,
 		nil)
 }
 
@@ -215,6 +225,7 @@ func TestValidateForceCustomSchemaCdxSchemaOlder(t *testing.T) {
 	innerValidateError(t,
 		TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE,
 		SCHEMA_VARIANT_NONE,
+		FORMAT_TEXT,
 		nil)
 }
 
@@ -224,3 +235,12 @@ func TestValidateForceCustomSchemaCdxSchemaOlder(t *testing.T) {
 // 		SCHEMA_VARIANT_NONE,
 // 		nil)
 // }
+
+func TestValidateCdx14ComponentsUniqueJsonResults(t *testing.T) {
+	//utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_3_CUSTOM
+	innerValidateError(t,
+		TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE,
+		SCHEMA_VARIANT_NONE,
+		FORMAT_JSON,
+		nil)
+}
