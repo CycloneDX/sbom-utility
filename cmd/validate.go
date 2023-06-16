@@ -337,6 +337,15 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 }
 
 func formatSchemaErrorTypes(resultError gojsonschema.ResultError, colorize bool) (formattedResult string) {
+
+	var jsonErrorMap = make(map[string]interface{})
+	jsonErrorMap["type"] = resultError.Type()
+	jsonErrorMap["context"] = resultError.Context()
+	jsonErrorMap["value"] = resultError.Value()
+	jsonErrorMap["details"] = resultError.Details()
+	jsonErrorMap["description"] = resultError.Description()
+	jsonErrorMap["descriptionFormat"] = resultError.DescriptionFormat()
+
 	switch resultError.(type) {
 	case *gojsonschema.FalseError:
 	case *gojsonschema.RequiredError:
@@ -354,7 +363,7 @@ func formatSchemaErrorTypes(resultError gojsonschema.ResultError, colorize bool)
 	case *gojsonschema.ArrayMaxItemsError:
 	case *gojsonschema.ItemsMustBeUniqueError:
 		getLogger().Infof("ItemsMustBeUniqueError:")
-		formattedResult, _ = log.FormatInterfaceAsJson(resultError)
+		formattedResult, _ = log.FormatInterfaceAsJson(jsonErrorMap)
 	case *gojsonschema.ArrayContainsError:
 	case *gojsonschema.ArrayMinPropertiesError:
 	case *gojsonschema.ArrayMaxPropertiesError:
@@ -374,16 +383,12 @@ func formatSchemaErrorTypes(resultError gojsonschema.ResultError, colorize bool)
 	case *gojsonschema.ConditionElseError:
 	default:
 		if colorize {
-			formattedResult, _ = log.FormatInterfaceAsColorizedJson(resultError)
+			formattedResult, _ = log.FormatInterfaceAsColorizedJson(jsonErrorMap)
 		} else {
-			formattedResult, _ = log.FormatInterfaceAsJson(resultError)
+			formattedResult, _ = log.FormatInterfaceAsJson(jsonErrorMap)
 		}
 	}
 
-	// err.SetType(t)
-	// err.SetContext(context)
-	// err.SetValue(value)
-	// err.SetDetails(details)
 	// err.SetDescriptionFormat(d)
 	// details["field"] = err.Field()
 	// if _, exists := details["context"]; !exists && context != nil {
