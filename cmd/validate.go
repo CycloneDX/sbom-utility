@@ -69,29 +69,27 @@ const (
 // JsonContext is a linked-list of JSON key strings
 type ValidationErrResult struct {
 	resultMap         *orderedmap.OrderedMap
+	ResultError       gojsonschema.ResultError
+	Context           *gojsonschema.JsonContext `json:"context"`           // jsonErrorMap["context"] = resultError.Context()
 	Type              string                    `json:"type"`              // jsonErrorMap["type"] = resultError.Type()
 	Field             string                    `json:"field"`             // details["field"] = err.Field()
 	Description       string                    `json:"description"`       // jsonErrorMap["description"] = resultError.Description()
 	DescriptionFormat string                    `json:"descriptionFormat"` // jsonErrorMap["descriptionFormat"] = resultError.DescriptionFormat()
 	Value             interface{}               `json:"value"`             // jsonErrorMap["value"] = resultError.Value()
-	Context           *gojsonschema.JsonContext `json:"context"`           // jsonErrorMap["context"] = resultError.Context()
 	Details           map[string]interface{}    `json:"details"`           // jsonErrorMap["details"] = resultError.Details()
 }
 
 func NewValidationErrResult(resultError gojsonschema.ResultError) (validationErrResult *ValidationErrResult) {
 	// Prepare values that are optionally output as JSON
 	validationErrResult = &ValidationErrResult{
-		DescriptionFormat: resultError.DescriptionFormat(),
-		Context:           resultError.Context(),
-		Value:             resultError.Value(),
-		Details:           resultError.Details(),
+		ResultError: resultError,
 	}
 	// Prepare for JSON output by adding all required fields to our ordered map
 	validationErrResult.resultMap = orderedmap.New()
 	validationErrResult.resultMap.Set("type", resultError.Type())
 	validationErrResult.resultMap.Set("field", resultError.Field())
-	if validationErrResult.Context != nil {
-		validationErrResult.resultMap.Set("context", validationErrResult.Context.String())
+	if context := resultError.Context(); context != nil {
+		validationErrResult.resultMap.Set("context", resultError.Context().String())
 	}
 	validationErrResult.resultMap.Set("description", resultError.Description())
 
@@ -102,20 +100,31 @@ func (validationErrResult *ValidationErrResult) MarshalJSON() (marshalled []byte
 	return validationErrResult.resultMap.MarshalJSON()
 }
 
-// details["field"] = err.Field()
-//
-//	if _, exists := details["context"]; !exists && context != nil {
-//		details["context"] = context.String()
-//	}
-//
-// err.SetDescription(formatErrorDescription(err.DescriptionFormat(), details))
 func (result *ValidationErrResult) Format(showValue bool, colorize bool) string {
 
 	var sb strings.Builder
 
 	// Conditionally, add optional values as requested
 	if showValue {
-		result.resultMap.Set("value", result.Value)
+		result.resultMap.Set("value", result.ResultError.Value())
+	}
+
+	formattedResult, err := log.FormatInterfaceAsJson(result.resultMap)
+	if err != nil {
+		return fmt.Sprintf("formatting error: %s", err.Error())
+	}
+	sb.WriteString(formattedResult)
+
+	return sb.String()
+}
+
+func (result *ValidationErrResult) FormatItemsMustBeUniqueError(showValue bool, colorize bool) string {
+
+	var sb strings.Builder
+
+	// Conditionally, add optional values as requested
+	if showValue {
+		result.resultMap.Set("value", result.ResultError.Value())
 	}
 
 	formattedResult, err := log.FormatInterfaceAsJson(result.resultMap)
@@ -419,7 +428,7 @@ func formatSchemaErrorTypes(resultError gojsonschema.ResultError, colorize bool)
 	// case *gojsonschema.InvalidPropertyPatternError:
 	// case *gojsonschema.InvalidTypeError:
 	case *gojsonschema.ItemsMustBeUniqueError:
-		formattedResult = validationErrorResult.Format(true, colorize)
+		formattedResult = validationErrorResult.FormatItemsMustBeUniqueError(true, colorize)
 	// case *gojsonschema.MissingDependencyError:
 	// case *gojsonschema.MultipleOfError:
 	// case *gojsonschema.NumberAllOfError:
