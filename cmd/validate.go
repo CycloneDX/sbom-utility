@@ -66,7 +66,7 @@ const (
 	PROTOCOL_PREFIX_FILE = "file://"
 )
 
-// JsonContext implements a persistent linked-list of strings
+// JsonContext is a linked-list of JSON key strings
 type ValidationErrResult struct {
 	resultMap         *orderedmap.OrderedMap
 	Type              string                    `json:"type"`              // jsonErrorMap["type"] = resultError.Type()
@@ -79,16 +79,20 @@ type ValidationErrResult struct {
 }
 
 func NewValidationErrResult(resultError gojsonschema.ResultError) (validationErrResult *ValidationErrResult) {
+	// Prepare values that are optionally output as JSON
 	validationErrResult = &ValidationErrResult{
 		DescriptionFormat: resultError.DescriptionFormat(),
 		Context:           resultError.Context(),
 		Value:             resultError.Value(),
 		Details:           resultError.Details(),
 	}
+	// Prepare for JSON output by adding all required fields to our ordered map
 	validationErrResult.resultMap = orderedmap.New()
 	validationErrResult.resultMap.Set("type", resultError.Type())
 	validationErrResult.resultMap.Set("field", resultError.Field())
-	validationErrResult.resultMap.Set("context", validationErrResult.Context.String())
+	if validationErrResult.Context != nil {
+		validationErrResult.resultMap.Set("context", validationErrResult.Context.String())
+	}
 	validationErrResult.resultMap.Set("description", resultError.Description())
 
 	return
@@ -105,9 +109,14 @@ func (validationErrResult *ValidationErrResult) MarshalJSON() (marshalled []byte
 //	}
 //
 // err.SetDescription(formatErrorDescription(err.DescriptionFormat(), details))
-func (result *ValidationErrResult) Format(showValue bool, showContext bool, colorize bool) string {
+func (result *ValidationErrResult) Format(showValue bool, colorize bool) string {
 
 	var sb strings.Builder
+
+	// Conditionally, add optional values as requested
+	if showValue {
+		result.resultMap.Set("value", result.Value)
+	}
 
 	formattedResult, err := log.FormatInterfaceAsJson(result.resultMap)
 	if err != nil {
@@ -410,7 +419,7 @@ func formatSchemaErrorTypes(resultError gojsonschema.ResultError, colorize bool)
 	// case *gojsonschema.InvalidPropertyPatternError:
 	// case *gojsonschema.InvalidTypeError:
 	case *gojsonschema.ItemsMustBeUniqueError:
-		formattedResult = validationErrorResult.Format(true, true, colorize)
+		formattedResult = validationErrorResult.Format(true, colorize)
 	// case *gojsonschema.MissingDependencyError:
 	// case *gojsonschema.MultipleOfError:
 	// case *gojsonschema.NumberAllOfError:
@@ -425,7 +434,7 @@ func formatSchemaErrorTypes(resultError gojsonschema.ResultError, colorize bool)
 	// case *gojsonschema.StringLengthGTEError:
 	// case *gojsonschema.StringLengthLTEError:
 	default:
-		formattedResult = validationErrorResult.Format(true, true, colorize)
+		formattedResult = validationErrorResult.Format(true, colorize)
 	}
 
 	return
