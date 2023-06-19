@@ -157,6 +157,43 @@ func innerTestSchemaErrorAndErrorResults(t *testing.T,
 	}
 }
 
+func schemaErrorExists(schemaErrors []gojsonschema.ResultError,
+	expectedType string, expectedField string, expectedValue interface{}) bool {
+
+	for i, resultError := range schemaErrors {
+		// Some descriptions include very long enums; in those cases,
+		// truncate to a reasonable length using an intelligent separator
+		getLogger().Tracef(">> %d. Type: [%s], Field: [%s], Value: [%v]",
+			i+1,
+			resultError.Type(),
+			resultError.Field(),
+			resultError.Value())
+
+		actualType := resultError.Type()
+		actualField := resultError.Field()
+		actualValue := resultError.Value()
+
+		if actualType == expectedType {
+			// we have matched on the type (key) field, continue to match other fields
+			if expectedField != "" &&
+				actualField != expectedField {
+				getLogger().Tracef("expected Field: `%s`; actual Field: `%s`", expectedField, actualField)
+				return false
+			}
+
+			if expectedValue != "" &&
+				actualValue != expectedValue {
+				getLogger().Tracef("expected Value: `%s`; actual Value: `%s`", actualValue, expectedValue)
+				return false
+			}
+			return true
+		} else {
+			getLogger().Debugf("Skipping result[%d]: expected Type: `%s`; actual Type: `%s`", i, expectedType, actualType)
+		}
+	}
+	return false
+}
+
 // -----------------------------------------------------------
 // Command tests
 // -----------------------------------------------------------

@@ -64,8 +64,47 @@ const (
 	PROTOCOL_PREFIX_FILE = "file://"
 )
 
+// JsonContext implements a persistent linked-list of strings
 type ValidationErrResult struct {
-	gojsonschema.ResultErrorFields
+	Type              string                    `json:"type"`              // jsonErrorMap["type"] = resultError.Type()
+	Description       string                    `json:"description"`       // jsonErrorMap["description"] = resultError.Description()
+	DescriptionFormat string                    `json:"descriptionFormat"` // jsonErrorMap["descriptionFormat"] = resultError.DescriptionFormat()
+	Value             interface{}               `json:"value"`             // jsonErrorMap["value"] = resultError.Value()
+	Context           *gojsonschema.JsonContext `json:"context"`           // jsonErrorMap["context"] = resultError.Context()
+	Details           map[string]interface{}    `json:"details"`           // jsonErrorMap["details"] = resultError.Details()
+}
+
+func NewValidationErrResult(resultError gojsonschema.ResultError) (validationErrResult *ValidationErrResult) {
+	//	var jsonErrorMap = make(map[string]interface{})
+	validationErrResult = &ValidationErrResult{
+		Type:              resultError.Type(),
+		Description:       resultError.Description(),
+		DescriptionFormat: resultError.DescriptionFormat(),
+		Context:           resultError.Context(),
+		Value:             resultError.Value(),
+		Details:           resultError.Details(),
+	}
+	return
+}
+
+// details["field"] = err.Field()
+//
+//	if _, exists := details["context"]; !exists && context != nil {
+//		details["context"] = context.String()
+//	}
+//
+// err.SetDescription(formatErrorDescription(err.DescriptionFormat(), details))
+func (result *ValidationErrResult) Format(showValue bool, showContext bool, colorize bool) string {
+
+	var sb strings.Builder
+
+	formattedResult, err := log.FormatInterfaceAsJson(result)
+	if err != nil {
+		return fmt.Sprintf("formatting error: %s", err.Error())
+	}
+	sb.WriteString(formattedResult)
+
+	return sb.String()
 }
 
 func NewCommandValidate() *cobra.Command {
@@ -286,7 +325,7 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 		// Format error results
 		format := utils.GlobalFlags.OutputFormat
 		var formattedSchemaErrors string
-		getLogger().Infof("Outputting error results (`%s` format)...", format)
+		getLogger().Infof("Outputting error results (`%s` format)...\n", format)
 		switch format {
 		case FORMAT_JSON:
 			formattedSchemaErrors = FormatSchemaErrorsJson(schemaErrors)
@@ -338,13 +377,7 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 
 func formatSchemaErrorTypes(resultError gojsonschema.ResultError, colorize bool) (formattedResult string) {
 
-	var jsonErrorMap = make(map[string]interface{})
-	jsonErrorMap["type"] = resultError.Type()
-	jsonErrorMap["context"] = resultError.Context()
-	jsonErrorMap["value"] = resultError.Value()
-	jsonErrorMap["details"] = resultError.Details()
-	jsonErrorMap["description"] = resultError.Description()
-	jsonErrorMap["descriptionFormat"] = resultError.DescriptionFormat()
+	validationErrorResult := NewValidationErrResult(resultError)
 
 	switch resultError.(type) {
 	case *gojsonschema.FalseError:
@@ -363,7 +396,7 @@ func formatSchemaErrorTypes(resultError gojsonschema.ResultError, colorize bool)
 	case *gojsonschema.ArrayMaxItemsError:
 	case *gojsonschema.ItemsMustBeUniqueError:
 		getLogger().Infof("ItemsMustBeUniqueError:")
-		formattedResult, _ = log.FormatInterfaceAsJson(jsonErrorMap)
+		formattedResult = validationErrorResult.Format(true, true, colorize)
 	case *gojsonschema.ArrayContainsError:
 	case *gojsonschema.ArrayMinPropertiesError:
 	case *gojsonschema.ArrayMaxPropertiesError:
@@ -382,19 +415,9 @@ func formatSchemaErrorTypes(resultError gojsonschema.ResultError, colorize bool)
 	case *gojsonschema.ConditionThenError:
 	case *gojsonschema.ConditionElseError:
 	default:
-		if colorize {
-			formattedResult, _ = log.FormatInterfaceAsColorizedJson(jsonErrorMap)
-		} else {
-			formattedResult, _ = log.FormatInterfaceAsJson(jsonErrorMap)
-		}
+		formattedResult = validationErrorResult.Format(true, true, colorize)
 	}
 
-	// err.SetDescriptionFormat(d)
-	// details["field"] = err.Field()
-	// if _, exists := details["context"]; !exists && context != nil {
-	// 	details["context"] = context.String()
-	// }
-	// err.SetDescription(formatErrorDescription(err.DescriptionFormat(), details))
 	return
 }
 
@@ -403,35 +426,42 @@ func FormatSchemaErrorsJson(errs []gojsonschema.ResultError) string {
 
 	lenErrs := len(errs)
 	if lenErrs > 0 {
+		sb.WriteString(fmt.Sprintf("\n(%d) Schema errors detected (use `--debug` for more details):\n", lenErrs))
 		errLimit := utils.GlobalFlags.ValidateFlags.MaxNumErrors
 		colorize := utils.GlobalFlags.ValidateFlags.ColorizeJsonErrors
 
-		sb.WriteString(fmt.Sprintf("\n(%d) Schema errors detected (use `--debug` for more details):", lenErrs))
-		for i, resultError := range errs {
+		// If we have more errors than the (default or user set) limit; notify user
+		if lenErrs > errLimit {
+			// notify users more errors exist
+			msg := fmt.Sprintf("Too many errors. Showing (%v/%v) errors.", errLimit, len(errs))
+			getLogger().Infof("%s", msg)
+		}
 
-			// short-circuit if we have too many errors
-			if i == errLimit {
-				// notify users more errors exist
-				msg := fmt.Sprintf("Too many errors. Showing (%v/%v) errors.", i, len(errs))
-				getLogger().Infof("%s", msg)
-				// always include limit message in discrete output (i.e., not turned off by --quiet flag)
-				sb.WriteString("\n" + msg)
+		if lenErrs > 1 {
+			sb.WriteString("[\n")
+		}
+
+		for i, resultError := range errs {
+			// short-circuit if too many errors (i.e., using the error limit flag value)
+			if i > errLimit {
 				break
 			}
 
+			// add to the result errors
 			schemaErrorText := formatSchemaErrorTypes(resultError, colorize)
-
-			// append the numbered schema error
-			// schemaErrorText := fmt.Sprintf("\n\t%d. Type: [%s], Field: [%s], Description: [%s] %s",
-			// 	i+1,
-			// 	resultError.Type(),
-			// 	resultError.Field(),
-			// 	description,
-			// 	failingObject)
-
 			sb.WriteString(schemaErrorText)
+
+			if i < (lenErrs-1) && i < (errLimit-1) {
+				sb.WriteString(",")
+				sb.WriteString(fmt.Sprintf("i: %v, errLimit: %v", i, errLimit))
+			}
+		}
+
+		if lenErrs > 1 {
+			sb.WriteString("\n]")
 		}
 	}
+
 	return sb.String()
 }
 
@@ -498,41 +528,4 @@ func FormatSchemaErrorsText(errs []gojsonschema.ResultError) string {
 		}
 	}
 	return sb.String()
-}
-
-func schemaErrorExists(schemaErrors []gojsonschema.ResultError,
-	expectedType string, expectedField string, expectedValue interface{}) bool {
-
-	for i, resultError := range schemaErrors {
-		// Some descriptions include very long enums; in those cases,
-		// truncate to a reasonable length using an intelligent separator
-		getLogger().Tracef(">> %d. Type: [%s], Field: [%s], Value: [%v]",
-			i+1,
-			resultError.Type(),
-			resultError.Field(),
-			resultError.Value())
-
-		actualType := resultError.Type()
-		actualField := resultError.Field()
-		actualValue := resultError.Value()
-
-		if actualType == expectedType {
-			// we have matched on the type (key) field, continue to match other fields
-			if expectedField != "" &&
-				actualField != expectedField {
-				getLogger().Tracef("expected Field: `%s`; actual Field: `%s`", expectedField, actualField)
-				return false
-			}
-
-			if expectedValue != "" &&
-				actualValue != expectedValue {
-				getLogger().Tracef("expected Value: `%s`; actual Value: `%s`", actualValue, expectedValue)
-				return false
-			}
-			return true
-		} else {
-			getLogger().Debugf("Skipping result[%d]: expected Type: `%s`; actual Type: `%s`", i, expectedType, actualType)
-		}
-	}
-	return false
 }
