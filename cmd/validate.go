@@ -17,6 +17,7 @@
 
 package cmd
 
+// "github.com/iancoleman/orderedmap"
 import (
 	"encoding/json"
 	"fmt"
@@ -27,6 +28,7 @@ import (
 	"github.com/CycloneDX/sbom-utility/resources"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
+	"github.com/iancoleman/orderedmap"
 	"github.com/spf13/cobra"
 	"github.com/xeipuuv/gojsonschema"
 )
@@ -66,7 +68,9 @@ const (
 
 // JsonContext implements a persistent linked-list of strings
 type ValidationErrResult struct {
+	resultMap         *orderedmap.OrderedMap
 	Type              string                    `json:"type"`              // jsonErrorMap["type"] = resultError.Type()
+	Field             string                    `json:"field"`             // details["field"] = err.Field()
 	Description       string                    `json:"description"`       // jsonErrorMap["description"] = resultError.Description()
 	DescriptionFormat string                    `json:"descriptionFormat"` // jsonErrorMap["descriptionFormat"] = resultError.DescriptionFormat()
 	Value             interface{}               `json:"value"`             // jsonErrorMap["value"] = resultError.Value()
@@ -75,16 +79,23 @@ type ValidationErrResult struct {
 }
 
 func NewValidationErrResult(resultError gojsonschema.ResultError) (validationErrResult *ValidationErrResult) {
-	//	var jsonErrorMap = make(map[string]interface{})
 	validationErrResult = &ValidationErrResult{
-		Type:              resultError.Type(),
-		Description:       resultError.Description(),
 		DescriptionFormat: resultError.DescriptionFormat(),
 		Context:           resultError.Context(),
 		Value:             resultError.Value(),
 		Details:           resultError.Details(),
 	}
+	validationErrResult.resultMap = orderedmap.New()
+	validationErrResult.resultMap.Set("type", resultError.Type())
+	validationErrResult.resultMap.Set("field", resultError.Field())
+	validationErrResult.resultMap.Set("context", validationErrResult.Context.String())
+	validationErrResult.resultMap.Set("description", resultError.Description())
+
 	return
+}
+
+func (validationErrResult *ValidationErrResult) MarshalJSON() (marshalled []byte, err error) {
+	return validationErrResult.resultMap.MarshalJSON()
 }
 
 // details["field"] = err.Field()
@@ -98,7 +109,7 @@ func (result *ValidationErrResult) Format(showValue bool, showContext bool, colo
 
 	var sb strings.Builder
 
-	formattedResult, err := log.FormatInterfaceAsJson(result)
+	formattedResult, err := log.FormatInterfaceAsJson(result.resultMap)
 	if err != nil {
 		return fmt.Sprintf("formatting error: %s", err.Error())
 	}
@@ -380,40 +391,39 @@ func formatSchemaErrorTypes(resultError gojsonschema.ResultError, colorize bool)
 	validationErrorResult := NewValidationErrResult(resultError)
 
 	switch resultError.(type) {
-	case *gojsonschema.FalseError:
-	case *gojsonschema.RequiredError:
-	case *gojsonschema.InvalidTypeError:
-	case *gojsonschema.NumberAnyOfError:
-	case *gojsonschema.NumberOneOfError:
-	case *gojsonschema.NumberAllOfError:
-	case *gojsonschema.NumberNotError:
-	case *gojsonschema.MissingDependencyError:
-	case *gojsonschema.InternalError:
-	case *gojsonschema.ConstError:
-	case *gojsonschema.EnumError:
-	case *gojsonschema.ArrayNoAdditionalItemsError:
-	case *gojsonschema.ArrayMinItemsError:
-	case *gojsonschema.ArrayMaxItemsError:
+	// case *gojsonschema.AdditionalPropertyNotAllowedError:
+	// case *gojsonschema.ArrayContainsError:
+	// case *gojsonschema.ArrayMaxItemsError:
+	// case *gojsonschema.ArrayMaxPropertiesError:
+	// case *gojsonschema.ArrayMinItemsError:
+	// case *gojsonschema.ArrayMinPropertiesError:
+	// case *gojsonschema.ArrayNoAdditionalItemsError:
+	// case *gojsonschema.ConditionElseError:
+	// case *gojsonschema.ConditionThenError:
+	// case *gojsonschema.ConstError:
+	// case *gojsonschema.DoesNotMatchFormatError:
+	// case *gojsonschema.DoesNotMatchPatternError:
+	// case *gojsonschema.EnumError:
+	// case *gojsonschema.FalseError:
+	// case *gojsonschema.InternalError:
+	// case *gojsonschema.InvalidPropertyNameError:
+	// case *gojsonschema.InvalidPropertyPatternError:
+	// case *gojsonschema.InvalidTypeError:
 	case *gojsonschema.ItemsMustBeUniqueError:
-		getLogger().Infof("ItemsMustBeUniqueError:")
 		formattedResult = validationErrorResult.Format(true, true, colorize)
-	case *gojsonschema.ArrayContainsError:
-	case *gojsonschema.ArrayMinPropertiesError:
-	case *gojsonschema.ArrayMaxPropertiesError:
-	case *gojsonschema.AdditionalPropertyNotAllowedError:
-	case *gojsonschema.InvalidPropertyPatternError:
-	case *gojsonschema.InvalidPropertyNameError:
-	case *gojsonschema.StringLengthGTEError:
-	case *gojsonschema.StringLengthLTEError:
-	case *gojsonschema.DoesNotMatchPatternError:
-	case *gojsonschema.DoesNotMatchFormatError:
-	case *gojsonschema.MultipleOfError:
-	case *gojsonschema.NumberGTEError:
-	case *gojsonschema.NumberGTError:
-	case *gojsonschema.NumberLTEError:
-	case *gojsonschema.NumberLTError:
-	case *gojsonschema.ConditionThenError:
-	case *gojsonschema.ConditionElseError:
+	// case *gojsonschema.MissingDependencyError:
+	// case *gojsonschema.MultipleOfError:
+	// case *gojsonschema.NumberAllOfError:
+	// case *gojsonschema.NumberAnyOfError:
+	// case *gojsonschema.NumberGTEError:
+	// case *gojsonschema.NumberGTError:
+	// case *gojsonschema.NumberLTEError:
+	// case *gojsonschema.NumberLTError:
+	// case *gojsonschema.NumberNotError:
+	// case *gojsonschema.NumberOneOfError:
+	// case *gojsonschema.RequiredError:
+	// case *gojsonschema.StringLengthGTEError:
+	// case *gojsonschema.StringLengthLTEError:
 	default:
 		formattedResult = validationErrorResult.Format(true, true, colorize)
 	}
@@ -453,7 +463,6 @@ func FormatSchemaErrorsJson(errs []gojsonschema.ResultError) string {
 
 			if i < (lenErrs-1) && i < (errLimit-1) {
 				sb.WriteString(",")
-				sb.WriteString(fmt.Sprintf("i: %v, errLimit: %v", i, errLimit))
 			}
 		}
 
