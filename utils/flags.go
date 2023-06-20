@@ -86,7 +86,9 @@ type ValidateCommandFlags struct {
 	ForcedJsonSchemaFile      string
 	MaxNumErrors              int
 	MaxErrorDescriptionLength int
-	ColorizeJsonErrors        bool
+	ColorizeErrorOutput       bool
+	ShowErrorValue            bool
+	ShowErrorDetail           bool
 }
 
 type VulnerabilityCommandFlags struct {

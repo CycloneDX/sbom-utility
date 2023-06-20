@@ -24,7 +24,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/CycloneDX/sbom-utility/log"
 	"github.com/CycloneDX/sbom-utility/resources"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
@@ -66,22 +65,9 @@ const (
 	PROTOCOL_PREFIX_FILE = "file://"
 )
 
-// JsonContext is a linked-list of JSON key strings
-type ValidationErrResult struct {
-	resultMap         *orderedmap.OrderedMap
-	ResultError       gojsonschema.ResultError
-	Context           *gojsonschema.JsonContext `json:"context"`           // jsonErrorMap["context"] = resultError.Context()
-	Type              string                    `json:"type"`              // jsonErrorMap["type"] = resultError.Type()
-	Field             string                    `json:"field"`             // details["field"] = err.Field()
-	Description       string                    `json:"description"`       // jsonErrorMap["description"] = resultError.Description()
-	DescriptionFormat string                    `json:"descriptionFormat"` // jsonErrorMap["descriptionFormat"] = resultError.DescriptionFormat()
-	Value             interface{}               `json:"value"`             // jsonErrorMap["value"] = resultError.Value()
-	Details           map[string]interface{}    `json:"details"`           // jsonErrorMap["details"] = resultError.Details()
-}
-
-func NewValidationErrResult(resultError gojsonschema.ResultError) (validationErrResult *ValidationErrResult) {
+func NewValidationErrResult(resultError gojsonschema.ResultError) (validationErrResult *ValidationResultFormat) {
 	// Prepare values that are optionally output as JSON
-	validationErrResult = &ValidationErrResult{
+	validationErrResult = &ValidationResultFormat{
 		ResultError: resultError,
 	}
 	// Prepare for JSON output by adding all required fields to our ordered map
@@ -94,46 +80,6 @@ func NewValidationErrResult(resultError gojsonschema.ResultError) (validationErr
 	validationErrResult.resultMap.Set("description", resultError.Description())
 
 	return
-}
-
-func (validationErrResult *ValidationErrResult) MarshalJSON() (marshalled []byte, err error) {
-	return validationErrResult.resultMap.MarshalJSON()
-}
-
-func (result *ValidationErrResult) Format(showValue bool, colorize bool) string {
-
-	var sb strings.Builder
-
-	// Conditionally, add optional values as requested
-	if showValue {
-		result.resultMap.Set("value", result.ResultError.Value())
-	}
-
-	formattedResult, err := log.FormatInterfaceAsJson(result.resultMap)
-	if err != nil {
-		return fmt.Sprintf("formatting error: %s", err.Error())
-	}
-	sb.WriteString(formattedResult)
-
-	return sb.String()
-}
-
-func (result *ValidationErrResult) FormatItemsMustBeUniqueError(showValue bool, colorize bool) string {
-
-	var sb strings.Builder
-
-	// Conditionally, add optional values as requested
-	if showValue {
-		result.resultMap.Set("value", result.ResultError.Value())
-	}
-
-	formattedResult, err := log.FormatInterfaceAsJson(result.resultMap)
-	if err != nil {
-		return fmt.Sprintf("formatting error: %s", err.Error())
-	}
-	sb.WriteString(formattedResult)
-
-	return sb.String()
 }
 
 func NewCommandValidate() *cobra.Command {
@@ -171,7 +117,7 @@ func initCommandValidate(command *cobra.Command) {
 	command.Flags().StringVarP(&utils.GlobalFlags.Variant, FLAG_VALIDATE_SCHEMA_VARIANT, "", "", MSG_VALIDATE_SCHEMA_VARIANT)
 	command.Flags().BoolVarP(&utils.GlobalFlags.CustomValidation, FLAG_VALIDATE_CUSTOM, "", false, MSG_VALIDATE_FLAG_CUSTOM)
 	// Colorize default: true (for historical reasons)
-	command.Flags().BoolVarP(&utils.GlobalFlags.ValidateFlags.ColorizeJsonErrors, FLAG_COLORIZE_OUTPUT, "", true, MSG_VALIDATE_FLAG_ERR_COLORIZE)
+	command.Flags().BoolVarP(&utils.GlobalFlags.ValidateFlags.ColorizeErrorOutput, FLAG_COLORIZE_OUTPUT, "", true, MSG_VALIDATE_FLAG_ERR_COLORIZE)
 	command.Flags().IntVarP(&utils.GlobalFlags.ValidateFlags.MaxNumErrors, FLAG_VALIDATE_ERR_LIMIT, "", DEFAULT_MAX_ERROR_LIMIT, MSG_VALIDATE_FLAG_ERR_LIMIT)
 }
 
@@ -357,13 +303,13 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 		getLogger().Infof("Outputting error results (`%s` format)...\n", format)
 		switch format {
 		case FORMAT_JSON:
-			formattedSchemaErrors = FormatSchemaErrorsJson(schemaErrors)
+			formattedSchemaErrors = FormatSchemaErrorsJson(schemaErrors, utils.GlobalFlags.ValidateFlags)
 		case FORMAT_TEXT:
-			formattedSchemaErrors = FormatSchemaErrorsText(schemaErrors)
+			formattedSchemaErrors = FormatSchemaErrorsText(schemaErrors, utils.GlobalFlags.ValidateFlags)
 		default:
 			getLogger().Warningf("error results not supported for `%s` format; defaulting to `%s` format...",
 				format, FORMAT_TEXT)
-			formattedSchemaErrors = FormatSchemaErrorsText(schemaErrors)
+			formattedSchemaErrors = FormatSchemaErrorsText(schemaErrors, utils.GlobalFlags.ValidateFlags)
 		}
 
 		// Append formatted schema errors "details" to the InvalidSBOMError type
@@ -402,157 +348,4 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 
 	// All validation tests passed; return VALID
 	return
-}
-
-func formatSchemaErrorTypes(resultError gojsonschema.ResultError, colorize bool) (formattedResult string) {
-
-	validationErrorResult := NewValidationErrResult(resultError)
-
-	switch resultError.(type) {
-	// case *gojsonschema.AdditionalPropertyNotAllowedError:
-	// case *gojsonschema.ArrayContainsError:
-	// case *gojsonschema.ArrayMaxItemsError:
-	// case *gojsonschema.ArrayMaxPropertiesError:
-	// case *gojsonschema.ArrayMinItemsError:
-	// case *gojsonschema.ArrayMinPropertiesError:
-	// case *gojsonschema.ArrayNoAdditionalItemsError:
-	// case *gojsonschema.ConditionElseError:
-	// case *gojsonschema.ConditionThenError:
-	// case *gojsonschema.ConstError:
-	// case *gojsonschema.DoesNotMatchFormatError:
-	// case *gojsonschema.DoesNotMatchPatternError:
-	// case *gojsonschema.EnumError:
-	// case *gojsonschema.FalseError:
-	// case *gojsonschema.InternalError:
-	// case *gojsonschema.InvalidPropertyNameError:
-	// case *gojsonschema.InvalidPropertyPatternError:
-	// case *gojsonschema.InvalidTypeError:
-	case *gojsonschema.ItemsMustBeUniqueError:
-		formattedResult = validationErrorResult.FormatItemsMustBeUniqueError(true, colorize)
-	// case *gojsonschema.MissingDependencyError:
-	// case *gojsonschema.MultipleOfError:
-	// case *gojsonschema.NumberAllOfError:
-	// case *gojsonschema.NumberAnyOfError:
-	// case *gojsonschema.NumberGTEError:
-	// case *gojsonschema.NumberGTError:
-	// case *gojsonschema.NumberLTEError:
-	// case *gojsonschema.NumberLTError:
-	// case *gojsonschema.NumberNotError:
-	// case *gojsonschema.NumberOneOfError:
-	// case *gojsonschema.RequiredError:
-	// case *gojsonschema.StringLengthGTEError:
-	// case *gojsonschema.StringLengthLTEError:
-	default:
-		formattedResult = validationErrorResult.Format(true, colorize)
-	}
-
-	return
-}
-
-func FormatSchemaErrorsJson(errs []gojsonschema.ResultError) string {
-	var sb strings.Builder
-
-	lenErrs := len(errs)
-	if lenErrs > 0 {
-		sb.WriteString(fmt.Sprintf("\n(%d) Schema errors detected (use `--debug` for more details):\n", lenErrs))
-		errLimit := utils.GlobalFlags.ValidateFlags.MaxNumErrors
-		colorize := utils.GlobalFlags.ValidateFlags.ColorizeJsonErrors
-
-		// If we have more errors than the (default or user set) limit; notify user
-		if lenErrs > errLimit {
-			// notify users more errors exist
-			msg := fmt.Sprintf("Too many errors. Showing (%v/%v) errors.", errLimit, len(errs))
-			getLogger().Infof("%s", msg)
-		}
-
-		if lenErrs > 1 {
-			sb.WriteString("[\n")
-		}
-
-		for i, resultError := range errs {
-			// short-circuit if too many errors (i.e., using the error limit flag value)
-			if i > errLimit {
-				break
-			}
-
-			// add to the result errors
-			schemaErrorText := formatSchemaErrorTypes(resultError, colorize)
-			sb.WriteString(schemaErrorText)
-
-			if i < (lenErrs-1) && i < (errLimit-1) {
-				sb.WriteString(",\n")
-			}
-		}
-
-		if lenErrs > 1 {
-			sb.WriteString("\n]")
-		}
-	}
-
-	return sb.String()
-}
-
-func FormatSchemaErrorsText(errs []gojsonschema.ResultError) string {
-	var sb strings.Builder
-
-	lenErrs := len(errs)
-	if lenErrs > 0 {
-		errLimit := utils.GlobalFlags.ValidateFlags.MaxNumErrors
-		colorize := utils.GlobalFlags.ValidateFlags.ColorizeJsonErrors
-		var formattedValue string
-		var description string
-		var failingObject string
-
-		sb.WriteString(fmt.Sprintf("\n(%d) Schema errors detected (use `--debug` for more details):", lenErrs))
-		for i, resultError := range errs {
-
-			// short-circuit if we have too many errors
-			if i == errLimit {
-				// notify users more errors exist
-				msg := fmt.Sprintf("Too many errors. Showing (%v/%v) errors.", i, len(errs))
-				getLogger().Infof("%s", msg)
-				// always include limit message in discrete output (i.e., not turned off by --quiet flag)
-				sb.WriteString("\n" + msg)
-				break
-			}
-
-			// Some descriptions include very long enums; in those cases,
-			// truncate to a reasonable length using an intelligent separator
-			description = resultError.Description()
-			// truncate output unless debug flag is used
-			if !utils.GlobalFlags.Debug &&
-				len(description) > DEFAULT_MAX_ERR_DESCRIPTION_LEN {
-				description, _, _ = strings.Cut(description, ":")
-				description = description + " ... (truncated)"
-			}
-
-			// TODO: provide flag to allow users to "turn on", by default we do NOT want this
-			// as this slows down processing on SBOMs with large numbers of errors
-			if colorize {
-				formattedValue, _ = log.FormatInterfaceAsColorizedJson(resultError.Value())
-			}
-			// Indent error detail output in logs
-			formattedValue = log.AddTabs(formattedValue)
-			// NOTE: if we do not colorize or indent we could simply do this:
-			failingObject = fmt.Sprintf("\n\tFailing object: [%v]", formattedValue)
-
-			// truncate output unless debug flag is used
-			if !utils.GlobalFlags.Debug &&
-				len(failingObject) > DEFAULT_MAX_ERR_DESCRIPTION_LEN {
-				failingObject = failingObject[:DEFAULT_MAX_ERR_DESCRIPTION_LEN]
-				failingObject = failingObject + " ... (truncated)"
-			}
-
-			// append the numbered schema error
-			schemaErrorText := fmt.Sprintf("\n\t%d. Type: [%s], Field: [%s], Description: [%s] %s",
-				i+1,
-				resultError.Type(),
-				resultError.Field(),
-				description,
-				failingObject)
-
-			sb.WriteString(schemaErrorText)
-		}
-	}
-	return sb.String()
 }
