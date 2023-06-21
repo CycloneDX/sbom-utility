@@ -32,6 +32,8 @@ const (
 	ERROR_DETAIL_KEY_VALUE            = "value"
 	ERROR_DETAIL_KEY_DATA_TYPE        = "type"
 	ERROR_DETAIL_KEY_VALUE_TYPE_ARRAY = "array"
+	ERROR_DETAIL_KEY_VALUE_INDEX      = "index"
+	ERROR_DETAIL_KEY_VALUE_ITEM       = "item"
 	ERROR_DETAIL_ARRAY_ITEM_INDEX_I   = "i"
 	ERROR_DETAIL_ARRAY_ITEM_INDEX_J   = "j"
 )
@@ -48,8 +50,26 @@ type ValidationResultFormatter struct {
 // JsonContext is a linked-list of JSON key strings
 type ValidationResultFormat struct {
 	resultMap   *orderedmap.OrderedMap
+	valuesMap   *orderedmap.OrderedMap
 	ResultError gojsonschema.ResultError
 	Context     *gojsonschema.JsonContext `json:"context"` // jsonErrorMap["context"] = resultError.Context()
+}
+
+func NewValidationErrResult(resultError gojsonschema.ResultError) (validationErrResult *ValidationResultFormat) {
+	// Prepare values that are optionally output as JSON
+	validationErrResult = &ValidationResultFormat{
+		ResultError: resultError,
+	}
+	// Prepare for JSON output by adding all required fields to our ordered map
+	validationErrResult.resultMap = orderedmap.New()
+	validationErrResult.resultMap.Set("type", resultError.Type())
+	validationErrResult.resultMap.Set("field", resultError.Field())
+	if context := resultError.Context(); context != nil {
+		validationErrResult.resultMap.Set("context", resultError.Context().String())
+	}
+	validationErrResult.resultMap.Set("description", resultError.Description())
+
+	return
 }
 
 func (validationErrResult *ValidationResultFormat) MarshalJSON() (marshalled []byte, err error) {
@@ -97,9 +117,12 @@ func (result *ValidationResultFormat) FormatItemsMustBeUniqueError(showValue boo
 				i, indexValid := index.(int)
 				// verify the claimed item index is within range
 				if arrayValid && indexValid && i < len(array) {
-					result.resultMap.Set(
-						fmt.Sprintf("item[%v]", i),
-						array[i])
+					// Add just the first array item to the value key
+					result.valuesMap = orderedmap.New()
+					result.valuesMap.Set(ERROR_DETAIL_KEY_DATA_TYPE, valueType)
+					result.valuesMap.Set(ERROR_DETAIL_KEY_VALUE_INDEX, i)
+					result.valuesMap.Set(ERROR_DETAIL_KEY_VALUE_ITEM, array[i])
+					result.resultMap.Set(ERROR_DETAIL_KEY_VALUE, result.valuesMap)
 				}
 			}
 		}

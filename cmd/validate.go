@@ -27,7 +27,6 @@ import (
 	"github.com/CycloneDX/sbom-utility/resources"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
-	"github.com/iancoleman/orderedmap"
 	"github.com/spf13/cobra"
 	"github.com/xeipuuv/gojsonschema"
 )
@@ -43,6 +42,8 @@ const (
 	FLAG_VALIDATE_SCHEMA_VARIANT   = "variant"
 	FLAG_VALIDATE_CUSTOM           = "custom" // TODO: document when no longer experimental
 	FLAG_VALIDATE_ERR_LIMIT        = "error-limit"
+	FLAG_VALIDATE_ERR_DETAILS      = "error-details"
+	FLAG_VALIDATE_ERR_VALUES       = "error-values"
 	MSG_VALIDATE_SCHEMA_FORCE      = "force specified schema file for validation; overrides inferred schema"
 	MSG_VALIDATE_SCHEMA_VARIANT    = "select named schema variant (e.g., \"strict\"); variant must be declared in configuration file (i.e., \"config.json\")"
 	MSG_VALIDATE_FLAG_CUSTOM       = "perform custom validation using custom configuration settings (i.e., \"custom.json\")"
@@ -64,23 +65,6 @@ const (
 const (
 	PROTOCOL_PREFIX_FILE = "file://"
 )
-
-func NewValidationErrResult(resultError gojsonschema.ResultError) (validationErrResult *ValidationResultFormat) {
-	// Prepare values that are optionally output as JSON
-	validationErrResult = &ValidationResultFormat{
-		ResultError: resultError,
-	}
-	// Prepare for JSON output by adding all required fields to our ordered map
-	validationErrResult.resultMap = orderedmap.New()
-	validationErrResult.resultMap.Set("type", resultError.Type())
-	validationErrResult.resultMap.Set("field", resultError.Field())
-	if context := resultError.Context(); context != nil {
-		validationErrResult.resultMap.Set("context", resultError.Context().String())
-	}
-	validationErrResult.resultMap.Set("description", resultError.Description())
-
-	return
-}
 
 func NewCommandValidate() *cobra.Command {
 	// NOTE: `RunE` function takes precedent over `Run` (anonymous) function if both provided
