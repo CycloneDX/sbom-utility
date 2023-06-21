@@ -28,6 +28,18 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
+const (
+	ERROR_DETAIL_KEY_DATA_TYPE        = "type"
+	ERROR_DETAIL_KEY_VALUE_TYPE_ARRAY = "array"
+	ERROR_DETAIL_ARRAY_ITEM_INDEX_I   = "i"
+	ERROR_DETAIL_ARRAY_ITEM_INDEX_J   = "j"
+)
+
+const (
+	ERROR_DETAIL_JSON_DEFAULT_PREFIX = "...."
+	ERROR_DETAIL_JSON_DEFAULT_INDENT = "    "
+)
+
 type ValidationResultFormatter struct {
 	Results []ValidationResultFormat
 }
@@ -58,7 +70,8 @@ func (result *ValidationResultFormat) Format(showValue bool, flags utils.Validat
 		result.resultMap.Set("value", result.ResultError.Value())
 	}
 
-	formattedResult, err := log.FormatInterfaceAsJson(result.resultMap)
+	// TODO: add a general JSON formatting flag
+	formattedResult, err := log.FormatIndentedInterfaceAsJson(result.resultMap, ERROR_DETAIL_JSON_DEFAULT_PREFIX, ERROR_DETAIL_JSON_DEFAULT_INDENT)
 	if err != nil {
 		return fmt.Sprintf("formatting error: %s", err.Error())
 	}
@@ -78,10 +91,10 @@ func (result *ValidationResultFormat) FormatItemsMustBeUniqueError(showValue boo
 	// TODO: deduplication (planned) will also help shrink large error output
 	if showValue {
 		details := result.ResultError.Details()
-		valueType, typeFound := details["type"]
+		valueType, typeFound := details[ERROR_DETAIL_KEY_DATA_TYPE]
 		// verify the claimed type is an array
-		if typeFound && valueType == "array" {
-			index, indexFound := details["i"]
+		if typeFound && valueType == ERROR_DETAIL_KEY_VALUE_TYPE_ARRAY {
+			index, indexFound := details[ERROR_DETAIL_ARRAY_ITEM_INDEX_I]
 			// if a claimed duplicate index is provided (we use the first "i" index not the 2nd "j" one)
 			if indexFound {
 				value := result.ResultError.Value()
@@ -89,13 +102,16 @@ func (result *ValidationResultFormat) FormatItemsMustBeUniqueError(showValue boo
 				i, indexValid := index.(int)
 				// verify the claimed item index is within range
 				if arrayValid && indexValid && i < len(array) {
-					result.resultMap.Set("value", array[i])
+					result.resultMap.Set(
+						fmt.Sprintf("item[%v]", i),
+						array[i])
 				}
 			}
 		}
 	}
 
-	formattedResult, err := log.FormatInterfaceAsJson(result.resultMap)
+	// TODO: add a general JSON formatting flag
+	formattedResult, err := log.FormatIndentedInterfaceAsJson(result.resultMap, ERROR_DETAIL_JSON_DEFAULT_PREFIX, ERROR_DETAIL_JSON_DEFAULT_INDENT)
 	if err != nil {
 		return fmt.Sprintf("formatting error: %s", err.Error())
 	}
@@ -192,6 +208,9 @@ func FormatSchemaErrorsJson(errs []gojsonschema.ResultError, flags utils.Validat
 
 			// add to the result errors
 			schemaErrorText := formatSchemaErrorTypes(resultError, flags)
+			// NOTE: we must add the prefix (indent) ourselves
+			// see issue: https://github.com/golang/go/issues/49261
+			sb.WriteString(ERROR_DETAIL_JSON_DEFAULT_PREFIX)
 			sb.WriteString(schemaErrorText)
 
 			if i < (lenErrs-1) && i < (errLimit-1) {
