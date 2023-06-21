@@ -188,7 +188,9 @@ func resourceCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	var resourceType string
 	resourceType, err = retrieveResourceType(cmd)
 
-	ListResources(writer, utils.GlobalFlags.PersistentFlags.OutputFormat, resourceType, whereFilters)
+	if err == nil {
+		err = ListResources(writer, utils.GlobalFlags.PersistentFlags.OutputFormat, resourceType, whereFilters)
+	}
 
 	return
 }
