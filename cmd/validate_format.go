@@ -215,7 +215,7 @@ func FormatSchemaErrorsJson(errs []gojsonschema.ResultError, flags utils.Validat
 			sb.WriteString(ERROR_DETAIL_JSON_DEFAULT_PREFIX)
 			sb.WriteString(schemaErrorText)
 
-			if i < (lenErrs-1) && i < (errLimit-1) {
+			if i < (lenErrs-1) && i < (errLimit) {
 				sb.WriteString(",\n")
 			}
 		}
