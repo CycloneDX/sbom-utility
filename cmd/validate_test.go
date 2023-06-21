@@ -63,7 +63,8 @@ func innerValidateError(t *testing.T, filename string, variant string, format st
 
 	// Invoke the actual validate function
 	var isValid bool
-	isValid, document, schemaErrors, actualError = Validate()
+	//isValid, document, schemaErrors, actualError = Validate()
+	isValid, document, schemaErrors, actualError = Validate(utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.ValidateFlags)
 
 	getLogger().Tracef("document: `%s`, isValid=`%t`, actualError=`%T`", document.GetFilename(), isValid, actualError)
 

@@ -61,15 +61,12 @@ type CommandFlags struct {
 
 // NOTE: These flags are shared by both the list and policy subcommands
 type PersistentCommandFlags struct {
-	Quiet            bool // suppresses all non-essential (informational) output from a command. Overrides any other log-level commands.
-	Trace            bool // trace logging
-	Debug            bool // debug logging
-	InputFile        string
-	OutputFile       string // Note: not used by `validate` command, which emits a warning if supplied
-	OutputSbomFormat string
-	// Summary formats (i.e., only valid for summary)
-	// NOTE: "query" and "list" (raw) commands always returns JSON by default
-	OutputFormat string // e.g., TXT (default), CSV, markdown (normalized to lowercase)
+	Quiet        bool // suppresses all non-essential (informational) output from a command. Overrides any other log-level commands.
+	Trace        bool // trace logging
+	Debug        bool // debug logging
+	InputFile    string
+	OutputFile   string // TODO: TODO: Note: not used by `validate` command, which emits a warning if supplied
+	OutputFormat string // e.g., "txt", "csv"", "md" (markdown) (normalized to lowercase)
 }
 
 type DiffCommandFlags struct {
@@ -92,7 +89,6 @@ type ValidateCommandFlags struct {
 	MaxErrorDescriptionLength int
 	ColorizeErrorOutput       bool
 	ShowErrorValue            bool
-	ShowErrorDetail           bool
 }
 
 type VulnerabilityCommandFlags struct {

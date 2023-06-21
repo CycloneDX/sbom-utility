@@ -76,12 +76,12 @@ func (validationErrResult *ValidationResultFormat) MarshalJSON() (marshalled []b
 	return validationErrResult.resultMap.MarshalJSON()
 }
 
-func (result *ValidationResultFormat) Format(showValue bool, flags utils.ValidateCommandFlags) string {
+func (result *ValidationResultFormat) Format(flags utils.ValidateCommandFlags) string {
 
 	var sb strings.Builder
 
 	// Conditionally, add optional values as requested
-	if showValue {
+	if flags.ShowErrorValue {
 		result.resultMap.Set(ERROR_DETAIL_KEY_VALUE, result.ResultError.Value())
 	}
 
@@ -95,7 +95,7 @@ func (result *ValidationResultFormat) Format(showValue bool, flags utils.Validat
 	return sb.String()
 }
 
-func (result *ValidationResultFormat) FormatItemsMustBeUniqueError(showValue bool, flags utils.ValidateCommandFlags) string {
+func (result *ValidationResultFormat) FormatItemsMustBeUniqueError(flags utils.ValidateCommandFlags) string {
 
 	var sb strings.Builder
 
@@ -103,8 +103,8 @@ func (result *ValidationResultFormat) FormatItemsMustBeUniqueError(showValue boo
 	// For this error type, we want to reduce the information show to the end user.
 	// Originally, the entire array with duplicate items was show for EVERY occurrence;
 	// attempt to only show the failing item itself once (and only once)
-	// TODO: deduplication (planned) will also help shrink large error output
-	if showValue {
+	// TODO: deduplication (planned) will also help shrink large error output results
+	if flags.ShowErrorValue {
 		details := result.ResultError.Details()
 		valueType, typeFound := details[ERROR_DETAIL_KEY_DATA_TYPE]
 		// verify the claimed type is an array
@@ -154,10 +154,13 @@ func FormatSchemaErrors(schemaErrors []gojsonschema.ResultError, flags utils.Val
 	return
 }
 
+// Custom formatting based upon possible JSON schema error types
 func formatSchemaErrorTypes(resultError gojsonschema.ResultError, flags utils.ValidateCommandFlags) (formattedResult string) {
 
 	validationErrorResult := NewValidationErrResult(resultError)
 
+	// The cases below represent the complete set of typed errors possible.
+	// Most are commented out as placeholder for future custom format methods.
 	switch errorType := resultError.(type) {
 	// case *gojsonschema.AdditionalPropertyNotAllowedError:
 	// case *gojsonschema.ArrayContainsError:
@@ -178,7 +181,7 @@ func formatSchemaErrorTypes(resultError gojsonschema.ResultError, flags utils.Va
 	// case *gojsonschema.InvalidPropertyPatternError:
 	// case *gojsonschema.InvalidTypeError:
 	case *gojsonschema.ItemsMustBeUniqueError:
-		formattedResult = validationErrorResult.FormatItemsMustBeUniqueError(true, flags)
+		formattedResult = validationErrorResult.FormatItemsMustBeUniqueError(flags)
 	// case *gojsonschema.MissingDependencyError:
 	// case *gojsonschema.MultipleOfError:
 	// case *gojsonschema.NumberAllOfError:
@@ -194,7 +197,7 @@ func formatSchemaErrorTypes(resultError gojsonschema.ResultError, flags utils.Va
 	// case *gojsonschema.StringLengthLTEError:
 	default:
 		getLogger().Debugf("default formatting: ResultError Type: [%v]", errorType)
-		formattedResult = validationErrorResult.Format(true, flags)
+		formattedResult = validationErrorResult.Format(flags)
 	}
 
 	return
@@ -283,6 +286,8 @@ func FormatSchemaErrorsText(errs []gojsonschema.ResultError, flags utils.Validat
 			// as this slows down processing on SBOMs with large numbers of errors
 			if colorize {
 				formattedValue, _ = log.FormatInterfaceAsColorizedJson(resultError.Value())
+			} else {
+				formattedValue, _ = log.FormatInterfaceAsJson(resultError.Value())
 			}
 			// Indent error detail output in logs
 			formattedValue = log.AddTabs(formattedValue)

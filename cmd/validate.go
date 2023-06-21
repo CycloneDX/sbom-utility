@@ -37,19 +37,22 @@ const (
 )
 
 // validation flags
+// TODO: support a `--truncate <int>“ flag (or similar... `err-value-truncate` <int>) used
+// to truncate formatted "value" (details) to <int> bytes.
+// This would replace the hardcoded "DEFAULT_MAX_ERR_DESCRIPTION_LEN" value
 const (
 	FLAG_VALIDATE_SCHEMA_FORCE     = "force"
 	FLAG_VALIDATE_SCHEMA_VARIANT   = "variant"
 	FLAG_VALIDATE_CUSTOM           = "custom" // TODO: document when no longer experimental
 	FLAG_VALIDATE_ERR_LIMIT        = "error-limit"
-	FLAG_VALIDATE_ERR_DETAILS      = "error-details"
-	FLAG_VALIDATE_ERR_VALUES       = "error-values"
+	FLAG_VALIDATE_ERR_VALUE        = "error-value"
 	MSG_VALIDATE_SCHEMA_FORCE      = "force specified schema file for validation; overrides inferred schema"
 	MSG_VALIDATE_SCHEMA_VARIANT    = "select named schema variant (e.g., \"strict\"); variant must be declared in configuration file (i.e., \"config.json\")"
 	MSG_VALIDATE_FLAG_CUSTOM       = "perform custom validation using custom configuration settings (i.e., \"custom.json\")"
 	MSG_VALIDATE_FLAG_ERR_COLORIZE = "Colorize formatted error output (true|false); default true"
-	MSG_VALIDATE_FLAG_ERR_LIMIT    = "Limit number of errors output (integer); default 10"
+	MSG_VALIDATE_FLAG_ERR_LIMIT    = "Limit number of errors output to specified (integer) (default 10)"
 	MSG_VALIDATE_FLAG_ERR_FORMAT   = "format error results using the specified format type"
+	MSG_VALIDATE_FLAG_ERR_VALUE    = "include details of failing value in error results (bool) (default: true)"
 )
 
 var VALIDATE_SUPPORTED_ERROR_FORMATS = MSG_VALIDATE_FLAG_ERR_FORMAT +
@@ -75,7 +78,6 @@ func NewCommandValidate() *cobra.Command {
 	command.RunE = validateCmdImpl
 	command.Flags().StringVarP(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", "",
 		MSG_VALIDATE_FLAG_ERR_FORMAT+VALIDATE_SUPPORTED_ERROR_FORMATS)
-
 	command.PreRunE = func(cmd *cobra.Command, args []string) error {
 
 		// This command can be called with this persistent flag, but does not make sense...
@@ -86,12 +88,12 @@ func NewCommandValidate() *cobra.Command {
 
 		return preRunTestForInputFile(cmd, args)
 	}
-	initCommandValidate(command)
+	initCommandValidateFlags(command)
 	return command
 }
 
 // Add local flags to validate command
-func initCommandValidate(command *cobra.Command) {
+func initCommandValidateFlags(command *cobra.Command) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -103,17 +105,31 @@ func initCommandValidate(command *cobra.Command) {
 	// Colorize default: true (for historical reasons)
 	command.Flags().BoolVarP(&utils.GlobalFlags.ValidateFlags.ColorizeErrorOutput, FLAG_COLORIZE_OUTPUT, "", true, MSG_VALIDATE_FLAG_ERR_COLORIZE)
 	command.Flags().IntVarP(&utils.GlobalFlags.ValidateFlags.MaxNumErrors, FLAG_VALIDATE_ERR_LIMIT, "", DEFAULT_MAX_ERROR_LIMIT, MSG_VALIDATE_FLAG_ERR_LIMIT)
+	command.Flags().BoolVarP(&utils.GlobalFlags.ValidateFlags.ShowErrorValue, FLAG_VALIDATE_ERR_VALUE, "", true, MSG_VALIDATE_FLAG_ERR_COLORIZE)
 }
 
 func validateCmdImpl(cmd *cobra.Command, args []string) error {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	// invoke validate and consistently manage exit messages and codes
-	isValid, _, _, err := Validate()
+	// TODO - support an output file for errors
+	// Create output writer
+	// outputFilename := utils.GlobalFlags.PersistentFlags.OutputFile
+	// outputFile, writer, err := createOutputFile(outputFilename)
 
-	// Note: all invalid SBOMs (that fail schema validation) SHOULD result in an
-	// InvalidSBOMError()
+	// // use function closure to assure consistent error output based upon error type
+	// defer func() {
+	// 	// always close the output file
+	// 	if outputFile != nil {
+	// 		err = outputFile.Close()
+	// 		getLogger().Infof("Closed output file: `%s`", outputFilename)
+	// 	}
+	// }()
+
+	// invoke validate and consistently manage exit messages and codes
+	isValid, _, _, err := Validate(utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.ValidateFlags)
+
+	// Note: all invalid SBOMs (that fail schema validation) MUST result in an InvalidSBOMError()
 	if err != nil {
 		if IsInvalidSBOMError(err) {
 			os.Exit(ERROR_VALIDATION)
@@ -164,7 +180,7 @@ func normalizeValidationErrorTypes(document *schema.Sbom, valid bool, err error)
 	getLogger().Info(message)
 }
 
-func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.ResultError, err error) {
+func Validate(persistentFlags utils.PersistentCommandFlags, validateFlags utils.ValidateCommandFlags) (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.ResultError, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -183,7 +199,7 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 	}
 
 	// if "custom" flag exists, then assure we support the format
-	if utils.GlobalFlags.ValidateFlags.CustomValidation && !document.FormatInfo.IsCycloneDx() {
+	if validateFlags.CustomValidation && !document.FormatInfo.IsCycloneDx() {
 		err = schema.NewUnsupportedFormatError(
 			schema.MSG_FORMAT_UNSUPPORTED_COMMAND,
 			document.GetFilename(),
@@ -194,7 +210,7 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 	}
 
 	// Create a loader for the SBOM (JSON) document
-	inputFile := utils.GlobalFlags.PersistentFlags.InputFile
+	inputFile := persistentFlags.InputFile
 	documentLoader := gojsonschema.NewReferenceLoader(PROTOCOL_PREFIX_FILE + inputFile)
 
 	schemaName := document.SchemaInfo.File
@@ -205,7 +221,7 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 	// If caller "forced" a specific schema file (version), load it instead of
 	// any SchemaInfo found in config.json
 	// TODO: support remote schema load (via URL) with a flag (default should always be local file for security)
-	forcedSchemaFile := utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile
+	forcedSchemaFile := validateFlags.ForcedJsonSchemaFile
 	if forcedSchemaFile != "" {
 		getLogger().Infof("Validating document using forced schema (i.e., `--force %s`)", forcedSchemaFile)
 		//schemaName = document.SchemaInfo.File
@@ -283,8 +299,7 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 			schemaErrors)
 
 		// Format error results and append to InvalidSBOMError error "details"
-		format := utils.GlobalFlags.PersistentFlags.OutputFormat
-		errInvalid.Details = FormatSchemaErrors(schemaErrors, utils.GlobalFlags.ValidateFlags, format)
+		errInvalid.Details = FormatSchemaErrors(schemaErrors, validateFlags, persistentFlags.OutputFormat)
 
 		return INVALID, document, schemaErrors, errInvalid
 	}
