@@ -102,27 +102,40 @@
   },
   "components": [
     {
-      "type": "library",
-      "bom-ref": "pkg:npm/sample@2.0.0",
-      "purl": "pkg:npm/sample@2.0.0",
-      "name": "sample",
-      "version": "2.0.0",
-      "description": "Node.js Sampler package",
-      "licenses": [
+      "type": "operating-system",
+      "name": "debian",
+      "version": "10",
+      "description": "Debian GNU/Linux 10 (buster)",
+      "externalReferences": [
         {
-          "license": {
-            "id": "MIT"
-          }
+          "url": "https://www.debian.org/",
+          "type": "website"
+        },
+        {
+          "url": "https://www.debian.org/support",
+          "type": "other",
+          "comment": "support"
         }
       ]
     },
     {
       "type": "library",
-      "bom-ref": "pkg:npm/body-parser@1.19.0",
-      "purl": "pkg:npm/body-parser@1.19.0",
-      "name": "body-parser",
-      "version": "1.19.0",
-      "description": "Node.js body parsing middleware",
+      "bom-ref": "pkg:empty",
+      "name": "Empty",
+      "externalReferences": [
+        {
+          "url": "",
+          "type": "build-meta"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/asn1.js@5.4.1?package-id=e24b6ffc41aa39e5",
+      "author": "Fedor Indutny",
+      "name": "asn1.js",
+      "version": "5.4.1",
+      "description": "ASN.1 encoder and decoder",
       "licenses": [
         {
           "license": {
@@ -130,57 +143,15 @@
           }
         }
       ],
-      "hashes": [
+      "purl": "pkg:npm/asn1.js@5.4.1",
+      "externalReferences": [
         {
-          "alg": "SHA-1",
-          "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "bom-ref": "pkg:npm/body-parser@1.19.0",
-      "purl": "pkg:npm/body-parser@1.19.0",
-      "name": "body-parser",
-      "version": "1.19.0",
-      "description": "Node.js body parsing middleware",
-      "licenses": [
+          "url": "git@github.com:indutny/asn1.js",
+          "type": "distribution"
+        },
         {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-1",
-          "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "body-parser",
-      "version": "1.20.0"
-    },
-    {
-      "type": "library",
-      "bom-ref": "pkg:npm/body-parser@1.19.0",
-      "purl": "pkg:npm/body-parser@1.19.0",
-      "name": "body-parser",
-      "version": "1.19.0",
-      "description": "Node.js body parsing middleware",
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ],
-      "hashes": [
-        {
-          "alg": "SHA-1",
-          "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+          "url": "https://github.com/indutny/asn1.js",
+          "type": "website"
         }
       ]
     }

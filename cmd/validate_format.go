@@ -29,6 +29,7 @@ import (
 )
 
 const (
+	ERROR_DETAIL_KEY_VALUE            = "value"
 	ERROR_DETAIL_KEY_DATA_TYPE        = "type"
 	ERROR_DETAIL_KEY_VALUE_TYPE_ARRAY = "array"
 	ERROR_DETAIL_ARRAY_ITEM_INDEX_I   = "i"
@@ -36,7 +37,7 @@ const (
 )
 
 const (
-	ERROR_DETAIL_JSON_DEFAULT_PREFIX = "...."
+	ERROR_DETAIL_JSON_DEFAULT_PREFIX = "    "
 	ERROR_DETAIL_JSON_DEFAULT_INDENT = "    "
 )
 
@@ -67,7 +68,7 @@ func (result *ValidationResultFormat) Format(showValue bool, flags utils.Validat
 
 	// Conditionally, add optional values as requested
 	if showValue {
-		result.resultMap.Set("value", result.ResultError.Value())
+		result.resultMap.Set(ERROR_DETAIL_KEY_VALUE, result.ResultError.Value())
 	}
 
 	// TODO: add a general JSON formatting flag
@@ -140,7 +141,7 @@ func formatSchemaErrorTypes(resultError gojsonschema.ResultError, flags utils.Va
 
 	validationErrorResult := NewValidationErrResult(resultError)
 
-	switch resultError.(type) {
+	switch errorType := resultError.(type) {
 	// case *gojsonschema.AdditionalPropertyNotAllowedError:
 	// case *gojsonschema.ArrayContainsError:
 	// case *gojsonschema.ArrayMaxItemsError:
@@ -175,6 +176,7 @@ func formatSchemaErrorTypes(resultError gojsonschema.ResultError, flags utils.Va
 	// case *gojsonschema.StringLengthGTEError:
 	// case *gojsonschema.StringLengthLTEError:
 	default:
+		getLogger().Debugf("default formatting: ResultError Type: [%v]", errorType)
 		formattedResult = validationErrorResult.Format(true, flags)
 	}
 

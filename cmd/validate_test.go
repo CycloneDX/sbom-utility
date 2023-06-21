@@ -45,7 +45,8 @@ const (
 )
 
 const (
-	TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE = "test/validation/cdx-1-4-validate-err-components-unique-items-1.json"
+	TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE    = "test/validation/cdx-1-4-validate-err-components-unique-items-1.json"
+	TEST_CDX_1_4_VALIDATE_ERR_FORMAT_IRI_REFERENCE = "test/validation/cdx-1-4-validate-err-components-format-iri-reference.json"
 )
 
 // Tests basic validation and expected errors
@@ -273,10 +274,19 @@ func TestValidateForceCustomSchemaCdxSchemaOlder(t *testing.T) {
 // 		nil)
 // }
 
-func TestValidateCdx14ComponentsUniqueJsonResults(t *testing.T) {
+func TestValidateCdx14ErrorResultsUniqueComponentsJson(t *testing.T) {
 	//utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_3_CUSTOM
 	innerValidateError(t,
 		TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE,
+		SCHEMA_VARIANT_NONE,
+		FORMAT_JSON,
+		&InvalidSBOMError{})
+}
+
+func TestValidateCdx14ErrorResultsFormatIriReferencesJson(t *testing.T) {
+	//utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_3_CUSTOM
+	innerValidateError(t,
+		TEST_CDX_1_4_VALIDATE_ERR_FORMAT_IRI_REFERENCE,
 		SCHEMA_VARIANT_NONE,
 		FORMAT_JSON,
 		&InvalidSBOMError{})
