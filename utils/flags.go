@@ -57,10 +57,8 @@ type CommandFlags struct {
 	VulnerabilityFlags VulnerabilityCommandFlags
 
 	// Validate (local) flags
-	Variant                 string
 	ValidateProperties      bool
 	ValidateFlags           ValidateCommandFlags
-	CustomValidation        bool
 	CustomValidationOptions CustomValidationFlags
 
 	// Summary formats (i.e., only valid for summary)
@@ -83,7 +81,11 @@ type LicenseCommandFlags struct {
 }
 
 type ValidateCommandFlags struct {
-	ForcedJsonSchemaFile      string
+	SchemaVariant        string
+	ForcedJsonSchemaFile string
+	// Uses custom validation flags if "true"; defaults to config. "custom.json"
+	CustomValidation bool
+	// error result processing
 	MaxNumErrors              int
 	MaxErrorDescriptionLength int
 	ColorizeErrorOutput       bool

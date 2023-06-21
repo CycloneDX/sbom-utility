@@ -114,8 +114,8 @@ func initCommandValidate(command *cobra.Command) {
 	// Force a schema file to use for validation (override inferred schema)
 	command.Flags().StringVarP(&utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile, FLAG_VALIDATE_SCHEMA_FORCE, "", "", MSG_VALIDATE_SCHEMA_FORCE)
 	// Optional schema "variant" of inferred schema (e.g, "strict")
-	command.Flags().StringVarP(&utils.GlobalFlags.Variant, FLAG_VALIDATE_SCHEMA_VARIANT, "", "", MSG_VALIDATE_SCHEMA_VARIANT)
-	command.Flags().BoolVarP(&utils.GlobalFlags.CustomValidation, FLAG_VALIDATE_CUSTOM, "", false, MSG_VALIDATE_FLAG_CUSTOM)
+	command.Flags().StringVarP(&utils.GlobalFlags.ValidateFlags.SchemaVariant, FLAG_VALIDATE_SCHEMA_VARIANT, "", "", MSG_VALIDATE_SCHEMA_VARIANT)
+	command.Flags().BoolVarP(&utils.GlobalFlags.ValidateFlags.CustomValidation, FLAG_VALIDATE_CUSTOM, "", false, MSG_VALIDATE_FLAG_CUSTOM)
 	// Colorize default: true (for historical reasons)
 	command.Flags().BoolVarP(&utils.GlobalFlags.ValidateFlags.ColorizeErrorOutput, FLAG_COLORIZE_OUTPUT, "", true, MSG_VALIDATE_FLAG_ERR_COLORIZE)
 	command.Flags().IntVarP(&utils.GlobalFlags.ValidateFlags.MaxNumErrors, FLAG_VALIDATE_ERR_LIMIT, "", DEFAULT_MAX_ERROR_LIMIT, MSG_VALIDATE_FLAG_ERR_LIMIT)
@@ -199,7 +199,7 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 	}
 
 	// if "custom" flag exists, then assure we support the format
-	if utils.GlobalFlags.CustomValidation && !document.FormatInfo.IsCycloneDx() {
+	if utils.GlobalFlags.ValidateFlags.CustomValidation && !document.FormatInfo.IsCycloneDx() {
 		err = schema.NewUnsupportedFormatError(
 			schema.MSG_FORMAT_UNSUPPORTED_COMMAND,
 			document.GetFilename(),
@@ -315,7 +315,7 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 
 	// Perform additional validation in document composition/structure
 	// and "custom" required data within specified fields
-	if utils.GlobalFlags.CustomValidation {
+	if utils.GlobalFlags.ValidateFlags.CustomValidation {
 		// Perform all custom validation
 		err := validateCustomCDXDocument(document)
 		if err != nil {

@@ -57,16 +57,16 @@ const (
 // -------------------------------------------
 
 func innerCustomValidateError(t *testing.T, filename string, variant string, innerError error) (document *schema.Sbom, schemaErrors []gojsonschema.ResultError, actualError error) {
-	utils.GlobalFlags.CustomValidation = true
+	utils.GlobalFlags.ValidateFlags.CustomValidation = true
 	document, schemaErrors, actualError = innerValidateError(t, filename, variant, FORMAT_TEXT, innerError)
-	utils.GlobalFlags.CustomValidation = false
+	utils.GlobalFlags.ValidateFlags.CustomValidation = false
 	return
 }
 
 func innerCustomValidateInvalidSBOMInnerError(t *testing.T, filename string, variant string, innerError error) (document *schema.Sbom, schemaErrors []gojsonschema.ResultError, actualError error) {
-	utils.GlobalFlags.CustomValidation = true
+	utils.GlobalFlags.ValidateFlags.CustomValidation = true
 	document, schemaErrors, actualError = innerValidateInvalidSBOMInnerError(t, filename, variant, innerError)
-	utils.GlobalFlags.CustomValidation = false
+	utils.GlobalFlags.ValidateFlags.CustomValidation = false
 	return
 }
 

@@ -72,15 +72,22 @@ func (result *ValidationResultFormat) FormatItemsMustBeUniqueError(showValue boo
 	var sb strings.Builder
 
 	// Conditionally, add optional values as requested
+	// For this error type, we want to reduce the information show to the end user.
+	// Originally, the entire array with duplicate items was show for EVERY occurrence;
+	// attempt to only show the failing item itself once (and only once)
+	// TODO: deduplication (planned) will also help shrink large error output
 	if showValue {
 		details := result.ResultError.Details()
 		valueType, typeFound := details["type"]
+		// verify the claimed type is an array
 		if typeFound && valueType == "array" {
 			index, indexFound := details["i"]
+			// if a claimed duplicate index is provided (we use the first "i" index not the 2nd "j" one)
 			if indexFound {
 				value := result.ResultError.Value()
 				array, arrayValid := value.([]interface{})
 				i, indexValid := index.(int)
+				// verify the claimed item index is within range
 				if arrayValid && indexValid && i < len(array) {
 					result.resultMap.Set("value", array[i])
 				}
