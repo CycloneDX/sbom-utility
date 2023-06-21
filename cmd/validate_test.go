@@ -279,5 +279,5 @@ func TestValidateCdx14ComponentsUniqueJsonResults(t *testing.T) {
 		TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE,
 		SCHEMA_VARIANT_NONE,
 		FORMAT_JSON,
-		nil)
+		&InvalidSBOMError{})
 }

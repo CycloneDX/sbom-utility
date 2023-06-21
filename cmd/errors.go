@@ -116,10 +116,11 @@ func (err BaseError) Error() string {
 	return formattedMessage
 }
 
+//nolint:all
 func (base BaseError) AppendMessage(addendum string) {
 	// Ignore (invalid) static linting message:
 	// "ineffective assignment to field (SA4005)"
-	base.Message += addendum
+	base.Message += addendum //nolint:staticcheck
 }
 
 type UtilityError struct {

@@ -34,15 +34,15 @@ type ValidationResultFormatter struct {
 
 // JsonContext is a linked-list of JSON key strings
 type ValidationResultFormat struct {
-	resultMap         *orderedmap.OrderedMap
-	ResultError       gojsonschema.ResultError
-	Context           *gojsonschema.JsonContext `json:"context"`           // jsonErrorMap["context"] = resultError.Context()
-	Type              string                    `json:"type"`              // jsonErrorMap["type"] = resultError.Type()
-	Field             string                    `json:"field"`             // details["field"] = err.Field()
-	Description       string                    `json:"description"`       // jsonErrorMap["description"] = resultError.Description()
-	DescriptionFormat string                    `json:"descriptionFormat"` // jsonErrorMap["descriptionFormat"] = resultError.DescriptionFormat()
-	Value             interface{}               `json:"value"`             // jsonErrorMap["value"] = resultError.Value()
-	Details           map[string]interface{}    `json:"details"`           // jsonErrorMap["details"] = resultError.Details()
+	resultMap   *orderedmap.OrderedMap
+	ResultError gojsonschema.ResultError
+	Context     *gojsonschema.JsonContext `json:"context"` // jsonErrorMap["context"] = resultError.Context()
+	//Type              string                    `json:"type"`              // jsonErrorMap["type"] = resultError.Type()
+	//Field             string                    `json:"field"`             // details["field"] = err.Field()
+	//Description       string                    `json:"description"`       // jsonErrorMap["description"] = resultError.Description()
+	//DescriptionFormat string                    `json:"descriptionFormat"` // jsonErrorMap["descriptionFormat"] = resultError.DescriptionFormat()
+	//Value             interface{}               `json:"value"`             // jsonErrorMap["value"] = resultError.Value()
+	//Details           map[string]interface{}    `json:"details"`           // jsonErrorMap["details"] = resultError.Details()
 }
 
 func (validationErrResult *ValidationResultFormat) MarshalJSON() (marshalled []byte, err error) {
@@ -73,7 +73,19 @@ func (result *ValidationResultFormat) FormatItemsMustBeUniqueError(showValue boo
 
 	// Conditionally, add optional values as requested
 	if showValue {
-		result.resultMap.Set("value", result.ResultError.Value())
+		details := result.ResultError.Details()
+		valueType, typeFound := details["type"]
+		if typeFound && valueType == "array" {
+			index, indexFound := details["i"]
+			if indexFound {
+				value := result.ResultError.Value()
+				array, arrayValid := value.([]interface{})
+				i, indexValid := index.(int)
+				if arrayValid && indexValid && i < len(array) {
+					result.resultMap.Set("value", array[i])
+				}
+			}
+		}
 	}
 
 	formattedResult, err := log.FormatInterfaceAsJson(result.resultMap)
@@ -83,6 +95,22 @@ func (result *ValidationResultFormat) FormatItemsMustBeUniqueError(showValue boo
 	sb.WriteString(formattedResult)
 
 	return sb.String()
+}
+
+func FormatSchemaErrors(schemaErrors []gojsonschema.ResultError, flags utils.ValidateCommandFlags, format string) (formattedSchemaErrors string) {
+
+	getLogger().Infof("Formatting error results (`%s` format)...\n", format)
+	switch format {
+	case FORMAT_JSON:
+		formattedSchemaErrors = FormatSchemaErrorsJson(schemaErrors, utils.GlobalFlags.ValidateFlags)
+	case FORMAT_TEXT:
+		formattedSchemaErrors = FormatSchemaErrorsText(schemaErrors, utils.GlobalFlags.ValidateFlags)
+	default:
+		getLogger().Warningf("error results not supported for `%s` format; defaulting to `%s` format...",
+			format, FORMAT_TEXT)
+		formattedSchemaErrors = FormatSchemaErrorsText(schemaErrors, utils.GlobalFlags.ValidateFlags)
+	}
+	return
 }
 
 func formatSchemaErrorTypes(resultError gojsonschema.ResultError, flags utils.ValidateCommandFlags) (formattedResult string) {

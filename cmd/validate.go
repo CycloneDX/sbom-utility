@@ -297,23 +297,9 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 			nil,
 			schemaErrors)
 
-		// Format error results
+		// Format error results and append to InvalidSBOMError error "details"
 		format := utils.GlobalFlags.OutputFormat
-		var formattedSchemaErrors string
-		getLogger().Infof("Outputting error results (`%s` format)...\n", format)
-		switch format {
-		case FORMAT_JSON:
-			formattedSchemaErrors = FormatSchemaErrorsJson(schemaErrors, utils.GlobalFlags.ValidateFlags)
-		case FORMAT_TEXT:
-			formattedSchemaErrors = FormatSchemaErrorsText(schemaErrors, utils.GlobalFlags.ValidateFlags)
-		default:
-			getLogger().Warningf("error results not supported for `%s` format; defaulting to `%s` format...",
-				format, FORMAT_TEXT)
-			formattedSchemaErrors = FormatSchemaErrorsText(schemaErrors, utils.GlobalFlags.ValidateFlags)
-		}
-
-		// Append formatted schema errors "details" to the InvalidSBOMError type
-		errInvalid.Details = formattedSchemaErrors
+		errInvalid.Details = FormatSchemaErrors(schemaErrors, utils.GlobalFlags.ValidateFlags, format)
 
 		return INVALID, document, schemaErrors, errInvalid
 	}
