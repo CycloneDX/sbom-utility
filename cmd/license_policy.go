@@ -122,7 +122,7 @@ func NewCommandPolicy() *cobra.Command {
 	command.Use = CMD_USAGE_LICENSE_POLICY
 	command.Short = "List policies associated with known licenses"
 	command.Long = "List caller-supplied, \"allow/deny\"-style policies associated with known software, hardware or data licenses"
-	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
+	command.Flags().StringVarP(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
 		FLAG_POLICY_OUTPUT_FORMAT_HELP+LICENSE_POLICY_SUPPORTED_FORMATS)
 	command.Flags().BoolVarP(
 		&utils.GlobalFlags.LicenseFlags.Summary, // re-use license flag
@@ -161,14 +161,14 @@ func policyCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	getLogger().Enter(args)
 	defer getLogger().Exit()
 
-	outputFile, writer, err := createOutputFile(utils.GlobalFlags.OutputFile)
+	outputFile, writer, err := createOutputFile(utils.GlobalFlags.PersistentFlags.OutputFile)
 
 	// use function closure to assure consistent error output based upon error type
 	defer func() {
 		// always close the output file
 		if outputFile != nil {
 			err = outputFile.Close()
-			getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.OutputFile)
+			getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.PersistentFlags.OutputFile)
 		}
 	}()
 
@@ -211,7 +211,7 @@ func ListLicensePolicies(writer io.Writer, whereFilters []WhereFilter, flags uti
 	}
 
 	// default output (writer) to standard out
-	switch utils.GlobalFlags.OutputFormat {
+	switch utils.GlobalFlags.PersistentFlags.OutputFormat {
 	case FORMAT_DEFAULT:
 		// defaults to text if no explicit `--format` parameter
 		err = DisplayLicensePoliciesTabbedText(writer, filteredMap, flags)
@@ -224,7 +224,7 @@ func ListLicensePolicies(writer io.Writer, whereFilters []WhereFilter, flags uti
 	default:
 		// default to text format for anything else
 		getLogger().Warningf("Unsupported format: `%s`; using default format.",
-			utils.GlobalFlags.OutputFormat)
+			utils.GlobalFlags.PersistentFlags.OutputFormat)
 		err = DisplayLicensePoliciesTabbedText(writer, filteredMap, flags)
 	}
 	return

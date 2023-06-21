@@ -92,7 +92,7 @@ func innerTestLicenseListBuffered(t *testing.T, testInfo *LicenseTestInfo, where
 	defer outputWriter.Flush()
 
 	// Use a test input SBOM formatted in SPDX
-	utils.GlobalFlags.InputFile = testInfo.InputFile
+	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile
 
 	// Invoke the actual List command (API)
 	err = ListLicenses(outputWriter, testInfo.ListFormat, whereFilters, testInfo.ListSummary)
@@ -288,9 +288,9 @@ func TestLicenseListPolicyCdx14InvalidLicenseName(t *testing.T) {
 	innerTestLicenseList(t, lti)
 }
 
-//---------------------------
+// ---------------------------
 // Where filter tests
-//---------------------------
+// ---------------------------
 func TestLicenseListSummaryTextCdx13WhereUsageNeedsReview(t *testing.T) {
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3, FORMAT_TEXT, true)
 	lti.WhereClause = "usage-policy=needs-review"

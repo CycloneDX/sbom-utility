@@ -46,7 +46,7 @@ func innerQuery(t *testing.T, filename string, queryRequest *QueryRequest, autof
 	}
 
 	// Copy the test filename to the command line flags were the code looks for it
-	utils.GlobalFlags.InputFile = filename
+	utils.GlobalFlags.PersistentFlags.InputFile = filename
 
 	// allocate response/result object and invoke query
 	var response = new(QueryResponse)

@@ -64,13 +64,20 @@ var QUERY_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 
 // query JSON map and return selected subset
 // SELECT
-//    <key.1>, <key.2>, ... // "firstname, lastname, email" || * (default)
+//
+//	<key.1>, <key.2>, ... // "firstname, lastname, email" || * (default)
+//
 // FROM
-//    <key path>            // "product.customers"
+//
+//	<key path>            // "product.customers"
+//
 // WHERE
-//    <key.X> == <value>    // "country='Germany'"
+//
+//	<key.X> == <value>    // "country='Germany'"
+//
 // ORDER BY
-//    <key.N>               // "lastname"
+//
+//	<key.N>               // "lastname"
 //
 // e.g.,SELECT * FROM product.customers WHERE country="Germany";
 type QueryRequest struct {
@@ -138,7 +145,7 @@ func initCommandQuery(command *cobra.Command) {
 	defer getLogger().Exit()
 
 	// Add local flags to command
-	command.PersistentFlags().StringVar(&utils.GlobalFlags.OutputFormat, FLAG_OUTPUT_FORMAT, FORMAT_JSON,
+	command.PersistentFlags().StringVar(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_OUTPUT_FORMAT, FORMAT_JSON,
 		FLAG_QUERY_OUTPUT_FORMAT_HELP+QUERY_SUPPORTED_FORMATS)
 	command.Flags().StringP(FLAG_QUERY_SELECT, "", QUERY_TOKEN_WILDCARD, FLAG_QUERY_SELECT_HELP)
 	// NOTE: TODO: There appears to be a bug in Cobra where the type of the `from`` flag is `--from` (i.e., not string)

@@ -55,11 +55,11 @@ func innerValidateError(t *testing.T, filename string, variant string, format st
 	defer getLogger().Exit()
 
 	// Copy the test filename to the command line flags where the code looks for it
-	utils.GlobalFlags.InputFile = filename
+	utils.GlobalFlags.PersistentFlags.InputFile = filename
+	// Set the err result format
+	utils.GlobalFlags.PersistentFlags.OutputFormat = format
 	// Set the schema variant where the command line flag would
 	utils.GlobalFlags.ValidateFlags.SchemaVariant = variant
-	// Set the err result format
-	utils.GlobalFlags.OutputFormat = format
 
 	// Invoke the actual validate function
 	var isValid bool

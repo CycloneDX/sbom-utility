@@ -155,15 +155,15 @@ func init() {
 	//rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigCustomValidationFile, FLAG_CONFIG_CUSTOM_VALIDATION, "", DEFAULT_CUSTOM_VALIDATION_CONFIG, "TODO")
 
 	// Declare top-level, persistent flags and where to place the post-parse values
-	rootCmd.PersistentFlags().BoolVarP(&utils.GlobalFlags.Trace, FLAG_TRACE, FLAG_TRACE_SHORT, false, MSG_FLAG_TRACE)
-	rootCmd.PersistentFlags().BoolVarP(&utils.GlobalFlags.Debug, FLAG_DEBUG, FLAG_DEBUG_SHORT, false, MSG_FLAG_DEBUG)
-	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.InputFile, FLAG_FILENAME_INPUT, FLAG_FILENAME_INPUT_SHORT, "", MSG_FLAG_INPUT)
-	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.OutputFile, FLAG_FILENAME_OUTPUT, FLAG_FILENAME_OUTPUT_SHORT, "", MSG_FLAG_OUTPUT)
+	rootCmd.PersistentFlags().BoolVarP(&utils.GlobalFlags.PersistentFlags.Trace, FLAG_TRACE, FLAG_TRACE_SHORT, false, MSG_FLAG_TRACE)
+	rootCmd.PersistentFlags().BoolVarP(&utils.GlobalFlags.PersistentFlags.Debug, FLAG_DEBUG, FLAG_DEBUG_SHORT, false, MSG_FLAG_DEBUG)
+	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.PersistentFlags.InputFile, FLAG_FILENAME_INPUT, FLAG_FILENAME_INPUT_SHORT, "", MSG_FLAG_INPUT)
+	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.PersistentFlags.OutputFile, FLAG_FILENAME_OUTPUT, FLAG_FILENAME_OUTPUT_SHORT, "", MSG_FLAG_OUTPUT)
 
 	// NOTE: Although we check for the quiet mode flag in main; we track the flag
 	// using Cobra framework in order to enable more comprehensive help
 	// and take advantage of other features.
-	rootCmd.PersistentFlags().BoolVarP(&utils.GlobalFlags.Quiet, FLAG_QUIET_MODE, FLAG_QUIET_MODE_SHORT, false, MSG_FLAG_LOG_QUIET)
+	rootCmd.PersistentFlags().BoolVarP(&utils.GlobalFlags.PersistentFlags.Quiet, FLAG_QUIET_MODE, FLAG_QUIET_MODE_SHORT, false, MSG_FLAG_LOG_QUIET)
 
 	// Optionally, allow log callstack trace to be indented
 	rootCmd.PersistentFlags().BoolVarP(&utils.GlobalFlags.LogOutputIndentCallstack, FLAG_LOG_OUTPUT_INDENT, "", false, MSG_FLAG_LOG_INDENT)
@@ -260,11 +260,11 @@ func preRunTestForInputFile(cmd *cobra.Command, args []string) error {
 	getLogger().Tracef("args: %v", args)
 
 	// Make sure the input filename is present and exists
-	file := utils.GlobalFlags.InputFile
-	if file == "" {
+	inputFilename := utils.GlobalFlags.PersistentFlags.InputFile
+	if inputFilename == "" {
 		return getLogger().Errorf("Missing required argument(s): %s", FLAG_FILENAME_INPUT)
-	} else if _, err := os.Stat(file); err != nil {
-		return getLogger().Errorf("File not found: `%s`", file)
+	} else if _, err := os.Stat(inputFilename); err != nil {
+		return getLogger().Errorf("File not found: `%s`", inputFilename)
 	}
 	return nil
 }

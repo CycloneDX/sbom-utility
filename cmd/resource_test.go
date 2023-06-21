@@ -88,7 +88,7 @@ func innerTestResourceList(t *testing.T, testInfo *ResourceTestInfo) (outputBuff
 	}
 
 	// The command looks for the input filename in global flags struct
-	utils.GlobalFlags.InputFile = testInfo.InputFile
+	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile
 
 	// invoke resource list command with a byte buffer
 	outputBuffer, err = innerBufferedTestResourceList(t, testInfo, whereFilters)

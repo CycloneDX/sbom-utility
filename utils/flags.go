@@ -40,12 +40,7 @@ type CommandFlags struct {
 	ConfigLicensePolicyFile    string
 
 	// persistent flags (common to all commands)
-	Quiet            bool // suppresses all non-essential (informational) output from a command. Overrides any other log-level commands.
-	Trace            bool // trace logging
-	Debug            bool // debug logging
-	InputFile        string
-	OutputFile       string // Note: not used by `validate` command, which emits a warning if supplied
-	OutputSbomFormat string
+	PersistentFlags PersistentCommandFlags
 
 	// Diff flags
 	DiffFlags DiffCommandFlags
@@ -57,19 +52,26 @@ type CommandFlags struct {
 	VulnerabilityFlags VulnerabilityCommandFlags
 
 	// Validate (local) flags
-	ValidateProperties      bool
 	ValidateFlags           ValidateCommandFlags
 	CustomValidationOptions CustomValidationFlags
-
-	// Summary formats (i.e., only valid for summary)
-	// NOTE: "query" and "list" (raw) commands always returns JSON by default
-	OutputFormat string // e.g., TXT (default), CSV, markdown (normalized to lowercase)
 
 	// Log indent
 	LogOutputIndentCallstack bool
 }
 
 // NOTE: These flags are shared by both the list and policy subcommands
+type PersistentCommandFlags struct {
+	Quiet            bool // suppresses all non-essential (informational) output from a command. Overrides any other log-level commands.
+	Trace            bool // trace logging
+	Debug            bool // debug logging
+	InputFile        string
+	OutputFile       string // Note: not used by `validate` command, which emits a warning if supplied
+	OutputSbomFormat string
+	// Summary formats (i.e., only valid for summary)
+	// NOTE: "query" and "list" (raw) commands always returns JSON by default
+	OutputFormat string // e.g., TXT (default), CSV, markdown (normalized to lowercase)
+}
+
 type DiffCommandFlags struct {
 	Colorize    bool
 	RevisedFile string

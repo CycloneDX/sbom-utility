@@ -89,13 +89,13 @@ func NewCommandValidate() *cobra.Command {
 	command.Short = "Validate input file against its declared BOM schema"
 	command.Long = "Validate input file against its declared BOM schema, if detectable and supported."
 	command.RunE = validateCmdImpl
-	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", "",
+	command.Flags().StringVarP(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", "",
 		MSG_VALIDATE_FLAG_ERR_FORMAT+VALIDATE_SUPPORTED_ERROR_FORMATS)
 
 	command.PreRunE = func(cmd *cobra.Command, args []string) error {
 
 		// This command can be called with this persistent flag, but does not make sense...
-		inputFile := utils.GlobalFlags.InputFile
+		inputFile := utils.GlobalFlags.PersistentFlags.InputFile
 		if inputFile != "" {
 			getLogger().Warningf("Invalid flag for command: `%s` (`%s`). Ignoring...", FLAG_FILENAME_OUTPUT, FLAG_FILENAME_OUTPUT_SHORT)
 		}
@@ -210,7 +210,8 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 	}
 
 	// Create a loader for the SBOM (JSON) document
-	documentLoader := gojsonschema.NewReferenceLoader(PROTOCOL_PREFIX_FILE + utils.GlobalFlags.InputFile)
+	inputFile := utils.GlobalFlags.PersistentFlags.InputFile
+	documentLoader := gojsonschema.NewReferenceLoader(PROTOCOL_PREFIX_FILE + inputFile)
 
 	schemaName := document.SchemaInfo.File
 	var schemaLoader gojsonschema.JSONLoader
@@ -298,7 +299,7 @@ func Validate() (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.
 			schemaErrors)
 
 		// Format error results and append to InvalidSBOMError error "details"
-		format := utils.GlobalFlags.OutputFormat
+		format := utils.GlobalFlags.PersistentFlags.OutputFormat
 		errInvalid.Details = FormatSchemaErrors(schemaErrors, utils.GlobalFlags.ValidateFlags, format)
 
 		return INVALID, document, schemaErrors, errInvalid

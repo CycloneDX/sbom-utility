@@ -50,12 +50,6 @@ type ValidationResultFormat struct {
 	resultMap   *orderedmap.OrderedMap
 	ResultError gojsonschema.ResultError
 	Context     *gojsonschema.JsonContext `json:"context"` // jsonErrorMap["context"] = resultError.Context()
-	//Type              string                    `json:"type"`              // jsonErrorMap["type"] = resultError.Type()
-	//Field             string                    `json:"field"`             // details["field"] = err.Field()
-	//Description       string                    `json:"description"`       // jsonErrorMap["description"] = resultError.Description()
-	//DescriptionFormat string                    `json:"descriptionFormat"` // jsonErrorMap["descriptionFormat"] = resultError.DescriptionFormat()
-	//Value             interface{}               `json:"value"`             // jsonErrorMap["value"] = resultError.Value()
-	//Details           map[string]interface{}    `json:"details"`           // jsonErrorMap["details"] = resultError.Details()
 }
 
 func (validationErrResult *ValidationResultFormat) MarshalJSON() (marshalled []byte, err error) {
@@ -256,7 +250,7 @@ func FormatSchemaErrorsText(errs []gojsonschema.ResultError, flags utils.Validat
 			// truncate to a reasonable length using an intelligent separator
 			description = resultError.Description()
 			// truncate output unless debug flag is used
-			if !utils.GlobalFlags.Debug &&
+			if !utils.GlobalFlags.PersistentFlags.Debug &&
 				len(description) > DEFAULT_MAX_ERR_DESCRIPTION_LEN {
 				description, _, _ = strings.Cut(description, ":")
 				description = description + " ... (truncated)"
@@ -273,7 +267,7 @@ func FormatSchemaErrorsText(errs []gojsonschema.ResultError, flags utils.Validat
 			failingObject = fmt.Sprintf("\n\tFailing object: [%v]", formattedValue)
 
 			// truncate output unless debug flag is used
-			if !utils.GlobalFlags.Debug &&
+			if !utils.GlobalFlags.PersistentFlags.Debug &&
 				len(failingObject) > DEFAULT_MAX_ERR_DESCRIPTION_LEN {
 				failingObject = failingObject[:DEFAULT_MAX_ERR_DESCRIPTION_LEN]
 				failingObject = failingObject + " ... (truncated)"

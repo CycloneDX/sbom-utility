@@ -401,7 +401,7 @@ func (sbom *Sbom) UnmarshalCDXSbom() (err error) {
 	return
 }
 
-func (sbom *Sbom) FindFormatAndSchema() (err error) {
+func (sbom *Sbom) FindFormatAndSchema(sbomFilename string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -422,7 +422,7 @@ func (sbom *Sbom) FindFormatAndSchema() (err error) {
 	}
 
 	// if we reach here, we did not find the format in our configuration (list)
-	err = NewUnknownFormatError(utils.GlobalFlags.InputFile)
+	err = NewUnknownFormatError(sbomFilename)
 	return
 }
 

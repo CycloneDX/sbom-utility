@@ -28,26 +28,28 @@ func LoadInputSbomFileAndDetectSchema() (document *schema.Sbom, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
+	inputFile := utils.GlobalFlags.PersistentFlags.InputFile
+
 	// check for required fields on command
-	getLogger().Tracef("utils.Flags.InputFile: `%s`", utils.GlobalFlags.InputFile)
-	if utils.GlobalFlags.InputFile == "" {
-		return nil, fmt.Errorf("invalid input file (-%s): `%s` ", FLAG_FILENAME_INPUT_SHORT, utils.GlobalFlags.InputFile)
+	getLogger().Tracef("utils.Flags.InputFile: `%s`", inputFile)
+	if inputFile == "" {
+		return nil, fmt.Errorf("invalid input file (-%s): `%s` ", FLAG_FILENAME_INPUT_SHORT, inputFile)
 	}
 
 	// Construct an Sbom object around the input file
-	document = schema.NewSbom(utils.GlobalFlags.InputFile)
+	document = schema.NewSbom(inputFile)
 
 	// Load the raw, candidate SBOM (file) as JSON data
-	getLogger().Infof("Attempting to load and unmarshal file `%s`...", utils.GlobalFlags.InputFile)
+	getLogger().Infof("Attempting to load and unmarshal file `%s`...", inputFile)
 	err = document.UnmarshalSBOMAsJsonMap() // i.e., utils.Flags.InputFile
 	if err != nil {
 		return
 	}
-	getLogger().Infof("Successfully unmarshalled data from: `%s`", utils.GlobalFlags.InputFile)
+	getLogger().Infof("Successfully unmarshalled data from: `%s`", inputFile)
 
 	// Search the document keys/values for known SBOM formats and schema in the config. file
 	getLogger().Infof("Determining file's SBOM format and version...")
-	err = document.FindFormatAndSchema()
+	err = document.FindFormatAndSchema(utils.GlobalFlags.PersistentFlags.InputFile)
 	if err != nil {
 		return
 	}

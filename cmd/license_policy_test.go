@@ -81,8 +81,8 @@ func innerTestLicensePolicyListCustomAndBuffered(t *testing.T, testInfo *License
 	}
 
 	// Use the test data to set the BOM input file and output format
-	utils.GlobalFlags.InputFile = testInfo.InputFile
-	utils.GlobalFlags.OutputFormat = testInfo.ListFormat
+	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile
+	utils.GlobalFlags.PersistentFlags.OutputFormat = testInfo.ListFormat
 	utils.GlobalFlags.LicenseFlags.Summary = testInfo.ListSummary
 
 	// TODO: pass GlobalConfig to every Command to allow per-instance changes for tests
@@ -118,9 +118,9 @@ func innerTestLicensePolicyList(t *testing.T, testInfo *LicenseTestInfo) (output
 	return
 }
 
-//-----------------------------------
+// -----------------------------------
 // Usage Policy: allowed value tests
-//-----------------------------------
+// -----------------------------------
 func TestLicensePolicyUsageValueAllow(t *testing.T) {
 	value := POLICY_ALLOW
 	if !IsValidUsagePolicy(value) {

@@ -119,9 +119,9 @@ func TestMain(m *testing.M) {
 		flag.Parse()
 	}
 	getLogger().Tracef("Setting Debug=`%t`, Trace=`%t`, Quiet=`%t`,", *TestLogLevelDebug, *TestLogLevelTrace, *TestLogQuiet)
-	utils.GlobalFlags.Trace = *TestLogLevelTrace
-	utils.GlobalFlags.Debug = *TestLogLevelDebug
-	utils.GlobalFlags.Quiet = *TestLogQuiet
+	utils.GlobalFlags.PersistentFlags.Trace = *TestLogLevelTrace
+	utils.GlobalFlags.PersistentFlags.Debug = *TestLogLevelDebug
+	utils.GlobalFlags.PersistentFlags.Quiet = *TestLogQuiet
 
 	// Load configs, create logger, etc.
 	// NOTE: Be sure ALL "go test" flags are parsed/processed BEFORE initializing
