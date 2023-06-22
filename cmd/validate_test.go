@@ -18,9 +18,12 @@
 package cmd
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/fs"
+	"os"
 	"testing"
 
 	"github.com/CycloneDX/sbom-utility/schema"
@@ -63,8 +66,8 @@ func innerValidateError(t *testing.T, filename string, variant string, format st
 
 	// Invoke the actual validate function
 	var isValid bool
-	//isValid, document, schemaErrors, actualError = Validate()
-	isValid, document, schemaErrors, actualError = Validate(utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.ValidateFlags)
+
+	isValid, document, schemaErrors, actualError = Validate(os.Stdout, utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.ValidateFlags)
 
 	getLogger().Tracef("document: `%s`, isValid=`%t`, actualError=`%T`", document.GetFilename(), isValid, actualError)
 
@@ -92,6 +95,19 @@ func innerValidateError(t *testing.T, filename string, variant string, format st
 	if expectedError == nil && !isValid {
 		t.Errorf("Input file invalid (%t); expected valid (no error)", isValid)
 	}
+
+	return
+}
+
+func innerValidateErrorBuffered(t *testing.T, filename string, variant string, format string, expectedError error) (schemaErrors []gojsonschema.ResultError, outputBuffer bytes.Buffer, err error) {
+	// Declare an output outputBuffer/outputWriter to use used during tests
+	var outputWriter = bufio.NewWriter(&outputBuffer)
+	// ensure all data is written to buffer before further validation
+	defer outputWriter.Flush()
+
+	// Invoke the actual command (API)
+	isValid, document, schemaErrors, actualError := Validate(outputWriter, utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.ValidateFlags)
+	getLogger().Tracef("document: `%s`, isValid=`%t`, actualError=`%T`", document.GetFilename(), isValid, actualError)
 
 	return
 }
@@ -277,7 +293,7 @@ func TestValidateForceCustomSchemaCdxSchemaOlder(t *testing.T) {
 
 func TestValidateCdx14ErrorResultsUniqueComponentsJson(t *testing.T) {
 	//utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_3_CUSTOM
-	innerValidateError(t,
+	innerValidateErrorBuffered(t,
 		TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE,
 		SCHEMA_VARIANT_NONE,
 		FORMAT_JSON,
@@ -286,7 +302,7 @@ func TestValidateCdx14ErrorResultsUniqueComponentsJson(t *testing.T) {
 
 func TestValidateCdx14ErrorResultsFormatIriReferencesJson(t *testing.T) {
 	//utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_3_CUSTOM
-	innerValidateError(t,
+	innerValidateErrorBuffered(t,
 		TEST_CDX_1_4_VALIDATE_ERR_FORMAT_IRI_REFERENCE,
 		SCHEMA_VARIANT_NONE,
 		FORMAT_JSON,

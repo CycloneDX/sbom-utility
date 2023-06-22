@@ -21,6 +21,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -112,22 +113,21 @@ func validateCmdImpl(cmd *cobra.Command, args []string) error {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	// TODO - support an output file for errors
 	// Create output writer
-	// outputFilename := utils.GlobalFlags.PersistentFlags.OutputFile
-	// outputFile, writer, err := createOutputFile(outputFilename)
+	outputFilename := utils.GlobalFlags.PersistentFlags.OutputFile
+	outputFile, writer, err := createOutputFile(outputFilename)
 
-	// // use function closure to assure consistent error output based upon error type
-	// defer func() {
-	// 	// always close the output file
-	// 	if outputFile != nil {
-	// 		err = outputFile.Close()
-	// 		getLogger().Infof("Closed output file: `%s`", outputFilename)
-	// 	}
-	// }()
+	// use function closure to assure consistent error output based upon error type
+	defer func() {
+		// always close the output file
+		if outputFile != nil {
+			err = outputFile.Close()
+			getLogger().Infof("Closed output file: `%s`", outputFilename)
+		}
+	}()
 
 	// invoke validate and consistently manage exit messages and codes
-	isValid, _, _, err := Validate(utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.ValidateFlags)
+	isValid, _, _, err := Validate(writer, utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.ValidateFlags)
 
 	// Note: all invalid SBOMs (that fail schema validation) MUST result in an InvalidSBOMError()
 	if err != nil {
@@ -180,7 +180,7 @@ func normalizeValidationErrorTypes(document *schema.Sbom, valid bool, err error)
 	getLogger().Info(message)
 }
 
-func Validate(persistentFlags utils.PersistentCommandFlags, validateFlags utils.ValidateCommandFlags) (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.ResultError, err error) {
+func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, validateFlags utils.ValidateCommandFlags) (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.ResultError, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -299,7 +299,14 @@ func Validate(persistentFlags utils.PersistentCommandFlags, validateFlags utils.
 			schemaErrors)
 
 		// Format error results and append to InvalidSBOMError error "details"
-		errInvalid.Details = FormatSchemaErrors(schemaErrors, validateFlags, persistentFlags.OutputFormat)
+		formattedErrors := FormatSchemaErrors(schemaErrors, validateFlags, persistentFlags.OutputFormat)
+		errInvalid.Details = formattedErrors
+
+		// Always produce JSON output (since it is considered non-informational), ignoring the `--quiet` flags
+		if persistentFlags.Quiet && persistentFlags.OutputFormat == FORMAT_JSON {
+			// Note: JSON data files MUST ends in a newline s as this is a POSIX standard
+			fmt.Fprintf(output, "%s\n", formattedErrors)
+		}
 
 		return INVALID, document, schemaErrors, errInvalid
 	}
@@ -313,6 +320,8 @@ func Validate(persistentFlags utils.PersistentCommandFlags, validateFlags utils.
 		}
 	}
 
+	// TODO: Need to perhaps factor in these errors into the JSON output as if they
+	// were actual schema errors...
 	// Perform additional validation in document composition/structure
 	// and "custom" required data within specified fields
 	if utils.GlobalFlags.ValidateFlags.CustomValidation {
