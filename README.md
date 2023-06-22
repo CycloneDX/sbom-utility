@@ -804,11 +804,15 @@ The following flags can be used to improve performance when formatting error out
 
 ##### `--error-limit` flag
 
-Use the `--error-limit x` flag to reduce the formatted error result output to the first `x` errors.  By default, only the first 10 errors are output with an informational messaging indicating `x/y` errors were shown.
+Use the `--error-limit x` (default: `10`) flag to reduce the formatted error result output to the first `x` errors.  By default, only the first 10 errors are output with an informational messaging indicating `x/y` errors were shown.
+
+##### `--error-value` flag
+
+Use the `--error-value=true|false` (default: `true`)flag to reduce the formatted error result output by not showing the `value` field which shows detailed information about the failing data in the BOM.
 
 ##### `--colorize` flag
 
-Use the `--colorize=true|false` flag to add/remove color formatting to error result output.  By default, formatted error output is colorized to help with human readability; for automated use, it can be turned off.
+Use the `--colorize=true|false` (default: `true`) flag to add/remove color formatting to error result `txt` formatted output.  By default, `txt` formatted error output is colorized to help with human readability; for automated use, it can be turned off.
 
 #### Validate Examples
 
@@ -909,6 +913,108 @@ The details include the full context of the failing `metadata.properties` object
 	    "value": "This SBOM is Confidential Information. Do not distribute."
 	  }
 	]]
+```
+
+#### Example: Validate using "JSON" format
+
+The JSON format will provide an `array` of schema error results that can be post-processed as part of validation toolchain.
+
+```bash
+./sbom-utility validate -i test/validation/cdx-1-4-validate-err-components-unique-items-1.json --format json --quiet
+```
+
+```json
+[
+    {
+        "type": "unique",
+        "field": "components",
+        "context": "(root).components",
+        "description": "array items[1,2] must be unique",
+        "value": {
+            "type": "array",
+            "index": 1,
+            "item": {
+                "bom-ref": "pkg:npm/body-parser@1.19.0",
+                "description": "Node.js body parsing middleware",
+                "hashes": [
+                    {
+                        "alg": "SHA-1",
+                        "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+                    }
+                ],
+                "licenses": [
+                    {
+                        "license": {
+                            "id": "MIT"
+                        }
+                    }
+                ],
+                "name": "body-parser",
+                "purl": "pkg:npm/body-parser@1.19.0",
+                "type": "library",
+                "version": "1.19.0"
+            }
+        }
+    },
+    {
+        "type": "unique",
+        "field": "components",
+        "context": "(root).components",
+        "description": "array items[2,4] must be unique",
+        "value": {
+            "type": "array",
+            "index": 2,
+            "item": {
+                "bom-ref": "pkg:npm/body-parser@1.19.0",
+                "description": "Node.js body parsing middleware",
+                "hashes": [
+                    {
+                        "alg": "SHA-1",
+                        "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+                    }
+                ],
+                "licenses": [
+                    {
+                        "license": {
+                            "id": "MIT"
+                        }
+                    }
+                ],
+                "name": "body-parser",
+                "purl": "pkg:npm/body-parser@1.19.0",
+                "type": "library",
+                "version": "1.19.0"
+            }
+        }
+    }
+]
+```
+
+##### Reducing output size using `error-value=false` flag
+
+In many cases, BOMs may have many errors and having the `value` information details included can be too verbose and lead to large output files to inspect.  In those cases, simply set the `error-value` flag to `false`.
+
+Rerunning the same command with this flag set to false yields a reduced set of information.
+
+```bash
+./sbom-utility validate -i test/validation/cdx-1-4-validate-err-components-unique-items-1.json --format json --error-value=false --quiet
+```
+
+```json
+[
+    {
+        "type": "unique",
+        "field": "components",
+        "context": "(root).components",
+        "description": "array items[1,2] must be unique"
+    },
+    {
+        "type": "unique",
+        "field": "components",
+        "context": "(root).components",
+        "description": "array items[2,4] must be unique"
+    }
+]
 ```
 
 ---
