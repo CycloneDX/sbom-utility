@@ -19,7 +19,7 @@ package cmd
 
 // "github.com/iancoleman/orderedmap"
 import (
-	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/CycloneDX/sbom-utility/log"
@@ -45,6 +45,22 @@ const (
 	ERROR_DETAIL_JSON_DEFAULT_PREFIX    = "    "
 	ERROR_DETAIL_JSON_DEFAULT_INDENT    = "    "
 	ERROR_DETAIL_JSON_CONTEXT_DELIMITER = "."
+)
+
+// JSON formatting
+const (
+	JSON_ARRAY_START    = "[\n"
+	JSON_ARRAY_ITEM_SEP = ",\n"
+	JSON_ARRAY_END      = "\n]\n"
+)
+
+// Recurring / translatable messages
+const (
+	MSG_INFO_FORMATTING_ERROR_RESULTS = "Formatting error results (`%s` format)..."
+	MSG_INFO_SCHEMA_ERRORS_DETECTED   = "(%d) schema errors detected."
+	MSG_INFO_TOO_MANY_ERRORS          = "Too many errors. Showing (%v/%v) errors."
+	MSG_ERROR_FORMATTING_ERROR        = "formatting error: %s"
+	MSG_WARN_INVALID_FORMAT           = "invalid format. error results not supported for `%s` format; defaulting to `%s` format..."
 )
 
 type ValidationResultFormatter struct {
@@ -80,37 +96,20 @@ func (validationErrResult *ValidationResultFormat) MarshalJSON() (marshalled []b
 	return validationErrResult.resultMap.MarshalJSON()
 }
 
-func (result *ValidationResultFormat) Format(flags utils.ValidateCommandFlags) string {
-
-	var sb strings.Builder
-
-	// Conditionally, add optional values as requested
+func (result *ValidationResultFormat) Format(flags utils.ValidateCommandFlags) {
+	// Conditionally, add optional values as requested (via flags)
 	if flags.ShowErrorValue {
 		result.resultMap.Set(ERROR_DETAIL_KEY_VALUE, result.ResultError.Value())
 	}
-
-	formattedResult, err := log.FormatIndentedInterfaceAsJson(
-		result.resultMap,
-		ERROR_DETAIL_JSON_DEFAULT_PREFIX,
-		ERROR_DETAIL_JSON_DEFAULT_INDENT,
-	)
-	if err != nil {
-		return fmt.Sprintf("formatting error: %s", err.Error())
-	}
-	sb.WriteString(formattedResult)
-
-	return sb.String()
 }
 
-func (result *ValidationResultFormat) FormatItemsMustBeUniqueError(flags utils.ValidateCommandFlags) string {
+func (result *ValidationResultFormat) FormatItemsMustBeUniqueError(flags utils.ValidateCommandFlags) {
 
-	var sb strings.Builder
-
-	// Conditionally, add optional values as requested
 	// For this error type, we want to reduce the information show to the end user.
 	// Originally, the entire array with duplicate items was show for EVERY occurrence;
 	// attempt to only show the failing item itself once (and only once)
 	// TODO: deduplication (planned) will also help shrink large error output results
+	// Conditionally, add optional values as requested (via flags)
 	if flags.ShowErrorValue {
 		details := result.ResultError.Details()
 		valueType, typeFound := details[ERROR_DETAIL_KEY_DATA_TYPE]
@@ -134,38 +133,26 @@ func (result *ValidationResultFormat) FormatItemsMustBeUniqueError(flags utils.V
 			}
 		}
 	}
-
-	// format information on the failing "value" (details) with proper JSON indenting
-	formattedResult, err := log.FormatIndentedInterfaceAsJson(
-		result.resultMap,
-		ERROR_DETAIL_JSON_DEFAULT_PREFIX,
-		ERROR_DETAIL_JSON_DEFAULT_INDENT,
-	)
-	if err != nil {
-		return fmt.Sprintf("formatting error: %s", err.Error())
-	}
-	sb.WriteString(formattedResult)
-
-	return sb.String()
 }
 
 func FormatSchemaErrors(schemaErrors []gojsonschema.ResultError, flags utils.ValidateCommandFlags, format string) (formattedSchemaErrors string) {
 
-	getLogger().Infof("Formatting error results (`%s` format)...", format)
+	getLogger().Infof(MSG_INFO_FORMATTING_ERROR_RESULTS, format)
 	switch format {
 	case FORMAT_JSON:
 		formattedSchemaErrors = FormatSchemaErrorsJson(schemaErrors, utils.GlobalFlags.ValidateFlags)
 	case FORMAT_TEXT:
 		formattedSchemaErrors = FormatSchemaErrorsText(schemaErrors, utils.GlobalFlags.ValidateFlags)
 	default:
-		getLogger().Warningf("error results not supported for `%s` format; defaulting to `%s` format...",
-			format, FORMAT_TEXT)
+		getLogger().Warningf(MSG_WARN_INVALID_FORMAT, format, FORMAT_TEXT)
 		formattedSchemaErrors = FormatSchemaErrorsText(schemaErrors, utils.GlobalFlags.ValidateFlags)
 	}
 	return
 }
 
 // Custom formatting based upon possible JSON schema error types
+// the custom formatting handlers SHOULD adjust the fields/keys and their values within the `resultMap`
+// for the respective errorResult being operated on.
 func formatSchemaErrorTypes(resultError gojsonschema.ResultError, flags utils.ValidateCommandFlags) (formattedResult string) {
 
 	validationErrorResult := NewValidationErrResult(resultError)
@@ -192,7 +179,7 @@ func formatSchemaErrorTypes(resultError gojsonschema.ResultError, flags utils.Va
 	// case *gojsonschema.InvalidPropertyPatternError:
 	// case *gojsonschema.InvalidTypeError:
 	case *gojsonschema.ItemsMustBeUniqueError:
-		formattedResult = validationErrorResult.FormatItemsMustBeUniqueError(flags)
+		validationErrorResult.FormatItemsMustBeUniqueError(flags)
 	// case *gojsonschema.MissingDependencyError:
 	// case *gojsonschema.MultipleOfError:
 	// case *gojsonschema.NumberAllOfError:
@@ -208,10 +195,38 @@ func formatSchemaErrorTypes(resultError gojsonschema.ResultError, flags utils.Va
 	// case *gojsonschema.StringLengthLTEError:
 	default:
 		getLogger().Debugf("default formatting: ResultError Type: [%v]", errorType)
-		formattedResult = validationErrorResult.Format(flags)
+		validationErrorResult.Format(flags)
 	}
 
-	return
+	return validationErrorResult.formatResultMap(flags)
+}
+
+func (result *ValidationResultFormat) formatResultMap(flags utils.ValidateCommandFlags) string {
+	// format information on the failing "value" (details) with proper JSON indenting
+	var formattedResult string
+	var errFormatting error
+	if flags.ColorizeErrorOutput {
+		formattedResult, errFormatting = log.FormatIndentedInterfaceAsColorizedJson(
+			result.resultMap,
+			len(ERROR_DETAIL_JSON_DEFAULT_INDENT),
+			"\n",
+		)
+	} else {
+		formattedResult, errFormatting = log.FormatIndentedInterfaceAsJson(
+			result.resultMap,
+			ERROR_DETAIL_JSON_DEFAULT_PREFIX,
+			ERROR_DETAIL_JSON_DEFAULT_INDENT,
+		)
+
+		// NOTE: we must add the prefix (indent) ourselves
+		// see issue: https://github.com/golang/go/issues/49261
+		formattedResult = ERROR_DETAIL_JSON_DEFAULT_PREFIX + formattedResult
+	}
+	if errFormatting != nil {
+		return getLogger().Errorf(MSG_ERROR_FORMATTING_ERROR, errFormatting.Error()).Error()
+	}
+
+	return formattedResult
 }
 
 func FormatSchemaErrorsJson(errs []gojsonschema.ResultError, flags utils.ValidateCommandFlags) string {
@@ -219,40 +234,35 @@ func FormatSchemaErrorsJson(errs []gojsonschema.ResultError, flags utils.Validat
 
 	lenErrs := len(errs)
 	if lenErrs > 0 {
-		getLogger().Infof("(%d) schema errors detected.", lenErrs)
+		getLogger().Infof(MSG_INFO_SCHEMA_ERRORS_DETECTED, lenErrs)
 		errLimit := flags.MaxNumErrors
 
 		// If we have more errors than the (default or user set) limit; notify user
 		if lenErrs > errLimit {
 			// notify users more errors exist
-			getLogger().Infof("Too many errors. Showing (%v/%v) errors.", errLimit, len(errs))
+			getLogger().Infof(MSG_INFO_TOO_MANY_ERRORS, errLimit, len(errs))
 		}
 
-		if lenErrs > 1 {
-			sb.WriteString("[\n")
-		}
+		// begin/open JSON array
+		sb.WriteString(JSON_ARRAY_START)
 
 		for i, resultError := range errs {
 			// short-circuit if too many errors (i.e., using the error limit flag value)
-			if i > errLimit {
+			if i == errLimit {
 				break
 			}
 
 			// add to the result errors
 			schemaErrorText := formatSchemaErrorTypes(resultError, flags)
-			// NOTE: we must add the prefix (indent) ourselves
-			// see issue: https://github.com/golang/go/issues/49261
-			sb.WriteString(ERROR_DETAIL_JSON_DEFAULT_PREFIX)
 			sb.WriteString(schemaErrorText)
 
-			if i < (lenErrs-1) && i < (errLimit) {
-				sb.WriteString(",\n")
+			if i < (lenErrs-1) && i < (errLimit-1) {
+				sb.WriteString(JSON_ARRAY_ITEM_SEP)
 			}
 		}
 
-		if lenErrs > 1 {
-			sb.WriteString("\n]\n")
-		}
+		// end/close JSON array
+		sb.WriteString(JSON_ARRAY_END)
 	}
 
 	return sb.String()
@@ -263,65 +273,29 @@ func FormatSchemaErrorsText(errs []gojsonschema.ResultError, flags utils.Validat
 
 	lenErrs := len(errs)
 	if lenErrs > 0 {
+		getLogger().Infof(MSG_INFO_SCHEMA_ERRORS_DETECTED, lenErrs)
 		errLimit := utils.GlobalFlags.ValidateFlags.MaxNumErrors
-		colorize := utils.GlobalFlags.ValidateFlags.ColorizeErrorOutput
-		var formattedValue string
-		var description string
-		var failingObject string
+		var errorIndex string
 
-		sb.WriteString(fmt.Sprintf("\n(%d) Schema errors detected (use `--debug` for more details):", lenErrs))
+		// If we have more errors than the (default or user set) limit; notify user
+		if lenErrs > errLimit {
+			// notify users more errors exist
+			getLogger().Infof(MSG_INFO_TOO_MANY_ERRORS, errLimit, len(errs))
+		}
+
 		for i, resultError := range errs {
 
-			// short-circuit if we have too many errors
+			// short-circuit if too many errors (i.e., using the error limit flag value)
 			if i == errLimit {
-				// notify users more errors exist
-				msg := fmt.Sprintf("Too many errors. Showing (%v/%v) errors.", i, len(errs))
-				getLogger().Infof("%s", msg)
-				// always include limit message in discrete output (i.e., not turned off by --quiet flag)
-				sb.WriteString("\n" + msg)
 				break
 			}
 
-			// Some descriptions include very long enums; in those cases,
-			// truncate to a reasonable length using an intelligent separator
-			description = resultError.Description()
-			// truncate output unless debug flag is used
-			if !utils.GlobalFlags.PersistentFlags.Debug &&
-				len(description) > DEFAULT_MAX_ERR_DESCRIPTION_LEN {
-				description, _, _ = strings.Cut(description, ":")
-				description = description + " ... (truncated)"
-			}
-
 			// append the numbered schema error
-			schemaErrorText := fmt.Sprintf("\n\t%d. \"%s\": \"%s\",\n\t\t\"%s\": [%s],\n\t\t\"%s\": [%s],\n\t\t\"%s\": [%s]",
-				i+1,
-				ERROR_DETAIL_KEY_DATA_TYPE, resultError.Type(),
-				ERROR_DETAIL_KEY_FIELD, resultError.Field(),
-				ERROR_DETAIL_KEY_CONTEXT, resultError.Context().String(ERROR_DETAIL_JSON_CONTEXT_DELIMITER),
-				ERROR_DETAIL_KEY_VALUE_DESCRIPTION, description)
+			errorIndex = strconv.Itoa(i + 1)
 
-			sb.WriteString(schemaErrorText)
-
-			if flags.ShowErrorValue {
-
-				// TODO: provide flag to allow users to "turn on", by default we do NOT want this
-				// as this slows down processing on SBOMs with large numbers of errors
-				if colorize {
-					formattedValue, _ = log.FormatIndentedInterfaceAsColorizedJson(
-						resultError.Value(),
-						len(ERROR_DETAIL_JSON_DEFAULT_INDENT),
-					)
-				} else {
-					// formattedValue, _ = log.FormatInterfaceAsJson(resultError.Value())
-					formattedValue, _ = log.FormatIndentedInterfaceAsJson(
-						resultError.Value(),
-						ERROR_DETAIL_JSON_DEFAULT_PREFIX,
-						ERROR_DETAIL_JSON_DEFAULT_INDENT,
-					)
-				}
-				failingObject = fmt.Sprintf("\n\t\t\"value\": %v", formattedValue)
-				sb.WriteString(failingObject)
-			}
+			// emit formatted error result
+			formattedResult := formatSchemaErrorTypes(resultError, utils.GlobalFlags.ValidateFlags)
+			sb.WriteString("\n" + errorIndex + ". " + formattedResult)
 		}
 	}
 	return sb.String()

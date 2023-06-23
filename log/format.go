@@ -161,9 +161,10 @@ func FormatInterfaceAsColorizedJson(data interface{}) (string, error) {
 	return string(bytes), nil
 }
 
-func FormatIndentedInterfaceAsColorizedJson(data interface{}, indent int) (string, error) {
+func FormatIndentedInterfaceAsColorizedJson(data interface{}, indent int, newline string) (string, error) {
 	formatter := prettyjson.NewFormatter()
 	formatter.Indent = indent
+	formatter.Newline = newline
 	bytes, err := formatter.Marshal(data)
 	if err != nil {
 		return "", err

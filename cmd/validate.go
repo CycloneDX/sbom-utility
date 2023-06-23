@@ -116,6 +116,13 @@ func validateCmdImpl(cmd *cobra.Command, args []string) error {
 	outputFilename := utils.GlobalFlags.PersistentFlags.OutputFile
 	outputFile, writer, err := createOutputFile(outputFilename)
 
+	// Note: all invalid SBOMs (that fail schema validation) MUST result in an InvalidSBOMError()
+	if err != nil {
+		// TODO: assure this gets normalized
+		getLogger().Error(err)
+		os.Exit(ERROR_APPLICATION)
+	}
+
 	// use function closure to assure consistent error output based upon error type
 	defer func() {
 		// always close the output file
@@ -141,6 +148,8 @@ func validateCmdImpl(cmd *cobra.Command, args []string) error {
 	// TODO: remove this if we can assure that we ALWAYS return an
 	// IsInvalidSBOMError(err) in these cases from the Validate() method
 	if !isValid {
+		// TODO: if JSON validation resulted in !valid, turn that into an
+		// InvalidSBOMError and test to make sure this works in all cases
 		os.Exit(ERROR_VALIDATION)
 	}
 
@@ -150,9 +159,6 @@ func validateCmdImpl(cmd *cobra.Command, args []string) error {
 
 // Normalize error/normalizeValidationErrorTypes from the Validate() function
 func normalizeValidationErrorTypes(document *schema.Sbom, valid bool, err error) {
-
-	// TODO: if JSON validation resulted in !valid, turn that into an
-	// InvalidSBOMError and test to make sure this works in all cases
 
 	// Consistently display errors before exiting
 	if err != nil {
@@ -315,8 +321,7 @@ func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, va
 		return INVALID, document, schemaErrors, errInvalid
 	}
 
-	// TODO: Need to perhaps factor in these errors into the JSON output as if they
-	// were actual schema errors...
+	// TODO: Perhaps factor in these errors into the JSON output as if they were actual schema errors...
 	// Perform additional validation in document composition/structure
 	// and "custom" required data within specified fields
 	if validateFlags.CustomValidation {
