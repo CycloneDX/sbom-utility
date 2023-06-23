@@ -293,7 +293,7 @@ func FormatSchemaErrorsText(errs []gojsonschema.ResultError, flags utils.Validat
 			}
 
 			// append the numbered schema error
-			schemaErrorText := fmt.Sprintf("\n\t%d. \"%s\": \"%s\", \"%s\": [%s], \"%s\": [%s], \"%s\": [%s]",
+			schemaErrorText := fmt.Sprintf("\n\t%d. \"%s\": \"%s\",\n\t\t\"%s\": [%s],\n\t\t\"%s\": [%s],\n\t\t\"%s\": [%s]",
 				i+1,
 				ERROR_DETAIL_KEY_DATA_TYPE, resultError.Type(),
 				ERROR_DETAIL_KEY_FIELD, resultError.Field(),

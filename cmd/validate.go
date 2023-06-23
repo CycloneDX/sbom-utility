@@ -165,7 +165,7 @@ func normalizeValidationErrorTypes(document *schema.Sbom, valid bool, err error)
 			// Note: InvalidSBOMError type errors include schema errors which have already
 			// been added to the error type and will shown with the Error() interface
 			if valid {
-				getLogger().Errorf("invalid state: error (%T) returned, but SBOM valid!", t)
+				_ = getLogger().Errorf("invalid state: error (%T) returned, but SBOM valid!", t)
 			}
 			getLogger().Error(err)
 		default:
