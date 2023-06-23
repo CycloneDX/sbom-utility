@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
-	"os"
 	"testing"
 
 	"github.com/CycloneDX/sbom-utility/schema"
@@ -67,7 +66,12 @@ func innerValidateError(t *testing.T, filename string, variant string, format st
 	// Invoke the actual validate function
 	var isValid bool
 
-	isValid, document, schemaErrors, actualError = Validate(os.Stdout, utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.ValidateFlags)
+	// TODO: support additional tests on output buffer (e.g., format==valid JSON)
+	isValid, document, schemaErrors, _, actualError = innerValidateErrorBuffered(
+		t,
+		utils.GlobalFlags.PersistentFlags,
+		utils.GlobalFlags.ValidateFlags,
+	)
 
 	getLogger().Tracef("document: `%s`, isValid=`%t`, actualError=`%T`", document.GetFilename(), isValid, actualError)
 
@@ -99,15 +103,15 @@ func innerValidateError(t *testing.T, filename string, variant string, format st
 	return
 }
 
-func innerValidateErrorBuffered(t *testing.T, filename string, variant string, format string, expectedError error) (schemaErrors []gojsonschema.ResultError, outputBuffer bytes.Buffer, err error) {
+func innerValidateErrorBuffered(t *testing.T, persistentFlags utils.PersistentCommandFlags, validationFlags utils.ValidateCommandFlags) (isValid bool, document *schema.Sbom, schemaErrors []gojsonschema.ResultError, outputBuffer bytes.Buffer, err error) {
 	// Declare an output outputBuffer/outputWriter to use used during tests
 	var outputWriter = bufio.NewWriter(&outputBuffer)
 	// ensure all data is written to buffer before further validation
 	defer outputWriter.Flush()
 
 	// Invoke the actual command (API)
-	isValid, document, schemaErrors, actualError := Validate(outputWriter, utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.ValidateFlags)
-	getLogger().Tracef("document: `%s`, isValid=`%t`, actualError=`%T`", document.GetFilename(), isValid, actualError)
+	isValid, document, schemaErrors, err = Validate(outputWriter, persistentFlags, utils.GlobalFlags.ValidateFlags)
+	getLogger().Tracef("document: `%s`, isValid=`%t`, err=`%T`", document.GetFilename(), isValid, err)
 
 	return
 }
@@ -284,16 +288,8 @@ func TestValidateForceCustomSchemaCdxSchemaOlder(t *testing.T) {
 		nil)
 }
 
-// func TestValidateSyntaxErrorCdx14AdHoc2(t *testing.T) {
-// 	innerValidateError(t,
-// 		"sample_co_May16.json",
-// 		SCHEMA_VARIANT_NONE,
-// 		nil)
-// }
-
 func TestValidateCdx14ErrorResultsUniqueComponentsJson(t *testing.T) {
-	//utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_3_CUSTOM
-	innerValidateErrorBuffered(t,
+	innerValidateError(t,
 		TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE,
 		SCHEMA_VARIANT_NONE,
 		FORMAT_JSON,
@@ -301,8 +297,7 @@ func TestValidateCdx14ErrorResultsUniqueComponentsJson(t *testing.T) {
 }
 
 func TestValidateCdx14ErrorResultsFormatIriReferencesJson(t *testing.T) {
-	//utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_3_CUSTOM
-	innerValidateErrorBuffered(t,
+	innerValidateError(t,
 		TEST_CDX_1_4_VALIDATE_ERR_FORMAT_IRI_REFERENCE,
 		SCHEMA_VARIANT_NONE,
 		FORMAT_JSON,

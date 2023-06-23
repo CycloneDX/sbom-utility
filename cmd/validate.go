@@ -103,8 +103,7 @@ func initCommandValidateFlags(command *cobra.Command) {
 	// Optional schema "variant" of inferred schema (e.g, "strict")
 	command.Flags().StringVarP(&utils.GlobalFlags.ValidateFlags.SchemaVariant, FLAG_VALIDATE_SCHEMA_VARIANT, "", "", MSG_VALIDATE_SCHEMA_VARIANT)
 	command.Flags().BoolVarP(&utils.GlobalFlags.ValidateFlags.CustomValidation, FLAG_VALIDATE_CUSTOM, "", false, MSG_VALIDATE_FLAG_CUSTOM)
-	// Colorize default: true (for historical reasons)
-	command.Flags().BoolVarP(&utils.GlobalFlags.ValidateFlags.ColorizeErrorOutput, FLAG_COLORIZE_OUTPUT, "", true, MSG_VALIDATE_FLAG_ERR_COLORIZE)
+	command.Flags().BoolVarP(&utils.GlobalFlags.ValidateFlags.ColorizeErrorOutput, FLAG_COLORIZE_OUTPUT, "", false, MSG_VALIDATE_FLAG_ERR_COLORIZE)
 	command.Flags().IntVarP(&utils.GlobalFlags.ValidateFlags.MaxNumErrors, FLAG_VALIDATE_ERR_LIMIT, "", DEFAULT_MAX_ERROR_LIMIT, MSG_VALIDATE_FLAG_ERR_LIMIT)
 	command.Flags().BoolVarP(&utils.GlobalFlags.ValidateFlags.ShowErrorValue, FLAG_VALIDATE_ERR_VALUE, "", true, MSG_VALIDATE_FLAG_ERR_COLORIZE)
 }
@@ -166,7 +165,7 @@ func normalizeValidationErrorTypes(document *schema.Sbom, valid bool, err error)
 			// Note: InvalidSBOMError type errors include schema errors which have already
 			// been added to the error type and will shown with the Error() interface
 			if valid {
-				getLogger().Errorf("invalid state: error (%T) returned, but SBOM valid !!!", t)
+				getLogger().Errorf("invalid state: error (%T) returned, but SBOM valid!", t)
 			}
 			getLogger().Error(err)
 		default:
@@ -298,49 +297,63 @@ func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, va
 			nil,
 			schemaErrors)
 
-		// Format error results and append to InvalidSBOMError error "details"
-		formattedErrors := FormatSchemaErrors(schemaErrors, validateFlags, persistentFlags.OutputFormat)
-		errInvalid.Details = formattedErrors
-
-		// Always produce JSON output (since it is considered non-informational), ignoring the `--quiet` flags
-		if persistentFlags.Quiet && persistentFlags.OutputFormat == FORMAT_JSON {
+		// TODO: de-duplicate errors (e.g., array item not "unique"...)
+		var formattedErrors string
+		switch persistentFlags.OutputFormat {
+		case FORMAT_JSON:
 			// Note: JSON data files MUST ends in a newline s as this is a POSIX standard
-			fmt.Fprintf(output, "%s\n", formattedErrors)
+			formattedErrors = FormatSchemaErrors(schemaErrors, validateFlags, FORMAT_JSON)
+			fmt.Fprintf(output, "%s", formattedErrors)
+		case FORMAT_TEXT:
+			fallthrough
+		default:
+			// Format error results and append to InvalidSBOMError error "details"
+			formattedErrors = FormatSchemaErrors(schemaErrors, validateFlags, FORMAT_TEXT)
+			errInvalid.Details = formattedErrors
 		}
 
 		return INVALID, document, schemaErrors, errInvalid
-	}
-
-	// If the validated SBOM is of a known format, we can unmarshal it into
-	// more convenient typed structure for simplified custom validation
-	if document.FormatInfo.IsCycloneDx() {
-		document.CdxBom, err = schema.UnMarshalDocument(document.GetJSONMap())
-		if err != nil {
-			return INVALID, document, schemaErrors, err
-		}
 	}
 
 	// TODO: Need to perhaps factor in these errors into the JSON output as if they
 	// were actual schema errors...
 	// Perform additional validation in document composition/structure
 	// and "custom" required data within specified fields
-	if utils.GlobalFlags.ValidateFlags.CustomValidation {
-		// Perform all custom validation
-		err := validateCustomCDXDocument(document)
-		if err != nil {
-			// Wrap any specific validation error in a single invalid SBOM error
-			if !IsInvalidSBOMError(err) {
-				err = NewInvalidSBOMError(
-					document,
-					err.Error(),
-					err,
-					nil)
-			}
-			// an error implies it is also invalid (according to custom requirements)
-			return INVALID, document, schemaErrors, err
-		}
+	if validateFlags.CustomValidation {
+		valid, err = validateCustom(document)
 	}
 
 	// All validation tests passed; return VALID
 	return
+}
+
+func validateCustom(document *schema.Sbom) (valid bool, err error) {
+
+	// If the validated SBOM is of a known format, we can unmarshal it into
+	// more convenient typed structure for simplified custom validation
+	if document.FormatInfo.IsCycloneDx() {
+		document.CdxBom, err = schema.UnMarshalDocument(document.GetJSONMap())
+		if err != nil {
+			return INVALID, err
+		}
+	}
+
+	// Perform all custom validation
+	// TODO Implement customValidation as an interface supported by the CDXDocument type
+	// and later supported by a SPDXDocument type.
+	err = validateCustomCDXDocument(document)
+	if err != nil {
+		// Wrap any specific validation error in a single invalid SBOM error
+		if !IsInvalidSBOMError(err) {
+			err = NewInvalidSBOMError(
+				document,
+				err.Error(),
+				err,
+				nil)
+		}
+		// an error implies it is also invalid (according to custom requirements)
+		return INVALID, err
+	}
+
+	return VALID, nil
 }

@@ -29,18 +29,22 @@ import (
 )
 
 const (
-	ERROR_DETAIL_KEY_VALUE            = "value"
-	ERROR_DETAIL_KEY_DATA_TYPE        = "type"
-	ERROR_DETAIL_KEY_VALUE_TYPE_ARRAY = "array"
-	ERROR_DETAIL_KEY_VALUE_INDEX      = "index"
-	ERROR_DETAIL_KEY_VALUE_ITEM       = "item"
-	ERROR_DETAIL_ARRAY_ITEM_INDEX_I   = "i"
-	ERROR_DETAIL_ARRAY_ITEM_INDEX_J   = "j"
+	ERROR_DETAIL_KEY_FIELD             = "field"
+	ERROR_DETAIL_KEY_CONTEXT           = "context"
+	ERROR_DETAIL_KEY_VALUE             = "value"
+	ERROR_DETAIL_KEY_DATA_TYPE         = "type"
+	ERROR_DETAIL_KEY_VALUE_TYPE_ARRAY  = "array"
+	ERROR_DETAIL_KEY_VALUE_INDEX       = "index"
+	ERROR_DETAIL_KEY_VALUE_ITEM        = "item"
+	ERROR_DETAIL_KEY_VALUE_DESCRIPTION = "description"
+	ERROR_DETAIL_ARRAY_ITEM_INDEX_I    = "i"
+	ERROR_DETAIL_ARRAY_ITEM_INDEX_J    = "j"
 )
 
 const (
-	ERROR_DETAIL_JSON_DEFAULT_PREFIX = "    "
-	ERROR_DETAIL_JSON_DEFAULT_INDENT = "    "
+	ERROR_DETAIL_JSON_DEFAULT_PREFIX    = "    "
+	ERROR_DETAIL_JSON_DEFAULT_INDENT    = "    "
+	ERROR_DETAIL_JSON_CONTEXT_DELIMITER = "."
 )
 
 type ValidationResultFormatter struct {
@@ -62,12 +66,12 @@ func NewValidationErrResult(resultError gojsonschema.ResultError) (validationErr
 	}
 	// Prepare for JSON output by adding all required fields to our ordered map
 	validationErrResult.resultMap = orderedmap.New()
-	validationErrResult.resultMap.Set("type", resultError.Type())
-	validationErrResult.resultMap.Set("field", resultError.Field())
+	validationErrResult.resultMap.Set(ERROR_DETAIL_KEY_DATA_TYPE, resultError.Type())
+	validationErrResult.resultMap.Set(ERROR_DETAIL_KEY_FIELD, resultError.Field())
 	if context := resultError.Context(); context != nil {
-		validationErrResult.resultMap.Set("context", resultError.Context().String())
+		validationErrResult.resultMap.Set(ERROR_DETAIL_KEY_CONTEXT, resultError.Context().String())
 	}
-	validationErrResult.resultMap.Set("description", resultError.Description())
+	validationErrResult.resultMap.Set(ERROR_DETAIL_KEY_VALUE_DESCRIPTION, resultError.Description())
 
 	return
 }
@@ -85,8 +89,11 @@ func (result *ValidationResultFormat) Format(flags utils.ValidateCommandFlags) s
 		result.resultMap.Set(ERROR_DETAIL_KEY_VALUE, result.ResultError.Value())
 	}
 
-	// TODO: add a general JSON formatting flag
-	formattedResult, err := log.FormatIndentedInterfaceAsJson(result.resultMap, ERROR_DETAIL_JSON_DEFAULT_PREFIX, ERROR_DETAIL_JSON_DEFAULT_INDENT)
+	formattedResult, err := log.FormatIndentedInterfaceAsJson(
+		result.resultMap,
+		ERROR_DETAIL_JSON_DEFAULT_PREFIX,
+		ERROR_DETAIL_JSON_DEFAULT_INDENT,
+	)
 	if err != nil {
 		return fmt.Sprintf("formatting error: %s", err.Error())
 	}
@@ -128,8 +135,12 @@ func (result *ValidationResultFormat) FormatItemsMustBeUniqueError(flags utils.V
 		}
 	}
 
-	// TODO: add a general JSON formatting flag
-	formattedResult, err := log.FormatIndentedInterfaceAsJson(result.resultMap, ERROR_DETAIL_JSON_DEFAULT_PREFIX, ERROR_DETAIL_JSON_DEFAULT_INDENT)
+	// format information on the failing "value" (details) with proper JSON indenting
+	formattedResult, err := log.FormatIndentedInterfaceAsJson(
+		result.resultMap,
+		ERROR_DETAIL_JSON_DEFAULT_PREFIX,
+		ERROR_DETAIL_JSON_DEFAULT_INDENT,
+	)
 	if err != nil {
 		return fmt.Sprintf("formatting error: %s", err.Error())
 	}
@@ -140,7 +151,7 @@ func (result *ValidationResultFormat) FormatItemsMustBeUniqueError(flags utils.V
 
 func FormatSchemaErrors(schemaErrors []gojsonschema.ResultError, flags utils.ValidateCommandFlags, format string) (formattedSchemaErrors string) {
 
-	getLogger().Infof("Formatting error results (`%s` format)...\n", format)
+	getLogger().Infof("Formatting error results (`%s` format)...", format)
 	switch format {
 	case FORMAT_JSON:
 		formattedSchemaErrors = FormatSchemaErrorsJson(schemaErrors, utils.GlobalFlags.ValidateFlags)
@@ -208,14 +219,13 @@ func FormatSchemaErrorsJson(errs []gojsonschema.ResultError, flags utils.Validat
 
 	lenErrs := len(errs)
 	if lenErrs > 0 {
-		sb.WriteString(fmt.Sprintf("\n(%d) Schema errors detected (use `--debug` for more details):\n", lenErrs))
+		getLogger().Infof("(%d) schema errors detected.", lenErrs)
 		errLimit := flags.MaxNumErrors
 
 		// If we have more errors than the (default or user set) limit; notify user
 		if lenErrs > errLimit {
 			// notify users more errors exist
-			msg := fmt.Sprintf("Too many errors. Showing (%v/%v) errors.", errLimit, len(errs))
-			getLogger().Infof("%s", msg)
+			getLogger().Infof("Too many errors. Showing (%v/%v) errors.", errLimit, len(errs))
 		}
 
 		if lenErrs > 1 {
@@ -241,7 +251,7 @@ func FormatSchemaErrorsJson(errs []gojsonschema.ResultError, flags utils.Validat
 		}
 
 		if lenErrs > 1 {
-			sb.WriteString("\n]")
+			sb.WriteString("\n]\n")
 		}
 	}
 
@@ -282,34 +292,36 @@ func FormatSchemaErrorsText(errs []gojsonschema.ResultError, flags utils.Validat
 				description = description + " ... (truncated)"
 			}
 
-			// TODO: provide flag to allow users to "turn on", by default we do NOT want this
-			// as this slows down processing on SBOMs with large numbers of errors
-			if colorize {
-				formattedValue, _ = log.FormatInterfaceAsColorizedJson(resultError.Value())
-			} else {
-				formattedValue, _ = log.FormatInterfaceAsJson(resultError.Value())
-			}
-			// Indent error detail output in logs
-			formattedValue = log.AddTabs(formattedValue)
-			// NOTE: if we do not colorize or indent we could simply do this:
-			failingObject = fmt.Sprintf("\n\tFailing object: [%v]", formattedValue)
-
-			// truncate output unless debug flag is used
-			if !utils.GlobalFlags.PersistentFlags.Debug &&
-				len(failingObject) > DEFAULT_MAX_ERR_DESCRIPTION_LEN {
-				failingObject = failingObject[:DEFAULT_MAX_ERR_DESCRIPTION_LEN]
-				failingObject = failingObject + " ... (truncated)"
-			}
-
 			// append the numbered schema error
-			schemaErrorText := fmt.Sprintf("\n\t%d. Type: [%s], Field: [%s], Description: [%s] %s",
+			schemaErrorText := fmt.Sprintf("\n\t%d. \"%s\": [%s], \"%s\": [%s], \"%s\": [%s], \"%s\": [%s]",
 				i+1,
-				resultError.Type(),
-				resultError.Field(),
-				description,
-				failingObject)
+				ERROR_DETAIL_KEY_DATA_TYPE, resultError.Type(),
+				ERROR_DETAIL_KEY_FIELD, resultError.Field(),
+				ERROR_DETAIL_KEY_CONTEXT, resultError.Context().String(ERROR_DETAIL_JSON_CONTEXT_DELIMITER),
+				ERROR_DETAIL_KEY_VALUE_DESCRIPTION, description)
 
 			sb.WriteString(schemaErrorText)
+
+			if flags.ShowErrorValue {
+
+				// TODO: provide flag to allow users to "turn on", by default we do NOT want this
+				// as this slows down processing on SBOMs with large numbers of errors
+				if colorize {
+					formattedValue, _ = log.FormatIndentedInterfaceAsColorizedJson(
+						resultError.Value(),
+						len(ERROR_DETAIL_JSON_DEFAULT_INDENT),
+					)
+				} else {
+					// formattedValue, _ = log.FormatInterfaceAsJson(resultError.Value())
+					formattedValue, _ = log.FormatIndentedInterfaceAsJson(
+						resultError.Value(),
+						ERROR_DETAIL_JSON_DEFAULT_PREFIX,
+						ERROR_DETAIL_JSON_DEFAULT_INDENT,
+					)
+				}
+				failingObject = fmt.Sprintf("\n\t\t\"value\": %v", formattedValue)
+				sb.WriteString(failingObject)
+			}
 		}
 	}
 	return sb.String()
