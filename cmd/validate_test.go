@@ -308,18 +308,38 @@ func TestValidateCdx14ErrorResultsFormatIriReferencesText(t *testing.T) {
 
 // TODO: add additional checks on the buffered output
 func TestValidateCdx14ErrorResultsUniqueComponentsJson(t *testing.T) {
-	innerValidateError(t,
+	var EXPECTED_ERROR_NUM = 2
+	var EXPECTED_ERROR_CONTEXT = "(root).components"
+	_, schemaErrors, _ := innerValidateError(t,
 		TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE,
 		SCHEMA_VARIANT_NONE,
 		FORMAT_JSON,
 		&InvalidSBOMError{})
+
+	if len(schemaErrors) != EXPECTED_ERROR_NUM {
+		t.Errorf("invalid error count: expected `%v` schema errors; actual errors: `%v`)", EXPECTED_ERROR_NUM, len(schemaErrors))
+	}
+
+	if schemaErrors[0].Context().String() != EXPECTED_ERROR_CONTEXT {
+		t.Errorf("invalid schema error context: expected `%v`; actual: `%v`)", EXPECTED_ERROR_CONTEXT, schemaErrors[0].Context().String())
+	}
 }
 
 // TODO: add additional checks on the buffered output
 func TestValidateCdx14ErrorResultsFormatIriReferencesJson(t *testing.T) {
-	innerValidateError(t,
+	var EXPECTED_ERROR_NUM = 1
+	var EXPECTED_ERROR_CONTEXT = "(root).components.2.externalReferences.0.url"
+	_, schemaErrors, _ := innerValidateError(t,
 		TEST_CDX_1_4_VALIDATE_ERR_FORMAT_IRI_REFERENCE,
 		SCHEMA_VARIANT_NONE,
 		FORMAT_JSON,
 		&InvalidSBOMError{})
+
+	if len(schemaErrors) != EXPECTED_ERROR_NUM {
+		t.Errorf("invalid schema error count: expected `%v`; actual: `%v`)", EXPECTED_ERROR_NUM, len(schemaErrors))
+	}
+
+	if schemaErrors[0].Context().String() != EXPECTED_ERROR_CONTEXT {
+		t.Errorf("invalid schema error context: expected `%v`; actual: `%v`)", EXPECTED_ERROR_CONTEXT, schemaErrors[0].Context().String())
+	}
 }

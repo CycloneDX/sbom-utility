@@ -808,11 +808,11 @@ Use the `--error-limit x` (default: `10`) flag to reduce the formatted error res
 
 ##### `--error-value` flag
 
-Use the `--error-value=true|false` (default: `true`)flag to reduce the formatted error result output by not showing the `value` field which shows detailed information about the failing data in the BOM.
+Use the `--error-value=true|false` (default: `true`) flag to reduce the formatted error result output by not showing the `value` field which shows detailed information about the failing data in the BOM.
 
 ##### `--colorize` flag
 
-Use the `--colorize=true|false` (default: `true`) flag to add/remove color formatting to error result `txt` formatted output.  By default, `txt` formatted error output is colorized to help with human readability; for automated use, it can be turned off.
+Use the `--colorize=true|false` (default: `false`) flag to add/remove color formatting to error result `txt` formatted output.  By default, `txt` formatted error output is colorized to help with human readability; for automated use, it can be turned off.
 
 #### Validate Examples
 
