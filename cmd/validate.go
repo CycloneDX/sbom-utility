@@ -309,6 +309,7 @@ func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, va
 		case FORMAT_JSON:
 			// Note: JSON data files MUST ends in a newline s as this is a POSIX standard
 			formattedErrors = FormatSchemaErrors(schemaErrors, validateFlags, FORMAT_JSON)
+			// getLogger().Debugf("%s", formattedErrors)
 			fmt.Fprintf(output, "%s", formattedErrors)
 		case FORMAT_TEXT:
 			fallthrough

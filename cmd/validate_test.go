@@ -116,6 +116,18 @@ func innerValidateErrorBuffered(t *testing.T, persistentFlags utils.PersistentCo
 	return
 }
 
+func innerValidateForcedSchema(t *testing.T, filename string, forcedSchema string, format string, expectedError error) (document *schema.Sbom, schemaErrors []gojsonschema.ResultError, actualError error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = forcedSchema
+	innerValidateError(t, filename, SCHEMA_VARIANT_NONE, format, expectedError)
+	// !!!Important!!! Must reset this global flag
+	utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = ""
+
+	return
+}
+
 // Tests *ErrorInvalidSBOM error types and any (lower-level) errors they "wrapped"
 func innerValidateInvalidSBOMInnerError(t *testing.T, filename string, variant string, innerError error) (document *schema.Sbom, schemaErrors []gojsonschema.ResultError, actualError error) {
 	getLogger().Enter()
@@ -260,30 +272,27 @@ func TestValidateSyntaxErrorCdx13Test2(t *testing.T) {
 
 // Force validation against a "custom" schema with compatible format (CDX) and version (1.3)
 func TestValidateForceCustomSchemaCdx13(t *testing.T) {
-	utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_3_CUSTOM
-	innerValidateError(t,
+	innerValidateForcedSchema(t,
 		TEST_CDX_1_3_MATURITY_EXAMPLE_1_BASE,
-		SCHEMA_VARIANT_NONE,
+		TEST_SCHEMA_CDX_1_3_CUSTOM,
 		FORMAT_TEXT,
 		nil)
 }
 
 // Force validation against a "custom" schema with compatible format (CDX) and version (1.4)
 func TestValidateForceCustomSchemaCdx14(t *testing.T) {
-	utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_4_CUSTOM
-	innerValidateError(t,
+	innerValidateForcedSchema(t,
 		TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE,
-		SCHEMA_VARIANT_NONE,
+		TEST_SCHEMA_CDX_1_4_CUSTOM,
 		FORMAT_TEXT,
 		nil)
 }
 
 // Force validation using schema with compatible format, but older version than the SBOM version
 func TestValidateForceCustomSchemaCdxSchemaOlder(t *testing.T) {
-	utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_3_CUSTOM
-	innerValidateError(t,
+	innerValidateForcedSchema(t,
 		TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE,
-		SCHEMA_VARIANT_NONE,
+		TEST_SCHEMA_CDX_1_3_CUSTOM,
 		FORMAT_TEXT,
 		nil)
 }
@@ -315,9 +324,11 @@ func TestValidateCdx14ErrorResultsUniqueComponentsJson(t *testing.T) {
 		SCHEMA_VARIANT_NONE,
 		FORMAT_JSON,
 		&InvalidSBOMError{})
+	//output, _ := log.FormatIndentedInterfaceAsJson(schemaErrors, "    ", "    ")
 
 	if len(schemaErrors) != EXPECTED_ERROR_NUM {
-		t.Errorf("invalid error count: expected `%v` schema errors; actual errors: `%v`)", EXPECTED_ERROR_NUM, len(schemaErrors))
+		t.Errorf("invalid schema error count: expected `%v`; actual: `%v`)", EXPECTED_ERROR_NUM, len(schemaErrors))
+		//fmt.Printf("schemaErrors:\n %s", output)
 	}
 
 	if schemaErrors[0].Context().String() != EXPECTED_ERROR_CONTEXT {
@@ -335,8 +346,11 @@ func TestValidateCdx14ErrorResultsFormatIriReferencesJson(t *testing.T) {
 		FORMAT_JSON,
 		&InvalidSBOMError{})
 
+	//output, _ := log.FormatIndentedInterfaceAsJson(schemaErrors, "    ", "    ")
+
 	if len(schemaErrors) != EXPECTED_ERROR_NUM {
 		t.Errorf("invalid schema error count: expected `%v`; actual: `%v`)", EXPECTED_ERROR_NUM, len(schemaErrors))
+		//fmt.Printf("schemaErrors:\n %s", output)
 	}
 
 	if schemaErrors[0].Context().String() != EXPECTED_ERROR_CONTEXT {
