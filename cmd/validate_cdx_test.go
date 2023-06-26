@@ -37,11 +37,11 @@ const (
 // -----------------------------------------------------------
 
 func TestValidateCdx13MinRequiredBasic(t *testing.T) {
-	innerValidateError(t, TEST_CDX_1_3_MIN_REQUIRED, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_CDX_1_3_MIN_REQUIRED, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 func TestValidateCdx14MinRequiredBasic(t *testing.T) {
-	innerValidateError(t, TEST_CDX_1_4_MIN_REQUIRED, SCHEMA_VARIANT_NONE, nil)
+	innerValidateError(t, TEST_CDX_1_4_MIN_REQUIRED, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 // -----------------------------------------------------------

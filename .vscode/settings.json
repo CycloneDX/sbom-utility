@@ -62,6 +62,7 @@
             "multimap",
             "myservices",
             "NOASSERTION",
+            "nolint",
             "nosec",
             "NTIA",
             "Nyffenegger",
@@ -102,5 +103,8 @@
       ],
       "files.watcherExclude": {
             "**/target": true
-      }
+      },
+      "cSpell.ignoreWords": [
+            "iancoleman"
+      ]
 }

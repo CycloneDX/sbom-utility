@@ -42,16 +42,18 @@ var VALID_USAGE_POLICIES = []string{POLICY_ALLOW, POLICY_DENY, POLICY_NEEDS_REVI
 var ALL_USAGE_POLICIES = []string{POLICY_ALLOW, POLICY_DENY, POLICY_NEEDS_REVIEW, POLICY_UNDEFINED, POLICY_CONFLICT}
 
 // Note: the SPDX spec. does not provide regex for an SPDX ID, but provides the following in ABNF:
-//     string = 1*(ALPHA / DIGIT / "-" / "." )
+//
+//	string = 1*(ALPHA / DIGIT / "-" / "." )
+//
 // Currently, the regex below tests composition of of only
 // alphanum, "-", and "." characters and disallows empty strings
 // TODO:
-// - First and last chars are not "-" or "."
-// - Enforce reasonable min/max lengths
-//   In theory, we can check overall length with positive lookahead
-//   (e.g., min 3 max 128):  (?=.{3,128}$)
-//   However, this does not appear to be supported in `regexp` package
-//   or perhaps it must be a compiled expression TBD
+//   - First and last chars are not "-" or "."
+//   - Enforce reasonable min/max lengths
+//     In theory, we can check overall length with positive lookahead
+//     (e.g., min 3 max 128):  (?=.{3,128}$)
+//     However, this does not appear to be supported in `regexp` package
+//     or perhaps it must be a compiled expression TBD
 const (
 	REGEX_VALID_SPDX_ID = "^[a-zA-Z0-9.-]+$"
 )

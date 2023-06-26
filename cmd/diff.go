@@ -20,7 +20,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -51,7 +50,7 @@ func NewCommandDiff() *cobra.Command {
 	command.Use = CMD_USAGE_DIFF
 	command.Short = "Report on differences between two BOM files using RFC 6902 format"
 	command.Long = "Report on differences between two BOM files using RFC 6902 format"
-	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
+	command.Flags().StringVarP(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
 		FLAG_DIFF_OUTPUT_FORMAT_HELP+DIFF_OUTPUT_SUPPORTED_FORMATS)
 	command.Flags().StringVarP(&utils.GlobalFlags.DiffFlags.RevisedFile,
 		FLAG_DIFF_FILENAME_REVISION,
@@ -75,7 +74,7 @@ func preRunTestForFiles(cmd *cobra.Command, args []string) error {
 	getLogger().Tracef("args: %v", args)
 
 	// Make sure the base (input) file is present and exists
-	baseFilename := utils.GlobalFlags.InputFile
+	baseFilename := utils.GlobalFlags.PersistentFlags.InputFile
 	if baseFilename == "" {
 		return getLogger().Errorf("Missing required argument(s): %s", FLAG_FILENAME_INPUT)
 	} else if _, err := os.Stat(baseFilename); err != nil {
@@ -98,7 +97,8 @@ func diffCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	defer getLogger().Exit()
 
 	// Create output writer
-	outputFile, writer, err := createOutputFile(utils.GlobalFlags.OutputFile)
+	outputFilename := utils.GlobalFlags.PersistentFlags.OutputFile
+	outputFile, writer, err := createOutputFile(outputFilename)
 	getLogger().Tracef("outputFile: `%v`; writer: `%v`", outputFile, writer)
 
 	// use function closure to assure consistent error output based upon error type
@@ -109,7 +109,7 @@ func diffCmdImpl(cmd *cobra.Command, args []string) (err error) {
 			if err != nil {
 				return
 			}
-			getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.OutputFile)
+			getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.PersistentFlags.OutputFile)
 		}
 	}()
 
@@ -123,11 +123,11 @@ func Diff(flags utils.CommandFlags) (err error) {
 	defer getLogger().Exit()
 
 	// create locals
-	format := utils.GlobalFlags.OutputFormat
-	baseFilename := utils.GlobalFlags.InputFile
-	outputFilename := utils.GlobalFlags.OutputFile
-	outputFormat := utils.GlobalFlags.OutputFormat
-	deltaFilename := utils.GlobalFlags.DiffFlags.RevisedFile
+	format := utils.GlobalFlags.PersistentFlags.OutputFormat
+	inputFilename := utils.GlobalFlags.PersistentFlags.InputFile
+	outputFilename := utils.GlobalFlags.PersistentFlags.OutputFile
+	outputFormat := utils.GlobalFlags.PersistentFlags.OutputFormat
+	revisedFilename := utils.GlobalFlags.DiffFlags.RevisedFile
 	deltaColorize := utils.GlobalFlags.DiffFlags.Colorize
 
 	// Create output writer
@@ -138,31 +138,31 @@ func Diff(flags utils.CommandFlags) (err error) {
 		// always close the output file
 		if outputFile != nil {
 			err = outputFile.Close()
-			getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.OutputFile)
+			getLogger().Infof("Closed output file: `%s`", outputFilename)
 		}
 	}()
 
-	getLogger().Infof("Reading file (--input-file): `%s` ...", baseFilename)
+	getLogger().Infof("Reading file (--input-file): `%s` ...", inputFilename)
 	// #nosec G304 (suppress warning)
-	bBaseData, errReadBase := ioutil.ReadFile(baseFilename)
+	bBaseData, errReadBase := os.ReadFile(inputFilename)
 	if errReadBase != nil {
 		getLogger().Debugf("%v", bBaseData[:255])
-		err = getLogger().Errorf("Failed to ReadFile '%s': %s\n", utils.GlobalFlags.InputFile, err.Error())
+		err = getLogger().Errorf("Failed to ReadFile '%s': %s\n", inputFilename, err.Error())
 		return
 	}
 
-	getLogger().Infof("Reading file (--input-revision): `%s` ...", deltaFilename)
+	getLogger().Infof("Reading file (--input-revision): `%s` ...", revisedFilename)
 	// #nosec G304 (suppress warning)
-	bRevisedData, errReadDelta := ioutil.ReadFile(deltaFilename)
+	bRevisedData, errReadDelta := os.ReadFile(revisedFilename)
 	if errReadDelta != nil {
 		getLogger().Debugf("%v", bRevisedData[:255])
-		err = getLogger().Errorf("Failed to ReadFile '%s': %s\n", utils.GlobalFlags.InputFile, err.Error())
+		err = getLogger().Errorf("Failed to ReadFile '%s': %s\n", inputFilename, err.Error())
 		return
 	}
 
 	// Compare the base with the revision
 	differ := diff.New()
-	getLogger().Infof("Comparing files: `%s` (base) to `%s` (revised) ...", baseFilename, deltaFilename)
+	getLogger().Infof("Comparing files: `%s` (base) to `%s` (revised) ...", inputFilename, revisedFilename)
 	d, err := differ.Compare(bBaseData, bRevisedData)
 	if err != nil {
 		err = getLogger().Errorf("Failed to Compare data: %s\n", err.Error())
@@ -178,7 +178,7 @@ func Diff(flags utils.CommandFlags) (err error) {
 			err = json.Unmarshal(bBaseData, &aJson)
 
 			if err != nil {
-				err = getLogger().Errorf("json.Unmarshal() failed '%s': %s\n", utils.GlobalFlags.InputFile, err.Error())
+				err = getLogger().Errorf("json.Unmarshal() failed '%s': %s\n", inputFilename, err.Error())
 				return
 			}
 
@@ -201,8 +201,7 @@ func Diff(flags utils.CommandFlags) (err error) {
 
 	} else {
 		getLogger().Infof("No deltas found. baseFilename: `%s`, revisedFilename=`%s` match.",
-			utils.GlobalFlags.InputFile,
-			utils.GlobalFlags.DiffFlags.RevisedFile)
+			inputFilename, revisedFilename)
 	}
 
 	return

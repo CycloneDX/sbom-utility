@@ -58,7 +58,7 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
-        extra_files: LICENSE config.json license.json custom.json ${{env.SBOM_NAME}}
+        extra_files: LICENSE README.md config.json license.json custom.json ${{env.SBOM_NAME}}
         # "auto" will use ZIP for Windows, otherwise default is TAR
         compress_assets: auto
         # NOTE: This verbose flag may be removed

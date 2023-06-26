@@ -401,7 +401,7 @@ func (sbom *Sbom) UnmarshalCDXSbom() (err error) {
 	return
 }
 
-func (sbom *Sbom) FindFormatAndSchema() (err error) {
+func (sbom *Sbom) FindFormatAndSchema(sbomFilename string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -416,13 +416,13 @@ func (sbom *Sbom) FindFormatAndSchema() (err error) {
 
 			// Copy format info into Sbom context
 			sbom.FormatInfo = format
-			err = sbom.findSchemaVersionWithVariant(format, version, utils.GlobalFlags.Variant)
+			err = sbom.findSchemaVersionWithVariant(format, version, utils.GlobalFlags.ValidateFlags.SchemaVariant)
 			return
 		}
 	}
 
 	// if we reach here, we did not find the format in our configuration (list)
-	err = NewUnknownFormatError(utils.GlobalFlags.InputFile)
+	err = NewUnknownFormatError(sbomFilename)
 	return
 }
 
@@ -444,9 +444,9 @@ func (sbom *Sbom) findSchemaVersionWithVariant(format FormatSchema, version stri
 
 			// If a variant is also requested, see if we can find one for that criteria
 			// Note: the default value for "variant" is an empty string
-			if utils.GlobalFlags.Variant == schema.Variant {
+			if utils.GlobalFlags.ValidateFlags.SchemaVariant == schema.Variant {
 				getLogger().Tracef("Match found for requested schema variant: `%s`",
-					FormatSchemaVariant(utils.GlobalFlags.Variant))
+					FormatSchemaVariant(utils.GlobalFlags.ValidateFlags.SchemaVariant))
 				sbom.SchemaInfo = schema
 				return
 			}

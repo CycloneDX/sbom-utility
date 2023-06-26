@@ -112,7 +112,7 @@ func NewCommandResource() *cobra.Command {
 	command.Use = CMD_USAGE_RESOURCE_LIST
 	command.Short = "Report on resources found in BOM input file"
 	command.Long = "Report on resources found in BOM input file"
-	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
+	command.Flags().StringVarP(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
 		FLAG_RESOURCE_OUTPUT_FORMAT_HELP+RESOURCE_LIST_OUTPUT_SUPPORTED_FORMATS)
 	command.Flags().StringP(FLAG_RESOURCE_TYPE, "", RESOURCE_TYPE_DEFAULT, FLAG_RESOURCE_TYPE_HELP)
 	command.Flags().StringP(FLAG_REPORT_WHERE, "", "", FLAG_REPORT_WHERE_HELP)
@@ -168,15 +168,16 @@ func resourceCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	defer getLogger().Exit()
 
 	// Create output writer
-	outputFile, writer, err := createOutputFile(utils.GlobalFlags.OutputFile)
-	getLogger().Tracef("outputFile: `%v`; writer: `%v`", outputFile, writer)
+	outputFilename := utils.GlobalFlags.PersistentFlags.OutputFile
+	outputFile, writer, err := createOutputFile(outputFilename)
+	getLogger().Tracef("outputFile: `%v`; writer: `%v`", outputFilename, writer)
 
 	// use function closure to assure consistent error output based upon error type
 	defer func() {
 		// always close the output file
 		if outputFile != nil {
 			outputFile.Close()
-			getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.OutputFile)
+			getLogger().Infof("Closed output file: `%s`", outputFilename)
 		}
 	}()
 
@@ -187,7 +188,9 @@ func resourceCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	var resourceType string
 	resourceType, err = retrieveResourceType(cmd)
 
-	ListResources(writer, utils.GlobalFlags.OutputFormat, resourceType, whereFilters)
+	if err == nil {
+		err = ListResources(writer, utils.GlobalFlags.PersistentFlags.OutputFormat, resourceType, whereFilters)
+	}
 
 	return
 }
