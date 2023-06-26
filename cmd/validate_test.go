@@ -288,6 +288,25 @@ func TestValidateForceCustomSchemaCdxSchemaOlder(t *testing.T) {
 		nil)
 }
 
+// TODO: add additional checks on the buffered output
+func TestValidateCdx14ErrorResultsUniqueComponentsText(t *testing.T) {
+	innerValidateError(t,
+		TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE,
+		SCHEMA_VARIANT_NONE,
+		FORMAT_TEXT,
+		&InvalidSBOMError{})
+}
+
+// TODO: add additional checks on the buffered output
+func TestValidateCdx14ErrorResultsFormatIriReferencesText(t *testing.T) {
+	innerValidateError(t,
+		TEST_CDX_1_4_VALIDATE_ERR_FORMAT_IRI_REFERENCE,
+		SCHEMA_VARIANT_NONE,
+		FORMAT_TEXT,
+		&InvalidSBOMError{})
+}
+
+// TODO: add additional checks on the buffered output
 func TestValidateCdx14ErrorResultsUniqueComponentsJson(t *testing.T) {
 	innerValidateError(t,
 		TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE,
@@ -296,6 +315,7 @@ func TestValidateCdx14ErrorResultsUniqueComponentsJson(t *testing.T) {
 		&InvalidSBOMError{})
 }
 
+// TODO: add additional checks on the buffered output
 func TestValidateCdx14ErrorResultsFormatIriReferencesJson(t *testing.T) {
 	innerValidateError(t,
 		TEST_CDX_1_4_VALIDATE_ERR_FORMAT_IRI_REFERENCE,

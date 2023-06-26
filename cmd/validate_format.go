@@ -19,6 +19,7 @@ package cmd
 
 // "github.com/iancoleman/orderedmap"
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -45,6 +46,7 @@ const (
 	ERROR_DETAIL_JSON_DEFAULT_PREFIX    = "    "
 	ERROR_DETAIL_JSON_DEFAULT_INDENT    = "    "
 	ERROR_DETAIL_JSON_CONTEXT_DELIMITER = "."
+	ERROR_DETAIL_JSON_NEWLINE_INDENT    = "\n" + ERROR_DETAIL_JSON_DEFAULT_PREFIX
 )
 
 // JSON formatting
@@ -209,7 +211,7 @@ func (result *ValidationResultFormat) formatResultMap(flags utils.ValidateComman
 		formattedResult, errFormatting = log.FormatIndentedInterfaceAsColorizedJson(
 			result.resultMap,
 			len(ERROR_DETAIL_JSON_DEFAULT_INDENT),
-			"\n",
+			ERROR_DETAIL_JSON_NEWLINE_INDENT,
 		)
 	} else {
 		formattedResult, errFormatting = log.FormatIndentedInterfaceAsJson(
@@ -217,10 +219,6 @@ func (result *ValidationResultFormat) formatResultMap(flags utils.ValidateComman
 			ERROR_DETAIL_JSON_DEFAULT_PREFIX,
 			ERROR_DETAIL_JSON_DEFAULT_INDENT,
 		)
-
-		// NOTE: we must add the prefix (indent) ourselves
-		// see issue: https://github.com/golang/go/issues/49261
-		formattedResult = ERROR_DETAIL_JSON_DEFAULT_PREFIX + formattedResult
 	}
 	if errFormatting != nil {
 		return getLogger().Errorf(MSG_ERROR_FORMATTING_ERROR, errFormatting.Error()).Error()
@@ -254,6 +252,9 @@ func FormatSchemaErrorsJson(errs []gojsonschema.ResultError, flags utils.Validat
 
 			// add to the result errors
 			schemaErrorText := formatSchemaErrorTypes(resultError, flags)
+			// NOTE: we must add the prefix (indent) ourselves
+			// see issue: https://github.com/golang/go/issues/49261
+			sb.WriteString(ERROR_DETAIL_JSON_DEFAULT_PREFIX)
 			sb.WriteString(schemaErrorText)
 
 			if i < (lenErrs-1) && i < (errLimit-1) {
@@ -270,7 +271,7 @@ func FormatSchemaErrorsJson(errs []gojsonschema.ResultError, flags utils.Validat
 
 func FormatSchemaErrorsText(errs []gojsonschema.ResultError, flags utils.ValidateCommandFlags) string {
 	var sb strings.Builder
-
+	var lineOutput string
 	lenErrs := len(errs)
 	if lenErrs > 0 {
 		getLogger().Infof(MSG_INFO_SCHEMA_ERRORS_DETECTED, lenErrs)
@@ -295,7 +296,10 @@ func FormatSchemaErrorsText(errs []gojsonschema.ResultError, flags utils.Validat
 
 			// emit formatted error result
 			formattedResult := formatSchemaErrorTypes(resultError, utils.GlobalFlags.ValidateFlags)
-			sb.WriteString("\n" + errorIndex + ". " + formattedResult)
+			// NOTE: we must add the prefix (indent) ourselves
+			// see issue: https://github.com/golang/go/issues/49261
+			lineOutput = fmt.Sprintf("\n%v. %s", errorIndex, formattedResult)
+			sb.WriteString(lineOutput)
 		}
 	}
 	return sb.String()
