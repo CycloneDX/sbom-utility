@@ -1,0 +1,159 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "version": 1,
+  "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
+  "metadata": {
+    "component": {
+      "type": "application",
+      "bom-ref": "pkg:oci/example.com/product/application@10.0.4.0",
+      "purl": "pkg:oci/example.com/product/application@10.0.4.0",
+      "name": "Example Application v10.0.4",
+      "description": "Example's Do-It-All application",
+      "version": "10.0.4.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://example.com/application"
+        }
+      ],
+      "properties": [
+        {
+          "name": "urn:example.com:identifier:product",
+          "value": "71C22290D7DB11EBAA175CFD3E629A2A"
+        },
+        {
+          "name": "urn:example.com:identifier:distribution",
+          "value": "5737-I23"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-1",
+          "content": "1111aaaa2222cccc3333dddd4444eeee5555ffff"
+        }
+      ],
+      "supplier": {
+        "name": "Example Co. Distribution Dept.",
+        "url": [
+          "https://example.com"
+        ],
+        "contact": [
+          {
+            "email": "distribution@example.com"
+          }
+        ]
+      },
+      "publisher": "Example Inc. EMEA"
+    },
+    "licenses": [
+      {
+        "license": {
+          "id": "Apache-1.0"
+        }
+      },
+      {
+        "license": {
+          "id": "Apache-2.0"
+        }
+      },
+      {
+        "license": {
+          "id": "GPL-3.0-only"
+        }
+      },
+      {
+        "license": {
+          "id": "MIT"
+        }
+      }
+    ],
+    "tools": [
+      {
+        "vendor": "SecurityTools.com",
+        "name": "Security Scanner v1.0",
+        "version": "1.0.0-beta.1+0099",
+        "hashes": [
+          {
+            "alg": "SHA-1",
+            "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+          }
+        ]
+      },
+      {
+        "vendor": "SBOM.com",
+        "name": "SBOM Generator v2.1",
+        "version": "2.1.12",
+        "hashes": [
+          {
+            "alg": "SHA-1",
+            "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    {
+      "type": "operating-system",
+      "name": "debian",
+      "version": "10",
+      "description": "Debian GNU/Linux 10 (buster)",
+      "externalReferences": [
+        {
+          "url": "https://www.debian.org/",
+          "type": "website"
+        },
+        {
+          "url": "https://www.debian.org/support",
+          "type": "other",
+          "comment": "support"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:empty",
+      "name": "Empty",
+      "externalReferences": [
+        {
+          "url": "",
+          "type": "build-meta"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/asn1.js@5.4.1?package-id=e24b6ffc41aa39e5",
+      "author": "Fedor Indutny",
+      "name": "asn1.js",
+      "version": "5.4.1",
+      "description": "ASN.1 encoder and decoder",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/asn1.js@5.4.1",
+      "externalReferences": [
+        {
+          "url": "git@github.com:indutny/asn1.js",
+          "type": "distribution"
+        },
+        {
+          "url": "https://github.com/indutny/asn1.js",
+          "type": "website"
+        }
+      ]
+    }
+  ]
+}

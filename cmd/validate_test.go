@@ -18,6 +18,8 @@
 package cmd
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/fs"
@@ -44,19 +46,32 @@ const (
 	TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE = "test/cyclonedx/cdx-1-4-mature-example-1.json"
 )
 
+const (
+	TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE    = "test/validation/cdx-1-4-validate-err-components-unique-items-1.json"
+	TEST_CDX_1_4_VALIDATE_ERR_FORMAT_IRI_REFERENCE = "test/validation/cdx-1-4-validate-err-components-format-iri-reference.json"
+)
+
 // Tests basic validation and expected errors
-func innerValidateError(t *testing.T, filename string, variant string, expectedError error) (document *schema.Sbom, schemaErrors []gojsonschema.ResultError, actualError error) {
+func innerValidateError(t *testing.T, filename string, variant string, format string, expectedError error) (document *schema.Sbom, schemaErrors []gojsonschema.ResultError, actualError error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	// Copy the test filename to the command line flags where the code looks for it
-	utils.GlobalFlags.InputFile = filename
+	utils.GlobalFlags.PersistentFlags.InputFile = filename
+	// Set the err result format
+	utils.GlobalFlags.PersistentFlags.OutputFormat = format
 	// Set the schema variant where the command line flag would
-	utils.GlobalFlags.Variant = variant
+	utils.GlobalFlags.ValidateFlags.SchemaVariant = variant
 
 	// Invoke the actual validate function
 	var isValid bool
-	isValid, document, schemaErrors, actualError = Validate()
+
+	// TODO: support additional tests on output buffer (e.g., format==valid JSON)
+	isValid, document, schemaErrors, _, actualError = innerValidateErrorBuffered(
+		t,
+		utils.GlobalFlags.PersistentFlags,
+		utils.GlobalFlags.ValidateFlags,
+	)
 
 	getLogger().Tracef("document: `%s`, isValid=`%t`, actualError=`%T`", document.GetFilename(), isValid, actualError)
 
@@ -88,12 +103,37 @@ func innerValidateError(t *testing.T, filename string, variant string, expectedE
 	return
 }
 
+func innerValidateErrorBuffered(t *testing.T, persistentFlags utils.PersistentCommandFlags, validationFlags utils.ValidateCommandFlags) (isValid bool, document *schema.Sbom, schemaErrors []gojsonschema.ResultError, outputBuffer bytes.Buffer, err error) {
+	// Declare an output outputBuffer/outputWriter to use used during tests
+	var outputWriter = bufio.NewWriter(&outputBuffer)
+	// ensure all data is written to buffer before further validation
+	defer outputWriter.Flush()
+
+	// Invoke the actual command (API)
+	isValid, document, schemaErrors, err = Validate(outputWriter, persistentFlags, utils.GlobalFlags.ValidateFlags)
+	getLogger().Tracef("document: `%s`, isValid=`%t`, err=`%T`", document.GetFilename(), isValid, err)
+
+	return
+}
+
+func innerValidateForcedSchema(t *testing.T, filename string, forcedSchema string, format string, expectedError error) (document *schema.Sbom, schemaErrors []gojsonschema.ResultError, actualError error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = forcedSchema
+	innerValidateError(t, filename, SCHEMA_VARIANT_NONE, format, expectedError)
+	// !!!Important!!! Must reset this global flag
+	utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = ""
+
+	return
+}
+
 // Tests *ErrorInvalidSBOM error types and any (lower-level) errors they "wrapped"
 func innerValidateInvalidSBOMInnerError(t *testing.T, filename string, variant string, innerError error) (document *schema.Sbom, schemaErrors []gojsonschema.ResultError, actualError error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	document, schemaErrors, actualError = innerValidateError(t, filename, variant, &InvalidSBOMError{})
+	document, schemaErrors, actualError = innerValidateError(t, filename, variant, FORMAT_TEXT, &InvalidSBOMError{})
 
 	invalidSBOMError, ok := actualError.(*InvalidSBOMError)
 
@@ -109,7 +149,7 @@ func innerValidateInvalidSBOMInnerError(t *testing.T, filename string, variant s
 // It also tests that the syntax error occurred at the expected line number and character offset
 func innerValidateSyntaxError(t *testing.T, filename string, variant string, expectedLineNum int, expectedCharNum int) (document *schema.Sbom, actualError error) {
 
-	document, _, actualError = innerValidateError(t, filename, variant, &json.SyntaxError{})
+	document, _, actualError = innerValidateError(t, filename, variant, FORMAT_TEXT, &json.SyntaxError{})
 	syntaxError, ok := actualError.(*json.SyntaxError)
 
 	if !ok {
@@ -136,6 +176,7 @@ func innerTestSchemaErrorAndErrorResults(t *testing.T,
 	document, results, _ := innerValidateError(t,
 		filename,
 		variant,
+		FORMAT_TEXT,
 		&InvalidSBOMError{})
 	getLogger().Debugf("filename: `%s`, results:\n%v", document.GetFilename(), results)
 
@@ -150,6 +191,43 @@ func innerTestSchemaErrorAndErrorResults(t *testing.T,
 	}
 }
 
+func schemaErrorExists(schemaErrors []gojsonschema.ResultError,
+	expectedType string, expectedField string, expectedValue interface{}) bool {
+
+	for i, resultError := range schemaErrors {
+		// Some descriptions include very long enums; in those cases,
+		// truncate to a reasonable length using an intelligent separator
+		getLogger().Tracef(">> %d. Type: [%s], Field: [%s], Value: [%v]",
+			i+1,
+			resultError.Type(),
+			resultError.Field(),
+			resultError.Value())
+
+		actualType := resultError.Type()
+		actualField := resultError.Field()
+		actualValue := resultError.Value()
+
+		if actualType == expectedType {
+			// we have matched on the type (key) field, continue to match other fields
+			if expectedField != "" &&
+				actualField != expectedField {
+				getLogger().Tracef("expected Field: `%s`; actual Field: `%s`", expectedField, actualField)
+				return false
+			}
+
+			if expectedValue != "" &&
+				actualValue != expectedValue {
+				getLogger().Tracef("expected Value: `%s`; actual Value: `%s`", actualValue, expectedValue)
+				return false
+			}
+			return true
+		} else {
+			getLogger().Debugf("Skipping result[%d]: expected Type: `%s`; actual Type: `%s`", i, expectedType, actualType)
+		}
+	}
+	return false
+}
+
 // -----------------------------------------------------------
 // Command tests
 // -----------------------------------------------------------
@@ -160,6 +238,7 @@ func TestValidateInvalidInputFileLoad(t *testing.T) {
 	innerValidateError(t,
 		TEST_INPUT_FILE_NON_EXISTENT,
 		SCHEMA_VARIANT_NONE,
+		FORMAT_TEXT,
 		&fs.PathError{})
 }
 
@@ -193,34 +272,88 @@ func TestValidateSyntaxErrorCdx13Test2(t *testing.T) {
 
 // Force validation against a "custom" schema with compatible format (CDX) and version (1.3)
 func TestValidateForceCustomSchemaCdx13(t *testing.T) {
-	utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_3_CUSTOM
-	innerValidateError(t,
+	innerValidateForcedSchema(t,
 		TEST_CDX_1_3_MATURITY_EXAMPLE_1_BASE,
-		SCHEMA_VARIANT_NONE,
+		TEST_SCHEMA_CDX_1_3_CUSTOM,
+		FORMAT_TEXT,
 		nil)
 }
 
 // Force validation against a "custom" schema with compatible format (CDX) and version (1.4)
 func TestValidateForceCustomSchemaCdx14(t *testing.T) {
-	utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_4_CUSTOM
-	innerValidateError(t,
+	innerValidateForcedSchema(t,
 		TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE,
-		SCHEMA_VARIANT_NONE,
+		TEST_SCHEMA_CDX_1_4_CUSTOM,
+		FORMAT_TEXT,
 		nil)
 }
 
 // Force validation using schema with compatible format, but older version than the SBOM version
 func TestValidateForceCustomSchemaCdxSchemaOlder(t *testing.T) {
-	utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = TEST_SCHEMA_CDX_1_3_CUSTOM
-	innerValidateError(t,
+	innerValidateForcedSchema(t,
 		TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE,
-		SCHEMA_VARIANT_NONE,
+		TEST_SCHEMA_CDX_1_3_CUSTOM,
+		FORMAT_TEXT,
 		nil)
 }
 
-// func TestValidateSyntaxErrorCdx14AdHoc2(t *testing.T) {
-// 	innerValidateError(t,
-// 		"sample_co_May16.json",
-// 		SCHEMA_VARIANT_NONE,
-// 		nil)
-// }
+// TODO: add additional checks on the buffered output
+func TestValidateCdx14ErrorResultsUniqueComponentsText(t *testing.T) {
+	innerValidateError(t,
+		TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE,
+		SCHEMA_VARIANT_NONE,
+		FORMAT_TEXT,
+		&InvalidSBOMError{})
+}
+
+// TODO: add additional checks on the buffered output
+func TestValidateCdx14ErrorResultsFormatIriReferencesText(t *testing.T) {
+	innerValidateError(t,
+		TEST_CDX_1_4_VALIDATE_ERR_FORMAT_IRI_REFERENCE,
+		SCHEMA_VARIANT_NONE,
+		FORMAT_TEXT,
+		&InvalidSBOMError{})
+}
+
+// TODO: add additional checks on the buffered output
+func TestValidateCdx14ErrorResultsUniqueComponentsJson(t *testing.T) {
+	var EXPECTED_ERROR_NUM = 2
+	var EXPECTED_ERROR_CONTEXT = "(root).components"
+	_, schemaErrors, _ := innerValidateError(t,
+		TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE,
+		SCHEMA_VARIANT_NONE,
+		FORMAT_JSON,
+		&InvalidSBOMError{})
+	//output, _ := log.FormatIndentedInterfaceAsJson(schemaErrors, "    ", "    ")
+
+	if len(schemaErrors) != EXPECTED_ERROR_NUM {
+		t.Errorf("invalid schema error count: expected `%v`; actual: `%v`)", EXPECTED_ERROR_NUM, len(schemaErrors))
+		//fmt.Printf("schemaErrors:\n %s", output)
+	}
+
+	if schemaErrors[0].Context().String() != EXPECTED_ERROR_CONTEXT {
+		t.Errorf("invalid schema error context: expected `%v`; actual: `%v`)", EXPECTED_ERROR_CONTEXT, schemaErrors[0].Context().String())
+	}
+}
+
+// TODO: add additional checks on the buffered output
+func TestValidateCdx14ErrorResultsFormatIriReferencesJson(t *testing.T) {
+	var EXPECTED_ERROR_NUM = 1
+	var EXPECTED_ERROR_CONTEXT = "(root).components.2.externalReferences.0.url"
+	_, schemaErrors, _ := innerValidateError(t,
+		TEST_CDX_1_4_VALIDATE_ERR_FORMAT_IRI_REFERENCE,
+		SCHEMA_VARIANT_NONE,
+		FORMAT_JSON,
+		&InvalidSBOMError{})
+
+	//output, _ := log.FormatIndentedInterfaceAsJson(schemaErrors, "    ", "    ")
+
+	if len(schemaErrors) != EXPECTED_ERROR_NUM {
+		t.Errorf("invalid schema error count: expected `%v`; actual: `%v`)", EXPECTED_ERROR_NUM, len(schemaErrors))
+		//fmt.Printf("schemaErrors:\n %s", output)
+	}
+
+	if schemaErrors[0].Context().String() != EXPECTED_ERROR_CONTEXT {
+		t.Errorf("invalid schema error context: expected `%v`; actual: `%v`)", EXPECTED_ERROR_CONTEXT, schemaErrors[0].Context().String())
+	}
+}

@@ -42,6 +42,7 @@ func TestValidateConfigInvalidFormatKey(t *testing.T) {
 	innerValidateError(t,
 		TEST_INVALID_FORMAT_KEY_FOO,
 		SCHEMA_VARIANT_NONE,
+		FORMAT_TEXT,
 		&schema.UnsupportedFormatError{})
 }
 
@@ -49,6 +50,7 @@ func TestValidateConfigInvalidVersion(t *testing.T) {
 	innerValidateError(t,
 		TEST_CDX_SPEC_VERSION_INVALID,
 		SCHEMA_VARIANT_NONE,
+		FORMAT_TEXT,
 		&schema.UnsupportedSchemaError{})
 }
 
@@ -56,6 +58,7 @@ func TestValidateConfigInvalidVariant(t *testing.T) {
 	innerValidateError(t,
 		TEST_CDX_1_4_MIN_REQUIRED,
 		"foo",
+		FORMAT_TEXT,
 		&schema.UnsupportedSchemaError{})
 }
 
@@ -63,6 +66,7 @@ func TestValidateConfigCDXBomFormatInvalid(t *testing.T) {
 	innerValidateError(t,
 		TEST_CDX_BOM_FORMAT_INVALID,
 		SCHEMA_VARIANT_NONE,
+		FORMAT_TEXT,
 		&schema.UnsupportedFormatError{})
 }
 
@@ -70,6 +74,7 @@ func TestValidateConfigCDXBomFormatMissing(t *testing.T) {
 	innerValidateError(t,
 		TEST_CDX_BOM_FORMAT_MISSING,
 		SCHEMA_VARIANT_NONE,
+		FORMAT_TEXT,
 		&schema.UnsupportedFormatError{})
 }
 
@@ -77,6 +82,7 @@ func TestValidateConfigCDXSpecVersionMissing(t *testing.T) {
 	innerValidateError(t,
 		TEST_CDX_SPEC_VERSION_MISSING,
 		SCHEMA_VARIANT_NONE,
+		FORMAT_TEXT,
 		&schema.UnsupportedSchemaError{})
 }
 
@@ -84,6 +90,7 @@ func TestValidateConfigSPDXSpdxIdInvalid(t *testing.T) {
 	innerValidateError(t,
 		TEST_SPDX_SPDX_ID_INVALID,
 		SCHEMA_VARIANT_NONE,
+		FORMAT_TEXT,
 		&schema.UnsupportedFormatError{})
 }
 
@@ -91,5 +98,6 @@ func TestValidateConfigSPDXSpdxVersionInvalid(t *testing.T) {
 	innerValidateError(t,
 		TEST_SPDX_SPDX_VERSION_MISSING,
 		SCHEMA_VARIANT_NONE,
+		FORMAT_TEXT,
 		&schema.UnsupportedSchemaError{})
 }

@@ -55,7 +55,7 @@ const (
 	CMD_USAGE_QUERY              = CMD_QUERY + " --input-file <input_file> [--select * | field1[,fieldN]] [--from [key1[.keyN]] [--where key=regex[,...]]"
 	CMD_USAGE_RESOURCE_LIST      = CMD_RESOURCE + " --input-file <input_file> [--type component|service] [--where key=regex[,...]] [--format txt|csv|md]"
 	CMD_USAGE_SCHEMA_LIST        = CMD_SCHEMA + " [--where key=regex[,...]] [--format txt|csv|md]"
-	CMD_USAGE_VALIDATE           = CMD_VALIDATE + " --input-file <input_file> [--variant <variant_name>] [--error-limit <integer>] [--colorize=true|false] [--force schema_file]"
+	CMD_USAGE_VALIDATE           = CMD_VALIDATE + " --input-file <input_file> [--variant <variant_name>] [--format txt|json] [--force schema_file]"
 	CMD_USAGE_VULNERABILITY_LIST = CMD_VULNERABILITY + " " + SUBCOMMAND_VULNERABILITY_LIST + " --input-file <input_file> [--summary] [--where key=regex[,...]] [--format json|txt|csv|md]"
 )
 
@@ -85,7 +85,7 @@ const (
 	MSG_FLAG_DEBUG          = "enable debug logging"
 	MSG_FLAG_INPUT          = "input filename (e.g., \"path/sbom.json\")"
 	MSG_FLAG_OUTPUT         = "output filename"
-	MSG_FLAG_LOG_QUIET      = "enable quiet logging mode (removes all information messages from console output); overrides other logging commands"
+	MSG_FLAG_LOG_QUIET      = "enable quiet logging mode (removes all informational messages from console output); overrides other logging commands"
 	MSG_FLAG_LOG_INDENT     = "enable log indentation of functional callstack"
 	MSG_FLAG_CONFIG_SCHEMA  = "provide custom application schema configuration file (i.e., overrides default `config.json`)"
 	MSG_FLAG_CONFIG_LICENSE = "provide custom application license policy configuration file (i.e., overrides default `license.json`)"
@@ -155,15 +155,15 @@ func init() {
 	//rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigCustomValidationFile, FLAG_CONFIG_CUSTOM_VALIDATION, "", DEFAULT_CUSTOM_VALIDATION_CONFIG, "TODO")
 
 	// Declare top-level, persistent flags and where to place the post-parse values
-	rootCmd.PersistentFlags().BoolVarP(&utils.GlobalFlags.Trace, FLAG_TRACE, FLAG_TRACE_SHORT, false, MSG_FLAG_TRACE)
-	rootCmd.PersistentFlags().BoolVarP(&utils.GlobalFlags.Debug, FLAG_DEBUG, FLAG_DEBUG_SHORT, false, MSG_FLAG_DEBUG)
-	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.InputFile, FLAG_FILENAME_INPUT, FLAG_FILENAME_INPUT_SHORT, "", MSG_FLAG_INPUT)
-	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.OutputFile, FLAG_FILENAME_OUTPUT, FLAG_FILENAME_OUTPUT_SHORT, "", MSG_FLAG_OUTPUT)
+	rootCmd.PersistentFlags().BoolVarP(&utils.GlobalFlags.PersistentFlags.Trace, FLAG_TRACE, FLAG_TRACE_SHORT, false, MSG_FLAG_TRACE)
+	rootCmd.PersistentFlags().BoolVarP(&utils.GlobalFlags.PersistentFlags.Debug, FLAG_DEBUG, FLAG_DEBUG_SHORT, false, MSG_FLAG_DEBUG)
+	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.PersistentFlags.InputFile, FLAG_FILENAME_INPUT, FLAG_FILENAME_INPUT_SHORT, "", MSG_FLAG_INPUT)
+	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.PersistentFlags.OutputFile, FLAG_FILENAME_OUTPUT, FLAG_FILENAME_OUTPUT_SHORT, "", MSG_FLAG_OUTPUT)
 
 	// NOTE: Although we check for the quiet mode flag in main; we track the flag
 	// using Cobra framework in order to enable more comprehensive help
 	// and take advantage of other features.
-	rootCmd.PersistentFlags().BoolVarP(&utils.GlobalFlags.Quiet, FLAG_QUIET_MODE, FLAG_QUIET_MODE_SHORT, false, MSG_FLAG_LOG_QUIET)
+	rootCmd.PersistentFlags().BoolVarP(&utils.GlobalFlags.PersistentFlags.Quiet, FLAG_QUIET_MODE, FLAG_QUIET_MODE_SHORT, false, MSG_FLAG_LOG_QUIET)
 
 	// Optionally, allow log callstack trace to be indented
 	rootCmd.PersistentFlags().BoolVarP(&utils.GlobalFlags.LogOutputIndentCallstack, FLAG_LOG_OUTPUT_INDENT, "", false, MSG_FLAG_LOG_INDENT)
@@ -260,11 +260,11 @@ func preRunTestForInputFile(cmd *cobra.Command, args []string) error {
 	getLogger().Tracef("args: %v", args)
 
 	// Make sure the input filename is present and exists
-	file := utils.GlobalFlags.InputFile
-	if file == "" {
+	inputFilename := utils.GlobalFlags.PersistentFlags.InputFile
+	if inputFilename == "" {
 		return getLogger().Errorf("Missing required argument(s): %s", FLAG_FILENAME_INPUT)
-	} else if _, err := os.Stat(file); err != nil {
-		return getLogger().Errorf("File not found: `%s`", file)
+	} else if _, err := os.Stat(inputFilename); err != nil {
+		return getLogger().Errorf("File not found: `%s`", inputFilename)
 	}
 	return nil
 }

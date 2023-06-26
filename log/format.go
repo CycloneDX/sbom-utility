@@ -161,7 +161,27 @@ func FormatInterfaceAsColorizedJson(data interface{}) (string, error) {
 	return string(bytes), nil
 }
 
-// TODO: make indent length configurable
+func FormatIndentedInterfaceAsColorizedJson(data interface{}, indent int, newline string) (string, error) {
+	formatter := prettyjson.NewFormatter()
+	formatter.Indent = indent
+	formatter.Newline = newline
+	bytes, err := formatter.Marshal(data)
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), nil
+}
+
+func FormatIndentedInterfaceAsJson(data interface{}, prefix string, indent string) (string, error) {
+	bytes, err := json.MarshalIndent(data, prefix, indent)
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), nil
+}
+
+// NOTE: hardcodes indent length
+// TODO: make configurable as a formatter field/value
 func FormatInterfaceAsJson(data interface{}) (string, error) {
 	bytes, err := json.MarshalIndent(data, "", "    ")
 	if err != nil {

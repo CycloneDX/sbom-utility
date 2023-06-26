@@ -50,7 +50,7 @@ const (
 	MSG_OUTPUT_NO_LICENSES_ONLY_NOASSERTION = "no valid licenses found in BOM document (only licenses marked NOASSERTION)"
 )
 
-//"Type", "ID/Name/Expression", "Component(s)", "BOM ref.", "Document location"
+// "Type", "ID/Name/Expression", "Component(s)", "BOM ref.", "Document location"
 // filter keys
 const (
 	LICENSE_FILTER_KEY_USAGE_POLICY  = "usage-policy"
@@ -106,7 +106,7 @@ func NewCommandList() *cobra.Command {
 	command.Use = CMD_USAGE_LICENSE_LIST
 	command.Short = "List licenses found in the BOM input file"
 	command.Long = "List licenses and associated policies found in the BOM input file"
-	command.Flags().StringVarP(&utils.GlobalFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", "",
+	command.Flags().StringVarP(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", "",
 		FLAG_LICENSE_LIST_OUTPUT_FORMAT_HELP+
 			LICENSE_LIST_SUPPORTED_FORMATS+
 			LICENSE_LIST_SUMMARY_SUPPORTED_FORMATS)
@@ -162,14 +162,15 @@ func listCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	defer getLogger().Exit()
 
 	// Create output writer
-	outputFile, writer, err := createOutputFile(utils.GlobalFlags.OutputFile)
+	outputFilename := utils.GlobalFlags.PersistentFlags.OutputFile
+	outputFile, writer, err := createOutputFile(outputFilename)
 
 	// use function closure to assure consistent error output based upon error type
 	defer func() {
 		// always close the output file
 		if outputFile != nil {
 			err = outputFile.Close()
-			getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.OutputFile)
+			getLogger().Infof("Closed output file: `%s`", outputFilename)
 		}
 	}()
 
@@ -177,7 +178,7 @@ func listCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	whereFilters, err := processWhereFlag(cmd)
 
 	if err == nil {
-		err = ListLicenses(writer, utils.GlobalFlags.OutputFormat, whereFilters, utils.GlobalFlags.LicenseFlags.Summary)
+		err = ListLicenses(writer, utils.GlobalFlags.PersistentFlags.OutputFormat, whereFilters, utils.GlobalFlags.LicenseFlags.Summary)
 	}
 
 	return
