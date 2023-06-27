@@ -80,13 +80,6 @@ func NewCommandValidate() *cobra.Command {
 	command.Flags().StringVarP(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", "",
 		MSG_VALIDATE_FLAG_ERR_FORMAT+VALIDATE_SUPPORTED_ERROR_FORMATS)
 	command.PreRunE = func(cmd *cobra.Command, args []string) error {
-
-		// This command can be called with this persistent flag, but does not make sense...
-		inputFile := utils.GlobalFlags.PersistentFlags.InputFile
-		if inputFile != "" {
-			getLogger().Warningf("Invalid flag for command: `%s` (`%s`). Ignoring...", FLAG_FILENAME_OUTPUT, FLAG_FILENAME_OUTPUT_SHORT)
-		}
-
 		return preRunTestForInputFile(cmd, args)
 	}
 	initCommandValidateFlags(command)
