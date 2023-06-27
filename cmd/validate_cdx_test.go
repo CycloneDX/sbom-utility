@@ -24,7 +24,17 @@ const (
 	// CycloneDX - Test versioned documents meet min. schema requirements
 	TEST_CDX_1_3_MIN_REQUIRED = "test/cyclonedx/cdx-1-3-min-required.json"
 	TEST_CDX_1_4_MIN_REQUIRED = "test/cyclonedx/cdx-1-4-min-required.json"
+	TEST_CDX_1_5_MIN_REQUIRED = "test/cyclonedx/cdx-1-5-min-required.json"
+)
 
+// Mature SBOMs used to test various schemas and queries
+const (
+	TEST_CDX_1_3_MATURITY_EXAMPLE_1_BASE = "test/cyclonedx/cdx-1-3-mature-example-1.json"
+	TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE = "test/cyclonedx/cdx-1-4-mature-example-1.json"
+	TEST_CDX_1_5_MATURITY_EXAMPLE_1_BASE = "test/cyclonedx/cdx-1-5-mature-example-1.json"
+)
+
+const (
 	// (invalid) schema tests
 	TEST_SCHEMA_CDX_1_3_INVALID_LICENSE_CHOICE = "test/cyclonedx/cdx-1-3-invalid-license-choice-oneof.json"
 	TEST_SCHEMA_CDX_1_3_INVALID_LICENSE_ID     = "test/cyclonedx/cdx-1-3-invalid-spdx-license-id.json"
@@ -33,7 +43,7 @@ const (
 )
 
 // -----------------------------------------------------------
-// CycloneDX - Min. req. tests
+// CycloneDX - Min. requirement & Mature tests
 // -----------------------------------------------------------
 
 func TestValidateCdx13MinRequiredBasic(t *testing.T) {
@@ -42,6 +52,22 @@ func TestValidateCdx13MinRequiredBasic(t *testing.T) {
 
 func TestValidateCdx14MinRequiredBasic(t *testing.T) {
 	innerValidateError(t, TEST_CDX_1_4_MIN_REQUIRED, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+}
+
+func TestValidateCdx15MinRequiredBasic(t *testing.T) {
+	innerValidateError(t, TEST_CDX_1_5_MIN_REQUIRED, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+}
+
+func TestValidateCdx13Mature(t *testing.T) {
+	innerValidateError(t, TEST_CDX_1_3_MATURITY_EXAMPLE_1_BASE, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+}
+
+func TestValidateCdx14MMature(t *testing.T) {
+	innerValidateError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+}
+
+func TestValidateCdx15Mature(t *testing.T) {
+	innerValidateError(t, TEST_CDX_1_5_MATURITY_EXAMPLE_1_BASE, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 // -----------------------------------------------------------
