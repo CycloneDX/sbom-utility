@@ -105,6 +105,15 @@
                     "default": false
                 },
                 {
+                    "version": "1.5",
+                    "variant": "",
+                    "name": "CycloneDX v1.5",
+                    "file": "schema/cyclonedx/1.5/bom-1.5.schema.json",
+                    "development": "https://github.com/CycloneDX/specification/blob/master/schema/bom-1.5.schema.json",
+                    "url": "https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.5.schema.json",
+                    "default": false
+                },
+                {
                     "version": "1.3",
                     "variant": "custom",
                     "name": "CycloneDX v1.3 (custom)",
