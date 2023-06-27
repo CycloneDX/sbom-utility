@@ -176,7 +176,7 @@ This example uses the `--format` flag on the `schema` command to output in markd
 ```md
 |name|format|version|variant|file (local)|url (remote)|
 |:--|:--|:--|:--|:--|:--|
-|CycloneDX v1.5 (development)|CycloneDX|1.5|development|schema/cyclonedx/1.5/bom-1.5-dev.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/v1.5-dev/schema/bom-1.5.schema.json|
+|CycloneDX v1.5|CycloneDX|1.5|(latest)|schema/cyclonedx/1.5/bom-1.5.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.5.schema.json|
 |CycloneDX v1.4|CycloneDX|1.4|(latest)|schema/cyclonedx/1.4/bom-1.4.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json|
 |CycloneDX/specification/master/schema/bom-1.3-strict.schema.json|
 |CycloneDX v1.3|CycloneDX|1.3|(latest)|schema/cyclonedx/1.3/bom-1.3.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3.schema.json|
@@ -203,7 +203,7 @@ This example shows the `--quiet` flag being used on the `schema` command to turn
 ```bash
 name                          format     version   variant      file (local)                                     url (remote)
 ----                          ------     -------   -------      ------------                                     ------------
-CycloneDX v1.5 (development)  CycloneDX  1.5       development  schema/cyclonedx/1.5/bom-1.5-dev.schema.json     https://raw.githubusercontent.com/CycloneDX/specification/v1.5-dev/schema/bom-1.5.schema.json
+CycloneDX v1.5                CycloneDX  1.5       (latest)     schema/cyclonedx/1.5/bom-1.5.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.5.schema.json
 CycloneDX v1.4                CycloneDX  1.4       (latest)     schema/cyclonedx/1.4/bom-1.4.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json
 CycloneDX v1.3                CycloneDX  1.3       (latest)     schema/cyclonedx/1.3/bom-1.3.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3.schema.json
 CycloneDX v1.2                CycloneDX  1.2       (latest)     schema/cyclonedx/1.2/bom-1.2.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2.schema.json
@@ -215,7 +215,7 @@ SPDX v2.2.1                   SPDX       SPDX-2.2  2.2.1        schema/spdx/2.2.
 
 #### Output flag
 
-All `list` subcommands support the `--output-file <filename>` flag (or its short-form `-o <filename>`) to send formatted output to a file.
+All `list` subcommands and the `validate` command support the `--output-file <filename>` flag (or its short-form `-o <filename>`) to send formatted output to a file.
 
 ##### Example: `--output-file` flag
 
