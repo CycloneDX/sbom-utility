@@ -44,6 +44,7 @@ const (
 const (
 	TEST_CDX_1_3_MATURITY_EXAMPLE_1_BASE = "test/cyclonedx/cdx-1-3-mature-example-1.json"
 	TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE = "test/cyclonedx/cdx-1-4-mature-example-1.json"
+	TEST_CDX_1_5_MATURITY_EXAMPLE_1_BASE = "test/cyclonedx/cdx-1-5-mature-example-1.json"
 )
 
 const (

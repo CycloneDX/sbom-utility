@@ -24,6 +24,7 @@ const (
 	// CycloneDX - Test versioned documents meet min. schema requirements
 	TEST_CDX_1_3_MIN_REQUIRED = "test/cyclonedx/cdx-1-3-min-required.json"
 	TEST_CDX_1_4_MIN_REQUIRED = "test/cyclonedx/cdx-1-4-min-required.json"
+	TEST_CDX_1_5_MIN_REQUIRED = "test/cyclonedx/cdx-1-5-min-required.json"
 
 	// (invalid) schema tests
 	TEST_SCHEMA_CDX_1_3_INVALID_LICENSE_CHOICE = "test/cyclonedx/cdx-1-3-invalid-license-choice-oneof.json"
@@ -42,6 +43,10 @@ func TestValidateCdx13MinRequiredBasic(t *testing.T) {
 
 func TestValidateCdx14MinRequiredBasic(t *testing.T) {
 	innerValidateError(t, TEST_CDX_1_4_MIN_REQUIRED, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+}
+
+func TestValidateCdx15MinRequiredBasic(t *testing.T) {
+	innerValidateError(t, TEST_CDX_1_5_MIN_REQUIRED, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
 
 // -----------------------------------------------------------
