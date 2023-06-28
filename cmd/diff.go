@@ -20,7 +20,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -144,7 +143,8 @@ func Diff(flags utils.CommandFlags) (err error) {
 
 	getLogger().Infof("Reading file (--input-file): `%s` ...", baseFilename)
 	// #nosec G304 (suppress warning)
-	bBaseData, errReadBase := ioutil.ReadFile(baseFilename)
+	// bBaseData, errReadBase := ioutil.ReadFile(baseFilename)
+	bBaseData, errReadBase := os.ReadFile(baseFilename)
 	if errReadBase != nil {
 		getLogger().Debugf("%v", bBaseData[:255])
 		err = getLogger().Errorf("Failed to ReadFile '%s': %s\n", utils.GlobalFlags.InputFile, err.Error())
@@ -153,7 +153,8 @@ func Diff(flags utils.CommandFlags) (err error) {
 
 	getLogger().Infof("Reading file (--input-revision): `%s` ...", deltaFilename)
 	// #nosec G304 (suppress warning)
-	bRevisedData, errReadDelta := ioutil.ReadFile(deltaFilename)
+	// bRevisedData, errReadDelta := ioutil.ReadFile(deltaFilename)
+	bRevisedData, errReadDelta := os.ReadFile(deltaFilename)
 	if errReadDelta != nil {
 		getLogger().Debugf("%v", bRevisedData[:255])
 		err = getLogger().Errorf("Failed to ReadFile '%s': %s\n", utils.GlobalFlags.InputFile, err.Error())
