@@ -318,11 +318,9 @@ func TestValidateCdx14ErrorResultsUniqueComponentsJson(t *testing.T) {
 		SCHEMA_VARIANT_NONE,
 		FORMAT_JSON,
 		&InvalidSBOMError{})
-	//output, _ := log.FormatIndentedInterfaceAsJson(schemaErrors, "    ", "    ")
 
 	if len(schemaErrors) != EXPECTED_ERROR_NUM {
 		t.Errorf("invalid schema error count: expected `%v`; actual: `%v`)", EXPECTED_ERROR_NUM, len(schemaErrors))
-		//fmt.Printf("schemaErrors:\n %s", output)
 	}
 
 	if schemaErrors[0].Context().String() != EXPECTED_ERROR_CONTEXT {
@@ -340,11 +338,8 @@ func TestValidateCdx14ErrorResultsFormatIriReferencesJson(t *testing.T) {
 		FORMAT_JSON,
 		&InvalidSBOMError{})
 
-	//output, _ := log.FormatIndentedInterfaceAsJson(schemaErrors, "    ", "    ")
-
 	if len(schemaErrors) != EXPECTED_ERROR_NUM {
 		t.Errorf("invalid schema error count: expected `%v`; actual: `%v`)", EXPECTED_ERROR_NUM, len(schemaErrors))
-		//fmt.Printf("schemaErrors:\n %s", output)
 	}
 
 	if schemaErrors[0].Context().String() != EXPECTED_ERROR_CONTEXT {

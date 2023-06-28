@@ -302,14 +302,15 @@ func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, va
 		case FORMAT_JSON:
 			// Note: JSON data files MUST ends in a newline s as this is a POSIX standard
 			formattedErrors = FormatSchemaErrors(schemaErrors, validateFlags, FORMAT_JSON)
-			// getLogger().Debugf("%s", formattedErrors)
 			fmt.Fprintf(output, "%s", formattedErrors)
 		case FORMAT_TEXT:
 			fallthrough
 		default:
-			// Format error results and append to InvalidSBOMError error "details"
+			// Note: we no longer add the formatted errors to the actual error "Detail"
+			// since it is too large and does not allow us to uniformly support flags
+			// that allow the user to control the error result output.
 			formattedErrors = FormatSchemaErrors(schemaErrors, validateFlags, FORMAT_TEXT)
-			errInvalid.Details = formattedErrors
+			fmt.Fprintf(output, "%s", formattedErrors)
 		}
 
 		return INVALID, document, schemaErrors, errInvalid

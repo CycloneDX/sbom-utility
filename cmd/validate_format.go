@@ -40,6 +40,7 @@ const (
 	ERROR_DETAIL_KEY_VALUE_DESCRIPTION = "description"
 	ERROR_DETAIL_ARRAY_ITEM_INDEX_I    = "i"
 	ERROR_DETAIL_ARRAY_ITEM_INDEX_J    = "j"
+	ERROR_DETAIL_CONTEXT_EMPTY         = ""
 )
 
 const (
@@ -65,21 +66,21 @@ const (
 	MSG_WARN_INVALID_FORMAT           = "invalid format. error results not supported for `%s` format; defaulting to `%s` format..."
 )
 
-type ValidationResultFormatter struct {
-	Results []ValidationResultFormat
-}
+// Holds resources (e.g., components, services) declared license(s)
+//var errorResultMap = slicemultimap.New()
 
 // JsonContext is a linked-list of JSON key strings
-type ValidationResultFormat struct {
+type ValidationErrorResult struct {
+	ResultError gojsonschema.ResultError // read only
+	hashMap     *orderedmap.OrderedMap
 	resultMap   *orderedmap.OrderedMap
 	valuesMap   *orderedmap.OrderedMap
-	ResultError gojsonschema.ResultError
-	Context     *gojsonschema.JsonContext `json:"context"` // jsonErrorMap["context"] = resultError.Context()
+	Context     *gojsonschema.JsonContext `json:"context"` // resultError.Context()
 }
 
-func NewValidationErrResult(resultError gojsonschema.ResultError) (validationErrResult *ValidationResultFormat) {
+func NewValidationErrorResult(resultError gojsonschema.ResultError) (validationErrResult *ValidationErrorResult) {
 	// Prepare values that are optionally output as JSON
-	validationErrResult = &ValidationResultFormat{
+	validationErrResult = &ValidationErrorResult{
 		ResultError: resultError,
 	}
 	// Prepare for JSON output by adding all required fields to our ordered map
@@ -88,24 +89,33 @@ func NewValidationErrResult(resultError gojsonschema.ResultError) (validationErr
 	validationErrResult.resultMap.Set(ERROR_DETAIL_KEY_FIELD, resultError.Field())
 	if context := resultError.Context(); context != nil {
 		validationErrResult.resultMap.Set(ERROR_DETAIL_KEY_CONTEXT, resultError.Context().String())
+	} else {
+		validationErrResult.resultMap.Set(ERROR_DETAIL_KEY_CONTEXT, ERROR_DETAIL_CONTEXT_EMPTY)
 	}
 	validationErrResult.resultMap.Set(ERROR_DETAIL_KEY_VALUE_DESCRIPTION, resultError.Description())
 
 	return
 }
 
-func (validationErrResult *ValidationResultFormat) MarshalJSON() (marshalled []byte, err error) {
+func (validationErrResult *ValidationErrorResult) MarshalJSON() (marshalled []byte, err error) {
 	return validationErrResult.resultMap.MarshalJSON()
 }
 
-func (result *ValidationResultFormat) Format(flags utils.ValidateCommandFlags) {
+func (validationErrResult *ValidationErrorResult) HashResultError() {
+	fmt.Printf("re:=%v", validationErrResult.ResultError)
+	validationErrResult.hashMap.Set(ERROR_DETAIL_KEY_DATA_TYPE, validationErrResult.ResultError.Type())
+	validationErrResult.hashMap.Set(ERROR_DETAIL_KEY_CONTEXT, validationErrResult.ResultError.Context().String())
+	validationErrResult.hashMap.Set(ERROR_DETAIL_KEY_VALUE, validationErrResult.ResultError.Value())
+}
+
+func (result *ValidationErrorResult) MapResultError(flags utils.ValidateCommandFlags) {
 	// Conditionally, add optional values as requested (via flags)
 	if flags.ShowErrorValue {
 		result.resultMap.Set(ERROR_DETAIL_KEY_VALUE, result.ResultError.Value())
 	}
 }
 
-func (result *ValidationResultFormat) FormatItemsMustBeUniqueError(flags utils.ValidateCommandFlags) {
+func (result *ValidationErrorResult) MapItemsMustBeUniqueError(flags utils.ValidateCommandFlags) {
 
 	// For this error type, we want to reduce the information show to the end user.
 	// Originally, the entire array with duplicate items was show for EVERY occurrence;
@@ -137,27 +147,12 @@ func (result *ValidationResultFormat) FormatItemsMustBeUniqueError(flags utils.V
 	}
 }
 
-func FormatSchemaErrors(schemaErrors []gojsonschema.ResultError, flags utils.ValidateCommandFlags, format string) (formattedSchemaErrors string) {
-
-	getLogger().Infof(MSG_INFO_FORMATTING_ERROR_RESULTS, format)
-	switch format {
-	case FORMAT_JSON:
-		formattedSchemaErrors = FormatSchemaErrorsJson(schemaErrors, utils.GlobalFlags.ValidateFlags)
-	case FORMAT_TEXT:
-		formattedSchemaErrors = FormatSchemaErrorsText(schemaErrors, utils.GlobalFlags.ValidateFlags)
-	default:
-		getLogger().Warningf(MSG_WARN_INVALID_FORMAT, format, FORMAT_TEXT)
-		formattedSchemaErrors = FormatSchemaErrorsText(schemaErrors, utils.GlobalFlags.ValidateFlags)
-	}
-	return
-}
-
-// Custom formatting based upon possible JSON schema error types
-// the custom formatting handlers SHOULD adjust the fields/keys and their values within the `resultMap`
+// Custom mapping of schema error results (for formatting) based upon possible JSON schema error types
+// the custom mapping handlers SHOULD adjust the fields/keys and their values within the `resultMap`
 // for the respective errorResult being operated on.
-func formatSchemaErrorTypes(resultError gojsonschema.ResultError, flags utils.ValidateCommandFlags) (formattedResult string) {
+func mapSchemaErrorResult(resultError gojsonschema.ResultError, flags utils.ValidateCommandFlags) (validationErrorResult *ValidationErrorResult) {
 
-	validationErrorResult := NewValidationErrResult(resultError)
+	validationErrorResult = NewValidationErrorResult(resultError)
 
 	// The cases below represent the complete set of typed errors possible.
 	// Most are commented out as placeholder for future custom format methods.
@@ -181,7 +176,7 @@ func formatSchemaErrorTypes(resultError gojsonschema.ResultError, flags utils.Va
 	// case *gojsonschema.InvalidPropertyPatternError:
 	// case *gojsonschema.InvalidTypeError:
 	case *gojsonschema.ItemsMustBeUniqueError:
-		validationErrorResult.FormatItemsMustBeUniqueError(flags)
+		validationErrorResult.MapItemsMustBeUniqueError(flags)
 	// case *gojsonschema.MissingDependencyError:
 	// case *gojsonschema.MultipleOfError:
 	// case *gojsonschema.NumberAllOfError:
@@ -197,13 +192,13 @@ func formatSchemaErrorTypes(resultError gojsonschema.ResultError, flags utils.Va
 	// case *gojsonschema.StringLengthLTEError:
 	default:
 		getLogger().Debugf("default formatting: ResultError Type: [%v]", errorType)
-		validationErrorResult.Format(flags)
+		validationErrorResult.MapResultError(flags)
 	}
 
-	return validationErrorResult.formatResultMap(flags)
+	return
 }
 
-func (result *ValidationResultFormat) formatResultMap(flags utils.ValidateCommandFlags) string {
+func (result *ValidationErrorResult) formatResultMap(flags utils.ValidateCommandFlags) string {
 	// format information on the failing "value" (details) with proper JSON indenting
 	var formattedResult string
 	var errFormatting error
@@ -225,6 +220,21 @@ func (result *ValidationResultFormat) formatResultMap(flags utils.ValidateComman
 	}
 
 	return formattedResult
+}
+
+func FormatSchemaErrors(schemaErrors []gojsonschema.ResultError, flags utils.ValidateCommandFlags, format string) (formattedSchemaErrors string) {
+
+	getLogger().Infof(MSG_INFO_FORMATTING_ERROR_RESULTS, format)
+	switch format {
+	case FORMAT_JSON:
+		formattedSchemaErrors = FormatSchemaErrorsJson(schemaErrors, utils.GlobalFlags.ValidateFlags)
+	case FORMAT_TEXT:
+		formattedSchemaErrors = FormatSchemaErrorsText(schemaErrors, utils.GlobalFlags.ValidateFlags)
+	default:
+		getLogger().Warningf(MSG_WARN_INVALID_FORMAT, format, FORMAT_TEXT)
+		formattedSchemaErrors = FormatSchemaErrorsText(schemaErrors, utils.GlobalFlags.ValidateFlags)
+	}
+	return
 }
 
 func FormatSchemaErrorsJson(errs []gojsonschema.ResultError, flags utils.ValidateCommandFlags) string {
@@ -251,11 +261,12 @@ func FormatSchemaErrorsJson(errs []gojsonschema.ResultError, flags utils.Validat
 			}
 
 			// add to the result errors
-			schemaErrorText := formatSchemaErrorTypes(resultError, flags)
+			validationErrorResult := mapSchemaErrorResult(resultError, flags)
+			formattedResult := validationErrorResult.formatResultMap(flags)
 			// NOTE: we must add the prefix (indent) ourselves
 			// see issue: https://github.com/golang/go/issues/49261
 			sb.WriteString(ERROR_DETAIL_JSON_DEFAULT_PREFIX)
-			sb.WriteString(schemaErrorText)
+			sb.WriteString(formattedResult)
 
 			if i < (lenErrs-1) && i < (errLimit-1) {
 				sb.WriteString(JSON_ARRAY_ITEM_SEP)
@@ -295,10 +306,12 @@ func FormatSchemaErrorsText(errs []gojsonschema.ResultError, flags utils.Validat
 			errorIndex = strconv.Itoa(i + 1)
 
 			// emit formatted error result
-			formattedResult := formatSchemaErrorTypes(resultError, utils.GlobalFlags.ValidateFlags)
+			validationErrorResult := mapSchemaErrorResult(resultError, flags)
+			formattedResult := validationErrorResult.formatResultMap(flags)
+
 			// NOTE: we must add the prefix (indent) ourselves
 			// see issue: https://github.com/golang/go/issues/49261
-			lineOutput = fmt.Sprintf("\n%v. %s", errorIndex, formattedResult)
+			lineOutput = fmt.Sprintf("%v. %s\n", errorIndex, formattedResult)
 			sb.WriteString(lineOutput)
 		}
 	}
