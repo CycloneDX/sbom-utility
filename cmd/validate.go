@@ -151,6 +151,7 @@ func validateCmdImpl(cmd *cobra.Command, args []string) error {
 }
 
 // Normalize ErrorTypes from the Validate() function
+// Note: this function name should not be changed
 func validationError(document *schema.Sbom, valid bool, err error) {
 
 	// Consistently display errors before exiting
@@ -185,6 +186,7 @@ func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	// use function closure to assure consistent error output based upon error type
 	defer func() {
 		if err != nil {
+			// normalize the error output to console
 			validationError(document, valid, err)
 		}
 	}()
