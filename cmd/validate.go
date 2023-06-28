@@ -282,7 +282,7 @@ func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	getLogger().Infof("SBOM valid against JSON schema: `%t`", result.Valid())
 	valid = result.Valid()
 
-	// Catch general errors from the validation module itself and pass them on'
+	// Catch general errors from the validation package/library itself and display them
 	if errValidate != nil {
 		// we force result to INVALID as any errors from the library means
 		// we could NOT actually confirm the input documents validity
@@ -308,9 +308,9 @@ func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, va
 		case FORMAT_TEXT:
 			fallthrough
 		default:
-			// Note: we no longer add the formatted errors to the actual error "Detail"
-			// since it is too large and does not allow us to uniformly support flags
-			// that allow the user to control the error result output.
+			// Note: we no longer add the formatted errors to the actual error "detail" field;
+			// since BOMs can have large numbers of errors.  The new method is to allow
+			// the user to control the error result output (e.g., file, detail, etc.) via flags
 			formattedErrors = FormatSchemaErrors(schemaErrors, validateFlags, FORMAT_TEXT)
 			fmt.Fprintf(output, "%s", formattedErrors)
 		}
