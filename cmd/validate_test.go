@@ -59,9 +59,10 @@ func innerValidateError(t *testing.T, filename string, variant string, format st
 
 	// Invoke the actual validate function
 	var isValid bool
+	var outputBuffer bytes.Buffer
 
 	// TODO: support additional tests on output buffer (e.g., format==valid JSON)
-	isValid, document, schemaErrors, _, actualError = innerValidateErrorBuffered(
+	isValid, document, schemaErrors, outputBuffer, actualError = innerValidateErrorBuffered(
 		t,
 		utils.GlobalFlags.PersistentFlags,
 		utils.GlobalFlags.ValidateFlags,
@@ -94,6 +95,15 @@ func innerValidateError(t *testing.T, filename string, variant string, format st
 		t.Errorf("Input file invalid (%t); expected valid (no error)", isValid)
 	}
 
+	// Assure it is valid JSON output
+	if format == FORMAT_JSON {
+		if !utils.IsValidJsonRaw(outputBuffer.Bytes()) {
+			err := getLogger().Errorf("output did not contain valid format data; expected: `%s`", FORMAT_JSON)
+			t.Error(err.Error())
+			t.Logf("%s", outputBuffer.String())
+			return
+		}
+	}
 	return
 }
 
@@ -345,4 +355,5 @@ func TestValidateCdx14ErrorResultsFormatIriReferencesJson(t *testing.T) {
 	if schemaErrors[0].Context().String() != EXPECTED_ERROR_CONTEXT {
 		t.Errorf("invalid schema error context: expected `%v`; actual: `%v`)", EXPECTED_ERROR_CONTEXT, schemaErrors[0].Context().String())
 	}
+
 }
