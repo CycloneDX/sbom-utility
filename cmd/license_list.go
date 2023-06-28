@@ -281,7 +281,7 @@ func DisplayLicenseListJson(output io.Writer) {
 	}
 	json, _ := log.FormatInterfaceAsJson(lc)
 
-	// Note: JSON data files MUST ends in a newline s as this is a POSIX standard
+	// Note: JSON data files MUST ends in a newline as this is a POSIX standard
 	fmt.Fprintf(output, "%s\n", json)
 }
 
@@ -330,7 +330,7 @@ func DisplayLicenseListCSV(output io.Writer) (err error) {
 					lc.License.Text.Content)
 
 				if errWrite := w.Write(currentRow); errWrite != nil {
-					return getLogger().Errorf("error writing to output (%v): %s", currentRow, err)
+					return getLogger().Errorf("error writing to output (%v): %s", currentRow, errWrite)
 				}
 			}
 		}

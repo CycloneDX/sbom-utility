@@ -319,7 +319,23 @@ func TestValidateCdx14ErrorResultsFormatIriReferencesText(t *testing.T) {
 		&InvalidSBOMError{})
 }
 
+func TestValidateCdx14ErrorResultsUniqueComponentsCsv(t *testing.T) {
+	innerValidateError(t,
+		TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE,
+		SCHEMA_VARIANT_NONE,
+		FORMAT_CSV,
+		&InvalidSBOMError{})
+}
+
 // TODO: add additional checks on the buffered output
+func TestValidateCdx14ErrorResultsFormatIriReferencesCsv(t *testing.T) {
+	innerValidateError(t,
+		TEST_CDX_1_4_VALIDATE_ERR_FORMAT_IRI_REFERENCE,
+		SCHEMA_VARIANT_NONE,
+		FORMAT_CSV,
+		&InvalidSBOMError{})
+}
+
 func TestValidateCdx14ErrorResultsUniqueComponentsJson(t *testing.T) {
 	var EXPECTED_ERROR_NUM = 2
 	var EXPECTED_ERROR_CONTEXT = "(root).components"

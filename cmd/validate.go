@@ -57,7 +57,7 @@ const (
 )
 
 var VALIDATE_SUPPORTED_ERROR_FORMATS = MSG_VALIDATE_FLAG_ERR_FORMAT +
-	strings.Join([]string{FORMAT_TEXT, FORMAT_JSON}, ", ") + " (default: txt)"
+	strings.Join([]string{FORMAT_TEXT, FORMAT_JSON, FORMAT_CSV}, ", ") + " (default: txt)"
 
 // limits
 const (
@@ -299,20 +299,21 @@ func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, va
 			schemaErrors)
 
 		// TODO: de-duplicate errors (e.g., array item not "unique"...)
-		var formattedErrors string
-		switch persistentFlags.OutputFormat {
+		format := persistentFlags.OutputFormat
+		switch format {
 		case FORMAT_JSON:
-			// Note: JSON data files MUST ends in a newline s as this is a POSIX standard
-			formattedErrors = FormatSchemaErrors(schemaErrors, validateFlags, FORMAT_JSON)
-			fmt.Fprintf(output, "%s", formattedErrors)
-		case FORMAT_TEXT:
 			fallthrough
-		default:
+		case FORMAT_CSV:
+			fallthrough
+		case FORMAT_TEXT:
 			// Note: we no longer add the formatted errors to the actual error "detail" field;
 			// since BOMs can have large numbers of errors.  The new method is to allow
 			// the user to control the error result output (e.g., file, detail, etc.) via flags
-			formattedErrors = FormatSchemaErrors(schemaErrors, validateFlags, FORMAT_TEXT)
-			fmt.Fprintf(output, "%s", formattedErrors)
+			FormatSchemaErrors(output, schemaErrors, validateFlags, format)
+		default:
+			// Notify caller that we are defaulting to "txt" format
+			getLogger().Warningf(MSG_WARN_INVALID_FORMAT, format, FORMAT_TEXT)
+			FormatSchemaErrors(output, schemaErrors, validateFlags, FORMAT_TEXT)
 		}
 
 		return INVALID, document, schemaErrors, errInvalid

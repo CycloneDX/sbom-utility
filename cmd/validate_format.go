@@ -19,7 +19,9 @@ package cmd
 
 // "github.com/iancoleman/orderedmap"
 import (
+	"encoding/csv"
 	"fmt"
+	"io"
 	"strconv"
 	"strings"
 
@@ -30,10 +32,10 @@ import (
 )
 
 const (
+	ERROR_DETAIL_KEY_DATA_TYPE         = "type"
 	ERROR_DETAIL_KEY_FIELD             = "field"
 	ERROR_DETAIL_KEY_CONTEXT           = "context"
 	ERROR_DETAIL_KEY_VALUE             = "value"
-	ERROR_DETAIL_KEY_DATA_TYPE         = "type"
 	ERROR_DETAIL_KEY_VALUE_TYPE_ARRAY  = "array"
 	ERROR_DETAIL_KEY_VALUE_INDEX       = "index"
 	ERROR_DETAIL_KEY_VALUE_ITEM        = "item"
@@ -65,6 +67,13 @@ const (
 	MSG_ERROR_FORMATTING_ERROR        = "formatting error: %s"
 	MSG_WARN_INVALID_FORMAT           = "invalid format. error results not supported for `%s` format; defaulting to `%s` format..."
 )
+
+var VALIDATION_ERROR_TITLES = []string{
+	ERROR_DETAIL_KEY_DATA_TYPE,
+	ERROR_DETAIL_KEY_FIELD,
+	ERROR_DETAIL_KEY_CONTEXT,
+	ERROR_DETAIL_KEY_VALUE_DESCRIPTION,
+}
 
 // Holds resources (e.g., components, services) declared license(s)
 //var errorResultMap = slicemultimap.New()
@@ -147,6 +156,28 @@ func (result *ValidationErrorResult) MapItemsMustBeUniqueError(flags utils.Valid
 	}
 }
 
+func FormatSchemaErrors(output io.Writer, schemaErrors []gojsonschema.ResultError, flags utils.ValidateCommandFlags, format string) (formattedSchemaErrors string) {
+
+	if lenErrs := len(schemaErrors); lenErrs > 0 {
+		getLogger().Infof(MSG_INFO_SCHEMA_ERRORS_DETECTED, lenErrs)
+		getLogger().Infof(MSG_INFO_FORMATTING_ERROR_RESULTS, format)
+		switch format {
+		case FORMAT_JSON:
+			DisplaySchemaErrorsJson(output, schemaErrors, utils.GlobalFlags.ValidateFlags)
+		case FORMAT_TEXT:
+			DisplaySchemaErrorsText(output, schemaErrors, utils.GlobalFlags.ValidateFlags)
+		case FORMAT_CSV:
+			DisplaySchemaErrorsCsv(output, schemaErrors, utils.GlobalFlags.ValidateFlags)
+		default:
+			getLogger().Warningf(MSG_WARN_INVALID_FORMAT, format, FORMAT_TEXT)
+			DisplaySchemaErrorsText(output, schemaErrors, utils.GlobalFlags.ValidateFlags)
+			fmt.Fprintf(output, "%s", formattedSchemaErrors)
+		}
+	}
+
+	return
+}
+
 // Custom mapping of schema error results (for formatting) based upon possible JSON schema error types
 // the custom mapping handlers SHOULD adjust the fields/keys and their values within the `resultMap`
 // for the respective errorResult being operated on.
@@ -222,30 +253,16 @@ func (result *ValidationErrorResult) formatResultMap(flags utils.ValidateCommand
 	return formattedResult
 }
 
-func FormatSchemaErrors(schemaErrors []gojsonschema.ResultError, flags utils.ValidateCommandFlags, format string) (formattedSchemaErrors string) {
+func DisplaySchemaErrorsJson(output io.Writer, errs []gojsonschema.ResultError, flags utils.ValidateCommandFlags) {
+	getLogger().Enter()
+	defer getLogger().Exit()
 
-	getLogger().Infof(MSG_INFO_FORMATTING_ERROR_RESULTS, format)
-	switch format {
-	case FORMAT_JSON:
-		formattedSchemaErrors = FormatSchemaErrorsJson(schemaErrors, utils.GlobalFlags.ValidateFlags)
-	case FORMAT_TEXT:
-		formattedSchemaErrors = FormatSchemaErrorsText(schemaErrors, utils.GlobalFlags.ValidateFlags)
-	default:
-		getLogger().Warningf(MSG_WARN_INVALID_FORMAT, format, FORMAT_TEXT)
-		formattedSchemaErrors = FormatSchemaErrorsText(schemaErrors, utils.GlobalFlags.ValidateFlags)
-	}
-	return
-}
-
-func FormatSchemaErrorsJson(errs []gojsonschema.ResultError, flags utils.ValidateCommandFlags) string {
 	var sb strings.Builder
 
-	lenErrs := len(errs)
-	if lenErrs > 0 {
-		getLogger().Infof(MSG_INFO_SCHEMA_ERRORS_DETECTED, lenErrs)
-		errLimit := flags.MaxNumErrors
+	if lenErrs := len(errs); lenErrs > 0 {
 
 		// If we have more errors than the (default or user set) limit; notify user
+		errLimit := flags.MaxNumErrors
 		if lenErrs > errLimit {
 			// notify users more errors exist
 			getLogger().Infof(MSG_INFO_TOO_MANY_ERRORS, errLimit, len(errs))
@@ -277,19 +294,22 @@ func FormatSchemaErrorsJson(errs []gojsonschema.ResultError, flags utils.Validat
 		sb.WriteString(JSON_ARRAY_END)
 	}
 
-	return sb.String()
+	// Note: JSON data files MUST ends in a newline as this is a POSIX standard
+	fmt.Fprintf(output, "%s\n", sb.String())
 }
 
-func FormatSchemaErrorsText(errs []gojsonschema.ResultError, flags utils.ValidateCommandFlags) string {
+func DisplaySchemaErrorsText(output io.Writer, errs []gojsonschema.ResultError, flags utils.ValidateCommandFlags) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
 	var sb strings.Builder
 	var lineOutput string
-	lenErrs := len(errs)
-	if lenErrs > 0 {
-		getLogger().Infof(MSG_INFO_SCHEMA_ERRORS_DETECTED, lenErrs)
-		errLimit := utils.GlobalFlags.ValidateFlags.MaxNumErrors
+
+	if lenErrs := len(errs); lenErrs > 0 {
 		var errorIndex string
 
 		// If we have more errors than the (default or user set) limit; notify user
+		errLimit := flags.MaxNumErrors
 		if lenErrs > errLimit {
 			// notify users more errors exist
 			getLogger().Infof(MSG_INFO_TOO_MANY_ERRORS, errLimit, len(errs))
@@ -315,5 +335,64 @@ func FormatSchemaErrorsText(errs []gojsonschema.ResultError, flags utils.Validat
 			sb.WriteString(lineOutput)
 		}
 	}
-	return sb.String()
+
+	fmt.Fprintf(output, "%s", sb.String())
+}
+
+func DisplaySchemaErrorsCsv(output io.Writer, errs []gojsonschema.ResultError, flags utils.ValidateCommandFlags) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	var currentRow []string
+
+	w := csv.NewWriter(output)
+	defer w.Flush()
+
+	// Emit title row
+	if err := w.Write(VALIDATION_ERROR_TITLES); err != nil {
+		getLogger().Errorf("error writing to output (%v): %s", LICENSE_LIST_TITLES_LICENSE_CHOICE, err)
+		return
+	}
+
+	if lenErrs := len(errs); lenErrs > 0 {
+
+		// If we have more errors than the (default or user set) limit; notify user
+		errLimit := flags.MaxNumErrors
+		if lenErrs > errLimit {
+			// notify users more errors exist
+			getLogger().Infof(MSG_INFO_TOO_MANY_ERRORS, errLimit, len(errs))
+		}
+
+		for i, resultError := range errs {
+			currentRow = nil
+
+			// short-circuit if too many errors (i.e., using the error limit flag value)
+			if i == errLimit {
+				break
+			}
+
+			// emit formatted error result
+			validationErrorResult := mapSchemaErrorResult(resultError, flags)
+			validationErrorResult.formatResultMap(flags)
+
+			// Each row will contain every field of a CDX LicenseChoice object
+			datatype, _ := validationErrorResult.resultMap.Get(ERROR_DETAIL_KEY_DATA_TYPE)
+			field, _ := validationErrorResult.resultMap.Get(ERROR_DETAIL_KEY_FIELD)
+			context, _ := validationErrorResult.resultMap.Get(ERROR_DETAIL_KEY_CONTEXT)
+			description, _ := validationErrorResult.resultMap.Get(ERROR_DETAIL_KEY_VALUE_DESCRIPTION)
+
+			currentRow = append(currentRow,
+				fmt.Sprintf("%v", datatype),
+				fmt.Sprintf("%v", field),
+				fmt.Sprintf("%v", context),
+				fmt.Sprintf("%v", description),
+			)
+
+			if errWrite := w.Write(currentRow); errWrite != nil {
+				getLogger().Errorf("error writing to output (%v): %s", currentRow, errWrite)
+				return
+			}
+
+		}
+	}
 }
