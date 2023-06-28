@@ -143,7 +143,6 @@ func Diff(flags utils.CommandFlags) (err error) {
 
 	getLogger().Infof("Reading file (--input-file): `%s` ...", baseFilename)
 	// #nosec G304 (suppress warning)
-	// bBaseData, errReadBase := ioutil.ReadFile(baseFilename)
 	bBaseData, errReadBase := os.ReadFile(baseFilename)
 	if errReadBase != nil {
 		getLogger().Debugf("%v", bBaseData[:255])

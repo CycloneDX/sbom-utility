@@ -197,7 +197,6 @@ func LoadSchemaConfig(filename string) (err error) {
 	// Note we actively supply informative error messages to help user
 	// understand exactly how the load failed
 	getLogger().Tracef("Reading schema config file: `%s`...", cfgFilename)
-	// buffer, err := ioutil.ReadFile(cfgFilename)
 	buffer, err := os.ReadFile(cfgFilename)
 	if err != nil {
 		return fmt.Errorf("unable to `ReadFile`: `%s`", cfgFilename)
@@ -357,7 +356,6 @@ func (sbom *Sbom) UnmarshalSBOMAsJsonMap() error {
 
 	// read our opened jsonFile as a byte array.
 	var errReadAll error
-	// sbom.rawBytes, errReadAll = ioutil.ReadAll(jsonFile)
 	sbom.rawBytes, errReadAll = io.ReadAll(jsonFile)
 	if errReadAll != nil {
 		getLogger().Error(errReadAll)
