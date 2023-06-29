@@ -350,7 +350,7 @@ func DisplaySchemaErrorsCsv(output io.Writer, errs []gojsonschema.ResultError, f
 
 	// Emit title row
 	if err := w.Write(VALIDATION_ERROR_TITLES); err != nil {
-		getLogger().Errorf("error writing to output (%v): %s", LICENSE_LIST_TITLES_LICENSE_CHOICE, err)
+		_ = getLogger().Errorf("error writing to output (%v): %s", LICENSE_LIST_TITLES_LICENSE_CHOICE, err)
 		return
 	}
 
