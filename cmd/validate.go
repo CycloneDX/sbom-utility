@@ -57,7 +57,7 @@ const (
 )
 
 var VALIDATE_SUPPORTED_ERROR_FORMATS = MSG_VALIDATE_FLAG_ERR_FORMAT +
-	strings.Join([]string{FORMAT_TEXT, FORMAT_JSON}, ", ") + " (default: txt)"
+	strings.Join([]string{FORMAT_TEXT, FORMAT_JSON, FORMAT_CSV}, ", ") + " (default: txt)"
 
 // limits
 const (
@@ -150,8 +150,9 @@ func validateCmdImpl(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// Normalize error/normalizeValidationErrorTypes from the Validate() function
-func normalizeValidationErrorTypes(document *schema.Sbom, valid bool, err error) {
+// Normalize ErrorTypes from the Validate() function
+// Note: this function name should not be changed
+func validationError(document *schema.Sbom, valid bool, err error) {
 
 	// Consistently display errors before exiting
 	if err != nil {
@@ -185,7 +186,8 @@ func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	// use function closure to assure consistent error output based upon error type
 	defer func() {
 		if err != nil {
-			normalizeValidationErrorTypes(document, valid, err)
+			// normalize the error output to console
+			validationError(document, valid, err)
 		}
 	}()
 
@@ -280,7 +282,7 @@ func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	getLogger().Infof("SBOM valid against JSON schema: `%t`", result.Valid())
 	valid = result.Valid()
 
-	// Catch general errors from the validation module itself and pass them on'
+	// Catch general errors from the validation package/library itself and display them
 	if errValidate != nil {
 		// we force result to INVALID as any errors from the library means
 		// we could NOT actually confirm the input documents validity
@@ -297,19 +299,21 @@ func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, va
 			schemaErrors)
 
 		// TODO: de-duplicate errors (e.g., array item not "unique"...)
-		var formattedErrors string
-		switch persistentFlags.OutputFormat {
+		format := persistentFlags.OutputFormat
+		switch format {
 		case FORMAT_JSON:
-			// Note: JSON data files MUST ends in a newline s as this is a POSIX standard
-			formattedErrors = FormatSchemaErrors(schemaErrors, validateFlags, FORMAT_JSON)
-			// getLogger().Debugf("%s", formattedErrors)
-			fmt.Fprintf(output, "%s", formattedErrors)
-		case FORMAT_TEXT:
 			fallthrough
+		case FORMAT_CSV:
+			fallthrough
+		case FORMAT_TEXT:
+			// Note: we no longer add the formatted errors to the actual error "detail" field;
+			// since BOMs can have large numbers of errors.  The new method is to allow
+			// the user to control the error result output (e.g., file, detail, etc.) via flags
+			FormatSchemaErrors(output, schemaErrors, validateFlags, format)
 		default:
-			// Format error results and append to InvalidSBOMError error "details"
-			formattedErrors = FormatSchemaErrors(schemaErrors, validateFlags, FORMAT_TEXT)
-			errInvalid.Details = formattedErrors
+			// Notify caller that we are defaulting to "txt" format
+			getLogger().Warningf(MSG_WARN_INVALID_FORMAT, format, FORMAT_TEXT)
+			FormatSchemaErrors(output, schemaErrors, validateFlags, FORMAT_TEXT)
 		}
 
 		return INVALID, document, schemaErrors, errInvalid

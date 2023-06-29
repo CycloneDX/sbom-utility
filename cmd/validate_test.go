@@ -59,9 +59,10 @@ func innerValidateError(t *testing.T, filename string, variant string, format st
 
 	// Invoke the actual validate function
 	var isValid bool
+	var outputBuffer bytes.Buffer
 
 	// TODO: support additional tests on output buffer (e.g., format==valid JSON)
-	isValid, document, schemaErrors, _, actualError = innerValidateErrorBuffered(
+	isValid, document, schemaErrors, outputBuffer, actualError = innerValidateErrorBuffered(
 		t,
 		utils.GlobalFlags.PersistentFlags,
 		utils.GlobalFlags.ValidateFlags,
@@ -94,6 +95,15 @@ func innerValidateError(t *testing.T, filename string, variant string, format st
 		t.Errorf("Input file invalid (%t); expected valid (no error)", isValid)
 	}
 
+	// Assure it is valid JSON output
+	if format == FORMAT_JSON {
+		if !utils.IsValidJsonRaw(outputBuffer.Bytes()) {
+			err := getLogger().Errorf("output did not contain valid format data; expected: `%s`", FORMAT_JSON)
+			t.Error(err.Error())
+			t.Logf("%s", outputBuffer.String())
+			return
+		}
+	}
 	return
 }
 
@@ -309,7 +319,23 @@ func TestValidateCdx14ErrorResultsFormatIriReferencesText(t *testing.T) {
 		&InvalidSBOMError{})
 }
 
+func TestValidateCdx14ErrorResultsUniqueComponentsCsv(t *testing.T) {
+	innerValidateError(t,
+		TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE,
+		SCHEMA_VARIANT_NONE,
+		FORMAT_CSV,
+		&InvalidSBOMError{})
+}
+
 // TODO: add additional checks on the buffered output
+func TestValidateCdx14ErrorResultsFormatIriReferencesCsv(t *testing.T) {
+	innerValidateError(t,
+		TEST_CDX_1_4_VALIDATE_ERR_FORMAT_IRI_REFERENCE,
+		SCHEMA_VARIANT_NONE,
+		FORMAT_CSV,
+		&InvalidSBOMError{})
+}
+
 func TestValidateCdx14ErrorResultsUniqueComponentsJson(t *testing.T) {
 	var EXPECTED_ERROR_NUM = 2
 	var EXPECTED_ERROR_CONTEXT = "(root).components"
@@ -318,11 +344,9 @@ func TestValidateCdx14ErrorResultsUniqueComponentsJson(t *testing.T) {
 		SCHEMA_VARIANT_NONE,
 		FORMAT_JSON,
 		&InvalidSBOMError{})
-	//output, _ := log.FormatIndentedInterfaceAsJson(schemaErrors, "    ", "    ")
 
 	if len(schemaErrors) != EXPECTED_ERROR_NUM {
 		t.Errorf("invalid schema error count: expected `%v`; actual: `%v`)", EXPECTED_ERROR_NUM, len(schemaErrors))
-		//fmt.Printf("schemaErrors:\n %s", output)
 	}
 
 	if schemaErrors[0].Context().String() != EXPECTED_ERROR_CONTEXT {
@@ -340,14 +364,12 @@ func TestValidateCdx14ErrorResultsFormatIriReferencesJson(t *testing.T) {
 		FORMAT_JSON,
 		&InvalidSBOMError{})
 
-	//output, _ := log.FormatIndentedInterfaceAsJson(schemaErrors, "    ", "    ")
-
 	if len(schemaErrors) != EXPECTED_ERROR_NUM {
 		t.Errorf("invalid schema error count: expected `%v`; actual: `%v`)", EXPECTED_ERROR_NUM, len(schemaErrors))
-		//fmt.Printf("schemaErrors:\n %s", output)
 	}
 
 	if schemaErrors[0].Context().String() != EXPECTED_ERROR_CONTEXT {
 		t.Errorf("invalid schema error context: expected `%v`; actual: `%v`)", EXPECTED_ERROR_CONTEXT, schemaErrors[0].Context().String())
 	}
+
 }
