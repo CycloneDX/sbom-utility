@@ -389,7 +389,7 @@ func DisplaySchemaErrorsCsv(output io.Writer, errs []gojsonschema.ResultError, f
 			)
 
 			if errWrite := w.Write(currentRow); errWrite != nil {
-				getLogger().Errorf("error writing to output (%v): %s", currentRow, errWrite)
+				_ = getLogger().Errorf("error writing to output (%v): %s", currentRow, errWrite)
 				return
 			}
 
