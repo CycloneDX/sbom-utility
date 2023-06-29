@@ -20,7 +20,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -173,7 +172,7 @@ func (config *LicenseComplianceConfig) innerLoadLicensePolicies(filename string)
 	getLogger().Infof("Loading license policy config file: `%s`...", config.policyConfigFile)
 
 	// attempt to read in contents of the policy config.
-	buffer, errRead := ioutil.ReadFile(config.policyConfigFile)
+	buffer, errRead := os.ReadFile(config.policyConfigFile)
 	if errRead != nil {
 		err = fmt.Errorf("unable to `ReadFile`: `%s`", config.policyConfigFile)
 		return

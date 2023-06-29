@@ -20,7 +20,7 @@ package schema
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -197,7 +197,8 @@ func LoadSchemaConfig(filename string) (err error) {
 	// Note we actively supply informative error messages to help user
 	// understand exactly how the load failed
 	getLogger().Tracef("Reading schema config file: `%s`...", cfgFilename)
-	buffer, err := ioutil.ReadFile(cfgFilename)
+	// #nosec G304 (suppress warning)
+	buffer, err := os.ReadFile(cfgFilename)
 	if err != nil {
 		return fmt.Errorf("unable to `ReadFile`: `%s`", cfgFilename)
 	}
@@ -356,10 +357,14 @@ func (sbom *Sbom) UnmarshalSBOMAsJsonMap() error {
 
 	// read our opened jsonFile as a byte array.
 	var errReadAll error
-	sbom.rawBytes, errReadAll = ioutil.ReadAll(jsonFile)
-	if errReadAll != nil {
-		getLogger().Error(errReadAll)
+
+	{ // #nosec
+		sbom.rawBytes, errReadAll = io.ReadAll(jsonFile)
+		if errReadAll != nil {
+			getLogger().Error(errReadAll)
+		}
 	}
+
 	getLogger().Tracef("read data from: `%s`", sbom.filename)
 	getLogger().Tracef("\n  >> rawBytes[:100]=[%s]", sbom.rawBytes[:100])
 

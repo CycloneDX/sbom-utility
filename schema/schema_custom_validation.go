@@ -20,7 +20,7 @@ package schema
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/CycloneDX/sbom-utility/utils"
 )
@@ -45,7 +45,8 @@ func LoadCustomValidationConfig(filename string) (err error) {
 	// Note we actively supply informative error messages to help user
 	// understand exactly how the load failed
 	getLogger().Infof("Loading custom validation config file: `%s`...", cfgFilename)
-	buffer, err := ioutil.ReadFile(cfgFilename)
+	// #nosec G304 (suppress warning)
+	buffer, err := os.ReadFile(cfgFilename)
 	if err != nil {
 		return fmt.Errorf("unable to `ReadFile`: `%s`", cfgFilename)
 	}
