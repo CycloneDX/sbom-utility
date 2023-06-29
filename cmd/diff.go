@@ -153,12 +153,7 @@ func Diff(flags utils.CommandFlags) (err error) {
 
 	getLogger().Infof("Reading file (--input-revision): `%s` ...", revisedFilename)
 	// #nosec G304 (suppress warning)
-<<<<<<< HEAD
-	// bRevisedData, errReadDelta := ioutil.ReadFile(deltaFilename)
-	bRevisedData, errReadDelta := os.ReadFile(deltaFilename)
-=======
 	bRevisedData, errReadDelta := os.ReadFile(revisedFilename)
->>>>>>> 5c10806 (Support schema error results to be ouptut in JSON format including custom format flags (#40))
 	if errReadDelta != nil {
 		getLogger().Debugf("%v", bRevisedData[:255])
 		err = getLogger().Errorf("Failed to ReadFile '%s': %s\n", inputFilename, err.Error())
