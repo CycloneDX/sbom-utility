@@ -357,6 +357,7 @@ func (sbom *Sbom) UnmarshalSBOMAsJsonMap() error {
 
 	// read our opened jsonFile as a byte array.
 	var errReadAll error
+	// #nosec
 	sbom.rawBytes, errReadAll = io.ReadAll(jsonFile)
 	if errReadAll != nil {
 		getLogger().Error(errReadAll)
