@@ -57,6 +57,7 @@
             "LDFLAGS",
             "libbzip",
             "Licence",
+            "lifecycles",
             "losslessly",
             "marshallers",
             "MLBOM",

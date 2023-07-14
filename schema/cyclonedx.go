@@ -44,6 +44,7 @@ type CDXBom struct {
 	ExternalReferences []CDXExternalReference `json:"externalReferences,omitempty"`
 	Compositions       []CDXCompositions      `json:"compositions,omitempty" cdx:"v1.3"`    // v1.3 added
 	Vulnerabilities    []CDXVulnerability     `json:"vulnerabilities,omitempty" cdx:"v1.4"` // v1.4 added
+	Annotations        []CDXAnnotation        `json:"annotations,omitempty" cdx:"v1.5"`     // v1.5 added
 	// TODO: Issue #27: Signature CDXSignature `json:"signature,omitempty" cdx:"v1.4"` // v1.4 added
 
 	// "annotations": {
@@ -72,16 +73,18 @@ type CDXBom struct {
 
 // v1.2: existed
 // v1.3: added "licenses", "properties"
+// v1.5: added "lifecycles"
 type CDXMetadata struct {
+	// Hashes       []CDXHash                  `json:"hashes,omitempty"` // TBD: verify this was never part of spec. in v1.2 (and removed)
 	Timestamp    string                     `json:"timestamp,omitempty"`
 	Tools        []CDXTool                  `json:"tools,omitempty"`
 	Authors      []CDXOrganizationalContact `json:"authors,omitempty"`
 	Component    CDXComponent               `json:"component,omitempty"`
 	Manufacturer CDXOrganizationalEntity    `json:"manufacturer,omitempty"`
 	Supplier     CDXOrganizationalEntity    `json:"supplier,omitempty"`
-	Hashes       []CDXHash                  `json:"hashes,omitempty"`
 	Licenses     []CDXLicenseChoice         `json:"licenses,omitempty"`   // v1.3 added
 	Properties   []CDXProperty              `json:"properties,omitempty"` // v1.3 added
+	Lifecycles   []CDXLifecycle             `json:"lifecycles,omitempty"` // v1.5 added
 }
 
 // v1.2: existed
@@ -463,7 +466,7 @@ type CDXVersionRange struct {
 }
 
 // v1.5 "annotations" and sub-schema added ("required": ["subjects","annotator","timestamp","text"])
-type CDXAnnotations struct {
+type CDXAnnotation struct {
 	BomRef    string       `json:"bom-ref,omitempty"`
 	Subjects  []CDXSubject `json:"subjects,omitempty"`
 	Annotator CDXAnnotator `json:"annotator,omitempty"`
@@ -491,24 +494,10 @@ type CDXSubject struct {
 // v1.5 added to represent the anonymous type defined in the "annotations" object
 // required" oneOf: organization, individual, component, service
 type CDXAnnotator struct {
-	// 		"properties": {
-	// 		  "organization": {
-	// 			"description": "The organization that created the annotation",
-	// 			"$ref": "#/definitions/organizationalEntity"
-	// 		  },
-	// 		  "individual": {
-	// 			"description": "The person that created the annotation",
-	// 			"$ref": "#/definitions/organizationalContact"
-	// 		  },
-	// 		  "component": {
-	// 			"description": "The tool or component that created the annotation",
-	// 			"$ref": "#/definitions/component"
-	// 		  },
-	// 		  "service": {
-	// 			"description": "The service that created the annotation",
-	// 			"$ref": "#/definitions/service"
-	// 		  }
-
+	Organization CDXOrganizationalEntity  `json:"organization,omitempty"`
+	Individual   CDXOrganizationalContact `json:"individual,omitempty"`
+	Component    CDXComponent             `json:"component,omitempty"`
+	Service      CDXService               `json:"service,omitempty"`
 }
 
 // v1.5 added for the "annotations" object
@@ -518,6 +507,12 @@ type CDXSignature struct {
 	// 		"title": "Signature",
 	// 		"description": "Enveloped signature in [JSON Signature Format (JSF)](https://cyberphone.github.io/doc/security/jsf.html)."
 	// 	  }
+}
+
+// v1.5 added to represent the anonymous type defined in the "annotations" object
+type CDXSigner struct {
+	Algorithm string `json:"algorithm,omitempty"` // TBD: implement "OneOf" { "string" OR enum["RS256", "RS384", etc.]
+	KeyId     string `json:"keyId,omitempty"`
 }
 
 // "annotations": {
@@ -541,6 +536,7 @@ type CDXSignature struct {
 // 	  }
 // 	}
 //   },
+
 //   "modelCard": {
 // 	"$comment": "Model card support in CycloneDX is derived from TensorFlow Model Card Toolkit released under the Apache 2.0 license and available from https://github.com/tensorflow/model-card-toolkit/blob/main/model_card_toolkit/schema/v0.0.2/model_card.schema.json. In addition, CycloneDX model card support includes portions of VerifyML, also released under the Apache 2.0 license and available from https://github.com/cylynx/verifyml/blob/main/verifyml/model_card_toolkit/schema/v0.0.4/model_card.schema.json.",
 // 	"type": "object",
@@ -962,945 +958,1046 @@ type CDXSignature struct {
 // 	"title": "Data Classification",
 // 	"description": "Data classification tags data according to its type, sensitivity, and value if altered, stolen, or destroyed."
 //   },
-//   "formula": {
-// 	"title": "Formula",
-// 	"description": "Describes workflows and resources that captures rules and other aspects of how the associated BOM component or service was formed.",
-// 	"type": "object",
-// 	"additionalProperties": false,
-// 	"properties": {
-// 	  "bom-ref": {
-// 		"title": "BOM Reference",
-// 		"description": "An optional identifier which can be used to reference the formula elsewhere in the BOM. Every bom-ref MUST be unique within the BOM.",
-// 		"$ref": "#/definitions/refType"
-// 	  },
-// 	  "components": {
-// 		"title": "Components",
-// 		"description": "Transient components that are used in tasks that constitute one or more of this formula's workflows",
-// 		"type": "array",
-// 		"items": {
-// 		  "$ref": "#/definitions/component"
-// 		},
-// 		"uniqueItems": true
-// 	  },
-// 	  "services": {
-// 		"title": "Services",
-// 		"description": "Transient services that are used in tasks that constitute one or more of this formula's workflows",
-// 		"type": "array",
-// 		"items": {
-// 		  "$ref": "#/definitions/service"
-// 		},
-// 		"uniqueItems": true
-// 	  },
-// 	  "workflows": {
-// 		"title": "Workflows",
-// 		"description": "List of workflows that can be declared to accomplish specific orchestrated goals and independently triggered.",
-// 		"$comment": "Different workflows can be designed to work together to perform end-to-end CI/CD builds and deployments.",
-// 		"type": "array",
-// 		"items": {
-// 		  "$ref": "#/definitions/workflow"
-// 		},
-// 		"uniqueItems": true
-// 	  },
-// 	  "properties": {
-// 		"type": "array",
-// 		"title": "Properties",
-// 		"items": {
-// 		  "$ref": "#/definitions/property"
-// 		}
-// 	  }
-// 	}
-//   },
-//   "workflow": {
-// 	"title": "Workflow",
-// 	"description": "A specialized orchestration task.",
-// 	"$comment": "Workflow are as task themselves and can trigger other workflow tasks.  These relationships can be modeled in the taskDependencies graph.",
-// 	"type": "object",
-// 	"required": [
-// 	  "bom-ref",
-// 	  "uid",
-// 	  "taskTypes"
-// 	],
-// 	"additionalProperties": false,
-// 	"properties": {
-// 	  "bom-ref": {
-// 		"title": "BOM Reference",
-// 		"description": "An optional identifier which can be used to reference the workflow elsewhere in the BOM. Every bom-ref MUST be unique within the BOM.",
-// 		"$ref": "#/definitions/refType"
-// 	  },
-// 	  "uid": {
-// 		"title": "Unique Identifier (UID)",
-// 		"description": "The unique identifier for the resource instance within its deployment context.",
-// 		"type": "string"
-// 	  },
-// 	  "name": {
-// 		"title": "Name",
-// 		"description": "The name of the resource instance.",
-// 		"type": "string"
-// 	  },
-// 	  "description": {
-// 		"title": "Description",
-// 		"description": "A description of the resource instance.",
-// 		"type": "string"
-// 	  },
-// 	  "resourceReferences": {
-// 		"title": "Resource references",
-// 		"description": "References to component or service resources that are used to realize the resource instance.",
-// 		"type": "array",
-// 		"uniqueItems": true,
-// 		"items": {
-// 		  "$ref": "#/definitions/resourceReferenceChoice"
-// 		}
-// 	  },
-// 	  "tasks": {
-// 		"title": "Tasks",
-// 		"description": "The tasks that comprise the workflow.",
-// 		"$comment": "Note that tasks can appear more than once as different instances (by name or UID).",
-// 		"type": "array",
-// 		"uniqueItems": true,
-// 		"items": {
-// 		  "$ref": "#/definitions/task"
-// 		}
-// 	  },
-// 	  "taskDependencies": {
-// 		"title": "Task dependency graph",
-// 		"description": "The graph of dependencies between tasks within the workflow.",
-// 		"type": "array",
-// 		"uniqueItems": true,
-// 		"items": {
-// 		  "$ref": "#/definitions/dependency"
-// 		}
-// 	  },
-// 	  "taskTypes": {
-// 		"title": "Task types",
-// 		"description": "Indicates the types of activities performed by the set of workflow tasks.",
-// 		"$comment": "Currently, these types reflect common CI/CD actions.",
-// 		"type": "array",
-// 		"items": {
-// 		  "$ref": "#/definitions/taskType"
-// 		}
-// 	  },
-// 	  "trigger": {
-// 		"title": "Trigger",
-// 		"description": "The trigger that initiated the task.",
-// 		"$ref": "#/definitions/trigger"
-// 	  },
-// 	  "steps": {
-// 		"title": "Steps",
-// 		"description": "The sequence of steps for the task.",
-// 		"type": "array",
-// 		"items": {
-// 		  "$ref": "#/definitions/step"
-// 		},
-// 		"uniqueItems": true
-// 	  },
-// 	  "inputs": {
-// 		"title": "Inputs",
-// 		"description": "Represents resources and data brought into a task at runtime by executor or task commands",
-// 		"examples": ["a `configuration` file which was declared as a local `component` or `externalReference`"],
-// 		"type": "array",
-// 		"items": {
-// 		  "$ref": "#/definitions/inputType"
-// 		},
-// 		"uniqueItems": true
-// 	  },
-// 	  "outputs": {
-// 		"title": "Outputs",
-// 		"description": "Represents resources and data output from a task at runtime by executor or task commands",
-// 		"examples": ["a log file or metrics data produced by the task"],
-// 		"type": "array",
-// 		"items": {
-// 		  "$ref": "#/definitions/outputType"
-// 		},
-// 		"uniqueItems": true
-// 	  },
-// 	  "timeStart": {
-// 		"title": "Time start",
-// 		"description": "The date and time (timestamp) when the task started.",
-// 		"type": "string",
-// 		"format": "date-time"
-// 	  },
-// 	  "timeEnd": {
-// 		"title": "Time end",
-// 		"description": "The date and time (timestamp) when the task ended.",
-// 		"type": "string",
-// 		"format": "date-time"
-// 	  },
-// 	  "workspaces": {
-// 		"title": "Workspaces",
-// 		"description": "A set of named filesystem or data resource shareable by workflow tasks.",
-// 		"type": "array",
-// 		"uniqueItems": true,
-// 		"items": {
-// 		  "$ref": "#/definitions/workspace"
-// 		}
-// 	  },
-// 	  "runtimeTopology": {
-// 		"title": "Runtime topology",
-// 		"description": "A graph of the component runtime topology for workflow's instance.",
-// 		"$comment": "A description of the runtime component and service topology.  This can describe a partial or complete topology used to host and execute the task (e.g., hardware, operating systems, configurations, etc.),",
-// 		"type": "array",
-// 		"uniqueItems": true,
-// 		"items": {
-// 		  "$ref": "#/definitions/dependency"
-// 		}
-// 	  },
-// 	  "properties": {
-// 		"type": "array",
-// 		"title": "Properties",
-// 		"items": {
-// 		  "$ref": "#/definitions/property"
-// 		}
-// 	  }
-// 	}
-//   },
-//   "task": {
-// 	"title": "Task",
-// 	"description": "Describes the inputs, sequence of steps and resources used to accomplish a task and its output.",
-// 	"$comment": "Tasks are building blocks for constructing assemble CI/CD workflows or pipelines.",
-// 	"type": "object",
-// 	"required": [
-// 	  "bom-ref",
-// 	  "uid",
-// 	  "taskTypes"
-// 	],
-// 	"additionalProperties": false,
-// 	"properties": {
-// 	  "bom-ref": {
-// 		"title": "BOM Reference",
-// 		"description": "An optional identifier which can be used to reference the task elsewhere in the BOM. Every bom-ref MUST be unique within the BOM.",
-// 		"$ref": "#/definitions/refType"
-// 	  },
-// 	  "uid": {
-// 		"title": "Unique Identifier (UID)",
-// 		"description": "The unique identifier for the resource instance within its deployment context.",
-// 		"type": "string"
-// 	  },
-// 	  "name": {
-// 		"title": "Name",
-// 		"description": "The name of the resource instance.",
-// 		"type": "string"
-// 	  },
-// 	  "description": {
-// 		"title": "Description",
-// 		"description": "A description of the resource instance.",
-// 		"type": "string"
-// 	  },
-// 	  "resourceReferences": {
-// 		"title": "Resource references",
-// 		"description": "References to component or service resources that are used to realize the resource instance.",
-// 		"type": "array",
-// 		"uniqueItems": true,
-// 		"items": {
-// 		  "$ref": "#/definitions/resourceReferenceChoice"
-// 		}
-// 	  },
-// 	  "taskTypes": {
-// 		"title": "Task types",
-// 		"description": "Indicates the types of activities performed by the set of workflow tasks.",
-// 		"$comment": "Currently, these types reflect common CI/CD actions.",
-// 		"type": "array",
-// 		"items": {
-// 		  "$ref": "#/definitions/taskType"
-// 		}
-// 	  },
-// 	  "trigger": {
-// 		"title": "Trigger",
-// 		"description": "The trigger that initiated the task.",
-// 		"$ref": "#/definitions/trigger"
-// 	  },
-// 	  "steps": {
-// 		"title": "Steps",
-// 		"description": "The sequence of steps for the task.",
-// 		"type": "array",
-// 		"items": {
-// 		  "$ref": "#/definitions/step"
-// 		},
-// 		"uniqueItems": true
-// 	  },
-// 	  "inputs": {
-// 		"title": "Inputs",
-// 		"description": "Represents resources and data brought into a task at runtime by executor or task commands",
-// 		"examples": ["a `configuration` file which was declared as a local `component` or `externalReference`"],
-// 		"type": "array",
-// 		"items": {
-// 		  "$ref": "#/definitions/inputType"
-// 		},
-// 		"uniqueItems": true
-// 	  },
-// 	  "outputs": {
-// 		"title": "Outputs",
-// 		"description": "Represents resources and data output from a task at runtime by executor or task commands",
-// 		"examples": ["a log file or metrics data produced by the task"],
-// 		"type": "array",
-// 		"items": {
-// 		  "$ref": "#/definitions/outputType"
-// 		},
-// 		"uniqueItems": true
-// 	  },
-// 	  "timeStart": {
-// 		"title": "Time start",
-// 		"description": "The date and time (timestamp) when the task started.",
-// 		"type": "string",
-// 		"format": "date-time"
-// 	  },
-// 	  "timeEnd": {
-// 		"title": "Time end",
-// 		"description": "The date and time (timestamp) when the task ended.",
-// 		"type": "string",
-// 		"format": "date-time"
-// 	  },
-// 	  "workspaces": {
-// 		"title": "Workspaces",
-// 		"description": "A set of named filesystem or data resource shareable by workflow tasks.",
-// 		"type": "array",
-// 		"items": {
-// 		  "$ref": "#/definitions/workspace"
-// 		},
-// 		"uniqueItems": true
-// 	  },
-// 	  "runtimeTopology": {
-// 		"title": "Runtime topology",
-// 		"description": "A graph of the component runtime topology for task's instance.",
-// 		"$comment": "A description of the runtime component and service topology.  This can describe a partial or complete topology used to host and execute the task (e.g., hardware, operating systems, configurations, etc.),",
-// 		"type": "array",
-// 		"items": {
-// 		  "$ref": "#/definitions/dependency"
-// 		},
-// 		"uniqueItems": true
-// 	  },
-// 	  "properties": {
-// 		"type": "array",
-// 		"title": "Properties",
-// 		"items": {
-// 		  "$ref": "#/definitions/property"
-// 		}
-// 	  }
-// 	}
-//   },
-//   "step": {
-// 	"type": "object",
-// 	"description": "Executes specific commands or tools in order to accomplish its owning task as part of a sequence.",
-// 	"additionalProperties": false,
-// 	"properties": {
-// 	  "name": {
-// 		"title": "Name",
-// 		"description": "A name for the step.",
-// 		"type": "string"
-// 	  },
-// 	  "description": {
-// 		"title": "Description",
-// 		"description": "A description of the step.",
-// 		"type": "string"
-// 	  },
-// 	  "commands": {
-// 		"title": "Commands",
-// 		"description": "Ordered list of commands or directives for the step",
-// 		"type": "array",
-// 		"items": {
-// 		  "$ref": "#/definitions/command"
-// 		}
-// 	  },
-// 	  "properties": {
-// 		"type": "array",
-// 		"title": "Properties",
-// 		"items": {
-// 		  "$ref": "#/definitions/property"
-// 		}
-// 	  }
-// 	}
-//   },
-//   "command": {
-// 	"type": "object",
-// 	"additionalProperties": false,
-// 	"properties": {
-// 	  "executed": {
-// 		"title": "Executed",
-// 		"description": "A text representation of the executed command.",
-// 		"type": "string"
-// 	  },
-// 	  "properties": {
-// 		"type": "array",
-// 		"title": "Properties",
-// 		"items": {
-// 		  "$ref": "#/definitions/property"
-// 		}
-// 	  }
-// 	}
-//   },
-//   "workspace": {
-// 	"title": "Workspace",
-// 	"description": "A named filesystem or data resource shareable by workflow tasks.",
-// 	"type": "object",
-// 	"required": [
-// 	  "bom-ref",
-// 	  "uid"
-// 	],
-// 	"additionalProperties": false,
-// 	"properties": {
-// 	  "bom-ref": {
-// 		"title": "BOM Reference",
-// 		"description": "An optional identifier which can be used to reference the workspace elsewhere in the BOM. Every bom-ref MUST be unique within the BOM.",
-// 		"$ref": "#/definitions/refType"
-// 	  },
-// 	  "uid": {
-// 		"title": "Unique Identifier (UID)",
-// 		"description": "The unique identifier for the resource instance within its deployment context.",
-// 		"type": "string"
-// 	  },
-// 	  "name": {
-// 		"title": "Name",
-// 		"description": "The name of the resource instance.",
-// 		"type": "string"
-// 	  },
-// 	  "aliases": {
-// 		"title": "Aliases",
-// 		"description": "The names for the workspace as referenced by other workflow tasks. Effectively, a name mapping so other tasks can use their own local name in their steps.",
-// 		"type": "array",
-// 		"items": {"type": "string"}
-// 	  },
-// 	  "description": {
-// 		"title": "Description",
-// 		"description": "A description of the resource instance.",
-// 		"type": "string"
-// 	  },
-// 	  "resourceReferences": {
-// 		"title": "Resource references",
-// 		"description": "References to component or service resources that are used to realize the resource instance.",
-// 		"type": "array",
-// 		"uniqueItems": true,
-// 		"items": {
-// 		  "$ref": "#/definitions/resourceReferenceChoice"
-// 		}
-// 	  },
-// 	  "accessMode": {
-// 		"title": "Access mode",
-// 		"description": "Describes the read-write access control for the workspace relative to the owning resource instance.",
-// 		"type": "string",
-// 		"enum": [
-// 		  "read-only",
-// 		  "read-write",
-// 		  "read-write-once",
-// 		  "write-once",
-// 		  "write-only"
-// 		]
-// 	  },
-// 	  "mountPath": {
-// 		"title": "Mount path",
-// 		"description": "A path to a location on disk where the workspace will be available to the associated task's steps.",
-// 		"type": "string"
-// 	  },
-// 	  "managedDataType": {
-// 		"title": "Managed data type",
-// 		"description": "The name of a domain-specific data type the workspace represents.",
-// 		"$comment": "This property is for CI/CD frameworks that are able to provide access to structured, managed data at a more granular level than a filesystem.",
-// 		"examples": ["ConfigMap","Secret"],
-// 		"type": "string"
-// 	  },
-// 	  "volumeRequest": {
-// 		"title": "Volume request",
-// 		"description": "Identifies the reference to the request for a specific volume type and parameters.",
-// 		"examples": ["a kubernetes Persistent Volume Claim (PVC) name"],
-// 		"type": "string"
-// 	  },
-// 	  "volume": {
-// 		"title": "Volume",
-// 		"description": "Information about the actual volume instance allocated to the workspace.",
-// 		"$comment": "The actual volume allocated may be different than the request.",
-// 		"examples": ["see https://kubernetes.io/docs/concepts/storage/persistent-volumes/"],
-// 		"$ref": "#/definitions/volume"
-// 	  },
-// 	  "properties": {
-// 		"type": "array",
-// 		"title": "Properties",
-// 		"items": {
-// 		  "$ref": "#/definitions/property"
-// 		}
-// 	  }
-// 	}
-//   },
-//   "volume": {
-// 	"title": "Volume",
-// 	"description": "An identifiable, logical unit of data storage tied to a physical device.",
-// 	"type": "object",
-// 	"additionalProperties": false,
-// 	"properties": {
-// 	  "uid": {
-// 		"title": "Unique Identifier (UID)",
-// 		"description": "The unique identifier for the volume instance within its deployment context.",
-// 		"type": "string"
-// 	  },
-// 	  "name": {
-// 		"title": "Name",
-// 		"description": "The name of the volume instance",
-// 		"type": "string"
-// 	  },
-// 	  "mode": {
-// 		"title": "Mode",
-// 		"description": "The mode for the volume instance.",
-// 		"type": "string",
-// 		"enum": [
-// 		  "filesystem", "block"
-// 		],
-// 		"default": "filesystem"
-// 	  },
-// 	  "path": {
-// 		"title": "Path",
-// 		"description": "The underlying path created from the actual volume.",
-// 		"type": "string"
-// 	  },
-// 	  "sizeAllocated": {
-// 		"title": "Size allocated",
-// 		"description": "The allocated size of the volume accessible to the associated workspace. This should include the scalar size as well as IEC standard unit in either decimal or binary form.",
-// 		"examples": ["10GB", "2Ti", "1Pi"],
-// 		"type": "string"
-// 	  },
-// 	  "persistent": {
-// 		"title": "Persistent",
-// 		"description": "Indicates if the volume persists beyond the life of the resource it is associated with.",
-// 		"type": "boolean"
-// 	  },
-// 	  "remote": {
-// 		"title": "Remote",
-// 		"description": "Indicates if the volume is remotely (i.e., network) attached.",
-// 		"type": "boolean"
-// 	  },
-// 	  "properties": {
-// 		"type": "array",
-// 		"title": "Properties",
-// 		"items": {
-// 		  "$ref": "#/definitions/property"
-// 		}
-// 	  }
-// 	}
-//   },
-//   "trigger": {
-// 	"title": "Trigger",
-// 	"description": "Represents a resource that can conditionally activate (or fire) tasks based upon associated events and their data.",
-// 	"type": "object",
-// 	"additionalProperties": false,
-// 	"required": [
-// 	  "type",
-// 	  "bom-ref",
-// 	  "uid"
-// 	],
-// 	"properties": {
-// 	  "bom-ref": {
-// 		"title": "BOM Reference",
-// 		"description": "An optional identifier which can be used to reference the trigger elsewhere in the BOM. Every bom-ref MUST be unique within the BOM.",
-// 		"$ref": "#/definitions/refType"
-// 	  },
-// 	  "uid": {
-// 		"title": "Unique Identifier (UID)",
-// 		"description": "The unique identifier for the resource instance within its deployment context.",
-// 		"type": "string"
-// 	  },
-// 	  "name": {
-// 		"title": "Name",
-// 		"description": "The name of the resource instance.",
-// 		"type": "string"
-// 	  },
-// 	  "description": {
-// 		"title": "Description",
-// 		"description": "A description of the resource instance.",
-// 		"type": "string"
-// 	  },
-// 	  "resourceReferences": {
-// 		"title": "Resource references",
-// 		"description": "References to component or service resources that are used to realize the resource instance.",
-// 		"type": "array",
-// 		"uniqueItems": true,
-// 		"items": {
-// 		  "$ref": "#/definitions/resourceReferenceChoice"
-// 		}
-// 	  },
-// 	  "type": {
-// 		"title": "Type",
-// 		"description": "The source type of event which caused the trigger to fire.",
-// 		"type": "string",
-// 		"enum": [
-// 		  "manual",
-// 		  "api",
-// 		  "webhook",
-// 		  "scheduled"
-// 		]
-// 	  },
-// 	  "event": {
-// 		"title": "Event",
-// 		"description": "The event data that caused the associated trigger to activate.",
-// 		"$ref": "#/definitions/event"
-// 	  },
-// 	  "conditions": {
-// 		"type": "array",
-// 		"uniqueItems": true,
-// 		"items": {
-// 		  "$ref": "#/definitions/condition"
-// 		}
-// 	  },
-// 	  "timeActivated": {
-// 		"title": "Time activated",
-// 		"description": "The date and time (timestamp) when the trigger was activated.",
-// 		"type": "string",
-// 		"format": "date-time"
-// 	  },
-// 	  "inputs": {
-// 		"title": "Inputs",
-// 		"description": "Represents resources and data brought into a task at runtime by executor or task commands",
-// 		"examples": ["a `configuration` file which was declared as a local `component` or `externalReference`"],
-// 		"type": "array",
-// 		"items": {
-// 		  "$ref": "#/definitions/inputType"
-// 		},
-// 		"uniqueItems": true
-// 	  },
-// 	  "outputs": {
-// 		"title": "Outputs",
-// 		"description": "Represents resources and data output from a task at runtime by executor or task commands",
-// 		"examples": ["a log file or metrics data produced by the task"],
-// 		"type": "array",
-// 		"items": {
-// 		  "$ref": "#/definitions/outputType"
-// 		},
-// 		"uniqueItems": true
-// 	  },
-// 	  "properties": {
-// 		"type": "array",
-// 		"title": "Properties",
-// 		"items": {
-// 		  "$ref": "#/definitions/property"
-// 		}
-// 	  }
-// 	}
-//   },
-//   "event": {
-// 	"title": "Event",
-// 	"description": "Represents something that happened that may trigger a response.",
-// 	"type": "object",
-// 	"additionalProperties": false,
-// 	"properties": {
-// 	  "uid": {
-// 		"title": "Unique Identifier (UID)",
-// 		"description": "The unique identifier of the event.",
-// 		"type": "string"
-// 	  },
-// 	  "description": {
-// 		"title": "Description",
-// 		"description": "A description of the event.",
-// 		"type": "string"
-// 	  },
-// 	  "timeReceived": {
-// 		"title": "Time Received",
-// 		"description": "The date and time (timestamp) when the event was received.",
-// 		"type": "string",
-// 		"format": "date-time"
-// 	  },
-// 	  "data": {
-// 		"title": "Data",
-// 		"description": "Encoding of the raw event data.",
-// 		"$ref": "#/definitions/attachment"
-// 	  },
-// 	  "source": {
-// 		"title": "Source",
-// 		"description": "References the component or service that was the source of the event",
-// 		"$ref": "#/definitions/resourceReferenceChoice"
-// 	  },
-// 	  "target": {
-// 		"title": "Target",
-// 		"description": "References the component or service that was the target of the event",
-// 		"$ref": "#/definitions/resourceReferenceChoice"
-// 	  },
-// 	  "properties": {
-// 		"type": "array",
-// 		"title": "Properties",
-// 		"items": {
-// 		  "$ref": "#/definitions/property"
-// 		}
-// 	  }
-// 	}
-//   },
-//   "inputType": {
-// 	"title": "Input type",
-// 	"description": "Type that represents various input data types and formats.",
-// 	"type": "object",
-// 	"oneOf": [
-// 	  {
-// 		"required": [
-// 		  "resource"
-// 		]
-// 	  },
-// 	  {
-// 		"required": [
-// 		  "parameters"
-// 		]
-// 	  },
-// 	  {
-// 		"required": [
-// 		  "environmentVars"
-// 		]
-// 	  },
-// 	  {
-// 		"required": [
-// 		  "data"
-// 		]
-// 	  }
-// 	],
-// 	"additionalProperties": false,
-// 	"properties": {
-// 	  "source": {
-// 		"title": "Source",
-// 		"description": "A references to the component or service that provided the input to the task (e.g., reference to a service with data flow value of `inbound`)",
-// 		"examples": [
-// 		  "source code repository",
-// 		  "database"
-// 		],
-// 		"$ref": "#/definitions/resourceReferenceChoice"
-// 	  },
-// 	  "target": {
-// 		"title": "Target",
-// 		"description": "A reference to the component or service that received or stored the input if not the task itself (e.g., a local, named storage workspace)",
-// 		"examples": [
-// 		  "workspace",
-// 		  "directory"
-// 		],
-// 		"$ref": "#/definitions/resourceReferenceChoice"
-// 	  },
-// 	  "resource": {
-// 		"title": "Resource",
-// 		"description": "A reference to an independent resource provided as an input to a task by the workflow runtime.",
-// 		"examples": [
-// 		  "reference to a configuration file in a repository (i.e., a bom-ref)",
-// 		  "reference to a scanning service used in a task (i.e., a bom-ref)"
-// 		],
-// 		"$ref": "#/definitions/resourceReferenceChoice"
-// 	  },
-// 	  "parameters": {
-// 		"title": "Parameters",
-// 		"description": "Inputs that have the form of parameters with names and values.",
-// 		"type": "array",
-// 		"uniqueItems": true,
-// 		"items": {
-// 		  "$ref": "#/definitions/parameter"
-// 		}
-// 	  },
-// 	  "environmentVars": {
-// 		"title": "Environment variables",
-// 		"description": "Inputs that have the form of parameters with names and values.",
-// 		"type": "array",
-// 		"uniqueItems": true,
-// 		"items": {
-// 		  "oneOf": [
-// 			{
-// 			  "$ref": "#/definitions/property"
-// 			},
-// 			{
-// 			  "type": "string"
-// 			}
-// 		  ]
-// 		}
-// 	  },
-// 	  "data": {
-// 		"title": "Data",
-// 		"description": "Inputs that have the form of data.",
-// 		"$ref": "#/definitions/attachment"
-// 	  },
-// 	  "properties": {
-// 		"type": "array",
-// 		"title": "Properties",
-// 		"items": {
-// 		  "$ref": "#/definitions/property"
-// 		}
-// 	  }
-// 	}
-//   },
-//   "outputType": {
-// 	"type": "object",
-// 	"oneOf": [
-// 	  {
-// 		"required": [
-// 		  "resource"
-// 		]
-// 	  },
-// 	  {
-// 		"required": [
-// 		  "environmentVars"
-// 		]
-// 	  },
-// 	  {
-// 		"required": [
-// 		  "data"
-// 		]
-// 	  }
-// 	],
-// 	"additionalProperties": false,
-// 	"properties": {
-// 	  "type": {
-// 		"title": "Type",
-// 		"description": "Describes the type of data output.",
-// 		"type": "string",
-// 		"enum": [
-// 		  "artifact",
-// 		  "attestation",
-// 		  "log",
-// 		  "evidence",
-// 		  "metrics",
-// 		  "other"
-// 		]
-// 	  },
-// 	  "source": {
-// 		"title": "Source",
-// 		"description": "Component or service that generated or provided the output from the task (e.g., a build tool)",
-// 		"$ref": "#/definitions/resourceReferenceChoice"
-// 	  },
-// 	  "target": {
-// 		"title": "Target",
-// 		"description": "Component or service that received the output from the task (e.g., reference to an artifactory service with data flow value of `outbound`)",
-// 		"examples": ["a log file described as an `externalReference` within its target domain."],
-// 		"$ref": "#/definitions/resourceReferenceChoice"
-// 	  },
-// 	  "resource": {
-// 		"title": "Resource",
-// 		"description": "A reference to an independent resource generated as output by the task.",
-// 		"examples": [
-// 		  "configuration file",
-// 		  "source code",
-// 		  "scanning service"
-// 		],
-// 		"$ref": "#/definitions/resourceReferenceChoice"
-// 	  },
-// 	  "data": {
-// 		"title": "Data",
-// 		"description": "Outputs that have the form of data.",
-// 		"$ref": "#/definitions/attachment"
-// 	  },
-// 	  "environmentVars": {
-// 		"title": "Environment variables",
-// 		"description": "Outputs that have the form of environment variables.",
-// 		"type": "array",
-// 		"items": {
-// 		  "oneOf": [
-// 			{
-// 			  "$ref": "#/definitions/property"
-// 			},
-// 			{
-// 			  "type": "string"
-// 			}
-// 		  ]
-// 		},
-// 		"uniqueItems": true
-// 	  },
-// 	  "properties": {
-// 		"type": "array",
-// 		"title": "Properties",
-// 		"items": {
-// 		  "$ref": "#/definitions/property"
-// 		}
-// 	  }
-// 	}
-//   },
-//   "resourceReferenceChoice": {
-// 	"title": "Resource reference choice",
-// 	"description": "A reference to a locally defined resource (e.g., a bom-ref) or an externally accessible resource.",
-// 	"$comment": "Enables reference to a resource that participates in a workflow; using either internal (bom-ref) or external (externalReference) types.",
-// 	"type": "object",
-// 	"additionalProperties": false,
-// 	"properties": {
-// 	  "ref": {
-// 		"title": "BOM Reference",
-// 		"description": "References an object by its bom-ref attribute",
-// 		"anyOf": [
-// 		  {
-// 			"title": "Ref",
-// 			"$ref": "#/definitions/refLinkType"
-// 		  },
-// 		  {
-// 			"title": "BOM-Link Element",
-// 			"$ref": "#/definitions/bomLinkElementType"
-// 		  }
-// 		]
-// 	  },
-// 	  "externalReference": {
-// 		"title": "External reference",
-// 		"description": "Reference to an externally accessible resource.",
-// 		"$ref": "#/definitions/externalReference"
-// 	  }
-// 	},
-// 	"oneOf": [
-// 	  {
-// 		"required": [
-// 		  "ref"
-// 		]
-// 	  },
-// 	  {
-// 		"required": [
-// 		  "externalReference"
-// 		]
-// 	  }
-// 	]
-//   },
-//   "condition": {
-// 	"title": "Condition",
-// 	"description": "A condition that was used to determine a trigger should be activated.",
-// 	"type": "object",
-// 	"additionalProperties": false,
-// 	"properties": {
-// 	  "description": {
-// 		"title": "Description",
-// 		"description": "Describes the set of conditions which cause the trigger to activate.",
-// 		"type": "string"
-// 	  },
-// 	  "expression": {
-// 		"title": "Expression",
-// 		"description": "The logical expression that was evaluated that determined the trigger should be fired.",
-// 		"type": "string"
-// 	  },
-// 	  "properties": {
-// 		"type": "array",
-// 		"title": "Properties",
-// 		"items": {
-// 		  "$ref": "#/definitions/property"
-// 		}
-// 	  }
-// 	}
-//   },
-//   "taskType": {
-// 	"type": "string",
-// 	"enum": [
-// 	  "copy",
-// 	  "clone",
-// 	  "lint",
-// 	  "scan",
-// 	  "merge",
-// 	  "build",
-// 	  "test",
-// 	  "deliver",
-// 	  "deploy",
-// 	  "release",
-// 	  "clean",
-// 	  "other"
-// 	]
-//   },
-//   "parameter": {
-// 	"title": "Parameter",
-// 	"description": "A representation of a functional parameter.",
-// 	"type": "object",
-// 	"additionalProperties": false,
-// 	"properties": {
-// 	  "name": {
-// 		"title": "Name",
-// 		"description": "The name of the parameter.",
-// 		"type": "string"
-// 	  },
-// 	  "value": {
-// 		"title": "Value",
-// 		"description": "The value of the parameter.",
-// 		"type": "string"
-// 	  },
-// 	  "dataType": {
-// 		"title": "Data type",
-// 		"description": "The data type of the parameter.",
-// 		"type": "string"
-// 	  }
-// 	}
-//   },
+
+type CDXFormula struct {
+
+	//	  "formula": {
+	//		"title": "Formula",
+	//		"description": "Describes workflows and resources that captures rules and other aspects of how the associated BOM component or service was formed.",
+	//		"type": "object",
+	//		"additionalProperties": false,
+	//		"properties": {
+	//		  "bom-ref": {
+	//			"title": "BOM Reference",
+	//			"description": "An optional identifier which can be used to reference the formula elsewhere in the BOM. Every bom-ref MUST be unique within the BOM.",
+	//			"$ref": "#/definitions/refType"
+	//		  },
+	//		  "components": {
+	//			"title": "Components",
+	//			"description": "Transient components that are used in tasks that constitute one or more of this formula's workflows",
+	//			"type": "array",
+	//			"items": {
+	//			  "$ref": "#/definitions/component"
+	//			},
+	//			"uniqueItems": true
+	//		  },
+	//		  "services": {
+	//			"title": "Services",
+	//			"description": "Transient services that are used in tasks that constitute one or more of this formula's workflows",
+	//			"type": "array",
+	//			"items": {
+	//			  "$ref": "#/definitions/service"
+	//			},
+	//			"uniqueItems": true
+	//		  },
+	//		  "workflows": {
+	//			"title": "Workflows",
+	//			"description": "List of workflows that can be declared to accomplish specific orchestrated goals and independently triggered.",
+	//			"$comment": "Different workflows can be designed to work together to perform end-to-end CI/CD builds and deployments.",
+	//			"type": "array",
+	//			"items": {
+	//			  "$ref": "#/definitions/workflow"
+	//			},
+	//			"uniqueItems": true
+	//		  },
+	//		  "properties": {
+	//			"type": "array",
+	//			"title": "Properties",
+	//			"items": {
+	//			  "$ref": "#/definitions/property"
+	//			}
+	//		  }
+	//		}
+	//	  },
+}
+
+type CDXWorkflow struct {
+
+	//	  "workflow": {
+	//		"title": "Workflow",
+	//		"description": "A specialized orchestration task.",
+	//		"$comment": "Workflow are as task themselves and can trigger other workflow tasks.  These relationships can be modeled in the taskDependencies graph.",
+	//		"type": "object",
+	//		"required": [
+	//		  "bom-ref",
+	//		  "uid",
+	//		  "taskTypes"
+	//		],
+	//		"additionalProperties": false,
+	//		"properties": {
+	//		  "bom-ref": {
+	//			"title": "BOM Reference",
+	//			"description": "An optional identifier which can be used to reference the workflow elsewhere in the BOM. Every bom-ref MUST be unique within the BOM.",
+	//			"$ref": "#/definitions/refType"
+	//		  },
+	//		  "uid": {
+	//			"title": "Unique Identifier (UID)",
+	//			"description": "The unique identifier for the resource instance within its deployment context.",
+	//			"type": "string"
+	//		  },
+	//		  "name": {
+	//			"title": "Name",
+	//			"description": "The name of the resource instance.",
+	//			"type": "string"
+	//		  },
+	//		  "description": {
+	//			"title": "Description",
+	//			"description": "A description of the resource instance.",
+	//			"type": "string"
+	//		  },
+	//		  "resourceReferences": {
+	//			"title": "Resource references",
+	//			"description": "References to component or service resources that are used to realize the resource instance.",
+	//			"type": "array",
+	//			"uniqueItems": true,
+	//			"items": {
+	//			  "$ref": "#/definitions/resourceReferenceChoice"
+	//			}
+	//		  },
+	//		  "tasks": {
+	//			"title": "Tasks",
+	//			"description": "The tasks that comprise the workflow.",
+	//			"$comment": "Note that tasks can appear more than once as different instances (by name or UID).",
+	//			"type": "array",
+	//			"uniqueItems": true,
+	//			"items": {
+	//			  "$ref": "#/definitions/task"
+	//			}
+	//		  },
+	//		  "taskDependencies": {
+	//			"title": "Task dependency graph",
+	//			"description": "The graph of dependencies between tasks within the workflow.",
+	//			"type": "array",
+	//			"uniqueItems": true,
+	//			"items": {
+	//			  "$ref": "#/definitions/dependency"
+	//			}
+	//		  },
+	//		  "taskTypes": {
+	//			"title": "Task types",
+	//			"description": "Indicates the types of activities performed by the set of workflow tasks.",
+	//			"$comment": "Currently, these types reflect common CI/CD actions.",
+	//			"type": "array",
+	//			"items": {
+	//			  "$ref": "#/definitions/taskType"
+	//			}
+	//		  },
+	//		  "trigger": {
+	//			"title": "Trigger",
+	//			"description": "The trigger that initiated the task.",
+	//			"$ref": "#/definitions/trigger"
+	//		  },
+	//		  "steps": {
+	//			"title": "Steps",
+	//			"description": "The sequence of steps for the task.",
+	//			"type": "array",
+	//			"items": {
+	//			  "$ref": "#/definitions/step"
+	//			},
+	//			"uniqueItems": true
+	//		  },
+	//		  "inputs": {
+	//			"title": "Inputs",
+	//			"description": "Represents resources and data brought into a task at runtime by executor or task commands",
+	//			"examples": ["a `configuration` file which was declared as a local `component` or `externalReference`"],
+	//			"type": "array",
+	//			"items": {
+	//			  "$ref": "#/definitions/inputType"
+	//			},
+	//			"uniqueItems": true
+	//		  },
+	//		  "outputs": {
+	//			"title": "Outputs",
+	//			"description": "Represents resources and data output from a task at runtime by executor or task commands",
+	//			"examples": ["a log file or metrics data produced by the task"],
+	//			"type": "array",
+	//			"items": {
+	//			  "$ref": "#/definitions/outputType"
+	//			},
+	//			"uniqueItems": true
+	//		  },
+	//		  "timeStart": {
+	//			"title": "Time start",
+	//			"description": "The date and time (timestamp) when the task started.",
+	//			"type": "string",
+	//			"format": "date-time"
+	//		  },
+	//		  "timeEnd": {
+	//			"title": "Time end",
+	//			"description": "The date and time (timestamp) when the task ended.",
+	//			"type": "string",
+	//			"format": "date-time"
+	//		  },
+	//		  "workspaces": {
+	//			"title": "Workspaces",
+	//			"description": "A set of named filesystem or data resource shareable by workflow tasks.",
+	//			"type": "array",
+	//			"uniqueItems": true,
+	//			"items": {
+	//			  "$ref": "#/definitions/workspace"
+	//			}
+	//		  },
+	//		  "runtimeTopology": {
+	//			"title": "Runtime topology",
+	//			"description": "A graph of the component runtime topology for workflow's instance.",
+	//			"$comment": "A description of the runtime component and service topology.  This can describe a partial or complete topology used to host and execute the task (e.g., hardware, operating systems, configurations, etc.),",
+	//			"type": "array",
+	//			"uniqueItems": true,
+	//			"items": {
+	//			  "$ref": "#/definitions/dependency"
+	//			}
+	//		  },
+	//		  "properties": {
+	//			"type": "array",
+	//			"title": "Properties",
+	//			"items": {
+	//			  "$ref": "#/definitions/property"
+	//			}
+	//		  }
+	//		}
+	//	  },
+}
+
+type CDXTask struct {
+
+	//	  "task": {
+	//		"title": "Task",
+	//		"description": "Describes the inputs, sequence of steps and resources used to accomplish a task and its output.",
+	//		"$comment": "Tasks are building blocks for constructing assemble CI/CD workflows or pipelines.",
+	//		"type": "object",
+	//		"required": [
+	//		  "bom-ref",
+	//		  "uid",
+	//		  "taskTypes"
+	//		],
+	//		"additionalProperties": false,
+	//		"properties": {
+	//		  "bom-ref": {
+	//			"title": "BOM Reference",
+	//			"description": "An optional identifier which can be used to reference the task elsewhere in the BOM. Every bom-ref MUST be unique within the BOM.",
+	//			"$ref": "#/definitions/refType"
+	//		  },
+	//		  "uid": {
+	//			"title": "Unique Identifier (UID)",
+	//			"description": "The unique identifier for the resource instance within its deployment context.",
+	//			"type": "string"
+	//		  },
+	//		  "name": {
+	//			"title": "Name",
+	//			"description": "The name of the resource instance.",
+	//			"type": "string"
+	//		  },
+	//		  "description": {
+	//			"title": "Description",
+	//			"description": "A description of the resource instance.",
+	//			"type": "string"
+	//		  },
+	//		  "resourceReferences": {
+	//			"title": "Resource references",
+	//			"description": "References to component or service resources that are used to realize the resource instance.",
+	//			"type": "array",
+	//			"uniqueItems": true,
+	//			"items": {
+	//			  "$ref": "#/definitions/resourceReferenceChoice"
+	//			}
+	//		  },
+	//		  "taskTypes": {
+	//			"title": "Task types",
+	//			"description": "Indicates the types of activities performed by the set of workflow tasks.",
+	//			"$comment": "Currently, these types reflect common CI/CD actions.",
+	//			"type": "array",
+	//			"items": {
+	//			  "$ref": "#/definitions/taskType"
+	//			}
+	//		  },
+	//		  "trigger": {
+	//			"title": "Trigger",
+	//			"description": "The trigger that initiated the task.",
+	//			"$ref": "#/definitions/trigger"
+	//		  },
+	//		  "steps": {
+	//			"title": "Steps",
+	//			"description": "The sequence of steps for the task.",
+	//			"type": "array",
+	//			"items": {
+	//			  "$ref": "#/definitions/step"
+	//			},
+	//			"uniqueItems": true
+	//		  },
+	//		  "inputs": {
+	//			"title": "Inputs",
+	//			"description": "Represents resources and data brought into a task at runtime by executor or task commands",
+	//			"examples": ["a `configuration` file which was declared as a local `component` or `externalReference`"],
+	//			"type": "array",
+	//			"items": {
+	//			  "$ref": "#/definitions/inputType"
+	//			},
+	//			"uniqueItems": true
+	//		  },
+	//		  "outputs": {
+	//			"title": "Outputs",
+	//			"description": "Represents resources and data output from a task at runtime by executor or task commands",
+	//			"examples": ["a log file or metrics data produced by the task"],
+	//			"type": "array",
+	//			"items": {
+	//			  "$ref": "#/definitions/outputType"
+	//			},
+	//			"uniqueItems": true
+	//		  },
+	//		  "timeStart": {
+	//			"title": "Time start",
+	//			"description": "The date and time (timestamp) when the task started.",
+	//			"type": "string",
+	//			"format": "date-time"
+	//		  },
+	//		  "timeEnd": {
+	//			"title": "Time end",
+	//			"description": "The date and time (timestamp) when the task ended.",
+	//			"type": "string",
+	//			"format": "date-time"
+	//		  },
+	//		  "workspaces": {
+	//			"title": "Workspaces",
+	//			"description": "A set of named filesystem or data resource shareable by workflow tasks.",
+	//			"type": "array",
+	//			"items": {
+	//			  "$ref": "#/definitions/workspace"
+	//			},
+	//			"uniqueItems": true
+	//		  },
+	//		  "runtimeTopology": {
+	//			"title": "Runtime topology",
+	//			"description": "A graph of the component runtime topology for task's instance.",
+	//			"$comment": "A description of the runtime component and service topology.  This can describe a partial or complete topology used to host and execute the task (e.g., hardware, operating systems, configurations, etc.),",
+	//			"type": "array",
+	//			"items": {
+	//			  "$ref": "#/definitions/dependency"
+	//			},
+	//			"uniqueItems": true
+	//		  },
+	//		  "properties": {
+	//			"type": "array",
+	//			"title": "Properties",
+	//			"items": {
+	//			  "$ref": "#/definitions/property"
+	//			}
+	//		  }
+	//		}
+	//	  },
+}
+
+type CDXStep struct {
+
+	//	  "step": {
+	//		"type": "object",
+	//		"description": "Executes specific commands or tools in order to accomplish its owning task as part of a sequence.",
+	//		"additionalProperties": false,
+	//		"properties": {
+	//		  "name": {
+	//			"title": "Name",
+	//			"description": "A name for the step.",
+	//			"type": "string"
+	//		  },
+	//		  "description": {
+	//			"title": "Description",
+	//			"description": "A description of the step.",
+	//			"type": "string"
+	//		  },
+	//		  "commands": {
+	//			"title": "Commands",
+	//			"description": "Ordered list of commands or directives for the step",
+	//			"type": "array",
+	//			"items": {
+	//			  "$ref": "#/definitions/command"
+	//			}
+	//		  },
+	//		  "properties": {
+	//			"type": "array",
+	//			"title": "Properties",
+	//			"items": {
+	//			  "$ref": "#/definitions/property"
+	//			}
+	//		  }
+	//		}
+	//	  },
+}
+
+type CDXCommand struct {
+
+	//	  "command": {
+	//		"type": "object",
+	//		"additionalProperties": false,
+	//		"properties": {
+	//		  "executed": {
+	//			"title": "Executed",
+	//			"description": "A text representation of the executed command.",
+	//			"type": "string"
+	//		  },
+	//		  "properties": {
+	//			"type": "array",
+	//			"title": "Properties",
+	//			"items": {
+	//			  "$ref": "#/definitions/property"
+	//			}
+	//		  }
+	//		}
+	//	  },
+}
+
+type CDXWorkspace struct {
+	//	  "workspace": {
+	//		"title": "Workspace",
+	//		"description": "A named filesystem or data resource shareable by workflow tasks.",
+	//		"type": "object",
+	//		"required": [
+	//		  "bom-ref",
+	//		  "uid"
+	//		],
+	//		"additionalProperties": false,
+	//		"properties": {
+	//		  "bom-ref": {
+	//			"title": "BOM Reference",
+	//			"description": "An optional identifier which can be used to reference the workspace elsewhere in the BOM. Every bom-ref MUST be unique within the BOM.",
+	//			"$ref": "#/definitions/refType"
+	//		  },
+	//		  "uid": {
+	//			"title": "Unique Identifier (UID)",
+	//			"description": "The unique identifier for the resource instance within its deployment context.",
+	//			"type": "string"
+	//		  },
+	//		  "name": {
+	//			"title": "Name",
+	//			"description": "The name of the resource instance.",
+	//			"type": "string"
+	//		  },
+	//		  "aliases": {
+	//			"title": "Aliases",
+	//			"description": "The names for the workspace as referenced by other workflow tasks. Effectively, a name mapping so other tasks can use their own local name in their steps.",
+	//			"type": "array",
+	//			"items": {"type": "string"}
+	//		  },
+	//		  "description": {
+	//			"title": "Description",
+	//			"description": "A description of the resource instance.",
+	//			"type": "string"
+	//		  },
+	//		  "resourceReferences": {
+	//			"title": "Resource references",
+	//			"description": "References to component or service resources that are used to realize the resource instance.",
+	//			"type": "array",
+	//			"uniqueItems": true,
+	//			"items": {
+	//			  "$ref": "#/definitions/resourceReferenceChoice"
+	//			}
+	//		  },
+	//		  "accessMode": {
+	//			"title": "Access mode",
+	//			"description": "Describes the read-write access control for the workspace relative to the owning resource instance.",
+	//			"type": "string",
+	//			"enum": [
+	//			  "read-only",
+	//			  "read-write",
+	//			  "read-write-once",
+	//			  "write-once",
+	//			  "write-only"
+	//			]
+	//		  },
+	//		  "mountPath": {
+	//			"title": "Mount path",
+	//			"description": "A path to a location on disk where the workspace will be available to the associated task's steps.",
+	//			"type": "string"
+	//		  },
+	//		  "managedDataType": {
+	//			"title": "Managed data type",
+	//			"description": "The name of a domain-specific data type the workspace represents.",
+	//			"$comment": "This property is for CI/CD frameworks that are able to provide access to structured, managed data at a more granular level than a filesystem.",
+	//			"examples": ["ConfigMap","Secret"],
+	//			"type": "string"
+	//		  },
+	//		  "volumeRequest": {
+	//			"title": "Volume request",
+	//			"description": "Identifies the reference to the request for a specific volume type and parameters.",
+	//			"examples": ["a kubernetes Persistent Volume Claim (PVC) name"],
+	//			"type": "string"
+	//		  },
+	//		  "volume": {
+	//			"title": "Volume",
+	//			"description": "Information about the actual volume instance allocated to the workspace.",
+	//			"$comment": "The actual volume allocated may be different than the request.",
+	//			"examples": ["see https://kubernetes.io/docs/concepts/storage/persistent-volumes/"],
+	//			"$ref": "#/definitions/volume"
+	//		  },
+	//		  "properties": {
+	//			"type": "array",
+	//			"title": "Properties",
+	//			"items": {
+	//			  "$ref": "#/definitions/property"
+	//			}
+	//		  }
+	//		}
+	//	  },
+}
+
+type CDXVolume struct {
+	//	  "volume": {
+	//		"title": "Volume",
+	//		"description": "An identifiable, logical unit of data storage tied to a physical device.",
+	//		"type": "object",
+	//		"additionalProperties": false,
+	//		"properties": {
+	//		  "uid": {
+	//			"title": "Unique Identifier (UID)",
+	//			"description": "The unique identifier for the volume instance within its deployment context.",
+	//			"type": "string"
+	//		  },
+	//		  "name": {
+	//			"title": "Name",
+	//			"description": "The name of the volume instance",
+	//			"type": "string"
+	//		  },
+	//		  "mode": {
+	//			"title": "Mode",
+	//			"description": "The mode for the volume instance.",
+	//			"type": "string",
+	//			"enum": [
+	//			  "filesystem", "block"
+	//			],
+	//			"default": "filesystem"
+	//		  },
+	//		  "path": {
+	//			"title": "Path",
+	//			"description": "The underlying path created from the actual volume.",
+	//			"type": "string"
+	//		  },
+	//		  "sizeAllocated": {
+	//			"title": "Size allocated",
+	//			"description": "The allocated size of the volume accessible to the associated workspace. This should include the scalar size as well as IEC standard unit in either decimal or binary form.",
+	//			"examples": ["10GB", "2Ti", "1Pi"],
+	//			"type": "string"
+	//		  },
+	//		  "persistent": {
+	//			"title": "Persistent",
+	//			"description": "Indicates if the volume persists beyond the life of the resource it is associated with.",
+	//			"type": "boolean"
+	//		  },
+	//		  "remote": {
+	//			"title": "Remote",
+	//			"description": "Indicates if the volume is remotely (i.e., network) attached.",
+	//			"type": "boolean"
+	//		  },
+	//		  "properties": {
+	//			"type": "array",
+	//			"title": "Properties",
+	//			"items": {
+	//			  "$ref": "#/definitions/property"
+	//			}
+	//		  }
+	//		}
+	//	  },
+}
+
+type CDXTrigger struct {
+	//	  "trigger": {
+	//		"title": "Trigger",
+	//		"description": "Represents a resource that can conditionally activate (or fire) tasks based upon associated events and their data.",
+	//		"type": "object",
+	//		"additionalProperties": false,
+	//		"required": [
+	//		  "type",
+	//		  "bom-ref",
+	//		  "uid"
+	//		],
+	//		"properties": {
+	//		  "bom-ref": {
+	//			"title": "BOM Reference",
+	//			"description": "An optional identifier which can be used to reference the trigger elsewhere in the BOM. Every bom-ref MUST be unique within the BOM.",
+	//			"$ref": "#/definitions/refType"
+	//		  },
+	//		  "uid": {
+	//			"title": "Unique Identifier (UID)",
+	//			"description": "The unique identifier for the resource instance within its deployment context.",
+	//			"type": "string"
+	//		  },
+	//		  "name": {
+	//			"title": "Name",
+	//			"description": "The name of the resource instance.",
+	//			"type": "string"
+	//		  },
+	//		  "description": {
+	//			"title": "Description",
+	//			"description": "A description of the resource instance.",
+	//			"type": "string"
+	//		  },
+	//		  "resourceReferences": {
+	//			"title": "Resource references",
+	//			"description": "References to component or service resources that are used to realize the resource instance.",
+	//			"type": "array",
+	//			"uniqueItems": true,
+	//			"items": {
+	//			  "$ref": "#/definitions/resourceReferenceChoice"
+	//			}
+	//		  },
+	//		  "type": {
+	//			"title": "Type",
+	//			"description": "The source type of event which caused the trigger to fire.",
+	//			"type": "string",
+	//			"enum": [
+	//			  "manual",
+	//			  "api",
+	//			  "webhook",
+	//			  "scheduled"
+	//			]
+	//		  },
+	//		  "event": {
+	//			"title": "Event",
+	//			"description": "The event data that caused the associated trigger to activate.",
+	//			"$ref": "#/definitions/event"
+	//		  },
+	//		  "conditions": {
+	//			"type": "array",
+	//			"uniqueItems": true,
+	//			"items": {
+	//			  "$ref": "#/definitions/condition"
+	//			}
+	//		  },
+	//		  "timeActivated": {
+	//			"title": "Time activated",
+	//			"description": "The date and time (timestamp) when the trigger was activated.",
+	//			"type": "string",
+	//			"format": "date-time"
+	//		  },
+	//		  "inputs": {
+	//			"title": "Inputs",
+	//			"description": "Represents resources and data brought into a task at runtime by executor or task commands",
+	//			"examples": ["a `configuration` file which was declared as a local `component` or `externalReference`"],
+	//			"type": "array",
+	//			"items": {
+	//			  "$ref": "#/definitions/inputType"
+	//			},
+	//			"uniqueItems": true
+	//		  },
+	//		  "outputs": {
+	//			"title": "Outputs",
+	//			"description": "Represents resources and data output from a task at runtime by executor or task commands",
+	//			"examples": ["a log file or metrics data produced by the task"],
+	//			"type": "array",
+	//			"items": {
+	//			  "$ref": "#/definitions/outputType"
+	//			},
+	//			"uniqueItems": true
+	//		  },
+	//		  "properties": {
+	//			"type": "array",
+	//			"title": "Properties",
+	//			"items": {
+	//			  "$ref": "#/definitions/property"
+	//			}
+	//		  }
+	//		}
+	//	  },
+	//	  "event": {
+}
+
+type CDXEvent struct {
+	//		"title": "Event",
+	//		"description": "Represents something that happened that may trigger a response.",
+	//		"type": "object",
+	//		"additionalProperties": false,
+	//		"properties": {
+	//		  "uid": {
+	//			"title": "Unique Identifier (UID)",
+	//			"description": "The unique identifier of the event.",
+	//			"type": "string"
+	//		  },
+	//		  "description": {
+	//			"title": "Description",
+	//			"description": "A description of the event.",
+	//			"type": "string"
+	//		  },
+	//		  "timeReceived": {
+	//			"title": "Time Received",
+	//			"description": "The date and time (timestamp) when the event was received.",
+	//			"type": "string",
+	//			"format": "date-time"
+	//		  },
+	//		  "data": {
+	//			"title": "Data",
+	//			"description": "Encoding of the raw event data.",
+	//			"$ref": "#/definitions/attachment"
+	//		  },
+	//		  "source": {
+	//			"title": "Source",
+	//			"description": "References the component or service that was the source of the event",
+	//			"$ref": "#/definitions/resourceReferenceChoice"
+	//		  },
+	//		  "target": {
+	//			"title": "Target",
+	//			"description": "References the component or service that was the target of the event",
+	//			"$ref": "#/definitions/resourceReferenceChoice"
+	//		  },
+	//		  "properties": {
+	//			"type": "array",
+	//			"title": "Properties",
+	//			"items": {
+	//			  "$ref": "#/definitions/property"
+	//			}
+	//		  }
+	//		}
+	//	  },
+}
+
+type CDXInputType struct {
+	//	  "inputType": {
+	//		"title": "Input type",
+	//		"description": "Type that represents various input data types and formats.",
+	//		"type": "object",
+	//		"oneOf": [
+	//		  {
+	//			"required": [
+	//			  "resource"
+	//			]
+	//		  },
+	//		  {
+	//			"required": [
+	//			  "parameters"
+	//			]
+	//		  },
+	//		  {
+	//			"required": [
+	//			  "environmentVars"
+	//			]
+	//		  },
+	//		  {
+	//			"required": [
+	//			  "data"
+	//			]
+	//		  }
+	//		],
+	//		"additionalProperties": false,
+	//		"properties": {
+	//		  "source": {
+	//			"title": "Source",
+	//			"description": "A references to the component or service that provided the input to the task (e.g., reference to a service with data flow value of `inbound`)",
+	//			"examples": [
+	//			  "source code repository",
+	//			  "database"
+	//			],
+	//			"$ref": "#/definitions/resourceReferenceChoice"
+	//		  },
+	//		  "target": {
+	//			"title": "Target",
+	//			"description": "A reference to the component or service that received or stored the input if not the task itself (e.g., a local, named storage workspace)",
+	//			"examples": [
+	//			  "workspace",
+	//			  "directory"
+	//			],
+	//			"$ref": "#/definitions/resourceReferenceChoice"
+	//		  },
+	//		  "resource": {
+	//			"title": "Resource",
+	//			"description": "A reference to an independent resource provided as an input to a task by the workflow runtime.",
+	//			"examples": [
+	//			  "reference to a configuration file in a repository (i.e., a bom-ref)",
+	//			  "reference to a scanning service used in a task (i.e., a bom-ref)"
+	//			],
+	//			"$ref": "#/definitions/resourceReferenceChoice"
+	//		  },
+	//		  "parameters": {
+	//			"title": "Parameters",
+	//			"description": "Inputs that have the form of parameters with names and values.",
+	//			"type": "array",
+	//			"uniqueItems": true,
+	//			"items": {
+	//			  "$ref": "#/definitions/parameter"
+	//			}
+	//		  },
+	//		  "environmentVars": {
+	//			"title": "Environment variables",
+	//			"description": "Inputs that have the form of parameters with names and values.",
+	//			"type": "array",
+	//			"uniqueItems": true,
+	//			"items": {
+	//			  "oneOf": [
+	//				{
+	//				  "$ref": "#/definitions/property"
+	//				},
+	//				{
+	//				  "type": "string"
+	//				}
+	//			  ]
+	//			}
+	//		  },
+	//		  "data": {
+	//			"title": "Data",
+	//			"description": "Inputs that have the form of data.",
+	//			"$ref": "#/definitions/attachment"
+	//		  },
+	//		  "properties": {
+	//			"type": "array",
+	//			"title": "Properties",
+	//			"items": {
+	//			  "$ref": "#/definitions/property"
+	//			}
+	//		  }
+	//		}
+	//	  },
+}
+
+type CDXOutputType struct {
+	//	  "outputType": {
+	//		"type": "object",
+	//		"oneOf": [
+	//		  {
+	//			"required": [
+	//			  "resource"
+	//			]
+	//		  },
+	//		  {
+	//			"required": [
+	//			  "environmentVars"
+	//			]
+	//		  },
+	//		  {
+	//			"required": [
+	//			  "data"
+	//			]
+	//		  }
+	//		],
+	//		"additionalProperties": false,
+	//		"properties": {
+	//		  "type": {
+	//			"title": "Type",
+	//			"description": "Describes the type of data output.",
+	//			"type": "string",
+	//			"enum": [
+	//			  "artifact",
+	//			  "attestation",
+	//			  "log",
+	//			  "evidence",
+	//			  "metrics",
+	//			  "other"
+	//			]
+	//		  },
+	//		  "source": {
+	//			"title": "Source",
+	//			"description": "Component or service that generated or provided the output from the task (e.g., a build tool)",
+	//			"$ref": "#/definitions/resourceReferenceChoice"
+	//		  },
+	//		  "target": {
+	//			"title": "Target",
+	//			"description": "Component or service that received the output from the task (e.g., reference to an artifactory service with data flow value of `outbound`)",
+	//			"examples": ["a log file described as an `externalReference` within its target domain."],
+	//			"$ref": "#/definitions/resourceReferenceChoice"
+	//		  },
+	//		  "resource": {
+	//			"title": "Resource",
+	//			"description": "A reference to an independent resource generated as output by the task.",
+	//			"examples": [
+	//			  "configuration file",
+	//			  "source code",
+	//			  "scanning service"
+	//			],
+	//			"$ref": "#/definitions/resourceReferenceChoice"
+	//		  },
+	//		  "data": {
+	//			"title": "Data",
+	//			"description": "Outputs that have the form of data.",
+	//			"$ref": "#/definitions/attachment"
+	//		  },
+	//		  "environmentVars": {
+	//			"title": "Environment variables",
+	//			"description": "Outputs that have the form of environment variables.",
+	//			"type": "array",
+	//			"items": {
+	//			  "oneOf": [
+	//				{
+	//				  "$ref": "#/definitions/property"
+	//				},
+	//				{
+	//				  "type": "string"
+	//				}
+	//			  ]
+	//			},
+	//			"uniqueItems": true
+	//		  },
+	//		  "properties": {
+	//			"type": "array",
+	//			"title": "Properties",
+	//			"items": {
+	//			  "$ref": "#/definitions/property"
+	//			}
+	//		  }
+	//		}
+	//	  },
+}
+
+type CDXResourceReferenceChoice struct {
+
+	//	  "resourceReferenceChoice": {
+	//		"title": "Resource reference choice",
+	//		"description": "A reference to a locally defined resource (e.g., a bom-ref) or an externally accessible resource.",
+	//		"$comment": "Enables reference to a resource that participates in a workflow; using either internal (bom-ref) or external (externalReference) types.",
+	//		"type": "object",
+	//		"additionalProperties": false,
+	//		"properties": {
+	//		  "ref": {
+	//			"title": "BOM Reference",
+	//			"description": "References an object by its bom-ref attribute",
+	//			"anyOf": [
+	//			  {
+	//				"title": "Ref",
+	//				"$ref": "#/definitions/refLinkType"
+	//			  },
+	//			  {
+	//				"title": "BOM-Link Element",
+	//				"$ref": "#/definitions/bomLinkElementType"
+	//			  }
+	//			]
+	//		  },
+	//		  "externalReference": {
+	//			"title": "External reference",
+	//			"description": "Reference to an externally accessible resource.",
+	//			"$ref": "#/definitions/externalReference"
+	//		  }
+	//		},
+	//		"oneOf": [
+	//		  {
+	//			"required": [
+	//			  "ref"
+	//			]
+	//		  },
+	//		  {
+	//			"required": [
+	//			  "externalReference"
+	//			]
+	//		  }
+	//		]
+	//	  },
+}
+
+type CDXCondition struct {
+	//	  "condition": {
+	//		"title": "Condition",
+	//		"description": "A condition that was used to determine a trigger should be activated.",
+	//		"type": "object",
+	//		"additionalProperties": false,
+	//		"properties": {
+	//		  "description": {
+	//			"title": "Description",
+	//			"description": "Describes the set of conditions which cause the trigger to activate.",
+	//			"type": "string"
+	//		  },
+	//		  "expression": {
+	//			"title": "Expression",
+	//			"description": "The logical expression that was evaluated that determined the trigger should be fired.",
+	//			"type": "string"
+	//		  },
+	//		  "properties": {
+	//			"type": "array",
+	//			"title": "Properties",
+	//			"items": {
+	//			  "$ref": "#/definitions/property"
+	//			}
+	//		  }
+	//		}
+	//	  },
+}
+
+type CDXTaskType struct {
+
+	//	  "taskType": {
+	//		"type": "string",
+	//		"enum": [
+	//		  "copy",
+	//		  "clone",
+	//		  "lint",
+	//		  "scan",
+	//		  "merge",
+	//		  "build",
+	//		  "test",
+	//		  "deliver",
+	//		  "deploy",
+	//		  "release",
+	//		  "clean",
+	//		  "other"
+	//		]
+	//	  },
+	//	  "parameter": {
+	//		"title": "Parameter",
+	//		"description": "A representation of a functional parameter.",
+	//		"type": "object",
+	//		"additionalProperties": false,
+	//		"properties": {
+	//		  "name": {
+	//			"title": "Name",
+	//			"description": "The name of the parameter.",
+	//			"type": "string"
+	//		  },
+	//		  "value": {
+	//			"title": "Value",
+	//			"description": "The value of the parameter.",
+	//			"type": "string"
+	//		  },
+	//		  "dataType": {
+	//			"title": "Data type",
+	//			"description": "The data type of the parameter.",
+	//			"type": "string"
+	//		  }
+	//		}
+	//	  },
+}
+
+// v1.5 new type for "metadata"
+type CDXLifecycle struct {
+	// "lifecycles": {
+	// 	"type": "array",
+	// 	"title": "Lifecycles",
+	// 	"description": "",
+	// 	"items": {
+	// 	  "type": "object",
+	// 	  "title": "Lifecycle",
+	// 	  "description": "The product lifecycle(s) that this BOM represents.",
+	// 	  "oneOf": [
+	// 		{
+	// 		  "required": ["phase"],
+	// 		  "additionalProperties": false,
+	// 		  "properties": {
+	// 			"phase": {
+	// 			  "type": "string",
+	// 			  "title": "Phase",
+	// 			  "description": "A pre-defined phase in the product lifecycle.\n\n* __design__ = BOM produced early in the development lifecycle containing inventory of components and services that are proposed or planned to be used. The inventory may need to be procured, retrieved, or resourced prior to use.\n* __pre-build__ = BOM consisting of information obtained prior to a build process and may contain source files and development artifacts and manifests. The inventory may need to be resolved and retrieved prior to use.\n* __build__ = BOM consisting of information obtained during a build process where component inventory is available for use. The precise versions of resolved components are usually available at this time as well as the provenance of where the components were retrieved from.\n* __post-build__ = BOM consisting of information obtained after a build process has completed and the resulting components(s) are available for further analysis. Built components may exist as the result of a CI/CD process, may have been installed or deployed to a system or device, and may need to be retrieved or extracted from the system or device.\n* __operations__ = BOM produced that represents inventory that is running and operational. This may include staging or production environments and will generally encompass multiple SBOMs describing the applications and operating system, along with HBOMs describing the hardware that makes up the system. Operations Bill of Materials (OBOM) can provide full-stack inventory of runtime environments, configurations, and additional dependencies.\n* __discovery__ = BOM consisting of information observed through network discovery providing point-in-time enumeration of embedded, on-premise, and cloud-native services such as server applications, connected devices, microservices, and serverless functions.\n* __decommission__ = BOM containing inventory that will be, or has been retired from operations.",
+	// 			  "enum": [
+	// 				"design",
+	// 				"pre-build",
+	// 				"build",
+	// 				"post-build",
+	// 				"operations",
+	// 				"discovery",
+	// 				"decommission"
+	// 			  ]
+	// 			}
+	// 		  }
+	// 		},
+	// 		{
+	// 		  "required": ["name"],
+	// 		  "additionalProperties": false,
+	// 		  "properties": {
+	// 			"name": {
+	// 			  "type": "string",
+	// 			  "title": "Name",
+	// 			  "description": "The name of the lifecycle phase"
+	// 			},
+	// 			"description": {
+	// 			  "type": "string",
+	// 			  "title": "Description",
+	// 			  "description": "The description of the lifecycle phase"
+	// 			}
+	// 		  }
+	// 		}
+	// 	  ]
+	// 	}
+	// },
+}
 
 // // TODO: implement JSF schema
 // // https://github.com/CycloneDX/specification/blob/master/schema/jsf-0.82.schema.json
