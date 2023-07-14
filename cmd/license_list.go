@@ -247,6 +247,8 @@ func ListLicenses(output io.Writer, format string, whereFilters []WhereFilter, s
 			err = DisplayLicenseListCSV(output)
 		case FORMAT_MARKDOWN:
 			DisplayLicenseListMarkdown(output)
+		case FORMAT_TEXT:
+			DisplayLicenseListSummaryText(output)
 		default:
 			// Default to JSON output for anything else
 			getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
