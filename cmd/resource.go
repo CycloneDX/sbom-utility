@@ -341,7 +341,7 @@ func hashComponentAsResource(cdxComponent schema.CDXComponent, whereFilters []Wh
 	resourceInfo.Type = RESOURCE_TYPE_COMPONENT
 	resourceInfo.Component = cdxComponent
 	resourceInfo.Name = cdxComponent.Name
-	resourceInfo.BomRef = cdxComponent.BomRef
+	resourceInfo.BomRef = cdxComponent.BomRef.String()
 	resourceInfo.Version = cdxComponent.Version
 	resourceInfo.SupplierProvider = cdxComponent.Supplier
 	resourceInfo.Properties = cdxComponent.Properties
@@ -412,7 +412,7 @@ func hashServiceAsResource(cdxService schema.CDXService, whereFilters []WhereFil
 	resourceInfo.Type = RESOURCE_TYPE_SERVICE
 	resourceInfo.Service = cdxService
 	resourceInfo.Name = cdxService.Name
-	resourceInfo.BomRef = cdxService.BomRef
+	resourceInfo.BomRef = cdxService.BomRef.String()
 	resourceInfo.Version = cdxService.Version
 	resourceInfo.SupplierProvider = cdxService.Provider
 	resourceInfo.Properties = cdxService.Properties

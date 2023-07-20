@@ -82,7 +82,7 @@ type LicenseInfo struct {
 	LicenseChoiceType      string                  `json:"license-type"`
 	License                string                  `json:"license"`
 	ResourceName           string                  `json:"resource-name"`
-	BomRef                 string                  `json:"bom-ref"`
+	BomRef                 schema.CDXRefType       `json:"bom-ref"`
 	BomLocationValue       int                     `json:"bom-location-value"`
 	BomLocation            string                  `json:"bom-location"`
 	LicenseChoice          schema.CDXLicenseChoice // Do not marshal

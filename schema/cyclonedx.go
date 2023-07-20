@@ -32,6 +32,7 @@ var EMPTY_CDXLicense = CDXLicense{}
 // will still be added as generic "interface{}" types
 // v1.3 added "compositions"
 // v1.4 added "vulnerabilities", "signature"
+// v1.5 added "annotations", "formulation", "properties"
 type CDXBom struct {
 	BomFormat          string                 `json:"bomFormat,omitempty"`
 	SpecVersion        string                 `json:"specVersion,omitempty"`
@@ -42,33 +43,12 @@ type CDXBom struct {
 	Services           []CDXService           `json:"services,omitempty"`
 	Dependencies       []CDXDependency        `json:"dependencies,omitempty"`
 	ExternalReferences []CDXExternalReference `json:"externalReferences,omitempty"`
-	Compositions       []CDXCompositions      `json:"compositions,omitempty" cdx:"v1.3"`    // v1.3 added
+	Compositions       []CDXCompositions      `json:"compositions,omitempty" cdx:"1.3"`     // v1.3 added
 	Vulnerabilities    []CDXVulnerability     `json:"vulnerabilities,omitempty" cdx:"v1.4"` // v1.4 added
-	Annotations        []CDXAnnotation        `json:"annotations,omitempty" cdx:"v1.5"`     // v1.5 added
-	// TODO: Issue #27: Signature CDXSignature `json:"signature,omitempty" cdx:"v1.4"` // v1.4 added
-
-	// "annotations": {
-	// 	"type": "array",
-	// 	"items": {"$ref": "#/definitions/annotations"},
-	// 	"uniqueItems": true,
-	// 	"title": "Annotations",
-	// 	"description": "Comments made by people, organizations, or tools about any object with a bom-ref, such as components, services, vulnerabilities, or the BOM itself. Unlike inventory information, annotations may contain opinion or commentary from various stakeholders. Annotations may be inline (with inventory) or externalized via BOM-Link, and may optionally be signed."
-	//   },
-	//   "formulation": {
-	// 	"type": "array",
-	// 	"items": {"$ref": "#/definitions/formula"},
-	// 	"uniqueItems": true,
-	// 	"title": "Formulation",
-	// 	"description": "Describes how a component or service was manufactured or deployed. This is achieved through the use of formulas, workflows, tasks, and steps, which declare the precise steps to reproduce along with the observed formulas describing the steps which transpired in the manufacturing process."
-	//   },
-	//   "properties": {
-	// 	"type": "array",
-	// 	"title": "Properties",
-	// 	"description": "Provides the ability to document properties in a name-value store. This provides flexibility to include data not officially supported in the standard without having to use additional namespaces or create extensions. Unlike key-value stores, properties support duplicate names, each potentially having different values. Property names of interest to the general public are encouraged to be registered in the [CycloneDX Property Taxonomy](https://github.com/CycloneDX/cyclonedx-property-taxonomy). Formal registration is OPTIONAL.",
-	// 	"items": {
-	// 	  "$ref": "#/definitions/property"
-	// 	}
-	//   },
+	Annotations        []CDXAnnotation        `json:"annotations,omitempty" cdx:"1.5"`      // v1.5 added
+	Formulation        []CDXFormula           `json:"formulation,omitempty" cdx:"1.5"`      // v1.5 added
+	Properties         []CDXProperty          `json:"properties,omitempty" cdx:"1.5"`       // v1.5 added
+	// TODO: Issue #27: Signature CDXSignature `json:"signature,omitempty" cdx:"1.4"` // v1.4 added
 }
 
 // v1.2: existed
@@ -87,6 +67,46 @@ type CDXMetadata struct {
 	Lifecycles   []CDXLifecycle             `json:"lifecycles,omitempty"` // v1.5 added
 }
 
+// v1.4 added
+type CDXRefType string // v1.5 added "minLength": 1
+
+// v1.5 added Stringer interface
+func (ref CDXRefType) String() string {
+	return string(ref)
+}
+
+// v1.5 added
+type CDXRefLinkType CDXRefType // "allOf": [{"$ref": "#/definitions/refType"}]
+
+// v1.5 added Stringer interface
+func (ref CDXRefLinkType) String() string {
+	return string(ref)
+}
+
+// v1.5 added
+type CDXBomLinkDocumentType string // "format": "iri-reference", "pattern": "^urn:cdx: ... "
+
+// v1.5 added Stringer interface
+func (link CDXBomLinkDocumentType) String() string {
+	return string(link)
+}
+
+// v1.5 added
+type CDXBomLinkElementType string // "format": "iri-reference", "pattern": "^urn:cdx: ... "
+
+// v1.5 added Stringer interface
+func (link CDXBomLinkElementType) String() string {
+	return string(link)
+}
+
+// v1.5 added
+// TODO see what happens if we use a struct with the 2 possible types
+type CDXBomLink string //  "anyOf": ["#/definitions/bomLinkDocumentType", "#/definitions/bomLinkElementType"]
+
+func (link CDXBomLink) String() string {
+	return string(link)
+}
+
 // v1.2: existed
 // v1.3: added: "evidence", "properties"
 // v1.4: added: "releaseNotes", "signature"
@@ -98,7 +118,7 @@ type CDXMetadata struct {
 type CDXComponent struct {
 	Primary            bool                    `json:"-"` // Proprietary: do NOT marshal/unmarshal
 	Purl               string                  `json:"purl,omitempty"`
-	BomRef             string                  `json:"bom-ref,omitempty"`
+	BomRef             CDXRefType              `json:"bom-ref,omitempty"`
 	Type               string                  `json:"type,omitempty"`
 	MimeType           string                  `json:"mime-type,omitempty"`
 	Name               string                  `json:"name,omitempty"`
@@ -136,7 +156,7 @@ type CDXComponent struct {
 // TODO: v1.2 "licenses" used to be an anon. type until v1.3 intro. the `LicenseChoice` def.
 // validate a v1.2 SBOM wit the anon. type parses properly
 type CDXService struct {
-	BomRef             string                  `json:"bom-ref,omitempty"`
+	BomRef             CDXRefType              `json:"bom-ref,omitempty"`
 	Provider           CDXOrganizationalEntity `json:"provider,omitempty"`
 	Group              string                  `json:"group,omitempty"`
 	Name               string                  `json:"name,omitempty"`
@@ -177,17 +197,21 @@ type CDXTool struct {
 }
 
 // v1.2: existed
+// v1.5: added "bom-ref"
 type CDXOrganizationalEntity struct {
+	BomRef  CDXRefType                 `json:"bom-ref,omitempty"` // v1.5 added
 	Name    string                     `json:"name,omitempty"`
 	Url     []string                   `json:"url,omitempty"`
 	Contact []CDXOrganizationalContact `json:"contact,omitempty"`
 }
 
 // v1.2: existed
+// v1.5: added "bom-ref"
 type CDXOrganizationalContact struct {
-	Name  string `json:"name,omitempty"`
-	Email string `json:"email,omitempty"`
-	Phone string `json:"phone,omitempty"`
+	BomRef CDXRefType `json:"bom-ref,omitempty"` // v1.5 added
+	Name   string     `json:"name,omitempty"`
+	Email  string     `json:"email,omitempty"`
+	Phone  string     `json:"phone,omitempty"`
 }
 
 // v1.2: existed
@@ -328,7 +352,7 @@ type CDXComponentEvidence struct {
 // v1.3: created "compositions" defn.
 // v1.4: added "signature"
 // Note: "aggregate" is type `aggregateType` which is a constrained string
-// TODO: Should not be plural
+// TODO: Should not be plural; open issue against v2.0 schema
 type CDXCompositions struct {
 	Aggregate    string       `json:"aggregate,omitempty"`
 	Assemblies   []string     `json:"assemblies,omitempty"`
@@ -397,7 +421,7 @@ type CDXVulnerabilitySource struct {
 // Note: "bom-ref" is a "ref-type" which is a constrained `string`
 // Note: "cwes" is a array of "cwe" which is a constrained `int`
 type CDXVulnerability struct {
-	BomRef         string                 `json:"bom-ref,omitempty"`
+	BomRef         CDXRefType             `json:"bom-ref,omitempty"`
 	Id             string                 `json:"id,omitempty"`
 	Source         CDXVulnerabilitySource `json:"source,omitempty"`
 	References     []CDXReference         `json:"references"` // an anon. type
@@ -467,7 +491,7 @@ type CDXVersionRange struct {
 
 // v1.5 "annotations" and sub-schema added ("required": ["subjects","annotator","timestamp","text"])
 type CDXAnnotation struct {
-	BomRef    string       `json:"bom-ref,omitempty"`
+	BomRef    CDXRefType   `json:"bom-ref,omitempty"`
 	Subjects  []CDXSubject `json:"subjects,omitempty"`
 	Annotator CDXAnnotator `json:"annotator,omitempty"`
 	Timestamp string       `json:"timestamp,omitempty"`
@@ -476,20 +500,10 @@ type CDXAnnotation struct {
 }
 
 // v1.5 added to represent the anonymous type defined in the "annotations" object
-type CDXSubject struct {
-	//"items": {
-	// 		  "anyOf": [
-	// 			{
-	// 			  "title": "Ref",
-	// 			  "$ref": "#/definitions/refLinkType"
-	// 			},
-	// 			{
-	// 			  "title": "BOM-Link Element",
-	// 			  "$ref": "#/definitions/bomLinkElementType"
-	// 			}
-	// 		  ]
-	// 		},
-}
+// Note: Since CDXSubject can be one of 2 other types (i.e., "#/definitions/refLinkType"
+// and "#/definitions/bomLinkElementType") which both are "string" types
+// we can also make it a "string" type as it does not affect constraint validation.
+type CDXSubject string
 
 // v1.5 added to represent the anonymous type defined in the "annotations" object
 // required" oneOf: organization, individual, component, service
@@ -1948,55 +1962,15 @@ type CDXTaskType struct {
 }
 
 // v1.5 new type for "metadata"
+type CDXNameDescription struct {
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
+}
+
 type CDXLifecycle struct {
-	// "lifecycles": {
-	// 	"type": "array",
-	// 	"title": "Lifecycles",
-	// 	"description": "",
-	// 	"items": {
-	// 	  "type": "object",
-	// 	  "title": "Lifecycle",
-	// 	  "description": "The product lifecycle(s) that this BOM represents.",
-	// 	  "oneOf": [
-	// 		{
-	// 		  "required": ["phase"],
-	// 		  "additionalProperties": false,
-	// 		  "properties": {
-	// 			"phase": {
-	// 			  "type": "string",
-	// 			  "title": "Phase",
-	// 			  "description": "A pre-defined phase in the product lifecycle.\n\n* __design__ = BOM produced early in the development lifecycle containing inventory of components and services that are proposed or planned to be used. The inventory may need to be procured, retrieved, or resourced prior to use.\n* __pre-build__ = BOM consisting of information obtained prior to a build process and may contain source files and development artifacts and manifests. The inventory may need to be resolved and retrieved prior to use.\n* __build__ = BOM consisting of information obtained during a build process where component inventory is available for use. The precise versions of resolved components are usually available at this time as well as the provenance of where the components were retrieved from.\n* __post-build__ = BOM consisting of information obtained after a build process has completed and the resulting components(s) are available for further analysis. Built components may exist as the result of a CI/CD process, may have been installed or deployed to a system or device, and may need to be retrieved or extracted from the system or device.\n* __operations__ = BOM produced that represents inventory that is running and operational. This may include staging or production environments and will generally encompass multiple SBOMs describing the applications and operating system, along with HBOMs describing the hardware that makes up the system. Operations Bill of Materials (OBOM) can provide full-stack inventory of runtime environments, configurations, and additional dependencies.\n* __discovery__ = BOM consisting of information observed through network discovery providing point-in-time enumeration of embedded, on-premise, and cloud-native services such as server applications, connected devices, microservices, and serverless functions.\n* __decommission__ = BOM containing inventory that will be, or has been retired from operations.",
-	// 			  "enum": [
-	// 				"design",
-	// 				"pre-build",
-	// 				"build",
-	// 				"post-build",
-	// 				"operations",
-	// 				"discovery",
-	// 				"decommission"
-	// 			  ]
-	// 			}
-	// 		  }
-	// 		},
-	// 		{
-	// 		  "required": ["name"],
-	// 		  "additionalProperties": false,
-	// 		  "properties": {
-	// 			"name": {
-	// 			  "type": "string",
-	// 			  "title": "Name",
-	// 			  "description": "The name of the lifecycle phase"
-	// 			},
-	// 			"description": {
-	// 			  "type": "string",
-	// 			  "title": "Description",
-	// 			  "description": "The description of the lifecycle phase"
-	// 			}
-	// 		  }
-	// 		}
-	// 	  ]
-	// 	}
-	// },
+	//  v1.5: "enum": [ "design", "pre-build", "build", "post-build", "operations", "discovery", "decommission"]
+	Phase              string `json:"phase,omitempty"`
+	CDXNameDescription        // name, description
 }
 
 // // TODO: implement JSF schema

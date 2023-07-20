@@ -507,7 +507,7 @@ func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
 				licenseInfo.LicenseChoiceType,
 				licenseName.(string),
 				licenseInfo.ResourceName,
-				licenseInfo.BomRef,
+				licenseInfo.BomRef.String(),
 				licenseInfo.BomLocation,
 			)
 
@@ -565,7 +565,7 @@ func DisplayLicenseListSummaryMarkdown(output io.Writer) {
 				licenseInfo.LicenseChoiceType,
 				licenseName.(string),
 				licenseInfo.ResourceName,
-				licenseInfo.BomRef,
+				licenseInfo.BomRef.String(),
 				licenseInfo.BomLocation,
 			)
 
