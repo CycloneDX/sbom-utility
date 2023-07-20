@@ -171,7 +171,7 @@ type CDXService struct {
 	Services           []CDXService            `json:"services,omitempty"`
 	Properties         []CDXProperty           `json:"properties,omitempty"`   // v1.3: added
 	ReleaseNotes       []CDXReleaseNotes       `json:"releaseNotes,omitempty"` // v1.4: added
-	Signature          CDXSignature            `json:"signature,omitempty"`    // v1.4: added
+	Signature          JSFSignature            `json:"signature,omitempty"`    // v1.4: added
 }
 
 // v1.2: existed as an anon. type in the "component" type defn.
@@ -357,7 +357,7 @@ type CDXCompositions struct {
 	Aggregate    string       `json:"aggregate,omitempty"`
 	Assemblies   []string     `json:"assemblies,omitempty"`
 	Dependencies []string     `json:"dependencies,omitempty"`
-	Signature    CDXSignature `json:"signature,omitempty"` // v1.4: added
+	Signature    JSFSignature `json:"signature,omitempty"` // v1.4: added
 }
 
 // v1.3: created "property" defn.
@@ -496,7 +496,7 @@ type CDXAnnotation struct {
 	Annotator CDXAnnotator `json:"annotator,omitempty"`
 	Timestamp string       `json:"timestamp,omitempty"`
 	Text      string       `json:"text,omitempty"`
-	Signature CDXSignature `json:"signature,omitempty"`
+	Signature JSFSignature `json:"signature,omitempty"`
 }
 
 // v1.5 added to represent the anonymous type defined in the "annotations" object
@@ -512,21 +512,6 @@ type CDXAnnotator struct {
 	Individual   CDXOrganizationalContact `json:"individual,omitempty"`
 	Component    CDXComponent             `json:"component,omitempty"`
 	Service      CDXService               `json:"service,omitempty"`
-}
-
-// v1.5 added for the "annotations" object
-type CDXSignature struct {
-	//"signature": {
-	// 		"$ref": "#/definitions/signature",
-	// 		"title": "Signature",
-	// 		"description": "Enveloped signature in [JSON Signature Format (JSF)](https://cyberphone.github.io/doc/security/jsf.html)."
-	// 	  }
-}
-
-// v1.5 added to represent the anonymous type defined in the "annotations" object
-type CDXSigner struct {
-	Algorithm string `json:"algorithm,omitempty"` // TBD: implement "OneOf" { "string" OR enum["RS256", "RS384", etc.]
-	KeyId     string `json:"keyId,omitempty"`
 }
 
 // "annotations": {
