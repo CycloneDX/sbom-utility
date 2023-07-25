@@ -79,87 +79,31 @@ type CDXModelParameters struct {
 	// 		  }
 }
 
+// v1.5: added (anonymous type)
+type CDXQuantitativeAnalysis struct {
+	PerformanceMetrics []CDXPerformanceMetric `json:"performanceMetrics,omitempty"`
+	Graphics           CDXGraphicsCollection  `json:"graphics,omitempty"`
+}
+
+// v1.5: added (anonymous type)
+// Considerations that should be taken into account regarding the model's construction,
+// training, and application
+type CDXConsiderations struct {
+	Users                 []string                `json:"users,omitempty"`
+	UseCases              []string                `json:"useCases,omitempty"`
+	TechnicalLimitations  []string                `json:"technicalLimitations,omitempty"`
+	PerformanceTradeoffs  []string                `json:"performanceTradeoffs,omitempty"`
+	EthicalConsiderations []string                `json:"ethicalConsiderations,omitempty"`
+	FairnessAssessments   []CDXFairnessAssessment `json:"fairnessAssessments,omitempty"`
+}
+
 // v1.5 added
 type CDXModelCard struct {
-	BomRef          CDXRefType         `json:"bom-ref,omitempty"`
-	ModelParameters CDXModelParameters `json:"modelParameters,omitempty"`
-
-	//		  "quantitativeAnalysis": {
-	//			"type": "object",
-	//			"description": "A quantitative analysis of the model",
-	//			"additionalProperties": false,
-	//			"properties": {
-	//			  "performanceMetrics": {
-	//				"type": "array",
-	//				"title": "Performance Metrics",
-	//				"description": "The model performance metrics being reported. Examples may include accuracy, F1 score, precision, top-3 error rates, MSC, etc.",
-	//				"items": { "$ref": "#/definitions/performanceMetric" }
-	//			  },
-	//			  "graphics": { "$ref": "#/definitions/graphicsCollection" }
-	//			}
-	//		  },
-	//		  "considerations": {
-	//			"type": "object",
-	//			"title": "Considerations",
-	//			"description": "What considerations should be taken into account regarding the model's construction, training, and application?",
-	//			"additionalProperties": false,
-	//			"properties": {
-	//			  "users": {
-	//				"type": "array",
-	//				"title": "Users",
-	//				"description": "Who are the intended users of the model?",
-	//				"items": {
-	//				  "type": "string"
-	//				}
-	//			  },
-	//			  "useCases": {
-	//				"type": "array",
-	//				"title": "Use Cases",
-	//				"description": "What are the intended use cases of the model?",
-	//				"items": {
-	//				  "type": "string"
-	//				}
-	//			  },
-	//			  "technicalLimitations": {
-	//				"type": "array",
-	//				"title": "Technical Limitations",
-	//				"description": "What are the known technical limitations of the model? E.g. What kind(s) of data should the model be expected not to perform well on? What are the factors that might degrade model performance?",
-	//				"items": {
-	//				  "type": "string"
-	//				}
-	//			  },
-	//			  "performanceTradeoffs": {
-	//				"type": "array",
-	//				"title": "Performance Tradeoffs",
-	//				"description": "What are the known tradeoffs in accuracy/performance of the model?",
-	//				"items": {
-	//				  "type": "string"
-	//				}
-	//			  },
-	//			  "ethicalConsiderations": {
-	//				"type": "array",
-	//				"title": "Ethical Considerations",
-	//				"description": "What are the ethical (or environmental) risks involved in the application of this model?",
-	//				"items": { "$ref": "#/definitions/risk" }
-	//			  },
-	//			  "fairnessAssessments": {
-	//				"type": "array",
-	//				"title": "Fairness Assessments",
-	//				"description": "How does the model affect groups at risk of being systematically disadvantaged? What are the harms and benefits to the various affected groups?",
-	//				"items": {
-	//				  "$ref": "#/definitions/fairnessAssessment"
-	//				}
-	//			  }
-	//			}
-	//		  },
-	//		  "properties": {
-	//			"type": "array",
-	//			"title": "Properties",
-	//			"description": "Provides the ability to document properties in a name-value store. This provides flexibility to include data not officially supported in the standard without having to use additional namespaces or create extensions. Unlike key-value stores, properties support duplicate names, each potentially having different values. Property names of interest to the general public are encouraged to be registered in the [CycloneDX Property Taxonomy](https://github.com/CycloneDX/cyclonedx-property-taxonomy). Formal registration is OPTIONAL.",
-	//			"items": {"$ref": "#/definitions/property"}
-	//		  }
-	//		}
-	//	  },
+	BomRef               CDXRefType              `json:"bom-ref,omitempty"`
+	ModelParameters      CDXModelParameters      `json:"modelParameters,omitempty"`
+	QuantitativeAnalysis CDXQuantitativeAnalysis `json:"quantitativeAnalysis,omitempty"`
+	Considerations       CDXConsiderations       `json:"considerations,omitempty"`
+	Properties           []CDXProperty           `json:"properties,omitempty"`
 }
 
 // v1.5 added
@@ -198,199 +142,60 @@ type CDXComponentData struct {
 	Contents       CDXContents           `json:"contents,omitempty"`
 	Classification CDXDataClassification `json:"classification,omitempty"`
 	SensitiveData  []string              `json:"sensitiveData,omitempty"`
-
-	//		  "graphics": { "$ref": "#/definitions/graphicsCollection" },
-	//		  "description": {
-	//			"description": "A description of the dataset. Can describe size of dataset, whether it's used for source code, training, testing, or validation, etc.",
-	//			"type": "string"
-	//		  },
-	//		  "governance": {
-	//			"type": "object",
-	//			"title": "Data Governance",
-	//			"$ref": "#/definitions/dataGovernance"
-	//		  }
-	//		}
-	//	  },
+	Graphics       CDXGraphicsCollection `json:"graphics,omitempty"`
+	Governance     CDXDataGovernance     `json:"governance,omitempty"`
 }
 
 // v1.5 added
 type CDXDataGovernance struct {
-	//	  "dataGovernance": {
-	//		"type": "object",
-	//		"title": "Data Governance",
-	//		"additionalProperties": false,
-	//		"properties": {
-	//		  "custodians": {
-	//			"type": "array",
-	//			"title": "Data Custodians",
-	//			"description": "Data custodians are responsible for the safe custody, transport, and storage of data.",
-	//			"items": { "$ref": "#/definitions/dataGovernanceResponsibleParty" }
-	//		  },
-	//		  "stewards": {
-	//			"type": "array",
-	//			"title": "Data Stewards",
-	//			"description": "Data stewards are responsible for data content, context, and associated business rules.",
-	//			"items": { "$ref": "#/definitions/dataGovernanceResponsibleParty" }
-	//		  },
-	//		  "owners": {
-	//			"type": "array",
-	//			"title": "Data Owners",
-	//			"description": "Data owners are concerned with risk and appropriate access to data.",
-	//			"items": { "$ref": "#/definitions/dataGovernanceResponsibleParty" }
-	//		  }
-	//		}
-	//	  },
+	Custodians []CDXDataGovernanceResponsibleParty   `json:"custodians,omitempty"`
+	Stewards   [][]CDXDataGovernanceResponsibleParty `json:"stewards,omitempty"`
+	Owners     [][]CDXDataGovernanceResponsibleParty `json:"owners,omitempty"`
 }
 
-// v1.5 added
+// v1.5 added. Constraints: "oneOf": ["organization", "contact"]
 type CDXDataGovernanceResponsibleParty struct {
-
-	//	  "dataGovernanceResponsibleParty": {
-	//		"type": "object",
-	//		"additionalProperties": false,
-	//		"properties": {
-	//		  "organization": {
-	//			"title": "Organization",
-	//			"$ref": "#/definitions/organizationalEntity"
-	//		  },
-	//		  "contact": {
-	//			"title": "Individual",
-	//			"$ref": "#/definitions/organizationalContact"
-	//		  }
-	//		},
-	//		"oneOf":[
-	//		  {
-	//			"required": ["organization"]
-	//		  },
-	//		  {
-	//			"required": ["contact"]
-	//		  }
-	//		]
-	//	  },
-
+	Organization CDXOrganizationalEntity  `json:"organization,omitempty"`
+	Contact      CDXOrganizationalContact `json:"contact,omitempty"`
 }
 
 // v1.5 added
 type CDXGraphicsCollection struct {
-
-	//	  "graphicsCollection": {
-	//		"type": "object",
-	//		"title": "Graphics Collection",
-	//		"description": "A collection of graphics that represent various measurements.",
-	//		"additionalProperties": false,
-	//		"properties": {
-	//		  "description": {
-	//			"description": "A description of this collection of graphics.",
-	//			"type": "string"
-	//		  },
-	//		  "collection": {
-	//			"description": "A collection of graphics.",
-	//			"type": "array",
-	//			"items": { "$ref": "#/definitions/graphic" }
-	//		  }
-	//		}
-	//	  },
+	Description string       `json:"description,omitempty"`
+	Collection  []CDXGraphic `json:"collection,omitempty"`
 }
 
 // v1.5 added
 type CDXGraphic struct {
+	Name  string        `json:"name,omitempty"`
+	Image CDXAttachment `json:"image,omitempty"`
+}
 
-	//	  "graphic": {
-	//		"type": "object",
-	//		"additionalProperties": false,
-	//		"properties": {
-	//		  "name": {
-	//			"description": "The name of the graphic.",
-	//			"type": "string"
-	//		  },
-	//		  "image": {
-	//			"title": "Graphic Image",
-	//			"description": "The graphic (vector or raster). Base64 encoding MUST be specified for binary images.",
-	//			"$ref": "#/definitions/attachment"
-	//		  }
-	//		}
-	//	  },
+// v1.5 added
+type CDXConfidenceInterval struct {
+	LowerBound string `json:"lowerBound,omitempty"`
+	UpperBound string `json:"upperBound,omitempty"`
 }
 
 // v1.5 added
 type CDXPerformanceMetric struct {
-	//	  "performanceMetric": {
-	//		"type": "object",
-	//		"additionalProperties": false,
-	//		"properties": {
-	//		  "type": {
-	//			"description": "The type of performance metric.",
-	//			"type": "string"
-	//		  },
-	//		  "value": {
-	//			"description": "The value of the performance metric.",
-	//			"type": "string"
-	//		  },
-	//		  "slice": {
-	//			"description": "The name of the slice this metric was computed on. By default, assume this metric is not sliced.",
-	//			"type": "string"
-	//		  },
-	//		  "confidenceInterval": {
-	//			"description": "The confidence interval of the metric.",
-	//			"type": "object",
-	//			"additionalProperties": false,
-	//			"properties": {
-	//			  "lowerBound": {
-	//				"description": "The lower bound of the confidence interval.",
-	//				"type": "string"
-	//			  },
-	//			  "upperBound": {
-	//				"description": "The upper bound of the confidence interval.",
-	//				"type": "string"
-	//			  }
-	//			}
-	//		  }
-	//		}
-	//	  },
+	Type               string                `json:"type,omitempty"`
+	Value              string                `json:"value,omitempty"`
+	Slice              string                `json:"slice,omitempty"`
+	ConfidenceInterval CDXConfidenceInterval `json:"confidenceInterval,omitempty"`
 }
 
 // v1.5 added
 type CDXRisk struct {
-	//	  "risk": {
-	//		"type": "object",
-	//		"additionalProperties": false,
-	//		"properties": {
-	//		  "name": {
-	//			"description": "The name of the risk.",
-	//			"type": "string"
-	//		  },
-	//		  "mitigationStrategy": {
-	//			"description": "Strategy used to address this risk.",
-	//			"type": "string"
-	//		  }
-	//		}
-	//	  },
+	Name               string `json:"name,omitempty"`
+	MitigationStrategy string `json:"mitigationStrategy,omitempty"`
 }
 
 // v1.5 added
+// Information about the benefits and harms of the model to an identified at risk group.
 type CDXFairnessAssessment struct {
-	//	  "fairnessAssessment": {
-	//		"type": "object",
-	//		"title": "Fairness Assessment",
-	//		"description": "Information about the benefits and harms of the model to an identified at risk group.",
-	//		"additionalProperties": false,
-	//		"properties": {
-	//		  "groupAtRisk": {
-	//			"type": "string",
-	//			"description": "The groups or individuals at risk of being systematically disadvantaged by the model."
-	//		  },
-	//		  "benefits": {
-	//			"type": "string",
-	//			"description": "Expected benefits to the identified groups."
-	//		  },
-	//		  "harms": {
-	//			"type": "string",
-	//			"description": "Expected harms to the identified groups."
-	//		  },
-	//		  "mitigationStrategy": {
-	//			"type": "string",
-	//			"description": "With respect to the benefits and harms outlined, please describe any mitigation strategy implemented."
-	//		  }
-	//		}
-	//	  },
+	GroupAtRisk        string `json:"groupAtRisk,omitempty"`
+	Benefits           string `json:"benefits,omitempty"`
+	Harms              string `json:"harms,omitempty"`
+	MitigationStrategy string `json:"mitigationStrategy,omitempty"`
 }
