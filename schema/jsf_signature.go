@@ -17,6 +17,8 @@
 
 package schema
 
+// See: https://github.com/CycloneDX/specification/blob/master/schema/jsf-0.82.schema.json
+
 // Note: struct will contain "oneOf": []"Signers", "Chain", "Signature"]
 type JSFSignature struct {
 	// "Unique top level property for Multiple Signatures."
