@@ -29,54 +29,22 @@ type CDXApproach struct {
 }
 
 // v1.5 added
-type CDXModelParameters struct {
-	Approach           CDXApproach `json:"approach,omitempty"`
-	Task               string      `json:"task,omitempty"`
-	ArchitectureFamily string      `json:"architectureFamily,omitempty"`
-	ModelArchitecture  string      `json:"modelArchitecture,omitempty"`
+// Constraint: "oneOf": ["#/definitions/componentData", "ref"]
+// TODO: actually, "Ref" should be its own anonymous type with "anyOf": ["#/definitions/refLinkType", "#/definitions/bomLinkElementType"]
+type CDXDataset struct {
+	CDXComponentData
+	Ref CDXRefLinkType `json:"ref,omitempty"`
+}
 
-	// 		  "datasets": {
-	// 			"type": "array",
-	// 			"title": "Datasets",
-	// 			"description": "The datasets used to train and evaluate the model.",
-	// 			"items" : {
-	// 			  "oneOf" : [
-	// 				{
-	//                 "title": "Inline Component Data",
-	//                 "$ref": "#/definitions/componentData"
-	// 				},
-	// 				{"type": "object",
-	//                "properties": {
-	// 					"ref": {
-	// 					  "anyOf": [
-	// 						{
-	// 						  "title": "Ref",
-	// 						  "$ref": "#/definitions/refLinkType"
-	// 						},
-	// 						{
-	// 						  "title": "BOM-Link Element",
-	// 						  "$ref": "#/definitions/bomLinkElementType"
-	// 						}
-	// 					  ],
-	// 					  "title": "Reference",
-	// 					  "description": "References a data component by the components bom-ref attribute"
-	// 					}}
-	// 				}
-	// 			  ]
-	// 			}
-	// 		  },
-	// 		  "inputs": {
-	// 			"type": "array",
-	// 			"title": "Inputs",
-	// 			"description": "The input format(s) of the model",
-	// 			"items": { "$ref": "#/definitions/inputOutputMLParameters" }
-	// 		  },
-	// 		  "outputs": {
-	// 			"type": "array",
-	// 			"title": "Outputs",
-	// 			"description": "The output format(s) from the model",
-	// 			"items": { "$ref": "#/definitions/inputOutputMLParameters" }
-	// 		  }
+// v1.5 added
+type CDXModelParameters struct {
+	Approach           CDXApproach                  `json:"approach,omitempty"`
+	Task               string                       `json:"task,omitempty"`
+	ArchitectureFamily string                       `json:"architectureFamily,omitempty"`
+	ModelArchitecture  string                       `json:"modelArchitecture,omitempty"`
+	Datasets           []CDXDataset                 `json:"datasets,omitempty"`
+	Inputs             []CDXInputOutputMLParameters `json:"inputs,omitempty"`
+	Outputs            []CDXInputOutputMLParameters `json:"outputs,omitempty"`
 }
 
 // v1.5: added (anonymous type)
@@ -153,7 +121,8 @@ type CDXDataGovernance struct {
 	Owners     [][]CDXDataGovernanceResponsibleParty `json:"owners,omitempty"`
 }
 
-// v1.5 added. Constraints: "oneOf": ["organization", "contact"]
+// v1.5 added
+// Constraints: "oneOf": ["organization", "contact"]
 type CDXDataGovernanceResponsibleParty struct {
 	Organization CDXOrganizationalEntity  `json:"organization,omitempty"`
 	Contact      CDXOrganizationalContact `json:"contact,omitempty"`
