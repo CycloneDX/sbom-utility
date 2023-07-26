@@ -393,12 +393,12 @@ func hashServiceLicense(cdxService schema.CDXService, location int, whereFilters
 		licenseInfo.Service = cdxService
 		licenseInfo.BomLocationValue = location
 		licenseInfo.ResourceName = cdxService.Name
-		licenseInfo.BomRef = cdxService.BomRef
+		licenseInfo.BomRef = cdxService.BOMRef
 		HashLicenseInfo(LICENSE_NO_ASSERTION, licenseInfo, whereFilters)
 
 		getLogger().Warningf("%s: %s (name: `%s`, version: `%s`)",
 			"No license found for service. bomRef",
-			cdxService.BomRef,
+			cdxService.BOMRef,
 			cdxService.Name,
 			cdxService.Version)
 
@@ -412,7 +412,7 @@ func hashServiceLicense(cdxService schema.CDXService, location int, whereFilters
 		licenseInfo.LicenseChoice = licenseChoice
 		licenseInfo.Service = cdxService
 		licenseInfo.ResourceName = cdxService.Name
-		licenseInfo.BomRef = cdxService.BomRef
+		licenseInfo.BomRef = cdxService.BOMRef
 		licenseInfo.BomLocationValue = location
 		err = hashLicenseInfoByLicenseType(licenseInfo, whereFilters)
 

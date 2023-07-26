@@ -92,7 +92,7 @@ type CDXOrganizationalEntity struct {
 	Name    string                     `json:"name,omitempty"`
 	Url     []string                   `json:"url,omitempty"`
 	Contact []CDXOrganizationalContact `json:"contact,omitempty"`
-	BomRef  CDXRefType                 `json:"bom-ref,omitempty"` // v1.5 added
+	BOMRef  CDXRefType                 `json:"bom-ref,omitempty"` // v1.5 added
 }
 
 // v1.2: existed

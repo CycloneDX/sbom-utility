@@ -404,7 +404,7 @@ func hashServiceAsResource(cdxService schema.CDXService, whereFilters []WhereFil
 		getLogger().Warningf("service named `%s` missing `version`", cdxService.Name)
 	}
 
-	if cdxService.BomRef == "" {
+	if cdxService.BOMRef == "" {
 		getLogger().Warningf("service named `%s` missing `bom-ref`", cdxService.Name)
 	}
 
@@ -412,7 +412,7 @@ func hashServiceAsResource(cdxService schema.CDXService, whereFilters []WhereFil
 	resourceInfo.Type = RESOURCE_TYPE_SERVICE
 	resourceInfo.Service = cdxService
 	resourceInfo.Name = cdxService.Name
-	resourceInfo.BomRef = cdxService.BomRef.String()
+	resourceInfo.BomRef = cdxService.BOMRef.String()
 	resourceInfo.Version = cdxService.Version
 	resourceInfo.SupplierProvider = cdxService.Provider
 	resourceInfo.Properties = cdxService.Properties
