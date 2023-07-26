@@ -22,6 +22,30 @@ package schema
 // https://github.com/tensorflow/model-card-toolkit/blob/main/model_card_toolkit/schema/v0.0.2/model_card.schema.json. In addition, CycloneDX model card support includes portions of VerifyML, also released under the Apache 2.0 license and available from https://github.com/cylynx/verifyml/blob/main/verifyml/model_card_toolkit/schema/v0.0.4/model_card.schema.json.",
 
 // v1.5 added
+type CDXModelCard struct {
+	BomRef               CDXRefType              `json:"bom-ref,omitempty"`
+	ModelParameters      CDXModelParameters      `json:"modelParameters,omitempty"`
+	QuantitativeAnalysis CDXQuantitativeAnalysis `json:"quantitativeAnalysis,omitempty"`
+	Considerations       CDXConsiderations       `json:"considerations,omitempty"`
+	Properties           []CDXProperty           `json:"properties,omitempty"`
+}
+
+// ========================================
+// Model Parameters
+// ========================================
+
+// v1.5 added
+type CDXModelParameters struct {
+	Approach           CDXApproach                  `json:"approach,omitempty"`
+	Task               string                       `json:"task,omitempty"`
+	ArchitectureFamily string                       `json:"architectureFamily,omitempty"`
+	ModelArchitecture  string                       `json:"modelArchitecture,omitempty"`
+	Datasets           []CDXDataset                 `json:"datasets,omitempty"`
+	Inputs             []CDXInputOutputMLParameters `json:"inputs,omitempty"`
+	Outputs            []CDXInputOutputMLParameters `json:"outputs,omitempty"`
+}
+
+// v1.5 added
 // "Learning types describing the learning problem or hybrid learning problem."
 // "enum": ["supervised","unsupervised","reinforcement-learning","semi-supervised","self-supervised"]
 type CDXApproach struct {
@@ -37,15 +61,15 @@ type CDXDataset struct {
 }
 
 // v1.5 added
-type CDXModelParameters struct {
-	Approach           CDXApproach                  `json:"approach,omitempty"`
-	Task               string                       `json:"task,omitempty"`
-	ArchitectureFamily string                       `json:"architectureFamily,omitempty"`
-	ModelArchitecture  string                       `json:"modelArchitecture,omitempty"`
-	Datasets           []CDXDataset                 `json:"datasets,omitempty"`
-	Inputs             []CDXInputOutputMLParameters `json:"inputs,omitempty"`
-	Outputs            []CDXInputOutputMLParameters `json:"outputs,omitempty"`
+// "The data format for input/output to the model.
+// Example formats include string, image, time-series",
+type CDXInputOutputMLParameters struct {
+	Format string `json:"format,omitempty"`
 }
+
+// ========================================
+// Quantitative Analysis
+// ========================================
 
 // v1.5: added (anonymous type)
 type CDXQuantitativeAnalysis struct {
@@ -53,79 +77,18 @@ type CDXQuantitativeAnalysis struct {
 	Graphics           CDXGraphicsCollection  `json:"graphics,omitempty"`
 }
 
-// v1.5: added (anonymous type)
-// Considerations that should be taken into account regarding the model's construction,
-// training, and application
-type CDXConsiderations struct {
-	Users                 []string                `json:"users,omitempty"`
-	UseCases              []string                `json:"useCases,omitempty"`
-	TechnicalLimitations  []string                `json:"technicalLimitations,omitempty"`
-	PerformanceTradeoffs  []string                `json:"performanceTradeoffs,omitempty"`
-	EthicalConsiderations []string                `json:"ethicalConsiderations,omitempty"`
-	FairnessAssessments   []CDXFairnessAssessment `json:"fairnessAssessments,omitempty"`
+// v1.5 added
+type CDXPerformanceMetric struct {
+	Type               string                `json:"type,omitempty"`
+	Value              string                `json:"value,omitempty"`
+	Slice              string                `json:"slice,omitempty"`
+	ConfidenceInterval CDXConfidenceInterval `json:"confidenceInterval,omitempty"`
 }
 
 // v1.5 added
-type CDXModelCard struct {
-	BomRef               CDXRefType              `json:"bom-ref,omitempty"`
-	ModelParameters      CDXModelParameters      `json:"modelParameters,omitempty"`
-	QuantitativeAnalysis CDXQuantitativeAnalysis `json:"quantitativeAnalysis,omitempty"`
-	Considerations       CDXConsiderations       `json:"considerations,omitempty"`
-	Properties           []CDXProperty           `json:"properties,omitempty"`
-}
-
-// v1.5 added
-// "The data format for input/output to the model.
-// Example formats include string, image, time-series",
-type CDXInputOutputMLParameters struct {
-	Format string `json:"format,omitempty"`
-}
-
-// v1.5 added
-type CDXContents struct {
-	Attachment CDXAttachment `json:"attachment,omitempty"`
-	Url        string        `json:"url,omitempty"`
-	Properties []CDXProperty `json:"properties,omitempty"`
-}
-
-// v1.5 added
-// Data classification tags data according to its type, sensitivity, and value if altered,
-// stolen, or destroyed.
-type CDXDataClassification string
-
-// v1.5 added
-// The general theme or subject matter of the data being specified.
-//
-//	__source-code__ = Any type of code, code snippet, or data-as-code.
-//	__configuration__ = Parameters or settings that may be used by other components.
-//	__dataset__ = A collection of data.
-//	__definition__ = Data that can be used to create new instances of what the definition defines.
-//	__other__ = Any other type of data that does not fit into existing definitions.,
-//
-// "type": "enum": ["source-code","configuration","dataset","definition","other"]
-type CDXComponentData struct {
-	BomRef         CDXRefType            `json:"bom-ref,omitempty"`
-	Type           string                `json:"type,omitempty"`
-	Name           string                `json:"name,omitempty"`
-	Contents       CDXContents           `json:"contents,omitempty"`
-	Classification CDXDataClassification `json:"classification,omitempty"`
-	SensitiveData  []string              `json:"sensitiveData,omitempty"`
-	Graphics       CDXGraphicsCollection `json:"graphics,omitempty"`
-	Governance     CDXDataGovernance     `json:"governance,omitempty"`
-}
-
-// v1.5 added
-type CDXDataGovernance struct {
-	Custodians []CDXDataGovernanceResponsibleParty   `json:"custodians,omitempty"`
-	Stewards   [][]CDXDataGovernanceResponsibleParty `json:"stewards,omitempty"`
-	Owners     [][]CDXDataGovernanceResponsibleParty `json:"owners,omitempty"`
-}
-
-// v1.5 added
-// Constraints: "oneOf": ["organization", "contact"]
-type CDXDataGovernanceResponsibleParty struct {
-	Organization CDXOrganizationalEntity  `json:"organization,omitempty"`
-	Contact      CDXOrganizationalContact `json:"contact,omitempty"`
+type CDXConfidenceInterval struct {
+	LowerBound string `json:"lowerBound,omitempty"`
+	UpperBound string `json:"upperBound,omitempty"`
 }
 
 // v1.5 added
@@ -140,18 +103,20 @@ type CDXGraphic struct {
 	Image CDXAttachment `json:"image,omitempty"`
 }
 
-// v1.5 added
-type CDXConfidenceInterval struct {
-	LowerBound string `json:"lowerBound,omitempty"`
-	UpperBound string `json:"upperBound,omitempty"`
-}
+// ========================================
+// Considerations
+// ========================================
 
-// v1.5 added
-type CDXPerformanceMetric struct {
-	Type               string                `json:"type,omitempty"`
-	Value              string                `json:"value,omitempty"`
-	Slice              string                `json:"slice,omitempty"`
-	ConfidenceInterval CDXConfidenceInterval `json:"confidenceInterval,omitempty"`
+// v1.5: added (anonymous type)
+// Considerations that should be taken into account regarding the model's construction,
+// training, and application
+type CDXConsiderations struct {
+	Users                 []string                `json:"users,omitempty"`
+	UseCases              []string                `json:"useCases,omitempty"`
+	TechnicalLimitations  []string                `json:"technicalLimitations,omitempty"`
+	PerformanceTradeoffs  []string                `json:"performanceTradeoffs,omitempty"`
+	EthicalConsiderations []CDXRisk               `json:"ethicalConsiderations,omitempty"`
+	FairnessAssessments   []CDXFairnessAssessment `json:"fairnessAssessments,omitempty"`
 }
 
 // v1.5 added

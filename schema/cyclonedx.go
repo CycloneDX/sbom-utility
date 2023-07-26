@@ -114,42 +114,88 @@ func (link CDXBomLink) String() string {
 // v1.4: added: "releaseNotes", "signature"
 // v1.4: changed: "version" no longer required
 // v1.4: deprecated: "modified", "cpe", "swid"
+// v1.5: added
 // Note: "bom-ref" is a "refType" which is a constrained `string`
 // TODO: "mime-type" SHOULD become "media-type" which is more modern/inclusive
 // TODO: Remove "service" from "Type" enum. as "service" now exists (deprecate in future versions)
 type CDXComponent struct {
-	BomRef             CDXRefType              `json:"bom-ref,omitempty"`
 	Primary            bool                    `json:"-"` // Proprietary: do NOT marshal/unmarshal
-	Purl               string                  `json:"purl,omitempty"`
 	Type               string                  `json:"type,omitempty"`
 	MimeType           string                  `json:"mime-type,omitempty"`
+	BomRef             CDXRefType              `json:"bom-ref,omitempty"`
+	Supplier           CDXOrganizationalEntity `json:"supplier,omitempty"`
+	Author             string                  `json:"author,omitempty"`
+	Publisher          string                  `json:"publisher,omitempty"`
+	Group              string                  `json:"group,omitempty"`
 	Name               string                  `json:"name,omitempty"`
 	Version            string                  `json:"version,omitempty"`
 	Description        string                  `json:"description,omitempty"`
-	Copyright          string                  `json:"copyright,omitempty"`
-	Publisher          string                  `json:"publisher,omitempty"`
-	Group              string                  `json:"group,omitempty"`
 	Scope              string                  `json:"scope,omitempty"`
-	Manufacturer       CDXOrganizationalEntity `json:"manufacturer,omitempty"`
-	Supplier           CDXOrganizationalEntity `json:"supplier,omitempty"`
-	Licenses           []CDXLicenseChoice      `json:"licenses,omitempty"`
 	Hashes             []CDXHash               `json:"hashes,omitempty"`
-	Author             string                  `json:"author,omitempty"`
+	Licenses           []CDXLicenseChoice      `json:"licenses,omitempty"`
+	Copyright          string                  `json:"copyright,omitempty"`
+	Purl               string                  `json:"purl,omitempty"`
+	Pedigree           CDXPedigree             `json:"pedigree,omitempty"` // anon. type
 	ExternalReferences []CDXExternalReference  `json:"externalReferences,omitempty"`
 	Components         []CDXComponent          `json:"components,omitempty"`
-	Pedigree           CDXPedigree             `json:"pedigree,omitempty"`     // anon. type
 	Evidence           CDXComponentEvidence    `json:"evidence,omitempty"`     // v1.3: added
-	Properties         []CDXProperty           `json:"properties,omitempty"`   // v1.3: added
-	Modified           bool                    `json:"modified,omitempty"`     // v1.4: deprecated
 	Cpe                string                  `json:"cpe,omitempty"`          // v1.4: deprecated
 	Swid               CDXSwid                 `json:"swid,omitempty"`         // v1.4: deprecated
+	Modified           bool                    `json:"modified,omitempty"`     // v1.4: deprecated
 	ReleaseNotes       []CDXReleaseNotes       `json:"releaseNotes,omitempty"` // v1.4: added
+	Properties         []CDXProperty           `json:"properties,omitempty"`   // v1.3: added
 	Signature          JSFSignature            `json:"signature,omitempty"`    // v1.4: added
+	ModelCard          CDXModelCard            `json:"modelCard,omitempty"`    // v1.5: added
+	Data               []CDXComponentData      `json:"data,omitempty"`         // v1.5: added
+}
+
+// v1.5 added
+// The general theme or subject matter of the data being specified.
+//
+//	__source-code__ = Any type of code, code snippet, or data-as-code.
+//	__configuration__ = Parameters or settings that may be used by other components.
+//	__dataset__ = A collection of data.
+//	__definition__ = Data that can be used to create new instances of what the definition defines.
+//	__other__ = Any other type of data that does not fit into existing definitions.,
+//
+// "type": "enum": ["source-code","configuration","dataset","definition","other"]
+type CDXComponentData struct {
+	BomRef         CDXRefType            `json:"bom-ref,omitempty"`
+	Type           string                `json:"type,omitempty"`
+	Name           string                `json:"name,omitempty"`
+	Contents       CDXContents           `json:"contents,omitempty"`
+	Classification CDXDataClassification `json:"classification,omitempty"`
+	SensitiveData  []string              `json:"sensitiveData,omitempty"`
+	Graphics       CDXGraphicsCollection `json:"graphics,omitempty"`
+	Description    string                `json:"description,omitempty"`
+	Governance     CDXDataGovernance     `json:"governance,omitempty"`
+}
+
+// v1.5 added
+type CDXContents struct {
+	Attachment CDXAttachment `json:"attachment,omitempty"`
+	Url        string        `json:"url,omitempty"`
+	Properties []CDXProperty `json:"properties,omitempty"`
+}
+
+// v1.5 added
+type CDXDataGovernance struct {
+	Custodians []CDXDataGovernanceResponsibleParty   `json:"custodians,omitempty"`
+	Stewards   [][]CDXDataGovernanceResponsibleParty `json:"stewards,omitempty"`
+	Owners     [][]CDXDataGovernanceResponsibleParty `json:"owners,omitempty"`
+}
+
+// v1.5 added
+// Constraints: "oneOf": ["organization", "contact"]
+type CDXDataGovernanceResponsibleParty struct {
+	Organization CDXOrganizationalEntity  `json:"organization,omitempty"`
+	Contact      CDXOrganizationalContact `json:"contact,omitempty"`
 }
 
 // v1.2: existed
 // v1.3: added: "properties"
 // v1.4: added: "releaseNotes", "signature"
+// v1.5: moved "data" object elements into "serviceData" object
 // -----
 // TODO: a service is not all auth or not auth.; that is, we have multiple endpoints
 // but only 1 boolean for "authenticated" (open spec. issue)
@@ -167,13 +213,27 @@ type CDXService struct {
 	Endpoints          []string                `json:"endpoints,omitempty"`
 	Authenticated      bool                    `json:"authenticated,omitempty"`
 	XTrustBoundary     bool                    `json:"x-trust-boundary,omitempty"`
-	Data               []CDXData               `json:"data,omitempty"`
+	Data               []CDXServiceData        `json:"data,omitempty"`
 	Licenses           []CDXLicenseChoice      `json:"licenses,omitempty"`
 	ExternalReferences []CDXExternalReference  `json:"externalReferences,omitempty"`
 	Services           []CDXService            `json:"services,omitempty"`
 	Properties         []CDXProperty           `json:"properties,omitempty"`   // v1.3: added
 	ReleaseNotes       []CDXReleaseNotes       `json:"releaseNotes,omitempty"` // v1.4: added
 	Signature          JSFSignature            `json:"signature,omitempty"`    // v1.4: added
+}
+
+// v1.5: added. aggregated related date from v1.2-v1.4 and added additional fields
+// v1.2-v1.4: "flow", "classification" existed
+// TODO: "source" is a "oneOf" type (both currently resolve to string), but needs to be its own anonymous type
+// TODO: "destination" is a "oneOf" type (both currently resolve to string), but needs to be its own anonymous type
+type CDXServiceData struct {
+	Flow           string                `json:"externalReferences,omitempty"`
+	Classification CDXDataClassification `json:"classification,omitempty"`
+	Name           string                `json:"name,omitempty"`        // v1.5: added
+	Description    string                `json:"description,omitempty"` // v1.5: added
+	Governance     CDXDataGovernance     `json:"governance,omitempty"`  // v1.5: added
+	Source         string                `json:"source,omitempty"`      // v1.5: added, TODO
+	Destination    string                `json:"destination,omitempty"` // v1.5: added, TODO
 }
 
 // v1.2: existed as an anon. type in the "component" type defn.
@@ -335,10 +395,16 @@ type CDXDependency struct {
 
 // v1.2: existed
 // Note: "flow" is of type "dataFlow" which is a constrained `string` type
-type CDXData struct {
-	Flow           string `json:"flow,omitempty"`
-	Classification string `json:"classification,omitempty"`
-}
+// v1.5: removed.  No longer an object; "flow" moved out as "string" into "serviceData" object
+// type CDXDataClassification struct {
+// 	Flow           string `json:"flow,omitempty"`
+// 	Classification string `json:"classification,omitempty"`
+// }
+
+// v1.5 added. Replaced former "object" type in favor of "string"
+// Data classification tags data according to its type, sensitivity, and value if altered,
+// stolen, or destroyed.
+type CDXDataClassification string
 
 // v1.3: created "copyright" defn.
 type CDXCopyright struct {
