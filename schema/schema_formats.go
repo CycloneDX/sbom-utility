@@ -20,7 +20,7 @@ package schema
 import (
 	"encoding/json"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -197,8 +197,7 @@ func LoadSchemaConfig(filename string) (err error) {
 	// Note we actively supply informative error messages to help user
 	// understand exactly how the load failed
 	getLogger().Tracef("Reading schema config file: `%s`...", cfgFilename)
-	// #nosec G304 (suppress warning)
-	buffer, err := os.ReadFile(cfgFilename)
+	buffer, err := ioutil.ReadFile(cfgFilename)
 	if err != nil {
 		return fmt.Errorf("unable to `ReadFile`: `%s`", cfgFilename)
 	}
@@ -272,14 +271,22 @@ func (sbom *Sbom) GetCdxMetadataProperties() (properties []CDXProperty) {
 
 func (sbom *Sbom) GetCdxComponents() (components []CDXComponent) {
 	if bom := sbom.GetCdxBom(); bom != nil {
-		components = bom.Components
+		if bom.Components != nil {
+			components = *bom.Components
+		} //else {
+		//			fmt.Printf("[WARN: bom.Components=`%v`\n", bom.Components)
+		//		}
 	}
 	return components
 }
 
 func (sbom *Sbom) GetCdxServices() (services []CDXService) {
 	if bom := sbom.GetCdxBom(); bom != nil {
-		services = bom.Services
+		if bom.Services != nil {
+			services = *bom.Services
+		} //else {
+		//			fmt.Printf("[WARN: bom.Services=`%v`\n", bom.Services)
+		//		}
 	}
 	return services
 }
@@ -357,14 +364,10 @@ func (sbom *Sbom) UnmarshalSBOMAsJsonMap() error {
 
 	// read our opened jsonFile as a byte array.
 	var errReadAll error
-
-	{ // #nosec
-		sbom.rawBytes, errReadAll = io.ReadAll(jsonFile)
-		if errReadAll != nil {
-			getLogger().Error(errReadAll)
-		}
+	sbom.rawBytes, errReadAll = ioutil.ReadAll(jsonFile)
+	if errReadAll != nil {
+		getLogger().Error(errReadAll)
 	}
-
 	getLogger().Tracef("read data from: `%s`", sbom.filename)
 	getLogger().Tracef("\n  >> rawBytes[:100]=[%s]", sbom.rawBytes[:100])
 

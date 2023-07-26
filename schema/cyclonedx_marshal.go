@@ -220,7 +220,7 @@ func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
 	return json.Marshal(temp)
 }
 
-func (value *CDXReference) MarshalJSON() ([]byte, error) {
+func (value *CDXVulnerabilityReference) MarshalJSON() ([]byte, error) {
 	temp := map[string]interface{}{}
 	if len(value.Id) > 0 {
 		temp["id"] = &value.Id
