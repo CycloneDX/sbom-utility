@@ -17,6 +17,7 @@
 
 package schema
 
+// v1.5: added
 type CDXFormula struct {
 
 	//	  "formula": {
@@ -69,6 +70,7 @@ type CDXFormula struct {
 	//	  },
 }
 
+// v1.5: added
 type CDXWorkflow struct {
 
 	//	  "workflow": {
@@ -216,6 +218,7 @@ type CDXWorkflow struct {
 	//	  },
 }
 
+// v1.5: added
 type CDXTask struct {
 
 	//	  "task": {
@@ -344,6 +347,11 @@ type CDXTask struct {
 	//	  },
 }
 
+// v1.5: added
+// "enum": ["copy","clone","lint","scan","merge","build","test","deliver","deploy","release","clean","other"]
+type CDXTaskType string
+
+// v1.5: added
 type CDXStep struct {
 
 	//	  "step": {
@@ -402,605 +410,98 @@ type CDXCommand struct {
 	//	  },
 }
 
+// v1.5: added
 type CDXWorkspace struct {
-	//	  "workspace": {
-	//		"title": "Workspace",
-	//		"description": "A named filesystem or data resource shareable by workflow tasks.",
-	//		"type": "object",
-	//		"required": [
-	//		  "bom-ref",
-	//		  "uid"
-	//		],
-	//		"additionalProperties": false,
-	//		"properties": {
-	//		  "bom-ref": {
-	//			"title": "BOM Reference",
-	//			"description": "An optional identifier which can be used to reference the workspace elsewhere in the BOM. Every bom-ref MUST be unique within the BOM.",
-	//			"$ref": "#/definitions/refType"
-	//		  },
-	//		  "uid": {
-	//			"title": "Unique Identifier (UID)",
-	//			"description": "The unique identifier for the resource instance within its deployment context.",
-	//			"type": "string"
-	//		  },
-	//		  "name": {
-	//			"title": "Name",
-	//			"description": "The name of the resource instance.",
-	//			"type": "string"
-	//		  },
-	//		  "aliases": {
-	//			"title": "Aliases",
-	//			"description": "The names for the workspace as referenced by other workflow tasks. Effectively, a name mapping so other tasks can use their own local name in their steps.",
-	//			"type": "array",
-	//			"items": {"type": "string"}
-	//		  },
-	//		  "description": {
-	//			"title": "Description",
-	//			"description": "A description of the resource instance.",
-	//			"type": "string"
-	//		  },
-	//		  "resourceReferences": {
-	//			"title": "Resource references",
-	//			"description": "References to component or service resources that are used to realize the resource instance.",
-	//			"type": "array",
-	//			"uniqueItems": true,
-	//			"items": {
-	//			  "$ref": "#/definitions/resourceReferenceChoice"
-	//			}
-	//		  },
-	//		  "accessMode": {
-	//			"title": "Access mode",
-	//			"description": "Describes the read-write access control for the workspace relative to the owning resource instance.",
-	//			"type": "string",
-	//			"enum": [
-	//			  "read-only",
-	//			  "read-write",
-	//			  "read-write-once",
-	//			  "write-once",
-	//			  "write-only"
-	//			]
-	//		  },
-	//		  "mountPath": {
-	//			"title": "Mount path",
-	//			"description": "A path to a location on disk where the workspace will be available to the associated task's steps.",
-	//			"type": "string"
-	//		  },
-	//		  "managedDataType": {
-	//			"title": "Managed data type",
-	//			"description": "The name of a domain-specific data type the workspace represents.",
-	//			"$comment": "This property is for CI/CD frameworks that are able to provide access to structured, managed data at a more granular level than a filesystem.",
-	//			"examples": ["ConfigMap","Secret"],
-	//			"type": "string"
-	//		  },
-	//		  "volumeRequest": {
-	//			"title": "Volume request",
-	//			"description": "Identifies the reference to the request for a specific volume type and parameters.",
-	//			"examples": ["a kubernetes Persistent Volume Claim (PVC) name"],
-	//			"type": "string"
-	//		  },
-	//		  "volume": {
-	//			"title": "Volume",
-	//			"description": "Information about the actual volume instance allocated to the workspace.",
-	//			"$comment": "The actual volume allocated may be different than the request.",
-	//			"examples": ["see https://kubernetes.io/docs/concepts/storage/persistent-volumes/"],
-	//			"$ref": "#/definitions/volume"
-	//		  },
-	//		  "properties": {
-	//			"type": "array",
-	//			"title": "Properties",
-	//			"items": {
-	//			  "$ref": "#/definitions/property"
-	//			}
-	//		  }
-	//		}
-	//	  },
+	BomRef             CDXRefType                   `json:"bom-ref,omitempty"`
+	Uid                string                       `json:"uid,omitempty"`
+	Name               string                       `json:"name,omitempty"`
+	Aliases            []string                     `json:"aliases,omitempty"`
+	Description        string                       `json:"description,omitempty"`
+	ResourceReferences []CDXResourceReferenceChoice `json:"resourceReferences,omitempty"`
+	AccessMode         string                       `json:"accessMode,omitempty"`
+	MountPath          string                       `json:"mountPath,omitempty"`
+	ManagedDataType    string                       `json:"managedDataType,omitempty"`
+	VolumeRequest      string                       `json:"volumeRequest,omitempty"`
+	Volume             CDXVolume                    `json:"volume,omitempty"`
+	Properties         []CDXProperty                `json:"properties,omitempty"`
 }
 
 type CDXVolume struct {
-	//	  "volume": {
-	//		"title": "Volume",
-	//		"description": "An identifiable, logical unit of data storage tied to a physical device.",
-	//		"type": "object",
-	//		"additionalProperties": false,
-	//		"properties": {
-	//		  "uid": {
-	//			"title": "Unique Identifier (UID)",
-	//			"description": "The unique identifier for the volume instance within its deployment context.",
-	//			"type": "string"
-	//		  },
-	//		  "name": {
-	//			"title": "Name",
-	//			"description": "The name of the volume instance",
-	//			"type": "string"
-	//		  },
-	//		  "mode": {
-	//			"title": "Mode",
-	//			"description": "The mode for the volume instance.",
-	//			"type": "string",
-	//			"enum": [
-	//			  "filesystem", "block"
-	//			],
-	//			"default": "filesystem"
-	//		  },
-	//		  "path": {
-	//			"title": "Path",
-	//			"description": "The underlying path created from the actual volume.",
-	//			"type": "string"
-	//		  },
-	//		  "sizeAllocated": {
-	//			"title": "Size allocated",
-	//			"description": "The allocated size of the volume accessible to the associated workspace. This should include the scalar size as well as IEC standard unit in either decimal or binary form.",
-	//			"examples": ["10GB", "2Ti", "1Pi"],
-	//			"type": "string"
-	//		  },
-	//		  "persistent": {
-	//			"title": "Persistent",
-	//			"description": "Indicates if the volume persists beyond the life of the resource it is associated with.",
-	//			"type": "boolean"
-	//		  },
-	//		  "remote": {
-	//			"title": "Remote",
-	//			"description": "Indicates if the volume is remotely (i.e., network) attached.",
-	//			"type": "boolean"
-	//		  },
-	//		  "properties": {
-	//			"type": "array",
-	//			"title": "Properties",
-	//			"items": {
-	//			  "$ref": "#/definitions/property"
-	//			}
-	//		  }
-	//		}
-	//	  },
+	Uid           string        `json:"uid,omitempty"`
+	Name          string        `json:"name,omitempty"`
+	Mode          string        `json:"mode,omitempty"`
+	Path          string        `json:"path,omitempty"`
+	SizeAllocated string        `json:"sizeAllocated,omitempty"`
+	Persistent    bool          `json:"persistent,omitempty"`
+	Remote        bool          `json:"remote,omitempty"`
+	Properties    []CDXProperty `json:"properties,omitempty"`
 }
 
 type CDXTrigger struct {
-	//	  "trigger": {
-	//		"title": "Trigger",
-	//		"description": "Represents a resource that can conditionally activate (or fire) tasks based upon associated events and their data.",
-	//		"type": "object",
-	//		"additionalProperties": false,
-	//		"required": [
-	//		  "type",
-	//		  "bom-ref",
-	//		  "uid"
-	//		],
-	//		"properties": {
-	//		  "bom-ref": {
-	//			"title": "BOM Reference",
-	//			"description": "An optional identifier which can be used to reference the trigger elsewhere in the BOM. Every bom-ref MUST be unique within the BOM.",
-	//			"$ref": "#/definitions/refType"
-	//		  },
-	//		  "uid": {
-	//			"title": "Unique Identifier (UID)",
-	//			"description": "The unique identifier for the resource instance within its deployment context.",
-	//			"type": "string"
-	//		  },
-	//		  "name": {
-	//			"title": "Name",
-	//			"description": "The name of the resource instance.",
-	//			"type": "string"
-	//		  },
-	//		  "description": {
-	//			"title": "Description",
-	//			"description": "A description of the resource instance.",
-	//			"type": "string"
-	//		  },
-	//		  "resourceReferences": {
-	//			"title": "Resource references",
-	//			"description": "References to component or service resources that are used to realize the resource instance.",
-	//			"type": "array",
-	//			"uniqueItems": true,
-	//			"items": {
-	//			  "$ref": "#/definitions/resourceReferenceChoice"
-	//			}
-	//		  },
-	//		  "type": {
-	//			"title": "Type",
-	//			"description": "The source type of event which caused the trigger to fire.",
-	//			"type": "string",
-	//			"enum": [
-	//			  "manual",
-	//			  "api",
-	//			  "webhook",
-	//			  "scheduled"
-	//			]
-	//		  },
-	//		  "event": {
-	//			"title": "Event",
-	//			"description": "The event data that caused the associated trigger to activate.",
-	//			"$ref": "#/definitions/event"
-	//		  },
-	//		  "conditions": {
-	//			"type": "array",
-	//			"uniqueItems": true,
-	//			"items": {
-	//			  "$ref": "#/definitions/condition"
-	//			}
-	//		  },
-	//		  "timeActivated": {
-	//			"title": "Time activated",
-	//			"description": "The date and time (timestamp) when the trigger was activated.",
-	//			"type": "string",
-	//			"format": "date-time"
-	//		  },
-	//		  "inputs": {
-	//			"title": "Inputs",
-	//			"description": "Represents resources and data brought into a task at runtime by executor or task commands",
-	//			"examples": ["a `configuration` file which was declared as a local `component` or `externalReference`"],
-	//			"type": "array",
-	//			"items": {
-	//			  "$ref": "#/definitions/inputType"
-	//			},
-	//			"uniqueItems": true
-	//		  },
-	//		  "outputs": {
-	//			"title": "Outputs",
-	//			"description": "Represents resources and data output from a task at runtime by executor or task commands",
-	//			"examples": ["a log file or metrics data produced by the task"],
-	//			"type": "array",
-	//			"items": {
-	//			  "$ref": "#/definitions/outputType"
-	//			},
-	//			"uniqueItems": true
-	//		  },
-	//		  "properties": {
-	//			"type": "array",
-	//			"title": "Properties",
-	//			"items": {
-	//			  "$ref": "#/definitions/property"
-	//			}
-	//		  }
-	//		}
-	//	  },
-	//	  "event": {
+	BomRef             CDXRefType                   `json:"bom-ref,omitempty"`
+	Uid                string                       `json:"uid,omitempty"`
+	Name               string                       `json:"name,omitempty"`
+	Description        string                       `json:"description,omitempty"`
+	ResourceReferences []CDXResourceReferenceChoice `json:"resourceReferences,omitempty"`
+	Type               string                       `json:"type,omitempty"` // "enum": ["manual", "api", "webhook","scheduled"]
+	Event              CDXEvent                     `json:"event,omitempty"`
+	Condition          CDXCondition                 `json:"condition,omitempty"`
+	TimeActivated      string                       `json:"timeActivated,omitempty"`
+	Inputs             []CDXInputType               `json:"inputs,omitempty"`
+	Outputs            []CDXOutputType              `json:"outputs,omitempty"`
+	Properties         []CDXProperty                `json:"properties,omitempty"`
 }
 
 type CDXEvent struct {
-	//		"title": "Event",
-	//		"description": "Represents something that happened that may trigger a response.",
-	//		"type": "object",
-	//		"additionalProperties": false,
-	//		"properties": {
-	//		  "uid": {
-	//			"title": "Unique Identifier (UID)",
-	//			"description": "The unique identifier of the event.",
-	//			"type": "string"
-	//		  },
-	//		  "description": {
-	//			"title": "Description",
-	//			"description": "A description of the event.",
-	//			"type": "string"
-	//		  },
-	//		  "timeReceived": {
-	//			"title": "Time Received",
-	//			"description": "The date and time (timestamp) when the event was received.",
-	//			"type": "string",
-	//			"format": "date-time"
-	//		  },
-	//		  "data": {
-	//			"title": "Data",
-	//			"description": "Encoding of the raw event data.",
-	//			"$ref": "#/definitions/attachment"
-	//		  },
-	//		  "source": {
-	//			"title": "Source",
-	//			"description": "References the component or service that was the source of the event",
-	//			"$ref": "#/definitions/resourceReferenceChoice"
-	//		  },
-	//		  "target": {
-	//			"title": "Target",
-	//			"description": "References the component or service that was the target of the event",
-	//			"$ref": "#/definitions/resourceReferenceChoice"
-	//		  },
-	//		  "properties": {
-	//			"type": "array",
-	//			"title": "Properties",
-	//			"items": {
-	//			  "$ref": "#/definitions/property"
-	//			}
-	//		  }
-	//		}
-	//	  },
+	Uid          string                     `json:"uid,omitempty"`
+	Description  string                     `json:"description,omitempty"`
+	TimeReceived string                     `json:"timeReceived,omitempty"`
+	Data         CDXAttachment              `json:"data,omitempty"`
+	Source       CDXResourceReferenceChoice `json:"source,omitempty"`
+	Target       CDXResourceReferenceChoice `json:"target,omitempty"`
+	Properties   []CDXProperty              `json:"properties,omitempty"`
 }
 
+// v1.5: added
+// TODO: likely nothing better we can do for "environmentVars" which is type "oneOf": ["#/definitions/property", "string"]
 type CDXInputType struct {
-	//	  "inputType": {
-	//		"title": "Input type",
-	//		"description": "Type that represents various input data types and formats.",
-	//		"type": "object",
-	//		"oneOf": [
-	//		  {
-	//			"required": [
-	//			  "resource"
-	//			]
-	//		  },
-	//		  {
-	//			"required": [
-	//			  "parameters"
-	//			]
-	//		  },
-	//		  {
-	//			"required": [
-	//			  "environmentVars"
-	//			]
-	//		  },
-	//		  {
-	//			"required": [
-	//			  "data"
-	//			]
-	//		  }
-	//		],
-	//		"additionalProperties": false,
-	//		"properties": {
-	//		  "source": {
-	//			"title": "Source",
-	//			"description": "A references to the component or service that provided the input to the task (e.g., reference to a service with data flow value of `inbound`)",
-	//			"examples": [
-	//			  "source code repository",
-	//			  "database"
-	//			],
-	//			"$ref": "#/definitions/resourceReferenceChoice"
-	//		  },
-	//		  "target": {
-	//			"title": "Target",
-	//			"description": "A reference to the component or service that received or stored the input if not the task itself (e.g., a local, named storage workspace)",
-	//			"examples": [
-	//			  "workspace",
-	//			  "directory"
-	//			],
-	//			"$ref": "#/definitions/resourceReferenceChoice"
-	//		  },
-	//		  "resource": {
-	//			"title": "Resource",
-	//			"description": "A reference to an independent resource provided as an input to a task by the workflow runtime.",
-	//			"examples": [
-	//			  "reference to a configuration file in a repository (i.e., a bom-ref)",
-	//			  "reference to a scanning service used in a task (i.e., a bom-ref)"
-	//			],
-	//			"$ref": "#/definitions/resourceReferenceChoice"
-	//		  },
-	//		  "parameters": {
-	//			"title": "Parameters",
-	//			"description": "Inputs that have the form of parameters with names and values.",
-	//			"type": "array",
-	//			"uniqueItems": true,
-	//			"items": {
-	//			  "$ref": "#/definitions/parameter"
-	//			}
-	//		  },
-	//		  "environmentVars": {
-	//			"title": "Environment variables",
-	//			"description": "Inputs that have the form of parameters with names and values.",
-	//			"type": "array",
-	//			"uniqueItems": true,
-	//			"items": {
-	//			  "oneOf": [
-	//				{
-	//				  "$ref": "#/definitions/property"
-	//				},
-	//				{
-	//				  "type": "string"
-	//				}
-	//			  ]
-	//			}
-	//		  },
-	//		  "data": {
-	//			"title": "Data",
-	//			"description": "Inputs that have the form of data.",
-	//			"$ref": "#/definitions/attachment"
-	//		  },
-	//		  "properties": {
-	//			"type": "array",
-	//			"title": "Properties",
-	//			"items": {
-	//			  "$ref": "#/definitions/property"
-	//			}
-	//		  }
-	//		}
-	//	  },
+	Source          CDXResourceReferenceChoice `json:"source,omitempty"`
+	Target          CDXResourceReferenceChoice `json:"target,omitempty"`
+	Resource        CDXResourceReferenceChoice `json:"resource,omitempty"`
+	Data            CDXAttachment              `json:"data,omitempty"`
+	Parameters      []CDXParameter             `json:"parameters,omitempty"`
+	EnvironmentVars []interface{}              `json:"environmentVars,omitempty"` // TODO: "oneOf": ["#/definitions/property", "string"]
+	Properties      []CDXProperty              `json:"properties,omitempty"`
 }
 
+// v1.5: added
+// TODO: likely nothing better we can do for "environmentVars" which is type "oneOf": ["#/definitions/property", "string"]
 type CDXOutputType struct {
-	//	  "outputType": {
-	//		"type": "object",
-	//		"oneOf": [
-	//		  {
-	//			"required": [
-	//			  "resource"
-	//			]
-	//		  },
-	//		  {
-	//			"required": [
-	//			  "environmentVars"
-	//			]
-	//		  },
-	//		  {
-	//			"required": [
-	//			  "data"
-	//			]
-	//		  }
-	//		],
-	//		"additionalProperties": false,
-	//		"properties": {
-	//		  "type": {
-	//			"title": "Type",
-	//			"description": "Describes the type of data output.",
-	//			"type": "string",
-	//			"enum": [
-	//			  "artifact",
-	//			  "attestation",
-	//			  "log",
-	//			  "evidence",
-	//			  "metrics",
-	//			  "other"
-	//			]
-	//		  },
-	//		  "source": {
-	//			"title": "Source",
-	//			"description": "Component or service that generated or provided the output from the task (e.g., a build tool)",
-	//			"$ref": "#/definitions/resourceReferenceChoice"
-	//		  },
-	//		  "target": {
-	//			"title": "Target",
-	//			"description": "Component or service that received the output from the task (e.g., reference to an artifactory service with data flow value of `outbound`)",
-	//			"examples": ["a log file described as an `externalReference` within its target domain."],
-	//			"$ref": "#/definitions/resourceReferenceChoice"
-	//		  },
-	//		  "resource": {
-	//			"title": "Resource",
-	//			"description": "A reference to an independent resource generated as output by the task.",
-	//			"examples": [
-	//			  "configuration file",
-	//			  "source code",
-	//			  "scanning service"
-	//			],
-	//			"$ref": "#/definitions/resourceReferenceChoice"
-	//		  },
-	//		  "data": {
-	//			"title": "Data",
-	//			"description": "Outputs that have the form of data.",
-	//			"$ref": "#/definitions/attachment"
-	//		  },
-	//		  "environmentVars": {
-	//			"title": "Environment variables",
-	//			"description": "Outputs that have the form of environment variables.",
-	//			"type": "array",
-	//			"items": {
-	//			  "oneOf": [
-	//				{
-	//				  "$ref": "#/definitions/property"
-	//				},
-	//				{
-	//				  "type": "string"
-	//				}
-	//			  ]
-	//			},
-	//			"uniqueItems": true
-	//		  },
-	//		  "properties": {
-	//			"type": "array",
-	//			"title": "Properties",
-	//			"items": {
-	//			  "$ref": "#/definitions/property"
-	//			}
-	//		  }
-	//		}
-	//	  },
+	Type            string                     `json:"type,omitempty"` // "enum": ["artifact", "attestation", "log", "evidence", "metrics", "other"]
+	Source          CDXResourceReferenceChoice `json:"source,omitempty"`
+	Target          CDXResourceReferenceChoice `json:"target,omitempty"`
+	Resource        CDXResourceReferenceChoice `json:"resource,omitempty"`
+	Data            CDXAttachment              `json:"data,omitempty"`
+	EnvironmentVars []interface{}              `json:"environmentVars,omitempty"`
+	Properties      []CDXProperty              `json:"properties,omitempty"`
 }
 
+// v1.5: added
+// TODO: actually, "Ref" should be its own anonymous type with "anyOf": ["#/definitions/refLinkType", "#/definitions/bomLinkElementType"]
 type CDXResourceReferenceChoice struct {
-
-	//	  "resourceReferenceChoice": {
-	//		"title": "Resource reference choice",
-	//		"description": "A reference to a locally defined resource (e.g., a bom-ref) or an externally accessible resource.",
-	//		"$comment": "Enables reference to a resource that participates in a workflow; using either internal (bom-ref) or external (externalReference) types.",
-	//		"type": "object",
-	//		"additionalProperties": false,
-	//		"properties": {
-	//		  "ref": {
-	//			"title": "BOM Reference",
-	//			"description": "References an object by its bom-ref attribute",
-	//			"anyOf": [
-	//			  {
-	//				"title": "Ref",
-	//				"$ref": "#/definitions/refLinkType"
-	//			  },
-	//			  {
-	//				"title": "BOM-Link Element",
-	//				"$ref": "#/definitions/bomLinkElementType"
-	//			  }
-	//			]
-	//		  },
-	//		  "externalReference": {
-	//			"title": "External reference",
-	//			"description": "Reference to an externally accessible resource.",
-	//			"$ref": "#/definitions/externalReference"
-	//		  }
-	//		},
-	//		"oneOf": [
-	//		  {
-	//			"required": [
-	//			  "ref"
-	//			]
-	//		  },
-	//		  {
-	//			"required": [
-	//			  "externalReference"
-	//			]
-	//		  }
-	//		]
-	//	  },
+	Ref               CDXRefLinkType       `json:"description,omitempty"`
+	ExternalReference CDXExternalReference `json:"externalReference,omitempty"`
 }
 
+// v1.5: added
 type CDXCondition struct {
-	//	  "condition": {
-	//		"title": "Condition",
-	//		"description": "A condition that was used to determine a trigger should be activated.",
-	//		"type": "object",
-	//		"additionalProperties": false,
-	//		"properties": {
-	//		  "description": {
-	//			"title": "Description",
-	//			"description": "Describes the set of conditions which cause the trigger to activate.",
-	//			"type": "string"
-	//		  },
-	//		  "expression": {
-	//			"title": "Expression",
-	//			"description": "The logical expression that was evaluated that determined the trigger should be fired.",
-	//			"type": "string"
-	//		  },
-	//		  "properties": {
-	//			"type": "array",
-	//			"title": "Properties",
-	//			"items": {
-	//			  "$ref": "#/definitions/property"
-	//			}
-	//		  }
-	//		}
-	//	  },
+	Description string        `json:"description,omitempty"`
+	Expression  string        `json:"expression,omitempty"`
+	Properties  []CDXProperty `json:"properties,omitempty"`
 }
 
-type CDXTaskType struct {
-
-	//	  "taskType": {
-	//		"type": "string",
-	//		"enum": [
-	//		  "copy",
-	//		  "clone",
-	//		  "lint",
-	//		  "scan",
-	//		  "merge",
-	//		  "build",
-	//		  "test",
-	//		  "deliver",
-	//		  "deploy",
-	//		  "release",
-	//		  "clean",
-	//		  "other"
-	//		]
-	//	  },
-	//	  "parameter": {
-	//		"title": "Parameter",
-	//		"description": "A representation of a functional parameter.",
-	//		"type": "object",
-	//		"additionalProperties": false,
-	//		"properties": {
-	//		  "name": {
-	//			"title": "Name",
-	//			"description": "The name of the parameter.",
-	//			"type": "string"
-	//		  },
-	//		  "value": {
-	//			"title": "Value",
-	//			"description": "The value of the parameter.",
-	//			"type": "string"
-	//		  },
-	//		  "dataType": {
-	//			"title": "Data type",
-	//			"description": "The data type of the parameter.",
-	//			"type": "string"
-	//		  }
-	//		}
-	//	  },
+type CDXParameter struct {
+	Name     string `json:"name,omitempty"`
+	Value    string `json:"value,omitempty"`
+	DataType string `json:"dataType,omitempty"`
 }

@@ -21,7 +21,7 @@ package schema
 // under the Apache 2.0 license and available from:
 // https://github.com/tensorflow/model-card-toolkit/blob/main/model_card_toolkit/schema/v0.0.2/model_card.schema.json. In addition, CycloneDX model card support includes portions of VerifyML, also released under the Apache 2.0 license and available from https://github.com/cylynx/verifyml/blob/main/verifyml/model_card_toolkit/schema/v0.0.4/model_card.schema.json.",
 
-// v1.5 added
+// v1.5: added
 type CDXModelCard struct {
 	BomRef               CDXRefType              `json:"bom-ref,omitempty"`
 	ModelParameters      CDXModelParameters      `json:"modelParameters,omitempty"`
@@ -34,7 +34,7 @@ type CDXModelCard struct {
 // Model Parameters
 // ========================================
 
-// v1.5 added
+// v1.5: added
 type CDXModelParameters struct {
 	Approach           CDXApproach                  `json:"approach,omitempty"`
 	Task               string                       `json:"task,omitempty"`
@@ -45,14 +45,14 @@ type CDXModelParameters struct {
 	Outputs            []CDXInputOutputMLParameters `json:"outputs,omitempty"`
 }
 
-// v1.5 added
+// v1.5: added
 // "Learning types describing the learning problem or hybrid learning problem."
 // "enum": ["supervised","unsupervised","reinforcement-learning","semi-supervised","self-supervised"]
 type CDXApproach struct {
 	Type string `json:"type,omitempty"`
 }
 
-// v1.5 added
+// v1.5: added
 // Constraint: "oneOf": ["#/definitions/componentData", "ref"]
 // TODO: actually, "Ref" should be its own anonymous type with "anyOf": ["#/definitions/refLinkType", "#/definitions/bomLinkElementType"]
 type CDXDataset struct {
@@ -60,7 +60,7 @@ type CDXDataset struct {
 	Ref CDXRefLinkType `json:"ref,omitempty"`
 }
 
-// v1.5 added
+// v1.5: added
 // "The data format for input/output to the model.
 // Example formats include string, image, time-series",
 type CDXInputOutputMLParameters struct {
@@ -77,7 +77,7 @@ type CDXQuantitativeAnalysis struct {
 	Graphics           CDXGraphicsCollection  `json:"graphics,omitempty"`
 }
 
-// v1.5 added
+// v1.5: added
 type CDXPerformanceMetric struct {
 	Type               string                `json:"type,omitempty"`
 	Value              string                `json:"value,omitempty"`
@@ -85,19 +85,19 @@ type CDXPerformanceMetric struct {
 	ConfidenceInterval CDXConfidenceInterval `json:"confidenceInterval,omitempty"`
 }
 
-// v1.5 added
+// v1.5: added
 type CDXConfidenceInterval struct {
 	LowerBound string `json:"lowerBound,omitempty"`
 	UpperBound string `json:"upperBound,omitempty"`
 }
 
-// v1.5 added
+// v1.5: added
 type CDXGraphicsCollection struct {
 	Description string       `json:"description,omitempty"`
 	Collection  []CDXGraphic `json:"collection,omitempty"`
 }
 
-// v1.5 added
+// v1.5: added
 type CDXGraphic struct {
 	Name  string        `json:"name,omitempty"`
 	Image CDXAttachment `json:"image,omitempty"`
@@ -119,13 +119,13 @@ type CDXConsiderations struct {
 	FairnessAssessments   []CDXFairnessAssessment `json:"fairnessAssessments,omitempty"`
 }
 
-// v1.5 added
+// v1.5: added
 type CDXRisk struct {
 	Name               string `json:"name,omitempty"`
 	MitigationStrategy string `json:"mitigationStrategy,omitempty"`
 }
 
-// v1.5 added
+// v1.5: added
 // Information about the benefits and harms of the model to an identified at risk group.
 type CDXFairnessAssessment struct {
 	GroupAtRisk        string `json:"groupAtRisk,omitempty"`
