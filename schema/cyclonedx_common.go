@@ -65,6 +65,14 @@ type CDXAttachment struct {
 	Content     string `json:"content,omitempty"`
 }
 
+// v1.2: existed
+// Note: "alg" is of type "hash-alg" which is a constrained `string` type
+// Note: "content" is of type "hash-content" which is a constrained `string` type
+type CDXHash struct {
+	Alg     string `json:"alg,omitempty"`
+	Content string `json:"content,omitempty"`
+}
+
 // v1.5 new type for "metadata"
 type CDXNameDescription struct {
 	Name        string `json:"name,omitempty"`

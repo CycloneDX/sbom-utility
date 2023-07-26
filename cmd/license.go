@@ -338,12 +338,12 @@ func hashComponentLicense(cdxComponent schema.CDXComponent, location int, whereF
 		licenseInfo.Component = cdxComponent
 		licenseInfo.BomLocationValue = location
 		licenseInfo.ResourceName = cdxComponent.Name
-		licenseInfo.BomRef = cdxComponent.BomRef
+		licenseInfo.BomRef = cdxComponent.BOMRef
 		HashLicenseInfo(LICENSE_NO_ASSERTION, licenseInfo, whereFilters)
 
 		getLogger().Warningf("%s: %s (name:`%s`, version: `%s`, package-url: `%s`)",
 			"No license found for component. bomRef",
-			cdxComponent.BomRef,
+			cdxComponent.BOMRef,
 			cdxComponent.Name,
 			cdxComponent.Version,
 			cdxComponent.Purl)
@@ -359,7 +359,7 @@ func hashComponentLicense(cdxComponent schema.CDXComponent, location int, whereF
 		licenseInfo.Component = cdxComponent
 		licenseInfo.BomLocationValue = location
 		licenseInfo.ResourceName = cdxComponent.Name
-		licenseInfo.BomRef = cdxComponent.BomRef
+		licenseInfo.BomRef = cdxComponent.BOMRef
 		err = hashLicenseInfoByLicenseType(licenseInfo, whereFilters)
 
 		if err != nil {

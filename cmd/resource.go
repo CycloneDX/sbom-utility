@@ -332,7 +332,7 @@ func hashComponentAsResource(cdxComponent schema.CDXComponent, whereFilters []Wh
 		getLogger().Warningf("component named `%s` missing `version`", cdxComponent.Name)
 	}
 
-	if cdxComponent.BomRef == "" {
+	if cdxComponent.BOMRef == "" {
 		getLogger().Warningf("component named `%s` missing `bom-ref`", cdxComponent.Name)
 	}
 
@@ -341,7 +341,7 @@ func hashComponentAsResource(cdxComponent schema.CDXComponent, whereFilters []Wh
 	resourceInfo.Type = RESOURCE_TYPE_COMPONENT
 	resourceInfo.Component = cdxComponent
 	resourceInfo.Name = cdxComponent.Name
-	resourceInfo.BomRef = cdxComponent.BomRef.String()
+	resourceInfo.BomRef = cdxComponent.BOMRef.String()
 	resourceInfo.Version = cdxComponent.Version
 	resourceInfo.SupplierProvider = cdxComponent.Supplier
 	resourceInfo.Properties = cdxComponent.Properties

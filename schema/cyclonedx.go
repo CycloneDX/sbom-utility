@@ -79,10 +79,10 @@ type CDXMetadata struct {
 // TODO: "mime-type" SHOULD become "media-type" which is more modern/inclusive
 // TODO: Remove "service" from "Type" enum. as "service" now exists (deprecate in future versions)
 type CDXComponent struct {
-	Primary            bool                    `json:"-"` // Proprietary: do NOT marshal/unmarshal
-	Type               string                  `json:"type,omitempty"`
+	Primary            bool                    `json:"-"`              // Proprietary: do NOT marshal/unmarshal
+	Type               string                  `json:"type,omitempty"` // Constraint: enum [see schema]
 	MimeType           string                  `json:"mime-type,omitempty"`
-	BomRef             CDXRefType              `json:"bom-ref,omitempty"`
+	BOMRef             CDXRefType              `json:"bom-ref,omitempty"`
 	Supplier           CDXOrganizationalEntity `json:"supplier,omitempty"`
 	Author             string                  `json:"author,omitempty"`
 	Publisher          string                  `json:"publisher,omitempty"`
@@ -90,7 +90,7 @@ type CDXComponent struct {
 	Name               string                  `json:"name,omitempty"`
 	Version            string                  `json:"version,omitempty"`
 	Description        string                  `json:"description,omitempty"`
-	Scope              string                  `json:"scope,omitempty"`
+	Scope              string                  `json:"scope,omitempty"` // Constraint: "enum": ["required","optional","excluded"]
 	Hashes             []CDXHash               `json:"hashes,omitempty"`
 	Licenses           []CDXLicenseChoice      `json:"licenses,omitempty"`
 	Copyright          string                  `json:"copyright,omitempty"`
@@ -210,15 +210,16 @@ type CDXPedigree struct {
 
 // v1.2: existed
 // v1.4: added "externalReferences"
-// v1.5 Note: The v1.4 structure/fields is now called the "Creation Tools (legacy)" structure
-// v1.5: In order to support the new structure "Creation Tools", we need to combine these fields
+// v1.5: deprecated "Creation Tools (legacy)" object in favor of new "Creation Tools" object
+// - v1.5 Note: The v1.4 structure/fields is now called the "Creation Tools (legacy)" structure
+// - v1.5: In order to support the new object "Creation Tools", we need to combine these fields
 // into with the legacy structure fields
 type CDXTool struct {
-	Vendor             string                 `json:"vendor,omitempty" cdx:"1.2"`
-	Name               string                 `json:"name,omitempty" cdx:"1.2"`
-	Version            string                 `json:"version,omitempty" cdx:"1.2"`
-	Hashes             []CDXHash              `json:"hashes,omitempty" cdx:"1.2"`
-	ExternalReferences []CDXExternalReference `json:"externalReferences,omitempty" cdx:"+1.4"` // v1.4: added
+	Vendor             string                 `json:"vendor,omitempty" cdx:"deprecated"`       // v1.5: deprecated
+	Name               string                 `json:"name,omitempty" cdx:"deprecated"`         // v1.5: deprecated
+	Version            string                 `json:"version,omitempty" cdx:"deprecated"`      // v1.5: deprecated
+	Hashes             []CDXHash              `json:"hashes,omitempty" cdx:"deprecated"`       // v1.5: deprecated
+	ExternalReferences []CDXExternalReference `json:"externalReferences,omitempty" cdx:"+1.4"` // v1.4: added, v1.5: deprecated
 	Components         []CDXComponent         `json:"components,omitempty" cdx:"+1.5"`         // v1.5: added (new type)
 	Services           []CDXService           `json:"services,omitempty" cdx:"+1.5"`           // v1.5: added (new type)
 }
@@ -233,14 +234,6 @@ type CDXSwid struct {
 	Patch      bool          `json:"patch,omitempty"`
 	Text       CDXAttachment `json:"attachment,omitempty"`
 	Url        string        `json:"url,omitempty"`
-}
-
-// v1.2: existed
-// Note: "alg" is of type "hash-alg" which is a constrained `string` type
-// Note: "content" is of type "hash-content" which is a constrained `string` type
-type CDXHash struct {
-	Alg     string `json:"alg,omitempty"`
-	Content string `json:"content,omitempty"`
 }
 
 // v1.2: was an anon. type in schema
