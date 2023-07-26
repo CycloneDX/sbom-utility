@@ -19,332 +19,51 @@ package schema
 
 // v1.5: added
 type CDXFormula struct {
-
-	//	  "formula": {
-	//		"title": "Formula",
-	//		"description": "Describes workflows and resources that captures rules and other aspects of how the associated BOM component or service was formed.",
-	//		"type": "object",
-	//		"additionalProperties": false,
-	//		"properties": {
-	//		  "bom-ref": {
-	//			"title": "BOM Reference",
-	//			"description": "An optional identifier which can be used to reference the formula elsewhere in the BOM. Every bom-ref MUST be unique within the BOM.",
-	//			"$ref": "#/definitions/refType"
-	//		  },
-	//		  "components": {
-	//			"title": "Components",
-	//			"description": "Transient components that are used in tasks that constitute one or more of this formula's workflows",
-	//			"type": "array",
-	//			"items": {
-	//			  "$ref": "#/definitions/component"
-	//			},
-	//			"uniqueItems": true
-	//		  },
-	//		  "services": {
-	//			"title": "Services",
-	//			"description": "Transient services that are used in tasks that constitute one or more of this formula's workflows",
-	//			"type": "array",
-	//			"items": {
-	//			  "$ref": "#/definitions/service"
-	//			},
-	//			"uniqueItems": true
-	//		  },
-	//		  "workflows": {
-	//			"title": "Workflows",
-	//			"description": "List of workflows that can be declared to accomplish specific orchestrated goals and independently triggered.",
-	//			"$comment": "Different workflows can be designed to work together to perform end-to-end CI/CD builds and deployments.",
-	//			"type": "array",
-	//			"items": {
-	//			  "$ref": "#/definitions/workflow"
-	//			},
-	//			"uniqueItems": true
-	//		  },
-	//		  "properties": {
-	//			"type": "array",
-	//			"title": "Properties",
-	//			"items": {
-	//			  "$ref": "#/definitions/property"
-	//			}
-	//		  }
-	//		}
-	//	  },
+	BomRef     CDXRefType     `json:"bom-ref,omitempty"`
+	Components []CDXComponent `json:"components,omitempty"`
+	Services   []CDXService   `json:"services,omitempty"`
+	Workflows  []CDXWorkflow  `json:"workflows,omitempty"`
+	Properties []CDXProperty  `json:"properties,omitempty"`
 }
 
 // v1.5: added
 type CDXWorkflow struct {
-
-	//	  "workflow": {
-	//		"title": "Workflow",
-	//		"description": "A specialized orchestration task.",
-	//		"$comment": "Workflow are as task themselves and can trigger other workflow tasks.  These relationships can be modeled in the taskDependencies graph.",
-	//		"type": "object",
-	//		"required": [
-	//		  "bom-ref",
-	//		  "uid",
-	//		  "taskTypes"
-	//		],
-	//		"additionalProperties": false,
-	//		"properties": {
-	//		  "bom-ref": {
-	//			"title": "BOM Reference",
-	//			"description": "An optional identifier which can be used to reference the workflow elsewhere in the BOM. Every bom-ref MUST be unique within the BOM.",
-	//			"$ref": "#/definitions/refType"
-	//		  },
-	//		  "uid": {
-	//			"title": "Unique Identifier (UID)",
-	//			"description": "The unique identifier for the resource instance within its deployment context.",
-	//			"type": "string"
-	//		  },
-	//		  "name": {
-	//			"title": "Name",
-	//			"description": "The name of the resource instance.",
-	//			"type": "string"
-	//		  },
-	//		  "description": {
-	//			"title": "Description",
-	//			"description": "A description of the resource instance.",
-	//			"type": "string"
-	//		  },
-	//		  "resourceReferences": {
-	//			"title": "Resource references",
-	//			"description": "References to component or service resources that are used to realize the resource instance.",
-	//			"type": "array",
-	//			"uniqueItems": true,
-	//			"items": {
-	//			  "$ref": "#/definitions/resourceReferenceChoice"
-	//			}
-	//		  },
-	//		  "tasks": {
-	//			"title": "Tasks",
-	//			"description": "The tasks that comprise the workflow.",
-	//			"$comment": "Note that tasks can appear more than once as different instances (by name or UID).",
-	//			"type": "array",
-	//			"uniqueItems": true,
-	//			"items": {
-	//			  "$ref": "#/definitions/task"
-	//			}
-	//		  },
-	//		  "taskDependencies": {
-	//			"title": "Task dependency graph",
-	//			"description": "The graph of dependencies between tasks within the workflow.",
-	//			"type": "array",
-	//			"uniqueItems": true,
-	//			"items": {
-	//			  "$ref": "#/definitions/dependency"
-	//			}
-	//		  },
-	//		  "taskTypes": {
-	//			"title": "Task types",
-	//			"description": "Indicates the types of activities performed by the set of workflow tasks.",
-	//			"$comment": "Currently, these types reflect common CI/CD actions.",
-	//			"type": "array",
-	//			"items": {
-	//			  "$ref": "#/definitions/taskType"
-	//			}
-	//		  },
-	//		  "trigger": {
-	//			"title": "Trigger",
-	//			"description": "The trigger that initiated the task.",
-	//			"$ref": "#/definitions/trigger"
-	//		  },
-	//		  "steps": {
-	//			"title": "Steps",
-	//			"description": "The sequence of steps for the task.",
-	//			"type": "array",
-	//			"items": {
-	//			  "$ref": "#/definitions/step"
-	//			},
-	//			"uniqueItems": true
-	//		  },
-	//		  "inputs": {
-	//			"title": "Inputs",
-	//			"description": "Represents resources and data brought into a task at runtime by executor or task commands",
-	//			"examples": ["a `configuration` file which was declared as a local `component` or `externalReference`"],
-	//			"type": "array",
-	//			"items": {
-	//			  "$ref": "#/definitions/inputType"
-	//			},
-	//			"uniqueItems": true
-	//		  },
-	//		  "outputs": {
-	//			"title": "Outputs",
-	//			"description": "Represents resources and data output from a task at runtime by executor or task commands",
-	//			"examples": ["a log file or metrics data produced by the task"],
-	//			"type": "array",
-	//			"items": {
-	//			  "$ref": "#/definitions/outputType"
-	//			},
-	//			"uniqueItems": true
-	//		  },
-	//		  "timeStart": {
-	//			"title": "Time start",
-	//			"description": "The date and time (timestamp) when the task started.",
-	//			"type": "string",
-	//			"format": "date-time"
-	//		  },
-	//		  "timeEnd": {
-	//			"title": "Time end",
-	//			"description": "The date and time (timestamp) when the task ended.",
-	//			"type": "string",
-	//			"format": "date-time"
-	//		  },
-	//		  "workspaces": {
-	//			"title": "Workspaces",
-	//			"description": "A set of named filesystem or data resource shareable by workflow tasks.",
-	//			"type": "array",
-	//			"uniqueItems": true,
-	//			"items": {
-	//			  "$ref": "#/definitions/workspace"
-	//			}
-	//		  },
-	//		  "runtimeTopology": {
-	//			"title": "Runtime topology",
-	//			"description": "A graph of the component runtime topology for workflow's instance.",
-	//			"$comment": "A description of the runtime component and service topology.  This can describe a partial or complete topology used to host and execute the task (e.g., hardware, operating systems, configurations, etc.),",
-	//			"type": "array",
-	//			"uniqueItems": true,
-	//			"items": {
-	//			  "$ref": "#/definitions/dependency"
-	//			}
-	//		  },
-	//		  "properties": {
-	//			"type": "array",
-	//			"title": "Properties",
-	//			"items": {
-	//			  "$ref": "#/definitions/property"
-	//			}
-	//		  }
-	//		}
-	//	  },
+	BomRef             CDXRefType                   `json:"bom-ref,omitempty"`
+	Uid                string                       `json:"uid,omitempty"`
+	Name               string                       `json:"name,omitempty"`
+	Description        string                       `json:"description,omitempty"`
+	ResourceReferences []CDXResourceReferenceChoice `json:"resourceReferences,omitempty"`
+	Tasks              []CDXTask                    `json:"tasks,omitempty"`
+	TaskDependencies   []CDXDependency              `json:"taskDependencies,omitempty"`
+	TaskTypes          []CDXTaskType                `json:"taskTypes,omitempty"`
+	Trigger            CDXTrigger                   `json:"trigger,omitempty"`
+	Steps              []CDXStep                    `json:"steps,omitempty"`
+	Inputs             []CDXInputType               `json:"inputs,omitempty"`
+	Outputs            []CDXOutputType              `json:"outputs,omitempty"`
+	TimeStart          string                       `json:"timeStart,omitempty"`
+	TimeEnd            string                       `json:"timeEnd,omitempty"`
+	Workspaces         []CDXWorkspace               `json:"workspaces,omitempty"`
+	RuntimeTopology    []CDXDependency              `json:"runtimeTopology,omitempty"`
+	Properties         []CDXProperty                `json:"properties,omitempty"`
 }
 
 // v1.5: added
 type CDXTask struct {
-
-	//	  "task": {
-	//		"title": "Task",
-	//		"description": "Describes the inputs, sequence of steps and resources used to accomplish a task and its output.",
-	//		"$comment": "Tasks are building blocks for constructing assemble CI/CD workflows or pipelines.",
-	//		"type": "object",
-	//		"required": [
-	//		  "bom-ref",
-	//		  "uid",
-	//		  "taskTypes"
-	//		],
-	//		"additionalProperties": false,
-	//		"properties": {
-	//		  "bom-ref": {
-	//			"title": "BOM Reference",
-	//			"description": "An optional identifier which can be used to reference the task elsewhere in the BOM. Every bom-ref MUST be unique within the BOM.",
-	//			"$ref": "#/definitions/refType"
-	//		  },
-	//		  "uid": {
-	//			"title": "Unique Identifier (UID)",
-	//			"description": "The unique identifier for the resource instance within its deployment context.",
-	//			"type": "string"
-	//		  },
-	//		  "name": {
-	//			"title": "Name",
-	//			"description": "The name of the resource instance.",
-	//			"type": "string"
-	//		  },
-	//		  "description": {
-	//			"title": "Description",
-	//			"description": "A description of the resource instance.",
-	//			"type": "string"
-	//		  },
-	//		  "resourceReferences": {
-	//			"title": "Resource references",
-	//			"description": "References to component or service resources that are used to realize the resource instance.",
-	//			"type": "array",
-	//			"uniqueItems": true,
-	//			"items": {
-	//			  "$ref": "#/definitions/resourceReferenceChoice"
-	//			}
-	//		  },
-	//		  "taskTypes": {
-	//			"title": "Task types",
-	//			"description": "Indicates the types of activities performed by the set of workflow tasks.",
-	//			"$comment": "Currently, these types reflect common CI/CD actions.",
-	//			"type": "array",
-	//			"items": {
-	//			  "$ref": "#/definitions/taskType"
-	//			}
-	//		  },
-	//		  "trigger": {
-	//			"title": "Trigger",
-	//			"description": "The trigger that initiated the task.",
-	//			"$ref": "#/definitions/trigger"
-	//		  },
-	//		  "steps": {
-	//			"title": "Steps",
-	//			"description": "The sequence of steps for the task.",
-	//			"type": "array",
-	//			"items": {
-	//			  "$ref": "#/definitions/step"
-	//			},
-	//			"uniqueItems": true
-	//		  },
-	//		  "inputs": {
-	//			"title": "Inputs",
-	//			"description": "Represents resources and data brought into a task at runtime by executor or task commands",
-	//			"examples": ["a `configuration` file which was declared as a local `component` or `externalReference`"],
-	//			"type": "array",
-	//			"items": {
-	//			  "$ref": "#/definitions/inputType"
-	//			},
-	//			"uniqueItems": true
-	//		  },
-	//		  "outputs": {
-	//			"title": "Outputs",
-	//			"description": "Represents resources and data output from a task at runtime by executor or task commands",
-	//			"examples": ["a log file or metrics data produced by the task"],
-	//			"type": "array",
-	//			"items": {
-	//			  "$ref": "#/definitions/outputType"
-	//			},
-	//			"uniqueItems": true
-	//		  },
-	//		  "timeStart": {
-	//			"title": "Time start",
-	//			"description": "The date and time (timestamp) when the task started.",
-	//			"type": "string",
-	//			"format": "date-time"
-	//		  },
-	//		  "timeEnd": {
-	//			"title": "Time end",
-	//			"description": "The date and time (timestamp) when the task ended.",
-	//			"type": "string",
-	//			"format": "date-time"
-	//		  },
-	//		  "workspaces": {
-	//			"title": "Workspaces",
-	//			"description": "A set of named filesystem or data resource shareable by workflow tasks.",
-	//			"type": "array",
-	//			"items": {
-	//			  "$ref": "#/definitions/workspace"
-	//			},
-	//			"uniqueItems": true
-	//		  },
-	//		  "runtimeTopology": {
-	//			"title": "Runtime topology",
-	//			"description": "A graph of the component runtime topology for task's instance.",
-	//			"$comment": "A description of the runtime component and service topology.  This can describe a partial or complete topology used to host and execute the task (e.g., hardware, operating systems, configurations, etc.),",
-	//			"type": "array",
-	//			"items": {
-	//			  "$ref": "#/definitions/dependency"
-	//			},
-	//			"uniqueItems": true
-	//		  },
-	//		  "properties": {
-	//			"type": "array",
-	//			"title": "Properties",
-	//			"items": {
-	//			  "$ref": "#/definitions/property"
-	//			}
-	//		  }
-	//		}
-	//	  },
+	BomRef             CDXRefType                   `json:"bom-ref,omitempty"`
+	Uid                string                       `json:"uid,omitempty"`
+	Name               string                       `json:"name,omitempty"`
+	Description        string                       `json:"description,omitempty"`
+	ResourceReferences []CDXResourceReferenceChoice `json:"resourceReferences,omitempty"`
+	TaskTypes          []CDXTaskType                `json:"taskTypes,omitempty"`
+	Trigger            CDXTrigger                   `json:"trigger,omitempty"`
+	Steps              []CDXStep                    `json:"steps,omitempty"`
+	Inputs             []CDXInputType               `json:"inputs,omitempty"`
+	Outputs            []CDXOutputType              `json:"outputs,omitempty"`
+	TimeStart          string                       `json:"timeStart,omitempty"`
+	TimeEnd            string                       `json:"timeEnd,omitempty"`
+	Workspaces         []CDXWorkspace               `json:"workspaces,omitempty"`
+	RuntimeTopology    []CDXDependency              `json:"runtimeTopology,omitempty"`
+	Properties         []CDXProperty                `json:"properties,omitempty"`
 }
 
 // v1.5: added
@@ -353,61 +72,15 @@ type CDXTaskType string
 
 // v1.5: added
 type CDXStep struct {
-
-	//	  "step": {
-	//		"type": "object",
-	//		"description": "Executes specific commands or tools in order to accomplish its owning task as part of a sequence.",
-	//		"additionalProperties": false,
-	//		"properties": {
-	//		  "name": {
-	//			"title": "Name",
-	//			"description": "A name for the step.",
-	//			"type": "string"
-	//		  },
-	//		  "description": {
-	//			"title": "Description",
-	//			"description": "A description of the step.",
-	//			"type": "string"
-	//		  },
-	//		  "commands": {
-	//			"title": "Commands",
-	//			"description": "Ordered list of commands or directives for the step",
-	//			"type": "array",
-	//			"items": {
-	//			  "$ref": "#/definitions/command"
-	//			}
-	//		  },
-	//		  "properties": {
-	//			"type": "array",
-	//			"title": "Properties",
-	//			"items": {
-	//			  "$ref": "#/definitions/property"
-	//			}
-	//		  }
-	//		}
-	//	  },
+	Name        string        `json:"name,omitempty"`
+	Description string        `json:"description,omitempty"`
+	Commands    []CDXCommand  `json:"commands,omitempty"`
+	Properties  []CDXProperty `json:"properties,omitempty"`
 }
 
 type CDXCommand struct {
-
-	//	  "command": {
-	//		"type": "object",
-	//		"additionalProperties": false,
-	//		"properties": {
-	//		  "executed": {
-	//			"title": "Executed",
-	//			"description": "A text representation of the executed command.",
-	//			"type": "string"
-	//		  },
-	//		  "properties": {
-	//			"type": "array",
-	//			"title": "Properties",
-	//			"items": {
-	//			  "$ref": "#/definitions/property"
-	//			}
-	//		  }
-	//		}
-	//	  },
+	Executed   bool          `json:"executed,omitempty"`
+	Properties []CDXProperty `json:"properties,omitempty"`
 }
 
 // v1.5: added
