@@ -243,12 +243,19 @@ type CDXHash struct {
 	Content string `json:"content,omitempty"`
 }
 
-// v1.2: was an anon. type
-// v1.3: created
+// v1.2: was an anon. type in schema
+// v1.3: created explicit schema object type
 // Note: "oneOf": ["license", "expression"] is required
 type CDXLicenseChoice struct {
-	License    CDXLicense `json:"license,omitempty"`
+	License CDXLicense `json:"license,omitempty"`
+	//Expression string     `json:"expression,omitempty"`
+	CDXLicenseExpression
+}
+
+// v1.5: added
+type CDXLicenseExpression struct {
 	Expression string     `json:"expression,omitempty"`
+	BomRef     CDXRefType `json:"bom-ref,omitempty"`
 }
 
 // v1.2: was an anon. type
