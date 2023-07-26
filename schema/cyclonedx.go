@@ -98,9 +98,9 @@ type CDXComponent struct {
 	Pedigree           CDXPedigree             `json:"pedigree,omitempty"` // anon. type
 	ExternalReferences []CDXExternalReference  `json:"externalReferences,omitempty"`
 	Components         []CDXComponent          `json:"components,omitempty"`
-	Evidence           CDXComponentEvidence    `json:"evidence,omitempty"`                  // v1.3: added
-	Cpe                string                  `json:"cpe,omitempty" cdx:"deprecated"`      // v1.4: deprecated
-	Swid               CDXSwid                 `json:"swid,omitempty" cdx:"deprecated"`     // v1.4: deprecated
+	Evidence           CDXComponentEvidence    `json:"evidence,omitempty"`             // v1.3: added
+	Cpe                string                  `json:"cpe,omitempty" cdx:"deprecated"` // v1.4: deprecated
+	Swid               CDXSwid                 `json:"swid,omitempty"`
 	Modified           bool                    `json:"modified,omitempty" cdx:"deprecated"` // v1.4: deprecated
 	ReleaseNotes       []CDXReleaseNotes       `json:"releaseNotes,omitempty"`              // v1.4: added
 	Properties         []CDXProperty           `json:"properties,omitempty"`                // v1.3: added

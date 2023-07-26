@@ -20,6 +20,7 @@ package schema
 import (
 	"bytes"
 	"encoding/json"
+	"reflect"
 )
 
 // --------------------------------------------------------------------------------
@@ -42,40 +43,15 @@ var ENCODED_EMPTY_SLICE_OF_STRUCT = []byte("[{}]")
 // --------------------------
 // CDXLicenseChoice structs
 // --------------------------
-func (value *CDXLicenseChoice) MarshalJSON1() (bytes []byte, err error) {
-	temp := map[string]interface{}{}
-	if value.Expression != "" {
-		temp["expression"] = value.Expression
-	}
 
-	// if the child struct is not "empty" we need to encode it as a map so to leverage the built-in
-	// handling of the json encoding package
-	if value.License != (CDXLicense{}) {
-		var bData []byte
-		bData, err = json.Marshal(&value.License)
-		if err != nil {
-			return
-		}
-
-		m := make(map[string]interface{})
-		err = json.Unmarshal(bData, &m)
-		if err != nil {
-			getLogger().Warningf("Unmarshal error: %s", err)
-			return
-		}
-		temp["license"] = m
-	}
-	// reuse built-in json encoder, which accepts a map primitive
-	return json.Marshal(temp)
-}
-
+// TODO: v1.5: no longer works with addition of "Licensing" object (requires deep compare/copy)
 func (value *CDXLicenseChoice) MarshalJSON() (marshalled []byte, err error) {
 	temp := map[string]interface{}{}
 	if value.Expression != "" {
 		temp["expression"] = value.Expression
 	}
 
-	if value.License != (CDXLicense{}) {
+	if !reflect.ValueOf(value.License).IsZero() {
 		temp["license"] = &value.License
 	}
 
