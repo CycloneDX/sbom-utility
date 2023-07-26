@@ -101,3 +101,10 @@ type CDXProperty struct {
 	Name  string `json:"name,omitempty"`
 	Value string `json:"value,omitempty"`
 }
+
+// v1.5: created for reuse in "licensing" schema for "licensee" and "licensor"
+// TODO: reuse on "annotator" as well?
+type CDXLicenseLegalParty struct {
+	Organization CDXOrganizationalEntity  `json:"organization,omitempty"`
+	Individual   CDXOrganizationalContact `json:"individual,omitempty"`
+}

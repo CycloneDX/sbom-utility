@@ -260,12 +260,28 @@ type CDXLicenseExpression struct {
 
 // v1.2: was an anon. type
 // v1.3: created
+// Note: "id" SHOULD be an SPDX license ID
 // Note: "oneOf": ["id", "name"] is required
 type CDXLicense struct {
-	Id   string        `json:"id,omitempty"`
-	Name string        `json:"name,omitempty"`
-	Text CDXAttachment `json:"text,omitempty"`
-	Url  string        `json:"url,omitempty"`
+	Id         string        `json:"id,omitempty"`
+	Name       string        `json:"name,omitempty"`
+	Text       CDXAttachment `json:"text,omitempty"`
+	Url        string        `json:"url,omitempty"`
+	BomRef     CDXRefType    `json:"bom-ref,omitempty"`    // v1.5: added
+	Licensing  CDXLicensing  `json:"licensing,omitempty"`  // v1.5: added
+	Properties []CDXProperty `json:"properties,omitempty"` // v1.5: added
+}
+
+// v1.5: added
+type CDXLicensing struct {
+	AltIds        []string             `json:"altIds,omitempty"`
+	Licensor      CDXLicenseLegalParty `json:"licensor,omitempty"`
+	Licensee      CDXLicenseLegalParty `json:"licensee,omitempty"`
+	Purchaser     CDXLicenseLegalParty `json:"purchaser,omitempty"`
+	PurchaseOrder string               `json:"purchaseOrder,omitempty"`
+	LicenseTypes  []string             `json:"licenseTypes,omitempty"` // Constraint: enum[see schema]
+	LastRenewal   string               `json:"lastRenewal,omitempty"`
+	Expiration    string               `json:"expiration,omitempty"`
 }
 
 // v1.2: existed
