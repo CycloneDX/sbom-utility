@@ -59,7 +59,7 @@ type CDXBom struct {
 // v1.5: added "lifecycles"
 type CDXMetadata struct {
 	Timestamp    string                     `json:"timestamp,omitempty"`
-	Tools        interface{}                `json:"tools,omitempty"` // v1.2: added. v1.5: "tools" is now an interface{}
+	Tools        interface{}                `json:"tools,omitempty"` // v1.2: added.v1.5: "tools" is now an interface{}
 	Authors      []CDXOrganizationalContact `json:"authors,omitempty"`
 	Component    CDXComponent               `json:"component,omitempty"`
 	Manufacturer CDXOrganizationalEntity    `json:"manufacturer,omitempty"`
@@ -324,9 +324,11 @@ type CDXExternalReference struct {
 
 // v1.2: existed
 // v1.4: "ref" and "dependsOn" became type "refType" which is a constrained `string`
+// v1.5: "ref": is now a constrained "string" of type "#/definitions/refLinkType"
+// v1.5: "dependsOn": is now a constrained "string" of type "#/definitions/refLinkType"
 type CDXDependency struct {
-	Ref       string   `json:"ref,omitempty"`
-	DependsOn []string `json:"dependsOn,omitempty"`
+	Ref       CDXRefLinkType   `json:"ref,omitempty"`
+	DependsOn []CDXRefLinkType `json:"dependsOn,omitempty"`
 }
 
 // v1.2: existed

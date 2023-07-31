@@ -19,12 +19,12 @@ package schema
 
 // v1.5 "annotations" and sub-schema added ("required": ["subjects","annotator","timestamp","text"])
 type CDXAnnotation struct {
-	BomRef    CDXRefType   `json:"bom-ref,omitempty"`
-	Subjects  []CDXSubject `json:"subjects,omitempty"`
-	Annotator CDXAnnotator `json:"annotator,omitempty"`
-	Timestamp string       `json:"timestamp,omitempty"`
-	Text      string       `json:"text,omitempty"`
-	Signature JSFSignature `json:"signature,omitempty"`
+	BomRef    CDXRefType   `json:"bom-ref,omitempty"`   // v1.5
+	Subjects  []CDXSubject `json:"subjects,omitempty"`  // v1.5
+	Annotator CDXAnnotator `json:"annotator,omitempty"` // v1.5
+	Timestamp string       `json:"timestamp,omitempty"` // v1.5
+	Text      string       `json:"text,omitempty"`      // v1.5
+	Signature JSFSignature `json:"signature,omitempty"` // v1.5
 }
 
 // v1.5 added to represent the anonymous type defined in the "annotations" object
@@ -36,8 +36,8 @@ type CDXSubject string
 // v1.5 added to represent the anonymous type defined in the "annotations" object
 // required" oneOf: organization, individual, component, service
 type CDXAnnotator struct {
-	Organization CDXOrganizationalEntity  `json:"organization,omitempty"`
-	Individual   CDXOrganizationalContact `json:"individual,omitempty"`
-	Component    CDXComponent             `json:"component,omitempty"`
-	Service      CDXService               `json:"service,omitempty"`
+	Organization CDXOrganizationalEntity  `json:"organization,omitempty"` // v1.5
+	Individual   CDXOrganizationalContact `json:"individual,omitempty"`   // v1.5
+	Component    CDXComponent             `json:"component,omitempty"`    // v1.5
+	Service      CDXService               `json:"service,omitempty"`      // v1.5
 }
