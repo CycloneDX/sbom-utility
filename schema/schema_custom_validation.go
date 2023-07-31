@@ -104,6 +104,6 @@ type CustomValidationProperty struct {
 }
 
 type CustomValidationTool struct {
-	CDXTool
+	CDXLegacyCreationTool
 	Description string `json:"_validate_description"`
 }

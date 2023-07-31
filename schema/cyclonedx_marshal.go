@@ -106,8 +106,8 @@ func (value *CDXAttachment) MarshalJSON() ([]byte, error) {
 func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
 	temp := map[string]interface{}{}
 
-	if value.BomRef != "" {
-		temp["bom-ref"] = value.BomRef
+	if value.BOMRef != "" {
+		temp["bom-ref"] = value.BOMRef
 	}
 
 	if value.Id != "" {
@@ -179,8 +179,14 @@ func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
 		temp["cwes"] = &value.Cwes
 	}
 
-	if len(value.Tools) > 0 {
-		temp["tools"] = &value.Tools
+	// TODO: author test for legacy (array) object vs. new tool object
+	if value.Tools != nil {
+		if reflect.TypeOf(value.Tools).Kind() == reflect.Slice {
+			arrayTools, ok := value.Tools.([]CDXLegacyCreationTool)
+			if ok && len(arrayTools) > 0 {
+				temp["tools"] = arrayTools
+			}
+		}
 	}
 
 	if len(value.Properties) > 0 {
