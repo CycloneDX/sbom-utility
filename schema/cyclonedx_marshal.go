@@ -23,6 +23,15 @@ import (
 	"reflect"
 )
 
+func IsInterfaceASlice(testValue interface{}) bool {
+	if testValue != nil {
+		if reflect.TypeOf(testValue).Kind() == reflect.Slice {
+			return true
+		}
+	}
+	return false
+}
+
 // --------------------------------------------------------------------------------
 // Custom marshallers
 // --------------------------------------------------------------------------------
@@ -179,13 +188,17 @@ func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
 		temp["cwes"] = &value.Cwes
 	}
 
+	// v1.5 allows tools to be either an array of (legacy) tool object or a new tool object
 	// TODO: author test for legacy (array) object vs. new tool object
-	if value.Tools != nil {
-		if reflect.TypeOf(value.Tools).Kind() == reflect.Slice {
-			arrayTools, ok := value.Tools.([]CDXLegacyCreationTool)
-			if ok && len(arrayTools) > 0 {
-				temp["tools"] = arrayTools
-			}
+	if IsInterfaceASlice(value.Tools) {
+		arrayTools, ok := value.Tools.([]CDXLegacyCreationTool)
+		if ok && len(arrayTools) > 0 {
+			temp["tools"] = arrayTools
+		}
+	} else {
+		tools, ok := value.Tools.(CDXCreationTools)
+		if ok {
+			temp["tools"] = tools
 		}
 	}
 
