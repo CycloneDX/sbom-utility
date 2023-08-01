@@ -31,7 +31,7 @@ type CDXAnnotation struct {
 // Note: Since CDXSubject can be one of 2 other types (i.e., "#/definitions/refLinkType"
 // and "#/definitions/bomLinkElementType") which both are "string" types
 // we can also make it a "string" type as it does not affect constraint validation.
-type CDXSubject string
+type CDXSubject string // v1.5
 
 // v1.5 added to represent the anonymous type defined in the "annotations" object
 // required" oneOf: organization, individual, component, service
