@@ -26,6 +26,7 @@ import (
 	"reflect"
 
 	"github.com/CycloneDX/sbom-utility/log"
+	"github.com/CycloneDX/sbom-utility/resources"
 	"github.com/CycloneDX/sbom-utility/utils"
 )
 
@@ -183,23 +184,35 @@ func (err UnsupportedSchemaError) Error() string {
 // in CI build systems (towards improved security, isolated builds)
 // NOTE: we have also found that standards orgs. freely move their schema files
 // within SCM systems thereby being a cause for remote retrieval failures.
-func LoadSchemaConfig(filename string) (err error) {
+func LoadUserSchemaConfigFile(filename string, defaultFilename string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 	getLogger().Tracef("filename: `%s`...", filename)
 
-	cfgFilename, err := utils.FindVerifyConfigFileAbsPath(getLogger(), filename)
+	var cfgFilename string
+	var buffer []byte
 
-	if err != nil {
-		return fmt.Errorf("unable to find schema config file: `%s`", filename)
-	}
+	if filename != "" {
+		cfgFilename, err = utils.FindVerifyConfigFileAbsPath(getLogger(), filename)
 
-	// Note we actively supply informative error messages to help user
-	// understand exactly how the load failed
-	getLogger().Tracef("Reading schema config file: `%s`...", cfgFilename)
-	buffer, err := ioutil.ReadFile(cfgFilename)
-	if err != nil {
-		return fmt.Errorf("unable to `ReadFile`: `%s`", cfgFilename)
+		if err != nil {
+			return fmt.Errorf("unable to find schema config file: `%s`", filename)
+		}
+
+		// Attempt to load user-provided config file
+		getLogger().Tracef("Reading schema config file: `%s`...", cfgFilename)
+		buffer, err = os.ReadFile(cfgFilename)
+		if err != nil {
+			return fmt.Errorf("unable to read schema config file:: `%s`", cfgFilename)
+		}
+	} else {
+		// Attempt to load the default config file from embedded file resources
+		getLogger().Tracef("Default config: `%s` loaded from embedded resources. Contents: %s", filename, string(buffer))
+		buffer, err = resources.LoadConfigFile(defaultFilename)
+		if err != nil {
+			getLogger().Errorf("unable to load schema config file: `%s` from embedded resources: `%s`",
+				filename, resources.RESOURCES_CONFIG_DIR)
+		}
 	}
 
 	err = json.Unmarshal(buffer, &SupportedFormatConfig)

@@ -18,7 +18,6 @@
 package cmd
 
 import (
-	"embed"
 	"fmt"
 	"io"
 	"os"
@@ -30,7 +29,7 @@ import (
 )
 
 // Globals
-var SchemaFiles embed.FS
+// var SchemaFiles embed.FS <== REMOVE TODO  !!!
 var ProjectLogger *log.MiniLogger
 var licensePolicyConfig *LicenseComplianceConfig
 
@@ -148,7 +147,7 @@ func init() {
 	cobra.OnInitialize(initConfigurations)
 
 	// Declare top-level, persistent flags used for configuration of utility
-	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigSchemaFile, FLAG_CONFIG_SCHEMA, "", DEFAULT_SCHEMA_CONFIG, MSG_FLAG_CONFIG_SCHEMA)
+	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigSchemaFile, FLAG_CONFIG_SCHEMA, "", "", MSG_FLAG_CONFIG_SCHEMA)
 	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigLicensePolicyFile, FLAG_CONFIG_LICENSE_POLICY, "", DEFAULT_LICENSE_POLICIES, MSG_FLAG_CONFIG_LICENSE)
 	utils.GlobalFlags.ConfigCustomValidationFile = DEFAULT_CUSTOM_VALIDATION_CONFIG
 	// TODO: Make configurable once we have organized the set of custom validation configurations
@@ -210,7 +209,7 @@ func initConfigurations() {
 
 	// Load application configuration file (i.e., primarily SBOM supported Formats/Schemas)
 	// TODO: page fault "load" of data only when needed
-	errCfg := schema.LoadSchemaConfig(utils.GlobalFlags.ConfigSchemaFile)
+	errCfg := schema.LoadUserSchemaConfigFile(utils.GlobalFlags.ConfigSchemaFile, DEFAULT_SCHEMA_CONFIG)
 	if errCfg != nil {
 		getLogger().Error(errCfg.Error())
 		os.Exit(ERROR_APPLICATION)

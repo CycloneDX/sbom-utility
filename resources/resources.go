@@ -22,5 +22,22 @@ import (
 )
 
 // Embed the JSON schema files used to validate SBOMs
+
 //go:embed schema
 var SBOMSchemaFiles embed.FS
+
+//go:embed config
+var ConfigFiles embed.FS
+
+const RESOURCES_SCHEMA_DIR = "schema/"
+const RESOURCES_CONFIG_DIR = "config/"
+
+func LoadConfigFile(baseFilename string) (bData []byte, err error) {
+	bData, err = ConfigFiles.ReadFile(RESOURCES_CONFIG_DIR + baseFilename)
+	return
+}
+
+func LoadSchemaFile(baseFilename string) (bData []byte, err error) {
+	bData, err = ConfigFiles.ReadFile(RESOURCES_SCHEMA_DIR + baseFilename)
+	return
+}
