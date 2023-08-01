@@ -19,7 +19,7 @@ package schema
 
 // v1.5: added
 type CDXFormula struct {
-	BomRef     CDXRefType     `json:"bom-ref,omitempty"`    // v1.5
+	BOMRef     CDXRefType     `json:"bom-ref,omitempty"`    // v1.5
 	Components []CDXComponent `json:"components,omitempty"` // v1.5
 	Services   []CDXService   `json:"services,omitempty"`   // v1.5
 	Workflows  []CDXWorkflow  `json:"workflows,omitempty"`  // v1.5
@@ -28,7 +28,7 @@ type CDXFormula struct {
 
 // v1.5: added
 type CDXWorkflow struct {
-	BomRef             CDXRefType                   `json:"bom-ref,omitempty"`            // v1.5
+	BOMRef             CDXRefType                   `json:"bom-ref,omitempty"`            // v1.5
 	Uid                string                       `json:"uid,omitempty"`                // v1.5
 	Name               string                       `json:"name,omitempty"`               // v1.5
 	Description        string                       `json:"description,omitempty"`        // v1.5
@@ -49,7 +49,7 @@ type CDXWorkflow struct {
 
 // v1.5: added
 type CDXTask struct {
-	BomRef             CDXRefType                   `json:"bom-ref,omitempty"`            // v1.5
+	BOMRef             CDXRefType                   `json:"bom-ref,omitempty"`            // v1.5
 	Uid                string                       `json:"uid,omitempty"`                // v1.5
 	Name               string                       `json:"name,omitempty"`               // v1.5
 	Description        string                       `json:"description,omitempty"`        // v1.5
@@ -86,7 +86,7 @@ type CDXCommand struct {
 
 // v1.5: added
 type CDXWorkspace struct {
-	BomRef             CDXRefType                   `json:"bom-ref,omitempty"`            // v1.5
+	BOMRef             CDXRefType                   `json:"bom-ref,omitempty"`            // v1.5
 	Uid                string                       `json:"uid,omitempty"`                // v1.5
 	Name               string                       `json:"name,omitempty"`               // v1.5
 	Aliases            []string                     `json:"aliases,omitempty"`            // v1.5
@@ -113,7 +113,7 @@ type CDXVolume struct {
 }
 
 type CDXTrigger struct {
-	BomRef             CDXRefType                   `json:"bom-ref,omitempty"`            // v1.5
+	BOMRef             CDXRefType                   `json:"bom-ref,omitempty"`            // v1.5
 	Uid                string                       `json:"uid,omitempty"`                // v1.5
 	Name               string                       `json:"name,omitempty"`               // v1.5
 	Description        string                       `json:"description,omitempty"`        // v1.5

@@ -19,7 +19,7 @@ package schema
 
 // v1.5 "annotations" and sub-schema added ("required": ["subjects","annotator","timestamp","text"])
 type CDXAnnotation struct {
-	BomRef    CDXRefType   `json:"bom-ref,omitempty"`   // v1.5
+	BOMRef    CDXRefType   `json:"bom-ref,omitempty"`   // v1.5
 	Subjects  []CDXSubject `json:"subjects,omitempty"`  // v1.5
 	Annotator CDXAnnotator `json:"annotator,omitempty"` // v1.5
 	Timestamp string       `json:"timestamp,omitempty"` // v1.5

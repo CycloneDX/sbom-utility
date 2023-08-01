@@ -101,7 +101,7 @@ type CDXOrganizationalContact struct {
 	Name   string     `json:"name,omitempty"`
 	Email  string     `json:"email,omitempty"`
 	Phone  string     `json:"phone,omitempty"`
-	BomRef CDXRefType `json:"bom-ref,omitempty"` // v1.5 added
+	BOMRef CDXRefType `json:"bom-ref,omitempty"` // v1.5 added
 }
 
 // v1.3: created "property" defn.

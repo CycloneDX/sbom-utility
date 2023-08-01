@@ -228,7 +228,7 @@ type CDXLicenseChoice struct {
 // v1.5: added
 type CDXLicenseExpression struct {
 	Expression string     `json:"expression,omitempty"`
-	BomRef     CDXRefType `json:"bom-ref,omitempty"`
+	BOMRef     CDXRefType `json:"bom-ref,omitempty"`
 }
 
 // v1.2: was an anon. type
@@ -240,7 +240,7 @@ type CDXLicense struct {
 	Name       string        `json:"name,omitempty"`
 	Text       CDXAttachment `json:"text,omitempty"`
 	Url        string        `json:"url,omitempty"`
-	BomRef     CDXRefType    `json:"bom-ref,omitempty"`    // v1.5: added
+	BOMRef     CDXRefType    `json:"bom-ref,omitempty"`    // v1.5: added
 	Licensing  CDXLicensing  `json:"licensing,omitempty"`  // v1.5: added
 	Properties []CDXProperty `json:"properties,omitempty"` // v1.5: added
 }

@@ -23,7 +23,7 @@ package schema
 
 // v1.5: added
 type CDXModelCard struct {
-	BomRef               CDXRefType              `json:"bom-ref,omitempty"`              // v1.5
+	BOMRef               CDXRefType              `json:"bom-ref,omitempty"`              // v1.5
 	ModelParameters      CDXModelParameters      `json:"modelParameters,omitempty"`      // v1.5
 	QuantitativeAnalysis CDXQuantitativeAnalysis `json:"quantitativeAnalysis,omitempty"` // v1.5
 	Considerations       CDXConsiderations       `json:"considerations,omitempty"`       // v1.5

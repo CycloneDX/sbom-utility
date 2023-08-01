@@ -445,8 +445,8 @@ func DisplayLicenseListSummaryText(output io.Writer) {
 				licenseInfo.LicenseChoiceType,
 				licenseName,
 				licenseInfo.ResourceName,
-				licenseInfo.BomRef,
-				licenseInfo.BomLocation,
+				licenseInfo.BOMRef,
+				licenseInfo.BOMLocation,
 			)
 		}
 	}
@@ -507,8 +507,8 @@ func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
 				licenseInfo.LicenseChoiceType,
 				licenseName.(string),
 				licenseInfo.ResourceName,
-				licenseInfo.BomRef.String(),
-				licenseInfo.BomLocation,
+				licenseInfo.BOMRef.String(),
+				licenseInfo.BOMLocation,
 			)
 
 			if errWrite := w.Write(currentRow); errWrite != nil {
@@ -565,8 +565,8 @@ func DisplayLicenseListSummaryMarkdown(output io.Writer) {
 				licenseInfo.LicenseChoiceType,
 				licenseName.(string),
 				licenseInfo.ResourceName,
-				licenseInfo.BomRef.String(),
-				licenseInfo.BomLocation,
+				licenseInfo.BOMRef.String(),
+				licenseInfo.BOMLocation,
 			)
 
 			lineRow = createMarkdownRow(line)
