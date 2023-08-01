@@ -84,14 +84,13 @@ type CustomValidationConfig struct {
 	Validation CustomValidation `json:"validation"`
 }
 
-// Custom Validation config.
 type CustomValidation struct {
 	Metadata CustomValidationMetadata `json:"metadata"`
 }
 
 type CustomValidationMetadata struct {
 	Properties []CustomValidationProperty `json:"properties"`
-	Tools      []CustomValidationTool     `json:"tools"`
+	//Tools      []CustomValidationTool     `json:"tools"`
 }
 
 // NOTE: Assumes property "key" is the value in the "name" field
@@ -103,7 +102,8 @@ type CustomValidationProperty struct {
 	CheckRegex  string `json:"_validate_regex"`
 }
 
-type CustomValidationTool struct {
-	CDXTool
-	Description string `json:"_validate_description"`
-}
+// TODO: if we keep using "custom" structs, then this needs to be updated to handle the new Creation Tools object
+// type CustomValidationTool struct {
+// 	CDXLegacyCreationTool
+// 	Description string `json:"_validate_description"`
+// }

@@ -247,6 +247,8 @@ func ListLicenses(output io.Writer, format string, whereFilters []WhereFilter, s
 			err = DisplayLicenseListCSV(output)
 		case FORMAT_MARKDOWN:
 			DisplayLicenseListMarkdown(output)
+		case FORMAT_TEXT:
+			DisplayLicenseListSummaryText(output)
 		default:
 			// Default to JSON output for anything else
 			getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
@@ -443,8 +445,8 @@ func DisplayLicenseListSummaryText(output io.Writer) {
 				licenseInfo.LicenseChoiceType,
 				licenseName,
 				licenseInfo.ResourceName,
-				licenseInfo.BomRef,
-				licenseInfo.BomLocation,
+				licenseInfo.BOMRef,
+				licenseInfo.BOMLocation,
 			)
 		}
 	}
@@ -505,8 +507,8 @@ func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
 				licenseInfo.LicenseChoiceType,
 				licenseName.(string),
 				licenseInfo.ResourceName,
-				licenseInfo.BomRef,
-				licenseInfo.BomLocation,
+				licenseInfo.BOMRef.String(),
+				licenseInfo.BOMLocation,
 			)
 
 			if errWrite := w.Write(currentRow); errWrite != nil {
@@ -563,8 +565,8 @@ func DisplayLicenseListSummaryMarkdown(output io.Writer) {
 				licenseInfo.LicenseChoiceType,
 				licenseName.(string),
 				licenseInfo.ResourceName,
-				licenseInfo.BomRef,
-				licenseInfo.BomLocation,
+				licenseInfo.BOMRef.String(),
+				licenseInfo.BOMLocation,
 			)
 
 			lineRow = createMarkdownRow(line)

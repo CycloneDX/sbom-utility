@@ -91,7 +91,7 @@ var VALID_RESOURCE_TYPES = []string{RESOURCE_TYPE_DEFAULT, RESOURCE_TYPE_COMPONE
 type ResourceInfo struct {
 	isRoot           bool
 	Type             string `json:"type"`
-	BomRef           string `json:"bom-ref"`
+	BOMRef           string `json:"bom-ref"`
 	Name             string `json:"name"`
 	Version          string `json:"version"`
 	SupplierProvider schema.CDXOrganizationalEntity
@@ -332,7 +332,7 @@ func hashComponentAsResource(cdxComponent schema.CDXComponent, whereFilters []Wh
 		getLogger().Warningf("component named `%s` missing `version`", cdxComponent.Name)
 	}
 
-	if cdxComponent.BomRef == "" {
+	if cdxComponent.BOMRef == "" {
 		getLogger().Warningf("component named `%s` missing `bom-ref`", cdxComponent.Name)
 	}
 
@@ -341,7 +341,7 @@ func hashComponentAsResource(cdxComponent schema.CDXComponent, whereFilters []Wh
 	resourceInfo.Type = RESOURCE_TYPE_COMPONENT
 	resourceInfo.Component = cdxComponent
 	resourceInfo.Name = cdxComponent.Name
-	resourceInfo.BomRef = cdxComponent.BomRef
+	resourceInfo.BOMRef = cdxComponent.BOMRef.String()
 	resourceInfo.Version = cdxComponent.Version
 	resourceInfo.SupplierProvider = cdxComponent.Supplier
 	resourceInfo.Properties = cdxComponent.Properties
@@ -353,12 +353,12 @@ func hashComponentAsResource(cdxComponent schema.CDXComponent, whereFilters []Wh
 	}
 
 	if match {
-		resourceMap.Put(resourceInfo.BomRef, resourceInfo)
+		resourceMap.Put(resourceInfo.BOMRef, resourceInfo)
 
 		getLogger().Tracef("Put: %s (`%s`), `%s`)",
 			resourceInfo.Name,
 			resourceInfo.Version,
-			resourceInfo.BomRef)
+			resourceInfo.BOMRef)
 	}
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
@@ -404,7 +404,7 @@ func hashServiceAsResource(cdxService schema.CDXService, whereFilters []WhereFil
 		getLogger().Warningf("service named `%s` missing `version`", cdxService.Name)
 	}
 
-	if cdxService.BomRef == "" {
+	if cdxService.BOMRef == "" {
 		getLogger().Warningf("service named `%s` missing `bom-ref`", cdxService.Name)
 	}
 
@@ -412,7 +412,7 @@ func hashServiceAsResource(cdxService schema.CDXService, whereFilters []WhereFil
 	resourceInfo.Type = RESOURCE_TYPE_SERVICE
 	resourceInfo.Service = cdxService
 	resourceInfo.Name = cdxService.Name
-	resourceInfo.BomRef = cdxService.BomRef
+	resourceInfo.BOMRef = cdxService.BOMRef.String()
 	resourceInfo.Version = cdxService.Version
 	resourceInfo.SupplierProvider = cdxService.Provider
 	resourceInfo.Properties = cdxService.Properties
@@ -425,13 +425,13 @@ func hashServiceAsResource(cdxService schema.CDXService, whereFilters []WhereFil
 
 	if match {
 		// TODO: AppendLicenseInfo(LICENSE_NONE, resourceInfo)
-		resourceMap.Put(resourceInfo.BomRef, resourceInfo)
+		resourceMap.Put(resourceInfo.BOMRef, resourceInfo)
 
 		getLogger().Tracef("Put: [`%s`] %s (`%s`), `%s`)",
 			resourceInfo.Type,
 			resourceInfo.Name,
 			resourceInfo.Version,
-			resourceInfo.BomRef,
+			resourceInfo.BOMRef,
 		)
 	}
 
@@ -496,7 +496,7 @@ func DisplayResourceListText(output io.Writer) {
 			resourceInfo.Type,
 			resourceInfo.Name,
 			resourceInfo.Version,
-			resourceInfo.BomRef)
+			resourceInfo.BOMRef)
 	}
 }
 
@@ -548,7 +548,7 @@ func DisplayResourceListCSV(output io.Writer) (err error) {
 			resourceInfo.Type,
 			resourceInfo.Name,
 			resourceInfo.Version,
-			resourceInfo.BomRef,
+			resourceInfo.BOMRef,
 		)
 
 		if err = w.Write(line); err != nil {
@@ -606,7 +606,7 @@ func DisplayResourceListMarkdown(output io.Writer) (err error) {
 			resourceInfo.Type,
 			resourceInfo.Name,
 			resourceInfo.Version,
-			resourceInfo.BomRef,
+			resourceInfo.BOMRef,
 		)
 
 		lineRow = createMarkdownRow(line)

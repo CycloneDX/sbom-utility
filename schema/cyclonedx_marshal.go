@@ -20,7 +20,17 @@ package schema
 import (
 	"bytes"
 	"encoding/json"
+	"reflect"
 )
+
+func IsInterfaceASlice(testValue interface{}) bool {
+	if testValue != nil {
+		if reflect.TypeOf(testValue).Kind() == reflect.Slice {
+			return true
+		}
+	}
+	return false
+}
 
 // --------------------------------------------------------------------------------
 // Custom marshallers
@@ -42,40 +52,15 @@ var ENCODED_EMPTY_SLICE_OF_STRUCT = []byte("[{}]")
 // --------------------------
 // CDXLicenseChoice structs
 // --------------------------
-func (value *CDXLicenseChoice) MarshalJSON1() (bytes []byte, err error) {
-	temp := map[string]interface{}{}
-	if value.Expression != "" {
-		temp["expression"] = value.Expression
-	}
 
-	// if the child struct is not "empty" we need to encode it as a map so to leverage the built-in
-	// handling of the json encoding package
-	if value.License != (CDXLicense{}) {
-		var bData []byte
-		bData, err = json.Marshal(&value.License)
-		if err != nil {
-			return
-		}
-
-		m := make(map[string]interface{})
-		err = json.Unmarshal(bData, &m)
-		if err != nil {
-			getLogger().Warningf("Unmarshal error: %s", err)
-			return
-		}
-		temp["license"] = m
-	}
-	// reuse built-in json encoder, which accepts a map primitive
-	return json.Marshal(temp)
-}
-
+// TODO: v1.5: no longer works with addition of "Licensing" object (requires deep compare/copy)
 func (value *CDXLicenseChoice) MarshalJSON() (marshalled []byte, err error) {
 	temp := map[string]interface{}{}
 	if value.Expression != "" {
 		temp["expression"] = value.Expression
 	}
 
-	if value.License != (CDXLicense{}) {
+	if !reflect.ValueOf(value.License).IsZero() {
 		temp["license"] = &value.License
 	}
 
@@ -130,8 +115,8 @@ func (value *CDXAttachment) MarshalJSON() ([]byte, error) {
 func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
 	temp := map[string]interface{}{}
 
-	if value.BomRef != "" {
-		temp["bom-ref"] = value.BomRef
+	if value.BOMRef != "" {
+		temp["bom-ref"] = value.BOMRef
 	}
 
 	if value.Id != "" {
@@ -203,8 +188,18 @@ func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
 		temp["cwes"] = &value.Cwes
 	}
 
-	if len(value.Tools) > 0 {
-		temp["tools"] = &value.Tools
+	// v1.5 allows tools to be either an array of (legacy) tool object or a new tool object
+	// TODO: author test for legacy (array) object vs. new tool object
+	if IsInterfaceASlice(value.Tools) {
+		arrayTools, ok := value.Tools.([]CDXLegacyCreationTool)
+		if ok && len(arrayTools) > 0 {
+			temp["tools"] = arrayTools
+		}
+	} else {
+		tools, ok := value.Tools.(CDXCreationTools)
+		if ok {
+			temp["tools"] = tools
+		}
 	}
 
 	if len(value.Properties) > 0 {
@@ -220,7 +215,7 @@ func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
 	return json.Marshal(temp)
 }
 
-func (value *CDXReference) MarshalJSON() ([]byte, error) {
+func (value *CDXVulnerabilityReference) MarshalJSON() ([]byte, error) {
 	temp := map[string]interface{}{}
 	if len(value.Id) > 0 {
 		temp["id"] = &value.Id
