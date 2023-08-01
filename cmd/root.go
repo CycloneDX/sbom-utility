@@ -29,7 +29,6 @@ import (
 )
 
 // Globals
-// var SchemaFiles embed.FS <== REMOVE TODO  !!!
 var ProjectLogger *log.MiniLogger
 var licensePolicyConfig *LicenseComplianceConfig
 
@@ -209,19 +208,21 @@ func initConfigurations() {
 
 	// Load application configuration file (i.e., primarily SBOM supported Formats/Schemas)
 	// TODO: page fault "load" of data only when needed
-	errCfg := schema.LoadUserSchemaConfigFile(utils.GlobalFlags.ConfigSchemaFile, DEFAULT_SCHEMA_CONFIG)
-	if errCfg != nil {
-		getLogger().Error(errCfg.Error())
+	var schemaConfigFile = utils.GlobalFlags.ConfigSchemaFile
+	errorLoadSchemaConfig := schema.LoadSchemaConfigFile(schemaConfigFile, DEFAULT_SCHEMA_CONFIG)
+	if errorLoadSchemaConfig != nil {
+		getLogger().Error(errorLoadSchemaConfig.Error())
 		os.Exit(ERROR_APPLICATION)
 	}
 
 	// License information and approval policies (customizable)
 	// TODO: page fault "load" of data only when needed (sync.Once)
+	var licensePolicyFile = utils.GlobalFlags.ConfigLicensePolicyFile
 	licensePolicyConfig = new(LicenseComplianceConfig)
-	errPolicies := licensePolicyConfig.LoadLicensePolicies(utils.GlobalFlags.ConfigLicensePolicyFile)
-	if errPolicies != nil {
-		getLogger().Warning(errPolicies.Error())
-		getLogger().Warningf("License policy will default to `%s`.", POLICY_UNDEFINED)
+	errLoadLicensePolicies := licensePolicyConfig.LoadLicensePolicies(licensePolicyFile)
+	if errLoadLicensePolicies != nil {
+		getLogger().Warning(errLoadLicensePolicies.Error())
+		getLogger().Warningf("All license policies will default to `%s`.", POLICY_UNDEFINED)
 	}
 }
 

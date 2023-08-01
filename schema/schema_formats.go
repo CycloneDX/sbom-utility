@@ -184,40 +184,39 @@ func (err UnsupportedSchemaError) Error() string {
 // in CI build systems (towards improved security, isolated builds)
 // NOTE: we have also found that standards orgs. freely move their schema files
 // within SCM systems thereby being a cause for remote retrieval failures.
-func LoadUserSchemaConfigFile(filename string, defaultFilename string) (err error) {
+func LoadSchemaConfigFile(filename string, defaultFilename string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
-	getLogger().Tracef("filename: `%s`...", filename)
 
-	var cfgFilename string
+	var absFilename string
 	var buffer []byte
 
 	if filename != "" {
-		cfgFilename, err = utils.FindVerifyConfigFileAbsPath(getLogger(), filename)
+		absFilename, err = utils.FindVerifyConfigFileAbsPath(getLogger(), filename)
 
 		if err != nil {
 			return fmt.Errorf("unable to find schema config file: `%s`", filename)
 		}
 
 		// Attempt to load user-provided config file
-		getLogger().Tracef("Reading schema config file: `%s`...", cfgFilename)
-		buffer, err = os.ReadFile(cfgFilename)
+		getLogger().Infof("Loading schema config file: `%s`...", absFilename)
+		buffer, err = os.ReadFile(absFilename)
 		if err != nil {
-			return fmt.Errorf("unable to read schema config file:: `%s`", cfgFilename)
+			return fmt.Errorf("unable to read schema config file: `%s`", absFilename)
 		}
 	} else {
 		// Attempt to load the default config file from embedded file resources
-		getLogger().Tracef("Default config: `%s` loaded from embedded resources. Contents: %s", filename, string(buffer))
+		getLogger().Infof("Loading (embedded) default schema config file: `%s`...", defaultFilename)
 		buffer, err = resources.LoadConfigFile(defaultFilename)
 		if err != nil {
-			getLogger().Errorf("unable to load schema config file: `%s` from embedded resources: `%s`",
+			return fmt.Errorf("unable to read schema config file: `%s` from embedded resources: `%s`",
 				filename, resources.RESOURCES_CONFIG_DIR)
 		}
 	}
 
 	err = json.Unmarshal(buffer, &SupportedFormatConfig)
 	if err != nil {
-		return fmt.Errorf("cannot `Unmarshal`: `%s`", cfgFilename)
+		return fmt.Errorf("cannot `Unmarshal`: `%s`", absFilename)
 	}
 
 	return
