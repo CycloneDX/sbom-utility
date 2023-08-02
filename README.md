@@ -73,10 +73,10 @@ Download and decompress the correct archive file (i.e., `.tar` for Unix/Linux sy
 
 The archive will contain the following files:
 
-- `sbom-utility` - binary executable
-- `config.json` - required schema configuration file
-- `license.json` - optional license policy configuration file
-- `custom.json` *(experimental)* - optional custom validation configuration file
+- `sbom-utility` - binary executable. This is all most need for non-customized configurations.
+- `config.json` *(optional)* - copy of the default schema configuration file for optional customization (to be passed on the command line)
+- `license.json` *(optional)* - copy of the default license policy configuration file for optional customization (to be passed on the command line)
+- `custom.json` *(experimental)* - custom validation configuration file
 - `LICENSE` - the software license for the utility (i.e. Apache 2)
 - `sbom-utility-<version>.sbom.json` - the Software Bill-of-Materials for the utility
 
@@ -84,9 +84,9 @@ The archive will contain the following files:
 
 ## Running
 
-For convenience, assure that the required `config.json` and optional `license.json` and `custom.json` configuration files are copied to the same directory as the executable.
+For convenience, the default `config.json` and optional `license.json` configuration files have been embedded in the executable and used if none are provided on the command line using the `--config-schema` or `--config-license` flags respectively.
 
-By default, the executable attempts to load the rall configuration files from the same path where the executable is run from. If you choose to keep them in a different directory, you will have to supply their relative locations using command flags.
+When providing configuration files using command line flags, the executable attempts to load them from the same path where the executable is run from. If you choose to keep them in a different directory, you will have to supply their location relative to the executable along with the filename.
 
 ##### MacOS - Granting executable permission
 
@@ -776,9 +776,9 @@ SPDX v2.2.1                   SPDX       SPDX-2.2  2.2.1        schema/spdx/2.2.
 
 #### Adding schemas
 
-Entries for new or "custom" schemas can be added to the `config.json` file by adding a new entry schema entry within the pre-defined format definitions.
+Entries for new or "custom" schemas can be added to the `config.json` file by adding a new schema entry and then will need to pass that file on the command line using the `--config-schema` flag.
 
-These new entries will tell the schema loader where to find the new schema locally, relative to the utility's executable.
+These new schema entries will tell the schema loader where to find the JSON schema file locally, relative to the utility's executable.
 
 For details see the "[Adding SBOM formats, schema versions and variants](#adding-sbom-formats-schema-versions-and-variants)" section.
 
@@ -1272,7 +1272,7 @@ or add it globally to the `settings.json` file:
 
 #### Adding SBOM formats, schema versions and variants
 
-The utility uses the [`config.json`](./config.json) file to lookup supported formats and their associated versioned schemas.  To add another SBOM format simply add another entry to the `format` array in the root of the document:
+The utility uses the [`config.json`](./config.json) file (either the default, embedded version or the equivalent provided on the command line using `--config-schema` flag) to lookup supported formats and their associated versioned JSON schema files.  To add another SBOM format simply add another entry to the `format` array in the root of the document:
 
 ```json
 {
@@ -1325,12 +1325,12 @@ Feel free to "grep" for the "TODO" tag, open an issue and/or submit a draft PR.
 
 An ad-hoc list of featured "TODOs" geared at making the tool more accessible, extensible and useful especially around "core" commands such as validation.
 
-- **Embedded resources** Look to optionally embed a default `config.json` (format/schema config.), `license.json` (license policy config.) and `custom.json` (experimental, custom validation config.) files.
 - **Merge command** Support merge of two (both validated) SBOMs with de-duplication and configurable. Please note that some method of normalization prior to merge will be necessary.
 - **Remote Schema loading** Support using SBOM schema files that are remotely hosted  (network accessible) from known, trusted source locations (e.g., releases of SPDX, CycloneDX specification schemas). Note that the config file has an existing `url` field per entry that can be used for this purpose.
 - **--orderby** Support ordering of query result sets by comparison of values from a specified field key.
 - **license.json** Document license policy configuration JSON schema structure and how to add entries relative to a CycloneDX `LicenseChoice` object for entries with SPDX IDs and those without.
-- **license.json** Add more widely-recognized licenses (both from SPDX identifier lists as well as those not recognized by the SPDX community).
+- **license.json** Add entries for all SPDX licenses listed in v3.21.
+  - See issue: https://github.com/CycloneDX/sbom-utility/issues/12
 - **Go libraries** Replace `go-prettyjson`, `go-multimap` libraries with alternatives that produce maintained releases.
 
 ---
