@@ -58,7 +58,8 @@ func NewLicensePolicyTestInfoBasic(format string, listLineWrap bool) *LicenseTes
 }
 
 func loadHashCustomPolicyFile(policyFile string) (err error) {
-	err = licensePolicyConfig.innerLoadLicensePolicies(policyFile)
+	// Do not pass a default file, it should fail if custom policy cannot be loaded
+	err = licensePolicyConfig.innerLoadLicensePolicies(policyFile, "")
 	if err != nil {
 		return
 	}
