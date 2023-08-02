@@ -179,6 +179,10 @@ func (err UnsupportedSchemaError) Error() string {
 		err.Variant)
 }
 
+func (config *BOMFormatAndSchemaConfig) Reset() {
+	config.Formats = nil
+}
+
 func (config *BOMFormatAndSchemaConfig) LoadSchemaConfigFile(filename string, defaultFilename string) (err error) {
 	getLogger().Enter(filename)
 	defer getLogger().Exit()
@@ -205,6 +209,9 @@ func (config *BOMFormatAndSchemaConfig) innerLoadSchemaConfigFile(filename strin
 	var absFilename string
 	var buffer []byte
 
+	// Always reset the config if a new format and schema file is loaded
+	config.Reset()
+
 	if filename != "" {
 		absFilename, err = utils.FindVerifyConfigFileAbsPath(getLogger(), filename)
 
@@ -224,7 +231,7 @@ func (config *BOMFormatAndSchemaConfig) innerLoadSchemaConfigFile(filename strin
 		buffer, err = resources.LoadConfigFile(defaultFilename)
 		if err != nil {
 			return fmt.Errorf("unable to read schema config file: `%s` from embedded resources: `%s`",
-				filename, resources.RESOURCES_CONFIG_DIR)
+				defaultFilename, resources.RESOURCES_CONFIG_DIR)
 		}
 	}
 

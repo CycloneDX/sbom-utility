@@ -97,7 +97,7 @@ const (
 const (
 	DEFAULT_SCHEMA_CONFIG            = "config.json"
 	DEFAULT_CUSTOM_VALIDATION_CONFIG = "custom.json"
-	DEFAULT_LICENSE_POLICIES         = "license.json"
+	DEFAULT_LICENSE_POLICY_CONFIG    = "license.json"
 )
 
 // Supported output formats
@@ -147,7 +147,7 @@ func init() {
 
 	// Declare top-level, persistent flags used for configuration of utility
 	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigSchemaFile, FLAG_CONFIG_SCHEMA, "", "", MSG_FLAG_CONFIG_SCHEMA)
-	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigLicensePolicyFile, FLAG_CONFIG_LICENSE_POLICY, "", DEFAULT_LICENSE_POLICIES, MSG_FLAG_CONFIG_LICENSE)
+	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigLicensePolicyFile, FLAG_CONFIG_LICENSE_POLICY, "", "", MSG_FLAG_CONFIG_LICENSE)
 	utils.GlobalFlags.ConfigCustomValidationFile = DEFAULT_CUSTOM_VALIDATION_CONFIG
 	// TODO: Make configurable once we have organized the set of custom validation configurations
 	//rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigCustomValidationFile, FLAG_CONFIG_CUSTOM_VALIDATION, "", DEFAULT_CUSTOM_VALIDATION_CONFIG, "TODO")
@@ -202,9 +202,9 @@ func initConfigurations() {
 		getLogger().Debugf("%s: \n%s", "utils.Flags", flagInfo)
 	}
 
-	// NOTE: some commands operate just on JSON SBOM (i.e., no validation)
+	// NOTE: some commands operate just on the JSON SBOM (i.e., no validation)
 	// we leave the code below "in place" as we may still want to validate any
-	// input file as JSON SBOM document that matches a known format/version (in the future)
+	// input file as JSON SBOM document that matches a known format/version (TODO in the future)
 
 	// Load application configuration file (i.e., primarily SBOM supported Formats/Schemas)
 	var schemaConfigFile = utils.GlobalFlags.ConfigSchemaFile
@@ -217,7 +217,7 @@ func initConfigurations() {
 	// License information and approval policies (customizable)
 	var licensePolicyFile = utils.GlobalFlags.ConfigLicensePolicyFile
 	licensePolicyConfig = new(LicenseComplianceConfig)
-	errLoadLicensePolicies := licensePolicyConfig.LoadLicensePolicies(licensePolicyFile)
+	errLoadLicensePolicies := licensePolicyConfig.LoadLicensePolicies(licensePolicyFile, DEFAULT_LICENSE_POLICY_CONFIG)
 	if errLoadLicensePolicies != nil {
 		getLogger().Warning(errLoadLicensePolicies.Error())
 		getLogger().Warningf("All license policies will default to `%s`.", POLICY_UNDEFINED)
