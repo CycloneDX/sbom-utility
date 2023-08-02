@@ -24,7 +24,7 @@ import (
 	"github.com/CycloneDX/sbom-utility/utils"
 )
 
-func LoadInputSbomFileAndDetectSchema() (document *schema.Sbom, err error) {
+func LoadInputBOMFileAndDetectSchema() (document *schema.BOM, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -49,7 +49,7 @@ func LoadInputSbomFileAndDetectSchema() (document *schema.Sbom, err error) {
 
 	// Search the document keys/values for known SBOM formats and schema in the config. file
 	getLogger().Infof("Determining file's SBOM format and version...")
-	err = document.FindFormatAndSchema(utils.GlobalFlags.PersistentFlags.InputFile)
+	err = SupportedFormatConfig.FindFormatAndSchema(document)
 	if err != nil {
 		return
 	}

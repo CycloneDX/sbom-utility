@@ -31,6 +31,7 @@ import (
 // Globals
 var ProjectLogger *log.MiniLogger
 var licensePolicyConfig *LicenseComplianceConfig
+var SupportedFormatConfig schema.BOMFormatAndSchemaConfig
 
 // top-level commands
 const (
@@ -208,7 +209,7 @@ func initConfigurations() {
 
 	// Load application configuration file (i.e., primarily SBOM supported Formats/Schemas)
 	var schemaConfigFile = utils.GlobalFlags.ConfigSchemaFile
-	errorLoadSchemaConfig := schema.SupportedFormatConfig.LoadSchemaConfigFile(schemaConfigFile, DEFAULT_SCHEMA_CONFIG)
+	errorLoadSchemaConfig := SupportedFormatConfig.LoadSchemaConfigFile(schemaConfigFile, DEFAULT_SCHEMA_CONFIG)
 	if errorLoadSchemaConfig != nil {
 		getLogger().Error(errorLoadSchemaConfig.Error())
 		os.Exit(ERROR_APPLICATION)

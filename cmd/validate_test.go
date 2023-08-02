@@ -46,7 +46,7 @@ const (
 )
 
 // Tests basic validation and expected errors
-func innerValidateError(t *testing.T, filename string, variant string, format string, expectedError error) (document *schema.Sbom, schemaErrors []gojsonschema.ResultError, actualError error) {
+func innerValidateError(t *testing.T, filename string, variant string, format string, expectedError error) (document *schema.BOM, schemaErrors []gojsonschema.ResultError, actualError error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -107,7 +107,7 @@ func innerValidateError(t *testing.T, filename string, variant string, format st
 	return
 }
 
-func innerValidateErrorBuffered(t *testing.T, persistentFlags utils.PersistentCommandFlags, validationFlags utils.ValidateCommandFlags) (isValid bool, document *schema.Sbom, schemaErrors []gojsonschema.ResultError, outputBuffer bytes.Buffer, err error) {
+func innerValidateErrorBuffered(t *testing.T, persistentFlags utils.PersistentCommandFlags, validationFlags utils.ValidateCommandFlags) (isValid bool, document *schema.BOM, schemaErrors []gojsonschema.ResultError, outputBuffer bytes.Buffer, err error) {
 	// Declare an output outputBuffer/outputWriter to use used during tests
 	var outputWriter = bufio.NewWriter(&outputBuffer)
 	// ensure all data is written to buffer before further validation
@@ -120,7 +120,7 @@ func innerValidateErrorBuffered(t *testing.T, persistentFlags utils.PersistentCo
 	return
 }
 
-func innerValidateForcedSchema(t *testing.T, filename string, forcedSchema string, format string, expectedError error) (document *schema.Sbom, schemaErrors []gojsonschema.ResultError, actualError error) {
+func innerValidateForcedSchema(t *testing.T, filename string, forcedSchema string, format string, expectedError error) (document *schema.BOM, schemaErrors []gojsonschema.ResultError, actualError error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -133,7 +133,7 @@ func innerValidateForcedSchema(t *testing.T, filename string, forcedSchema strin
 }
 
 // Tests *ErrorInvalidSBOM error types and any (lower-level) errors they "wrapped"
-func innerValidateInvalidSBOMInnerError(t *testing.T, filename string, variant string, innerError error) (document *schema.Sbom, schemaErrors []gojsonschema.ResultError, actualError error) {
+func innerValidateInvalidSBOMInnerError(t *testing.T, filename string, variant string, innerError error) (document *schema.BOM, schemaErrors []gojsonschema.ResultError, actualError error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -151,7 +151,7 @@ func innerValidateInvalidSBOMInnerError(t *testing.T, filename string, variant s
 
 // Tests for *json.SyntaxErrors "wrapped" in *ErrorInvalidSBOM error types
 // It also tests that the syntax error occurred at the expected line number and character offset
-func innerValidateSyntaxError(t *testing.T, filename string, variant string, expectedLineNum int, expectedCharNum int) (document *schema.Sbom, actualError error) {
+func innerValidateSyntaxError(t *testing.T, filename string, variant string, expectedLineNum int, expectedCharNum int) (document *schema.BOM, actualError error) {
 
 	document, _, actualError = innerValidateError(t, filename, variant, FORMAT_TEXT, &json.SyntaxError{})
 	syntaxError, ok := actualError.(*json.SyntaxError)
@@ -373,3 +373,24 @@ func TestValidateCdx14ErrorResultsFormatIriReferencesJson(t *testing.T) {
 	}
 
 }
+
+// -----------------------------------------------------------
+// Test `--config-schema` flag
+// -----------------------------------------------------------
+
+// func loadCustomSchemaConfig(filename string) (err error) {
+// 	// Do not pass a default file, it should fail if custom policy cannot be loaded
+// 	err = schema.SupportedFormatConfig.innerLoadSchemaConfigFile(filename, "")
+// 	if err != nil {
+// 		return
+// 	}
+// 	return
+// }
+
+// func TestValidateWithCustomSchemaConfiguration(t *testing.T) {
+// 	loadCustomSchemaConfig(DEFAULT_SCHEMA_CONFIG)
+// 	innerValidateError(t, TEST_CDX_1_4_MIN_REQUIRED, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+// 	// !!!Important!!! MUST reset global flag to its proper default (i.e., empty)
+// 	// which will cause the embedded `config.json` to be used for all other tests
+// 	loadCustomSchemaConfig("")
+// }

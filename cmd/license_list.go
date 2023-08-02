@@ -196,8 +196,8 @@ func ListLicenses(output io.Writer, format string, whereFilters []WhereFilter, s
 	}()
 
 	// Note: returns error if either file load or unmarshal to JSON map fails
-	var document *schema.Sbom
-	document, err = LoadInputSbomFileAndDetectSchema()
+	var document *schema.BOM
+	document, err = LoadInputBOMFileAndDetectSchema()
 
 	if err != nil {
 		return

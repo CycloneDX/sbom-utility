@@ -147,7 +147,7 @@ func filterFormatSchemas(whereFilters []WhereFilter) (filteredFormats []schema.F
 	defer getLogger().Exit(err)
 
 	// Get format array
-	sliceFormats := (schema.SupportedFormatConfig).Formats
+	sliceFormats := SupportedFormatConfig.Formats
 
 	// flatten structs
 	sliceSchemas := flattenFormatSchemas(sliceFormats)
