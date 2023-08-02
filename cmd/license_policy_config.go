@@ -104,13 +104,6 @@ func (config *LicenseComplianceConfig) Reset() {
 	}
 }
 
-// func (config *LicenseComplianceConfig) Debug() {
-// 	fmt.Printf(">> policyConfigFile: %s\n", config.policyConfigFile)
-// 	fmt.Printf(">> PolicyList (length): %v\n", len(config.PolicyList))
-// 	fmt.Printf(">> licenseFamilyNameMap.Keys\n() (length): %v\n", len(config.licenseFamilyNameMap.Keys()))
-// 	fmt.Printf(">> licenseIdMap.Keys\n() (length): %v\n", len(config.licenseIdMap.Keys()))
-// }
-
 func (config *LicenseComplianceConfig) GetFamilyNameMap() (hashmap *slicemultimap.MultiMap, err error) {
 	if config.licenseFamilyNameMap == nil {
 		err = config.HashLicensePolicies()
@@ -168,8 +161,6 @@ func (config *LicenseComplianceConfig) innerLoadLicensePolicies(filename string)
 		err = fmt.Errorf("unable to find license policy config file: `%s`", filename)
 		return
 	}
-
-	getLogger().Infof("Loading license policy config file: `%s`...", config.policyConfigFile)
 
 	// attempt to read in contents of the policy config.
 	buffer, errRead := os.ReadFile(config.policyConfigFile)

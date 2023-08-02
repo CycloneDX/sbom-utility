@@ -207,16 +207,14 @@ func initConfigurations() {
 	// input file as JSON SBOM document that matches a known format/version (in the future)
 
 	// Load application configuration file (i.e., primarily SBOM supported Formats/Schemas)
-	// TODO: page fault "load" of data only when needed
 	var schemaConfigFile = utils.GlobalFlags.ConfigSchemaFile
-	errorLoadSchemaConfig := schema.LoadSchemaConfigFile(schemaConfigFile, DEFAULT_SCHEMA_CONFIG)
+	errorLoadSchemaConfig := schema.SupportedFormatConfig.LoadSchemaConfigFile(schemaConfigFile, DEFAULT_SCHEMA_CONFIG)
 	if errorLoadSchemaConfig != nil {
 		getLogger().Error(errorLoadSchemaConfig.Error())
 		os.Exit(ERROR_APPLICATION)
 	}
 
 	// License information and approval policies (customizable)
-	// TODO: page fault "load" of data only when needed (sync.Once)
 	var licensePolicyFile = utils.GlobalFlags.ConfigLicensePolicyFile
 	licensePolicyConfig = new(LicenseComplianceConfig)
 	errLoadLicensePolicies := licensePolicyConfig.LoadLicensePolicies(licensePolicyFile)

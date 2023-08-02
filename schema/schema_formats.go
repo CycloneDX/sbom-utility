@@ -20,10 +20,11 @@ package schema
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"reflect"
+	"sync"
 
 	"github.com/CycloneDX/sbom-utility/log"
 	"github.com/CycloneDX/sbom-utility/resources"
@@ -54,7 +55,7 @@ var (
 )
 
 // Globals
-var SupportedFormatConfig FormatSchemaConfig
+var SupportedFormatConfig BOMFormatAndSchemaConfig
 
 func getLogger() *log.MiniLogger {
 	if ProjectLogger == nil {
@@ -71,6 +72,21 @@ func getLogger() *log.MiniLogger {
 	return ProjectLogger
 }
 
+// Configs
+type BOMFormatAndSchemaConfig struct {
+	loadOnce sync.Once
+	Formats  []FormatSchema `json:"formats"`
+}
+
+// Representation of SBOM format
+type FormatSchema struct {
+	CanonicalName       string                 `json:"canonicalName"`
+	PropertyKeyFormat   string                 `json:"propertyKeyFormat"`
+	PropertyKeyVersion  string                 `json:"propertyKeyVersion"`
+	PropertyValueFormat string                 `json:"propertyValueFormat"`
+	Schemas             []FormatSchemaInstance `json:"schemas"`
+}
+
 // Representation of SBOM schema instance
 // TODO: add support for schema (Hash) key if we end up having lots of entries
 // e.g.,    key string
@@ -84,20 +100,6 @@ type FormatSchemaInstance struct {
 	Default     bool   `json:"default"`
 	Variant     string `json:"variant"`
 	Format      string `json:"format"` // value set from parent FormatSchema's `CanonicalName`
-}
-
-// Representation of SBOM format
-type FormatSchema struct {
-	CanonicalName       string                 `json:"canonicalName"`
-	PropertyKeyFormat   string                 `json:"propertyKeyFormat"`
-	PropertyKeyVersion  string                 `json:"propertyKeyVersion"`
-	PropertyValueFormat string                 `json:"propertyValueFormat"`
-	Schemas             []FormatSchemaInstance `json:"schemas"`
-}
-
-// Configs
-type FormatSchemaConfig struct {
-	Formats []FormatSchema `json:"formats"`
 }
 
 // Format/schema error types
@@ -177,6 +179,18 @@ func (err UnsupportedSchemaError) Error() string {
 		err.Variant)
 }
 
+func (config *BOMFormatAndSchemaConfig) LoadSchemaConfigFile(filename string, defaultFilename string) (err error) {
+	getLogger().Enter(filename)
+	defer getLogger().Exit()
+
+	// Only load the policy config. once
+	config.loadOnce.Do(func() {
+		err = config.innerLoadSchemaConfigFile(filename, defaultFilename)
+	})
+
+	return
+}
+
 // TODO: Add error messages as constants (for future i18n)
 // TODO: Support remote schema retrieval as an optional program flag
 // However, we want to default to local for performance where possible
@@ -184,7 +198,7 @@ func (err UnsupportedSchemaError) Error() string {
 // in CI build systems (towards improved security, isolated builds)
 // NOTE: we have also found that standards orgs. freely move their schema files
 // within SCM systems thereby being a cause for remote retrieval failures.
-func LoadSchemaConfigFile(filename string, defaultFilename string) (err error) {
+func (config *BOMFormatAndSchemaConfig) innerLoadSchemaConfigFile(filename string, defaultFilename string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -376,7 +390,7 @@ func (sbom *Sbom) UnmarshalSBOMAsJsonMap() error {
 
 	// read our opened jsonFile as a byte array.
 	var errReadAll error
-	sbom.rawBytes, errReadAll = ioutil.ReadAll(jsonFile)
+	sbom.rawBytes, errReadAll = io.ReadAll(jsonFile)
 	if errReadAll != nil {
 		getLogger().Error(errReadAll)
 	}
