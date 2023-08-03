@@ -387,10 +387,14 @@ func loadCustomSchemaConfig(t *testing.T, filename string) (err error) {
 	return
 }
 
+func restoreEmbeddedDefaultSchemaConfig(t *testing.T) (err error) {
+	return loadCustomSchemaConfig(t, "")
+}
+
 func TestValidateWithCustomSchemaConfiguration(t *testing.T) {
 	loadCustomSchemaConfig(t, DEFAULT_SCHEMA_CONFIG)
 	innerValidateError(t, TEST_CDX_1_4_MIN_REQUIRED, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 	// !!!Important!!! MUST reset global flag to its proper default (i.e., empty)
 	// which will cause the embedded `config.json` to be used for all other tests
-	loadCustomSchemaConfig(t, "")
+	restoreEmbeddedDefaultSchemaConfig(t)
 }
