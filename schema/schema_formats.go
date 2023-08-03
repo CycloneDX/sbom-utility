@@ -109,7 +109,7 @@ func (config *BOMFormatAndSchemaConfig) LoadSchemaConfigFile(filename string, de
 
 	// Only load the policy config. once
 	config.loadOnce.Do(func() {
-		err = config.innerLoadSchemaConfigFile(filename, defaultFilename)
+		err = config.InnerLoadSchemaConfigFile(filename, defaultFilename)
 	})
 
 	return
@@ -122,7 +122,7 @@ func (config *BOMFormatAndSchemaConfig) LoadSchemaConfigFile(filename string, de
 // in CI build systems (towards improved security, isolated builds)
 // NOTE: we have also found that standards orgs. freely move their schema files
 // within SCM systems thereby being a cause for remote retrieval failures.
-func (config *BOMFormatAndSchemaConfig) innerLoadSchemaConfigFile(filename string, defaultFilename string) (err error) {
+func (config *BOMFormatAndSchemaConfig) InnerLoadSchemaConfigFile(filename string, defaultFilename string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
