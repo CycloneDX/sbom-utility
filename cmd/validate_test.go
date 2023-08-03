@@ -378,9 +378,9 @@ func TestValidateCdx14ErrorResultsFormatIriReferencesJson(t *testing.T) {
 // Test custom config.json (i.e., `--config-schema` flag)
 // -----------------------------------------------------------
 
-func loadCustomSchemaConfig(filename string) (err error) {
+func loadCustomSchemaConfig(t *testing.T, filename string) (err error) {
 	// Do not pass a default file, it should fail if custom policy cannot be loaded
-	err = SupportedFormatConfig.InnerLoadSchemaConfigFile(filename, "")
+	err = SupportedFormatConfig.InnerLoadSchemaConfigFile(filename, DEFAULT_SCHEMA_CONFIG)
 	if err != nil {
 		return
 	}
@@ -388,9 +388,9 @@ func loadCustomSchemaConfig(filename string) (err error) {
 }
 
 func TestValidateWithCustomSchemaConfiguration(t *testing.T) {
-	loadCustomSchemaConfig(DEFAULT_SCHEMA_CONFIG)
+	loadCustomSchemaConfig(t, DEFAULT_SCHEMA_CONFIG)
 	innerValidateError(t, TEST_CDX_1_4_MIN_REQUIRED, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 	// !!!Important!!! MUST reset global flag to its proper default (i.e., empty)
 	// which will cause the embedded `config.json` to be used for all other tests
-	loadCustomSchemaConfig("")
+	loadCustomSchemaConfig(t, "")
 }
