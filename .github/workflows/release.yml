@@ -2,7 +2,7 @@ name: Release Go Binaries
 
 on:
   release:
-    types: [created]
+    types: [created, prereleased]
   workflow_dispatch:
 
 
