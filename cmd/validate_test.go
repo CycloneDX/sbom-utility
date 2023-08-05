@@ -391,10 +391,15 @@ func restoreEmbeddedDefaultSchemaConfig(t *testing.T) (err error) {
 	return loadCustomSchemaConfig(t, "")
 }
 
-func TestValidateWithCustomSchemaConfiguration(t *testing.T) {
-	loadCustomSchemaConfig(t, DEFAULT_SCHEMA_CONFIG)
-	innerValidateError(t, TEST_CDX_1_4_MIN_REQUIRED, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+func innerValidateCustomSchemaConfig(t *testing.T, filename string, configFile string, variant string, format string, expectedError error) (document *schema.BOM, schemaErrors []gojsonschema.ResultError, actualError error) {
+	loadCustomSchemaConfig(t, configFile)
+	document, schemaErrors, actualError = innerValidateError(t, TEST_CDX_1_4_MIN_REQUIRED, variant, FORMAT_TEXT, nil)
 	// !!!Important!!! MUST reset global flag to its proper default (i.e., empty)
 	// which will cause the embedded `config.json` to be used for all other tests
 	restoreEmbeddedDefaultSchemaConfig(t)
+	return
+}
+
+func TestValidateWithCustomSchemaConfiguration(t *testing.T) {
+	innerValidateCustomSchemaConfig(t, TEST_CDX_1_4_MIN_REQUIRED, DEFAULT_SCHEMA_CONFIG, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 }
