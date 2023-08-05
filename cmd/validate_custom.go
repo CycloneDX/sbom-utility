@@ -30,7 +30,7 @@ import (
 // 1. Composition - document elements are organized as required (even though allowed by schema)
 // 2. Metadata - Top-level, document metadata includes specific fields and/or values that match required criteria (e.g., regex)
 // 3. License data - Components, Services (or any object that carries a License) meets specified requirements
-func validateCustomCDXDocument(document *schema.Sbom) (innerError error) {
+func validateCustomCDXDocument(document *schema.BOM) (innerError error) {
 	getLogger().Enter()
 	defer getLogger().Exit(innerError)
 
@@ -64,7 +64,7 @@ func validateCustomCDXDocument(document *schema.Sbom) (innerError error) {
 // This validation function checks for custom composition requirements as follows:
 // 1. Assure that the "metadata.component" does NOT have child Components
 // 2. TODO: Assure that the "components" list is a "flat" list
-func validateCustomDocumentComposition(document *schema.Sbom) (innerError error) {
+func validateCustomDocumentComposition(document *schema.BOM) (innerError error) {
 	getLogger().Enter()
 	defer getLogger().Exit(innerError)
 
@@ -95,7 +95,7 @@ func validateCustomDocumentComposition(document *schema.Sbom) (innerError error)
 // 2. Supplier field is filled out according to custom requirements
 // 3. Manufacturer field is filled out according to custom requirements
 // TODO: test for custom values in other metadata/fields:
-func validateCustomMetadata(document *schema.Sbom) (err error) {
+func validateCustomMetadata(document *schema.BOM) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -119,7 +119,7 @@ func validateCustomMetadata(document *schema.Sbom) (err error) {
 
 // This validation function checks for custom metadata property requirements (i.e., names, values)
 // TODO: Evaluate need for this given new means to do this with JSON Schema v6 and 7
-func validateCustomMetadataProperties(document *schema.Sbom) (err error) {
+func validateCustomMetadataProperties(document *schema.BOM) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -226,7 +226,7 @@ func hashMetadataProperties(hashmap *slicemultimap.MultiMap, properties []schema
 // that at least one valid license is found
 // TODO: Assure top-level "metadata.component"
 // TODO support []WhereFilter
-func validateLicenseData(document *schema.Sbom) (err error) {
+func validateLicenseData(document *schema.BOM) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 

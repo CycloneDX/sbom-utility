@@ -20,12 +20,14 @@ package schema
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"reflect"
+	"sync"
 
 	"github.com/CycloneDX/sbom-utility/log"
+	"github.com/CycloneDX/sbom-utility/resources"
 	"github.com/CycloneDX/sbom-utility/utils"
 )
 
@@ -52,9 +54,6 @@ var (
 	ProjectLogger *log.MiniLogger
 )
 
-// Globals
-var SupportedFormatConfig FormatSchemaConfig
-
 func getLogger() *log.MiniLogger {
 	if ProjectLogger == nil {
 		// TODO: use LDFLAGS to turn on "TRACE" (and require creation of a Logger)
@@ -68,6 +67,21 @@ func getLogger() *log.MiniLogger {
 		ProjectLogger.InitLogLevelAndModeFromFlags()
 	}
 	return ProjectLogger
+}
+
+// Configs
+type BOMFormatAndSchemaConfig struct {
+	loadOnce sync.Once
+	Formats  []FormatSchema `json:"formats"`
+}
+
+// Representation of SBOM format
+type FormatSchema struct {
+	CanonicalName       string                 `json:"canonicalName"`
+	PropertyKeyFormat   string                 `json:"propertyKeyFormat"`
+	PropertyKeyVersion  string                 `json:"propertyKeyVersion"`
+	PropertyValueFormat string                 `json:"propertyValueFormat"`
+	Schemas             []FormatSchemaInstance `json:"schemas"`
 }
 
 // Representation of SBOM schema instance
@@ -85,95 +99,20 @@ type FormatSchemaInstance struct {
 	Format      string `json:"format"` // value set from parent FormatSchema's `CanonicalName`
 }
 
-// Representation of SBOM format
-type FormatSchema struct {
-	CanonicalName       string                 `json:"canonicalName"`
-	PropertyKeyFormat   string                 `json:"propertyKeyFormat"`
-	PropertyKeyVersion  string                 `json:"propertyKeyVersion"`
-	PropertyValueFormat string                 `json:"propertyValueFormat"`
-	Schemas             []FormatSchemaInstance `json:"schemas"`
+func (config *BOMFormatAndSchemaConfig) Reset() {
+	config.Formats = nil
 }
 
-// Configs
-type FormatSchemaConfig struct {
-	Formats []FormatSchema `json:"formats"`
-}
+func (config *BOMFormatAndSchemaConfig) LoadSchemaConfigFile(filename string, defaultFilename string) (err error) {
+	getLogger().Enter(filename)
+	defer getLogger().Exit()
 
-// Format/schema error types
-type UnsupportedFormatError struct {
-	Type      string
-	Message   string
-	InputFile string
-	Format    string
-	Version   string
-	Variant   string
-	Command   string
-	Flags     string
-}
+	// Only load the policy config. once
+	config.loadOnce.Do(func() {
+		err = config.InnerLoadSchemaConfigFile(filename, defaultFilename)
+	})
 
-type UnsupportedSchemaError struct {
-	UnsupportedFormatError
-}
-
-func NewUnsupportedSchemaError(m string, format string, version string, variant string) *UnsupportedSchemaError {
-	var err = new(UnsupportedSchemaError)
-	err.Type = ERR_TYPE_UNSUPPORTED_SCHEMA
-	err.Message = m
-	err.Format = format
-	err.Version = version
-	err.Variant = variant
-	return err
-}
-
-func NewUnsupportedFormatError(msg string, f string, fmt string, cmd string, flags string) *UnsupportedFormatError {
-	var err = new(UnsupportedFormatError)
-	err.Type = ERR_TYPE_UNSUPPORTED_FORMAT
-	err.Message = msg
-	err.InputFile = f
-	err.Format = fmt
-	err.Command = cmd
-	err.Flags = flags
-	return err
-}
-
-func NewUnsupportedFormatForCommandError(f string, fmt string, cmd string, flags string) *UnsupportedFormatError {
-	var err = new(UnsupportedFormatError)
-	err.Type = ERR_TYPE_UNSUPPORTED_FORMAT
-	err.Message = MSG_FORMAT_UNSUPPORTED_COMMAND
-	err.InputFile = f
-	err.Format = fmt
-	err.Command = cmd
-	err.Flags = flags
-	return err
-}
-
-func NewUnknownFormatError(f string) *UnsupportedFormatError {
-	var err = new(UnsupportedFormatError)
-	err.Type = ERR_TYPE_UNSUPPORTED_FORMAT
-	err.Message = MSG_FORMAT_UNSUPPORTED_UNKNOWN
-	err.InputFile = f
-	return err
-}
-
-func (err UnsupportedFormatError) Error() string {
-	baseMessage := fmt.Sprintf("%s: %s (`%s`)", err.Type, err.Message, err.InputFile)
-	if err.Format != "" {
-		return fmt.Sprintf("%s: format: `%s`, command: `%s`, flags: `%s`",
-			baseMessage,
-			err.Format,
-			err.Command,
-			err.Flags)
-	}
-	return baseMessage
-}
-
-func (err UnsupportedSchemaError) Error() string {
-	return fmt.Sprintf("%s: %s: Schema Format: `%s`, Version: `%s`, Variant: `%s` ",
-		err.Type,
-		err.Message,
-		err.Format,
-		err.Version,
-		err.Variant)
+	return
 }
 
 // TODO: Add error messages as constants (for future i18n)
@@ -183,28 +122,43 @@ func (err UnsupportedSchemaError) Error() string {
 // in CI build systems (towards improved security, isolated builds)
 // NOTE: we have also found that standards orgs. freely move their schema files
 // within SCM systems thereby being a cause for remote retrieval failures.
-func LoadSchemaConfig(filename string) (err error) {
+func (config *BOMFormatAndSchemaConfig) InnerLoadSchemaConfigFile(filename string, defaultFilename string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
-	getLogger().Tracef("filename: `%s`...", filename)
 
-	cfgFilename, err := utils.FindVerifyConfigFileAbsPath(getLogger(), filename)
+	var absFilename string
+	var buffer []byte
 
-	if err != nil {
-		return fmt.Errorf("unable to find schema config file: `%s`", filename)
+	// Always reset the config if a new format and schema file is loaded
+	config.Reset()
+
+	if filename != "" {
+		absFilename, err = utils.FindVerifyConfigFileAbsPath(getLogger(), filename)
+
+		if err != nil {
+			return fmt.Errorf("unable to find schema config file: `%s`", filename)
+		}
+
+		// Attempt to load user-provided config file
+		getLogger().Infof("Loading schema config file: `%s`...", absFilename)
+		buffer, err = os.ReadFile(absFilename)
+		if err != nil {
+			return fmt.Errorf("unable to read schema config file: `%s`", absFilename)
+		}
+	} else {
+		// Attempt to load the default config file from embedded file resources
+		getLogger().Infof("Loading (embedded) default schema config file: `%s`...", defaultFilename)
+		buffer, err = resources.LoadConfigFile(defaultFilename)
+		if err != nil {
+			return fmt.Errorf("unable to read schema config file: `%s` from embedded resources: `%s`",
+				defaultFilename, resources.RESOURCES_CONFIG_DIR)
+		}
 	}
 
-	// Note we actively supply informative error messages to help user
-	// understand exactly how the load failed
-	getLogger().Tracef("Reading schema config file: `%s`...", cfgFilename)
-	buffer, err := ioutil.ReadFile(cfgFilename)
+	//err = json.Unmarshal(buffer, &SupportedFormatConfig)
+	err = json.Unmarshal(buffer, config)
 	if err != nil {
-		return fmt.Errorf("unable to `ReadFile`: `%s`", cfgFilename)
-	}
-
-	err = json.Unmarshal(buffer, &SupportedFormatConfig)
-	if err != nil {
-		return fmt.Errorf("cannot `Unmarshal`: `%s`", cfgFilename)
+		return fmt.Errorf("cannot `Unmarshal`: `%s`", absFilename)
 	}
 
 	return
@@ -213,7 +167,7 @@ func LoadSchemaConfig(filename string) (err error) {
 // Candidate SBOM document (context) information
 // TODO: rename to SBOM to jive more with Go conventions;
 // although it may look like a constant unless we expand the name...
-type Sbom struct {
+type BOM struct {
 	filename    string
 	absFilename string
 	rawBytes    []byte
@@ -223,8 +177,8 @@ type Sbom struct {
 	CdxBom      *CDXBom
 }
 
-func (sbom *Sbom) GetRawBytes() []byte {
-	return sbom.rawBytes
+func (bom *BOM) GetRawBytes() []byte {
+	return bom.rawBytes
 }
 
 func (format *FormatSchema) IsSpdx() bool {
@@ -235,42 +189,42 @@ func (format *FormatSchema) IsCycloneDx() bool {
 	return format.CanonicalName == SCHEMA_FORMAT_CYCLONEDX
 }
 
-func NewSbom(inputFile string) *Sbom {
-	temp := Sbom{
+func NewSbom(inputFile string) *BOM {
+	temp := BOM{
 		filename: inputFile,
 	}
 	// NOTE: the Map is allocated (i.e., using `make`) as part of `UnmarshalSBOM` method
 	return &temp
 }
 
-func (sbom *Sbom) GetFilename() string {
-	return sbom.filename
+func (bom *BOM) GetFilename() string {
+	return bom.filename
 }
 
-func (sbom *Sbom) GetJSONMap() map[string]interface{} {
-	return sbom.JsonMap
+func (bom *BOM) GetJSONMap() map[string]interface{} {
+	return bom.JsonMap
 }
 
-func (sbom *Sbom) GetCdxBom() (cdxBom *CDXBom) {
-	return sbom.CdxBom
+func (bom *BOM) GetCdxBom() (cdxBom *CDXBom) {
+	return bom.CdxBom
 }
 
-func (sbom *Sbom) GetCdxMetadata() (metadata *CDXMetadata) {
-	if bom := sbom.GetCdxBom(); bom != nil {
+func (bom *BOM) GetCdxMetadata() (metadata *CDXMetadata) {
+	if bom := bom.GetCdxBom(); bom != nil {
 		metadata = bom.Metadata
 	}
 	return metadata
 }
 
-func (sbom *Sbom) GetCdxMetadataProperties() (properties []CDXProperty) {
-	if metadata := sbom.GetCdxMetadata(); metadata != nil {
+func (bom *BOM) GetCdxMetadataProperties() (properties []CDXProperty) {
+	if metadata := bom.GetCdxMetadata(); metadata != nil {
 		properties = metadata.Properties
 	}
 	return properties
 }
 
-func (sbom *Sbom) GetCdxComponents() (components []CDXComponent) {
-	if bom := sbom.GetCdxBom(); bom != nil {
+func (bom *BOM) GetCdxComponents() (components []CDXComponent) {
+	if bom := bom.GetCdxBom(); bom != nil {
 		if bom.Components != nil {
 			components = *bom.Components
 		} //else {
@@ -280,8 +234,8 @@ func (sbom *Sbom) GetCdxComponents() (components []CDXComponent) {
 	return components
 }
 
-func (sbom *Sbom) GetCdxServices() (services []CDXService) {
-	if bom := sbom.GetCdxBom(); bom != nil {
+func (bom *BOM) GetCdxServices() (services []CDXService) {
+	if bom := bom.GetCdxBom(); bom != nil {
 		if bom.Services != nil {
 			services = *bom.Services
 		} //else {
@@ -291,39 +245,39 @@ func (sbom *Sbom) GetCdxServices() (services []CDXService) {
 	return services
 }
 
-func (sbom *Sbom) GetCdxMetadataComponent() (component *CDXComponent) {
-	if metadata := sbom.GetCdxMetadata(); metadata != nil {
+func (bom *BOM) GetCdxMetadataComponent() (component *CDXComponent) {
+	if metadata := bom.GetCdxMetadata(); metadata != nil {
 		component = &metadata.Component
 	}
 	return component
 }
 
-func (sbom *Sbom) GetCdxMetadataLicenses() (licenses []CDXLicenseChoice) {
-	if metadata := sbom.GetCdxMetadata(); metadata != nil {
+func (bom *BOM) GetCdxMetadataLicenses() (licenses []CDXLicenseChoice) {
+	if metadata := bom.GetCdxMetadata(); metadata != nil {
 		licenses = metadata.Licenses
 	}
 	return licenses
 }
 
-func (sbom *Sbom) GetCdxVulnerabilities() (vulnerabilities []CDXVulnerability) {
-	if bom := sbom.GetCdxBom(); bom != nil {
+func (bom *BOM) GetCdxVulnerabilities() (vulnerabilities []CDXVulnerability) {
+	if bom := bom.GetCdxBom(); bom != nil {
 		vulnerabilities = bom.Vulnerabilities
 	}
 	return vulnerabilities
 }
 
-func (sbom *Sbom) GetKeyValueAsString(key string) (sValue string, err error) {
+func (bom *BOM) GetKeyValueAsString(key string) (sValue string, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	getLogger().Tracef("key: `%s`", key)
 
-	if (sbom.JsonMap) == nil {
+	if (bom.JsonMap) == nil {
 		err := fmt.Errorf("document object does not have a Map allocated")
 		getLogger().Error(err)
 		return "", err
 	}
-	value := sbom.JsonMap[key]
+	value := bom.JsonMap[key]
 
 	if value == nil {
 		getLogger().Tracef("key: `%s` not found in document map", key)
@@ -334,24 +288,24 @@ func (sbom *Sbom) GetKeyValueAsString(key string) (sValue string, err error) {
 	return value.(string), nil
 }
 
-func (sbom *Sbom) UnmarshalSBOMAsJsonMap() error {
+func (bom *BOM) UnmarshalSBOMAsJsonMap() error {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	// validate filename
-	if len(sbom.filename) == 0 {
-		return fmt.Errorf("schema: invalid SBOM filename: `%s`", sbom.filename)
+	if len(bom.filename) == 0 {
+		return fmt.Errorf("schema: invalid SBOM filename: `%s`", bom.filename)
 	}
 
 	// Conditionally append working directory if no abs. path detected
-	if len(sbom.filename) > 0 && !filepath.IsAbs(sbom.filename) {
-		sbom.absFilename = filepath.Join(utils.GlobalFlags.WorkingDir, sbom.filename)
+	if len(bom.filename) > 0 && !filepath.IsAbs(bom.filename) {
+		bom.absFilename = filepath.Join(utils.GlobalFlags.WorkingDir, bom.filename)
 	} else {
-		sbom.absFilename = sbom.filename
+		bom.absFilename = bom.filename
 	}
 
 	// Open our jsonFile
-	jsonFile, errOpen := os.Open(sbom.absFilename)
+	jsonFile, errOpen := os.Open(bom.absFilename)
 
 	// if input file cannot be opened, log it and terminate
 	if errOpen != nil {
@@ -364,44 +318,44 @@ func (sbom *Sbom) UnmarshalSBOMAsJsonMap() error {
 
 	// read our opened jsonFile as a byte array.
 	var errReadAll error
-	sbom.rawBytes, errReadAll = ioutil.ReadAll(jsonFile)
+	bom.rawBytes, errReadAll = io.ReadAll(jsonFile)
 	if errReadAll != nil {
 		getLogger().Error(errReadAll)
 	}
-	getLogger().Tracef("read data from: `%s`", sbom.filename)
-	getLogger().Tracef("\n  >> rawBytes[:100]=[%s]", sbom.rawBytes[:100])
+	getLogger().Tracef("read data from: `%s`", bom.filename)
+	getLogger().Tracef("\n  >> rawBytes[:100]=[%s]", bom.rawBytes[:100])
 
 	// Attempt to unmarshal the prospective JSON document to a map
-	sbom.JsonMap = make(map[string]interface{})
-	errUnmarshal := json.Unmarshal(sbom.rawBytes, &(sbom.JsonMap))
+	bom.JsonMap = make(map[string]interface{})
+	errUnmarshal := json.Unmarshal(bom.rawBytes, &(bom.JsonMap))
 	if errUnmarshal != nil {
 		getLogger().Trace(errUnmarshal)
 		if syntaxError, ok := errUnmarshal.(*json.SyntaxError); ok {
-			line, character := CalcLineAndCharacterPos(sbom.rawBytes, syntaxError.Offset)
+			line, character := CalcLineAndCharacterPos(bom.rawBytes, syntaxError.Offset)
 			getLogger().Tracef("syntax error found at line,char=[%d,%d]", line, character)
 		}
 		return errUnmarshal
 	}
 
 	// Print the data type of result variable
-	getLogger().Tracef("sbom.jsonMap(%s)", reflect.TypeOf(sbom.JsonMap))
+	getLogger().Tracef("bom.jsonMap(%s)", reflect.TypeOf(bom.JsonMap))
 
 	return nil
 }
 
-func (sbom *Sbom) UnmarshalCDXSbom() (err error) {
+func (bom *BOM) UnmarshalCDXSbom() (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	// Unmarshal as a JSON Map if not done already
-	if sbom.JsonMap == nil {
-		if err = sbom.UnmarshalSBOMAsJsonMap(); err != nil {
+	if bom.JsonMap == nil {
+		if err = bom.UnmarshalSBOMAsJsonMap(); err != nil {
 			return
 		}
 	}
 
 	// Use the JSON Map to unmarshal to CDX-specific types
-	sbom.CdxBom, err = UnMarshalDocument(sbom.JsonMap)
+	bom.CdxBom, err = UnMarshalDocument(bom.JsonMap)
 	if err != nil {
 		return
 	}
@@ -409,33 +363,33 @@ func (sbom *Sbom) UnmarshalCDXSbom() (err error) {
 	return
 }
 
-func (sbom *Sbom) FindFormatAndSchema(sbomFilename string) (err error) {
+func (schemaConfig *BOMFormatAndSchemaConfig) FindFormatAndSchema(bom *BOM) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	// Iterate over known formats to see if SBOM document contains a known value
-	for _, format := range SupportedFormatConfig.Formats {
+	for _, format := range schemaConfig.Formats {
 
 		// See if the format identifier key exists and is a known value
-		formatValue, _ := sbom.GetKeyValueAsString(format.PropertyKeyFormat)
+		formatValue, _ := bom.GetKeyValueAsString(format.PropertyKeyFormat)
 
 		if formatValue == format.PropertyValueFormat {
-			version, _ := sbom.GetKeyValueAsString(format.PropertyKeyVersion)
+			version, _ := bom.GetKeyValueAsString(format.PropertyKeyVersion)
 
 			// Copy format info into Sbom context
-			sbom.FormatInfo = format
-			err = sbom.findSchemaVersionWithVariant(format, version, utils.GlobalFlags.ValidateFlags.SchemaVariant)
+			bom.FormatInfo = format
+			err = bom.findSchemaVersionWithVariant(format, version, utils.GlobalFlags.ValidateFlags.SchemaVariant)
 			return
 		}
 	}
 
 	// if we reach here, we did not find the format in our configuration (list)
-	err = NewUnknownFormatError(sbomFilename)
+	err = NewUnknownFormatError(bom.filename)
 	return
 }
 
 // There are multiple variants possible within a given version
-func (sbom *Sbom) findSchemaVersionWithVariant(format FormatSchema, version string, variant string) (err error) {
+func (bom *BOM) findSchemaVersionWithVariant(format FormatSchema, version string, variant string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 	var versionExists bool
@@ -455,7 +409,7 @@ func (sbom *Sbom) findSchemaVersionWithVariant(format FormatSchema, version stri
 			if utils.GlobalFlags.ValidateFlags.SchemaVariant == schema.Variant {
 				getLogger().Tracef("Match found for requested schema variant: `%s`",
 					FormatSchemaVariant(utils.GlobalFlags.ValidateFlags.SchemaVariant))
-				sbom.SchemaInfo = schema
+				bom.SchemaInfo = schema
 				return
 			}
 		}

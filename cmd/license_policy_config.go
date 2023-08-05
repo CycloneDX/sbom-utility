@@ -25,6 +25,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/CycloneDX/sbom-utility/resources"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/jwangsadinata/go-multimap/slicemultimap"
 )
@@ -93,7 +94,7 @@ type LicenseComplianceConfig struct {
 }
 
 func (config *LicenseComplianceConfig) Reset() {
-	config.policyConfigFile = DEFAULT_LICENSE_POLICIES
+	config.policyConfigFile = DEFAULT_LICENSE_POLICY_CONFIG
 	config.PolicyList = nil
 	config.Annotations = nil
 	if config.licenseFamilyNameMap != nil {
@@ -103,13 +104,6 @@ func (config *LicenseComplianceConfig) Reset() {
 		config.licenseIdMap.Clear()
 	}
 }
-
-// func (config *LicenseComplianceConfig) Debug() {
-// 	fmt.Printf(">> policyConfigFile: %s\n", config.policyConfigFile)
-// 	fmt.Printf(">> PolicyList (length): %v\n", len(config.PolicyList))
-// 	fmt.Printf(">> licenseFamilyNameMap.Keys\n() (length): %v\n", len(config.licenseFamilyNameMap.Keys()))
-// 	fmt.Printf(">> licenseIdMap.Keys\n() (length): %v\n", len(config.licenseIdMap.Keys()))
-// }
 
 func (config *LicenseComplianceConfig) GetFamilyNameMap() (hashmap *slicemultimap.MultiMap, err error) {
 	if config.licenseFamilyNameMap == nil {
@@ -142,40 +136,50 @@ func (config *LicenseComplianceConfig) GetFilteredFamilyNameMap(whereFilters []W
 	return config.filteredFamilyNameMap, err
 }
 
-func (config *LicenseComplianceConfig) LoadLicensePolicies(filename string) (err error) {
+func (config *LicenseComplianceConfig) LoadLicensePolicies(filename string, defaultFilename string) (err error) {
 	getLogger().Enter(filename)
 	defer getLogger().Exit()
 
 	// Only load the policy config. once
 	config.loadOnce.Do(func() {
-		err = config.innerLoadLicensePolicies(filename)
+		err = config.innerLoadLicensePolicies(filename, defaultFilename)
 	})
 
 	return
 }
 
-func (config *LicenseComplianceConfig) innerLoadLicensePolicies(filename string) (err error) {
+func (config *LicenseComplianceConfig) innerLoadLicensePolicies(filename string, defaultFilename string) (err error) {
 	getLogger().Enter(filename)
 	defer getLogger().Exit()
+
+	var buffer []byte
 
 	// Always reset the config if a new policy file is loaded
 	config.Reset()
 
-	// locate the license policy file
-	config.policyConfigFile, err = utils.FindVerifyConfigFileAbsPath(getLogger(), filename)
+	if filename != "" {
 
-	if err != nil {
-		err = fmt.Errorf("unable to find license policy config file: `%s`", filename)
-		return
-	}
+		// locate the license policy file
+		config.policyConfigFile, err = utils.FindVerifyConfigFileAbsPath(getLogger(), filename)
 
-	getLogger().Infof("Loading license policy config file: `%s`...", config.policyConfigFile)
+		if err != nil {
+			return fmt.Errorf("unable to find license policy file: `%s`", filename)
+		}
 
-	// attempt to read in contents of the policy config.
-	buffer, errRead := os.ReadFile(config.policyConfigFile)
-	if errRead != nil {
-		err = fmt.Errorf("unable to `ReadFile`: `%s`", config.policyConfigFile)
-		return
+		// attempt to read in contents of the policy config.
+		getLogger().Infof("Loading license policy file: `%s`...", config.policyConfigFile)
+		buffer, err = os.ReadFile(config.policyConfigFile)
+		if err != nil {
+			return fmt.Errorf("unable to `ReadFile`: `%s`", config.policyConfigFile)
+		}
+	} else {
+		// Attempt to load the default config file from embedded file resources
+		getLogger().Infof("Loading (embedded) default license policy file: `%s`...", defaultFilename)
+		buffer, err = resources.LoadConfigFile(defaultFilename)
+		if err != nil {
+			return fmt.Errorf("unable to read schema config file: `%s` from embedded resources: `%s`",
+				defaultFilename, resources.RESOURCES_CONFIG_DIR)
+		}
 	}
 
 	// NOTE: this cleverly unmarshals into the current config instance this function is associated with

@@ -216,8 +216,8 @@ func ListResources(output io.Writer, format string, resourceType string, whereFi
 	}()
 
 	// Note: returns error if either file load or unmarshal to JSON map fails
-	var document *schema.Sbom
-	document, err = LoadInputSbomFileAndDetectSchema()
+	var document *schema.BOM
+	document, err = LoadInputBOMFileAndDetectSchema()
 
 	if err != nil {
 		return
@@ -249,7 +249,7 @@ func ListResources(output io.Writer, format string, resourceType string, whereFi
 	return
 }
 
-func loadDocumentResources(document *schema.Sbom, resourceType string, whereFilters []WhereFilter) (err error) {
+func loadDocumentResources(document *schema.BOM, resourceType string, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 

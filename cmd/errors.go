@@ -192,7 +192,7 @@ func (err QueryError) Error() string {
 // Extend the base error type
 type InvalidSBOMError struct {
 	BaseError
-	SBOM         *schema.Sbom
+	SBOM         *schema.BOM
 	FieldKeys    []string // Keys used to dereference into JSON map where error found
 	SchemaErrors []gojsonschema.ResultError
 }
@@ -219,7 +219,7 @@ type SBOMMetadataPropertyError struct {
 	Actual   []schema.CDXProperty
 }
 
-func NewInvalidSBOMError(sbom *schema.Sbom, m string, errIn error, schemaErrors []gojsonschema.ResultError) *InvalidSBOMError {
+func NewInvalidSBOMError(sbom *schema.BOM, m string, errIn error, schemaErrors []gojsonschema.ResultError) *InvalidSBOMError {
 	var err = new(InvalidSBOMError)
 	err.Type = ERR_TYPE_INVALID_SBOM
 	err.Message = m
@@ -232,7 +232,7 @@ func NewInvalidSBOMError(sbom *schema.Sbom, m string, errIn error, schemaErrors 
 	return err
 }
 
-func NewSbomLicenseNotFoundError(sbom *schema.Sbom) *SBOMLicenseError {
+func NewSbomLicenseNotFoundError(sbom *schema.BOM) *SBOMLicenseError {
 	var err = new(SBOMLicenseError)
 	err.Type = ERR_TYPE_SBOM_LICENSE
 	err.Message = MSG_LICENSES_NOT_FOUND
@@ -250,7 +250,7 @@ func NewSbomLicenseDataError() *SBOMLicenseError {
 	return err
 }
 
-func NewSBOMCompositionError(m string, sbom *schema.Sbom, fields []string) *SBOMCompositionError {
+func NewSBOMCompositionError(m string, sbom *schema.BOM, fields []string) *SBOMCompositionError {
 	var err = new(SBOMCompositionError)
 	err.Type = ERR_TYPE_SBOM_COMPOSITION
 	err.Message = m
@@ -263,7 +263,7 @@ func NewSBOMCompositionError(m string, sbom *schema.Sbom, fields []string) *SBOM
 }
 
 // TODO: create Error() (interface) method that displays CDXMetadata
-func NewSBOMMetadataError(sbom *schema.Sbom, m string, metadata schema.CDXMetadata) *SBOMMetadataError {
+func NewSBOMMetadataError(sbom *schema.BOM, m string, metadata schema.CDXMetadata) *SBOMMetadataError {
 	var err = new(SBOMMetadataError)
 	err.Type = ERR_TYPE_SBOM_METADATA
 	err.Message = m
@@ -276,7 +276,7 @@ func NewSBOMMetadataError(sbom *schema.Sbom, m string, metadata schema.CDXMetada
 }
 
 // TODO: create Error() (interface) method that displays CDXProperty
-func NewSbomMetadataPropertyError(sbom *schema.Sbom, m string,
+func NewSbomMetadataPropertyError(sbom *schema.BOM, m string,
 	expected *schema.CustomValidationProperty,
 	values []schema.CDXProperty) *SBOMMetadataPropertyError {
 

@@ -189,48 +189,9 @@ func TestDiffJsonArrayOrderMove1ObjectWithAddAndDeleteFormatText(t *testing.T) {
 // 	return
 // }
 
+// See: https://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html
+
 // Validate value (range)
 // func Colorize(color string, text string) (colorizedText string) {
 // 	return color + text + Reset
 // }
-
-// func ColorizeBackgroundRed(text string) (colorizedText string) {
-// 	return BG_Red + text + Reset
-// }
-
-// func ColorizeBackgroundGreen(text string) (colorizedText string) {
-// 	return BG_Green + text + Reset
-// }
-
-// func ColorizeBackgroundYellow(text string) (colorizedText string) {
-// 	return BG_Yellow + text + Reset
-// }
-
-// func ColorizeBackgroundCyan(text string) (colorizedText string) {
-// 	return BG_Cyan + text + Reset
-// }
-
-// func ColorizeBackgroundBlue(text string) (colorizedText string) {
-// 	return BG_Blue + text + Reset
-// }
-
-// // See: https://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html
-// const (
-// 	Reset         = "\033[0m"
-// 	FG_Red        = "\033[31m"
-// 	FG_Green      = "\033[32m"
-// 	FG_Yellow     = "\033[33m"
-// 	FG_Cyan       = "\033[36m"
-// 	FG_Gray       = "\033[37m"
-// 	FG_White      = "\033[97m"
-// 	FG_LightWhite = "\033[39m"
-// 	FG_Default    = FG_LightWhite // often default for terminal "white" foreground
-// 	BG_Red        = "\033[41m"
-// 	BG_Green      = "\033[42m"
-// 	BG_Yellow     = "\033[43m"
-// 	BG_Blue       = "\033[44m"
-// 	BG_Magenta    = "\033[45m"
-// 	BG_Cyan       = "\033[46m"
-// 	BG_White      = "\033[47m"
-// 	BG_Default    = "\033[49m"
-// )

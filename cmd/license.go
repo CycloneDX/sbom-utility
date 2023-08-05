@@ -175,7 +175,7 @@ func licenseCmdImpl(cmd *cobra.Command, args []string) error {
 // 2. (root).metadata.component.licenses[] + all "nested" components
 // 3. (root).components[](.license[]) (each component + all "nested" components)
 // 4. (root).services[](.license[]) (each service + all "nested" services)
-func loadDocumentLicenses(document *schema.Sbom, whereFilters []WhereFilter) (err error) {
+func loadDocumentLicenses(document *schema.BOM, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -230,7 +230,7 @@ func loadDocumentLicenses(document *schema.Sbom, whereFilters []WhereFilter) (er
 }
 
 // Hash the license found in the (root).metadata.licenses[] array
-func hashMetadataLicenses(document *schema.Sbom, location int, whereFilters []WhereFilter) (err error) {
+func hashMetadataLicenses(document *schema.BOM, location int, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -271,7 +271,7 @@ func hashMetadataLicenses(document *schema.Sbom, location int, whereFilters []Wh
 }
 
 // Hash the license found in the (root).metadata.component object (and any "nested" components)
-func hashMetadataComponentLicenses(document *schema.Sbom, location int, whereFilters []WhereFilter) (err error) {
+func hashMetadataComponentLicenses(document *schema.BOM, location int, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 

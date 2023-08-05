@@ -152,7 +152,7 @@ func validateCmdImpl(cmd *cobra.Command, args []string) error {
 
 // Normalize ErrorTypes from the Validate() function
 // Note: this function name should not be changed
-func validationError(document *schema.Sbom, valid bool, err error) {
+func validationError(document *schema.BOM, valid bool, err error) {
 
 	// Consistently display errors before exiting
 	if err != nil {
@@ -179,7 +179,7 @@ func validationError(document *schema.Sbom, valid bool, err error) {
 	getLogger().Info(message)
 }
 
-func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, validateFlags utils.ValidateCommandFlags) (valid bool, document *schema.Sbom, schemaErrors []gojsonschema.ResultError, err error) {
+func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, validateFlags utils.ValidateCommandFlags) (valid bool, document *schema.BOM, schemaErrors []gojsonschema.ResultError, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -193,7 +193,7 @@ func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, va
 
 	// Attempt to load and unmarshal the input file as a Json document
 	// Note: JSON syntax errors return "encoding/json.SyntaxError"
-	document, err = LoadInputSbomFileAndDetectSchema()
+	document, err = LoadInputBOMFileAndDetectSchema()
 	if err != nil {
 		return INVALID, document, schemaErrors, err
 	}
@@ -330,7 +330,7 @@ func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	return
 }
 
-func validateCustom(document *schema.Sbom) (valid bool, err error) {
+func validateCustom(document *schema.BOM) (valid bool, err error) {
 
 	// If the validated SBOM is of a known format, we can unmarshal it into
 	// more convenient typed structure for simplified custom validation
