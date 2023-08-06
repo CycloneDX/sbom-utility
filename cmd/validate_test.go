@@ -427,7 +427,7 @@ func TestUserInput(t *testing.T) {
 	os.Stdin = file
 
 	innerValidateError(t,
-		INPUT_STANDARD_IN,
+		INPUT_TYPE_STDIN,
 		SCHEMA_VARIANT_NONE,
 		FORMAT_JSON,
 		nil)

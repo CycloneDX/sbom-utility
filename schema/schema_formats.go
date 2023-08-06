@@ -40,6 +40,11 @@ const (
 	SCHEMA_VARIANT_LATEST = "(latest)"
 )
 
+// Input (source) reserved values
+const (
+	INPUT_TYPE_STDIN = "-"
+)
+
 const (
 	ERR_TYPE_UNSUPPORTED_FORMAT = "format not supported"
 	ERR_TYPE_UNSUPPORTED_SCHEMA = "schema not supported"
@@ -298,7 +303,7 @@ func (bom *BOM) UnmarshalSBOMAsJsonMap() (err error) {
 	}
 
 	// Check to see of stdin is the BOM source data
-	if bom.filename == "-" {
+	if bom.filename == INPUT_TYPE_STDIN {
 		bom.rawBytes, err = io.ReadAll(os.Stdin)
 		if err != nil {
 			return

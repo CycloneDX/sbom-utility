@@ -113,7 +113,7 @@ const (
 
 // Command reserved values
 const (
-	INPUT_STANDARD_IN = "-"
+	INPUT_TYPE_STDIN = "-"
 )
 
 var rootCmd = &cobra.Command{
@@ -267,7 +267,7 @@ func preRunTestForInputFile(cmd *cobra.Command, args []string) error {
 	inputFilename := utils.GlobalFlags.PersistentFlags.InputFile
 	if inputFilename == "" {
 		return getLogger().Errorf("Missing required argument(s): %s", FLAG_FILENAME_INPUT)
-	} else if inputFilename == INPUT_STANDARD_IN {
+	} else if inputFilename == INPUT_TYPE_STDIN {
 		return nil
 	} else if _, err := os.Stat(inputFilename); err != nil {
 		return getLogger().Errorf("File not found: `%s`", inputFilename)
