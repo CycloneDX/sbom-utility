@@ -19,6 +19,7 @@ package cmd
 
 // "github.com/iancoleman/orderedmap"
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -210,13 +211,28 @@ func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	}
 
 	// Create a loader for the SBOM (JSON) document
-	inputFile := persistentFlags.InputFile
-	documentLoader := gojsonschema.NewReferenceLoader(PROTOCOL_PREFIX_FILE + inputFile)
-
-	schemaName := document.SchemaInfo.File
+	var documentLoader gojsonschema.JSONLoader
 	var schemaLoader gojsonschema.JSONLoader
 	var errRead error
-	var bSchema []byte
+	var bSchema, bDocument []byte
+
+	if bDocument = document.GetRawBytes(); len(bDocument) > 0 {
+		bufferTemp := new(bytes.Buffer)
+		// Strip off newlines which the json Decoder dislikes at EOF (as well as extra spaces, etc.)
+		if err := json.Compact(bufferTemp, bDocument); err != nil {
+			fmt.Println(err)
+		}
+		documentLoader = gojsonschema.NewBytesLoader(bufferTemp.Bytes())
+	} else {
+		inputFile := persistentFlags.InputFile
+		documentLoader = gojsonschema.NewReferenceLoader(PROTOCOL_PREFIX_FILE + inputFile)
+	}
+
+	if documentLoader == nil {
+		return INVALID, document, schemaErrors, fmt.Errorf("unable to load document: `%s`", document.GetFilename())
+	}
+
+	schemaName := document.SchemaInfo.File
 
 	// If caller "forced" a specific schema file (version), load it instead of
 	// any SchemaInfo found in config.json

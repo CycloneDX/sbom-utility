@@ -23,6 +23,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
+	"log"
+	"os"
 	"testing"
 
 	"github.com/CycloneDX/sbom-utility/schema"
@@ -97,7 +99,15 @@ func innerValidateError(t *testing.T, filename string, variant string, format st
 
 	// Assure it is valid JSON output
 	if format == FORMAT_JSON {
-		if !utils.IsValidJsonRaw(outputBuffer.Bytes()) {
+		if outputBuffer.Len() == 0 {
+			if expectedError == nil {
+				getLogger().Tracef("output data empty as expected (nil).")
+			} else {
+				t.Error(fmt.Errorf("output data empty; expected error text: %s", expectedError.Error()))
+				t.Logf("%s", outputBuffer.String())
+			}
+
+		} else if !utils.IsValidJsonRaw(outputBuffer.Bytes()) {
 			err := getLogger().Errorf("output did not contain valid format data; expected: `%s`", FORMAT_JSON)
 			t.Error(err.Error())
 			t.Logf("%s", outputBuffer.String())
@@ -402,4 +412,23 @@ func innerValidateCustomSchemaConfig(t *testing.T, filename string, configFile s
 
 func TestValidateWithCustomSchemaConfiguration(t *testing.T) {
 	innerValidateCustomSchemaConfig(t, TEST_CDX_1_4_MIN_REQUIRED, DEFAULT_SCHEMA_CONFIG, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+}
+
+func TestUserInput(t *testing.T) {
+
+	file, err := os.Open(TEST_CDX_1_4_MIN_REQUIRED) // For read access.
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// convert byte slice to io.Reader
+	savedStdIn := os.Stdin
+	defer func() { os.Stdin = savedStdIn }()
+	os.Stdin = file
+
+	innerValidateError(t,
+		INPUT_STANDARD_IN,
+		SCHEMA_VARIANT_NONE,
+		FORMAT_JSON,
+		nil)
 }

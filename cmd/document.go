@@ -36,7 +36,7 @@ func LoadInputBOMFileAndDetectSchema() (document *schema.BOM, err error) {
 		return nil, fmt.Errorf("invalid input file (-%s): `%s` ", FLAG_FILENAME_INPUT_SHORT, inputFile)
 	}
 
-	// Construct an Sbom object around the input file
+	// Construct an SBOM document object around the input file
 	document = schema.NewSbom(inputFile)
 
 	// Load the raw, candidate SBOM (file) as JSON data

@@ -288,7 +288,7 @@ func (bom *BOM) GetKeyValueAsString(key string) (sValue string, err error) {
 	return value.(string), nil
 }
 
-func (bom *BOM) UnmarshalSBOMAsJsonMap() error {
+func (bom *BOM) UnmarshalSBOMAsJsonMap() (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -297,31 +297,40 @@ func (bom *BOM) UnmarshalSBOMAsJsonMap() error {
 		return fmt.Errorf("schema: invalid SBOM filename: `%s`", bom.filename)
 	}
 
-	// Conditionally append working directory if no abs. path detected
-	if len(bom.filename) > 0 && !filepath.IsAbs(bom.filename) {
-		bom.absFilename = filepath.Join(utils.GlobalFlags.WorkingDir, bom.filename)
-	} else {
-		bom.absFilename = bom.filename
+	// Check to see of stdin is the BOM source data
+	if bom.filename == "-" {
+		bom.rawBytes, err = io.ReadAll(os.Stdin)
+		if err != nil {
+			return
+		}
+	} else { // load the BOM data from relative filename
+		// Conditionally append working directory if no abs. path detected
+		if len(bom.filename) > 0 && !filepath.IsAbs(bom.filename) {
+			bom.absFilename = filepath.Join(utils.GlobalFlags.WorkingDir, bom.filename)
+		} else {
+			bom.absFilename = bom.filename
+		}
+
+		// Open our jsonFile
+		jsonFile, errOpen := os.Open(bom.absFilename)
+
+		// if input file cannot be opened, log it and terminate
+		if errOpen != nil {
+			getLogger().Error(errOpen)
+			return errOpen
+		}
+
+		// defer the closing of our jsonFile
+		defer jsonFile.Close()
+
+		// read our opened jsonFile as a byte array.
+		var errReadAll error
+		bom.rawBytes, errReadAll = io.ReadAll(jsonFile)
+		if errReadAll != nil {
+			getLogger().Error(errReadAll)
+		}
 	}
 
-	// Open our jsonFile
-	jsonFile, errOpen := os.Open(bom.absFilename)
-
-	// if input file cannot be opened, log it and terminate
-	if errOpen != nil {
-		getLogger().Error(errOpen)
-		return errOpen
-	}
-
-	// defer the closing of our jsonFile
-	defer jsonFile.Close()
-
-	// read our opened jsonFile as a byte array.
-	var errReadAll error
-	bom.rawBytes, errReadAll = io.ReadAll(jsonFile)
-	if errReadAll != nil {
-		getLogger().Error(errReadAll)
-	}
 	getLogger().Tracef("read data from: `%s`", bom.filename)
 	getLogger().Tracef("\n  >> rawBytes[:100]=[%s]", bom.rawBytes[:100])
 

@@ -111,6 +111,11 @@ const (
 	FORMAT_ANY      = "<any>" // Used for test errors
 )
 
+// Command reserved values
+const (
+	INPUT_STANDARD_IN = "-"
+)
+
 var rootCmd = &cobra.Command{
 	Use:           fmt.Sprintf("%s [command] [flags]", utils.GlobalFlags.Project),
 	SilenceErrors: false,
@@ -262,6 +267,8 @@ func preRunTestForInputFile(cmd *cobra.Command, args []string) error {
 	inputFilename := utils.GlobalFlags.PersistentFlags.InputFile
 	if inputFilename == "" {
 		return getLogger().Errorf("Missing required argument(s): %s", FLAG_FILENAME_INPUT)
+	} else if inputFilename == INPUT_STANDARD_IN {
+		return nil
 	} else if _, err := os.Stat(inputFilename); err != nil {
 		return getLogger().Errorf("File not found: `%s`", inputFilename)
 	}
