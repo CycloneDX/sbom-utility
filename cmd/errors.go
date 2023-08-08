@@ -307,12 +307,12 @@ func ErrorTypesMatch(err error, expected error) bool {
 	return reflect.TypeOf(err) == reflect.TypeOf(expected)
 }
 
-func IsInvalidSBOMError(err error) bool {
+func IsInvalidBOMError(err error) bool {
 	_, ok := err.(*InvalidSBOMError)
 	return ok
 }
 
-func IsSBOMLicenseError(err error) (*SBOMLicenseError, bool) {
+func IsBOMLicenseError(err error) (*SBOMLicenseError, bool) {
 	sbomErr, ok := err.(*SBOMLicenseError)
 	return sbomErr, ok
 }

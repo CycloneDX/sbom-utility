@@ -196,7 +196,7 @@ func loadDocumentLicenses(document *schema.BOM, whereFilters []WhereFilter) (err
 
 	// Before looking for license data, fully unmarshal the SBOM
 	// into named structures
-	if err = document.UnmarshalCDXSbom(); err != nil {
+	if err = document.UnmarshalCycloneDXBOM(); err != nil {
 		return
 	}
 

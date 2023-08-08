@@ -265,9 +265,8 @@ func loadDocumentResources(document *schema.BOM, resourceType string, whereFilte
 	// Clear out any old (global)hashmap data (NOTE: 'go test' needs this)
 	ClearGlobalResourceData()
 
-	// Before looking for license data, fully unmarshal the SBOM
-	// into named structures
-	if err = document.UnmarshalCDXSbom(); err != nil {
+	// Before looking for license data, fully unmarshal the SBOM into named structures
+	if err = document.UnmarshalCycloneDXBOM(); err != nil {
 		return
 	}
 

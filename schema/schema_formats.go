@@ -194,7 +194,7 @@ func (format *FormatSchema) IsCycloneDx() bool {
 	return format.CanonicalName == SCHEMA_FORMAT_CYCLONEDX
 }
 
-func NewSbom(inputFile string) *BOM {
+func NewBOM(inputFile string) *BOM {
 	temp := BOM{
 		filename: inputFile,
 	}
@@ -203,6 +203,14 @@ func NewSbom(inputFile string) *BOM {
 }
 
 func (bom *BOM) GetFilename() string {
+	return bom.filename
+}
+
+func (bom *BOM) GetFilenameInterpolated() string {
+
+	if bom.filename == INPUT_TYPE_STDIN {
+		return "stdin"
+	}
 	return bom.filename
 }
 
@@ -293,13 +301,13 @@ func (bom *BOM) GetKeyValueAsString(key string) (sValue string, err error) {
 	return value.(string), nil
 }
 
-func (bom *BOM) UnmarshalSBOMAsJsonMap() (err error) {
+func (bom *BOM) UnmarshalBOMAsJSONMap() (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	// validate filename
 	if len(bom.filename) == 0 {
-		return fmt.Errorf("schema: invalid SBOM filename: `%s`", bom.filename)
+		return fmt.Errorf("schema: invalid BOM filename: `%s`", bom.filename)
 	}
 
 	// Check to see of stdin is the BOM source data
@@ -357,13 +365,13 @@ func (bom *BOM) UnmarshalSBOMAsJsonMap() (err error) {
 	return nil
 }
 
-func (bom *BOM) UnmarshalCDXSbom() (err error) {
+func (bom *BOM) UnmarshalCycloneDXBOM() (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	// Unmarshal as a JSON Map if not done already
 	if bom.JsonMap == nil {
-		if err = bom.UnmarshalSBOMAsJsonMap(); err != nil {
+		if err = bom.UnmarshalBOMAsJSONMap(); err != nil {
 			return
 		}
 	}

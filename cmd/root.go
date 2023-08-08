@@ -249,7 +249,7 @@ func Execute() {
 	defer getLogger().Exit()
 
 	if err := rootCmd.Execute(); err != nil {
-		if IsInvalidSBOMError(err) {
+		if IsInvalidBOMError(err) {
 			os.Exit(ERROR_VALIDATION)
 		} else {
 			os.Exit(ERROR_APPLICATION)

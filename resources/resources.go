@@ -21,10 +21,10 @@ import (
 	"embed"
 )
 
-// Embed the JSON schema files used to validate SBOMs
+// Embed the JSON schema files used to validate BOMs
 
 //go:embed schema
-var SBOMSchemaFiles embed.FS
+var BOMSchemaFiles embed.FS
 
 //go:embed config
 var ConfigFiles embed.FS
