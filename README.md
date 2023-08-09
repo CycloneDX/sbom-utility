@@ -78,7 +78,7 @@ The archive will contain the following files:
 - `license.json` *(optional)* - copy of the default license policy configuration file for optional customization (to be passed on the command line)
 - `custom.json` *(experimental)* - custom validation configuration file
 - `LICENSE` - the software license for the utility (i.e. Apache 2)
-- `sbom-utility-<version>.sbom.json` - the Software Bill-of-Materials for the utility
+- `sbom-utility-<version>.sbom.json` - a simple Software Bill-of-Materials (SBOM) for the utility
 
 ---
 
