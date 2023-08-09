@@ -27,6 +27,7 @@ import (
 // Note: these following examples are published by the CDX community here:
 // https://github.com/CycloneDX/bom-examples
 const (
+	// SBOM
 	TEST_CDX_1_2_EXAMPLE_SBOM_CERN_LHC_VDM_EDITOR    = "examples/cyclonedx/SBOM/cern-lhc-vdm-editor-e564943/bom.json"
 	TEST_CDX_1_2_EXAMPLE_SBOM_DROP_WIZARD_V1_3_15    = "examples/cyclonedx/SBOM/dropwizard-1.3.15/bom.json"
 	TEST_CDX_1_2_EXAMPLE_SBOM_NPM_JUICE_SHOP_V11_1_2 = "examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json"
@@ -36,11 +37,32 @@ const (
 	TEST_CDX_1_2_EXAMPLE_SBOM_PROTON_BRIDGE_V1_6_3   = "examples/cyclonedx/SBOM/proton-bridge/proton-bridge-v1.6.3.bom.json"
 	TEST_CDX_1_2_EXAMPLE_SBOM_PROTON_BRIDGE_V1_8_0   = "examples/cyclonedx/SBOM/proton-bridge/proton-bridge-v1.8.0.bom.json"
 	TEST_CDX_1_2_EXAMPLE_SBOM_PROTON_MAIL_WEB_CLIENT = "examples/cyclonedx/SBOM/protonmail-webclient-v4-0912dff/bom.json"
+	// SaaSBOM
 	TEST_CDX_1_4_EXAMPLE_SAASBOM_APIGW_MS_DATASTORES = "examples/cyclonedx/SaaSBOM/apigateway-microservices-datastores/bom.json"
+	// HBOM
 	TEST_CDX_1_4_EXAMPLE_HBOM_PCI_SATA_ADAPTER_BOARD = "examples/cyclonedx/HBOM/PCIe-SATA-adapter-board/bom.json"
-	TEST_CDX_1_4_EXAMPLE_SBOM_KEYCLOAK_DECOUPLED     = "examples/cyclonedx/OBOM/Example-1-Decoupled/bom.json"
-	TEST_CDX_1_4_EXAMPLE_OBOM_KEYCLOAK_DECOUPLED     = "examples/cyclonedx/OBOM/Example-1-Decoupled/obom.json"
-	TEST_CDX_1_4_EXAMPLE_OBOM_KEYCLOAK_STANDALONE    = "examples/cyclonedx/OBOM/Example-1-Standalone/bom.json"
+	// OBOM
+	TEST_CDX_1_4_EXAMPLE_SBOM_KEYCLOAK_DECOUPLED  = "examples/cyclonedx/OBOM/Example-1-Decoupled/bom.json"
+	TEST_CDX_1_4_EXAMPLE_OBOM_KEYCLOAK_DECOUPLED  = "examples/cyclonedx/OBOM/Example-1-Decoupled/obom.json"
+	TEST_CDX_1_4_EXAMPLE_OBOM_KEYCLOAK_STANDALONE = "examples/cyclonedx/OBOM/Example-1-Standalone/bom.json"
+	//VEX
+	TEST_CDX_1_4_EXAMPLE_VEX_EXAMPLE_APP_BOM                     = "examples/cyclonedx/VEX/bom.json"
+	TEST_CDX_1_4_EXAMPLE_VEX_EXAMPLE_APP_VEX                     = "examples/cyclonedx/VEX/vex.json"
+	TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_1_AFFECTED            = "examples/cyclonedx/VEX/CISA-Use-Cases/Case-1/vex-affected.json"
+	TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_1_FIXED               = "examples/cyclonedx/VEX/CISA-Use-Cases/Case-1/vex-fixed.json"
+	TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_1_NOT_AFFECTED        = "examples/cyclonedx/VEX/CISA-Use-Cases/Case-1/vex-not_affected.json"
+	TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_1_UNDER_INVESTIGATION = "examples/cyclonedx/VEX/CISA-Use-Cases/Case-1/vex-under_investigation.json"
+	TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_2                     = "examples/cyclonedx/VEX/CISA-Use-Cases/Case-2/vex.json"
+	TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_3                     = "examples/cyclonedx/VEX/CISA-Use-Cases/Case-3/vex.json"
+	TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_4                     = "examples/cyclonedx/VEX/CISA-Use-Cases/Case-4/vex.json"
+	TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_5                     = "examples/cyclonedx/VEX/CISA-Use-Cases/Case-4/vex.json"
+	TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_6                     = "examples/cyclonedx/VEX/CISA-Use-Cases/Case-5/vex.json"
+	TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_7                     = "examples/cyclonedx/VEX/CISA-Use-Cases/Case-7/vex.json"
+	TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_7_1                   = "examples/cyclonedx/VEX/CISA-Use-Cases/Case-7/bom-1.json"
+	TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_7_2                   = "examples/cyclonedx/VEX/CISA-Use-Cases/Case-7/bom-2.json"
+	TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_8                     = "examples/cyclonedx/VEX/CISA-Use-Cases/Case-8/vex.json"
+	TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_8_1                   = "examples/cyclonedx/VEX/CISA-Use-Cases/Case-8/bom-1.json"
+	TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_8_2                   = "examples/cyclonedx/VEX/CISA-Use-Cases/Case-8/bom-2.json"
 )
 
 // CycloneDX - Examples
@@ -111,6 +133,91 @@ func TestValidateExampleOBOMCdx14KeycloakStandalone(t *testing.T) {
 	innerValidateTest(t, *vti)
 
 	vti.InputFile = TEST_CDX_1_4_EXAMPLE_OBOM_KEYCLOAK_DECOUPLED
+	innerValidateTest(t, *vti)
+}
+
+// VEX
+func TestValidateExampleVEXExampleAppBOM(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_EXAMPLE_APP_BOM)
+	innerValidateTest(t, *vti)
+}
+
+func TestValidateExampleVEXExampleAppVEX(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_EXAMPLE_APP_VEX)
+	innerValidateTest(t, *vti)
+}
+
+func TestValidateExampleVEX_CISAUseCase1Affected(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_1_AFFECTED)
+	innerValidateTest(t, *vti)
+}
+func TestValidateExampleVEX_CISAUseCase1Fixed(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_1_FIXED)
+	innerValidateTest(t, *vti)
+}
+
+func TestValidateExampleVEX_CISAUseCase1NotAffected(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_1_NOT_AFFECTED)
+	innerValidateTest(t, *vti)
+}
+
+func TestValidateExampleVEX_CISAUseCase1UnderInvestigation(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_1_UNDER_INVESTIGATION)
+	innerValidateTest(t, *vti)
+}
+
+func TestValidateExampleVEX_CISAUseCase2(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_2)
+	innerValidateTest(t, *vti)
+}
+
+func TestValidateExampleVEX_CISAUseCase3(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_3)
+	innerValidateTest(t, *vti)
+}
+
+func TestValidateExampleVEX_CISAUseCase4(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_4)
+	innerValidateTest(t, *vti)
+}
+
+func TestValidateExampleVEX_CISAUseCase5(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_5)
+	innerValidateTest(t, *vti)
+}
+
+func TestValidateExampleVEX_CISAUseCase6(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_6)
+	innerValidateTest(t, *vti)
+}
+
+func TestValidateExampleVEX_CISAUseCase7(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_7)
+	innerValidateTest(t, *vti)
+}
+
+func TestValidateExampleVEX_CISAUseCase7_1(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_7_1)
+	innerValidateTest(t, *vti)
+}
+
+func TestValidateExampleVEX_CISAUseCase7_2(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_7_2)
+	innerValidateTest(t, *vti)
+}
+
+func TestValidateExampleVEX_CISAUseCase8(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_8)
+	innerValidateTest(t, *vti)
+}
+
+func TestValidateExampleVEX_CISAUseCase8_1(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_8_1)
+	innerValidateTest(t, *vti)
+}
+
+func TestValidateExampleVEX_CISAUseCase8_2(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_8_2)
 	innerValidateTest(t, *vti)
 }
 

@@ -1,0 +1,34 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "version": 1,
+  "metadata" : {
+    "timestamp" : "2022-03-03T00:00:00Z",
+    "component" : {
+      "name" : "ABC",
+      "version": "4.2",
+      "type" : "application",
+      "bom-ref" : "product-ABC"
+    }
+  },
+  "vulnerabilities": [
+    {
+      "id": "CVE-2021-44228",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2021-44228"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "code_not_present",
+        "response": ["will_not_fix"],
+        "detail": "This version of Product ABC is not affected by the vulnerability. Class with vulnerable code was removed before shipping."
+      },
+      "affects": [
+        {
+          "ref": "product-ABC"
+        }
+      ]
+    }
+  ]
+}
