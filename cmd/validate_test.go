@@ -528,6 +528,7 @@ func TestValidateWithCustomSchemaConfiguration(t *testing.T) {
 
 func TestValidateUsingStdin(t *testing.T) {
 
+	// TODO use Mock for stdin tests... after adopting CommonTestInfo struct
 	file, err := os.Open(TEST_CDX_1_4_MIN_REQUIRED) // For read access.
 	if err != nil {
 		log.Fatal(err)
