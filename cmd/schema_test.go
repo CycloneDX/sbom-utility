@@ -59,7 +59,7 @@ func innerTestSchemaList(t *testing.T, pTestInfo *CommonTestInfo) (outputBuffer 
 
 func TestSchemaListText(t *testing.T) {
 	ti := NewCommonTestInfo()
-	ti.ListFormat = FORMAT_TEXT
+	ti.OutputFormat = FORMAT_TEXT
 	ti.ResultExpectedLineCount = TI_DEFAULT_LINE_COUNT
 
 	// verify correct error is returned

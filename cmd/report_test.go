@@ -69,7 +69,7 @@ func innerRunReportResultTests(t *testing.T, testInfo *CommonTestInfo, outputBuf
 			err = getLogger().Errorf("output did not contain expected line count: %v/%v (expected/actual)", testInfo.ResultExpectedLineCount, outputLineCount)
 			t.Errorf("%s: format: `%s`, summary: `%v`, where clause: `%s`",
 				err.Error(),
-				testInfo.ListFormat,
+				testInfo.OutputFormat,
 				testInfo.ListSummary,
 				testInfo.WhereClause)
 			return
@@ -79,7 +79,7 @@ func innerRunReportResultTests(t *testing.T, testInfo *CommonTestInfo, outputBuf
 
 	// TEST: valid JSON if format JSON
 	// TODO: Allow caller to pass in CDX struct type to validate JSON array contains that type
-	if testInfo.ListFormat == FORMAT_JSON {
+	if testInfo.OutputFormat == FORMAT_JSON {
 		// Use Marshal to test for validity
 		if !utils.IsValidJsonRaw(outputBuffer.Bytes()) {
 			err = getLogger().Errorf("output did not contain valid format data; expected: `%s`", FORMAT_JSON)
@@ -91,11 +91,11 @@ func innerRunReportResultTests(t *testing.T, testInfo *CommonTestInfo, outputBuf
 	}
 
 	// TODO: add general validation for CSV and Markdown formats
-	if testInfo.ListFormat == FORMAT_CSV {
+	if testInfo.OutputFormat == FORMAT_CSV {
 		getLogger().Tracef("Testing format: %s", FORMAT_CSV)
 	}
 
-	if testInfo.ListFormat == FORMAT_MARKDOWN {
+	if testInfo.OutputFormat == FORMAT_MARKDOWN {
 		getLogger().Tracef("Testing format: %s", FORMAT_MARKDOWN)
 	}
 
