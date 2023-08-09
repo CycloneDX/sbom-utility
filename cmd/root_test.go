@@ -52,13 +52,14 @@ var TestLogQuiet = flag.Bool(FLAG_QUIET_MODE, false, "")
 
 type CommonTestInfo struct {
 	InputFile                         string
-	ListFormat                        string
+	OutputFormat                      string
 	ListSummary                       bool
 	WhereClause                       string
 	ResultExpectedError               error
 	ResultExpectedLineCount           int
 	ResultLineContainsValuesAtLineNum int
 	ResultLineContainsValues          []string
+	MockStdin                         bool
 }
 
 func NewCommonTestInfo() *CommonTestInfo {
@@ -70,7 +71,7 @@ func NewCommonTestInfoBasic(inputFile string, whereClause string, listFormat str
 	var ti = NewCommonTestInfo()
 	ti.InputFile = inputFile
 	ti.WhereClause = whereClause
-	ti.ListFormat = listFormat
+	ti.OutputFormat = listFormat
 	ti.ListSummary = listSummary
 	return ti
 }
@@ -87,13 +88,13 @@ const (
 // Stringer interface for ResourceTestInfo (just display subset of key values)
 func (ti *CommonTestInfo) String() string {
 	return fmt.Sprintf("InputFile: `%s`, Format: `%s`, WhereClause: `%s`, ListSummary: `%v`",
-		ti.InputFile, ti.ListFormat, ti.WhereClause, ti.ListSummary)
+		ti.InputFile, ti.OutputFormat, ti.WhereClause, ti.ListSummary)
 }
 
 func (ti *CommonTestInfo) Init(inputFile string, listFormat string, listSummary bool, whereClause string,
 	resultContainsValues []string, resultExpectedLineCount int, resultExpectedError error) *CommonTestInfo {
 	ti.InputFile = inputFile
-	ti.ListFormat = listFormat
+	ti.OutputFormat = listFormat
 	ti.ListSummary = listSummary
 	ti.WhereClause = whereClause
 	ti.ResultExpectedLineCount = resultExpectedLineCount

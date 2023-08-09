@@ -47,7 +47,8 @@ const (
 // -----------------------------------------------------------
 
 func TestValidateCdx13MinRequiredBasic(t *testing.T) {
-	innerValidateError(t, TEST_CDX_1_3_MIN_REQUIRED, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_3_MIN_REQUIRED)
+	innerValidateTest(t, *vti)
 }
 
 func TestValidateCdx14MinRequiredBasic(t *testing.T) {

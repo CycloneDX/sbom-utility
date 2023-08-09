@@ -19,6 +19,7 @@ package cmd
 
 // "github.com/iancoleman/orderedmap"
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -109,7 +110,7 @@ func validateCmdImpl(cmd *cobra.Command, args []string) error {
 	outputFilename := utils.GlobalFlags.PersistentFlags.OutputFile
 	outputFile, writer, err := createOutputFile(outputFilename)
 
-	// Note: all invalid SBOMs (that fail schema validation) MUST result in an InvalidSBOMError()
+	// Note: all invalid BOMs (that fail schema validation) MUST result in an InvalidSBOMError()
 	if err != nil {
 		// TODO: assure this gets normalized
 		getLogger().Error(err)
@@ -128,9 +129,9 @@ func validateCmdImpl(cmd *cobra.Command, args []string) error {
 	// invoke validate and consistently manage exit messages and codes
 	isValid, _, _, err := Validate(writer, utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.ValidateFlags)
 
-	// Note: all invalid SBOMs (that fail schema validation) MUST result in an InvalidSBOMError()
+	// Note: all invalid BOMs (that fail schema validation) MUST result in an InvalidSBOMError()
 	if err != nil {
-		if IsInvalidSBOMError(err) {
+		if IsInvalidBOMError(err) {
 			os.Exit(ERROR_VALIDATION)
 		}
 		os.Exit(ERROR_APPLICATION)
@@ -165,7 +166,7 @@ func validationError(document *schema.BOM, valid bool, err error) {
 			// Note: InvalidSBOMError type errors include schema errors which have already
 			// been added to the error type and will shown with the Error() interface
 			if valid {
-				_ = getLogger().Errorf("invalid state: error (%T) returned, but SBOM valid!", t)
+				_ = getLogger().Errorf("invalid state: error (%T) returned, but BOM valid!", t)
 			}
 			getLogger().Error(err)
 		default:
@@ -209,14 +210,29 @@ func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, va
 		return valid, document, schemaErrors, err
 	}
 
-	// Create a loader for the SBOM (JSON) document
-	inputFile := persistentFlags.InputFile
-	documentLoader := gojsonschema.NewReferenceLoader(PROTOCOL_PREFIX_FILE + inputFile)
-
-	schemaName := document.SchemaInfo.File
+	// Create a loader for the BOM (JSON) document
+	var documentLoader gojsonschema.JSONLoader
 	var schemaLoader gojsonschema.JSONLoader
 	var errRead error
-	var bSchema []byte
+	var bSchema, bDocument []byte
+
+	if bDocument = document.GetRawBytes(); len(bDocument) > 0 {
+		bufferTemp := new(bytes.Buffer)
+		// Strip off newlines which the json Decoder dislikes at EOF (as well as extra spaces, etc.)
+		if err := json.Compact(bufferTemp, bDocument); err != nil {
+			fmt.Println(err)
+		}
+		documentLoader = gojsonschema.NewBytesLoader(bufferTemp.Bytes())
+	} else {
+		inputFile := persistentFlags.InputFile
+		documentLoader = gojsonschema.NewReferenceLoader(PROTOCOL_PREFIX_FILE + inputFile)
+	}
+
+	if documentLoader == nil {
+		return INVALID, document, schemaErrors, fmt.Errorf("unable to load document: `%s`", document.GetFilename())
+	}
+
+	schemaName := document.SchemaInfo.File
 
 	// If caller "forced" a specific schema file (version), load it instead of
 	// any SchemaInfo found in config.json
@@ -232,7 +248,7 @@ func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, va
 		// Load the matching JSON schema (format, version and variant) from embedded resources
 		// i.e., using the matching schema found in config.json (as SchemaInfo)
 		getLogger().Infof("Loading schema `%s`...", document.SchemaInfo.File)
-		bSchema, errRead = resources.SBOMSchemaFiles.ReadFile(document.SchemaInfo.File)
+		bSchema, errRead = resources.BOMSchemaFiles.ReadFile(document.SchemaInfo.File)
 
 		if errRead != nil {
 			// we force result to INVALID as any errors from the library means
@@ -252,7 +268,7 @@ func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	// create a reusable schema object (TODO: validate multiple documents)
 	var errLoad error = nil
 	const RETRY int = 3
-	var jsonSbomSchema *gojsonschema.Schema
+	var jsonBOMSchema *gojsonschema.Schema
 
 	// we force result to INVALID as any errors from the library means
 	// we could NOT actually confirm the input documents validity
@@ -260,7 +276,7 @@ func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	// over http... then there is a chance of 503 errors (as the pkg. loads
 	// externally referenced schemas over network)... attempt fixed retry...
 	for i := 0; i < RETRY; i++ {
-		jsonSbomSchema, errLoad = gojsonschema.NewSchema(schemaLoader)
+		jsonBOMSchema, errLoad = gojsonschema.NewSchema(schemaLoader)
 
 		if errLoad == nil {
 			break
@@ -275,12 +291,12 @@ func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	getLogger().Infof("Schema `%s` loaded.", schemaName)
 
 	// Validate against the schema and save result determination
-	getLogger().Infof("Validating `%s`...", document.GetFilename())
-	result, errValidate := jsonSbomSchema.Validate(documentLoader)
+	getLogger().Infof("Validating `%s`...", document.GetFilenameInterpolated())
+	result, errValidate := jsonBOMSchema.Validate(documentLoader)
 
-	// ALWAYS set the valid return parameter
-	getLogger().Infof("SBOM valid against JSON schema: `%t`", result.Valid())
+	// ALWAYS set the valid return parameter and provide user an informative message
 	valid = result.Valid()
+	getLogger().Infof("BOM valid against JSON schema: `%t`", valid)
 
 	// Catch general errors from the validation package/library itself and display them
 	if errValidate != nil {
@@ -332,8 +348,8 @@ func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, va
 
 func validateCustom(document *schema.BOM) (valid bool, err error) {
 
-	// If the validated SBOM is of a known format, we can unmarshal it into
-	// more convenient typed structure for simplified custom validation
+	// If the validated BOM is of a known format, we can unmarshal it into
+	// more convenient typed structures for simplified custom validation
 	if document.FormatInfo.IsCycloneDx() {
 		document.CdxBom, err = schema.UnMarshalDocument(document.GetJSONMap())
 		if err != nil {
@@ -346,8 +362,8 @@ func validateCustom(document *schema.BOM) (valid bool, err error) {
 	// and later supported by a SPDXDocument type.
 	err = validateCustomCDXDocument(document)
 	if err != nil {
-		// Wrap any specific validation error in a single invalid SBOM error
-		if !IsInvalidSBOMError(err) {
+		// Wrap any specific validation error in a single invalid BOM error
+		if !IsInvalidBOMError(err) {
 			err = NewInvalidSBOMError(
 				document,
 				err.Error(),

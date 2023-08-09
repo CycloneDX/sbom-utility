@@ -70,21 +70,3 @@ func FindVerifyConfigFileAbsPath(logger *log.MiniLogger, filename string) (absFi
 	logger.Tracef("returning config absolute filename: `%s`", absFilename)
 	return
 }
-
-// func GetContext(skip int) string {
-// 	var sb strings.Builder
-
-// 	pc, file, _, ok := runtime.Caller(skip)
-
-// 	if !ok {
-// 		return "[ERROR] unable to retrieve runtime information"
-// 	}
-
-// 	sb.WriteString(fmt.Sprintf("pc: '%v'\n", pc))
-// 	sb.WriteString(fmt.Sprintf("file: '%v'\n", file))
-
-// 	wd, _ := os.Getwd()
-// 	sb.WriteString(fmt.Sprintf("wd: '%v'\n", wd))
-
-// 	return sb.String()
-// }

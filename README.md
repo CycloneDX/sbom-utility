@@ -78,7 +78,7 @@ The archive will contain the following files:
 - `license.json` *(optional)* - copy of the default license policy configuration file for optional customization (to be passed on the command line)
 - `custom.json` *(experimental)* - custom validation configuration file
 - `LICENSE` - the software license for the utility (i.e. Apache 2)
-- `sbom-utility-<version>.sbom.json` - the Software Bill-of-Materials for the utility
+- `sbom-utility-<version>.sbom.json` - a simple Software Bill-of-Materials (SBOM) for the utility
 
 ---
 
@@ -212,6 +212,28 @@ SPDX v2.3                     SPDX       SPDX-2.3  (latest)     schema/spdx/2.3/
 SPDX v2.2.2                   SPDX       SPDX-2.2  (latest)     schema/spdx/2.2.2/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.2/schemas/spdx-schema.json
 SPDX v2.2.1                   SPDX       SPDX-2.2  2.2.1        schema/spdx/2.2.1/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json
 ```
+
+#### Input flag
+
+All `list` subcommands and the `validate` command support the `--input-file <filename>` flag (or its short-form `-i <filename>`) to declare file contents (i.e., BOM data) the commands will read and operate on.
+
+#### Standard input (stdin)
+
+All commands that support the input flag can also accept data from standard input or `stdin` by using the `-` (dash) character as the value instead of a filename.
+
+##### Example of stdin using pipe
+
+```bash
+ cat examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json | ./sbom-utility resource list -i -
+```
+
+##### Example of stdin using redirect
+
+
+```bash
+./sbom-utility validate -i - <  examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json
+```
+
 
 #### Output flag
 

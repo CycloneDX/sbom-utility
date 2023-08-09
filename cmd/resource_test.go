@@ -22,6 +22,8 @@ import (
 	"bytes"
 	"fmt"
 	"io/fs"
+	"log"
+	"os"
 	"testing"
 
 	"github.com/CycloneDX/sbom-utility/schema"
@@ -45,13 +47,13 @@ func (ti *ResourceTestInfo) String() string {
 	return fmt.Sprintf("%s, %s", pParent.String(), ti.ResourceType)
 }
 
-func NewResourceTestInfo(inputFile string, listFormat string, listSummary bool, whereClause string,
+func NewResourceTestInfo(inputFile string, outputFormat string, listSummary bool, whereClause string,
 	resultContainsValues []string, resultExpectedLineCount int, resultExpectedError error, resourceType string) *ResourceTestInfo {
 
 	var ti = new(ResourceTestInfo)
 	var pCommon = &ti.CommonTestInfo
 	// initialize common fields
-	pCommon.Init(inputFile, listFormat, listSummary, whereClause,
+	pCommon.Init(inputFile, outputFormat, listSummary, whereClause,
 		resultContainsValues, resultExpectedLineCount, resultExpectedError)
 	// Initialize resource-unique fields
 	ti.ResourceType = resourceType
@@ -74,7 +76,7 @@ func innerBufferedTestResourceList(t *testing.T, testInfo *ResourceTestInfo, whe
 	// ensure all data is written to buffer before further validation
 	defer outputWriter.Flush()
 
-	err = ListResources(outputWriter, testInfo.ListFormat, testInfo.ResourceType, whereFilters)
+	err = ListResources(outputWriter, testInfo.OutputFormat, testInfo.ResourceType, whereFilters)
 	return
 }
 
@@ -89,6 +91,21 @@ func innerTestResourceList(t *testing.T, testInfo *ResourceTestInfo) (outputBuff
 
 	// The command looks for the input filename in global flags struct
 	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile
+
+	// Mock stdin if requested
+	if testInfo.MockStdin == true {
+		utils.GlobalFlags.PersistentFlags.InputFile = INPUT_TYPE_STDIN
+		file, err := os.Open(testInfo.InputFile) // For read access.
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// convert byte slice to io.Reader
+		savedStdIn := os.Stdin
+		// !!!Important restore stdin
+		defer func() { os.Stdin = savedStdIn }()
+		os.Stdin = file
+	}
 
 	// invoke resource list command with a byte buffer
 	outputBuffer, err = innerBufferedTestResourceList(t, testInfo, whereFilters)
@@ -291,5 +308,19 @@ func TestResourceListTextCdx13WhereClauseAndResultsNone(t *testing.T) {
 
 	// THere are no services that meet the where filter criteria
 	// check for warning message in output
+	innerTestResourceList(t, rti)
+}
+
+func TestResourceListUsingStdin(t *testing.T) {
+
+	rti := NewResourceTestInfoBasic(
+		TEST_RESOURCE_LIST_CDX_1_3,
+		FORMAT_TEXT,
+		nil, // no error
+		RESOURCE_TYPE_DEFAULT,
+	)
+
+	rti.MockStdin = true
+
 	innerTestResourceList(t, rti)
 }

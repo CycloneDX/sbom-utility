@@ -36,29 +36,29 @@ func LoadInputBOMFileAndDetectSchema() (document *schema.BOM, err error) {
 		return nil, fmt.Errorf("invalid input file (-%s): `%s` ", FLAG_FILENAME_INPUT_SHORT, inputFile)
 	}
 
-	// Construct an Sbom object around the input file
-	document = schema.NewSbom(inputFile)
+	// Construct a BOM document object around the input file
+	document = schema.NewBOM(inputFile)
 
-	// Load the raw, candidate SBOM (file) as JSON data
-	getLogger().Infof("Attempting to load and unmarshal file `%s`...", inputFile)
-	err = document.UnmarshalSBOMAsJsonMap() // i.e., utils.Flags.InputFile
+	// Load the raw, candidate BOM (file) as JSON data
+	getLogger().Infof("Attempting to load and unmarshal data from: `%s`...", document.GetFilenameInterpolated())
+	err = document.UnmarshalBOMAsJSONMap() // i.e., utils.Flags.InputFile
 	if err != nil {
 		return
 	}
-	getLogger().Infof("Successfully unmarshalled data from: `%s`", inputFile)
+	getLogger().Infof("Successfully unmarshalled data from: `%s`", document.GetFilenameInterpolated())
 
-	// Search the document keys/values for known SBOM formats and schema in the config. file
-	getLogger().Infof("Determining file's SBOM format and version...")
+	// Search the document keys/values for known BOM formats and schema in the config. file
+	getLogger().Infof("Determining file's BOM format and version...")
 	err = SupportedFormatConfig.FindFormatAndSchema(document)
 	if err != nil {
 		return
 	}
 
 	// Display detected format, version with (optional) schema variant (i.e., if requested on command line)
-	getLogger().Infof("Determined SBOM format, version (variant): `%s`, `%s` %s",
+	getLogger().Infof("Determined BOM format, version (variant): `%s`, `%s` %s",
 		document.FormatInfo.CanonicalName,
 		document.SchemaInfo.Version,
 		schema.FormatSchemaVariant(document.SchemaInfo.Variant))
-	getLogger().Infof("Matching SBOM schema (for validation): %s", document.SchemaInfo.File)
+	getLogger().Infof("Matching BOM schema (for validation): %s", document.SchemaInfo.File)
 	return
 }
