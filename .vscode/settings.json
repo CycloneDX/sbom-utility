@@ -89,6 +89,7 @@
             "POSIX",
             "prettyjson",
             "PROPKEY",
+            "protonmail",
             "repackager",
             "SAAS",
             "SAASBOM",
@@ -117,6 +118,7 @@
             "usecases",
             "VULN",
             "Warningf",
+            "webclient",
             "Xdebug",
             "Zope"
       ],

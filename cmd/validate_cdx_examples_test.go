@@ -35,6 +35,7 @@ const (
 	TEST_CDX_1_4_EXAMPLE_SBOM_LARAVEL_V7_12_0        = "examples/cyclonedx/SBOM/laravel-7.12.0/bom.1.4.json"
 	TEST_CDX_1_2_EXAMPLE_SBOM_PROTON_BRIDGE_V1_6_3   = "examples/cyclonedx/SBOM/proton-bridge/proton-bridge-v1.6.3.bom.json"
 	TEST_CDX_1_2_EXAMPLE_SBOM_PROTON_BRIDGE_V1_8_0   = "examples/cyclonedx/SBOM/proton-bridge/proton-bridge-v1.8.0.bom.json"
+	TEST_CDX_1_2_EXAMPLE_SBOM_PROTON_MAIL_WEB_CLIENT = "examples/cyclonedx/SBOM/protonmail-webclient-v4-0912dff/bom.json"
 	TEST_CDX_1_4_EXAMPLE_SAASBOM_APIGW_MS_DATASTORES = "examples/cyclonedx/SaaSBOM/apigateway-microservices-datastores/bom.json"
 	TEST_CDX_1_4_EXAMPLE_HBOM_PCI_SATA_ADAPTER_BOARD = "examples/cyclonedx/HBOM/PCIe-SATA-adapter-board/bom.json"
 	TEST_CDX_1_4_EXAMPLE_SBOM_KEYCLOAK_DECOUPLED     = "examples/cyclonedx/OBOM/Example-1-Decoupled/bom.json"
@@ -79,6 +80,11 @@ func TestValidateExampleSaaSBOMCdx12ProtonBridgeV163(t *testing.T) {
 
 func TestValidateExampleSaaSBOMCdx12ProtonBridgeV180(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_2_EXAMPLE_SBOM_PROTON_BRIDGE_V1_8_0)
+	innerValidateTest(t, *vti)
+}
+
+func TestValidateExampleSaaSBOMCdx12ProtonMailWebClient(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_2_EXAMPLE_SBOM_PROTON_MAIL_WEB_CLIENT)
 	innerValidateTest(t, *vti)
 }
 
