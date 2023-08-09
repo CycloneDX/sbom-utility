@@ -52,23 +52,28 @@ func TestValidateCdx13MinRequiredBasic(t *testing.T) {
 }
 
 func TestValidateCdx14MinRequiredBasic(t *testing.T) {
-	innerValidateError(t, TEST_CDX_1_4_MIN_REQUIRED, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_MIN_REQUIRED)
+	innerValidateTest(t, *vti)
 }
 
 func TestValidateCdx15MinRequiredBasic(t *testing.T) {
-	innerValidateError(t, TEST_CDX_1_5_MIN_REQUIRED, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_5_MIN_REQUIRED)
+	innerValidateTest(t, *vti)
 }
 
 func TestValidateCdx13Mature(t *testing.T) {
-	innerValidateError(t, TEST_CDX_1_3_MATURITY_EXAMPLE_1_BASE, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_3_MATURITY_EXAMPLE_1_BASE)
+	innerValidateTest(t, *vti)
 }
 
 func TestValidateCdx14MMature(t *testing.T) {
-	innerValidateError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	innerValidateTest(t, *vti)
 }
 
 func TestValidateCdx15Mature(t *testing.T) {
-	innerValidateError(t, TEST_CDX_1_5_MATURITY_EXAMPLE_1_BASE, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_5_MATURITY_EXAMPLE_1_BASE)
+	innerValidateTest(t, *vti)
 }
 
 // -----------------------------------------------------------

@@ -21,24 +21,78 @@ import (
 	"testing"
 )
 
+// -----------------------------------------------------
+// CycloneDX - Examples
+// -----------------------------------------------------
+// Note: these following examples are published by the CDX community here:
+// https://github.com/CycloneDX/bom-examples
 const (
-	// -----------------------------------------------------
-	// CycloneDX - Examples
-	// -----------------------------------------------------
-	// Note: these following examples are published by the CDX community here:
-	// https://github.com/CycloneDX/bom-examples
-	TEST_CDX_1_2_EXAMPLE_BOM_NPM_JUICE_SHOP          = "examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json"
-	TEST_CDX_1_3_EXAMPLE_BOM_LARAVEL                 = "examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json"
+	TEST_CDX_1_2_EXAMPLE_SBOM_CERN_LHC_VDM_EDITOR    = "examples/cyclonedx/SBOM/cern-lhc-vdm-editor-e564943/bom.json"
+	TEST_CDX_1_2_EXAMPLE_SBOM_DROP_WIZARD            = "examples/cyclonedx/SBOM/dropwizard-1.3.15/bom.json"
+	TEST_CDX_1_2_EXAMPLE_SBOM_NPM_JUICE_SHOP         = "examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json"
+	TEST_CDX_1_3_EXAMPLE_SBOM_LARAVEL                = "examples/cyclonedx/SBOM/laravel-7.12.0/bom.1.3.json"
 	TEST_CDX_1_4_EXAMPLE_SAASBOM_APIGW_MS_DATASTORES = "examples/cyclonedx/SaaSBOM/apigateway-microservices-datastores/bom.json"
+	TEST_CDX_1_4_EXAMPLE_HBOM_PCI_SATA_ADAPTER_BOARD = "examples/cyclonedx/HBOM/PCIe-SATA-adapter-board/bom.json"
+	TEST_CDX_1_4_EXAMPLE_SBOM_KEYCLOAK_DECOUPLED     = "examples/cyclonedx/OBOM/Example-1-Decoupled/bom.json"
+	TEST_CDX_1_4_EXAMPLE_OBOM_KEYCLOAK_DECOUPLED     = "examples/cyclonedx/OBOM/Example-1-Decoupled/obom.json"
+	TEST_CDX_1_4_EXAMPLE_OBOM_KEYCLOAK_STANDALONE    = "examples/cyclonedx/OBOM/Example-1-Standalone/bom.json"
+)
 
-	// -----------------------------------------------------
-	// CycloneDX - Use cases
-	// -----------------------------------------------------
-	// Note: all current CDX use cases currently reference v1.4 schema
-	// Note: the following use cases are published by the CDX community here:
-	// https://cyclonedx.org/use-cases/
-	// These source for these use cases are found here:
-	// https://github.com/CycloneDX/cyclonedx.org/tree/master/theme/_includes/examples
+// CycloneDX - Examples
+func TestValidateExampleSBOMCdx12CERN_LHC_VDMEditor(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_2_EXAMPLE_SBOM_CERN_LHC_VDM_EDITOR)
+	innerValidateTest(t, *vti)
+}
+
+func TestValidateExampleSBOMCdx12Dropwizard(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_2_EXAMPLE_SBOM_DROP_WIZARD)
+	innerValidateTest(t, *vti)
+}
+func TestValidateExampleSBOMCdx12NpmJuiceShop(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_2_EXAMPLE_SBOM_NPM_JUICE_SHOP)
+	innerValidateTest(t, *vti)
+}
+
+func TestValidateExampleSBOMCdx13Laravel(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_3_EXAMPLE_SBOM_LARAVEL)
+	innerValidateTest(t, *vti)
+}
+
+func TestValidateExampleSaaSBOMCdx14ApiGatewayDatastores(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_SAASBOM_APIGW_MS_DATASTORES)
+	innerValidateTest(t, *vti)
+}
+
+func TestValidateExampleHBOMCdx14ApiGatewayDatastores(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_HBOM_PCI_SATA_ADAPTER_BOARD)
+	innerValidateTest(t, *vti)
+}
+
+func TestValidateExampleOBOMCdx14KeycloakDecoupled(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_SBOM_KEYCLOAK_DECOUPLED)
+	innerValidateTest(t, *vti)
+
+	vti.InputFile = TEST_CDX_1_4_EXAMPLE_OBOM_KEYCLOAK_DECOUPLED
+	innerValidateTest(t, *vti)
+}
+
+func TestValidateExampleOBOMCdx14KeycloakStandalone(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_OBOM_KEYCLOAK_STANDALONE)
+	innerValidateTest(t, *vti)
+
+	vti.InputFile = TEST_CDX_1_4_EXAMPLE_OBOM_KEYCLOAK_DECOUPLED
+	innerValidateTest(t, *vti)
+}
+
+// -----------------------------------------------------
+// CycloneDX - Use cases
+// -----------------------------------------------------
+// Note: all current CDX use cases currently reference v1.4 schema
+// Note: the following use cases are published by the CDX community here:
+// https://cyclonedx.org/use-cases/
+// These source for these use cases are found here:
+// https://github.com/CycloneDX/cyclonedx.org/tree/master/theme/_includes/examples
+const (
 	TEST_EXAMPLE_CDX_1_4_USE_CASE_ASSEMBLY                 = "examples/cyclonedx/usecases/cdx-use-case-assembly.json"
 	TEST_EXAMPLE_CDX_1_4_USE_CASE_AUTHENTICITY_JSF         = "examples/cyclonedx/usecases/cdx-use-case-authenticity-jsf.json"
 	TEST_EXAMPLE_CDX_1_4_USE_CASE_COMP_KNOWN_VULN          = "examples/cyclonedx/usecases/cdx-use-case-component-known-vulnerabilities.json"
@@ -57,92 +111,94 @@ const (
 	TEST_EXAMPLE_CDX_1_4_USE_CASE_SVC_DEFN                 = "examples/cyclonedx/usecases/cdx-use-case-service-defn.json"
 	TEST_EXAMPLE_CDX_1_4_USE_CASE_VULN_EXPLOITATION        = "examples/cyclonedx/usecases/cdx-use-case-vulnerability-exploitability.json"
 	TEST_EXAMPLE_CDX_1_4_USE_CASE_VULN_REMEDIATION         = "examples/cyclonedx/usecases/cdx-use-case-vulnerability-remediation.json"
-
-	// TODO - turn these into tool independent test files
-	//TEST_CRA_ALPINE            = "test/cyclonedx/samples/cra/fvt/data/alpine"
 )
 
 func TestValidateExampleCdx14UseCaseAssembly(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_ASSEMBLY, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_ASSEMBLY)
+	innerValidateTest(t, *vti)
 }
 
 func TestValidateExampleCdx14UseCaseAuthenticityJsf(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_AUTHENTICITY_JSF, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_AUTHENTICITY_JSF)
+	innerValidateTest(t, *vti)
 }
 
 func TestValidateExampleCdx14UseCaseComponentKnownVulnerabilities(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_COMP_KNOWN_VULN, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_COMP_KNOWN_VULN)
+	innerValidateTest(t, *vti)
 }
 
 func TestValidateExampleCdx14UseCaseCompositionAndCompleteness(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_COMPOSITION_COMPLETENESS, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_COMPOSITION_COMPLETENESS)
+	innerValidateTest(t, *vti)
 }
 
 func TestValidateExampleCdx14UseCaseDependencyGraph(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_DEP_GRAPH, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_DEP_GRAPH)
+	innerValidateTest(t, *vti)
 }
 
 func TestValidateExampleCdx14UseCaseExternalReferences(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_EXT_REFS, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_EXT_REFS)
+	innerValidateTest(t, *vti)
 }
 
 func TestValidateExampleCdx14UseCaseIntegrityVerification(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_INTEGRITY_VERIFICATION, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_INTEGRITY_VERIFICATION)
+	innerValidateTest(t, *vti)
 }
 
 func TestValidateExampleCdx14UseCaseInventory(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_INVENTORY, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_INVENTORY)
+	innerValidateTest(t, *vti)
 }
 
 func TestValidateExampleCdx14UseCaseLicenseCompliance(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_LICENSE_COMPLIANCE, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_LICENSE_COMPLIANCE)
+	innerValidateTest(t, *vti)
 }
 
 func TestValidateExampleCdx14UseCaseOpenChainConformance(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_OPENCHAIN_CONFORMANCE, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_OPENCHAIN_CONFORMANCE)
+	innerValidateTest(t, *vti)
 }
 
 func TestValidateExampleCdx14UseCasePackageEvaluation(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_PKG_EVALUATION, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_PKG_EVALUATION)
+	innerValidateTest(t, *vti)
 }
 
 func TestValidateExampleCdx14UseCasePackagingDistribution(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_PKG_DIST, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_PKG_DIST)
+	innerValidateTest(t, *vti)
 }
 
 func TestValidateExampleCdx14UseCasePedigree(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_PEDIGREE, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_PEDIGREE)
+	innerValidateTest(t, *vti)
 }
 
 func TestValidateExampleCdx14UseCaseProvenance(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_PROVENANCE, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_PROVENANCE)
+	innerValidateTest(t, *vti)
 }
 
 func TestValidateExampleCdx14UseCaseSecurityAdvisories(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_SEC_ADVISORIES, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_SEC_ADVISORIES)
+	innerValidateTest(t, *vti)
 }
 
 func TestValidateExampleCdx14UseCaseServiceDefinition(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_SVC_DEFN, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_SVC_DEFN)
+	innerValidateTest(t, *vti)
 }
 
 func TestValidateExampleCdx14UseCaseVulnerabilityExploitation(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_VULN_EXPLOITATION, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_VULN_EXPLOITATION)
+	innerValidateTest(t, *vti)
 }
 
 func TestValidateExampleCdx14UseCaseVulnerabilityRemediation(t *testing.T) {
-	innerValidateError(t, TEST_EXAMPLE_CDX_1_4_USE_CASE_VULN_REMEDIATION, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
-}
-
-// CycloneDX - Examples
-func TestValidateExampleBomCdx12NpmJuiceShop(t *testing.T) {
-	innerValidateError(t, TEST_CDX_1_2_EXAMPLE_BOM_NPM_JUICE_SHOP, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
-}
-
-func TestValidateExampleBomCdx13Laravel(t *testing.T) {
-	innerValidateError(t, TEST_CDX_1_3_EXAMPLE_BOM_LARAVEL, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
-}
-
-func TestValidateExampleSaaSBomCdx14ApiGatewayDatastores(t *testing.T) {
-	innerValidateError(t, TEST_CDX_1_4_EXAMPLE_SAASBOM_APIGW_MS_DATASTORES, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_VULN_REMEDIATION)
+	innerValidateTest(t, *vti)
 }

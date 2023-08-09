@@ -41,7 +41,8 @@ const (
 // TODO: Need an SPDX 2.2.1 variant
 // TODO: Need an SPDX 2.2 "custom" variant
 func TestValidateSpdx22MinRequiredBasic(t *testing.T) {
-	innerValidateError(t, TEST_SPDX_2_2_MIN_REQUIRED, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_SPDX_2_2_MIN_REQUIRED)
+	innerValidateTest(t, *vti)
 }
 
 // -----------------------------------------------------------
