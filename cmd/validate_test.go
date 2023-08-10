@@ -79,7 +79,7 @@ func NewValidateTestInfoBasic(inputFile string, outputFormat string, expectedErr
 	return ti
 }
 
-func NewValidateTestInfoSchema(inputFile string, outputFormat string, schemaVariant string, expectedError error) *ValidateTestInfo {
+func NewValidateTestInfo(inputFile string, outputFormat string, schemaVariant string, expectedError error) *ValidateTestInfo {
 	var ti = new(ValidateTestInfo)
 	var pCommon = &ti.CommonTestInfo
 	pCommon.InputFile = inputFile
