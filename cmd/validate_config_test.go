@@ -38,6 +38,11 @@ const (
 	TEST_SPDX_SPDX_VERSION_MISSING = "test/config/test-spdx-spdx-version-missing.json"
 )
 
+// Test values
+const (
+	TEST_INVALID_VARIANT_FOO = "foo"
+)
+
 func TestValidateConfigInvalidFormatKey(t *testing.T) {
 	vti := NewValidateTestInfoBasic(TEST_INVALID_FORMAT_KEY_FOO, FORMAT_TEXT, &schema.UnsupportedFormatError{})
 	innerValidateTest(t, *vti)
@@ -49,7 +54,7 @@ func TestValidateConfigInvalidVersion(t *testing.T) {
 }
 
 func TestValidateConfigInvalidVariant(t *testing.T) {
-	vti := NewValidateTestInfo(TEST_CDX_1_4_MIN_REQUIRED, FORMAT_TEXT, "foo", &schema.UnsupportedSchemaError{})
+	vti := NewValidateTestInfo(TEST_CDX_1_4_MIN_REQUIRED, FORMAT_TEXT, TEST_INVALID_VARIANT_FOO, &schema.UnsupportedSchemaError{})
 	innerValidateTest(t, *vti)
 }
 

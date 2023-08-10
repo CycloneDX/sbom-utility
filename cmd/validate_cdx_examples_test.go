@@ -66,61 +66,61 @@ const (
 )
 
 // CycloneDX - Examples
-func TestValidateExampleSBOMCdx12CERN_LHC_VDMEditor(t *testing.T) {
+func TestValidateCdx12ExampleSBOMCernLhcVdmEditor(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_2_EXAMPLE_SBOM_CERN_LHC_VDM_EDITOR)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleSBOMCdx12Dropwizard(t *testing.T) {
+func TestValidateCdx12ExampleSBOMDropwizard(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_2_EXAMPLE_SBOM_DROP_WIZARD_V1_3_15)
 	innerValidateTest(t, *vti)
 }
-func TestValidateExampleSBOMCdx12NpmJuiceShop(t *testing.T) {
+func TestValidateCdx12ExampleSBOMNpmJuiceShop(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_2_EXAMPLE_SBOM_NPM_JUICE_SHOP_V11_1_2)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleSBOMCdx12Keycloak(t *testing.T) {
+func TestValidateCdx12ExampleSBOMKeycloak(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_2_EXAMPLE_SBOM_KEYCLOAK_V10_0_2)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleSBOMCdx13Laravel(t *testing.T) {
+func TestValidateCdx13ExampleSBOMLaravel(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_3_EXAMPLE_SBOM_LARAVEL_V7_12_0)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleSBOMCdx14Laravel(t *testing.T) {
+func TestValidateCdx14ExampleSBOMLaravel(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_SBOM_LARAVEL_V7_12_0)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleSaaSBOMCdx12ProtonBridgeV163(t *testing.T) {
+func TestValidateCdx12ExampleSaaSBOMProtonBridgeV163(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_2_EXAMPLE_SBOM_PROTON_BRIDGE_V1_6_3)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleSaaSBOMCdx12ProtonBridgeV180(t *testing.T) {
+func TestValidateCdx12ExampleSaaSBOMProtonBridgeV180(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_2_EXAMPLE_SBOM_PROTON_BRIDGE_V1_8_0)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleSaaSBOMCdx12ProtonMailWebClient(t *testing.T) {
+func TestValidateCdx12ExampleSaaSBOMProtonMailWebClient(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_2_EXAMPLE_SBOM_PROTON_MAIL_WEB_CLIENT)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleSaaSBOMCdx14ApiGatewayDatastores(t *testing.T) {
+func TestValidateCdx14ExampleSaaSBOMApiGatewayDatastores(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_SAASBOM_APIGW_MS_DATASTORES)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleHBOMCdx14ApiGatewayDatastores(t *testing.T) {
+func TestValidateCdx14ExampleHBOMApiGatewayDatastores(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_HBOM_PCI_SATA_ADAPTER_BOARD)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleOBOMCdx14KeycloakDecoupled(t *testing.T) {
+func TestValidateCdx14ExampleOBOMKeycloakDecoupled(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_SBOM_KEYCLOAK_DECOUPLED)
 	innerValidateTest(t, *vti)
 
@@ -128,7 +128,7 @@ func TestValidateExampleOBOMCdx14KeycloakDecoupled(t *testing.T) {
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleOBOMCdx14KeycloakStandalone(t *testing.T) {
+func TestValidateCdx14ExampleOBOMKeycloakStandalone(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_OBOM_KEYCLOAK_STANDALONE)
 	innerValidateTest(t, *vti)
 
@@ -137,86 +137,86 @@ func TestValidateExampleOBOMCdx14KeycloakStandalone(t *testing.T) {
 }
 
 // VEX
-func TestValidateExampleVEXExampleAppBOM(t *testing.T) {
+func TestValidateCdxExampleVEXExampleAppBOM(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_EXAMPLE_APP_BOM)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleVEXExampleAppVEX(t *testing.T) {
+func TestValidateCdxExampleVEXExampleAppVEX(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_EXAMPLE_APP_VEX)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleVEX_CISAUseCase1Affected(t *testing.T) {
+func TestValidateCdxExampleVEX_CISAUseCase1Affected(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_1_AFFECTED)
 	innerValidateTest(t, *vti)
 }
-func TestValidateExampleVEX_CISAUseCase1Fixed(t *testing.T) {
+func TestValidateCdxExampleVEX_CISAUseCase1Fixed(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_1_FIXED)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleVEX_CISAUseCase1NotAffected(t *testing.T) {
+func TestValidateCdxExampleVEX_CISAUseCase1NotAffected(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_1_NOT_AFFECTED)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleVEX_CISAUseCase1UnderInvestigation(t *testing.T) {
+func TestValidateCdxExampleVEX_CISAUseCase1UnderInvestigation(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_1_UNDER_INVESTIGATION)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleVEX_CISAUseCase2(t *testing.T) {
+func TestValidateCdxExampleVEX_CISAUseCase2(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_2)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleVEX_CISAUseCase3(t *testing.T) {
+func TestValidateCdxExampleVEX_CISAUseCase3(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_3)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleVEX_CISAUseCase4(t *testing.T) {
+func TestValidateCdxExampleVEX_CISAUseCase4(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_4)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleVEX_CISAUseCase5(t *testing.T) {
+func TestValidateCdxExampleVEX_CISAUseCase5(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_5)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleVEX_CISAUseCase6(t *testing.T) {
+func TestValidateCdxExampleVEX_CISAUseCase6(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_6)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleVEX_CISAUseCase7(t *testing.T) {
+func TestValidateCdxExampleVEX_CISAUseCase7(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_7)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleVEX_CISAUseCase7_1(t *testing.T) {
+func TestValidateCdxExampleVEX_CISAUseCase7_1(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_7_1)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleVEX_CISAUseCase7_2(t *testing.T) {
+func TestValidateCdxExampleVEX_CISAUseCase7_2(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_7_2)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleVEX_CISAUseCase8(t *testing.T) {
+func TestValidateCdxExampleVEX_CISAUseCase8(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_8)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleVEX_CISAUseCase8_1(t *testing.T) {
+func TestValidateCdxExampleVEX_CISAUseCase8_1(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_8_1)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleVEX_CISAUseCase8_2(t *testing.T) {
+func TestValidateCdxExampleVEX_CISAUseCase8_2(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_EXAMPLE_VEX_CISA_USE_CASE_8_2)
 	innerValidateTest(t, *vti)
 }
@@ -250,92 +250,92 @@ const (
 	TEST_EXAMPLE_CDX_1_4_USE_CASE_VULN_REMEDIATION         = "examples/cyclonedx/usecases/cdx-use-case-vulnerability-remediation.json"
 )
 
-func TestValidateExampleCdx14UseCaseAssembly(t *testing.T) {
+func TestValidateCdxExampleCdx14UseCaseAssembly(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_ASSEMBLY)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleCdx14UseCaseAuthenticityJsf(t *testing.T) {
+func TestValidateCdxExampleCdx14UseCaseAuthenticityJsf(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_AUTHENTICITY_JSF)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleCdx14UseCaseComponentKnownVulnerabilities(t *testing.T) {
+func TestValidateCdxExampleCdx14UseCaseComponentKnownVulnerabilities(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_COMP_KNOWN_VULN)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleCdx14UseCaseCompositionAndCompleteness(t *testing.T) {
+func TestValidateCdxExampleCdx14UseCaseCompositionAndCompleteness(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_COMPOSITION_COMPLETENESS)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleCdx14UseCaseDependencyGraph(t *testing.T) {
+func TestValidateCdxExampleCdx14UseCaseDependencyGraph(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_DEP_GRAPH)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleCdx14UseCaseExternalReferences(t *testing.T) {
+func TestValidateCdxExampleCdx14UseCaseExternalReferences(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_EXT_REFS)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleCdx14UseCaseIntegrityVerification(t *testing.T) {
+func TestValidateCdxExampleCdx14UseCaseIntegrityVerification(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_INTEGRITY_VERIFICATION)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleCdx14UseCaseInventory(t *testing.T) {
+func TestValidateCdxExampleCdx14UseCaseInventory(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_INVENTORY)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleCdx14UseCaseLicenseCompliance(t *testing.T) {
+func TestValidateCdxExampleCdx14UseCaseLicenseCompliance(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_LICENSE_COMPLIANCE)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleCdx14UseCaseOpenChainConformance(t *testing.T) {
+func TestValidateCdxExampleCdx14UseCaseOpenChainConformance(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_OPENCHAIN_CONFORMANCE)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleCdx14UseCasePackageEvaluation(t *testing.T) {
+func TestValidateCdxExampleCdx14UseCasePackageEvaluation(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_PKG_EVALUATION)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleCdx14UseCasePackagingDistribution(t *testing.T) {
+func TestValidateCdxExampleCdx14UseCasePackagingDistribution(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_PKG_DIST)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleCdx14UseCasePedigree(t *testing.T) {
+func TestValidateCdxExampleCdx14UseCasePedigree(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_PEDIGREE)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleCdx14UseCaseProvenance(t *testing.T) {
+func TestValidateCdxExampleCdx14UseCaseProvenance(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_PROVENANCE)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleCdx14UseCaseSecurityAdvisories(t *testing.T) {
+func TestValidateCdxExampleCdx14UseCaseSecurityAdvisories(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_SEC_ADVISORIES)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleCdx14UseCaseServiceDefinition(t *testing.T) {
+func TestValidateCdxExampleCdx14UseCaseServiceDefinition(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_SVC_DEFN)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleCdx14UseCaseVulnerabilityExploitation(t *testing.T) {
+func TestValidateCdxExampleCdx14UseCaseVulnerabilityExploitation(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_VULN_EXPLOITATION)
 	innerValidateTest(t, *vti)
 }
 
-func TestValidateExampleCdx14UseCaseVulnerabilityRemediation(t *testing.T) {
+func TestValidateCdxExampleCdx14UseCaseVulnerabilityRemediation(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_EXAMPLE_CDX_1_4_USE_CASE_VULN_REMEDIATION)
 	innerValidateTest(t, *vti)
 }
