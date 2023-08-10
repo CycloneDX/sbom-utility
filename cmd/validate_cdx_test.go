@@ -48,32 +48,32 @@ const (
 
 func TestValidateCdx13MinRequiredBasic(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_3_MIN_REQUIRED)
-	innerValidateTest(t, *vti)
+	innerTestValidate(t, *vti)
 }
 
 func TestValidateCdx14MinRequiredBasic(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_MIN_REQUIRED)
-	innerValidateTest(t, *vti)
+	innerTestValidate(t, *vti)
 }
 
 func TestValidateCdx15MinRequiredBasic(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_5_MIN_REQUIRED)
-	innerValidateTest(t, *vti)
+	innerTestValidate(t, *vti)
 }
 
 func TestValidateCdx13Mature(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_3_MATURITY_EXAMPLE_1_BASE)
-	innerValidateTest(t, *vti)
+	innerTestValidate(t, *vti)
 }
 
 func TestValidateCdx14MMature(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
-	innerValidateTest(t, *vti)
+	innerTestValidate(t, *vti)
 }
 
 func TestValidateCdx15Mature(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_5_MATURITY_EXAMPLE_1_BASE)
-	innerValidateTest(t, *vti)
+	innerTestValidate(t, *vti)
 }
 
 // -----------------------------------------------------------

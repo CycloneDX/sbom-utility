@@ -89,7 +89,7 @@ func NewValidateTestInfo(inputFile string, outputFormat string, schemaVariant st
 	return ti
 }
 
-func innerValidateTest(t *testing.T, vti ValidateTestInfo) (document *schema.BOM, schemaErrors []gojsonschema.ResultError, actualError error) {
+func innerTestValidate(t *testing.T, vti ValidateTestInfo) (document *schema.BOM, schemaErrors []gojsonschema.ResultError, actualError error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -363,7 +363,7 @@ func schemaErrorExists(schemaErrors []gojsonschema.ResultError,
 func TestValidateInvalidInputFileLoad(t *testing.T) {
 	// Assure we return path error
 	vti := NewValidateTestInfoBasic(TEST_INPUT_FILE_NON_EXISTENT, FORMAT_TEXT, &fs.PathError{})
-	innerValidateTest(t, *vti)
+	innerTestValidate(t, *vti)
 }
 
 // -----------------------------------------------------------

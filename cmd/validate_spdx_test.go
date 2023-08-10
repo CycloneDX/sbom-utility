@@ -42,7 +42,7 @@ const (
 // TODO: Need an SPDX 2.2 "custom" variant
 func TestValidateSpdx22MinRequiredBasic(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_SPDX_2_2_MIN_REQUIRED)
-	innerValidateTest(t, *vti)
+	innerTestValidate(t, *vti)
 }
 
 // -----------------------------------------------------------
