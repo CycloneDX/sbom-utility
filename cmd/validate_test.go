@@ -49,8 +49,10 @@ const (
 
 type ValidateTestInfo struct {
 	CommonTestInfo
-	SchemaVariant string
-	CustomSchema  string
+	SchemaVariant              string
+	CustomSchema               string
+	SchemaErrorExpectedLineNum int
+	SchemaErrorExpectedCharNum int
 }
 
 func (ti *ValidateTestInfo) String() string {
@@ -58,7 +60,6 @@ func (ti *ValidateTestInfo) String() string {
 	return fmt.Sprintf("%s, %s, %s", pParent.String(), ti.SchemaVariant, ti.CustomSchema)
 }
 
-// TEST_CDX_1_3_MIN_REQUIRED, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
 func NewValidateTestInfoMinimum(inputFile string) *ValidateTestInfo {
 	var ti = new(ValidateTestInfo)
 	var pCommon = &ti.CommonTestInfo
@@ -88,7 +89,7 @@ func NewValidateTestInfo(inputFile string, outputFormat string, schemaVariant st
 	return ti
 }
 
-func innerValidateTest(t *testing.T, vti ValidateTestInfo) (document *schema.BOM, schemaErrors []gojsonschema.ResultError, actualError error) {
+func innerTestValidate(t *testing.T, vti ValidateTestInfo) (document *schema.BOM, schemaErrors []gojsonschema.ResultError, actualError error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -361,11 +362,8 @@ func schemaErrorExists(schemaErrors []gojsonschema.ResultError,
 // Test for invalid input file provided on the `-i` flag
 func TestValidateInvalidInputFileLoad(t *testing.T) {
 	// Assure we return path error
-	innerValidateError(t,
-		TEST_INPUT_FILE_NON_EXISTENT,
-		SCHEMA_VARIANT_NONE,
-		FORMAT_TEXT,
-		&fs.PathError{})
+	vti := NewValidateTestInfoBasic(TEST_INPUT_FILE_NON_EXISTENT, FORMAT_TEXT, &fs.PathError{})
+	innerTestValidate(t, *vti)
 }
 
 // -----------------------------------------------------------

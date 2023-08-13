@@ -32,29 +32,36 @@ const (
 
 // SPDX - Examples
 func TestValidateSpdx22Example1(t *testing.T) {
-	innerValidateError(t, TEST_SPDX_2_2_EXAMPLE_1, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+	vti := NewValidateTestInfoMinimum(TEST_SPDX_2_2_EXAMPLE_1)
+	innerTestValidate(t, *vti)
 }
 
-func TestValidateSPDX22Example2Bin(t *testing.T) {
-	innerValidateError(t, TEST_SPDX_2_2_EXAMPLE_2_BIN, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+func TestValidateSpdx22Example2Bin(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_SPDX_2_2_EXAMPLE_2_BIN)
+	innerTestValidate(t, *vti)
 }
 
-func TestValidateSPDX22Example2Src(t *testing.T) {
-	innerValidateError(t, TEST_SPDX_2_2_EXAMPLE_2_SRC, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+func TestValidateSpdx22Example2Src(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_SPDX_2_2_EXAMPLE_2_SRC)
+	innerTestValidate(t, *vti)
 }
 
-func TestValidateSPDX22Example5Bin(t *testing.T) {
-	innerValidateError(t, TEST_SPDX_2_2_EXAMPLE_5_BIN, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+func TestValidateSpdx22Example5Bin(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_SPDX_2_2_EXAMPLE_5_BIN)
+	innerTestValidate(t, *vti)
 }
 
-func TestValidateSPDX22Example5Src(t *testing.T) {
-	innerValidateError(t, TEST_SPDX_2_2_EXAMPLE_5_SRC, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+func TestValidateSpdx22Example5Src(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_SPDX_2_2_EXAMPLE_5_SRC)
+	innerTestValidate(t, *vti)
 }
 
-func TestValidateSPDX22Example6Lib(t *testing.T) {
-	innerValidateError(t, TEST_SPDX_2_2_EXAMPLE_6_LIB, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+func TestValidateSpdx22Example6Lib(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_SPDX_2_2_EXAMPLE_6_LIB)
+	innerTestValidate(t, *vti)
 }
 
-func TestValidateSPDX22Example6Src(t *testing.T) {
-	innerValidateError(t, TEST_SPDX_2_2_EXAMPLE_6_SRC, SCHEMA_VARIANT_NONE, FORMAT_TEXT, nil)
+func TestValidateSpdx22Example6Src(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_SPDX_2_2_EXAMPLE_6_SRC)
+	innerTestValidate(t, *vti)
 }

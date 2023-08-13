@@ -56,14 +56,14 @@ const (
 // Test wrappers
 // -------------------------------------------
 
-func innerCustomValidateError(t *testing.T, filename string, variant string, innerError error) (document *schema.BOM, schemaErrors []gojsonschema.ResultError, actualError error) {
+func innerTestValidateCustom(t *testing.T, vti ValidateTestInfo) (document *schema.BOM, schemaErrors []gojsonschema.ResultError, actualError error) {
 	utils.GlobalFlags.ValidateFlags.CustomValidation = true
-	document, schemaErrors, actualError = innerValidateError(t, filename, variant, FORMAT_TEXT, innerError)
+	document, schemaErrors, actualError = innerTestValidate(t, vti)
 	utils.GlobalFlags.ValidateFlags.CustomValidation = false
 	return
 }
 
-func innerCustomValidateInvalidSBOMInnerError(t *testing.T, filename string, variant string, innerError error) (document *schema.BOM, schemaErrors []gojsonschema.ResultError, actualError error) {
+func innerTestValidateCustomInvalidSBOMInnerError(t *testing.T, filename string, variant string, innerError error) (document *schema.BOM, schemaErrors []gojsonschema.ResultError, actualError error) {
 	utils.GlobalFlags.ValidateFlags.CustomValidation = true
 	document, schemaErrors, actualError = innerValidateInvalidSBOMInnerError(t, filename, variant, innerError)
 	utils.GlobalFlags.ValidateFlags.CustomValidation = false
@@ -76,10 +76,8 @@ func innerCustomValidateInvalidSBOMInnerError(t *testing.T, filename string, var
 
 // Test format unsupported (SPDX) for "--custom" flag
 func TestValidateCustomFormatUnsupportedSPDX(t *testing.T) {
-	innerCustomValidateError(t,
-		TEST_SPDX_2_2_MIN_REQUIRED,
-		SCHEMA_VARIANT_NONE,
-		&schema.UnsupportedFormatError{})
+	vti := NewValidateTestInfo(TEST_SPDX_2_2_MIN_REQUIRED, FORMAT_ANY, SCHEMA_VARIANT_NONE, &schema.UnsupportedFormatError{})
+	innerTestValidateCustom(t, *vti)
 }
 
 // -------------------------------------------
@@ -88,10 +86,8 @@ func TestValidateCustomFormatUnsupportedSPDX(t *testing.T) {
 
 // Error if no licenses found in entirety of SBOM (variant none)
 func TestValidateCustomErrorCdx14NoLicensesFound(t *testing.T) {
-	document, results, _ := innerCustomValidateError(t,
-		TEST_CUSTOM_CDX_1_4_INVALID_LICENSES_NOT_FOUND,
-		SCHEMA_VARIANT_NONE,
-		&InvalidSBOMError{})
+	vti := NewValidateTestInfo(TEST_CUSTOM_CDX_1_4_INVALID_LICENSES_NOT_FOUND, FORMAT_ANY, SCHEMA_VARIANT_NONE, &InvalidSBOMError{})
+	document, results, _ := innerTestValidateCustom(t, *vti)
 	getLogger().Debugf("filename: `%s`, results:\n%v", document.GetFilename(), results)
 }
 
@@ -100,20 +96,14 @@ func TestValidateCustomErrorCdx14NoLicensesFound(t *testing.T) {
 // -------------------------------------------
 
 func TestValidateCustomCdx14MetadataPropsMissingDisclaimer(t *testing.T) {
-	document, results, _ := innerValidateError(t,
-		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_MISSING,
-		SCHEMA_VARIANT_CUSTOM,
-		FORMAT_TEXT,
-		&InvalidSBOMError{})
+	vti := NewValidateTestInfo(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_MISSING, FORMAT_TEXT, SCHEMA_VARIANT_CUSTOM, &InvalidSBOMError{})
+	document, results, _ := innerTestValidate(t, *vti)
 	getLogger().Debugf("filename: `%s`, results:\n%v", document.GetFilename(), results)
 }
 
 func TestValidateCustomCdx14MetadataPropsMissingClassification(t *testing.T) {
-	document, results, _ := innerValidateError(t,
-		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_MISSING,
-		SCHEMA_VARIANT_CUSTOM,
-		FORMAT_TEXT,
-		&InvalidSBOMError{})
+	vti := NewValidateTestInfo(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_MISSING, FORMAT_TEXT, SCHEMA_VARIANT_CUSTOM, &InvalidSBOMError{})
+	document, results, _ := innerTestValidate(t, *vti)
 	getLogger().Debugf("filename: `%s`, results:\n%v", document.GetFilename(), results)
 }
 
@@ -173,7 +163,7 @@ func TestValidateCustomCdx14MetadataPropsInvalidClassification(t *testing.T) {
 // Note: The "uniqueness" constraint for objects is not supported in JSON schema v7
 
 func TestValidateCustomCdx14MetadataPropertyUniqueDisclaimer(t *testing.T) {
-	document, results, _ := innerCustomValidateInvalidSBOMInnerError(t,
+	document, results, _ := innerTestValidateCustomInvalidSBOMInnerError(t,
 		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE,
 		SCHEMA_VARIANT_NONE,
 		&SBOMMetadataPropertyError{})
@@ -181,7 +171,7 @@ func TestValidateCustomCdx14MetadataPropertyUniqueDisclaimer(t *testing.T) {
 }
 
 func TestValidateCustomCdx14MetadataPropertyUniqueClassification(t *testing.T) {
-	document, results, _ := innerCustomValidateInvalidSBOMInnerError(t,
+	document, results, _ := innerTestValidateCustomInvalidSBOMInnerError(t,
 		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE,
 		SCHEMA_VARIANT_NONE,
 		&SBOMMetadataPropertyError{})
@@ -194,7 +184,7 @@ func TestValidateCustomCdx14MetadataPropertyUniqueClassification(t *testing.T) {
 
 // Error if hierarchical components found in top-level "metadata.component" object
 func TestValidateCustomErrorCdx13InvalidCompositionMetadataComponent(t *testing.T) {
-	innerCustomValidateInvalidSBOMInnerError(t,
+	innerTestValidateCustomInvalidSBOMInnerError(t,
 		TEST_CUSTOM_CDX_1_3_INVALID_COMPOSITION_METADATA_COMPONENT,
 		SCHEMA_VARIANT_NONE,
 		&SBOMCompositionError{})
@@ -202,7 +192,7 @@ func TestValidateCustomErrorCdx13InvalidCompositionMetadataComponent(t *testing.
 
 // Error if hierarchical components in top-level "components" array
 func TestValidateCustomErrorCdx13InvalidCompositionComponents(t *testing.T) {
-	innerCustomValidateInvalidSBOMInnerError(t,
+	innerTestValidateCustomInvalidSBOMInnerError(t,
 		TEST_CUSTOM_CDX_1_3_INVALID_COMPOSITION_METADATA_COMPONENT,
 		SCHEMA_VARIANT_NONE,
 		&SBOMCompositionError{})

@@ -38,66 +38,47 @@ const (
 	TEST_SPDX_SPDX_VERSION_MISSING = "test/config/test-spdx-spdx-version-missing.json"
 )
 
+// Test values
+const (
+	TEST_INVALID_VARIANT_FOO = "foo"
+)
+
 func TestValidateConfigInvalidFormatKey(t *testing.T) {
-	innerValidateError(t,
-		TEST_INVALID_FORMAT_KEY_FOO,
-		SCHEMA_VARIANT_NONE,
-		FORMAT_TEXT,
-		&schema.UnsupportedFormatError{})
+	vti := NewValidateTestInfoBasic(TEST_INVALID_FORMAT_KEY_FOO, FORMAT_TEXT, &schema.UnsupportedFormatError{})
+	innerTestValidate(t, *vti)
 }
 
 func TestValidateConfigInvalidVersion(t *testing.T) {
-	innerValidateError(t,
-		TEST_CDX_SPEC_VERSION_INVALID,
-		SCHEMA_VARIANT_NONE,
-		FORMAT_TEXT,
-		&schema.UnsupportedSchemaError{})
+	vti := NewValidateTestInfoBasic(TEST_CDX_SPEC_VERSION_INVALID, FORMAT_TEXT, &schema.UnsupportedSchemaError{})
+	innerTestValidate(t, *vti)
 }
 
 func TestValidateConfigInvalidVariant(t *testing.T) {
-	innerValidateError(t,
-		TEST_CDX_1_4_MIN_REQUIRED,
-		"foo",
-		FORMAT_TEXT,
-		&schema.UnsupportedSchemaError{})
+	vti := NewValidateTestInfo(TEST_CDX_1_4_MIN_REQUIRED, FORMAT_TEXT, TEST_INVALID_VARIANT_FOO, &schema.UnsupportedSchemaError{})
+	innerTestValidate(t, *vti)
 }
 
 func TestValidateConfigCDXBomFormatInvalid(t *testing.T) {
-	innerValidateError(t,
-		TEST_CDX_BOM_FORMAT_INVALID,
-		SCHEMA_VARIANT_NONE,
-		FORMAT_TEXT,
-		&schema.UnsupportedFormatError{})
+	vti := NewValidateTestInfoBasic(TEST_CDX_BOM_FORMAT_INVALID, FORMAT_TEXT, &schema.UnsupportedFormatError{})
+	innerTestValidate(t, *vti)
 }
 
 func TestValidateConfigCDXBomFormatMissing(t *testing.T) {
-	innerValidateError(t,
-		TEST_CDX_BOM_FORMAT_MISSING,
-		SCHEMA_VARIANT_NONE,
-		FORMAT_TEXT,
-		&schema.UnsupportedFormatError{})
+	vti := NewValidateTestInfoBasic(TEST_CDX_BOM_FORMAT_MISSING, FORMAT_TEXT, &schema.UnsupportedFormatError{})
+	innerTestValidate(t, *vti)
 }
 
 func TestValidateConfigCDXSpecVersionMissing(t *testing.T) {
-	innerValidateError(t,
-		TEST_CDX_SPEC_VERSION_MISSING,
-		SCHEMA_VARIANT_NONE,
-		FORMAT_TEXT,
-		&schema.UnsupportedSchemaError{})
+	vti := NewValidateTestInfoBasic(TEST_CDX_SPEC_VERSION_MISSING, FORMAT_TEXT, &schema.UnsupportedSchemaError{})
+	innerTestValidate(t, *vti)
 }
 
 func TestValidateConfigSPDXSpdxIdInvalid(t *testing.T) {
-	innerValidateError(t,
-		TEST_SPDX_SPDX_ID_INVALID,
-		SCHEMA_VARIANT_NONE,
-		FORMAT_TEXT,
-		&schema.UnsupportedFormatError{})
+	vti := NewValidateTestInfoBasic(TEST_SPDX_SPDX_ID_INVALID, FORMAT_TEXT, &schema.UnsupportedFormatError{})
+	innerTestValidate(t, *vti)
 }
 
 func TestValidateConfigSPDXSpdxVersionInvalid(t *testing.T) {
-	innerValidateError(t,
-		TEST_SPDX_SPDX_VERSION_MISSING,
-		SCHEMA_VARIANT_NONE,
-		FORMAT_TEXT,
-		&schema.UnsupportedSchemaError{})
+	vti := NewValidateTestInfoBasic(TEST_SPDX_SPDX_VERSION_MISSING, FORMAT_TEXT, &schema.UnsupportedSchemaError{})
+	innerTestValidate(t, *vti)
 }
