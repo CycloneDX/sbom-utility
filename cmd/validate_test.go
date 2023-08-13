@@ -100,6 +100,21 @@ func innerTestValidate(t *testing.T, vti ValidateTestInfo) (document *schema.BOM
 	// Set the schema variant where the command line flag would
 	utils.GlobalFlags.ValidateFlags.SchemaVariant = vti.SchemaVariant
 
+	// Mock stdin if requested
+	if vti.MockStdin == true {
+		utils.GlobalFlags.PersistentFlags.InputFile = INPUT_TYPE_STDIN
+		file, err := os.Open(vti.InputFile) // For read access.
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// convert byte slice to io.Reader
+		savedStdIn := os.Stdin
+		// !!!Important restore stdin
+		defer func() { os.Stdin = savedStdIn }()
+		os.Stdin = file
+	}
+
 	// Invoke the actual validate function
 	var isValid bool
 	var outputBuffer bytes.Buffer
@@ -160,76 +175,6 @@ func innerTestValidate(t *testing.T, vti ValidateTestInfo) (document *schema.BOM
 	return
 }
 
-// Tests basic validation and expected errors
-func innerValidateError(t *testing.T, filename string, variant string, format string, expectedError error) (document *schema.BOM, schemaErrors []gojsonschema.ResultError, actualError error) {
-	getLogger().Enter()
-	defer getLogger().Exit()
-
-	// Copy the test filename to the command line flags where the code looks for it
-	utils.GlobalFlags.PersistentFlags.InputFile = filename
-	// Set the err result format
-	utils.GlobalFlags.PersistentFlags.OutputFormat = format
-	// Set the schema variant where the command line flag would
-	utils.GlobalFlags.ValidateFlags.SchemaVariant = variant
-
-	// Invoke the actual validate function
-	var isValid bool
-	var outputBuffer bytes.Buffer
-
-	// TODO: support additional tests on output buffer (e.g., format==valid JSON)
-	isValid, document, schemaErrors, outputBuffer, actualError = innerValidateErrorBuffered(
-		t,
-		utils.GlobalFlags.PersistentFlags,
-		utils.GlobalFlags.ValidateFlags,
-	)
-
-	getLogger().Tracef("document: `%s`, isValid=`%t`, actualError=`%T`", document.GetFilename(), isValid, actualError)
-
-	// Always compare actual against expected error (even if it is `nil`)
-	if !ErrorTypesMatch(actualError, expectedError) {
-		if len(schemaErrors) > 0 {
-			getLogger().Debugf("schemaErrors=`%s`", schemaErrors)
-		}
-
-		switch t := actualError.(type) {
-		default:
-			fmt.Printf("unhandled error type: `%v`\n", t)
-			fmt.Printf(">> value: `%v`\n", t)
-			getLogger().Error(actualError)
-		}
-		t.Errorf("expected error type: `%T`, actual type: `%T`", expectedError, actualError)
-	}
-
-	// ANY error returned from Validate() SHOULD mark the input file as "invalid"
-	if actualError != nil && isValid {
-		t.Errorf("Validate() returned error (`%T`); however, input file still valid (%t)", actualError, isValid)
-	}
-
-	// ALWAYS make sure the if error was NOT expected that input file is marked "valid"
-	if expectedError == nil && !isValid {
-		t.Errorf("Input file invalid (%t); expected valid (no error)", isValid)
-	}
-
-	// Assure it is valid JSON output
-	if format == FORMAT_JSON {
-		if outputBuffer.Len() == 0 {
-			if expectedError == nil {
-				getLogger().Tracef("output data empty as expected (nil).")
-			} else {
-				t.Error(fmt.Errorf("output data empty; expected error text: %s", expectedError.Error()))
-				t.Logf("%s", outputBuffer.String())
-			}
-
-		} else if !utils.IsValidJsonRaw(outputBuffer.Bytes()) {
-			err := getLogger().Errorf("output did not contain valid format data; expected: `%s`", FORMAT_JSON)
-			t.Error(err.Error())
-			t.Logf("%s", outputBuffer.String())
-			return
-		}
-	}
-	return
-}
-
 func innerValidateErrorBuffered(t *testing.T, persistentFlags utils.PersistentCommandFlags, validationFlags utils.ValidateCommandFlags) (isValid bool, document *schema.BOM, schemaErrors []gojsonschema.ResultError, outputBuffer bytes.Buffer, err error) {
 	// Declare an output outputBuffer/outputWriter to use used during tests
 	var outputWriter = bufio.NewWriter(&outputBuffer)
@@ -243,15 +188,15 @@ func innerValidateErrorBuffered(t *testing.T, persistentFlags utils.PersistentCo
 	return
 }
 
-func innerValidateForcedSchema(t *testing.T, filename string, forcedSchema string, format string, expectedError error) (document *schema.BOM, schemaErrors []gojsonschema.ResultError, actualError error) {
+func innerValidateForcedSchema(t *testing.T, filename string, forcedSchema string, outputFormat string, expectedError error) (document *schema.BOM, schemaErrors []gojsonschema.ResultError, actualError error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = forcedSchema
-	innerValidateError(t, filename, SCHEMA_VARIANT_NONE, format, expectedError)
-	// !!!Important!!! Must reset this global flag
-	utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = ""
-
+	// !!!Important!!! Must reset this global flag and use the default schema for subsequent tests
+	defer func() { utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = "" }()
+	vti := NewValidateTestInfo(filename, outputFormat, SCHEMA_VARIANT_NONE, expectedError)
+	innerTestValidate(t, *vti)
 	return
 }
 
@@ -260,7 +205,8 @@ func innerValidateInvalidSBOMInnerError(t *testing.T, filename string, variant s
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	document, schemaErrors, actualError = innerValidateError(t, filename, variant, FORMAT_TEXT, &InvalidSBOMError{})
+	vti := NewValidateTestInfo(filename, FORMAT_TEXT, variant, &InvalidSBOMError{})
+	document, schemaErrors, actualError = innerTestValidate(t, *vti)
 
 	invalidSBOMError, ok := actualError.(*InvalidSBOMError)
 
@@ -275,8 +221,12 @@ func innerValidateInvalidSBOMInnerError(t *testing.T, filename string, variant s
 // Tests for *json.SyntaxErrors "wrapped" in *ErrorInvalidSBOM error types
 // It also tests that the syntax error occurred at the expected line number and character offset
 func innerValidateSyntaxError(t *testing.T, filename string, variant string, expectedLineNum int, expectedCharNum int) (document *schema.BOM, actualError error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
 
-	document, _, actualError = innerValidateError(t, filename, variant, FORMAT_TEXT, &json.SyntaxError{})
+	vti := NewValidateTestInfo(filename, FORMAT_TEXT, variant, &json.SyntaxError{})
+	document, _, actualError = innerTestValidate(t, *vti)
+
 	syntaxError, ok := actualError.(*json.SyntaxError)
 
 	if !ok {
@@ -300,11 +250,8 @@ func innerTestSchemaErrorAndErrorResults(t *testing.T,
 	filename string, variant string,
 	schemaErrorType string, schemaErrorField string, schemaErrorValue string) {
 
-	document, results, _ := innerValidateError(t,
-		filename,
-		variant,
-		FORMAT_TEXT,
-		&InvalidSBOMError{})
+	vti := NewValidateTestInfo(filename, FORMAT_TEXT, variant, &InvalidSBOMError{})
+	document, results, _ := innerTestValidate(t, *vti)
 	getLogger().Debugf("filename: `%s`, results:\n%v", document.GetFilename(), results)
 
 	// See ResultType struct fields (and values) in the `gojsonschema` package
@@ -423,47 +370,33 @@ func TestValidateForceCustomSchemaCdxSchemaOlder(t *testing.T) {
 
 // TODO: add additional checks on the buffered output
 func TestValidateCdx14ErrorResultsUniqueComponentsText(t *testing.T) {
-	innerValidateError(t,
-		TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE,
-		SCHEMA_VARIANT_NONE,
-		FORMAT_TEXT,
-		&InvalidSBOMError{})
+	vti := NewValidateTestInfo(TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE, FORMAT_TEXT, SCHEMA_VARIANT_NONE, &InvalidSBOMError{})
+	innerTestValidate(t, *vti)
 }
 
 // TODO: add additional checks on the buffered output
 func TestValidateCdx14ErrorResultsFormatIriReferencesText(t *testing.T) {
-	innerValidateError(t,
-		TEST_CDX_1_4_VALIDATE_ERR_FORMAT_IRI_REFERENCE,
-		SCHEMA_VARIANT_NONE,
-		FORMAT_TEXT,
-		&InvalidSBOMError{})
+	vti := NewValidateTestInfo(TEST_CDX_1_4_VALIDATE_ERR_FORMAT_IRI_REFERENCE, FORMAT_TEXT, SCHEMA_VARIANT_NONE, &InvalidSBOMError{})
+	innerTestValidate(t, *vti)
 }
 
 func TestValidateCdx14ErrorResultsUniqueComponentsCsv(t *testing.T) {
-	innerValidateError(t,
-		TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE,
-		SCHEMA_VARIANT_NONE,
-		FORMAT_CSV,
-		&InvalidSBOMError{})
+	vti := NewValidateTestInfo(TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE, FORMAT_CSV, SCHEMA_VARIANT_NONE, &InvalidSBOMError{})
+	innerTestValidate(t, *vti)
 }
 
 // TODO: add additional checks on the buffered output
 func TestValidateCdx14ErrorResultsFormatIriReferencesCsv(t *testing.T) {
-	innerValidateError(t,
-		TEST_CDX_1_4_VALIDATE_ERR_FORMAT_IRI_REFERENCE,
-		SCHEMA_VARIANT_NONE,
-		FORMAT_CSV,
-		&InvalidSBOMError{})
+	vti := NewValidateTestInfo(TEST_CDX_1_4_VALIDATE_ERR_FORMAT_IRI_REFERENCE, FORMAT_CSV, SCHEMA_VARIANT_NONE, &InvalidSBOMError{})
+	innerTestValidate(t, *vti)
 }
 
 func TestValidateCdx14ErrorResultsUniqueComponentsJson(t *testing.T) {
 	var EXPECTED_ERROR_NUM = 2
 	var EXPECTED_ERROR_CONTEXT = "(root).components"
-	_, schemaErrors, _ := innerValidateError(t,
-		TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE,
-		SCHEMA_VARIANT_NONE,
-		FORMAT_JSON,
-		&InvalidSBOMError{})
+
+	vti := NewValidateTestInfo(TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE, FORMAT_JSON, SCHEMA_VARIANT_NONE, &InvalidSBOMError{})
+	_, schemaErrors, _ := innerTestValidate(t, *vti)
 
 	if len(schemaErrors) != EXPECTED_ERROR_NUM {
 		t.Errorf("invalid schema error count: expected `%v`; actual: `%v`)", EXPECTED_ERROR_NUM, len(schemaErrors))
@@ -478,11 +411,9 @@ func TestValidateCdx14ErrorResultsUniqueComponentsJson(t *testing.T) {
 func TestValidateCdx14ErrorResultsFormatIriReferencesJson(t *testing.T) {
 	var EXPECTED_ERROR_NUM = 1
 	var EXPECTED_ERROR_CONTEXT = "(root).components.2.externalReferences.0.url"
-	_, schemaErrors, _ := innerValidateError(t,
-		TEST_CDX_1_4_VALIDATE_ERR_FORMAT_IRI_REFERENCE,
-		SCHEMA_VARIANT_NONE,
-		FORMAT_JSON,
-		&InvalidSBOMError{})
+
+	vti := NewValidateTestInfo(TEST_CDX_1_4_VALIDATE_ERR_FORMAT_IRI_REFERENCE, FORMAT_JSON, SCHEMA_VARIANT_NONE, &InvalidSBOMError{})
+	_, schemaErrors, _ := innerTestValidate(t, *vti)
 
 	if len(schemaErrors) != EXPECTED_ERROR_NUM {
 		t.Errorf("invalid schema error count: expected `%v`; actual: `%v`)", EXPECTED_ERROR_NUM, len(schemaErrors))
@@ -491,7 +422,6 @@ func TestValidateCdx14ErrorResultsFormatIriReferencesJson(t *testing.T) {
 	if schemaErrors[0].Context().String() != EXPECTED_ERROR_CONTEXT {
 		t.Errorf("invalid schema error context: expected `%v`; actual: `%v`)", EXPECTED_ERROR_CONTEXT, schemaErrors[0].Context().String())
 	}
-
 }
 
 // -----------------------------------------------------------
@@ -512,11 +442,15 @@ func restoreEmbeddedDefaultSchemaConfig(t *testing.T) (err error) {
 }
 
 func innerValidateCustomSchemaConfig(t *testing.T, filename string, configFile string, variant string, format string, expectedError error) (document *schema.BOM, schemaErrors []gojsonschema.ResultError, actualError error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
 	loadCustomSchemaConfig(t, configFile)
-	document, schemaErrors, actualError = innerValidateError(t, TEST_CDX_1_4_MIN_REQUIRED, variant, FORMAT_TEXT, nil)
-	// !!!Important!!! MUST reset global flag to its proper default (i.e., empty)
-	// which will cause the embedded `config.json` to be used for all other tests
-	restoreEmbeddedDefaultSchemaConfig(t)
+	// !!!Important!!! MUST restore the embedded `config.json` to be used for all other tests
+	defer restoreEmbeddedDefaultSchemaConfig(t)
+
+	vti := NewValidateTestInfo(TEST_CDX_1_4_MIN_REQUIRED, FORMAT_TEXT, variant, nil)
+	document, schemaErrors, actualError = innerTestValidate(t, *vti)
 	return
 }
 
@@ -525,22 +459,7 @@ func TestValidateWithCustomSchemaConfiguration(t *testing.T) {
 }
 
 func TestValidateUsingStdin(t *testing.T) {
-
-	// TODO use Mock for stdin tests... after adopting CommonTestInfo struct
-	file, err := os.Open(TEST_CDX_1_4_MIN_REQUIRED) // For read access.
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// convert byte slice to io.Reader
-	savedStdIn := os.Stdin
-	// !!!Important restore stdin
-	defer func() { os.Stdin = savedStdIn }()
-	os.Stdin = file
-
-	innerValidateError(t,
-		INPUT_TYPE_STDIN,
-		SCHEMA_VARIANT_NONE,
-		FORMAT_JSON,
-		nil)
+	vti := NewValidateTestInfo(TEST_CDX_1_4_MIN_REQUIRED, FORMAT_JSON, SCHEMA_VARIANT_NONE, nil)
+	vti.MockStdin = true
+	innerTestValidate(t, *vti)
 }
