@@ -148,9 +148,10 @@ which returns `0` (zero) or "no error":
 
 This section describes some of the important command line flags that apply to most commands that have a `list` subcommand for generating columnar, report-styled output (e.g., `schema`, `license`, `vulnerability`, etc.).
 
+- [input flag](#input-flag): with `--output` or `-o`
+- [output flag](#output-flag): with `--output` or `-o`
 - [format flag](#format-flag): with `--format`
 - [quiet flag](#quiet-flag): with `--quiet` or `-q`
-- [output flag](#output-flag): with `--output` or `-o`
 - [where flag](#where-flag-output-filtering): with `--output` or `-o`
 
 **Note**: The `validate` command does not have a `list` subcommand and ignores the `format`, `where` and `output` flags.
