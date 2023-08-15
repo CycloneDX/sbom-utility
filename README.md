@@ -154,7 +154,59 @@ This section describes some of the important command line flags that apply to mo
 - [quiet flag](#quiet-flag): with `--quiet` or `-q`
 - [where flag](#where-flag-output-filtering): with `--output` or `-o`
 
-**Note**: The `validate` command does not have a `list` subcommand and ignores the `format`, `where` and `output` flags.
+**Note**: The `validate` command does not have a `list` subcommand and ignores the `format` and  `where` flags.
+
+#### Input flag
+
+All `list` subcommands and the `validate` command support the `--input-file <filename>` flag (or its short-form `-i <filename>`) to declare file contents (i.e., BOM data) the commands will read and operate on.
+
+#### Standard input (stdin)
+
+All commands that support the input flag can also accept data from standard input or `stdin` by using the `-` (dash) character as the value instead of a filename.
+
+##### Example of stdin using pipe
+
+```bash
+ cat examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json | ./sbom-utility resource list -i -
+```
+
+##### Example of stdin using redirect
+
+```bash
+./sbom-utility validate -i - < examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json
+```
+
+#### Output flag
+
+All `list` subcommands and the `validate` command support the `--output-file <filename>` flag (or its short-form `-o <filename>`) to send formatted output to a file.
+
+##### Example: `--output-file` flag
+
+This example uses the `schema` command to output to a file named `output.txt` with format set to `csv`:
+
+```bash
+./sbom-utility schema --format csv -o output.csv
+```
+
+Verify the contents of `output.csv` contain CSV formatted output:
+
+```bash
+cat output.csv
+```
+
+```csv
+Name,Format,Version,Variant,File (local),URL (remote)
+CycloneDX v1.5 (development),CycloneDX,1.5,development,schema/cyclonedx/1.5/bom-1.5-dev.schema.json,https://raw.githubusercontent.com/CycloneDX/specification/v1.5-dev/schema/bom-1.5.schema.json
+CycloneDX v1.4,CycloneDX,1.4,(latest),schema/cyclonedx/1.4/bom-1.4.schema.json,https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json
+CycloneDX v1.3,CycloneDX,1.3,(latest),schema/cyclonedx/1.3/bom-1.3.schema.json,https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3.schema.json
+CycloneDX v1.2,CycloneDX,1.2,(latest),schema/cyclonedx/1.2/bom-1.2.schema.json,https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2.schema.json
+SPDX v2.3.1 (development),SPDX,SPDX-2.3,development,schema/spdx/2.3.1/spdx-schema.json,https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3.1/schemas/spdx-schema.json
+SPDX v2.3,SPDX,SPDX-2.3,(latest),schema/spdx/2.3/spdx-schema.json,https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3/schemas/spdx-schema.json
+SPDX v2.2.2,SPDX,SPDX-2.2,(latest),schema/spdx/2.2.2/spdx-schema.json,https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.2/schemas/spdx-schema.json
+SPDX v2.2.1,SPDX,SPDX-2.2,2.2.1,schema/spdx/2.2.1/spdx-schema.json,https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json
+```
+
+- **Note**: You can verify that `output.csv` loads within a spreadsheet app like MS Excel.
 
 #### Format flag
 
@@ -214,60 +266,6 @@ SPDX v2.2.2                   SPDX       SPDX-2.2  (latest)     schema/spdx/2.2.
 SPDX v2.2.1                   SPDX       SPDX-2.2  2.2.1        schema/spdx/2.2.1/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json
 ```
 
-#### Input flag
-
-All `list` subcommands and the `validate` command support the `--input-file <filename>` flag (or its short-form `-i <filename>`) to declare file contents (i.e., BOM data) the commands will read and operate on.
-
-#### Standard input (stdin)
-
-All commands that support the input flag can also accept data from standard input or `stdin` by using the `-` (dash) character as the value instead of a filename.
-
-##### Example of stdin using pipe
-
-```bash
- cat examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json | ./sbom-utility resource list -i -
-```
-
-##### Example of stdin using redirect
-
-
-```bash
-./sbom-utility validate -i - <  examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json
-```
-
-
-#### Output flag
-
-All `list` subcommands and the `validate` command support the `--output-file <filename>` flag (or its short-form `-o <filename>`) to send formatted output to a file.
-
-##### Example: `--output-file` flag
-
-This example uses the `schema` command to output to a file named `output.txt` with format set to `csv`:
-
-```bash
-./sbom-utility schema --format csv -o output.csv
-```
-
-Verify the contents of `output.csv` contain CSV formatted output:
-
-```bash
-cat output.csv
-```
-
-```csv
-Name,Format,Version,Variant,File (local),URL (remote)
-CycloneDX v1.5 (development),CycloneDX,1.5,development,schema/cyclonedx/1.5/bom-1.5-dev.schema.json,https://raw.githubusercontent.com/CycloneDX/specification/v1.5-dev/schema/bom-1.5.schema.json
-CycloneDX v1.4,CycloneDX,1.4,(latest),schema/cyclonedx/1.4/bom-1.4.schema.json,https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json
-CycloneDX v1.3,CycloneDX,1.3,(latest),schema/cyclonedx/1.3/bom-1.3.schema.json,https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3.schema.json
-CycloneDX v1.2,CycloneDX,1.2,(latest),schema/cyclonedx/1.2/bom-1.2.schema.json,https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2.schema.json
-SPDX v2.3.1 (development),SPDX,SPDX-2.3,development,schema/spdx/2.3.1/spdx-schema.json,https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3.1/schemas/spdx-schema.json
-SPDX v2.3,SPDX,SPDX-2.3,(latest),schema/spdx/2.3/spdx-schema.json,https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3/schemas/spdx-schema.json
-SPDX v2.2.2,SPDX,SPDX-2.2,(latest),schema/spdx/2.2.2/spdx-schema.json,https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.2/schemas/spdx-schema.json
-SPDX v2.2.1,SPDX,SPDX-2.2,2.2.1,schema/spdx/2.2.1/spdx-schema.json,https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json
-```
-
-- **Note**: You can verify that `output.csv` loads within a spreadsheet app like MS Excel.
-
 #### Where flag (output filtering)
 
 All `list` subcommands support the `--where`  flag. It can be used to filter output results based upon matches to regular expressions (regex) by using the output list's column titles as keys.
@@ -321,7 +319,7 @@ Use the `--summary` flag on the `license list` command to produce a summary repo
 This example shows a few entries of the JSON output that exhibit the three types of license data described above:
 
 ```bash
-./sbom-utility license list -i examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json
+./sbom-utility license list -i examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json --format json --quiet
 ```
 
 ```json
@@ -642,7 +640,7 @@ In this example, the `--from` clause references the top-level `metadata.supplier
 In this example, the `--from` clause references the singleton JSON object `component` found under the top-level `metadata` object. It then reduces the resultant JSON object to only return the `name` and `value` fields and their values as requested on the `--select` clause.
 
 ```bash
-./sbom-utility query --select name,version --from metadata.component -i examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json
+./sbom-utility query --select name,version --from metadata.component -i examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json --quiet
 ```
 
 ```json
@@ -657,7 +655,7 @@ In this example, the `--from` clause references the singleton JSON object `compo
 In this example, the `--where` filter will be applied to a set of `properties` results to only include entries that match the specified regex.
 
 ```bash
-./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from metadata.properties --where name=urn:example.com:classification
+./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from metadata.properties --where name=urn:example.com:classification --quiet
 ```
 
 ```json
@@ -672,7 +670,7 @@ In this example, the `--where` filter will be applied to a set of `properties` r
 additionally, you can apply a `--select` clause to simply obtain the matching entry's `value`:
 
 ```bash
-./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --select value --from metadata.properties --where name=urn:example.com:classification
+./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --select value --from metadata.properties --where name=urn:example.com:classification --quiet
 ```
 
 ```json
@@ -844,20 +842,21 @@ Use the `--colorize=true|false` (default: `false`) flag to add/remove color form
 Validating the "juice shop" SBOM (CycloneDX 1.2) example provided in this repository.
 
 ```bash
-./sbom-utility validate -i examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json
+./sbom-utility validate -i examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json
 ```
 
 ```bash
-[INFO] Loading license policy config file: `license.json`...
-[INFO] Attempting to load and unmarshal file `examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json`...
-[INFO] Successfully unmarshalled data from: `examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json`
-[INFO] Determining file's SBOM format and version...
-[INFO] Determined SBOM format, version (variant): `CycloneDX`, `1.2` (latest)
-[INFO] Matching SBOM schema (for validation): schema/cyclonedx/1.2/bom-1.2.schema.json
+[INFO] Loading (embedded) default schema config file: `config.json`...
+[INFO] Loading (embedded) default license policy file: `license.json`...
+[INFO] Attempting to load and unmarshal data from: `examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json`...
+[INFO] Successfully unmarshalled data from: `examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json`
+[INFO] Determining file's BOM format and version...
+[INFO] Determined BOM format, version (variant): `CycloneDX`, `1.2` (latest)
+[INFO] Matching BOM schema (for validation): schema/cyclonedx/1.2/bom-1.2.schema.json
 [INFO] Loading schema `schema/cyclonedx/1.2/bom-1.2.schema.json`...
 [INFO] Schema `schema/cyclonedx/1.2/bom-1.2.schema.json` loaded.
-[INFO] Validating `examples/cyclonedx/BOM/juice-shop-11.1.2/bom.json`...
-[INFO] SBOM valid against JSON schema: `true`
+[INFO] Validating `examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json`...
+[INFO] BOM valid against JSON schema: `true`
 ```
 
 You can also verify the [exit code](#exit-codes) from the validate command:
@@ -878,32 +877,67 @@ The validation command will use the declared format and version found within the
 If you run the sample command above, you would see several "custom" schema errors resulting in an invalid SBOM determination (i.e., `exit status 2`):
 
 ```text
-[INFO] Loading license policy config file: `license.json`...
-[INFO] Attempting to load and unmarshal file `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`...
+[INFO] Loading (embedded) default schema config file: `config.json`...
+[INFO] Loading (embedded) default license policy file: `license.json`...
+[INFO] Attempting to load and unmarshal data from: `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`...
 [INFO] Successfully unmarshalled data from: `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`
-[INFO] Determining file's SBOM format and version...
-[INFO] Determined SBOM format, version (variant): `CycloneDX`, `1.4` (custom)
-[INFO] Matching SBOM schema (for validation): schema/test/bom-1.4-custom.schema.json
+[INFO] Determining file's BOM format and version...
+[INFO] Determined BOM format, version (variant): `CycloneDX`, `1.4` custom
+[INFO] Matching BOM schema (for validation): schema/test/bom-1.4-custom.schema.json
 [INFO] Loading schema `schema/test/bom-1.4-custom.schema.json`...
 [INFO] Schema `schema/test/bom-1.4-custom.schema.json` loaded.
 [INFO] Validating `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`...
-[INFO] SBOM valid against JSON schema: `false`
-[ERROR] invalid SBOM: schema errors found (test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json):
-(3) Schema errors detected (use `--debug` for more details):
-	1. Type: [contains], Field: [metadata.properties], Description: [At least one of the items must match]
-	Failing object: [[
-	  {
-	    "name": "urn:example.com:disclaimer",
-	    "value": "This ... (truncated)
-	2. Type: [const], Field: [metadata.properties.0.value], Description: [metadata.properties.0.value does not match: "This SBOM is current as of the date it was generated and is subject to change."]
-	Failing object: ["This SBOM is current as of the date it was generated."]
-	3. Type: [number_all_of], Field: [metadata.properties], Description: [Must validate all the schemas (allOf)]
-	Failing object: [[
-	  {
-	    "name": "urn:example.com:disclaimer",
-	    "value": "This ... (truncated)
+[INFO] BOM valid against JSON schema: `false`
+[INFO] (3) schema errors detected.
+[INFO] Formatting error results (`txt` format)...
+1. {
+        "type": "contains",
+        "field": "metadata.properties",
+        "context": "(root).metadata.properties",
+        "description": "At least one of the items must match",
+        "value": [
+            {
+                "name": "urn:example.com:disclaimer",
+                "value": "This SBOM is current as of the date it was generated."
+            },
+            {
+                "name": "urn:example.com:classification",
+                "value": "This SBOM is Confidential Information. Do not distribute."
+            }
+        ]
+    }
+2. {
+        "type": "const",
+        "field": "metadata.properties.0.value",
+        "context": "(root).metadata.properties.0.value",
+        "description": "metadata.properties.0.value does not match: \"This SBOM is current as of the date it was generated and is subject to change.\"",
+        "value": "This SBOM is current as of the date it was generated."
+    }
+3. {
+        "type": "number_all_of",
+        "field": "metadata.properties",
+        "context": "(root).metadata.properties",
+        "description": "Must validate all the schemas (allOf)",
+        "value": [
+            {
+                "name": "urn:example.com:disclaimer",
+                "value": "This SBOM is current as of the date it was generated."
+            },
+            {
+                "name": "urn:example.com:classification",
+                "value": "This SBOM is Confidential Information. Do not distribute."
+            }
+        ]
+    }
+[ERROR] invalid SBOM: schema errors found (test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json)
 [INFO] document `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`: valid=[false]
-exit status 2
+```
+
+confirming the exit code:
+
+```bash
+$ echo $?
+2
 ```
 
 ##### Why validation failed
@@ -925,17 +959,22 @@ Use the `--debug` or `-d` flag to see all schema error details:
 The details include the full context of the failing `metadata.properties` object which also includes a `"urn:example.com:classification"` property:
 
 ```bash
-	3. Type: [number_all_of], Field: [metadata.properties], Description: [Must validate all the schemas (allOf)]
-	Failing object: [[
-	  {
-	    "name": "urn:example.com:disclaimer",
-	    "value": "This SBOM is current as of the date it was generated."
-	  },
-	  {
-	    "name": "urn:example.com:classification",
-	    "value": "This SBOM is Confidential Information. Do not distribute."
-	  }
-	]]
+3. {
+        "type": "number_all_of",
+        "field": "metadata.properties",
+        "context": "(root).metadata.properties",
+        "description": "Must validate all the schemas (allOf)",
+        "value": [
+            {
+                "name": "urn:example.com:disclaimer",
+                "value": "This SBOM is current as of the date it was generated."
+            },
+            {
+                "name": "urn:example.com:classification",
+                "value": "This SBOM is Confidential Information. Do not distribute."
+            }
+        ]
+    }
 ```
 
 #### Example: Validate using "JSON" format
