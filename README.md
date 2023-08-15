@@ -152,7 +152,7 @@ This section describes some of the important command line flags that apply to mo
 - [output flag](#output-flag): with `--output` or `-o`
 - [format flag](#format-flag): with `--format`
 - [quiet flag](#quiet-flag): with `--quiet` or `-q`
-- [where flag](#where-flag-output-filtering): with `--output` or `-o`
+- [where flag](#where-flag-output-filtering): with `--where`
 
 **Note**: The `validate` command does not have a `list` subcommand and ignores the `format` and  `where` flags.
 
