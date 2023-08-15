@@ -92,7 +92,7 @@ When providing configuration files using command line flags, the executable atte
 
 On MacOS, the utility is not a registered Apple application and may warn you that it cannot open it the first time. If so, you will need to explicitly permit the executable to be "opened" on your system acknowledging it trusted.  This process is initiated from the Finder application by using `ctrl-click` on the executable file and agreeing using the "Open" button.
 
-- See https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unidentified-developer-mh40616/mac
+- See how to ["Open a Mac app from an unidentified developer"](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unidentified-developer-mh40616/mac)
 
 ---
 
@@ -748,7 +748,7 @@ This example uses the `where` filter on the `name` field. In this case we supply
 ./sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --where "name=Library A" --quiet
 ```
 
-```
+```bash
 type       name       version  bom-ref
 ----       ----       -------  -------
 component  Library A  1.0.0    pkg:lib/libraryA@1.0.0
@@ -862,7 +862,10 @@ Validating the "juice shop" SBOM (CycloneDX 1.2) example provided in this reposi
 You can also verify the [exit code](#exit-codes) from the validate command:
 
 ```bash
-$ echo $?
+echo $?
+```
+
+```bash
 0  // no error (valid)
 ```
 
@@ -936,13 +939,17 @@ If you run the sample command above, you would see several "custom" schema error
 confirming the exit code:
 
 ```bash
-$ echo $?
-2
+echo $?
+```
+
+```bash
+2 // SBOM error
 ```
 
 ##### Why validation failed
 
 The output shows a first schema error indicating the failing JSON object; in this case,
+
 - the CycloneDX `metadata.properties` field, which is a list of `property` objects.
 - Found that a property with a `name` field with the value  `"urn:example.com:disclaimer"` had an incorrect `value`.
   - the `value` field SHOULD have had a constant value of `"This SBOM is current as of the date it was generated and is subject to change."` (as was required by the custom schema's regex).
@@ -1160,7 +1167,7 @@ CVE-2020-25649           611      CVSSv31: 7.5 (high), CVSSv31: 8.2 (high), CVSS
 
 This *experimental* command will compare two BOMs and return the delta (or "diff") in JSON (diff-patch format) or text.
 
-**Notes**
+##### Notes
 
 - This command is undergoing analysis and tests which are exposing some underlying issues around "moved" objects in dependent diff-patch packages that may not be fixable and have no alternatives.
   - *Specifically, the means by which "moved" objects are assigned "similarity" scores appears flawed in the case of JSON.*
@@ -1454,13 +1461,13 @@ The built-in `go test` command is used to execute all functional tests that appe
 The `Makefile` includes a `test` target for convenience which will use `go test` to run all tests found in all subdirectories:
 
 ```bash
-$ make test
+make test
 ```
 
 The `test_cmd` target will use run only the test found in the `cmd` package:
 
 ```bash
-$ make test_cmd
+make test_cmd
 ```
 
 #### Using go test
@@ -1508,7 +1515,7 @@ go test github.com/CycloneDX/sbom-utility/cmd -v --args --quiet
 
 In order to initiate the release workflow, simply go to the release page of the repository:
 
-- https://github.com/CycloneDX/sbom-utility/releases
+- [https://github.com/CycloneDX/sbom-utility/releases](https://github.com/CycloneDX/sbom-utility/releases)
 
 and click on the `Draft a new release` button.  Follow the instructions to create a new version tag, provide an appropriate release title and description and `publish` the release.  The GitHub release workflow will be triggered automatically.
 
@@ -1580,13 +1587,13 @@ $ go build ${LDFLAGS} -o ${BINARY}
 - GitHub: https://github.com/spdx
   - Specifications (by branch): https://github.com/spdx/spdx-spec
   - Schemas (by branch):
-    - https://github.com/spdx/spdx-spec/tree/development/v2.3.1/schemas
-    - https://github.com/spdx/spdx-spec/tree/development/v2.3/schemas
-    - https://github.com/spdx/spdx-spec/tree/development/v2.2.2/schemas
-  - Examples: https://github.com/spdx/spdx-examples
+    - [v2.3.1](https://github.com/spdx/spdx-spec/tree/development/v2.3.1/schemas)
+    - [v2.3](https://github.com/spdx/spdx-spec/tree/development/v2.3/schemas)
+    - [v2.2.2](https://github.com/spdx/spdx-spec/tree/development/v2.2.2/schemas)
+  - SPDX Examples: [https://github.com/spdx/spdx-examples](https://github.com/spdx/spdx-examples)
 
 - Tools
-  - SPDX Online Tool: https://tools.spdx.org/app/
+  - [SPDX Online Tool](https://tools.spdx.org/app/)
     - **Note** Used the [convert](https://tools.spdx.org/app/convert/) tool to convert SPDX examples from `.tv` format to `.json`; however, conversion of [`example6-bin.spdx`](https://github.com/spdx/spdx-examples/blob/master/example6/spdx/example6-bin.spdx) resulted in an error.
 
 ### Software-Bill-of-Materials (SBOM)
@@ -1598,4 +1605,4 @@ $ go build ${LDFLAGS} -o ${BINARY}
 #### Guides
 
 - [FOSSA](https://fossa.com/)
-  - "A Practical Guide to CycloneDX": https://fossa.com/cyclonedx
+  - *["A Practical Guide to CycloneDX"](https://fossa.com/cyclonedx)*
