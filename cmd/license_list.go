@@ -178,13 +178,13 @@ func listCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	whereFilters, err := processWhereFlag(cmd)
 
 	if err == nil {
-		err = ListLicenses(writer, utils.GlobalFlags.PersistentFlags.OutputFormat, whereFilters, utils.GlobalFlags.LicenseFlags.Summary)
+		err = ListLicenses(writer, utils.GlobalFlags.PersistentFlags, whereFilters, utils.GlobalFlags.LicenseFlags.Summary)
 	}
 
 	return
 }
 
-func ListLicenses(writer io.Writer, format string, whereFilters []WhereFilter, summary bool) (err error) {
+func ListLicenses(writer io.Writer, persistentFlags utils.PersistentCommandFlags, whereFilters []WhereFilter, summary bool) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -211,13 +211,9 @@ func ListLicenses(writer io.Writer, format string, whereFilters []WhereFilter, s
 		return
 	}
 
+	format := persistentFlags.OutputFormat
 	// if `--summary` report requested
 	if summary {
-		// set default format to text for license summary
-		if format == "" {
-			format = FORMAT_TEXT
-		}
-
 		// TODO surface errors returned from "DisplayXXX" functions
 		getLogger().Infof("Outputting summary (`%s` format)...", format)
 		switch format {
@@ -233,11 +229,6 @@ func ListLicenses(writer io.Writer, format string, whereFilters []WhereFilter, s
 			DisplayLicenseListSummaryText(writer)
 		}
 	} else {
-		// If no format requested, default to JSON format
-		if format == "" {
-			format = FORMAT_JSON
-		}
-
 		// TODO surface errors returned from "DisplayXXX" functions
 		getLogger().Infof("Outputting listing (`%s` format)...", format)
 		switch format {
