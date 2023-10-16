@@ -94,9 +94,10 @@ func innerTestLicenseListBuffered(t *testing.T, testInfo *LicenseTestInfo, where
 	// Use a test input SBOM formatted in SPDX
 	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile
 	utils.GlobalFlags.PersistentFlags.OutputFormat = testInfo.OutputFormat
+	utils.GlobalFlags.LicenseFlags.Summary = testInfo.ListSummary
 
 	// Invoke the actual List command (API)
-	err = ListLicenses(outputWriter, utils.GlobalFlags.PersistentFlags, whereFilters, testInfo.ListSummary)
+	err = ListLicenses(outputWriter, utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.LicenseFlags, whereFilters)
 
 	return
 }

@@ -178,13 +178,13 @@ func listCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	whereFilters, err := processWhereFlag(cmd)
 
 	if err == nil {
-		err = ListLicenses(writer, utils.GlobalFlags.PersistentFlags, whereFilters, utils.GlobalFlags.LicenseFlags.Summary)
+		err = ListLicenses(writer, utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.LicenseFlags, whereFilters)
 	}
 
 	return
 }
 
-func ListLicenses(writer io.Writer, persistentFlags utils.PersistentCommandFlags, whereFilters []WhereFilter, summary bool) (err error) {
+func ListLicenses(writer io.Writer, persistentFlags utils.PersistentCommandFlags, flags utils.LicenseCommandFlags, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -212,8 +212,9 @@ func ListLicenses(writer io.Writer, persistentFlags utils.PersistentCommandFlags
 	}
 
 	format := persistentFlags.OutputFormat
+
 	// if `--summary` report requested
-	if summary {
+	if flags.Summary {
 		// TODO surface errors returned from "DisplayXXX" functions
 		getLogger().Infof("Outputting summary (`%s` format)...", format)
 		switch format {
@@ -225,7 +226,8 @@ func ListLicenses(writer io.Writer, persistentFlags utils.PersistentCommandFlags
 			DisplayLicenseListSummaryMarkdown(writer)
 		default:
 			// Default to text output
-			getLogger().Warningf("Summary not supported for `%s` format; defaulting to `%s` format...", format, FORMAT_TEXT)
+			getLogger().Warningf("Summary not supported for `%s` format; defaulting to `%s` format...",
+				format, FORMAT_TEXT)
 			DisplayLicenseListSummaryText(writer)
 		}
 	} else {
