@@ -126,7 +126,7 @@ func schemaCmdImpl(cmd *cobra.Command, args []string) (err error) {
 		return
 	}
 
-	err = ListSchemas(writer, whereFilters)
+	err = ListSchemas(writer, utils.GlobalFlags.PersistentFlags, whereFilters)
 
 	return
 }
@@ -193,7 +193,7 @@ func sortFormatSchemaInstances(filteredSchemas []schema.FormatSchemaInstance) []
 	return filteredSchemas
 }
 
-func ListSchemas(writer io.Writer, whereFilters []WhereFilter) (err error) {
+func ListSchemas(writer io.Writer, persistentFlags utils.PersistentCommandFlags, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -207,7 +207,7 @@ func ListSchemas(writer io.Writer, whereFilters []WhereFilter) (err error) {
 	}
 
 	// default output (writer) to standard out
-	format := utils.GlobalFlags.PersistentFlags.OutputFormat
+	format := persistentFlags.OutputFormat
 	switch format {
 	case FORMAT_DEFAULT:
 		// defaults to text if no explicit `--format` parameter
