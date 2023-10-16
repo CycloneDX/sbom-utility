@@ -184,7 +184,7 @@ func listCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	return
 }
 
-func ListLicenses(output io.Writer, format string, whereFilters []WhereFilter, summary bool) (err error) {
+func ListLicenses(writer io.Writer, format string, whereFilters []WhereFilter, summary bool) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -222,15 +222,15 @@ func ListLicenses(output io.Writer, format string, whereFilters []WhereFilter, s
 		getLogger().Infof("Outputting summary (`%s` format)...", format)
 		switch format {
 		case FORMAT_TEXT:
-			DisplayLicenseListSummaryText(output)
+			DisplayLicenseListSummaryText(writer)
 		case FORMAT_CSV:
-			err = DisplayLicenseListSummaryCSV(output)
+			err = DisplayLicenseListSummaryCSV(writer)
 		case FORMAT_MARKDOWN:
-			DisplayLicenseListSummaryMarkdown(output)
+			DisplayLicenseListSummaryMarkdown(writer)
 		default:
 			// Default to text output
 			getLogger().Warningf("Summary not supported for `%s` format; defaulting to `%s` format...", format, FORMAT_TEXT)
-			DisplayLicenseListSummaryText(output)
+			DisplayLicenseListSummaryText(writer)
 		}
 	} else {
 		// If no format requested, default to JSON format
@@ -242,18 +242,18 @@ func ListLicenses(output io.Writer, format string, whereFilters []WhereFilter, s
 		getLogger().Infof("Outputting listing (`%s` format)...", format)
 		switch format {
 		case FORMAT_JSON:
-			DisplayLicenseListJson(output)
+			DisplayLicenseListJson(writer)
 		case FORMAT_CSV:
-			err = DisplayLicenseListCSV(output)
+			err = DisplayLicenseListCSV(writer)
 		case FORMAT_MARKDOWN:
-			DisplayLicenseListMarkdown(output)
+			DisplayLicenseListMarkdown(writer)
 		case FORMAT_TEXT:
-			DisplayLicenseListSummaryText(output)
+			DisplayLicenseListSummaryText(writer)
 		default:
 			// Default to JSON output for anything else
 			getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
 				format, FORMAT_JSON)
-			DisplayLicenseListJson(output)
+			DisplayLicenseListJson(writer)
 		}
 	}
 

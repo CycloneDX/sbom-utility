@@ -180,7 +180,7 @@ func validationError(document *schema.BOM, valid bool, err error) {
 	getLogger().Info(message)
 }
 
-func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, validateFlags utils.ValidateCommandFlags) (valid bool, document *schema.BOM, schemaErrors []gojsonschema.ResultError, err error) {
+func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, validateFlags utils.ValidateCommandFlags) (valid bool, document *schema.BOM, schemaErrors []gojsonschema.ResultError, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -325,11 +325,11 @@ func Validate(output io.Writer, persistentFlags utils.PersistentCommandFlags, va
 			// Note: we no longer add the formatted errors to the actual error "detail" field;
 			// since BOMs can have large numbers of errors.  The new method is to allow
 			// the user to control the error result output (e.g., file, detail, etc.) via flags
-			FormatSchemaErrors(output, schemaErrors, validateFlags, format)
+			FormatSchemaErrors(writer, schemaErrors, validateFlags, format)
 		default:
 			// Notify caller that we are defaulting to "txt" format
 			getLogger().Warningf(MSG_WARN_INVALID_FORMAT, format, FORMAT_TEXT)
-			FormatSchemaErrors(output, schemaErrors, validateFlags, FORMAT_TEXT)
+			FormatSchemaErrors(writer, schemaErrors, validateFlags, FORMAT_TEXT)
 		}
 
 		return INVALID, document, schemaErrors, errInvalid

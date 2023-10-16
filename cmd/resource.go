@@ -189,7 +189,7 @@ func resourceCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	resourceType, err = retrieveResourceType(cmd)
 
 	if err == nil {
-		err = ListResources(writer, utils.GlobalFlags.PersistentFlags.OutputFormat, resourceType, whereFilters)
+		err = ListResources(writer, utils.GlobalFlags.PersistentFlags, resourceType, whereFilters)
 	}
 
 	return
@@ -204,7 +204,7 @@ func processResourceListResults(err error) {
 }
 
 // NOTE: resourceType has already been validated
-func ListResources(output io.Writer, format string, resourceType string, whereFilters []WhereFilter) (err error) {
+func ListResources(writer io.Writer, persistentFlags utils.PersistentCommandFlags, resourceType string, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -231,19 +231,20 @@ func ListResources(output io.Writer, format string, resourceType string, whereFi
 		return
 	}
 
+	format := persistentFlags.OutputFormat
 	getLogger().Infof("Outputting listing (`%s` format)...", format)
 	switch format {
 	case FORMAT_TEXT:
-		DisplayResourceListText(output)
+		DisplayResourceListText(writer)
 	case FORMAT_CSV:
-		DisplayResourceListCSV(output)
+		DisplayResourceListCSV(writer)
 	case FORMAT_MARKDOWN:
-		DisplayResourceListMarkdown(output)
+		DisplayResourceListMarkdown(writer)
 	default:
 		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_TEXT)
-		DisplayResourceListText(output)
+		DisplayResourceListText(writer)
 	}
 
 	return

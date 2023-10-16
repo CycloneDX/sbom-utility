@@ -76,7 +76,10 @@ func innerBufferedTestResourceList(t *testing.T, testInfo *ResourceTestInfo, whe
 	// ensure all data is written to buffer before further validation
 	defer outputWriter.Flush()
 
-	err = ListResources(outputWriter, testInfo.OutputFormat, testInfo.ResourceType, whereFilters)
+	var persistentFlags utils.PersistentCommandFlags
+	persistentFlags.OutputFormat = testInfo.OutputFormat
+
+	err = ListResources(outputWriter, persistentFlags, testInfo.ResourceType, whereFilters)
 	return
 }
 

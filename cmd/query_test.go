@@ -19,6 +19,8 @@
 package cmd
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/fs"
@@ -48,9 +50,15 @@ func innerQuery(t *testing.T, filename string, queryRequest *QueryRequest, autof
 	// Copy the test filename to the command line flags were the code looks for it
 	utils.GlobalFlags.PersistentFlags.InputFile = filename
 
+	// Declare an output outputBuffer/outputWriter to use used during tests
+	var outputBuffer bytes.Buffer
+	var outputWriter = bufio.NewWriter(&outputBuffer)
+	// ensure all data is written to buffer before further validation
+	defer outputWriter.Flush()
+
 	// allocate response/result object and invoke query
 	var response = new(QueryResponse)
-	result, err = query(queryRequest, response)
+	result, err = Query(outputWriter, queryRequest, response)
 
 	// if the query resulted in a failure
 	if err != nil {
