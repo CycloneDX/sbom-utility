@@ -113,22 +113,22 @@ func diffCmdImpl(cmd *cobra.Command, args []string) (err error) {
 		}
 	}()
 
-	err = Diff(utils.GlobalFlags)
+	err = Diff(utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.DiffFlags)
 
 	return
 }
 
-func Diff(flags utils.CommandFlags) (err error) {
+func Diff(persistentFlags utils.PersistentCommandFlags, flags utils.DiffCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	// create locals
-	format := utils.GlobalFlags.PersistentFlags.OutputFormat
-	inputFilename := utils.GlobalFlags.PersistentFlags.InputFile
-	outputFilename := utils.GlobalFlags.PersistentFlags.OutputFile
-	outputFormat := utils.GlobalFlags.PersistentFlags.OutputFormat
-	revisedFilename := utils.GlobalFlags.DiffFlags.RevisedFile
-	deltaColorize := utils.GlobalFlags.DiffFlags.Colorize
+	format := persistentFlags.OutputFormat
+	inputFilename := persistentFlags.InputFile
+	outputFilename := persistentFlags.OutputFile
+	outputFormat := persistentFlags.OutputFormat
+	revisedFilename := flags.RevisedFile
+	deltaColorize := flags.Colorize
 
 	// Create output writer
 	outputFile, output, err := createOutputFile(outputFilename)
