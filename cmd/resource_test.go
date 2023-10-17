@@ -78,8 +78,9 @@ func innerBufferedTestResourceList(t *testing.T, testInfo *ResourceTestInfo, whe
 
 	var persistentFlags utils.PersistentCommandFlags
 	persistentFlags.OutputFormat = testInfo.OutputFormat
+	resourceFlags := utils.NewResourceCommandFlags(testInfo.ResourceType)
 
-	err = ListResources(outputWriter, persistentFlags, testInfo.ResourceType, whereFilters)
+	err = ListResources(outputWriter, persistentFlags, resourceFlags, whereFilters)
 	return
 }
 

@@ -190,7 +190,7 @@ func processLicensePolicyListResults(err error) {
 	}
 }
 
-func ListLicensePolicies(writer io.Writer, whereFilters []WhereFilter, flags utils.LicenseCommandFlags) (err error) {
+func ListLicensePolicies(writer io.Writer, whereFilters []WhereFilter, licenseFlags utils.LicenseCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -214,18 +214,18 @@ func ListLicensePolicies(writer io.Writer, whereFilters []WhereFilter, flags uti
 	switch utils.GlobalFlags.PersistentFlags.OutputFormat {
 	case FORMAT_DEFAULT:
 		// defaults to text if no explicit `--format` parameter
-		err = DisplayLicensePoliciesTabbedText(writer, filteredMap, flags)
+		err = DisplayLicensePoliciesTabbedText(writer, filteredMap, licenseFlags)
 	case FORMAT_TEXT:
-		err = DisplayLicensePoliciesTabbedText(writer, filteredMap, flags)
+		err = DisplayLicensePoliciesTabbedText(writer, filteredMap, licenseFlags)
 	case FORMAT_CSV:
-		err = DisplayLicensePoliciesCSV(writer, filteredMap, flags)
+		err = DisplayLicensePoliciesCSV(writer, filteredMap, licenseFlags)
 	case FORMAT_MARKDOWN:
-		err = DisplayLicensePoliciesMarkdown(writer, filteredMap, flags)
+		err = DisplayLicensePoliciesMarkdown(writer, filteredMap, licenseFlags)
 	default:
 		// default to text format for anything else
 		getLogger().Warningf("Unsupported format: `%s`; using default format.",
 			utils.GlobalFlags.PersistentFlags.OutputFormat)
-		err = DisplayLicensePoliciesTabbedText(writer, filteredMap, flags)
+		err = DisplayLicensePoliciesTabbedText(writer, filteredMap, licenseFlags)
 	}
 	return
 }

@@ -30,6 +30,7 @@ import (
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/jwangsadinata/go-multimap/slicemultimap"
 	"github.com/spf13/cobra"
+	"golang.org/x/exp/slices"
 )
 
 const (
@@ -86,6 +87,10 @@ const (
 )
 
 var VALID_RESOURCE_TYPES = []string{RESOURCE_TYPE_DEFAULT, RESOURCE_TYPE_COMPONENT, RESOURCE_TYPE_SERVICE}
+
+func isValidResourceType(value string) bool {
+	return slices.Contains(VALID_RESOURCE_TYPES, value)
+}
 
 // TODO: need to strip `-` from `bom-ref` for where filter
 type ResourceInfo struct {
@@ -150,16 +155,12 @@ func retrieveResourceType(cmd *cobra.Command) (resourceType string, err error) {
 		return
 	}
 
-	// validate value
-	for _, validType := range VALID_RESOURCE_TYPES {
-		if resourceType == validType {
-			// valid
-			return
-		}
+	// validate resource type is a known keyword
+	if !isValidResourceType(resourceType) {
+		// invalid
+		err = getLogger().Errorf("invalid resource `%s`: `%s`", FLAG_RESOURCE_TYPE, resourceType)
 	}
 
-	// invalid
-	err = getLogger().Errorf("invalid resource `type`: `%s`", resourceType)
 	return
 }
 
@@ -186,10 +187,12 @@ func resourceCmdImpl(cmd *cobra.Command, args []string) (err error) {
 
 	// Process flag: --type
 	var resourceType string
+	var resourceFlags utils.ResourceCommandFlags
 	resourceType, err = retrieveResourceType(cmd)
 
 	if err == nil {
-		err = ListResources(writer, utils.GlobalFlags.PersistentFlags, resourceType, whereFilters)
+		resourceFlags.ResourceType = resourceType
+		err = ListResources(writer, utils.GlobalFlags.PersistentFlags, resourceFlags, whereFilters)
 	}
 
 	return
@@ -204,7 +207,7 @@ func processResourceListResults(err error) {
 }
 
 // NOTE: resourceType has already been validated
-func ListResources(writer io.Writer, persistentFlags utils.PersistentCommandFlags, resourceType string, whereFilters []WhereFilter) (err error) {
+func ListResources(writer io.Writer, persistentFlags utils.PersistentCommandFlags, resourceFlags utils.ResourceCommandFlags, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -225,7 +228,7 @@ func ListResources(writer io.Writer, persistentFlags utils.PersistentCommandFlag
 
 	// Hash all licenses within input file
 	getLogger().Infof("Scanning document for licenses...")
-	err = loadDocumentResources(document, resourceType, whereFilters)
+	err = loadDocumentResources(document, resourceFlags.ResourceType, whereFilters)
 
 	if err != nil {
 		return

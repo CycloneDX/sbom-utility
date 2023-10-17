@@ -184,7 +184,7 @@ func listCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	return
 }
 
-func ListLicenses(writer io.Writer, persistentFlags utils.PersistentCommandFlags, flags utils.LicenseCommandFlags, whereFilters []WhereFilter) (err error) {
+func ListLicenses(writer io.Writer, persistentFlags utils.PersistentCommandFlags, LicenseFlags utils.LicenseCommandFlags, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -214,7 +214,7 @@ func ListLicenses(writer io.Writer, persistentFlags utils.PersistentCommandFlags
 	format := persistentFlags.OutputFormat
 
 	// if `--summary` report requested
-	if flags.Summary {
+	if LicenseFlags.Summary {
 		// TODO surface errors returned from "DisplayXXX" functions
 		getLogger().Infof("Outputting summary (`%s` format)...", format)
 		switch format {
