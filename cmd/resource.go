@@ -92,19 +92,6 @@ func isValidResourceType(value string) bool {
 	return slices.Contains(VALID_RESOURCE_TYPES, value)
 }
 
-// TODO: need to strip `-` from `bom-ref` for where filter
-type ResourceInfo struct {
-	isRoot           bool
-	Type             string `json:"type"`
-	BOMRef           string `json:"bom-ref"`
-	Name             string `json:"name"`
-	Version          string `json:"version"`
-	SupplierProvider schema.CDXOrganizationalEntity
-	Properties       []schema.CDXProperty
-	Component        schema.CDXComponent
-	Service          schema.CDXService
-}
-
 // Holds resources (e.g., components, services) declared license(s)
 var resourceMap = slicemultimap.New()
 
@@ -276,7 +263,7 @@ func loadDocumentResources(document *schema.BOM, resourceType string, whereFilte
 
 	// Add top-level SBOM component
 	if resourceType == RESOURCE_TYPE_DEFAULT || resourceType == RESOURCE_TYPE_COMPONENT {
-		_, err = hashComponentAsResource(*document.GetCdxMetadataComponent(), whereFilters, true)
+		_, err = hashComponent(*document.GetCdxMetadataComponent(), whereFilters, true)
 		if err != nil {
 			return
 		}
@@ -306,7 +293,7 @@ func hashComponents(components []schema.CDXComponent, whereFilters []WhereFilter
 	defer getLogger().Exit(err)
 
 	for _, cdxComponent := range components {
-		_, err = hashComponentAsResource(cdxComponent, whereFilters, root)
+		_, err = hashComponent(cdxComponent, whereFilters, root)
 		if err != nil {
 			return
 		}
@@ -316,10 +303,10 @@ func hashComponents(components []schema.CDXComponent, whereFilters []WhereFilter
 
 // Hash a CDX Component and recursively those of any "nested" components
 // TODO we should WARN if version is not a valid semver (e.g., examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json)
-func hashComponentAsResource(cdxComponent schema.CDXComponent, whereFilters []WhereFilter, root bool) (ri *ResourceInfo, err error) {
+func hashComponent(cdxComponent schema.CDXComponent, whereFilters []WhereFilter, root bool) (ri *schema.CDXResourceInfo, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
-	var resourceInfo ResourceInfo
+	var resourceInfo schema.CDXResourceInfo
 	ri = &resourceInfo
 
 	if reflect.DeepEqual(cdxComponent, schema.CDXComponent{}) {
@@ -340,7 +327,7 @@ func hashComponentAsResource(cdxComponent schema.CDXComponent, whereFilters []Wh
 	}
 
 	// hash any component w/o a license using special key name
-	resourceInfo.isRoot = root
+	resourceInfo.IsRoot = root
 	resourceInfo.Type = RESOURCE_TYPE_COMPONENT
 	resourceInfo.Component = cdxComponent
 	resourceInfo.Name = cdxComponent.Name
@@ -388,10 +375,10 @@ func hashServices(services []schema.CDXService, whereFilters []WhereFilter) (err
 }
 
 // Hash a CDX Component and recursively those of any "nested" components
-func hashServiceAsResource(cdxService schema.CDXService, whereFilters []WhereFilter) (ri *ResourceInfo, err error) {
+func hashServiceAsResource(cdxService schema.CDXService, whereFilters []WhereFilter) (ri *schema.CDXResourceInfo, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
-	var resourceInfo ResourceInfo
+	var resourceInfo schema.CDXResourceInfo
 	ri = &resourceInfo
 
 	if reflect.DeepEqual(cdxService, schema.CDXService{}) {
@@ -479,8 +466,8 @@ func DisplayResourceListText(output io.Writer) {
 
 	// Sort by Type then Name
 	sort.Slice(entries, func(i, j int) bool {
-		resource1 := (entries[i].Value).(ResourceInfo)
-		resource2 := (entries[j].Value).(ResourceInfo)
+		resource1 := (entries[i].Value).(schema.CDXResourceInfo)
+		resource2 := (entries[j].Value).(schema.CDXResourceInfo)
 		if resource1.Type != resource2.Type {
 			return resource1.Type < resource2.Type
 		}
@@ -488,11 +475,11 @@ func DisplayResourceListText(output io.Writer) {
 		return resource1.Name < resource2.Name
 	})
 
-	var resourceInfo ResourceInfo
+	var resourceInfo schema.CDXResourceInfo
 
 	for _, entry := range entries {
 		value := entry.Value
-		resourceInfo = value.(ResourceInfo)
+		resourceInfo = value.(schema.CDXResourceInfo)
 
 		// Format line and write to output
 		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
@@ -531,8 +518,8 @@ func DisplayResourceListCSV(output io.Writer) (err error) {
 
 	// Sort by Type
 	sort.Slice(entries, func(i, j int) bool {
-		resource1 := (entries[i].Value).(ResourceInfo)
-		resource2 := (entries[j].Value).(ResourceInfo)
+		resource1 := (entries[i].Value).(schema.CDXResourceInfo)
+		resource2 := (entries[j].Value).(schema.CDXResourceInfo)
 		if resource1.Type != resource2.Type {
 			return resource1.Type < resource2.Type
 		}
@@ -540,12 +527,12 @@ func DisplayResourceListCSV(output io.Writer) (err error) {
 		return resource1.Name < resource2.Name
 	})
 
-	var resourceInfo ResourceInfo
+	var resourceInfo schema.CDXResourceInfo
 	var line []string
 
 	for _, entry := range entries {
 		value := entry.Value
-		resourceInfo = value.(ResourceInfo)
+		resourceInfo = value.(schema.CDXResourceInfo)
 		line = nil
 		line = append(line,
 			resourceInfo.Type,
@@ -586,8 +573,8 @@ func DisplayResourceListMarkdown(output io.Writer) (err error) {
 
 	// Sort by Type
 	sort.Slice(entries, func(i, j int) bool {
-		resource1 := (entries[i].Value).(ResourceInfo)
-		resource2 := (entries[j].Value).(ResourceInfo)
+		resource1 := (entries[i].Value).(schema.CDXResourceInfo)
+		resource2 := (entries[j].Value).(schema.CDXResourceInfo)
 		if resource1.Type != resource2.Type {
 			return resource1.Type < resource2.Type
 		}
@@ -595,13 +582,13 @@ func DisplayResourceListMarkdown(output io.Writer) (err error) {
 		return resource1.Name < resource2.Name
 	})
 
-	var resourceInfo ResourceInfo
+	var resourceInfo schema.CDXResourceInfo
 	var line []string
 	var lineRow string
 
 	for _, entry := range entries {
 		value := entry.Value
-		resourceInfo = value.(ResourceInfo)
+		resourceInfo = value.(schema.CDXResourceInfo)
 		// reset current line
 		line = nil
 

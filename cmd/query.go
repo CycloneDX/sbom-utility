@@ -22,7 +22,6 @@ import (
 	"encoding/gob"
 	"fmt"
 	"io"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -93,19 +92,6 @@ type QueryRequest struct {
 	//orderByKeys       []string // TODO
 	isFromObjectAMap    bool
 	isFromObjectAnArray bool
-}
-
-type WhereFilter struct {
-	key        string
-	Operand    string
-	Value      string
-	ValueRegEx *regexp.Regexp
-}
-
-func (filter *WhereFilter) GetNormalizeKey() (normalizedKey string) {
-	normalizedKey = strings.ToLower(filter.key)
-	normalizedKey = strings.Replace(normalizedKey, "-", "", -1)
-	return
 }
 
 // Implement the Stringer interface for QueryRequest
@@ -323,7 +309,7 @@ func parseWhereFilter(rawExpression string) (pWhereSelector *WhereFilter) {
 
 	var whereFilter = WhereFilter{}
 	whereFilter.Operand = QUERY_WHERE_OPERAND_EQUALS
-	whereFilter.key = tokens[0]
+	whereFilter.Key = tokens[0]
 	whereFilter.Value = tokens[1]
 
 	if whereFilter.Value == "" {
@@ -587,7 +573,7 @@ func whereFilterMatch(mapObject map[string]interface{}, whereFilters []WhereFilt
 
 	for _, filter := range whereFilters {
 
-		key = filter.key
+		key = filter.Key
 		value, present := mapObject[key]
 		getLogger().Debugf("testing object map[%s]: `%v`", key, value)
 

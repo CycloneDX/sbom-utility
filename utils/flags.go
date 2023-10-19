@@ -50,6 +50,7 @@ type CommandFlags struct {
 	SchemaFlags             SchemaCommandFlags
 	ValidateFlags           ValidateCommandFlags
 	VulnerabilityFlags      VulnerabilityCommandFlags
+	StatsFlags              StatsCommandFlags
 
 	// Misc flags
 	LogOutputIndentCallstack bool // Log indent
@@ -102,6 +103,9 @@ func NewResourceCommandFlags(resourceType string) ResourceCommandFlags {
 }
 
 type SchemaCommandFlags struct {
+}
+
+type StatsCommandFlags struct {
 }
 
 type CustomValidationFlags struct {

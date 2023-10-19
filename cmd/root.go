@@ -43,6 +43,7 @@ const (
 	CMD_VALIDATE      = "validate"
 	CMD_VERSION       = "version"
 	CMD_VULNERABILITY = "vulnerability"
+	CMD_STATS         = "stats"
 )
 
 // WARNING!!! The ".Use" field of a Cobra command MUST have the first word be the actual command
@@ -56,6 +57,7 @@ const (
 	CMD_USAGE_SCHEMA_LIST        = CMD_SCHEMA + " [--where key=regex[,...]] [--format txt|csv|md]"
 	CMD_USAGE_VALIDATE           = CMD_VALIDATE + " --input-file <input_file> [--variant <variant_name>] [--format txt|json] [--force schema_file]"
 	CMD_USAGE_VULNERABILITY_LIST = CMD_VULNERABILITY + " " + SUBCOMMAND_VULNERABILITY_LIST + " --input-file <input_file> [--summary] [--where key=regex[,...]] [--format json|txt|csv|md]"
+	CMD_USAGE_STATS_LIST         = CMD_STATS + " --input-file <input_file> [--type component|service] [--format txt|csv|md]"
 )
 
 const (
@@ -180,6 +182,7 @@ func init() {
 	rootCmd.AddCommand(NewCommandResource())
 	rootCmd.AddCommand(NewCommandVulnerability())
 	rootCmd.AddCommand(NewCommandDiff())
+	rootCmd.AddCommand(NewCommandStats())
 
 	// Add license command its subcommands
 	licenseCmd := NewCommandLicense()
