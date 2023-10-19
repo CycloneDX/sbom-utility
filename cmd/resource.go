@@ -26,11 +26,11 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	. "github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/jwangsadinata/go-multimap/slicemultimap"
 	"github.com/spf13/cobra"
-	"golang.org/x/exp/slices"
 )
 
 const (
@@ -79,19 +79,6 @@ const (
 var RESOURCE_LIST_OUTPUT_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{FORMAT_TEXT, FORMAT_CSV, FORMAT_MARKDOWN}, ", ")
 
-// resource types
-const (
-	RESOURCE_TYPE_DEFAULT   = "" // i.e., all resource types
-	RESOURCE_TYPE_COMPONENT = "component"
-	RESOURCE_TYPE_SERVICE   = "service"
-)
-
-var VALID_RESOURCE_TYPES = []string{RESOURCE_TYPE_DEFAULT, RESOURCE_TYPE_COMPONENT, RESOURCE_TYPE_SERVICE}
-
-func isValidResourceType(value string) bool {
-	return slices.Contains(VALID_RESOURCE_TYPES, value)
-}
-
 // Holds resources (e.g., components, services) declared license(s)
 var resourceMap = slicemultimap.New()
 
@@ -106,7 +93,7 @@ func NewCommandResource() *cobra.Command {
 	command.Long = "Report on resources found in BOM input file"
 	command.Flags().StringVarP(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
 		FLAG_RESOURCE_OUTPUT_FORMAT_HELP+RESOURCE_LIST_OUTPUT_SUPPORTED_FORMATS)
-	command.Flags().StringP(FLAG_RESOURCE_TYPE, "", RESOURCE_TYPE_DEFAULT, FLAG_RESOURCE_TYPE_HELP)
+	command.Flags().StringP(FLAG_RESOURCE_TYPE, "", schema.RESOURCE_TYPE_DEFAULT, FLAG_RESOURCE_TYPE_HELP)
 	command.Flags().StringP(FLAG_REPORT_WHERE, "", "", FLAG_REPORT_WHERE_HELP)
 	command.RunE = resourceCmdImpl
 	command.ValidArgs = VALID_SUBCOMMANDS_RESOURCE
@@ -143,7 +130,7 @@ func retrieveResourceType(cmd *cobra.Command) (resourceType string, err error) {
 	}
 
 	// validate resource type is a known keyword
-	if !isValidResourceType(resourceType) {
+	if !schema.IsValidResourceType(resourceType) {
 		// invalid
 		err = getLogger().Errorf("invalid resource `%s`: `%s`", FLAG_RESOURCE_TYPE, resourceType)
 	}
@@ -262,7 +249,7 @@ func loadDocumentResources(document *schema.BOM, resourceType string, whereFilte
 	}
 
 	// Add top-level SBOM component
-	if resourceType == RESOURCE_TYPE_DEFAULT || resourceType == RESOURCE_TYPE_COMPONENT {
+	if resourceType == schema.RESOURCE_TYPE_DEFAULT || resourceType == schema.RESOURCE_TYPE_COMPONENT {
 		_, err = hashComponent(*document.GetCdxMetadataComponent(), whereFilters, true)
 		if err != nil {
 			return
@@ -276,7 +263,7 @@ func loadDocumentResources(document *schema.BOM, resourceType string, whereFilte
 		}
 	}
 
-	if resourceType == RESOURCE_TYPE_DEFAULT || resourceType == RESOURCE_TYPE_SERVICE {
+	if resourceType == schema.RESOURCE_TYPE_DEFAULT || resourceType == schema.RESOURCE_TYPE_SERVICE {
 		// Hash services found in the (root).services[] (array) (+ "nested" services)
 		if services := document.GetCdxServices(); len(services) > 0 {
 			if err = hashServices(services, whereFilters); err != nil {
@@ -328,7 +315,7 @@ func hashComponent(cdxComponent schema.CDXComponent, whereFilters []WhereFilter,
 
 	// hash any component w/o a license using special key name
 	resourceInfo.IsRoot = root
-	resourceInfo.Type = RESOURCE_TYPE_COMPONENT
+	resourceInfo.Type = schema.RESOURCE_TYPE_COMPONENT
 	resourceInfo.Component = cdxComponent
 	resourceInfo.Name = cdxComponent.Name
 	resourceInfo.BOMRef = cdxComponent.BOMRef.String()
@@ -399,7 +386,7 @@ func hashServiceAsResource(cdxService schema.CDXService, whereFilters []WhereFil
 	}
 
 	// hash any component w/o a license using special key name
-	resourceInfo.Type = RESOURCE_TYPE_SERVICE
+	resourceInfo.Type = schema.RESOURCE_TYPE_SERVICE
 	resourceInfo.Service = cdxService
 	resourceInfo.Name = cdxService.Name
 	resourceInfo.BOMRef = cdxService.BOMRef.String()

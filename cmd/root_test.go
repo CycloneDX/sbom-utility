@@ -25,6 +25,7 @@ import (
 	"sync"
 	"testing"
 
+	. "github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/utils"
 )
 

@@ -25,6 +25,7 @@ import (
 	"strings"
 	"sync"
 
+	. "github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/resources"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/jwangsadinata/go-multimap/slicemultimap"

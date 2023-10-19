@@ -17,6 +17,21 @@
 
 package schema
 
+import "golang.org/x/exp/slices"
+
+// resource types
+const (
+	RESOURCE_TYPE_DEFAULT   = "" // i.e., all resource types
+	RESOURCE_TYPE_COMPONENT = "component"
+	RESOURCE_TYPE_SERVICE   = "service"
+)
+
+var VALID_RESOURCE_TYPES = []string{RESOURCE_TYPE_DEFAULT, RESOURCE_TYPE_COMPONENT, RESOURCE_TYPE_SERVICE}
+
+func IsValidResourceType(value string) bool {
+	return slices.Contains(VALID_RESOURCE_TYPES, value)
+}
+
 // TODO: need to strip `-` from `bom-ref` for where filter
 // To be clear, we need the "json:" annotations to enable "where" filter
 // "key=value" matches when hashing resources since we apply it to a

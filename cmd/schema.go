@@ -25,6 +25,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	. "github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/spf13/cobra"

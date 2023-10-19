@@ -22,6 +22,7 @@ import (
 	"strconv"
 	"strings"
 
+	. "github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/spf13/cobra"
 )
@@ -251,10 +252,10 @@ const REPORT_REPLACE_LINE_FEEDS_TRUE = true
 const DEFAULT_COLUMN_TRUNCATE_LENGTH = -1
 
 // TODO: Support additional flags to:
-// - show number of chars shown vs. available when truncated (e.g., (x/y))
-// - provide "empty" value to display in column (e.g., "none" or "UNDEFINED")
-// - inform how to "summarize" (e.g., show-first-only) data if data type is a slice (e.g., []string)
-//   NOTE: if only a subset of entries are shown on a summary, an indication of (x) entries could be shown as well
+//   - show number of chars shown vs. available when truncated (e.g., (x/y))
+//   - provide "empty" value to display in column (e.g., "none" or "UNDEFINED")
+//   - inform how to "summarize" (e.g., show-first-only) data if data type is a slice (e.g., []string)
+//     NOTE: if only a subset of entries are shown on a summary, an indication of (x) entries could be shown as well
 type ColumnFormatData struct {
 	DataKey               string // Note: data key is the column label (where possible)
 	DefaultTruncateLength int    // truncate data when `--format txt`

@@ -18,13 +18,17 @@
 package schema
 
 import (
+	"bytes"
+	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"reflect"
+	"strconv"
 
+	. "github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/jwangsadinata/go-multimap/slicemultimap"
 )
@@ -238,7 +242,7 @@ func (bom *BOM) UnmarshalCycloneDXBOM() (err error) {
 	return
 }
 
-// func (bom *BOM) hashComponents(whereFilters []WhereFilter, root bool) (err error) {
+// func (bom *BOM) hashComponents(components []CDXComponent, whereFilters []WhereFilter, root bool) (err error) {
 // 	getLogger().Enter()
 // 	defer getLogger().Exit(err)
 
@@ -254,62 +258,130 @@ func (bom *BOM) UnmarshalCycloneDXBOM() (err error) {
 // 	return
 // }
 
+func (bom *BOM) hashComponents(components []CDXComponent, whereFilters []WhereFilter, root bool) (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit(err)
+	for _, cdxComponent := range components {
+		_, err = bom.hashComponent(cdxComponent, whereFilters, root)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
 // Hash a CDX Component and recursively those of any "nested" components
 // TODO we should WARN if version is not a valid semver (e.g., examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json)
-// func (bom *BOM) hashComponent(cdxComponent CDXComponent, whereFilters []WhereFilter, root bool) (ri *ResourceInfo, err error) {
-// 	getLogger().Enter()
-// 	defer getLogger().Exit(err)
-// 	var resourceInfo ResourceInfo
-// 	ri = &resourceInfo
+func (bom *BOM) hashComponent(cdxComponent CDXComponent, whereFilters []WhereFilter, root bool) (ri *CDXResourceInfo, err error) {
+	getLogger().Enter()
+	defer getLogger().Exit(err)
+	var resourceInfo CDXResourceInfo
+	ri = &resourceInfo
 
-// 	if reflect.DeepEqual(cdxComponent, CDXComponent{}) {
-// 		getLogger().Errorf("invalid component: missing or empty : %v ", cdxComponent)
-// 		return
-// 	}
+	if reflect.DeepEqual(cdxComponent, CDXComponent{}) {
+		getLogger().Errorf("invalid component: missing or empty : %v ", cdxComponent)
+		return
+	}
 
-// 	if cdxComponent.Name == "" {
-// 		getLogger().Errorf("component missing required value `name` : %v ", cdxComponent)
-// 	}
+	if cdxComponent.Name == "" {
+		getLogger().Errorf("component missing required value `name` : %v ", cdxComponent)
+	}
 
-// 	if cdxComponent.Version == "" {
-// 		getLogger().Warningf("component named `%s` missing `version`", cdxComponent.Name)
-// 	}
+	if cdxComponent.Version == "" {
+		getLogger().Warningf("component named `%s` missing `version`", cdxComponent.Name)
+	}
 
-// 	if cdxComponent.BOMRef == "" {
-// 		getLogger().Warningf("component named `%s` missing `bom-ref`", cdxComponent.Name)
-// 	}
+	if cdxComponent.BOMRef == "" {
+		getLogger().Warningf("component named `%s` missing `bom-ref`", cdxComponent.Name)
+	}
 
-// 	// hash any component w/o a license using special key name
-// 	resourceInfo.isRoot = root
-// 	resourceInfo.Type = RESOURCE_TYPE_COMPONENT
-// 	resourceInfo.Component = cdxComponent
-// 	resourceInfo.Name = cdxComponent.Name
-// 	resourceInfo.BOMRef = cdxComponent.BOMRef.String()
-// 	resourceInfo.Version = cdxComponent.Version
-// 	resourceInfo.SupplierProvider = cdxComponent.Supplier
-// 	resourceInfo.Properties = cdxComponent.Properties
+	// hash any component w/o a license using special key name
+	resourceInfo.IsRoot = root
+	resourceInfo.Type = "" // RESOURCE_TYPE_COMPONENT
+	resourceInfo.Component = cdxComponent
+	resourceInfo.Name = cdxComponent.Name
+	resourceInfo.BOMRef = cdxComponent.BOMRef.String()
+	resourceInfo.Version = cdxComponent.Version
+	resourceInfo.SupplierProvider = cdxComponent.Supplier
+	resourceInfo.Properties = cdxComponent.Properties
 
-// 	var match bool = true
-// 	if len(whereFilters) > 0 {
-// 		mapResourceInfo, _ := utils.ConvertStructToMap(resourceInfo)
-// 		match, _ = whereFilterMatch(mapResourceInfo, whereFilters)
-// 	}
+	var match bool = true
+	if len(whereFilters) > 0 {
+		mapResourceInfo, _ := utils.ConvertStructToMap(resourceInfo)
+		match, _ = whereFilterMatch(mapResourceInfo, whereFilters)
+	}
 
-// 	if match {
-// 		resourceMap.Put(resourceInfo.BOMRef, resourceInfo)
+	if match {
+		bom.resourceMap.Put(resourceInfo.BOMRef, resourceInfo)
 
-// 		getLogger().Tracef("Put: %s (`%s`), `%s`)",
-// 			resourceInfo.Name,
-// 			resourceInfo.Version,
-// 			resourceInfo.BOMRef)
-// 	}
+		getLogger().Tracef("Put: %s (`%s`), `%s`)",
+			resourceInfo.Name,
+			resourceInfo.Version,
+			resourceInfo.BOMRef)
+	}
 
-// 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
-// 	if len(cdxComponent.Components) > 0 {
-// 		err = bom.hashComponents(cdxComponent.Components, whereFilters, root)
-// 		if err != nil {
-// 			return
-// 		}
-// 	}
-// 	return
-// }
+	// Recursively hash licenses for all child components (i.e., hierarchical composition)
+	if len(cdxComponent.Components) > 0 {
+		err = bom.hashComponents(cdxComponent.Components, whereFilters, root)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+// Note: Golang supports the RE2 regular exp. engine which does not support many
+// features such as lookahead, lookbehind, etc.
+// See: https://en.wikipedia.org/wiki/Comparison_of_regular_expression_engines
+func whereFilterMatch(mapObject map[string]interface{}, whereFilters []WhereFilter) (match bool, err error) {
+	var buf bytes.Buffer
+	var key string
+
+	// create a byte encoder
+	enc := gob.NewEncoder(&buf)
+
+	for _, filter := range whereFilters {
+
+		key = filter.Key
+		value, present := mapObject[key]
+		getLogger().Debugf("testing object map[%s]: `%v`", key, value)
+
+		if !present {
+			match = false
+			err = getLogger().Errorf("key `%s` not found ib object map", key)
+			break
+		}
+
+		// Reset the encoder'a byte buffer on each iteration and
+		// convert the value (an interface{}) to []byte we can use on regex. eval.
+		buf.Reset()
+
+		// Do not encode nil pointer values; replace with empty string
+		if value == nil {
+			value = ""
+		}
+
+		// Handle non-string data types in the map by converting them to string
+		switch data := value.(type) {
+		case bool:
+			value = strconv.FormatBool(data)
+		case int:
+			value = strconv.Itoa(data)
+		}
+
+		err = enc.Encode(value)
+
+		if err != nil {
+			err = getLogger().Errorf("Unable to convert value: `%v`, to []byte", value)
+			return
+		}
+
+		// Test that the field value matches the regex supplied in the current filter
+		// Note: the regex compilation is performed during command param. processing
+		if match = filter.ValueRegEx.Match(buf.Bytes()); !match {
+			break
+		}
+	}
+
+	return
+}
