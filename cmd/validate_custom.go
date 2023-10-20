@@ -197,6 +197,7 @@ func validateCustomMetadataProperties(document *schema.BOM) (err error) {
 	return err
 }
 
+// TODO: move to utils
 func compileRegex(test string) (expression *regexp.Regexp, err error) {
 	if test != "" {
 		expression, err = regexp.Compile(test)

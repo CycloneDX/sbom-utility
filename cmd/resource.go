@@ -25,7 +25,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	. "github.com/CycloneDX/sbom-utility/common"
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/spf13/cobra"
@@ -38,6 +38,7 @@ const (
 var VALID_SUBCOMMANDS_RESOURCE = []string{SUBCOMMAND_RESOURCE_LIST}
 
 // filter keys
+// Note: these string values MUST match annotations for the ResourceInfo struct fields
 const (
 	RESOURCE_FILTER_KEY_TYPE    = "type"
 	RESOURCE_FILTER_KEY_NAME    = "name"
@@ -76,13 +77,6 @@ const (
 
 var RESOURCE_LIST_OUTPUT_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{FORMAT_TEXT, FORMAT_CSV, FORMAT_MARKDOWN}, ", ")
-
-// Holds resources (e.g., components, services) declared license(s)
-//var resourceMap = slicemultimap.New()
-
-// func ClearGlobalResourceData() {
-// 	resourceMap.Clear()
-// }
 
 func NewCommandResource() *cobra.Command {
 	var command = new(cobra.Command)
@@ -179,7 +173,7 @@ func processResourceListResults(err error) {
 }
 
 // NOTE: resourceType has already been validated
-func ListResources(writer io.Writer, persistentFlags utils.PersistentCommandFlags, resourceFlags utils.ResourceCommandFlags, whereFilters []WhereFilter) (err error) {
+func ListResources(writer io.Writer, persistentFlags utils.PersistentCommandFlags, resourceFlags utils.ResourceCommandFlags, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -225,7 +219,7 @@ func ListResources(writer io.Writer, persistentFlags utils.PersistentCommandFlag
 	return
 }
 
-func loadDocumentResources(document *schema.BOM, resourceType string, whereFilters []WhereFilter) (err error) {
+func loadDocumentResources(document *schema.BOM, resourceType string, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -238,9 +232,6 @@ func loadDocumentResources(document *schema.BOM, resourceType string, whereFilte
 		return
 	}
 
-	// Clear out any old (global)hashmap data (NOTE: 'go test' needs this)
-	//ClearGlobalResourceData()
-
 	// Before looking for license data, fully unmarshal the SBOM into named structures
 	if err = document.UnmarshalCycloneDXBOM(); err != nil {
 		return
@@ -248,32 +239,17 @@ func loadDocumentResources(document *schema.BOM, resourceType string, whereFilte
 
 	// Add top-level SBOM component
 	if resourceType == schema.RESOURCE_TYPE_DEFAULT || resourceType == schema.RESOURCE_TYPE_COMPONENT {
-		// _, err = hashComponent(*document.GetCdxMetadataComponent(), whereFilters, true)
-		// if err != nil {
-		// 	return
-		// }
-
-		// // Hash all components found in the (root).components[] (+ "nested" components)
-		// if components := document.GetCdxComponents(); len(components) > 0 {
-		// 	if err = hashComponents(components, whereFilters, false); err != nil {
-		// 		return
-		// 	}
-		// }
 		err = document.HashComponentResources(whereFilters)
-
 		if err != nil {
 			return
 		}
 	}
 
 	if resourceType == schema.RESOURCE_TYPE_DEFAULT || resourceType == schema.RESOURCE_TYPE_SERVICE {
-		// Hash services found in the (root).services[] (array) (+ "nested" services)
-		// if services := document.GetCdxServices(); len(services) > 0 {
-		// 	if err = hashServices(document, services, whereFilters); err != nil {
-		// 		return
-		// 	}
-		// }
-		document.HashServiceResources(whereFilters)
+		err = document.HashServiceResources(whereFilters)
+		if err != nil {
+			return
+		}
 	}
 
 	return

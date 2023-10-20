@@ -27,6 +27,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"strconv"
+	"strings"
 
 	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/utils"
@@ -35,16 +36,17 @@ import (
 
 // Candidate BOM document (context) information
 type BOM struct {
-	filename     string
-	absFilename  string
-	rawBytes     []byte
-	JsonMap      map[string]interface{}
-	FormatInfo   FormatSchema
-	SchemaInfo   FormatSchemaInstance
-	CdxBom       *CDXBom
-	ResourceMap  *slicemultimap.MultiMap
-	ComponentMap *slicemultimap.MultiMap
-	ServiceMap   *slicemultimap.MultiMap
+	filename         string
+	absFilename      string
+	rawBytes         []byte
+	JsonMap          map[string]interface{}
+	FormatInfo       FormatSchema
+	SchemaInfo       FormatSchemaInstance
+	CdxBom           *CDXBom
+	ResourceMap      *slicemultimap.MultiMap
+	ComponentMap     *slicemultimap.MultiMap
+	ServiceMap       *slicemultimap.MultiMap
+	VulnerabilityMap *slicemultimap.MultiMap
 }
 
 func (bom *BOM) GetRawBytes() []byte {
@@ -56,10 +58,12 @@ func NewBOM(inputFile string) *BOM {
 		filename: inputFile,
 	}
 
+	// NOTE: the CdxBom Map is allocated (i.e., using `make`) as part of `UnmarshalSBOM` method
 	temp.ResourceMap = slicemultimap.New()
 	temp.ComponentMap = slicemultimap.New()
 	temp.ServiceMap = slicemultimap.New()
-	// NOTE: the Map is allocated (i.e., using `make`) as part of `UnmarshalSBOM` method
+	temp.VulnerabilityMap = slicemultimap.New()
+
 	return &temp
 }
 
@@ -101,9 +105,7 @@ func (bom *BOM) GetCdxComponents() (components []CDXComponent) {
 	if bom := bom.GetCdxBom(); bom != nil {
 		if bom.Components != nil {
 			components = *bom.Components
-		} //else {
-		//			fmt.Printf("[WARN: bom.Components=`%v`\n", bom.Components)
-		//		}
+		}
 	}
 	return components
 }
@@ -112,9 +114,7 @@ func (bom *BOM) GetCdxServices() (services []CDXService) {
 	if bom := bom.GetCdxBom(); bom != nil {
 		if bom.Services != nil {
 			services = *bom.Services
-		} //else {
-		//			fmt.Printf("[WARN: bom.Services=`%v`\n", bom.Services)
-		//		}
+		}
 	}
 	return services
 }
@@ -436,6 +436,151 @@ func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFi
 	}
 	return
 }
+
+// -------------------
+// Vulnerabilities
+// -------------------
+
+// We need to hash our own informational structure around the CDX data in order
+// to simplify --where queries to command line users
+func (bom *BOM) HashVulnerabilities(vulnerabilities []CDXVulnerability, whereFilters []common.WhereFilter) (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit(err)
+
+	for _, cdxVulnerability := range vulnerabilities {
+		_, err = bom.HashVulnerability(cdxVulnerability, whereFilters)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+// Hash a CDX Component and recursively those of any "nested" components
+// TODO we should WARN if version is not a valid semver (e.g., examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json)
+func (bom *BOM) HashVulnerability(cdxVulnerability CDXVulnerability, whereFilters []common.WhereFilter) (vi *VulnerabilityInfo, err error) {
+	getLogger().Enter()
+	defer getLogger().Exit(err)
+	var vulnInfo VulnerabilityInfo
+	vi = &vulnInfo
+
+	if reflect.DeepEqual(cdxVulnerability, CDXVulnerability{}) {
+		err = getLogger().Errorf("invalid vulnerability info: missing or empty : %v ", cdxVulnerability)
+		return
+	}
+
+	if cdxVulnerability.Id == "" {
+		getLogger().Warningf("vulnerability missing required value `id` : %v ", cdxVulnerability)
+	}
+
+	if cdxVulnerability.Published == "" {
+		getLogger().Warningf("vulnerability (`%s`) missing `published` date", cdxVulnerability.Id)
+	}
+
+	if cdxVulnerability.Created == "" {
+		getLogger().Warningf("vulnerability (`%s`) missing `created` date", cdxVulnerability.Id)
+	}
+
+	if len(cdxVulnerability.Ratings) == 0 {
+		getLogger().Warningf("vulnerability (`%s`) missing `ratings`", cdxVulnerability.Id)
+	}
+
+	// hash any component w/o a license using special key name
+	vulnInfo.Vulnerability = cdxVulnerability
+	vulnInfo.BOMRef = cdxVulnerability.BOMRef.String()
+	vulnInfo.Id = cdxVulnerability.Id
+
+	// Truncate dates from 2023-02-02T00:00:00.000Z to 2023-02-02
+	// Note: if validation errors are found by the "truncate" function,
+	// it will emit an error and return the original (failing) value
+	dateTime, _ := utils.TruncateTimeStampISO8601Date(cdxVulnerability.Created)
+	vulnInfo.Created = dateTime
+
+	dateTime, _ = utils.TruncateTimeStampISO8601Date(cdxVulnerability.Published)
+	vulnInfo.Published = dateTime
+
+	dateTime, _ = utils.TruncateTimeStampISO8601Date(cdxVulnerability.Updated)
+	vulnInfo.Updated = dateTime
+
+	dateTime, _ = utils.TruncateTimeStampISO8601Date(cdxVulnerability.Rejected)
+	vulnInfo.Rejected = dateTime
+
+	vulnInfo.Description = cdxVulnerability.Description
+
+	// Source object: retrieve report fields from nested objects
+	vulnInfo.Source = cdxVulnerability.Source
+	vulnInfo.SourceName = cdxVulnerability.Source.Name
+	vulnInfo.SourceUrl = cdxVulnerability.Source.Url
+
+	// TODO: replace empty Analysis values with "UNDEFINED"
+	vulnInfo.AnalysisState = cdxVulnerability.Analysis.State
+	if vulnInfo.AnalysisState == "" {
+		vulnInfo.AnalysisState = VULN_ANALYSIS_STATE_EMPTY
+	}
+
+	vulnInfo.AnalysisJustification = cdxVulnerability.Analysis.Justification
+	if vulnInfo.AnalysisJustification == "" {
+		vulnInfo.AnalysisJustification = VULN_ANALYSIS_STATE_EMPTY
+	}
+	vulnInfo.AnalysisResponse = cdxVulnerability.Analysis.Response
+	if len(vulnInfo.AnalysisResponse) == 0 {
+		vulnInfo.AnalysisResponse = []string{VULN_ANALYSIS_STATE_EMPTY}
+	}
+
+	// Convert []int to []string for --where filter
+	// TODO see if we can eliminate this conversion and handle while preparing report data
+	// as this SHOULD appear there as []interface{}
+	if len(cdxVulnerability.Cwes) > 0 {
+		vulnInfo.CweIds = strings.Fields(strings.Trim(fmt.Sprint(cdxVulnerability.Cwes), "[]"))
+	}
+
+	// CVSS Score 	Qualitative Rating
+	// 0.0 	        None
+	// 0.1 – 3.9 	Low
+	// 4.0 – 6.9 	Medium
+	// 7.0 – 8.9 	High
+	// 9.0 – 10.0 	Critical
+
+	// TODO: if summary report, see if more than one severity can be shown without clogging up column data
+	numRatings := len(cdxVulnerability.Ratings)
+	if numRatings > 0 {
+		//var sourceMatch int
+		for _, rating := range cdxVulnerability.Ratings {
+			// defer to same source as the top-level vuln. declares
+			fSeverity := fmt.Sprintf("%s: %v (%s)", rating.Method, rating.Score, rating.Severity)
+			// give listing priority to ratings that matches top-level vuln. reporting source
+			if rating.Source.Name == cdxVulnerability.Source.Name {
+				// prepend to slice
+				vulnInfo.CvssSeverity = append([]string{fSeverity}, vulnInfo.CvssSeverity...)
+				continue
+			}
+			vulnInfo.CvssSeverity = append(vulnInfo.CvssSeverity, fSeverity)
+		}
+
+	} else {
+		// Set first entry to empty value (i.e., "none")
+		vulnInfo.CvssSeverity = append(vulnInfo.CvssSeverity, VULN_RATING_EMPTY)
+	}
+
+	var match bool = true
+	if len(whereFilters) > 0 {
+		mapVulnInfo, _ := utils.ConvertStructToMap(vulnInfo)
+		match, _ = whereFilterMatch(mapVulnInfo, whereFilters)
+	}
+
+	if match {
+		bom.VulnerabilityMap.Put(vulnInfo.Id, vulnInfo)
+
+		getLogger().Tracef("Put: %s (`%s`), `%s`)",
+			vulnInfo.Id, vulnInfo.Description, vulnInfo.BOMRef)
+	}
+
+	return
+}
+
+// -------------------
+// Misc
+// -------------------
 
 // Note: Golang supports the RE2 regular exp. engine which does not support many
 // features such as lookahead, lookbehind, etc.

@@ -19,6 +19,10 @@ package schema
 
 import "golang.org/x/exp/slices"
 
+// -------------------
+// Resources
+// -------------------
+
 // resource types
 const (
 	RESOURCE_TYPE_DEFAULT   = "" // i.e., all resource types
@@ -54,4 +58,35 @@ type CDXResourceInfo struct {
 	Properties       []CDXProperty
 	Component        CDXComponent
 	Service          CDXService
+}
+
+// -------------------
+// Vulnerabilities
+// -------------------
+
+// default / "empty" values
+const (
+	VULN_DATE_EMPTY           = "none"
+	VULN_ANALYSIS_STATE_EMPTY = "UNDEFINED"
+	VULN_RATING_EMPTY         = "none"
+)
+
+// This data consolidates nested information into a flattened version more suitable for report listings
+type VulnerabilityInfo struct {
+	Id                    string                 `json:"id"`
+	BOMRef                string                 `json:"bom-ref"`
+	CvssSeverity          []string               `json:"cvss-severity"`
+	Created               string                 `json:"created"`
+	Published             string                 `json:"published"`
+	Updated               string                 `json:"updated"`
+	Rejected              string                 `json:"rejected"`
+	Description           string                 `json:"description"`
+	SourceUrl             string                 `json:"source-url"`
+	SourceName            string                 `json:"source-name"`
+	AnalysisState         string                 `json:"analysis-state"`
+	AnalysisJustification string                 `json:"analysis-justification"`
+	AnalysisResponse      []string               `json:"analysis-response"`
+	CweIds                []string               `json:"cwe-ids"`
+	Source                CDXVulnerabilitySource `json:"source"`
+	Vulnerability         CDXVulnerability
 }
