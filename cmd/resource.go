@@ -21,7 +21,6 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
-	"reflect"
 	"sort"
 	"strings"
 	"text/tabwriter"
@@ -269,160 +268,14 @@ func loadDocumentResources(document *schema.BOM, resourceType string, whereFilte
 
 	if resourceType == schema.RESOURCE_TYPE_DEFAULT || resourceType == schema.RESOURCE_TYPE_SERVICE {
 		// Hash services found in the (root).services[] (array) (+ "nested" services)
-		if services := document.GetCdxServices(); len(services) > 0 {
-			if err = hashServices(document, services, whereFilters); err != nil {
-				return
-			}
-		}
+		// if services := document.GetCdxServices(); len(services) > 0 {
+		// 	if err = hashServices(document, services, whereFilters); err != nil {
+		// 		return
+		// 	}
+		// }
+		document.HashServiceResources(whereFilters)
 	}
 
-	return
-}
-
-// func hashComponents(components []schema.CDXComponent, whereFilters []WhereFilter, root bool) (err error) {
-// 	getLogger().Enter()
-// 	defer getLogger().Exit(err)
-
-// 	for _, cdxComponent := range components {
-// 		_, err = hashComponent(cdxComponent, whereFilters, root)
-// 		if err != nil {
-// 			return
-// 		}
-// 	}
-// 	return
-// }
-
-// Hash a CDX Component and recursively those of any "nested" components
-// TODO we should WARN if version is not a valid semver (e.g., examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json)
-// func hashComponent(cdxComponent schema.CDXComponent, whereFilters []WhereFilter, root bool) (ri *schema.CDXResourceInfo, err error) {
-// 	getLogger().Enter()
-// 	defer getLogger().Exit(err)
-// 	var resourceInfo schema.CDXResourceInfo
-// 	ri = &resourceInfo
-
-// 	if reflect.DeepEqual(cdxComponent, schema.CDXComponent{}) {
-// 		getLogger().Errorf("invalid component: missing or empty : %v ", cdxComponent)
-// 		return
-// 	}
-
-// 	if cdxComponent.Name == "" {
-// 		getLogger().Errorf("component missing required value `name` : %v ", cdxComponent)
-// 	}
-
-// 	if cdxComponent.Version == "" {
-// 		getLogger().Warningf("component named `%s` missing `version`", cdxComponent.Name)
-// 	}
-
-// 	if cdxComponent.BOMRef == "" {
-// 		getLogger().Warningf("component named `%s` missing `bom-ref`", cdxComponent.Name)
-// 	}
-
-// 	// hash any component w/o a license using special key name
-// 	resourceInfo.IsRoot = root
-// 	resourceInfo.Type = schema.RESOURCE_TYPE_COMPONENT
-// 	resourceInfo.Component = cdxComponent
-// 	resourceInfo.Name = cdxComponent.Name
-// 	resourceInfo.BOMRef = cdxComponent.BOMRef.String()
-// 	resourceInfo.Version = cdxComponent.Version
-// 	resourceInfo.SupplierProvider = cdxComponent.Supplier
-// 	resourceInfo.Properties = cdxComponent.Properties
-
-// 	var match bool = true
-// 	if len(whereFilters) > 0 {
-// 		mapResourceInfo, _ := utils.ConvertStructToMap(resourceInfo)
-// 		match, _ = whereFilterMatch(mapResourceInfo, whereFilters)
-// 	}
-
-// 	if match {
-// 		resourceMap.Put(resourceInfo.BOMRef, resourceInfo)
-
-// 		getLogger().Tracef("Put: %s (`%s`), `%s`)",
-// 			resourceInfo.Name,
-// 			resourceInfo.Version,
-// 			resourceInfo.BOMRef)
-// 	}
-
-// 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
-// 	if len(cdxComponent.Components) > 0 {
-// 		err = hashComponents(cdxComponent.Components, whereFilters, root)
-// 		if err != nil {
-// 			return
-// 		}
-// 	}
-// 	return
-// }
-
-func hashServices(bom *schema.BOM, services []schema.CDXService, whereFilters []WhereFilter) (err error) {
-	getLogger().Enter()
-	defer getLogger().Exit(err)
-
-	for _, cdxService := range services {
-		_, err = hashServiceAsResource(bom, cdxService, whereFilters)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-// Hash a CDX Component and recursively those of any "nested" components
-func hashServiceAsResource(bom *schema.BOM, cdxService schema.CDXService, whereFilters []WhereFilter) (ri *schema.CDXResourceInfo, err error) {
-	getLogger().Enter()
-	defer getLogger().Exit(err)
-	var resourceInfo schema.CDXResourceInfo
-	ri = &resourceInfo
-
-	if reflect.DeepEqual(cdxService, schema.CDXService{}) {
-		getLogger().Errorf("invalid service: missing or empty : %v", cdxService)
-		return
-	}
-
-	if cdxService.Name == "" {
-		getLogger().Errorf("service missing required value `name` : %v ", cdxService)
-	}
-
-	if cdxService.Version == "" {
-		getLogger().Warningf("service named `%s` missing `version`", cdxService.Name)
-	}
-
-	if cdxService.BOMRef == "" {
-		getLogger().Warningf("service named `%s` missing `bom-ref`", cdxService.Name)
-	}
-
-	// hash any component w/o a license using special key name
-	resourceInfo.Type = schema.RESOURCE_TYPE_SERVICE
-	resourceInfo.Service = cdxService
-	resourceInfo.Name = cdxService.Name
-	resourceInfo.BOMRef = cdxService.BOMRef.String()
-	resourceInfo.Version = cdxService.Version
-	resourceInfo.SupplierProvider = cdxService.Provider
-	resourceInfo.Properties = cdxService.Properties
-
-	var match bool = true
-	if len(whereFilters) > 0 {
-		mapResourceInfo, _ := utils.ConvertStructToMap(resourceInfo)
-		match, _ = whereFilterMatch(mapResourceInfo, whereFilters)
-	}
-
-	if match {
-		// TODO: AppendLicenseInfo(LICENSE_NONE, resourceInfo)
-		bom.ResourceMap.Put(resourceInfo.BOMRef, resourceInfo)
-
-		getLogger().Tracef("Put: [`%s`] %s (`%s`), `%s`)",
-			resourceInfo.Type,
-			resourceInfo.Name,
-			resourceInfo.Version,
-			resourceInfo.BOMRef,
-		)
-	}
-
-	// Recursively hash licenses for all child components (i.e., hierarchical composition)
-	if len(cdxService.Services) > 0 {
-		err = hashServices(bom, cdxService.Services, whereFilters)
-		if err != nil {
-			return
-		}
-	}
 	return
 }
 

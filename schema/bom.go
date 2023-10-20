@@ -244,6 +244,10 @@ func (bom *BOM) UnmarshalCycloneDXBOM() (err error) {
 	return
 }
 
+// -------------------
+// Components
+// -------------------
+
 // This hashes all components regardless where in the BOM document structure
 // they are declared.  This includes both the top-level metadata component
 // (i.e., the subject of the BOM) as well as the components array.
@@ -331,6 +335,97 @@ func (bom *BOM) HashComponent(cdxComponent CDXComponent, whereFilters []common.W
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
 	if len(cdxComponent.Components) > 0 {
 		err = bom.HashComponents(cdxComponent.Components, whereFilters, root)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+// -------------------
+// Services
+// -------------------
+
+func (bom *BOM) HashServiceResources(whereFilters []common.WhereFilter) (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit(err)
+
+	if services := bom.GetCdxServices(); len(services) > 0 {
+		if err = bom.HashServices(services, whereFilters); err != nil {
+			return
+		}
+	}
+
+	return
+}
+
+func (bom *BOM) HashServices(services []CDXService, whereFilters []common.WhereFilter) (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit(err)
+
+	for _, cdxService := range services {
+		_, err = bom.HashService(cdxService, whereFilters)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+// Hash a CDX Component and recursively those of any "nested" components
+func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFilter) (ri *CDXResourceInfo, err error) {
+	getLogger().Enter()
+	defer getLogger().Exit(err)
+	var resourceInfo CDXResourceInfo
+	ri = &resourceInfo
+
+	if reflect.DeepEqual(cdxService, CDXService{}) {
+		getLogger().Errorf("invalid service: missing or empty : %v", cdxService)
+		return
+	}
+
+	if cdxService.Name == "" {
+		getLogger().Errorf("service missing required value `name` : %v ", cdxService)
+	}
+
+	if cdxService.Version == "" {
+		getLogger().Warningf("service named `%s` missing `version`", cdxService.Name)
+	}
+
+	if cdxService.BOMRef == "" {
+		getLogger().Warningf("service named `%s` missing `bom-ref`", cdxService.Name)
+	}
+
+	// hash any component w/o a license using special key name
+	resourceInfo.Type = RESOURCE_TYPE_SERVICE
+	resourceInfo.Service = cdxService
+	resourceInfo.Name = cdxService.Name
+	resourceInfo.BOMRef = cdxService.BOMRef.String()
+	resourceInfo.Version = cdxService.Version
+	resourceInfo.SupplierProvider = cdxService.Provider
+	resourceInfo.Properties = cdxService.Properties
+
+	var match bool = true
+	if len(whereFilters) > 0 {
+		mapResourceInfo, _ := utils.ConvertStructToMap(resourceInfo)
+		match, _ = whereFilterMatch(mapResourceInfo, whereFilters)
+	}
+
+	if match {
+		// TODO: AppendLicenseInfo(LICENSE_NONE, resourceInfo)
+		bom.ResourceMap.Put(resourceInfo.BOMRef, resourceInfo)
+
+		getLogger().Tracef("Put: [`%s`] %s (`%s`), `%s`)",
+			resourceInfo.Type,
+			resourceInfo.Name,
+			resourceInfo.Version,
+			resourceInfo.BOMRef,
+		)
+	}
+
+	// Recursively hash licenses for all child components (i.e., hierarchical composition)
+	if len(cdxService.Services) > 0 {
+		err = bom.HashServices(cdxService.Services, whereFilters)
 		if err != nil {
 			return
 		}
