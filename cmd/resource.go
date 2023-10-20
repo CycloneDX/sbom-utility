@@ -29,7 +29,6 @@ import (
 	. "github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
-	"github.com/jwangsadinata/go-multimap/slicemultimap"
 	"github.com/spf13/cobra"
 )
 
@@ -80,11 +79,11 @@ var RESOURCE_LIST_OUTPUT_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{FORMAT_TEXT, FORMAT_CSV, FORMAT_MARKDOWN}, ", ")
 
 // Holds resources (e.g., components, services) declared license(s)
-var resourceMap = slicemultimap.New()
+//var resourceMap = slicemultimap.New()
 
-func ClearGlobalResourceData() {
-	resourceMap.Clear()
-}
+// func ClearGlobalResourceData() {
+// 	resourceMap.Clear()
+// }
 
 func NewCommandResource() *cobra.Command {
 	var command = new(cobra.Command)
@@ -212,16 +211,16 @@ func ListResources(writer io.Writer, persistentFlags utils.PersistentCommandFlag
 	getLogger().Infof("Outputting listing (`%s` format)...", format)
 	switch format {
 	case FORMAT_TEXT:
-		DisplayResourceListText(writer)
+		DisplayResourceListText(document, writer)
 	case FORMAT_CSV:
-		DisplayResourceListCSV(writer)
+		DisplayResourceListCSV(document, writer)
 	case FORMAT_MARKDOWN:
-		DisplayResourceListMarkdown(writer)
+		DisplayResourceListMarkdown(document, writer)
 	default:
 		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_TEXT)
-		DisplayResourceListText(writer)
+		DisplayResourceListText(document, writer)
 	}
 
 	return
@@ -241,7 +240,7 @@ func loadDocumentResources(document *schema.BOM, resourceType string, whereFilte
 	}
 
 	// Clear out any old (global)hashmap data (NOTE: 'go test' needs this)
-	ClearGlobalResourceData()
+	//ClearGlobalResourceData()
 
 	// Before looking for license data, fully unmarshal the SBOM into named structures
 	if err = document.UnmarshalCycloneDXBOM(); err != nil {
@@ -250,23 +249,28 @@ func loadDocumentResources(document *schema.BOM, resourceType string, whereFilte
 
 	// Add top-level SBOM component
 	if resourceType == schema.RESOURCE_TYPE_DEFAULT || resourceType == schema.RESOURCE_TYPE_COMPONENT {
-		_, err = hashComponent(*document.GetCdxMetadataComponent(), whereFilters, true)
+		// _, err = hashComponent(*document.GetCdxMetadataComponent(), whereFilters, true)
+		// if err != nil {
+		// 	return
+		// }
+
+		// // Hash all components found in the (root).components[] (+ "nested" components)
+		// if components := document.GetCdxComponents(); len(components) > 0 {
+		// 	if err = hashComponents(components, whereFilters, false); err != nil {
+		// 		return
+		// 	}
+		// }
+		err = document.HashComponentResources(whereFilters)
+
 		if err != nil {
 			return
-		}
-
-		// Hash all components found in the (root).components[] (+ "nested" components)
-		if components := document.GetCdxComponents(); len(components) > 0 {
-			if err = hashComponents(components, whereFilters, false); err != nil {
-				return
-			}
 		}
 	}
 
 	if resourceType == schema.RESOURCE_TYPE_DEFAULT || resourceType == schema.RESOURCE_TYPE_SERVICE {
 		// Hash services found in the (root).services[] (array) (+ "nested" services)
 		if services := document.GetCdxServices(); len(services) > 0 {
-			if err = hashServices(services, whereFilters); err != nil {
+			if err = hashServices(document, services, whereFilters); err != nil {
 				return
 			}
 		}
@@ -275,85 +279,85 @@ func loadDocumentResources(document *schema.BOM, resourceType string, whereFilte
 	return
 }
 
-func hashComponents(components []schema.CDXComponent, whereFilters []WhereFilter, root bool) (err error) {
-	getLogger().Enter()
-	defer getLogger().Exit(err)
+// func hashComponents(components []schema.CDXComponent, whereFilters []WhereFilter, root bool) (err error) {
+// 	getLogger().Enter()
+// 	defer getLogger().Exit(err)
 
-	for _, cdxComponent := range components {
-		_, err = hashComponent(cdxComponent, whereFilters, root)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
+// 	for _, cdxComponent := range components {
+// 		_, err = hashComponent(cdxComponent, whereFilters, root)
+// 		if err != nil {
+// 			return
+// 		}
+// 	}
+// 	return
+// }
 
 // Hash a CDX Component and recursively those of any "nested" components
 // TODO we should WARN if version is not a valid semver (e.g., examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json)
-func hashComponent(cdxComponent schema.CDXComponent, whereFilters []WhereFilter, root bool) (ri *schema.CDXResourceInfo, err error) {
-	getLogger().Enter()
-	defer getLogger().Exit(err)
-	var resourceInfo schema.CDXResourceInfo
-	ri = &resourceInfo
+// func hashComponent(cdxComponent schema.CDXComponent, whereFilters []WhereFilter, root bool) (ri *schema.CDXResourceInfo, err error) {
+// 	getLogger().Enter()
+// 	defer getLogger().Exit(err)
+// 	var resourceInfo schema.CDXResourceInfo
+// 	ri = &resourceInfo
 
-	if reflect.DeepEqual(cdxComponent, schema.CDXComponent{}) {
-		getLogger().Errorf("invalid component: missing or empty : %v ", cdxComponent)
-		return
-	}
+// 	if reflect.DeepEqual(cdxComponent, schema.CDXComponent{}) {
+// 		getLogger().Errorf("invalid component: missing or empty : %v ", cdxComponent)
+// 		return
+// 	}
 
-	if cdxComponent.Name == "" {
-		getLogger().Errorf("component missing required value `name` : %v ", cdxComponent)
-	}
+// 	if cdxComponent.Name == "" {
+// 		getLogger().Errorf("component missing required value `name` : %v ", cdxComponent)
+// 	}
 
-	if cdxComponent.Version == "" {
-		getLogger().Warningf("component named `%s` missing `version`", cdxComponent.Name)
-	}
+// 	if cdxComponent.Version == "" {
+// 		getLogger().Warningf("component named `%s` missing `version`", cdxComponent.Name)
+// 	}
 
-	if cdxComponent.BOMRef == "" {
-		getLogger().Warningf("component named `%s` missing `bom-ref`", cdxComponent.Name)
-	}
+// 	if cdxComponent.BOMRef == "" {
+// 		getLogger().Warningf("component named `%s` missing `bom-ref`", cdxComponent.Name)
+// 	}
 
-	// hash any component w/o a license using special key name
-	resourceInfo.IsRoot = root
-	resourceInfo.Type = schema.RESOURCE_TYPE_COMPONENT
-	resourceInfo.Component = cdxComponent
-	resourceInfo.Name = cdxComponent.Name
-	resourceInfo.BOMRef = cdxComponent.BOMRef.String()
-	resourceInfo.Version = cdxComponent.Version
-	resourceInfo.SupplierProvider = cdxComponent.Supplier
-	resourceInfo.Properties = cdxComponent.Properties
+// 	// hash any component w/o a license using special key name
+// 	resourceInfo.IsRoot = root
+// 	resourceInfo.Type = schema.RESOURCE_TYPE_COMPONENT
+// 	resourceInfo.Component = cdxComponent
+// 	resourceInfo.Name = cdxComponent.Name
+// 	resourceInfo.BOMRef = cdxComponent.BOMRef.String()
+// 	resourceInfo.Version = cdxComponent.Version
+// 	resourceInfo.SupplierProvider = cdxComponent.Supplier
+// 	resourceInfo.Properties = cdxComponent.Properties
 
-	var match bool = true
-	if len(whereFilters) > 0 {
-		mapResourceInfo, _ := utils.ConvertStructToMap(resourceInfo)
-		match, _ = whereFilterMatch(mapResourceInfo, whereFilters)
-	}
+// 	var match bool = true
+// 	if len(whereFilters) > 0 {
+// 		mapResourceInfo, _ := utils.ConvertStructToMap(resourceInfo)
+// 		match, _ = whereFilterMatch(mapResourceInfo, whereFilters)
+// 	}
 
-	if match {
-		resourceMap.Put(resourceInfo.BOMRef, resourceInfo)
+// 	if match {
+// 		resourceMap.Put(resourceInfo.BOMRef, resourceInfo)
 
-		getLogger().Tracef("Put: %s (`%s`), `%s`)",
-			resourceInfo.Name,
-			resourceInfo.Version,
-			resourceInfo.BOMRef)
-	}
+// 		getLogger().Tracef("Put: %s (`%s`), `%s`)",
+// 			resourceInfo.Name,
+// 			resourceInfo.Version,
+// 			resourceInfo.BOMRef)
+// 	}
 
-	// Recursively hash licenses for all child components (i.e., hierarchical composition)
-	if len(cdxComponent.Components) > 0 {
-		err = hashComponents(cdxComponent.Components, whereFilters, root)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
+// 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
+// 	if len(cdxComponent.Components) > 0 {
+// 		err = hashComponents(cdxComponent.Components, whereFilters, root)
+// 		if err != nil {
+// 			return
+// 		}
+// 	}
+// 	return
+// }
 
-func hashServices(services []schema.CDXService, whereFilters []WhereFilter) (err error) {
+func hashServices(bom *schema.BOM, services []schema.CDXService, whereFilters []WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
 	for _, cdxService := range services {
-		_, err = hashServiceAsResource(cdxService, whereFilters)
+		_, err = hashServiceAsResource(bom, cdxService, whereFilters)
 		if err != nil {
 			return
 		}
@@ -362,7 +366,7 @@ func hashServices(services []schema.CDXService, whereFilters []WhereFilter) (err
 }
 
 // Hash a CDX Component and recursively those of any "nested" components
-func hashServiceAsResource(cdxService schema.CDXService, whereFilters []WhereFilter) (ri *schema.CDXResourceInfo, err error) {
+func hashServiceAsResource(bom *schema.BOM, cdxService schema.CDXService, whereFilters []WhereFilter) (ri *schema.CDXResourceInfo, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 	var resourceInfo schema.CDXResourceInfo
@@ -402,7 +406,7 @@ func hashServiceAsResource(cdxService schema.CDXService, whereFilters []WhereFil
 
 	if match {
 		// TODO: AppendLicenseInfo(LICENSE_NONE, resourceInfo)
-		resourceMap.Put(resourceInfo.BOMRef, resourceInfo)
+		bom.ResourceMap.Put(resourceInfo.BOMRef, resourceInfo)
 
 		getLogger().Tracef("Put: [`%s`] %s (`%s`), `%s`)",
 			resourceInfo.Type,
@@ -414,7 +418,7 @@ func hashServiceAsResource(cdxService schema.CDXService, whereFilters []WhereFil
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
 	if len(cdxService.Services) > 0 {
-		err = hashServices(cdxService.Services, whereFilters)
+		err = hashServices(bom, cdxService.Services, whereFilters)
 		if err != nil {
 			return
 		}
@@ -424,7 +428,7 @@ func hashServiceAsResource(cdxService schema.CDXService, whereFilters []WhereFil
 
 // NOTE: This list is NOT de-duplicated
 // TODO: Add a --no-title flag to skip title output
-func DisplayResourceListText(output io.Writer) {
+func DisplayResourceListText(bom *schema.BOM, output io.Writer) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -443,7 +447,7 @@ func DisplayResourceListText(output io.Writer) {
 	fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
 	// Display a warning "missing" in the actual output and return (short-circuit)
-	entries := resourceMap.Entries()
+	entries := bom.ResourceMap.Entries()
 
 	// Emit no license warning into output
 	if len(entries) == 0 {
@@ -478,7 +482,7 @@ func DisplayResourceListText(output io.Writer) {
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplayResourceListCSV(output io.Writer) (err error) {
+func DisplayResourceListCSV(bom *schema.BOM, output io.Writer) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -491,7 +495,7 @@ func DisplayResourceListCSV(output io.Writer) (err error) {
 	}
 
 	// Display a warning "missing" in the actual output and return (short-circuit)
-	entries := resourceMap.Entries()
+	entries := bom.ResourceMap.Entries()
 
 	// Emit no resource found warning into output
 	if len(entries) == 0 {
@@ -537,7 +541,7 @@ func DisplayResourceListCSV(output io.Writer) (err error) {
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplayResourceListMarkdown(output io.Writer) (err error) {
+func DisplayResourceListMarkdown(bom *schema.BOM, output io.Writer) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -550,7 +554,7 @@ func DisplayResourceListMarkdown(output io.Writer) (err error) {
 	fmt.Fprintf(output, "%s\n", alignmentRow)
 
 	// Display a warning "missing" in the actual output and return (short-circuit)
-	entries := resourceMap.Entries()
+	entries := bom.ResourceMap.Entries()
 
 	// Emit no resource found warning into output
 	if len(entries) == 0 {

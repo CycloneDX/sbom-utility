@@ -181,7 +181,7 @@ func ListStats(writer io.Writer, persistentFlags utils.PersistentCommandFlags, s
 	getLogger().Infof("Outputting listing (`%s` format)...", format)
 	switch format {
 	case FORMAT_TEXT:
-		DisplayStatsText(writer)
+		DisplayStatsText(document, writer)
 	// case FORMAT_CSV:
 	// 	DisplayResourceListCSV(writer)
 	// case FORMAT_MARKDOWN:
@@ -190,7 +190,7 @@ func ListStats(writer io.Writer, persistentFlags utils.PersistentCommandFlags, s
 		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Stats not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_TEXT)
-		DisplayStatsText(writer)
+		DisplayStatsText(document, writer)
 	}
 
 	return
@@ -210,30 +210,11 @@ func loadDocumentStatisticalEntities(document *schema.BOM, statsFlags utils.Stat
 	}
 
 	// Clear out any old (global)hashmap data (NOTE: 'go test' needs this)
-	ClearGlobalResourceData()
+	//ClearGlobalResourceData()
 
 	// Before looking for license data, fully unmarshal the SBOM into named structures
 	if err = document.UnmarshalCycloneDXBOM(); err != nil {
 		return
-	}
-
-	_, err = hashComponent(*document.GetCdxMetadataComponent(), nil, true)
-	if err != nil {
-		return
-	}
-
-	// Hash all components found in the (root).components[] (+ "nested" components)
-	if components := document.GetCdxComponents(); len(components) > 0 {
-		if err = hashComponents(components, nil, false); err != nil {
-			return
-		}
-	}
-
-	// Hash services found in the (root).services[] (array) (+ "nested" services)
-	if services := document.GetCdxServices(); len(services) > 0 {
-		if err = hashServices(services, nil); err != nil {
-			return
-		}
 	}
 
 	return
@@ -241,7 +222,7 @@ func loadDocumentStatisticalEntities(document *schema.BOM, statsFlags utils.Stat
 
 // NOTE: This list is NOT de-duplicated
 // TODO: Add a --no-title flag to skip title output
-func DisplayStatsText(output io.Writer) {
+func DisplayStatsText(bom *schema.BOM, output io.Writer) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -260,7 +241,7 @@ func DisplayStatsText(output io.Writer) {
 	fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
 	// Display a warning "missing" in the actual output and return (short-circuit)
-	entries := resourceMap.Entries()
+	entries := bom.ResourceMap.Entries()
 
 	// Emit no license warning into output
 	if len(entries) == 0 {

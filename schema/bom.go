@@ -28,7 +28,7 @@ import (
 	"reflect"
 	"strconv"
 
-	. "github.com/CycloneDX/sbom-utility/common"
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/jwangsadinata/go-multimap/slicemultimap"
 )
@@ -42,7 +42,7 @@ type BOM struct {
 	FormatInfo   FormatSchema
 	SchemaInfo   FormatSchemaInstance
 	CdxBom       *CDXBom
-	resourceMap  *slicemultimap.MultiMap
+	ResourceMap  *slicemultimap.MultiMap
 	componentMap *slicemultimap.MultiMap
 	serviceMap   *slicemultimap.MultiMap
 }
@@ -55,6 +55,8 @@ func NewBOM(inputFile string) *BOM {
 	temp := BOM{
 		filename: inputFile,
 	}
+
+	temp.ResourceMap = slicemultimap.New()
 	// NOTE: the Map is allocated (i.e., using `make`) as part of `UnmarshalSBOM` method
 	return &temp
 }
@@ -242,27 +244,33 @@ func (bom *BOM) UnmarshalCycloneDXBOM() (err error) {
 	return
 }
 
-// func (bom *BOM) hashComponents(components []CDXComponent, whereFilters []WhereFilter, root bool) (err error) {
-// 	getLogger().Enter()
-// 	defer getLogger().Exit(err)
+// This hashes all components regardless where in the BOM document structure
+// they are declared.  This includes both the top-level metadata component
+// (i.e., the subject of the BOM) as well as the components array.
+func (bom *BOM) HashComponentResources(whereFilters []common.WhereFilter) (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit(err)
 
-// 	if components := bom.GetCdxComponents(); len(components) > 0 {
+	// Hash the top-level component declared in the BOM metadata
+	_, err = bom.HashComponent(*bom.GetCdxMetadataComponent(), whereFilters, true)
+	if err != nil {
+		return
+	}
 
-// 		for _, cdxComponent := range components {
-// 			_, err = bom.hashComponent(cdxComponent, whereFilters, root)
-// 			if err != nil {
-// 				return
-// 			}
-// 		}
-// 	}
-// 	return
-// }
+	// Hash all components found in the (root).components[] (+ "nested" components)
+	if components := bom.GetCdxComponents(); len(components) > 0 {
+		if err = bom.HashComponents(components, whereFilters, false); err != nil {
+			return
+		}
+	}
+	return
+}
 
-func (bom *BOM) hashComponents(components []CDXComponent, whereFilters []WhereFilter, root bool) (err error) {
+func (bom *BOM) HashComponents(components []CDXComponent, whereFilters []common.WhereFilter, root bool) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 	for _, cdxComponent := range components {
-		_, err = bom.hashComponent(cdxComponent, whereFilters, root)
+		_, err = bom.HashComponent(cdxComponent, whereFilters, root)
 		if err != nil {
 			return
 		}
@@ -272,7 +280,7 @@ func (bom *BOM) hashComponents(components []CDXComponent, whereFilters []WhereFi
 
 // Hash a CDX Component and recursively those of any "nested" components
 // TODO we should WARN if version is not a valid semver (e.g., examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json)
-func (bom *BOM) hashComponent(cdxComponent CDXComponent, whereFilters []WhereFilter, root bool) (ri *CDXResourceInfo, err error) {
+func (bom *BOM) HashComponent(cdxComponent CDXComponent, whereFilters []common.WhereFilter, root bool) (ri *CDXResourceInfo, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 	var resourceInfo CDXResourceInfo
@@ -297,7 +305,7 @@ func (bom *BOM) hashComponent(cdxComponent CDXComponent, whereFilters []WhereFil
 
 	// hash any component w/o a license using special key name
 	resourceInfo.IsRoot = root
-	resourceInfo.Type = "" // RESOURCE_TYPE_COMPONENT
+	resourceInfo.Type = RESOURCE_TYPE_COMPONENT
 	resourceInfo.Component = cdxComponent
 	resourceInfo.Name = cdxComponent.Name
 	resourceInfo.BOMRef = cdxComponent.BOMRef.String()
@@ -312,7 +320,7 @@ func (bom *BOM) hashComponent(cdxComponent CDXComponent, whereFilters []WhereFil
 	}
 
 	if match {
-		bom.resourceMap.Put(resourceInfo.BOMRef, resourceInfo)
+		bom.ResourceMap.Put(resourceInfo.BOMRef, resourceInfo)
 
 		getLogger().Tracef("Put: %s (`%s`), `%s`)",
 			resourceInfo.Name,
@@ -322,7 +330,7 @@ func (bom *BOM) hashComponent(cdxComponent CDXComponent, whereFilters []WhereFil
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
 	if len(cdxComponent.Components) > 0 {
-		err = bom.hashComponents(cdxComponent.Components, whereFilters, root)
+		err = bom.HashComponents(cdxComponent.Components, whereFilters, root)
 		if err != nil {
 			return
 		}
@@ -333,7 +341,7 @@ func (bom *BOM) hashComponent(cdxComponent CDXComponent, whereFilters []WhereFil
 // Note: Golang supports the RE2 regular exp. engine which does not support many
 // features such as lookahead, lookbehind, etc.
 // See: https://en.wikipedia.org/wiki/Comparison_of_regular_expression_engines
-func whereFilterMatch(mapObject map[string]interface{}, whereFilters []WhereFilter) (match bool, err error) {
+func whereFilterMatch(mapObject map[string]interface{}, whereFilters []common.WhereFilter) (match bool, err error) {
 	var buf bytes.Buffer
 	var key string
 
