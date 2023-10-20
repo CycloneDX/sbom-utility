@@ -43,8 +43,8 @@ type BOM struct {
 	SchemaInfo   FormatSchemaInstance
 	CdxBom       *CDXBom
 	ResourceMap  *slicemultimap.MultiMap
-	componentMap *slicemultimap.MultiMap
-	serviceMap   *slicemultimap.MultiMap
+	ComponentMap *slicemultimap.MultiMap
+	ServiceMap   *slicemultimap.MultiMap
 }
 
 func (bom *BOM) GetRawBytes() []byte {
@@ -57,6 +57,8 @@ func NewBOM(inputFile string) *BOM {
 	}
 
 	temp.ResourceMap = slicemultimap.New()
+	temp.ComponentMap = slicemultimap.New()
+	temp.ServiceMap = slicemultimap.New()
 	// NOTE: the Map is allocated (i.e., using `make`) as part of `UnmarshalSBOM` method
 	return &temp
 }
@@ -324,6 +326,7 @@ func (bom *BOM) HashComponent(cdxComponent CDXComponent, whereFilters []common.W
 	}
 
 	if match {
+		bom.ComponentMap.Put(resourceInfo.BOMRef, resourceInfo)
 		bom.ResourceMap.Put(resourceInfo.BOMRef, resourceInfo)
 
 		getLogger().Tracef("Put: %s (`%s`), `%s`)",
@@ -413,6 +416,7 @@ func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFi
 
 	if match {
 		// TODO: AppendLicenseInfo(LICENSE_NONE, resourceInfo)
+		bom.ServiceMap.Put(resourceInfo.BOMRef, resourceInfo)
 		bom.ResourceMap.Put(resourceInfo.BOMRef, resourceInfo)
 
 		getLogger().Tracef("Put: [`%s`] %s (`%s`), `%s`)",
