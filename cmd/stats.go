@@ -29,49 +29,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// const (
-// 	SUBCOMMAND_RESOURCE_LIST = "list"
-// )
-
-// var VALID_SUBCOMMANDS_RESOURCE = []string{SUBCOMMAND_RESOURCE_LIST}
-
-// filter keys
-// const (
-// 	RESOURCE_FILTER_KEY_TYPE    = "type"
-// 	RESOURCE_FILTER_KEY_NAME    = "name"
-// 	RESOURCE_FILTER_KEY_VERSION = "version"
-// 	RESOURCE_FILTER_KEY_BOMREF  = "bom-ref"
-// )
-
-// var VALID_RESOURCE_FILTER_KEYS = []string{
-// 	RESOURCE_FILTER_KEY_TYPE,
-// 	RESOURCE_FILTER_KEY_NAME,
-// 	RESOURCE_FILTER_KEY_VERSION,
-// 	RESOURCE_FILTER_KEY_BOMREF,
-// }
-
-// var RESOURCE_LIST_TITLES = []string{
-// 	RESOURCE_FILTER_KEY_TYPE,
-// 	RESOURCE_FILTER_KEY_NAME,
-// 	RESOURCE_FILTER_KEY_VERSION,
-// 	RESOURCE_FILTER_KEY_BOMREF,
-// }
-
-// Flags. Reuse query flag values where possible
-// const (
-// 	FLAG_RESOURCE_TYPE      = "type"
-// 	FLAG_RESOURCE_TYPE_HELP = "filter output by resource type (i.e., component | service)"
-// )
-
-// const (
-// 	MSG_OUTPUT_NO_RESOURCES_FOUND = "[WARN] no matching resources found for query"
-// )
-
-// Command help formatting
-// const (
-// 	FLAG_RESOURCE_OUTPUT_FORMAT_HELP = "format output using the specified type"
-// )
-
 var STATS_LIST_OUTPUT_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{FORMAT_TEXT, FORMAT_CSV, FORMAT_MARKDOWN}, ", ")
 
@@ -84,8 +41,17 @@ type EntityEnablement struct {
 type ComponentStats struct {
 }
 
+type ServiceStats struct {
+}
+
+type VulnerabilityStats struct {
+}
+
 type StatisticsInfo struct {
 	EntityEnablement
+	Component     ComponentStats
+	Service       ServiceStats
+	Vulnerability VulnerabilityStats
 }
 
 func NewCommandStats() *cobra.Command {
@@ -209,11 +175,23 @@ func loadDocumentStatisticalEntities(document *schema.BOM, statsFlags utils.Stat
 		return
 	}
 
-	// Clear out any old (global)hashmap data (NOTE: 'go test' needs this)
-	//ClearGlobalResourceData()
-
 	// Before looking for license data, fully unmarshal the SBOM into named structures
 	if err = document.UnmarshalCycloneDXBOM(); err != nil {
+		return
+	}
+
+	err = document.HashComponentResources(nil)
+	if err != nil {
+		return
+	}
+
+	err = document.HashServiceResources(nil)
+	if err != nil {
+		return
+	}
+
+	err = document.HashVulnerabilityResources(nil)
+	if err != nil {
 		return
 	}
 

@@ -358,7 +358,6 @@ func (bom *BOM) HashServiceResources(whereFilters []common.WhereFilter) (err err
 			return
 		}
 	}
-
 	return
 }
 
@@ -440,6 +439,18 @@ func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFi
 // -------------------
 // Vulnerabilities
 // -------------------
+
+func (bom *BOM) HashVulnerabilityResources(whereFilters []common.WhereFilter) (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit(err)
+
+	if vulnerabilities := bom.GetCdxVulnerabilities(); len(vulnerabilities) > 0 {
+		if err = bom.HashVulnerabilities(vulnerabilities, whereFilters); err != nil {
+			return
+		}
+	}
+	return
+}
 
 // We need to hash our own informational structure around the CDX data in order
 // to simplify --where queries to command line users
