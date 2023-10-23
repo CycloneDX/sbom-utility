@@ -64,7 +64,7 @@ func trimCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	}()
 
 	if err == nil {
-		err = Trim(writer, utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.StatsFlags)
+		err = Trim(writer, utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.TrimFlags)
 	}
 
 	return
@@ -79,7 +79,7 @@ func processTrimResults(err error) {
 }
 
 // NOTE: resourceType has already been validated
-func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, statsFlags utils.StatsCommandFlags) (err error) {
+func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, statsFlags utils.TrimCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -94,13 +94,6 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, statsF
 	var document *schema.BOM
 	document, err = LoadInputBOMFileAndDetectSchema()
 
-	if err != nil {
-		return
-	}
-
-	loadDocumentStatisticalEntities(document, statsFlags)
-
-	err = loadComponentStats(document)
 	if err != nil {
 		return
 	}

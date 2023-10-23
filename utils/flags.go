@@ -51,6 +51,7 @@ type CommandFlags struct {
 	ValidateFlags           ValidateCommandFlags
 	VulnerabilityFlags      VulnerabilityCommandFlags
 	StatsFlags              StatsCommandFlags
+	TrimFlags               TrimCommandFlags
 
 	// Misc flags
 	LogOutputIndentCallstack bool // Log indent
@@ -106,6 +107,9 @@ type SchemaCommandFlags struct {
 }
 
 type StatsCommandFlags struct {
+}
+
+type TrimCommandFlags struct {
 }
 
 type CustomValidationFlags struct {
