@@ -44,6 +44,7 @@ const (
 	CMD_VERSION       = "version"
 	CMD_VULNERABILITY = "vulnerability"
 	CMD_STATS         = "stats"
+	CMD_TRIM          = "trim"
 )
 
 // WARNING!!! The ".Use" field of a Cobra command MUST have the first word be the actual command
@@ -58,6 +59,7 @@ const (
 	CMD_USAGE_VALIDATE           = CMD_VALIDATE + " --input-file <input_file> [--variant <variant_name>] [--format txt|json] [--force schema_file]"
 	CMD_USAGE_VULNERABILITY_LIST = CMD_VULNERABILITY + " " + SUBCOMMAND_VULNERABILITY_LIST + " --input-file <input_file> [--summary] [--where key=regex[,...]] [--format json|txt|csv|md]"
 	CMD_USAGE_STATS_LIST         = CMD_STATS + " --input-file <input_file> [--type component|service] [--format txt|csv|md]"
+	CMD_USAGE_TRIM               = CMD_TRIM + " --input-file <input_file>  --input-file <output_file>"
 )
 
 const (

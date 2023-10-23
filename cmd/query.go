@@ -25,7 +25,7 @@ import (
 	"strconv"
 	"strings"
 
-	. "github.com/CycloneDX/sbom-utility/common"
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/spf13/cobra"
@@ -88,7 +88,7 @@ type QueryRequest struct {
 	fromObjectSelectors []string
 	whereValuesRaw      string
 	whereExpressions    []string
-	whereFilters        []WhereFilter
+	whereFilters        []common.WhereFilter
 	orderByKeysRaw      string
 	//orderByKeys       []string // TODO
 	isFromObjectAMap    bool
@@ -279,7 +279,7 @@ func (qr *QueryRequest) parseWhereFilterExpressions() (err error) {
 		return NewQueryWhereClauseError(qr, qr.whereValuesRaw)
 	}
 
-	var filter *WhereFilter
+	var filter *common.WhereFilter
 	for _, clause := range qr.whereExpressions {
 
 		filter = parseWhereFilter(clause)
@@ -296,7 +296,7 @@ func (qr *QueryRequest) parseWhereFilterExpressions() (err error) {
 }
 
 // TODO: generate more specific error messages on why parsing failed
-func parseWhereFilter(rawExpression string) (pWhereSelector *WhereFilter) {
+func parseWhereFilter(rawExpression string) (pWhereSelector *common.WhereFilter) {
 
 	if rawExpression == "" {
 		return // nil
@@ -308,7 +308,7 @@ func parseWhereFilter(rawExpression string) (pWhereSelector *WhereFilter) {
 		return // nil
 	}
 
-	var whereFilter = WhereFilter{}
+	var whereFilter = common.WhereFilter{}
 	whereFilter.Operand = QUERY_WHERE_OPERAND_EQUALS
 	whereFilter.Key = tokens[0]
 	whereFilter.Value = tokens[1]
@@ -565,7 +565,7 @@ func selectFieldsFromSlice(request *QueryRequest, jsonSlice []interface{}) (slic
 // Note: Golang supports the RE2 regular exp. engine which does not support many
 // features such as lookahead, lookbehind, etc.
 // See: https://en.wikipedia.org/wiki/Comparison_of_regular_expression_engines
-func whereFilterMatch(mapObject map[string]interface{}, whereFilters []WhereFilter) (match bool, err error) {
+func whereFilterMatch(mapObject map[string]interface{}, whereFilters []common.WhereFilter) (match bool, err error) {
 	var buf bytes.Buffer
 	var key string
 

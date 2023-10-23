@@ -22,7 +22,7 @@ import (
 	"bytes"
 	"testing"
 
-	. "github.com/CycloneDX/sbom-utility/common"
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/utils"
 )
 
@@ -30,7 +30,7 @@ import (
 // resource list test helper functions
 // -------------------------------------------
 
-func innerBufferedTestSchemaList(t *testing.T, pTestInfo *CommonTestInfo, whereFilters []WhereFilter) (outputBuffer bytes.Buffer, err error) {
+func innerBufferedTestSchemaList(t *testing.T, pTestInfo *CommonTestInfo, whereFilters []common.WhereFilter) (outputBuffer bytes.Buffer, err error) {
 	// Declare an output outputBuffer/outputWriter to use used during tests
 	var outputWriter = bufio.NewWriter(&outputBuffer)
 	// ensure all data is written to buffer before further validation

@@ -25,7 +25,7 @@ import (
 	"strings"
 	"sync"
 
-	. "github.com/CycloneDX/sbom-utility/common"
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/resources"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/jwangsadinata/go-multimap/slicemultimap"
@@ -120,7 +120,7 @@ func (config *LicenseComplianceConfig) GetLicenseIdMap() (hashmap *slicemultimap
 	return config.licenseIdMap, err
 }
 
-func (config *LicenseComplianceConfig) GetFilteredFamilyNameMap(whereFilters []WhereFilter) (hashmap *slicemultimap.MultiMap, err error) {
+func (config *LicenseComplianceConfig) GetFilteredFamilyNameMap(whereFilters []common.WhereFilter) (hashmap *slicemultimap.MultiMap, err error) {
 	// NOTE: This call is necessary as this will cause all `licensePolicyConfig.PolicyList`
 	// entries to have alternative field names to be mapped (e.g., `usagePolicy` -> `usage-policy`)
 	config.filteredFamilyNameMap, err = config.GetFamilyNameMap()
@@ -321,7 +321,7 @@ func (config *LicenseComplianceConfig) hashChildPolicies(policy LicensePolicy) (
 	return
 }
 
-func (config *LicenseComplianceConfig) filteredHashLicensePolicies(whereFilters []WhereFilter) (err error) {
+func (config *LicenseComplianceConfig) filteredHashLicensePolicies(whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -338,7 +338,7 @@ func (config *LicenseComplianceConfig) filteredHashLicensePolicies(whereFilters 
 
 // Hash a CDX Component and recursively those of any "nested" components
 // TODO we should WARN if version is not a valid semver (e.g., examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json)
-func (config *LicenseComplianceConfig) filteredHashLicensePolicy(policy LicensePolicy, whereFilters []WhereFilter) (err error) {
+func (config *LicenseComplianceConfig) filteredHashLicensePolicy(policy LicensePolicy, whereFilters []common.WhereFilter) (err error) {
 	var match bool = true
 	var mapPolicy map[string]interface{}
 

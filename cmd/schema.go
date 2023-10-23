@@ -25,7 +25,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	. "github.com/CycloneDX/sbom-utility/common"
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/spf13/cobra"
@@ -143,7 +143,7 @@ func flattenFormatSchemas(sliceFormatSchemas []schema.FormatSchema) (flattenedFo
 	return
 }
 
-func filterFormatSchemas(whereFilters []WhereFilter) (filteredFormats []schema.FormatSchemaInstance, err error) {
+func filterFormatSchemas(whereFilters []common.WhereFilter) (filteredFormats []schema.FormatSchemaInstance, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -194,7 +194,7 @@ func sortFormatSchemaInstances(filteredSchemas []schema.FormatSchemaInstance) []
 	return filteredSchemas
 }
 
-func ListSchemas(writer io.Writer, persistentFlags utils.PersistentCommandFlags, whereFilters []WhereFilter) (err error) {
+func ListSchemas(writer io.Writer, persistentFlags utils.PersistentCommandFlags, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 

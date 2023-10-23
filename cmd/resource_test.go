@@ -26,7 +26,7 @@ import (
 	"os"
 	"testing"
 
-	. "github.com/CycloneDX/sbom-utility/common"
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 )
@@ -71,7 +71,7 @@ func NewResourceTestInfoBasic(inputFile string, listFormat string, resultExpecte
 // -------------------------------------------
 // resource list test helper functions
 // -------------------------------------------
-func innerBufferedTestResourceList(t *testing.T, testInfo *ResourceTestInfo, whereFilters []WhereFilter) (outputBuffer bytes.Buffer, err error) {
+func innerBufferedTestResourceList(t *testing.T, testInfo *ResourceTestInfo, whereFilters []common.WhereFilter) (outputBuffer bytes.Buffer, err error) {
 	// Declare an output outputBuffer/outputWriter to use used during tests
 	var outputWriter = bufio.NewWriter(&outputBuffer)
 	// ensure all data is written to buffer before further validation

@@ -26,7 +26,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	. "github.com/CycloneDX/sbom-utility/common"
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/jwangsadinata/go-multimap/slicemultimap"
 	"github.com/spf13/cobra"
@@ -191,7 +191,7 @@ func processLicensePolicyListResults(err error) {
 	}
 }
 
-func ListLicensePolicies(writer io.Writer, whereFilters []WhereFilter, licenseFlags utils.LicenseCommandFlags) (err error) {
+func ListLicensePolicies(writer io.Writer, whereFilters []common.WhereFilter, licenseFlags utils.LicenseCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 

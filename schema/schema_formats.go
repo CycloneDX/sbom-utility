@@ -39,7 +39,8 @@ const (
 
 // Input (source) reserved values
 const (
-	INPUT_TYPE_STDIN = "-"
+	INPUT_TYPE_STDIN  = "-"
+	INPUT_TYPE_STDOUT = "-"
 )
 
 const (

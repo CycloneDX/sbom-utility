@@ -43,10 +43,53 @@ type BOM struct {
 	FormatInfo       FormatSchema
 	SchemaInfo       FormatSchemaInstance
 	CdxBom           *CDXBom
+	Statistics       *StatisticsInfo
 	ResourceMap      *slicemultimap.MultiMap
 	ComponentMap     *slicemultimap.MultiMap
 	ServiceMap       *slicemultimap.MultiMap
 	VulnerabilityMap *slicemultimap.MultiMap
+}
+
+const (
+	COMPONENT_ID_NONE   = "None"
+	COMPONENT_ID_NAME   = "name"
+	COMPONENT_ID_BOMREF = "bom-ref"
+	COMPONENT_ID_PURL   = "purl"
+	COMPONENT_ID_CPE    = "cpe"
+	COMPONENT_ID_SWID   = "swid"
+)
+
+type BOMComponentStats struct {
+	Total          int
+	MapIdentifiers map[string]int
+	MapTypes       map[string]int
+	MapMimeTypes   map[string]int
+	// Number w/o licenses
+	// Number not in dependency graph
+}
+
+const (
+	SERVICE_ID_NONE   = "None"
+	SERVICE_ID_BOMREF = "bom-ref"
+)
+
+type BOMServiceStats struct {
+	Total        int
+	MapEndpoints map[string]int // map["name"] len(endpoints)
+	// Number Unauthenticated
+	// Number w/o licenses
+}
+
+type BOMVulnerabilityStats struct {
+	Total int
+	// Number w/o mitigation or workaround or rejected
+	MapSeverities map[string]int
+}
+
+type StatisticsInfo struct {
+	ComponentStats     *BOMComponentStats
+	ServiceStats       *BOMServiceStats
+	VulnerabilityStats *BOMVulnerabilityStats
 }
 
 func (bom *BOM) GetRawBytes() []byte {
@@ -63,6 +106,10 @@ func NewBOM(inputFile string) *BOM {
 	temp.ComponentMap = slicemultimap.New()
 	temp.ServiceMap = slicemultimap.New()
 	temp.VulnerabilityMap = slicemultimap.New()
+
+	// Stats
+	temp.Statistics = new(StatisticsInfo)
+	temp.Statistics.ComponentStats = new(BOMComponentStats)
 
 	return &temp
 }
@@ -242,6 +289,60 @@ func (bom *BOM) UnmarshalCycloneDXBOM() (err error) {
 	if err != nil {
 		return
 	}
+
+	return
+}
+
+func (bom *BOM) MarshalCycloneDXBOM(filename string) (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	// validate filename
+	if len(filename) == 0 {
+		return fmt.Errorf("schema: invalid output BOM filename: `%s`", filename)
+	}
+
+	// Check to see of stdin is the BOM source data
+	var jsonFile *os.File
+	var absFilename string
+	if filename == INPUT_TYPE_STDOUT {
+		jsonFile = os.Stdout
+		// TODO: close() ?
+	} else { // load the BOM data from relative filename
+		// Conditionally append working directory if no abs. path detected
+		if len(filename) > 0 && !filepath.IsAbs(filename) {
+			absFilename = filepath.Join(utils.GlobalFlags.WorkingDir, bom.filename)
+		} else {
+			absFilename = bom.filename
+		}
+
+		// Open our jsonFile
+		jsonFile, err = os.Create(absFilename)
+
+		// if input file cannot be opened, log it and terminate
+		if err != nil {
+			getLogger().Error(err)
+			return
+		}
+
+		// defer the closing of our jsonFile
+		defer jsonFile.Close()
+
+	}
+
+	var bytes []byte
+	bytes, err = json.Marshal(bom.CdxBom)
+	if err != nil {
+		return
+	}
+
+	// write our opened jsonFile as a byte array.
+	numBytes, errWrite := jsonFile.Write(bytes)
+	if errWrite != nil {
+		return errWrite
+	}
+	getLogger().Tracef("wrote data to: `%s`", filename)
+	getLogger().Tracef("\n  >> rawBytes[:100]=[%v]", numBytes)
 
 	return
 }

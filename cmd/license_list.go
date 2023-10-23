@@ -26,7 +26,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	. "github.com/CycloneDX/sbom-utility/common"
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/log"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
@@ -185,7 +185,7 @@ func listCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	return
 }
 
-func ListLicenses(writer io.Writer, persistentFlags utils.PersistentCommandFlags, LicenseFlags utils.LicenseCommandFlags, whereFilters []WhereFilter) (err error) {
+func ListLicenses(writer io.Writer, persistentFlags utils.PersistentCommandFlags, LicenseFlags utils.LicenseCommandFlags, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 

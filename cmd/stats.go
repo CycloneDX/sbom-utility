@@ -32,28 +32,6 @@ import (
 var STATS_LIST_OUTPUT_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{FORMAT_TEXT, FORMAT_CSV, FORMAT_MARKDOWN}, ", ")
 
-type EntityEnablement struct {
-	ShowComponents      bool
-	ShowServices        bool
-	ShowVulnerabilities bool
-}
-
-type ComponentStats struct {
-}
-
-type ServiceStats struct {
-}
-
-type VulnerabilityStats struct {
-}
-
-type StatisticsInfo struct {
-	EntityEnablement
-	Component     ComponentStats
-	Service       ServiceStats
-	Vulnerability VulnerabilityStats
-}
-
 func NewCommandStats() *cobra.Command {
 	var command = new(cobra.Command)
 	command.Use = CMD_USAGE_STATS_LIST
@@ -64,25 +42,8 @@ func NewCommandStats() *cobra.Command {
 	command.RunE = statsCmdImpl
 	// TODO: command.ValidArgs = VALID_SUBCOMMANDS_S
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
-		// the command requires at least 1 valid subcommand (argument)
-		if len(args) > 1 {
-			return getLogger().Errorf("Too many arguments provided: %v", args)
-		}
-
-		// Make sure (optional) subcommand is known/valid
-		if len(args) == 1 {
-			if !preRunTestForSubcommand(command, VALID_SUBCOMMANDS_RESOURCE, args[0]) {
-				return getLogger().Errorf("Subcommand provided is not valid: `%v`", args[0])
-			}
-		}
-
-		if len(args) == 0 {
-			getLogger().Tracef("No subcommands provided; defaulting to: `%s` subcommand", SUBCOMMAND_SCHEMA_LIST)
-		}
-
 		// Test for required flags (parameters)
 		err = preRunTestForInputFile(cmd, args)
-
 		return
 	}
 	return command
@@ -143,6 +104,11 @@ func ListStats(writer io.Writer, persistentFlags utils.PersistentCommandFlags, s
 
 	loadDocumentStatisticalEntities(document, statsFlags)
 
+	err = loadComponentStats(document)
+	if err != nil {
+		return
+	}
+
 	format := persistentFlags.OutputFormat
 	getLogger().Infof("Outputting listing (`%s` format)...", format)
 	switch format {
@@ -157,6 +123,42 @@ func ListStats(writer io.Writer, persistentFlags utils.PersistentCommandFlags, s
 		getLogger().Warningf("Stats not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_TEXT)
 		DisplayStatsText(document, writer)
+	}
+
+	return
+}
+
+func loadComponentStats(document *schema.BOM) (err error) {
+	if document == nil {
+		return getLogger().Errorf("invalid BOM document")
+	}
+
+	stats := document.Statistics
+
+	if stats == nil || stats.ComponentStats == nil {
+		return getLogger().Errorf("invalid BOM stats")
+	}
+
+	//componentStats := stats.ComponentStats
+	mapComponents := document.ComponentMap
+
+	if mapComponents == nil {
+		return getLogger().Errorf("invalid component map")
+	}
+
+	for _, key := range mapComponents.KeySet() {
+		aComponents, _ := mapComponents.Get(key)
+
+		fmt.Printf("value=%v", aComponents)
+
+		if len(aComponents) > 1 {
+			// TODO: are they unique entries? or are DeepEqual() duplicates?
+			getLogger().Warningf("component `%v` has duplicate `%v` entries", key, len(aComponents))
+		}
+
+		for _, c := range aComponents {
+			fmt.Printf("comp=%v", c)
+		}
 	}
 
 	return

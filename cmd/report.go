@@ -22,7 +22,7 @@ import (
 	"strconv"
 	"strings"
 
-	. "github.com/CycloneDX/sbom-utility/common"
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/spf13/cobra"
 )
@@ -82,7 +82,7 @@ func createMarkdownRow(data []string) string {
 }
 
 // Report processing helpers
-func processWhereFlag(cmd *cobra.Command) (whereFilters []WhereFilter, err error) {
+func processWhereFlag(cmd *cobra.Command) (whereFilters []common.WhereFilter, err error) {
 	// Process flag: --where
 	whereValues, errGet := cmd.Flags().GetString(FLAG_REPORT_WHERE)
 
@@ -96,13 +96,13 @@ func processWhereFlag(cmd *cobra.Command) (whereFilters []WhereFilter, err error
 	return
 }
 
-func retrieveWhereFilters(whereValues string) (whereFilters []WhereFilter, err error) {
+func retrieveWhereFilters(whereValues string) (whereFilters []common.WhereFilter, err error) {
 	var whereExpressions []string
 
 	if whereValues != "" {
 		whereExpressions = strings.Split(whereValues, QUERY_WHERE_EXPRESSION_SEP)
 
-		var filter *WhereFilter
+		var filter *common.WhereFilter
 		for _, clause := range whereExpressions {
 
 			filter = parseWhereFilter(clause)

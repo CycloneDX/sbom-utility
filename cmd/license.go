@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"os"
 
-	. "github.com/CycloneDX/sbom-utility/common"
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/jwangsadinata/go-multimap/slicemultimap"
@@ -102,7 +102,7 @@ func ClearGlobalLicenseData() {
 	licenseSlice = nil
 }
 
-func HashLicenseInfo(key string, licenseInfo LicenseInfo, whereFilters []WhereFilter) {
+func HashLicenseInfo(key string, licenseInfo LicenseInfo, whereFilters []common.WhereFilter) {
 	// Find license usage policy by either license Id, Name or Expression
 	policy, err := FindPolicy(licenseInfo)
 
@@ -176,7 +176,7 @@ func licenseCmdImpl(cmd *cobra.Command, args []string) error {
 // 2. (root).metadata.component.licenses[] + all "nested" components
 // 3. (root).components[](.license[]) (each component + all "nested" components)
 // 4. (root).services[](.license[]) (each service + all "nested" services)
-func loadDocumentLicenses(document *schema.BOM, whereFilters []WhereFilter) (err error) {
+func loadDocumentLicenses(document *schema.BOM, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -231,7 +231,7 @@ func loadDocumentLicenses(document *schema.BOM, whereFilters []WhereFilter) (err
 }
 
 // Hash the license found in the (root).metadata.licenses[] array
-func hashMetadataLicenses(document *schema.BOM, location int, whereFilters []WhereFilter) (err error) {
+func hashMetadataLicenses(document *schema.BOM, location int, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -272,7 +272,7 @@ func hashMetadataLicenses(document *schema.BOM, location int, whereFilters []Whe
 }
 
 // Hash the license found in the (root).metadata.component object (and any "nested" components)
-func hashMetadataComponentLicenses(document *schema.BOM, location int, whereFilters []WhereFilter) (err error) {
+func hashMetadataComponentLicenses(document *schema.BOM, location int, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -300,7 +300,7 @@ func hashMetadataComponentLicenses(document *schema.BOM, location int, whereFilt
 
 // Hash all licenses found in an array of CDX Components
 // TODO use array of pointer to CDXComponent
-func hashComponentsLicenses(components []schema.CDXComponent, location int, whereFilters []WhereFilter) (err error) {
+func hashComponentsLicenses(components []schema.CDXComponent, location int, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -315,7 +315,7 @@ func hashComponentsLicenses(components []schema.CDXComponent, location int, wher
 
 // Hash all licenses found in an array of CDX Services
 // TODO use array of pointer to CDXService
-func hashServicesLicenses(services []schema.CDXService, location int, whereFilters []WhereFilter) (err error) {
+func hashServicesLicenses(services []schema.CDXService, location int, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -329,7 +329,7 @@ func hashServicesLicenses(services []schema.CDXService, location int, whereFilte
 }
 
 // Hash a CDX Component's licenses and recursively those of any "nested" components
-func hashComponentLicense(cdxComponent schema.CDXComponent, location int, whereFilters []WhereFilter) (li *LicenseInfo, err error) {
+func hashComponentLicense(cdxComponent schema.CDXComponent, location int, whereFilters []common.WhereFilter) (li *LicenseInfo, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 	var licenseInfo LicenseInfo
@@ -383,7 +383,7 @@ func hashComponentLicense(cdxComponent schema.CDXComponent, location int, whereF
 
 // Hash all licenses found in a CDX Service
 // TODO use pointer to CDXService
-func hashServiceLicense(cdxService schema.CDXService, location int, whereFilters []WhereFilter) (err error) {
+func hashServiceLicense(cdxService schema.CDXService, location int, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -440,7 +440,7 @@ func hashServiceLicense(cdxService schema.CDXService, location int, whereFilters
 // 2. Where the license was found within the SBOM
 // 3. The entity name (e.g., service or component name) that declared the license
 // 4. The entity local BOM reference (i.e., "bomRef")
-func hashLicenseInfoByLicenseType(licenseInfo LicenseInfo, whereFilters []WhereFilter) (err error) {
+func hashLicenseInfoByLicenseType(licenseInfo LicenseInfo, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
