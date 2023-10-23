@@ -311,9 +311,9 @@ func (bom *BOM) MarshalCycloneDXBOM(filename string) (err error) {
 	} else { // load the BOM data from relative filename
 		// Conditionally append working directory if no abs. path detected
 		if len(filename) > 0 && !filepath.IsAbs(filename) {
-			absFilename = filepath.Join(utils.GlobalFlags.WorkingDir, bom.filename)
+			absFilename = filepath.Join(utils.GlobalFlags.WorkingDir, filename)
 		} else {
-			absFilename = bom.filename
+			absFilename = filename
 		}
 
 		// Open our jsonFile
@@ -331,7 +331,8 @@ func (bom *BOM) MarshalCycloneDXBOM(filename string) (err error) {
 	}
 
 	var bytes []byte
-	bytes, err = json.Marshal(bom.CdxBom)
+	temp := bom.CdxBom
+	bytes, err = json.Marshal(temp)
 	if err != nil {
 		return
 	}

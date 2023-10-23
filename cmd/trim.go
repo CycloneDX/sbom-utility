@@ -98,6 +98,20 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, statsF
 		return
 	}
 
+	// At this time, fail SPDX format SBOMs as "unsupported" (for "any" format)
+	if !document.FormatInfo.IsCycloneDx() {
+		err = schema.NewUnsupportedFormatForCommandError(
+			document.FormatInfo.CanonicalName,
+			document.GetFilename(),
+			CMD_LICENSE, FORMAT_ANY)
+		return
+	}
+
+	// Before looking for license data, fully unmarshal the SBOM into named structures
+	if err = document.UnmarshalCycloneDXBOM(); err != nil {
+		return
+	}
+
 	format := persistentFlags.OutputFormat
 	getLogger().Infof("Outputting listing (`%s` format)...", format)
 	switch format {
@@ -119,7 +133,7 @@ func TrimProperties(bom *schema.BOM) (err error) {
 		return NewInvalidSBOMError(bom, "", nil, nil)
 	}
 
-	bom.MarshalCycloneDXBOM("./output.json")
+	bom.MarshalCycloneDXBOM("output.json")
 
 	return
 }
