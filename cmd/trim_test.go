@@ -20,6 +20,8 @@ package cmd
 import (
 	"bufio"
 	"bytes"
+	"fmt"
+	"io"
 	"log"
 	"os"
 	"testing"
@@ -53,24 +55,41 @@ func NewTrimTestInfoBasic(inputFile string, resultExpectedError error) *TrimTest
 // resource list test helper functions
 // -------------------------------------------
 func innerBufferedTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer bytes.Buffer, err error) {
-	// Declare an output outputBuffer/outputWriter to use used during tests
-	var outputWriter = bufio.NewWriter(&outputBuffer)
-	// ensure all data is written to buffer before further validation
-	defer outputWriter.Flush()
 
-	var persistentFlags utils.PersistentCommandFlags
-	persistentFlags.OutputFormat = testInfo.OutputFormat
+	// The command looks for the input & output filename in global flags struct
+	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile
+	utils.GlobalFlags.PersistentFlags.OutputFile = testInfo.OutputFile
+	utils.GlobalFlags.PersistentFlags.OutputFormat = testInfo.OutputFormat
 	var trimFlags utils.TrimCommandFlags
+	var outputWriter io.Writer
+	var outputFile *os.File
 
-	err = Trim(outputWriter, persistentFlags, trimFlags)
+	// Note: Any "Mocking" of os.Stdin/os.Stdout should be done in functions that call this one
+	if testInfo.OutputFile == "" {
+		// Declare an output outputBuffer/outputWriter to use used during tests
+		bufferedWriter := bufio.NewWriter(&outputBuffer)
+		outputWriter = bufferedWriter
+		defer bufferedWriter.Flush()
+	} else {
+		outputFile, outputWriter, err = createOutputFile(testInfo.OutputFile)
+		getLogger().Tracef("outputFile: `%v`; writer: `%v`", testInfo.OutputFile, outputWriter)
+
+		// use function closure to assure consistent error output based upon error type
+		defer func() {
+			// always close the output file
+			if outputFile != nil {
+				outputFile.Close()
+				getLogger().Infof("Closed output file: `%s`", testInfo.OutputFile)
+			}
+		}()
+	}
+
+	err = Trim(outputWriter, utils.GlobalFlags.PersistentFlags, trimFlags)
 	return
 }
 
 func innerTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer bytes.Buffer, basicTestInfo string, err error) {
 	getLogger().Tracef("TestInfo: %s", testInfo)
-
-	// The command looks for the input filename in global flags struct
-	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile
 
 	// Mock stdin if requested
 	if testInfo.MockStdin == true {
@@ -95,10 +114,15 @@ func innerTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer bytes.Buf
 
 func TestTrimCdx15ComponentProperties(t *testing.T) {
 	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_COMP_PROPS_1, nil)
-	innerTestTrim(t, ti)
+	//ti.CommonTestInfo.OutputFile = "output.json"
+	outputBuffer, _ := innerBufferedTestTrim(t, ti)
+	// TODO: verify "after" trim lengths and content have removed properties
+	fmt.Printf("Len(outputBuffer): `%v`", outputBuffer.Len())
 }
 
 func TestTrimCdx14ComponentPropertiesSampleXXL(t *testing.T) {
 	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_4_SAMPLE_XXL_1, nil)
+	ti.CommonTestInfo.OutputFile = "output.json"
+	// TODO: verify "after" trim lengths and content have removed properties
 	innerTestTrim(t, ti)
 }

@@ -112,36 +112,56 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, statsF
 		return
 	}
 
-	TrimComponentProperties(document)
+	err = TrimBOMComponentProperties(document)
+	if err != nil {
+		return
+	}
 
 	format := persistentFlags.OutputFormat
+
 	getLogger().Infof("Outputting listing (`%s` format)...", format)
 	switch format {
 	case FORMAT_JSON:
-		document.MarshalCycloneDXBOM("output.json", "", "  ")
+		document.MarshalCycloneDXBOM(writer, "", "  ")
 	default:
 		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Stats not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_TEXT)
-		document.MarshalCycloneDXBOM("output.json", "", "  ")
+		document.MarshalCycloneDXBOM(writer, "", "  ")
 	}
 
 	return
 }
 
-func TrimComponentProperties(bom *schema.BOM) (err error) {
+func TrimBOMComponentProperties(bom *schema.BOM) (err error) {
 
 	if bom == nil {
 		return NewInvalidSBOMError(bom, "", nil, nil)
 	}
 
-	// dereference to get to slice
-	components := *(bom.GetCdxComponents())
+	TrimComponentsProperties(bom.GetCdxComponents())
+
+	return
+}
+
+func TrimComponentsProperties(pComponents *[]schema.CDXComponent) (err error) {
+
+	var component schema.CDXComponent
+	components := *pComponents
 	for i := range components {
-		if components[i].Properties != nil {
-			//fmt.Printf("BEFORE: component: %v\n", components[i].Properties)
-			components[i].Properties = nil
-			//fmt.Printf("AFTER: component: %v\n", components[i].Properties)
+		component = components[i]
+		if component.Properties != nil {
+			// detach the slice from the pointer
+			component.Properties = nil
+		}
+
+		// Recurse if component has a components array (slice)
+		if component.Components != nil {
+			err = TrimComponentsProperties(component.Components)
+
+			if err != nil {
+				return
+			}
 		}
 	}
 

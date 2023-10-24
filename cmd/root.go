@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/CycloneDX/sbom-utility/log"
 	"github.com/CycloneDX/sbom-utility/schema"
@@ -296,18 +297,41 @@ func preRunTestForSubcommand(cmd *cobra.Command, validSubcommands []string, subc
 	return false
 }
 
+// NOTE: Caller must Close() any open io.Writer...
 func createOutputFile(outputFilename string) (outputFile *os.File, writer io.Writer, err error) {
+
 	// default to Stdout
 	writer = os.Stdout
 
-	// If command included an output file, attempt to create it and create a writer
+	// validate filename
 	if outputFilename != "" {
-		getLogger().Infof("Creating output file: `%s`...", outputFilename)
-		outputFile, err = os.Create(outputFilename)
-		if err != nil {
-			getLogger().Error(err)
+
+		// Check to see of stdin is the BOM source data
+		var absFilename string
+		if outputFilename == schema.INPUT_TYPE_STDOUT {
+			outputFile = os.Stdout
+
+		} else { // load the BOM data from relative filename
+			// Conditionally append working directory if no abs. path detected
+			if len(outputFilename) > 0 && !filepath.IsAbs(outputFilename) {
+				absFilename = filepath.Join(utils.GlobalFlags.WorkingDir, outputFilename)
+			} else {
+				absFilename = outputFilename
+			}
+
+			// Open our jsonFile
+			outputFile, err = os.Create(absFilename)
+
+			// if input file cannot be opened, log it and terminate
+			if err != nil {
+				getLogger().Error(err)
+				return
+			}
 		}
+
+		// os.File implements the io.Writer interface
 		writer = outputFile
 	}
+
 	return
 }

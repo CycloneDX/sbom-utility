@@ -70,13 +70,6 @@ func innerBufferedTestStatsList(t *testing.T, testInfo *StatsTestInfo) (outputBu
 func innerTestStatsList(t *testing.T, testInfo *StatsTestInfo) (outputBuffer bytes.Buffer, basicTestInfo string, err error) {
 	getLogger().Tracef("TestInfo: %s", testInfo)
 
-	// Parse out --where filters and exit out if error detected
-	// TODO: REMOVE:
-	// whereFilters, err := prepareWhereFilters(t, &testInfo.CommonTestInfo)
-	// if err != nil {
-	// 	return
-	// }
-
 	// The command looks for the input filename in global flags struct
 	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile
 

@@ -294,41 +294,41 @@ func (bom *BOM) UnmarshalCycloneDXBOM() (err error) {
 	return
 }
 
-func (bom *BOM) MarshalCycloneDXBOM(filename string, prefix string, indent string) (err error) {
+func (bom *BOM) MarshalCycloneDXBOM(writer io.Writer, prefix string, indent string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	// validate filename
-	if len(filename) == 0 {
-		return fmt.Errorf("schema: invalid output BOM filename: `%s`", filename)
-	}
+	// // validate filename
+	// if len(filename) == 0 {
+	// 	return fmt.Errorf("schema: invalid output BOM filename: `%s`", filename)
+	// }
 
-	// Check to see of stdin is the BOM source data
-	var jsonFile *os.File
-	var absFilename string
-	if filename == INPUT_TYPE_STDOUT {
-		jsonFile = os.Stdout
-		// TODO: close() ?
-	} else { // load the BOM data from relative filename
-		// Conditionally append working directory if no abs. path detected
-		if len(filename) > 0 && !filepath.IsAbs(filename) {
-			absFilename = filepath.Join(utils.GlobalFlags.WorkingDir, filename)
-		} else {
-			absFilename = filename
-		}
+	// // Check to see of stdin is the BOM source data
+	// var jsonFile *os.File
+	// var absFilename string
+	// if filename == INPUT_TYPE_STDOUT {
+	// 	jsonFile = os.Stdout
+	// 	// TODO: close() ?
+	// } else { // load the BOM data from relative filename
+	// 	// Conditionally append working directory if no abs. path detected
+	// 	if len(filename) > 0 && !filepath.IsAbs(filename) {
+	// 		absFilename = filepath.Join(utils.GlobalFlags.WorkingDir, filename)
+	// 	} else {
+	// 		absFilename = filename
+	// 	}
 
-		// Open our jsonFile
-		jsonFile, err = os.Create(absFilename)
+	// 	// Open our jsonFile
+	// 	jsonFile, err = os.Create(absFilename)
 
-		// if input file cannot be opened, log it and terminate
-		if err != nil {
-			getLogger().Error(err)
-			return
-		}
+	// 	// if input file cannot be opened, log it and terminate
+	// 	if err != nil {
+	// 		getLogger().Error(err)
+	// 		return
+	// 	}
 
-		// defer the closing of our jsonFile
-		defer jsonFile.Close()
-	}
+	// 	// defer the closing of our jsonFile
+	// 	defer jsonFile.Close()
+	// }
 
 	var bytes []byte
 	temp := bom.CdxBom
@@ -338,12 +338,11 @@ func (bom *BOM) MarshalCycloneDXBOM(filename string, prefix string, indent strin
 	}
 
 	// write our opened jsonFile as a byte array.
-	numBytes, errWrite := jsonFile.Write(bytes)
+	numBytes, errWrite := writer.Write(bytes)
 	if errWrite != nil {
 		return errWrite
 	}
-	getLogger().Tracef("wrote data to: `%s`", filename)
-	getLogger().Tracef("\n  >> rawBytes[:100]=[%v]", numBytes)
+	getLogger().Tracef("wrote [%v] bytes to output", numBytes)
 
 	return
 }
