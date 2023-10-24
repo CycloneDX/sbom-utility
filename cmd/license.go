@@ -222,8 +222,9 @@ func loadDocumentLicenses(document *schema.BOM, whereFilters []common.WhereFilte
 	}
 
 	// 4. Hash all service licenses found in the (root).services[] (array) (+ "nested" services)
-	if services := document.GetCdxServices(); len(services) > 0 {
-		if err = hashServicesLicenses(services, LC_LOC_SERVICES, whereFilters); err != nil {
+	pServices := document.GetCdxServices()
+	if pServices != nil && len(*pServices) > 0 {
+		if err = hashServicesLicenses(*pServices, LC_LOC_SERVICES, whereFilters); err != nil {
 			return
 		}
 	}

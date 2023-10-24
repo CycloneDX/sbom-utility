@@ -151,18 +151,18 @@ func (bom *BOM) GetCdxMetadataProperties() (properties []CDXProperty) {
 
 func (bom *BOM) GetCdxComponents() (components *[]CDXComponent) {
 	if bom := bom.GetCdxBom(); bom != nil {
-		if bom.Components != nil {
-			components = bom.Components
-		}
+		//if bom.Components != nil {
+		components = bom.Components
+		//}
 	}
 	return components
 }
 
-func (bom *BOM) GetCdxServices() (services []CDXService) {
+func (bom *BOM) GetCdxServices() (services *[]CDXService) {
 	if bom := bom.GetCdxBom(); bom != nil {
-		if bom.Services != nil {
-			services = *bom.Services
-		}
+		//if bom.Services != nil {
+		services = bom.Services
+		//	}
 	}
 	return services
 }
@@ -430,8 +430,9 @@ func (bom *BOM) HashServiceResources(whereFilters []common.WhereFilter) (err err
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
-	if services := bom.GetCdxServices(); len(services) > 0 {
-		if err = bom.HashServices(services, whereFilters); err != nil {
+	pServices := bom.GetCdxServices()
+	if pServices != nil && len(*pServices) > 0 {
+		if err = bom.HashServices(*pServices, whereFilters); err != nil {
 			return
 		}
 	}
