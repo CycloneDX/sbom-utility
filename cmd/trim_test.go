@@ -29,8 +29,8 @@ import (
 
 const (
 	// Test "resource list" command
-	TEST_TRIM_CDX_1_5_COMP_PROPS_1   = "test/stats/trim-cdx-1-5-comp-props-1.json"
-	TEST_TRIM_CDX_1_4_LARGE_SAMPLE_1 = "test/stats/sample-1.sbom.json"
+	TEST_TRIM_CDX_1_5_COMP_PROPS_1   = "test/trim/trim-cdx-1-5-comp-props-1.json"
+	TEST_TRIM_CDX_1_4_LARGE_SAMPLE_1 = "test/trim/trim-cdx-1-4-sample-xxl-1.sbom.json"
 )
 
 type TrimTestInfo struct {

@@ -18,7 +18,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"strings"
 
@@ -113,7 +112,7 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, statsF
 		return
 	}
 
-	TrimProperties(document)
+	TrimComponentProperties(document)
 
 	format := persistentFlags.OutputFormat
 	getLogger().Infof("Outputting listing (`%s` format)...", format)
@@ -130,7 +129,7 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, statsF
 	return
 }
 
-func TrimProperties(bom *schema.BOM) (err error) {
+func TrimComponentProperties(bom *schema.BOM) (err error) {
 
 	if bom == nil {
 		return NewInvalidSBOMError(bom, "", nil, nil)
@@ -140,9 +139,9 @@ func TrimProperties(bom *schema.BOM) (err error) {
 	components := *(bom.GetCdxComponents())
 	for i, _ := range components {
 		if components[i].Properties != nil {
-			fmt.Printf("BEFORE: component: %v\n", components[i].Properties)
+			//fmt.Printf("BEFORE: component: %v\n", components[i].Properties)
 			components[i].Properties = nil
-			fmt.Printf("AFTER: component: %v\n", components[i].Properties)
+			//fmt.Printf("AFTER: component: %v\n", components[i].Properties)
 		}
 	}
 

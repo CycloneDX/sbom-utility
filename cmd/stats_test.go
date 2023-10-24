@@ -31,7 +31,7 @@ import (
 
 const (
 	// Test "resource list" command
-	TEST_STATS_CDX_1_4 = "test/cyclonedx/cdx-1-3-resource-list.json"
+	TEST_STATS_CDX_1_4_SAMPLE_XXL_1 = "test/stats/stats-cdx-1-4-sample-xxl-1.json"
 )
 
 type StatsTestInfo struct {
@@ -105,16 +105,7 @@ func innerTestStatsList(t *testing.T, testInfo *StatsTestInfo) (outputBuffer byt
 // Command flag tests
 // ----------------------------------------
 
-func TestStatsList1(t *testing.T) {
-	ti := NewStatsTestInfoBasic(
-		TEST_STATS_CDX_1_4,
-		FORMAT_DEFAULT,
-		&fs.PathError{},
-	)
-
-	// verify correct error is returned
-	innerTestStatsList(t, ti)
-}
+// TBD
 
 // -------------------------------------------
 // Test format unsupported (SPDX)
@@ -124,6 +115,20 @@ func TestStatsListFormatUnsupportedSPDXMinReq(t *testing.T) {
 		TEST_SPDX_2_2_MIN_REQUIRED,
 		FORMAT_DEFAULT,
 		&schema.UnsupportedFormatError{},
+	)
+
+	// verify correct error is returned
+	innerTestStatsList(t, ti)
+}
+
+// -------------------------------------------
+// Data tests
+// -------------------------------------------
+func TestStatsCdx14SampleXXL1(t *testing.T) {
+	ti := NewStatsTestInfoBasic(
+		TEST_STATS_CDX_1_4_SAMPLE_XXL_1,
+		FORMAT_DEFAULT,
+		&fs.PathError{},
 	)
 
 	// verify correct error is returned
