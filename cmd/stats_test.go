@@ -98,9 +98,6 @@ func innerTestStatsList(t *testing.T, testInfo *StatsTestInfo) (outputBuffer byt
 	// invoke resource list command with a byte buffer
 	outputBuffer, err = innerBufferedTestStatsList(t, testInfo)
 
-	// Run all common tests against "result" values in the CommonTestInfo struct
-	// TODO: REMOVE: err = innerRunReportResultTests(t, &testInfo.CommonTestInfo, outputBuffer, err)
-
 	return
 }
 

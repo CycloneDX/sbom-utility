@@ -214,8 +214,9 @@ func loadDocumentLicenses(document *schema.BOM, whereFilters []common.WhereFilte
 	}
 
 	// 3. Hash all component licenses found in the (root).components[] (+ "nested" components)
-	if components := document.GetCdxComponents(); len(components) > 0 {
-		if err = hashComponentsLicenses(components, LC_LOC_COMPONENTS, whereFilters); err != nil {
+	pComponents := document.GetCdxComponents()
+	if pComponents != nil && len(*pComponents) > 0 {
+		if err = hashComponentsLicenses(*pComponents, LC_LOC_COMPONENTS, whereFilters); err != nil {
 			return
 		}
 	}
@@ -371,8 +372,9 @@ func hashComponentLicense(cdxComponent schema.CDXComponent, location int, whereF
 	}
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
-	if len(cdxComponent.Components) > 0 {
-		err = hashComponentsLicenses(cdxComponent.Components, location, whereFilters)
+	pComponent := cdxComponent.Components
+	if pComponent != nil && len(*pComponent) > 0 {
+		err = hashComponentsLicenses(*cdxComponent.Components, location, whereFilters)
 		if err != nil {
 			return
 		}

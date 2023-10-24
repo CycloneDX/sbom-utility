@@ -18,6 +18,7 @@
 package cmd
 
 import (
+	"fmt"
 	"io"
 	"strings"
 
@@ -112,16 +113,18 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, statsF
 		return
 	}
 
+	TrimProperties(document)
+
 	format := persistentFlags.OutputFormat
 	getLogger().Infof("Outputting listing (`%s` format)...", format)
 	switch format {
 	case FORMAT_JSON:
-		TrimProperties(document)
+		document.MarshalCycloneDXBOM("output.json", "", "  ")
 	default:
 		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Stats not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_TEXT)
-		TrimProperties(document)
+		document.MarshalCycloneDXBOM("output.json", "", "  ")
 	}
 
 	return
@@ -133,7 +136,15 @@ func TrimProperties(bom *schema.BOM) (err error) {
 		return NewInvalidSBOMError(bom, "", nil, nil)
 	}
 
-	bom.MarshalCycloneDXBOM("output.json")
+	// dereference to get to slice
+	components := *(bom.GetCdxComponents())
+	for i, _ := range components {
+		if components[i].Properties != nil {
+			fmt.Printf("BEFORE: component: %v\n", components[i].Properties)
+			components[i].Properties = nil
+			fmt.Printf("AFTER: component: %v\n", components[i].Properties)
+		}
+	}
 
 	return
 }

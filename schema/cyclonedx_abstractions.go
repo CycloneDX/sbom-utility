@@ -55,7 +55,7 @@ type CDXResourceInfo struct {
 	Name             string `json:"name"`
 	Version          string `json:"version"`
 	SupplierProvider CDXOrganizationalEntity
-	Properties       []CDXProperty
+	Properties       *([]CDXProperty)
 	Component        CDXComponent
 	Service          CDXService
 }

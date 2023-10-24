@@ -29,7 +29,8 @@ import (
 
 const (
 	// Test "resource list" command
-	TEST_TRIM_CDX_1_4_SAMPLE_1 = "test/stats/sample-1.sbom.json"
+	TEST_TRIM_CDX_1_5_COMP_PROPS_1   = "test/stats/trim-cdx-1-5-comp-props-1.json"
+	TEST_TRIM_CDX_1_4_LARGE_SAMPLE_1 = "test/stats/sample-1.sbom.json"
 )
 
 type TrimTestInfo struct {
@@ -41,10 +42,10 @@ func (ti *TrimTestInfo) String() string {
 	return pParent.String()
 }
 
-func NewTrimTestInfoBasic(inputFile string, listFormat string, resultExpectedError error) *TrimTestInfo {
+func NewTrimTestInfoBasic(inputFile string, resultExpectedError error) *TrimTestInfo {
 	var ti = new(TrimTestInfo)
 	var pCommon = &ti.CommonTestInfo
-	pCommon.InitBasic(inputFile, listFormat, resultExpectedError)
+	pCommon.InitBasic(inputFile, FORMAT_JSON, resultExpectedError)
 	return ti
 }
 
@@ -89,19 +90,15 @@ func innerTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer bytes.Buf
 	// invoke resource list command with a byte buffer
 	outputBuffer, err = innerBufferedTestTrim(t, testInfo)
 
-	// Run all common tests against "result" values in the CommonTestInfo struct
-	// TODO: REMOVE: err = innerRunReportResultTests(t, &testInfo.CommonTestInfo, outputBuffer, err)
-
 	return
 }
 
-func TestTrimSample1(t *testing.T) {
-	ti := NewTrimTestInfoBasic(
-		TEST_TRIM_CDX_1_4_SAMPLE_1,
-		FORMAT_JSON,
-		nil,
-	)
+func TestTrimExample1(t *testing.T) {
+	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_COMP_PROPS_1, nil)
+	innerTestTrim(t, ti)
+}
 
-	// verify correct error is returned
+func TestTrimLargeSample1(t *testing.T) {
+	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_4_LARGE_SAMPLE_1, nil)
 	innerTestTrim(t, ti)
 }

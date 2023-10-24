@@ -149,16 +149,16 @@ func loadComponentStats(document *schema.BOM) (err error) {
 	for _, key := range mapComponents.KeySet() {
 		aComponents, _ := mapComponents.Get(key)
 
-		fmt.Printf("value=%v", aComponents)
+		//fmt.Printf("value=%v", aComponents)
 
 		if len(aComponents) > 1 {
 			// TODO: are they unique entries? or are DeepEqual() duplicates?
 			getLogger().Warningf("component `%v` has duplicate `%v` entries", key, len(aComponents))
 		}
 
-		for _, c := range aComponents {
-			fmt.Printf("comp=%v", c)
-		}
+		// for _, c := range aComponents {
+		// 	fmt.Printf("comp=%v", c)
+		// }
 	}
 
 	return

@@ -26,6 +26,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime/debug"
 	"strconv"
 	"strings"
 
@@ -148,10 +149,10 @@ func (bom *BOM) GetCdxMetadataProperties() (properties []CDXProperty) {
 	return properties
 }
 
-func (bom *BOM) GetCdxComponents() (components []CDXComponent) {
+func (bom *BOM) GetCdxComponents() (components *[]CDXComponent) {
 	if bom := bom.GetCdxBom(); bom != nil {
 		if bom.Components != nil {
-			components = *bom.Components
+			components = bom.Components
 		}
 	}
 	return components
@@ -293,7 +294,7 @@ func (bom *BOM) UnmarshalCycloneDXBOM() (err error) {
 	return
 }
 
-func (bom *BOM) MarshalCycloneDXBOM(filename string) (err error) {
+func (bom *BOM) MarshalCycloneDXBOM(filename string, prefix string, indent string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -327,12 +328,11 @@ func (bom *BOM) MarshalCycloneDXBOM(filename string) (err error) {
 
 		// defer the closing of our jsonFile
 		defer jsonFile.Close()
-
 	}
 
 	var bytes []byte
 	temp := bom.CdxBom
-	bytes, err = json.Marshal(temp)
+	bytes, err = json.MarshalIndent(temp, prefix, indent)
 	if err != nil {
 		return
 	}
@@ -357,6 +357,11 @@ func (bom *BOM) MarshalCycloneDXBOM(filename string) (err error) {
 // (i.e., the subject of the BOM) as well as the components array.
 func (bom *BOM) HashComponentResources(whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
+	defer func() {
+		if panicInfo := recover(); panicInfo != nil {
+			fmt.Printf("%v, %s", panicInfo, string(debug.Stack()))
+		}
+	}()
 	defer getLogger().Exit(err)
 
 	// Hash the top-level component declared in the BOM metadata
@@ -366,8 +371,10 @@ func (bom *BOM) HashComponentResources(whereFilters []common.WhereFilter) (err e
 	}
 
 	// Hash all components found in the (root).components[] (+ "nested" components)
-	if components := bom.GetCdxComponents(); len(components) > 0 {
-		if err = bom.HashComponents(components, whereFilters, false); err != nil {
+	pComponents := bom.GetCdxComponents()
+	if pComponents != nil && len(*pComponents) > 0 {
+		//if components := bom.GetCdxComponents(); len(*components) > 0 {
+		if err = bom.HashComponents(*pComponents, whereFilters, false); err != nil {
 			return
 		}
 	}
@@ -438,8 +445,9 @@ func (bom *BOM) HashComponent(cdxComponent CDXComponent, whereFilters []common.W
 	}
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
-	if len(cdxComponent.Components) > 0 {
-		err = bom.HashComponents(cdxComponent.Components, whereFilters, root)
+	pComponent := cdxComponent.Components
+	if pComponent != nil && len(*pComponent) > 0 {
+		err = bom.HashComponents(*cdxComponent.Components, whereFilters, root)
 		if err != nil {
 			return
 		}

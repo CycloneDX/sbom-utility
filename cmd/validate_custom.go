@@ -78,7 +78,8 @@ func validateCustomDocumentComposition(document *schema.BOM) (innerError error) 
 	}
 
 	// Generate a (composition) validation error
-	if len(component.Components) > 0 {
+	pComponent := component.Components
+	if pComponent != nil && len(*pComponent) > 0 {
 		var fields = []string{"metadata", "component", "components"}
 		innerError = NewSBOMCompositionError(
 			MSG_INVALID_METADATA_COMPONENT_COMPONENTS,
