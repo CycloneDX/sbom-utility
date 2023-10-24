@@ -69,6 +69,7 @@ func innerBufferedTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer b
 		// Declare an output outputBuffer/outputWriter to use used during tests
 		bufferedWriter := bufio.NewWriter(&outputBuffer)
 		outputWriter = bufferedWriter
+		// MUST ensure all data is written to buffer before further testing
 		defer bufferedWriter.Flush()
 	} else {
 		outputFile, outputWriter, err = createOutputFile(testInfo.OutputFile)

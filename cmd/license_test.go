@@ -89,7 +89,7 @@ func NewLicenseTestInfoBasic(inputFile string, listFormat string, listSummary bo
 func innerTestLicenseListBuffered(t *testing.T, testInfo *LicenseTestInfo, whereFilters []common.WhereFilter) (outputBuffer bytes.Buffer, err error) {
 	// Declare an output outputBuffer/outputWriter to use used during tests
 	var outputWriter = bufio.NewWriter(&outputBuffer)
-	// ensure all data is written to buffer before further validation
+	// MUST ensure all data is written to buffer before further validation
 	defer outputWriter.Flush()
 
 	// Use a test input SBOM formatted in SPDX
