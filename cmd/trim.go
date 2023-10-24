@@ -137,7 +137,7 @@ func TrimComponentProperties(bom *schema.BOM) (err error) {
 
 	// dereference to get to slice
 	components := *(bom.GetCdxComponents())
-	for i, _ := range components {
+	for i := range components {
 		if components[i].Properties != nil {
 			//fmt.Printf("BEFORE: component: %v\n", components[i].Properties)
 			components[i].Properties = nil

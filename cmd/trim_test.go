@@ -29,8 +29,8 @@ import (
 
 const (
 	// Test "resource list" command
-	TEST_TRIM_CDX_1_5_COMP_PROPS_1   = "test/trim/trim-cdx-1-5-comp-props-1.json"
-	TEST_TRIM_CDX_1_4_LARGE_SAMPLE_1 = "test/trim/trim-cdx-1-4-sample-xxl-1.sbom.json"
+	TEST_TRIM_CDX_1_5_COMP_PROPS_1 = "test/trim/trim-cdx-1-5-comp-props-1.json"
+	TEST_TRIM_CDX_1_4_SAMPLE_XXL_1 = "test/trim/trim-cdx-1-4-sample-xxl-1.sbom.json"
 )
 
 type TrimTestInfo struct {
@@ -93,12 +93,12 @@ func innerTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer bytes.Buf
 	return
 }
 
-func TestTrimExample1(t *testing.T) {
+func TestTrimCdx15ComponentProperties(t *testing.T) {
 	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_COMP_PROPS_1, nil)
 	innerTestTrim(t, ti)
 }
 
-func TestTrimLargeSample1(t *testing.T) {
-	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_4_LARGE_SAMPLE_1, nil)
+func TestTrimCdx14ComponentPropertiesSampleXXL(t *testing.T) {
+	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_4_SAMPLE_XXL_1, nil)
 	innerTestTrim(t, ti)
 }
