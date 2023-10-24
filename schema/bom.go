@@ -181,7 +181,7 @@ func (bom *BOM) GetCdxMetadataLicenses() (licenses []CDXLicenseChoice) {
 	return licenses
 }
 
-func (bom *BOM) GetCdxVulnerabilities() (vulnerabilities []CDXVulnerability) {
+func (bom *BOM) GetCdxVulnerabilities() (vulnerabilities *[]CDXVulnerability) {
 	if bom := bom.GetCdxBom(); bom != nil {
 		vulnerabilities = bom.Vulnerabilities
 	}
@@ -297,38 +297,6 @@ func (bom *BOM) UnmarshalCycloneDXBOM() (err error) {
 func (bom *BOM) MarshalCycloneDXBOM(writer io.Writer, prefix string, indent string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
-
-	// // validate filename
-	// if len(filename) == 0 {
-	// 	return fmt.Errorf("schema: invalid output BOM filename: `%s`", filename)
-	// }
-
-	// // Check to see of stdin is the BOM source data
-	// var jsonFile *os.File
-	// var absFilename string
-	// if filename == INPUT_TYPE_STDOUT {
-	// 	jsonFile = os.Stdout
-	// 	// TODO: close() ?
-	// } else { // load the BOM data from relative filename
-	// 	// Conditionally append working directory if no abs. path detected
-	// 	if len(filename) > 0 && !filepath.IsAbs(filename) {
-	// 		absFilename = filepath.Join(utils.GlobalFlags.WorkingDir, filename)
-	// 	} else {
-	// 		absFilename = filename
-	// 	}
-
-	// 	// Open our jsonFile
-	// 	jsonFile, err = os.Create(absFilename)
-
-	// 	// if input file cannot be opened, log it and terminate
-	// 	if err != nil {
-	// 		getLogger().Error(err)
-	// 		return
-	// 	}
-
-	// 	// defer the closing of our jsonFile
-	// 	defer jsonFile.Close()
-	// }
 
 	var bytes []byte
 	temp := bom.CdxBom
@@ -553,8 +521,10 @@ func (bom *BOM) HashVulnerabilityResources(whereFilters []common.WhereFilter) (e
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
-	if vulnerabilities := bom.GetCdxVulnerabilities(); len(vulnerabilities) > 0 {
-		if err = bom.HashVulnerabilities(vulnerabilities, whereFilters); err != nil {
+	pVulnerabilities := bom.GetCdxVulnerabilities()
+
+	if pVulnerabilities != nil && len(*pVulnerabilities) > 0 {
+		if err = bom.HashVulnerabilities(*pVulnerabilities, whereFilters); err != nil {
 			return
 		}
 	}

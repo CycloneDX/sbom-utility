@@ -47,7 +47,7 @@ type CDXBom struct {
 	ExternalReferences []CDXExternalReference `json:"externalReferences,omitempty"`
 	Dependencies       []CDXDependency        `json:"dependencies,omitempty"`
 	Compositions       []CDXCompositions      `json:"compositions,omitempty" cdx:"+1.3"`    // v1.3 added
-	Vulnerabilities    []CDXVulnerability     `json:"vulnerabilities,omitempty" cdx:"+1.4"` // v1.4 added
+	Vulnerabilities    *[]CDXVulnerability    `json:"vulnerabilities,omitempty" cdx:"+1.4"` // v1.4 added
 	Signature          JSFSignature           `json:"signature,omitempty" cdx:"+1.4"`       // v1.4 added
 	Annotations        []CDXAnnotation        `json:"annotations,omitempty" cdx:"+1.5"`     // v1.5 added
 	Formulation        []CDXFormula           `json:"formulation,omitempty" cdx:"+1.5"`     // v1.5 added
