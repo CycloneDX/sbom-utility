@@ -20,7 +20,6 @@ package cmd
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -115,15 +114,14 @@ func innerTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer bytes.Buf
 
 func TestTrimCdx15ComponentProperties(t *testing.T) {
 	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_COMP_PROPS_1, nil)
-	//ti.CommonTestInfo.OutputFile = "output.json"
 	outputBuffer, _ := innerBufferedTestTrim(t, ti)
 	// TODO: verify "after" trim lengths and content have removed properties
-	fmt.Printf("Len(outputBuffer): `%v`", outputBuffer.Len())
+	getLogger().Tracef("Len(outputBuffer): `%v`\n", outputBuffer.Len())
 }
 
 func TestTrimCdx14ComponentPropertiesSampleXXL(t *testing.T) {
 	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_4_SAMPLE_XXL_1, nil)
-	ti.CommonTestInfo.OutputFile = "output.json"
+	outputBuffer, _ := innerBufferedTestTrim(t, ti)
 	// TODO: verify "after" trim lengths and content have removed properties
-	innerTestTrim(t, ti)
+	getLogger().Tracef("Len(outputBuffer): `%v`\n", outputBuffer.Len())
 }

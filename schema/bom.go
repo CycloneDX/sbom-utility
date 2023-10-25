@@ -142,7 +142,7 @@ func (bom *BOM) GetCdxMetadata() (metadata *CDXMetadata) {
 	return metadata
 }
 
-func (bom *BOM) GetCdxMetadataProperties() (properties []CDXProperty) {
+func (bom *BOM) GetCdxMetadataProperties() (properties *[]CDXProperty) {
 	if metadata := bom.GetCdxMetadata(); metadata != nil {
 		properties = metadata.Properties
 	}
@@ -151,18 +151,14 @@ func (bom *BOM) GetCdxMetadataProperties() (properties []CDXProperty) {
 
 func (bom *BOM) GetCdxComponents() (components *[]CDXComponent) {
 	if bom := bom.GetCdxBom(); bom != nil {
-		//if bom.Components != nil {
 		components = bom.Components
-		//}
 	}
 	return components
 }
 
 func (bom *BOM) GetCdxServices() (services *[]CDXService) {
 	if bom := bom.GetCdxBom(); bom != nil {
-		//if bom.Services != nil {
 		services = bom.Services
-		//	}
 	}
 	return services
 }
@@ -505,8 +501,9 @@ func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFi
 	}
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
-	if len(cdxService.Services) > 0 {
-		err = bom.HashServices(cdxService.Services, whereFilters)
+	pServices := cdxService.Services
+	if pServices != nil && len(*pServices) > 0 {
+		err = bom.HashServices(*pServices, whereFilters)
 		if err != nil {
 			return
 		}

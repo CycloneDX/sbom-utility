@@ -131,9 +131,13 @@ func validateCustomMetadataProperties(document *schema.BOM) (err error) {
 	}
 
 	hashmap := slicemultimap.New()
-	err = hashMetadataProperties(hashmap, document.GetCdxMetadataProperties())
-	if err != nil {
-		return
+	pProperties := document.GetCdxMetadataProperties()
+
+	if pProperties != nil {
+		err = hashMetadataProperties(hashmap, *document.GetCdxMetadataProperties())
+		if err != nil {
+			return
+		}
 	}
 
 	for _, checks := range validationProps {

@@ -426,8 +426,9 @@ func hashServiceLicense(cdxService schema.CDXService, location int, whereFilters
 	}
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
-	if len(cdxService.Services) > 0 {
-		err = hashServicesLicenses(cdxService.Services, location, whereFilters)
+	pServices := cdxService.Services
+	if pServices != nil && len(*pServices) > 0 {
+		err = hashServicesLicenses(*pServices, location, whereFilters)
 		if err != nil {
 			// Show intent to not check for error returns as there is no recovery
 			_ = getLogger().Errorf("Unable to hash empty license: %v", licenseInfo)

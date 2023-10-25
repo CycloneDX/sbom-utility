@@ -51,7 +51,7 @@ type CDXBom struct {
 	Signature          JSFSignature           `json:"signature,omitempty" cdx:"+1.4"`       // v1.4 added
 	Annotations        []CDXAnnotation        `json:"annotations,omitempty" cdx:"+1.5"`     // v1.5 added
 	Formulation        []CDXFormula           `json:"formulation,omitempty" cdx:"+1.5"`     // v1.5 added
-	Properties         []CDXProperty          `json:"properties,omitempty" cdx:"+1.5"`      // v1.5 added
+	Properties         *[]CDXProperty         `json:"properties,omitempty" cdx:"+1.5"`      // v1.5 added
 }
 
 // v1.2: existed
@@ -65,7 +65,7 @@ type CDXMetadata struct {
 	Manufacturer CDXOrganizationalEntity    `json:"manufacturer,omitempty"`
 	Supplier     CDXOrganizationalEntity    `json:"supplier,omitempty"`
 	Licenses     []CDXLicenseChoice         `json:"licenses,omitempty"`   // v1.3 added
-	Properties   []CDXProperty              `json:"properties,omitempty"` // v1.3 added
+	Properties   *[]CDXProperty             `json:"properties,omitempty"` // v1.3 added
 	Lifecycles   []CDXLifecycle             `json:"lifecycles,omitempty"` // v1.5 added
 }
 
@@ -171,7 +171,7 @@ type CDXService struct {
 	Data               []CDXServiceData        `json:"data,omitempty"`
 	Licenses           []CDXLicenseChoice      `json:"licenses,omitempty"`
 	ExternalReferences []CDXExternalReference  `json:"externalReferences,omitempty"`
-	Services           []CDXService            `json:"services,omitempty"`
+	Services           *[]CDXService           `json:"services,omitempty"`
 	Properties         *[]CDXProperty          `json:"properties,omitempty"`   // v1.3: added
 	ReleaseNotes       []CDXReleaseNotes       `json:"releaseNotes,omitempty"` // v1.4: added
 	Signature          JSFSignature            `json:"signature,omitempty"`    // v1.4: added
@@ -236,13 +236,13 @@ type CDXLicenseExpression struct {
 // Note: "id" SHOULD be an SPDX license ID
 // Note: "oneOf": ["id", "name"] is required
 type CDXLicense struct {
-	Id         string        `json:"id,omitempty"`
-	Name       string        `json:"name,omitempty"`
-	Text       CDXAttachment `json:"text,omitempty"`
-	Url        string        `json:"url,omitempty"`
-	BOMRef     CDXRefType    `json:"bom-ref,omitempty"`    // v1.5: added
-	Licensing  CDXLicensing  `json:"licensing,omitempty"`  // v1.5: added
-	Properties []CDXProperty `json:"properties,omitempty"` // v1.5: added
+	Id         string         `json:"id,omitempty"`
+	Name       string         `json:"name,omitempty"`
+	Text       CDXAttachment  `json:"text,omitempty"`
+	Url        string         `json:"url,omitempty"`
+	BOMRef     CDXRefType     `json:"bom-ref,omitempty"`    // v1.5: added
+	Licensing  CDXLicensing   `json:"licensing,omitempty"`  // v1.5: added
+	Properties *[]CDXProperty `json:"properties,omitempty"` // v1.5: added
 }
 
 // v1.5: added
