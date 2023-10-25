@@ -341,7 +341,9 @@ func hashComponentLicense(cdxComponent schema.CDXComponent, location int, whereF
 		licenseInfo.Component = cdxComponent
 		licenseInfo.BOMLocationValue = location
 		licenseInfo.ResourceName = cdxComponent.Name
-		licenseInfo.BOMRef = cdxComponent.BOMRef
+		if cdxComponent.BOMRef != nil {
+			licenseInfo.BOMRef = *cdxComponent.BOMRef
+		}
 		HashLicenseInfo(LICENSE_NO_ASSERTION, licenseInfo, whereFilters)
 
 		getLogger().Warningf("%s: %s (name:`%s`, version: `%s`, package-url: `%s`)",
@@ -362,7 +364,9 @@ func hashComponentLicense(cdxComponent schema.CDXComponent, location int, whereF
 		licenseInfo.Component = cdxComponent
 		licenseInfo.BOMLocationValue = location
 		licenseInfo.ResourceName = cdxComponent.Name
-		licenseInfo.BOMRef = cdxComponent.BOMRef
+		if cdxComponent.BOMRef != nil {
+			licenseInfo.BOMRef = *cdxComponent.BOMRef
+		}
 		err = hashLicenseInfoByLicenseType(licenseInfo, whereFilters)
 
 		if err != nil {

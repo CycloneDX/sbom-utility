@@ -377,7 +377,7 @@ func (bom *BOM) HashComponent(cdxComponent CDXComponent, whereFilters []common.W
 		getLogger().Warningf("component named `%s` missing `version`", cdxComponent.Name)
 	}
 
-	if cdxComponent.BOMRef == "" {
+	if cdxComponent.BOMRef != nil && *cdxComponent.BOMRef == "" {
 		getLogger().Warningf("component named `%s` missing `bom-ref`", cdxComponent.Name)
 	}
 
@@ -386,9 +386,13 @@ func (bom *BOM) HashComponent(cdxComponent CDXComponent, whereFilters []common.W
 	resourceInfo.Type = RESOURCE_TYPE_COMPONENT
 	resourceInfo.Component = cdxComponent
 	resourceInfo.Name = cdxComponent.Name
-	resourceInfo.BOMRef = cdxComponent.BOMRef.String()
+	if cdxComponent.BOMRef != nil {
+		resourceInfo.BOMRef = (*cdxComponent.BOMRef).String()
+	}
 	resourceInfo.Version = cdxComponent.Version
-	resourceInfo.SupplierProvider = cdxComponent.Supplier
+	if cdxComponent.Supplier != nil {
+		resourceInfo.SupplierProvider = *cdxComponent.Supplier
+	}
 	resourceInfo.Properties = cdxComponent.Properties
 
 	var match bool = true
