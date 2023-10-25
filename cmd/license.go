@@ -238,7 +238,6 @@ func hashMetadataLicenses(document *schema.BOM, location int, whereFilters []com
 	defer getLogger().Exit(err)
 
 	pLicenses := document.GetCdxMetadataLicenses()
-
 	if pLicenses == nil {
 		sbomError := NewInvalidSBOMError(
 			document,
@@ -279,7 +278,6 @@ func hashMetadataComponentLicenses(document *schema.BOM, location int, whereFilt
 	defer getLogger().Exit(err)
 
 	component := document.GetCdxMetadataComponent()
-
 	if component == nil {
 		sbomError := NewInvalidSBOMError(
 			document,

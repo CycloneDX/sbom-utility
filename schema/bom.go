@@ -144,7 +144,7 @@ func (bom *BOM) GetCdxMetadata() (pMetadata *CDXMetadata) {
 
 func (bom *BOM) GetCdxMetadataComponent() (pComponent *CDXComponent) {
 	if metadata := bom.GetCdxMetadata(); metadata != nil {
-		pComponent = &metadata.Component
+		pComponent = metadata.Component
 	}
 	return pComponent
 }

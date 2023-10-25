@@ -58,15 +58,15 @@ type CDXBom struct {
 // v1.3: added "licenses", "properties"
 // v1.5: added "lifecycles"
 type CDXMetadata struct {
-	Timestamp    string                     `json:"timestamp,omitempty"`
-	Tools        interface{}                `json:"tools,omitempty"` // v1.2: added.v1.5: "tools" is now an interface{}
-	Authors      []CDXOrganizationalContact `json:"authors,omitempty"`
-	Component    CDXComponent               `json:"component,omitempty"`
-	Manufacturer CDXOrganizationalEntity    `json:"manufacturer,omitempty"`
-	Supplier     CDXOrganizationalEntity    `json:"supplier,omitempty"`
-	Licenses     *[]CDXLicenseChoice        `json:"licenses,omitempty"`   // v1.3 added
-	Properties   *[]CDXProperty             `json:"properties,omitempty"` // v1.3 added
-	Lifecycles   []CDXLifecycle             `json:"lifecycles,omitempty"` // v1.5 added
+	Timestamp    string                      `json:"timestamp,omitempty"`
+	Tools        interface{}                 `json:"tools,omitempty"` // v1.2: added.v1.5: "tools" is now an interface{}
+	Authors      *[]CDXOrganizationalContact `json:"authors,omitempty"`
+	Component    *CDXComponent               `json:"component,omitempty"`
+	Manufacturer CDXOrganizationalEntity     `json:"manufacturer,omitempty"`
+	Supplier     CDXOrganizationalEntity     `json:"supplier,omitempty"`
+	Licenses     *[]CDXLicenseChoice         `json:"licenses,omitempty"`   // v1.3 added
+	Properties   *[]CDXProperty              `json:"properties,omitempty"` // v1.3 added
+	Lifecycles   *[]CDXLifecycle             `json:"lifecycles,omitempty"` // v1.5 added
 }
 
 // v1.2: existed

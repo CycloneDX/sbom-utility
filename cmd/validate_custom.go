@@ -130,9 +130,9 @@ func validateCustomMetadataProperties(document *schema.BOM) (err error) {
 		return
 	}
 
+	// TODO: move map to BOM object
 	hashmap := slicemultimap.New()
 	pProperties := document.GetCdxMetadataProperties()
-
 	if pProperties != nil {
 		err = hashMetadataProperties(hashmap, *pProperties)
 		if err != nil {
