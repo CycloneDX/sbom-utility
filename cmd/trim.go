@@ -138,29 +138,30 @@ func TrimBOMComponentProperties(bom *schema.BOM) (err error) {
 	if bom == nil {
 		return NewInvalidSBOMError(bom, "", nil, nil)
 	}
-
 	TrimComponentsProperties(bom.GetCdxComponents())
 
 	return
 }
 
 func TrimComponentsProperties(pComponents *[]schema.CDXComponent) (err error) {
-
 	var component schema.CDXComponent
-	components := *pComponents
-	for i := range components {
-		component = components[i]
-		if component.Properties != nil {
-			// detach the slice from the pointer
-			component.Properties = nil
-		}
 
-		// Recurse if component has a components array (slice)
-		if component.Components != nil {
-			err = TrimComponentsProperties(component.Components)
+	if pComponents != nil {
+		components := *pComponents
+		for i := range components {
+			component = components[i]
+			if component.Properties != nil {
+				// detach the slice from the pointer
+				component.Properties = nil
+			}
 
-			if err != nil {
-				return
+			// Recurse if component has a components array (slice)
+			if component.Components != nil {
+				err = TrimComponentsProperties(component.Components)
+
+				if err != nil {
+					return
+				}
 			}
 		}
 	}

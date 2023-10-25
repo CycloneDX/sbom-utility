@@ -158,7 +158,7 @@ type CDXDataGovernanceResponsibleParty struct {
 // TODO: v1.2 "licenses" used to be an anon. type until v1.3 intro. the `LicenseChoice` def.
 // validate a v1.2 SBOM wit the anon. type parses properly
 type CDXService struct {
-	BOMRef             CDXRefType              `json:"bom-ref,omitempty"`
+	BOMRef             *CDXRefType             `json:"bom-ref,omitempty"`
 	Provider           CDXOrganizationalEntity `json:"provider,omitempty"`
 	Group              string                  `json:"group,omitempty"`
 	Name               string                  `json:"name,omitempty"`

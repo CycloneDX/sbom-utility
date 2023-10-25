@@ -100,8 +100,8 @@ func validateCustomMetadata(document *schema.BOM) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
-	// validate that the top-level component is declared with all required values
-	if component := document.GetCdxMetadataComponent(); component == nil {
+	// validate that the top-level pComponent is declared with all required values
+	if pComponent := document.GetCdxMetadataComponent(); pComponent == nil {
 		err := NewSBOMMetadataError(
 			document,
 			MSG_INVALID_METADATA_COMPONENT,
@@ -134,7 +134,7 @@ func validateCustomMetadataProperties(document *schema.BOM) (err error) {
 	pProperties := document.GetCdxMetadataProperties()
 
 	if pProperties != nil {
-		err = hashMetadataProperties(hashmap, *document.GetCdxMetadataProperties())
+		err = hashMetadataProperties(hashmap, *pProperties)
 		if err != nil {
 			return
 		}

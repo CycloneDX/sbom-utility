@@ -131,45 +131,46 @@ func (bom *BOM) GetJSONMap() map[string]interface{} {
 	return bom.JsonMap
 }
 
-func (bom *BOM) GetCdxBom() (cdxBom *CDXBom) {
+func (bom *BOM) GetCdxBom() (pCdxBom *CDXBom) {
 	return bom.CdxBom
 }
 
-func (bom *BOM) GetCdxMetadata() (metadata *CDXMetadata) {
+func (bom *BOM) GetCdxMetadata() (pMetadata *CDXMetadata) {
 	if bom := bom.GetCdxBom(); bom != nil {
-		metadata = bom.Metadata
+		pMetadata = bom.Metadata
 	}
-	return metadata
+	return pMetadata
 }
 
-func (bom *BOM) GetCdxMetadataProperties() (properties *[]CDXProperty) {
+func (bom *BOM) GetCdxMetadataProperties() (pProperties *[]CDXProperty) {
 	if metadata := bom.GetCdxMetadata(); metadata != nil {
-		properties = metadata.Properties
+		pProperties = metadata.Properties
 	}
-	return properties
+	return pProperties
 }
 
-func (bom *BOM) GetCdxComponents() (components *[]CDXComponent) {
+func (bom *BOM) GetCdxComponents() (pComponents *[]CDXComponent) {
 	if bom := bom.GetCdxBom(); bom != nil {
-		components = bom.Components
+		pComponents = bom.Components
 	}
-	return components
+	return pComponents
 }
 
-func (bom *BOM) GetCdxServices() (services *[]CDXService) {
+func (bom *BOM) GetCdxServices() (pServices *[]CDXService) {
 	if bom := bom.GetCdxBom(); bom != nil {
-		services = bom.Services
+		pServices = bom.Services
 	}
-	return services
+	return pServices
 }
 
-func (bom *BOM) GetCdxMetadataComponent() (component *CDXComponent) {
+func (bom *BOM) GetCdxMetadataComponent() (pComponent *CDXComponent) {
 	if metadata := bom.GetCdxMetadata(); metadata != nil {
-		component = &metadata.Component
+		pComponent = &metadata.Component
 	}
-	return component
+	return pComponent
 }
 
+// TODO: make a pointer
 func (bom *BOM) GetCdxMetadataLicenses() (licenses []CDXLicenseChoice) {
 	if metadata := bom.GetCdxMetadata(); metadata != nil {
 		licenses = metadata.Licenses
@@ -177,11 +178,11 @@ func (bom *BOM) GetCdxMetadataLicenses() (licenses []CDXLicenseChoice) {
 	return licenses
 }
 
-func (bom *BOM) GetCdxVulnerabilities() (vulnerabilities *[]CDXVulnerability) {
+func (bom *BOM) GetCdxVulnerabilities() (pVulnerabilities *[]CDXVulnerability) {
 	if bom := bom.GetCdxBom(); bom != nil {
-		vulnerabilities = bom.Vulnerabilities
+		pVulnerabilities = bom.Vulnerabilities
 	}
-	return vulnerabilities
+	return pVulnerabilities
 }
 
 func (bom *BOM) GetKeyValueAsString(key string) (sValue string, err error) {
@@ -328,9 +329,12 @@ func (bom *BOM) HashComponentResources(whereFilters []common.WhereFilter) (err e
 	defer getLogger().Exit(err)
 
 	// Hash the top-level component declared in the BOM metadata
-	_, err = bom.HashComponent(*bom.GetCdxMetadataComponent(), whereFilters, true)
-	if err != nil {
-		return
+	pMetadataComponent := bom.GetCdxMetadataComponent()
+	if pMetadataComponent != nil {
+		_, err = bom.HashComponent(*pMetadataComponent, whereFilters, true)
+		if err != nil {
+			return
+		}
 	}
 
 	// Hash all components found in the (root).components[] (+ "nested" components)
@@ -344,6 +348,7 @@ func (bom *BOM) HashComponentResources(whereFilters []common.WhereFilter) (err e
 	return
 }
 
+// TODO: use pointer for []CDXComponent
 func (bom *BOM) HashComponents(components []CDXComponent, whereFilters []common.WhereFilter, root bool) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
@@ -357,7 +362,8 @@ func (bom *BOM) HashComponents(components []CDXComponent, whereFilters []common.
 }
 
 // Hash a CDX Component and recursively those of any "nested" components
-// TODO we should WARN if version is not a valid semver (e.g., examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json)
+// TODO: we should WARN if version is not a valid semver (e.g., examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json)
+// TODO: Use pointer for CDXComponent
 func (bom *BOM) HashComponent(cdxComponent CDXComponent, whereFilters []common.WhereFilter, root bool) (ri *CDXResourceInfo, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
@@ -439,6 +445,7 @@ func (bom *BOM) HashServiceResources(whereFilters []common.WhereFilter) (err err
 	return
 }
 
+// TODO: use pointer for []CDXService
 func (bom *BOM) HashServices(services []CDXService, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
@@ -453,6 +460,7 @@ func (bom *BOM) HashServices(services []CDXService, whereFilters []common.WhereF
 }
 
 // Hash a CDX Component and recursively those of any "nested" components
+// TODO: use pointer for CDXService
 func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFilter) (ri *CDXResourceInfo, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
@@ -472,7 +480,7 @@ func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFi
 		getLogger().Warningf("service named `%s` missing `version`", cdxService.Name)
 	}
 
-	if cdxService.BOMRef == "" {
+	if cdxService.BOMRef == nil && *cdxService.BOMRef != "" {
 		getLogger().Warningf("service named `%s` missing `bom-ref`", cdxService.Name)
 	}
 
@@ -480,7 +488,9 @@ func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFi
 	resourceInfo.Type = RESOURCE_TYPE_SERVICE
 	resourceInfo.Service = cdxService
 	resourceInfo.Name = cdxService.Name
-	resourceInfo.BOMRef = cdxService.BOMRef.String()
+	if cdxService.BOMRef != nil {
+		resourceInfo.BOMRef = cdxService.BOMRef.String()
+	}
 	resourceInfo.Version = cdxService.Version
 	resourceInfo.SupplierProvider = cdxService.Provider
 	resourceInfo.Properties = cdxService.Properties

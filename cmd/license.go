@@ -301,7 +301,7 @@ func hashMetadataComponentLicenses(document *schema.BOM, location int, whereFilt
 }
 
 // Hash all licenses found in an array of CDX Components
-// TODO use array of pointer to CDXComponent
+// TODO use array of pointer to []CDXComponent
 func hashComponentsLicenses(components []schema.CDXComponent, location int, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
@@ -316,7 +316,7 @@ func hashComponentsLicenses(components []schema.CDXComponent, location int, wher
 }
 
 // Hash all licenses found in an array of CDX Services
-// TODO use array of pointer to CDXService
+// TODO use array of pointer to []CDXService
 func hashServicesLicenses(services []schema.CDXService, location int, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
@@ -377,9 +377,9 @@ func hashComponentLicense(cdxComponent schema.CDXComponent, location int, whereF
 	}
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
-	pComponent := cdxComponent.Components
-	if pComponent != nil && len(*pComponent) > 0 {
-		err = hashComponentsLicenses(*cdxComponent.Components, location, whereFilters)
+	pComponents := cdxComponent.Components
+	if pComponents != nil && len(*pComponents) > 0 {
+		err = hashComponentsLicenses(*pComponents, location, whereFilters)
 		if err != nil {
 			return
 		}
@@ -401,7 +401,9 @@ func hashServiceLicense(cdxService schema.CDXService, location int, whereFilters
 		licenseInfo.Service = cdxService
 		licenseInfo.BOMLocationValue = location
 		licenseInfo.ResourceName = cdxService.Name
-		licenseInfo.BOMRef = cdxService.BOMRef
+		if cdxService.BOMRef != nil {
+			licenseInfo.BOMRef = *cdxService.BOMRef
+		}
 		HashLicenseInfo(LICENSE_NO_ASSERTION, licenseInfo, whereFilters)
 
 		getLogger().Warningf("%s: %s (name: `%s`, version: `%s`)",
@@ -420,7 +422,9 @@ func hashServiceLicense(cdxService schema.CDXService, location int, whereFilters
 		licenseInfo.LicenseChoice = licenseChoice
 		licenseInfo.Service = cdxService
 		licenseInfo.ResourceName = cdxService.Name
-		licenseInfo.BOMRef = cdxService.BOMRef
+		if cdxService.BOMRef != nil {
+			licenseInfo.BOMRef = *cdxService.BOMRef
+		}
 		licenseInfo.BOMLocationValue = location
 		err = hashLicenseInfoByLicenseType(licenseInfo, whereFilters)
 
