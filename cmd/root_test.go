@@ -29,6 +29,9 @@ import (
 	"github.com/CycloneDX/sbom-utility/utils"
 )
 
+// Default test output (i.e., --output) directory
+const TEST_OUTPUT_PATH = "temp/"
+
 // Test files that span commands
 const (
 	TEST_INPUT_FILE_NON_EXISTENT = "non-existent-sbom.json"

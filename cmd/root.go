@@ -312,11 +312,18 @@ func createOutputFile(outputFilename string) (outputFile *os.File, writer io.Wri
 			outputFile = os.Stdout
 
 		} else { // load the BOM data from relative filename
+
 			// Conditionally append working directory if no abs. path detected
 			if len(outputFilename) > 0 && !filepath.IsAbs(outputFilename) {
 				absFilename = filepath.Join(utils.GlobalFlags.WorkingDir, outputFilename)
 			} else {
 				absFilename = outputFilename
+			}
+
+			// If the (temporary, not persisted) "test" output directory does not exist, create it
+			path := filepath.Dir(absFilename)
+			if _, err := os.Stat(path); os.IsNotExist(err) {
+				os.MkdirAll(path, os.ModePerm)
 			}
 
 			// Open our jsonFile

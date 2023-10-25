@@ -1,6 +1,7 @@
 # make target file types
 sbom-utility*
 /release
+/temp
 
 # IDEs (e.g., VSCode)
 *.code-workspace

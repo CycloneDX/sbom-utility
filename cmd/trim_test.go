@@ -63,6 +63,7 @@ func innerBufferedTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer b
 	var outputWriter io.Writer
 	var outputFile *os.File
 
+	// TODO: centralize this logic to a function all Commands can use...
 	// Note: Any "Mocking" of os.Stdin/os.Stdout should be done in functions that call this one
 	if testInfo.OutputFile == "" {
 		// Declare an output outputBuffer/outputWriter to use used during tests
@@ -71,17 +72,21 @@ func innerBufferedTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer b
 		// MUST ensure all data is written to buffer before further testing
 		defer bufferedWriter.Flush()
 	} else {
-		outputFile, outputWriter, err = createOutputFile(testInfo.OutputFile)
+		outputFile, outputWriter, err = createOutputFile(TEST_OUTPUT_PATH + testInfo.OutputFile)
 		getLogger().Tracef("outputFile: `%v`; writer: `%v`", testInfo.OutputFile, outputWriter)
 
 		// use function closure to assure consistent error output based upon error type
 		defer func() {
-			// always close the output file
+			// always close the output file (even if error, as long as file handle returned)
 			if outputFile != nil {
 				outputFile.Close()
 				getLogger().Infof("Closed output file: `%s`", testInfo.OutputFile)
 			}
 		}()
+
+		if err != nil {
+			return
+		}
 	}
 
 	err = Trim(outputWriter, utils.GlobalFlags.PersistentFlags, trimFlags)
@@ -124,4 +129,11 @@ func TestTrimCdx14ComponentPropertiesSampleXXL(t *testing.T) {
 	outputBuffer, _ := innerBufferedTestTrim(t, ti)
 	// TODO: verify "after" trim lengths and content have removed properties
 	getLogger().Tracef("Len(outputBuffer): `%v`\n", outputBuffer.Len())
+}
+
+func TestTrimCdx14ComponentPropertiesSampleXXL2(t *testing.T) {
+	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_4_SAMPLE_XXL_1, nil)
+	ti.OutputFile = "output.sbom.json"
+	innerTestTrim(t, ti)
+	// TODO: verify output file was written and trimmed props.
 }
