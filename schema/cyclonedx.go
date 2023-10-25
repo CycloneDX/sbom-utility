@@ -91,8 +91,8 @@ type CDXComponent struct {
 	Version            string                   `json:"version,omitempty"`
 	Description        string                   `json:"description,omitempty"`
 	Scope              string                   `json:"scope,omitempty"` // Constraint: "enum": ["required","optional","excluded"]
-	Hashes             []CDXHash                `json:"hashes,omitempty"`
-	Licenses           []CDXLicenseChoice       `json:"licenses,omitempty"`
+	Hashes             *[]CDXHash               `json:"hashes,omitempty"`
+	Licenses           *[]CDXLicenseChoice      `json:"licenses,omitempty"`
 	Copyright          string                   `json:"copyright,omitempty"`
 	Cpe                string                   `json:"cpe,omitempty"`      // See: https://nvd.nist.gov/products/cpe
 	Purl               string                   `json:"purl,omitempty"`     // See: https://github.com/package-url/purl-spec
@@ -169,7 +169,7 @@ type CDXService struct {
 	XTrustBoundary     bool                    `json:"x-trust-boundary,omitempty"`
 	TrustZone          string                  `json:"trustZone,omitempty"`
 	Data               []CDXServiceData        `json:"data,omitempty"`
-	Licenses           []CDXLicenseChoice      `json:"licenses,omitempty"`
+	Licenses           *[]CDXLicenseChoice     `json:"licenses,omitempty"`
 	ExternalReferences []CDXExternalReference  `json:"externalReferences,omitempty"`
 	Services           *[]CDXService           `json:"services,omitempty"`
 	Properties         *[]CDXProperty          `json:"properties,omitempty"`   // v1.3: added

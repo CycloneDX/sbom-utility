@@ -334,7 +334,9 @@ func hashComponentLicense(cdxComponent schema.CDXComponent, location int, whereF
 	defer getLogger().Exit(err)
 	var licenseInfo LicenseInfo
 
-	if len(cdxComponent.Licenses) == 0 {
+	pLicenses := cdxComponent.Licenses
+	// Account for component with no license with an "UNDEFINED" entry
+	if pLicenses == nil || len(*pLicenses) == 0 {
 		// hash any component w/o a license using special key name
 		licenseInfo.Component = cdxComponent
 		licenseInfo.BOMLocationValue = location
@@ -352,25 +354,25 @@ func hashComponentLicense(cdxComponent schema.CDXComponent, location int, whereF
 			cdxComponent.Purl)
 		// No actual licenses to process
 		return
-	}
+	} else {
+		for _, licenseChoice := range *pLicenses {
+			getLogger().Debugf("licenseChoice: %s", getLogger().FormatStruct(licenseChoice))
+			getLogger().Tracef("hashing license for component=`%s`", cdxComponent.Name)
 
-	for _, licenseChoice := range cdxComponent.Licenses {
-		getLogger().Debugf("licenseChoice: %s", getLogger().FormatStruct(licenseChoice))
-		getLogger().Tracef("hashing license for component=`%s`", cdxComponent.Name)
+			licenseInfo.LicenseChoice = licenseChoice
+			licenseInfo.Component = cdxComponent
+			licenseInfo.BOMLocationValue = location
+			licenseInfo.ResourceName = cdxComponent.Name
+			if cdxComponent.BOMRef != nil {
+				licenseInfo.BOMRef = *cdxComponent.BOMRef
+			}
+			err = hashLicenseInfoByLicenseType(licenseInfo, whereFilters)
 
-		licenseInfo.LicenseChoice = licenseChoice
-		licenseInfo.Component = cdxComponent
-		licenseInfo.BOMLocationValue = location
-		licenseInfo.ResourceName = cdxComponent.Name
-		if cdxComponent.BOMRef != nil {
-			licenseInfo.BOMRef = *cdxComponent.BOMRef
-		}
-		err = hashLicenseInfoByLicenseType(licenseInfo, whereFilters)
-
-		if err != nil {
-			// Show intent to not check for error returns as there no intent to recover
-			_ = getLogger().Errorf("Unable to hash empty license: %v", licenseInfo)
-			return
+			if err != nil {
+				// Show intent to not check for error returns as there no intent to recover
+				_ = getLogger().Errorf("Unable to hash empty license: %v", licenseInfo)
+				return
+			}
 		}
 	}
 
@@ -394,7 +396,10 @@ func hashServiceLicense(cdxService schema.CDXService, location int, whereFilters
 
 	var licenseInfo LicenseInfo
 
-	if len(cdxService.Licenses) == 0 {
+	pLicenses := cdxService.Licenses
+
+	// Account for service with no license with an "UNDEFINED" entry
+	if pLicenses == nil || len(*pLicenses) == 0 {
 		// hash any service w/o a license using special key name
 		licenseInfo.Service = cdxService
 		licenseInfo.BOMLocationValue = location
@@ -412,22 +417,22 @@ func hashServiceLicense(cdxService schema.CDXService, location int, whereFilters
 
 		// No actual licenses to process
 		return
-	}
+	} else {
+		for _, licenseChoice := range *pLicenses {
+			getLogger().Debugf("licenseChoice: %s", getLogger().FormatStruct(licenseChoice))
+			getLogger().Tracef("Hashing license for service=`%s`", cdxService.Name)
+			licenseInfo.LicenseChoice = licenseChoice
+			licenseInfo.Service = cdxService
+			licenseInfo.ResourceName = cdxService.Name
+			if cdxService.BOMRef != nil {
+				licenseInfo.BOMRef = *cdxService.BOMRef
+			}
+			licenseInfo.BOMLocationValue = location
+			err = hashLicenseInfoByLicenseType(licenseInfo, whereFilters)
 
-	for _, licenseChoice := range cdxService.Licenses {
-		getLogger().Debugf("licenseChoice: %s", getLogger().FormatStruct(licenseChoice))
-		getLogger().Tracef("Hashing license for service=`%s`", cdxService.Name)
-		licenseInfo.LicenseChoice = licenseChoice
-		licenseInfo.Service = cdxService
-		licenseInfo.ResourceName = cdxService.Name
-		if cdxService.BOMRef != nil {
-			licenseInfo.BOMRef = *cdxService.BOMRef
-		}
-		licenseInfo.BOMLocationValue = location
-		err = hashLicenseInfoByLicenseType(licenseInfo, whereFilters)
-
-		if err != nil {
-			return
+			if err != nil {
+				return
+			}
 		}
 	}
 
