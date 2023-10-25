@@ -343,15 +343,19 @@ func (bom *BOM) MarshalCycloneDXBOM(writer io.Writer, prefix string, indent stri
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	var bytes []byte
-	temp := bom.CdxBom
-	bytes, err = json.MarshalIndent(temp, prefix, indent)
+	var jsonBytes []byte
+	jsonBytes, err = json.MarshalIndent(bom.CdxBom, prefix, indent)
 	if err != nil {
 		return
 	}
 
+	// TODO: unescape: \u0026 &, \u003c <, \u003e >
+	// unescaped := bytes.Replace(jsonBytes, []byte("\u0026"), []byte("&"), -1)
+	// unescaped = bytes.Replace(unescaped, []byte("\u003c"), []byte("<"), -1)
+	// unescaped = bytes.Replace(unescaped, []byte("\u003e"), []byte(">"), -1)
+
 	// write our opened jsonFile as a byte array.
-	numBytes, errWrite := writer.Write(bytes)
+	numBytes, errWrite := writer.Write(jsonBytes)
 	if errWrite != nil {
 		return errWrite
 	}
@@ -359,6 +363,19 @@ func (bom *BOM) MarshalCycloneDXBOM(writer io.Writer, prefix string, indent stri
 
 	return
 }
+
+// TODO: Marshal escapes certain characters which is not desireable
+// the only alternative is to use an Encoder, but then we lose formatting/indent
+// func (bom *BOM) EncodeCycloneDXBOM() ([]byte, error) {
+// 	getLogger().Enter()
+// 	defer getLogger().Exit()
+
+// 	buffer := &bytes.Buffer{}
+// 	encoder := json.NewEncoder(buffer)
+// 	encoder.SetEscapeHTML(false)
+// 	err := encoder.Encode(bom.CdxBom)
+// 	return buffer.Bytes(), err
+// }
 
 // -------------------
 // Components

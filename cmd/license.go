@@ -335,26 +335,7 @@ func hashComponentLicense(cdxComponent schema.CDXComponent, location int, whereF
 	var licenseInfo LicenseInfo
 
 	pLicenses := cdxComponent.Licenses
-	// Account for component with no license with an "UNDEFINED" entry
-	if pLicenses == nil || len(*pLicenses) == 0 {
-		// hash any component w/o a license using special key name
-		licenseInfo.Component = cdxComponent
-		licenseInfo.BOMLocationValue = location
-		licenseInfo.ResourceName = cdxComponent.Name
-		if cdxComponent.BOMRef != nil {
-			licenseInfo.BOMRef = *cdxComponent.BOMRef
-		}
-		HashLicenseInfo(LICENSE_NO_ASSERTION, licenseInfo, whereFilters)
-
-		getLogger().Warningf("%s: %s (name:`%s`, version: `%s`, package-url: `%s`)",
-			"No license found for component. bomRef",
-			cdxComponent.BOMRef,
-			cdxComponent.Name,
-			cdxComponent.Version,
-			cdxComponent.Purl)
-		// No actual licenses to process
-		return
-	} else {
+	if pLicenses != nil && len(*pLicenses) > 0 {
 		for _, licenseChoice := range *pLicenses {
 			getLogger().Debugf("licenseChoice: %s", getLogger().FormatStruct(licenseChoice))
 			getLogger().Tracef("hashing license for component=`%s`", cdxComponent.Name)
@@ -374,6 +355,25 @@ func hashComponentLicense(cdxComponent schema.CDXComponent, location int, whereF
 				return
 			}
 		}
+	} else {
+		// Account for component with no license with an "UNDEFINED" entry
+		// hash any component w/o a license using special key name
+		licenseInfo.Component = cdxComponent
+		licenseInfo.BOMLocationValue = location
+		licenseInfo.ResourceName = cdxComponent.Name
+		if cdxComponent.BOMRef != nil {
+			licenseInfo.BOMRef = *cdxComponent.BOMRef
+		}
+		HashLicenseInfo(LICENSE_NO_ASSERTION, licenseInfo, whereFilters)
+
+		getLogger().Warningf("%s: %s (name:`%s`, version: `%s`, package-url: `%s`)",
+			"No license found for component. bomRef",
+			cdxComponent.BOMRef,
+			cdxComponent.Name,
+			cdxComponent.Version,
+			cdxComponent.Purl)
+		// No actual licenses to process
+		return
 	}
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
@@ -397,9 +397,25 @@ func hashServiceLicense(cdxService schema.CDXService, location int, whereFilters
 	var licenseInfo LicenseInfo
 
 	pLicenses := cdxService.Licenses
+	if pLicenses != nil && len(*pLicenses) > 0 {
+		for _, licenseChoice := range *pLicenses {
+			getLogger().Debugf("licenseChoice: %s", getLogger().FormatStruct(licenseChoice))
+			getLogger().Tracef("Hashing license for service=`%s`", cdxService.Name)
+			licenseInfo.LicenseChoice = licenseChoice
+			licenseInfo.Service = cdxService
+			licenseInfo.ResourceName = cdxService.Name
+			if cdxService.BOMRef != nil {
+				licenseInfo.BOMRef = *cdxService.BOMRef
+			}
+			licenseInfo.BOMLocationValue = location
+			err = hashLicenseInfoByLicenseType(licenseInfo, whereFilters)
 
-	// Account for service with no license with an "UNDEFINED" entry
-	if pLicenses == nil || len(*pLicenses) == 0 {
+			if err != nil {
+				return
+			}
+		}
+	} else {
+		// Account for service with no license with an "UNDEFINED" entry
 		// hash any service w/o a license using special key name
 		licenseInfo.Service = cdxService
 		licenseInfo.BOMLocationValue = location
@@ -417,23 +433,6 @@ func hashServiceLicense(cdxService schema.CDXService, location int, whereFilters
 
 		// No actual licenses to process
 		return
-	} else {
-		for _, licenseChoice := range *pLicenses {
-			getLogger().Debugf("licenseChoice: %s", getLogger().FormatStruct(licenseChoice))
-			getLogger().Tracef("Hashing license for service=`%s`", cdxService.Name)
-			licenseInfo.LicenseChoice = licenseChoice
-			licenseInfo.Service = cdxService
-			licenseInfo.ResourceName = cdxService.Name
-			if cdxService.BOMRef != nil {
-				licenseInfo.BOMRef = *cdxService.BOMRef
-			}
-			licenseInfo.BOMLocationValue = location
-			err = hashLicenseInfoByLicenseType(licenseInfo, whereFilters)
-
-			if err != nil {
-				return
-			}
-		}
 	}
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
