@@ -142,6 +142,20 @@ func (bom *BOM) GetCdxMetadata() (pMetadata *CDXMetadata) {
 	return pMetadata
 }
 
+func (bom *BOM) GetCdxMetadataComponent() (pComponent *CDXComponent) {
+	if metadata := bom.GetCdxMetadata(); metadata != nil {
+		pComponent = &metadata.Component
+	}
+	return pComponent
+}
+
+func (bom *BOM) GetCdxMetadataLicenses() (licenses *[]CDXLicenseChoice) {
+	if metadata := bom.GetCdxMetadata(); metadata != nil {
+		licenses = metadata.Licenses
+	}
+	return licenses
+}
+
 func (bom *BOM) GetCdxMetadataProperties() (pProperties *[]CDXProperty) {
 	if metadata := bom.GetCdxMetadata(); metadata != nil {
 		pProperties = metadata.Properties
@@ -163,19 +177,53 @@ func (bom *BOM) GetCdxServices() (pServices *[]CDXService) {
 	return pServices
 }
 
-func (bom *BOM) GetCdxMetadataComponent() (pComponent *CDXComponent) {
-	if metadata := bom.GetCdxMetadata(); metadata != nil {
-		pComponent = &metadata.Component
+func (bom *BOM) GetCdxProperties() (pProperties *[]CDXProperty) {
+	if bom := bom.GetCdxBom(); bom != nil {
+		pProperties = bom.Properties
 	}
-	return pComponent
+	return pProperties
 }
 
-// TODO: make a pointer
-func (bom *BOM) GetCdxMetadataLicenses() (licenses []CDXLicenseChoice) {
-	if metadata := bom.GetCdxMetadata(); metadata != nil {
-		licenses = metadata.Licenses
+func (bom *BOM) GetCdxExternalReferences() (pReferences *[]CDXExternalReference) {
+	if bom := bom.GetCdxBom(); bom != nil {
+		pReferences = bom.ExternalReferences
 	}
-	return licenses
+	return pReferences
+}
+
+func (bom *BOM) GetCdxDependencies() (pDependencies *[]CDXDependency) {
+	if bom := bom.GetCdxBom(); bom != nil {
+		pDependencies = bom.Dependencies
+	}
+	return pDependencies
+}
+
+func (bom *BOM) GetCdxCompositions() (pCompositions *[]CDXCompositions) {
+	if bom := bom.GetCdxBom(); bom != nil {
+		pCompositions = bom.Compositions
+	}
+	return pCompositions
+}
+
+func (bom *BOM) GetCdxAnnotations() (pAnnotations *[]CDXAnnotation) {
+	if bom := bom.GetCdxBom(); bom != nil {
+		pAnnotations = bom.Annotations
+	}
+	return pAnnotations
+}
+
+func (bom *BOM) GetCdxFormula() (pFormula *[]CDXFormula) {
+	if bom := bom.GetCdxBom(); bom != nil {
+		pFormula = bom.Formulation
+	}
+	return pFormula
+}
+
+func (bom *BOM) GetCdxSignature() (pSignature *JSFSignature) {
+	if bom := bom.GetCdxBom(); bom != nil {
+		pSignature = bom.Signature
+	}
+	return pSignature
 }
 
 func (bom *BOM) GetCdxVulnerabilities() (pVulnerabilities *[]CDXVulnerability) {

@@ -37,21 +37,21 @@ var EMPTY_CDXLicense = CDXLicense{}
 // v1.4: added "vulnerabilities", "signature"
 // v1.5: added "annotations", "formulation", "properties"
 type CDXBom struct {
-	BOMFormat          string                 `json:"bomFormat,omitempty"`
-	SpecVersion        string                 `json:"specVersion,omitempty"`
-	SerialNumber       string                 `json:"serialNumber,omitempty"`
-	Version            int                    `json:"version,omitempty"`
-	Metadata           *CDXMetadata           `json:"metadata,omitempty"`
-	Components         *[]CDXComponent        `json:"components,omitempty"`
-	Services           *[]CDXService          `json:"services,omitempty"`
-	ExternalReferences []CDXExternalReference `json:"externalReferences,omitempty"`
-	Dependencies       []CDXDependency        `json:"dependencies,omitempty"`
-	Compositions       []CDXCompositions      `json:"compositions,omitempty" cdx:"+1.3"`    // v1.3 added
-	Vulnerabilities    *[]CDXVulnerability    `json:"vulnerabilities,omitempty" cdx:"+1.4"` // v1.4 added
-	Signature          JSFSignature           `json:"signature,omitempty" cdx:"+1.4"`       // v1.4 added
-	Annotations        []CDXAnnotation        `json:"annotations,omitempty" cdx:"+1.5"`     // v1.5 added
-	Formulation        []CDXFormula           `json:"formulation,omitempty" cdx:"+1.5"`     // v1.5 added
-	Properties         *[]CDXProperty         `json:"properties,omitempty" cdx:"+1.5"`      // v1.5 added
+	BOMFormat          string                  `json:"bomFormat,omitempty"`
+	SpecVersion        string                  `json:"specVersion,omitempty"`
+	SerialNumber       string                  `json:"serialNumber,omitempty"`
+	Version            int                     `json:"version,omitempty"`
+	Metadata           *CDXMetadata            `json:"metadata,omitempty"`
+	Components         *[]CDXComponent         `json:"components,omitempty"`
+	Services           *[]CDXService           `json:"services,omitempty"`
+	ExternalReferences *[]CDXExternalReference `json:"externalReferences,omitempty"`
+	Dependencies       *[]CDXDependency        `json:"dependencies,omitempty"`
+	Compositions       *[]CDXCompositions      `json:"compositions,omitempty" cdx:"+1.3"`    // v1.3 added
+	Vulnerabilities    *[]CDXVulnerability     `json:"vulnerabilities,omitempty" cdx:"+1.4"` // v1.4 added
+	Signature          *JSFSignature           `json:"signature,omitempty" cdx:"+1.4"`       // v1.4 added
+	Annotations        *[]CDXAnnotation        `json:"annotations,omitempty" cdx:"+1.5"`     // v1.5 added
+	Formulation        *[]CDXFormula           `json:"formulation,omitempty" cdx:"+1.5"`     // v1.5 added
+	Properties         *[]CDXProperty          `json:"properties,omitempty" cdx:"+1.5"`      // v1.5 added
 }
 
 // v1.2: existed
@@ -64,7 +64,7 @@ type CDXMetadata struct {
 	Component    CDXComponent               `json:"component,omitempty"`
 	Manufacturer CDXOrganizationalEntity    `json:"manufacturer,omitempty"`
 	Supplier     CDXOrganizationalEntity    `json:"supplier,omitempty"`
-	Licenses     []CDXLicenseChoice         `json:"licenses,omitempty"`   // v1.3 added
+	Licenses     *[]CDXLicenseChoice        `json:"licenses,omitempty"`   // v1.3 added
 	Properties   *[]CDXProperty             `json:"properties,omitempty"` // v1.3 added
 	Lifecycles   []CDXLifecycle             `json:"lifecycles,omitempty"` // v1.5 added
 }

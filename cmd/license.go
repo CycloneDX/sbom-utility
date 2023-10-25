@@ -237,9 +237,9 @@ func hashMetadataLicenses(document *schema.BOM, location int, whereFilters []com
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
-	licenses := document.GetCdxMetadataLicenses()
+	pLicenses := document.GetCdxMetadataLicenses()
 
-	if licenses == nil {
+	if pLicenses == nil {
 		sbomError := NewInvalidSBOMError(
 			document,
 			fmt.Sprintf("%s (%s)",
@@ -255,7 +255,7 @@ func hashMetadataLicenses(document *schema.BOM, location int, whereFilters []com
 	}
 
 	var licenseInfo LicenseInfo
-	for _, lc := range licenses {
+	for _, lc := range *pLicenses {
 		getLogger().Tracef("hashing license: id: `%s`, name: `%s`",
 			lc.License.Id, lc.License.Name)
 
