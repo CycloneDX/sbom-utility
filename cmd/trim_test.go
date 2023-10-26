@@ -119,9 +119,11 @@ func innerTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer bytes.Buf
 
 func TestTrimCdx15ComponentProperties(t *testing.T) {
 	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_COMP_PROPS_1, nil)
-	outputBuffer, _ := innerBufferedTestTrim(t, ti)
+	//outputBuffer, _ := innerBufferedTestTrim(t, ti)
+	ti.OutputFile = "output-small.sbom.json"
+	innerTestTrim(t, ti)
 	// TODO: verify "after" trim lengths and content have removed properties
-	getLogger().Tracef("Len(outputBuffer): `%v`\n", outputBuffer.Len())
+	//getLogger().Tracef("Len(outputBuffer): `%v`\n", outputBuffer.Len())
 }
 
 func TestTrimCdx14ComponentPropertiesSampleXXL(t *testing.T) {
@@ -133,7 +135,7 @@ func TestTrimCdx14ComponentPropertiesSampleXXL(t *testing.T) {
 
 func TestTrimCdx14ComponentPropertiesSampleXXL2(t *testing.T) {
 	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_4_SAMPLE_XXL_1, nil)
-	ti.OutputFile = "output.sbom.json"
+	ti.OutputFile = "output-xxl.sbom.json"
 	innerTestTrim(t, ti)
 	// TODO: verify output file was written and trimmed props.
 }

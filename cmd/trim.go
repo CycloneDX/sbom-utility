@@ -144,20 +144,20 @@ func TrimBOMComponentProperties(bom *schema.BOM) (err error) {
 }
 
 func TrimComponentsProperties(pComponents *[]schema.CDXComponent) (err error) {
-	var component schema.CDXComponent
+	//var component schema.CDXComponent
 
 	if pComponents != nil {
 		components := *pComponents
 		for i := range components {
-			component = components[i]
-			if component.Properties != nil {
+			//component = components[i]
+			if components[i].Properties != nil {
 				// detach the slice from the pointer
-				component.Properties = nil
+				components[i].Properties = nil
 			}
 
 			// Recurse if component has a components array (slice)
-			if component.Components != nil {
-				err = TrimComponentsProperties(component.Components)
+			if components[i].Components != nil {
+				err = TrimComponentsProperties(components[i].Components)
 
 				if err != nil {
 					return
