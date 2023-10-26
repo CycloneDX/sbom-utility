@@ -185,7 +185,9 @@ func init() {
 	rootCmd.AddCommand(NewCommandResource())
 	rootCmd.AddCommand(NewCommandVulnerability())
 	rootCmd.AddCommand(NewCommandDiff())
-	rootCmd.AddCommand(NewCommandStats())
+	rootCmd.AddCommand(NewCommandTrim())
+	// TODO: when fully implemented for some stat subset uncomment:
+	//rootCmd.AddCommand(NewCommandStats())
 
 	// Add license command its subcommands
 	licenseCmd := NewCommandLicense()
