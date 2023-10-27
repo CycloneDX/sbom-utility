@@ -30,6 +30,7 @@ import (
 
 const (
 	// Test "resource list" command
+	TEST_TRIM_CDX_1_5_COMPS_ONLY   = "test/trim/trim-cdx-1-5-comps-only.json"
 	TEST_TRIM_CDX_1_5_COMP_PROPS_1 = "test/trim/trim-cdx-1-5-comp-props-1.json"
 	TEST_TRIM_CDX_1_4_SAMPLE_XXL_1 = "test/trim/trim-cdx-1-4-sample-xxl-1.sbom.json"
 )
@@ -117,10 +118,19 @@ func innerTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer bytes.Buf
 	return
 }
 
+func TestTrimCdx15ComponentsOnlyProperties(t *testing.T) {
+	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_COMPS_ONLY, nil)
+	//outputBuffer, _ := innerBufferedTestTrim(t, ti)
+	ti.OutputFile = "output-comps-only.sbom.json"
+	innerTestTrim(t, ti)
+	// TODO: verify "after" trim lengths and content have removed properties
+	//getLogger().Tracef("Len(outputBuffer): `%v`\n", outputBuffer.Len())
+}
+
 func TestTrimCdx15ComponentProperties(t *testing.T) {
 	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_COMP_PROPS_1, nil)
 	//outputBuffer, _ := innerBufferedTestTrim(t, ti)
-	ti.OutputFile = "output-small.sbom.json"
+	ti.OutputFile = "output-comps-props.sbom.json"
 	innerTestTrim(t, ti)
 	// TODO: verify "after" trim lengths and content have removed properties
 	//getLogger().Tracef("Len(outputBuffer): `%v`\n", outputBuffer.Len())

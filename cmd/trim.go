@@ -26,6 +26,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// parent objects
+const (
+	SUBCOMMAND_TRIM_DOCUMENT_ROOT       = "root"
+	SUBCOMMAND_TRIM_DOCUMENT_COMPONENT  = "component"  // e.g., metadata
+	SUBCOMMAND_TRIM_DOCUMENT_COMPONENTS = "components" // e.g., root, tools
+	SUBCOMMAND_TRIM_DOCUMENT_SERVICES   = "services"   // e.g., root, tools
+	// others: license, releaseNotes, vulnerability, modelCard,
+	// (componentData) contents, formula, task, step, command,
+	// workspace, volume, trigger, event, inputType, outputType, condition
+)
+
+// informational decorators
+const (
+	SUBCOMMAND_TRIM_EXT_PROPERTIES = "properties"
+	// TODO: SUBCOMMAND_TRIM_EXT_EXTERNAL_REFERENCES = "externalReferences"
+)
+
 var TRIM_LIST_OUTPUT_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{FORMAT_JSON}, ", ")
 
@@ -93,10 +110,23 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, statsF
 	// Note: returns error if either file load or unmarshal to JSON map fails
 	var document *schema.BOM
 	document, err = LoadInputBOMFileAndDetectSchema()
-
 	if err != nil {
 		return
 	}
+	// TEST 1
+	// delete(document.JsonMap, "metadata")
+	// TEST 2
+	// meta := document.JsonMap["metadata"]
+	// mapMeta := meta.(map[string]interface{})
+	// delete(mapMeta, "component")
+
+	//document.GetEntityMap("component")
+	// document.GetEntityMap("metadata")
+	// document.GetEntityMap("name")
+	// document.GetEntityMap("version")
+	// document.GetEntityMap("purl")
+	// document.GetEntityMap("externalReferences")
+	document.TrimJsonMap("properties")
 
 	// At this time, fail SPDX format SBOMs as "unsupported" (for "any" format)
 	if !document.FormatInfo.IsCycloneDx() {
@@ -112,10 +142,10 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, statsF
 		return
 	}
 
-	err = TrimBOMComponentProperties(document)
-	if err != nil {
-		return
-	}
+	// err = TrimBOMComponentProperties(document)
+	// if err != nil {
+	// 	return
+	// }
 
 	format := persistentFlags.OutputFormat
 

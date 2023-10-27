@@ -183,5 +183,11 @@
         }
       ]
     }
+  ],
+  "properties": [
+    {
+      "name": "abc",
+      "value": "123"
+    }
   ]
 }

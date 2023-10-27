@@ -49,6 +49,7 @@ type BOM struct {
 	ComponentMap     *slicemultimap.MultiMap
 	ServiceMap       *slicemultimap.MultiMap
 	VulnerabilityMap *slicemultimap.MultiMap
+	EntityMap        *slicemultimap.MultiMap
 }
 
 const (
