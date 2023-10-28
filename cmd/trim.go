@@ -113,19 +113,8 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, statsF
 	if err != nil {
 		return
 	}
-	// TEST 1
-	// delete(document.JsonMap, "metadata")
-	// TEST 2
-	// meta := document.JsonMap["metadata"]
-	// mapMeta := meta.(map[string]interface{})
-	// delete(mapMeta, "component")
 
-	//document.GetEntityMap("component")
-	// document.GetEntityMap("metadata")
-	// document.GetEntityMap("name")
-	// document.GetEntityMap("version")
-	// document.GetEntityMap("purl")
-	// document.GetEntityMap("externalReferences")
+	// TODO: use a parameter to obtain and normalize  object key names
 	document.TrimJsonMap("properties")
 
 	// At this time, fail SPDX format SBOMs as "unsupported" (for "any" format)
@@ -142,11 +131,6 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, statsF
 		return
 	}
 
-	// err = TrimBOMComponentProperties(document)
-	// if err != nil {
-	// 	return
-	// }
-
 	format := persistentFlags.OutputFormat
 
 	getLogger().Infof("Outputting listing (`%s` format)...", format)
@@ -158,42 +142,6 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, statsF
 		getLogger().Warningf("Stats not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_TEXT)
 		document.MarshalCycloneDXBOM(writer, "", "  ")
-	}
-
-	return
-}
-
-func TrimBOMComponentProperties(bom *schema.BOM) (err error) {
-
-	if bom == nil {
-		return NewInvalidSBOMError(bom, "", nil, nil)
-	}
-	TrimComponentsProperties(bom.GetCdxComponents())
-
-	return
-}
-
-func TrimComponentsProperties(pComponents *[]schema.CDXComponent) (err error) {
-	//var component schema.CDXComponent
-
-	if pComponents != nil {
-		components := *pComponents
-		for i := range components {
-			//component = components[i]
-			if components[i].Properties != nil {
-				// detach the slice from the pointer
-				components[i].Properties = nil
-			}
-
-			// Recurse if component has a components array (slice)
-			if components[i].Components != nil {
-				err = TrimComponentsProperties(components[i].Components)
-
-				if err != nil {
-					return
-				}
-			}
-		}
 	}
 
 	return

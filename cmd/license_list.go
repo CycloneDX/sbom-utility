@@ -220,34 +220,34 @@ func ListLicenses(writer io.Writer, persistentFlags utils.PersistentCommandFlags
 		getLogger().Infof("Outputting summary (`%s` format)...", format)
 		switch format {
 		case FORMAT_TEXT:
-			DisplayLicenseListSummaryText(writer)
+			DisplayLicenseListSummaryText(document, writer)
 		case FORMAT_CSV:
-			err = DisplayLicenseListSummaryCSV(writer)
+			err = DisplayLicenseListSummaryCSV(document, writer)
 		case FORMAT_MARKDOWN:
-			DisplayLicenseListSummaryMarkdown(writer)
+			DisplayLicenseListSummaryMarkdown(document, writer)
 		default:
 			// Default to text output
 			getLogger().Warningf("Summary not supported for `%s` format; defaulting to `%s` format...",
 				format, FORMAT_TEXT)
-			DisplayLicenseListSummaryText(writer)
+			DisplayLicenseListSummaryText(document, writer)
 		}
 	} else {
 		// TODO surface errors returned from "DisplayXXX" functions
 		getLogger().Infof("Outputting listing (`%s` format)...", format)
 		switch format {
 		case FORMAT_JSON:
-			DisplayLicenseListJson(writer)
+			DisplayLicenseListJson(document, writer)
 		case FORMAT_CSV:
-			err = DisplayLicenseListCSV(writer)
+			err = DisplayLicenseListCSV(document, writer)
 		case FORMAT_MARKDOWN:
-			DisplayLicenseListMarkdown(writer)
+			DisplayLicenseListMarkdown(document, writer)
 		case FORMAT_TEXT:
-			DisplayLicenseListSummaryText(writer)
+			DisplayLicenseListSummaryText(document, writer)
 		default:
 			// Default to JSON output for anything else
 			getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
 				format, FORMAT_JSON)
-			DisplayLicenseListJson(writer)
+			DisplayLicenseListJson(document, writer)
 		}
 	}
 
@@ -258,15 +258,15 @@ func ListLicenses(writer io.Writer, persistentFlags utils.PersistentCommandFlags
 // NOTE: if no license are found, the "json.Marshal" method(s) will return a value of "null"
 // which is valid JSON (and not an empty array)
 // TODO: Support de-duplication (flag) (which MUST be exact using deep comparison)
-func DisplayLicenseListJson(output io.Writer) {
+func DisplayLicenseListJson(bom *schema.BOM, output io.Writer) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	var licenseInfo LicenseInfo
 	var lc []schema.CDXLicenseChoice
 
-	for _, licenseName := range licenseMap.KeySet() {
-		arrLicenseInfo, _ := licenseMap.Get(licenseName)
+	for _, licenseName := range bom.LicenseMap.KeySet() {
+		arrLicenseInfo, _ := bom.LicenseMap.Get(licenseName)
 
 		for _, iInfo := range arrLicenseInfo {
 			licenseInfo = iInfo.(LicenseInfo)
@@ -282,7 +282,7 @@ func DisplayLicenseListJson(output io.Writer) {
 }
 
 // NOTE: This list is NOT de-duplicated
-func DisplayLicenseListCSV(output io.Writer) (err error) {
+func DisplayLicenseListCSV(bom *schema.BOM, output io.Writer) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -298,13 +298,13 @@ func DisplayLicenseListCSV(output io.Writer) (err error) {
 	}
 
 	// Emit warning (confirmation) message if no licenses found in document
-	licenseKeys := licenseMap.KeySet()
+	licenseKeys := bom.LicenseMap.KeySet()
 
 	// Emit no license or assertion-only warning into output
 	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
 
 	for _, licenseName := range licenseKeys {
-		arrLicenseInfo, _ := licenseMap.Get(licenseName)
+		arrLicenseInfo, _ := bom.LicenseMap.Get(licenseName)
 
 		for _, iInfo := range arrLicenseInfo {
 			// reset line after each iteration
@@ -335,7 +335,7 @@ func DisplayLicenseListCSV(output io.Writer) (err error) {
 }
 
 // NOTE: This list is NOT de-duplicated
-func DisplayLicenseListMarkdown(output io.Writer) {
+func DisplayLicenseListMarkdown(bom *schema.BOM, output io.Writer) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -350,7 +350,7 @@ func DisplayLicenseListMarkdown(output io.Writer) {
 	fmt.Fprintf(output, "%s\n", alignmentRow)
 
 	// Display a warning messing in the actual output and return (short-circuit)
-	licenseKeys := licenseMap.KeySet()
+	licenseKeys := bom.LicenseMap.KeySet()
 
 	// Emit no license or assertion-only warning into output
 	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
@@ -360,7 +360,7 @@ func DisplayLicenseListMarkdown(output io.Writer) {
 	var content string
 
 	for _, licenseName := range licenseKeys {
-		arrLicenseInfo, _ := licenseMap.Get(licenseName)
+		arrLicenseInfo, _ := bom.LicenseMap.Get(licenseName)
 
 		for _, iInfo := range arrLicenseInfo {
 			// Each row will contain every field of a CDX LicenseChoice object
@@ -398,7 +398,7 @@ func DisplayLicenseListMarkdown(output io.Writer) {
 // TODO: Make policy column optional
 // TODO: Add a --no-title flag to skip title output
 // TODO: Support a new --sort <column> flag
-func DisplayLicenseListSummaryText(output io.Writer) {
+func DisplayLicenseListSummaryText(bom *schema.BOM, output io.Writer) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -419,7 +419,7 @@ func DisplayLicenseListSummaryText(output io.Writer) {
 	fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
 	// Display a warning missing in the actual output and return (short-circuit)
-	licenseKeys := licenseMap.KeySet()
+	licenseKeys := bom.LicenseMap.KeySet()
 
 	// Emit no license or assertion-only warning into output
 	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
@@ -428,7 +428,7 @@ func DisplayLicenseListSummaryText(output io.Writer) {
 	sortLicenseKeys(licenseKeys)
 
 	for _, licenseName := range licenseKeys {
-		arrLicenseInfo, _ := licenseMap.Get(licenseName)
+		arrLicenseInfo, _ := bom.LicenseMap.Get(licenseName)
 
 		for _, iInfo := range arrLicenseInfo {
 			licenseInfo = iInfo.(LicenseInfo)
@@ -450,7 +450,7 @@ func DisplayLicenseListSummaryText(output io.Writer) {
 // TODO: Make policy column optional
 // TODO: Add a --no-title flag to skip title output
 // TODO: Support a new --sort <column> flag
-func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
+func DisplayLicenseListSummaryCSV(bom *schema.BOM, output io.Writer) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -469,7 +469,7 @@ func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
 	}
 
 	// retrieve all hashed licenses (keys) found in the document and verify we have ones to process
-	licenseKeys := licenseMap.KeySet()
+	licenseKeys := bom.LicenseMap.KeySet()
 
 	// Emit no license or assertion-only warning into output
 	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
@@ -479,7 +479,7 @@ func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
 
 	// output the each license entry as a row
 	for _, licenseName := range licenseKeys {
-		arrLicenseInfo, _ := licenseMap.Get(licenseName)
+		arrLicenseInfo, _ := bom.LicenseMap.Get(licenseName)
 
 		// An SBOM SHOULD always contain at least 1 (declared) license
 		if len(arrLicenseInfo) == 0 {
@@ -518,7 +518,7 @@ func DisplayLicenseListSummaryCSV(output io.Writer) (err error) {
 // TODO: Make policy column optional
 // TODO: Add a --no-title flag to skip title output
 // TODO: Support a new --sort <column> flag
-func DisplayLicenseListSummaryMarkdown(output io.Writer) {
+func DisplayLicenseListSummaryMarkdown(bom *schema.BOM, output io.Writer) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -533,7 +533,7 @@ func DisplayLicenseListSummaryMarkdown(output io.Writer) {
 	fmt.Fprintf(output, "%s\n", alignmentRow)
 
 	// Display a warning messing in the actual output and return (short-circuit)
-	licenseKeys := licenseMap.KeySet()
+	licenseKeys := bom.LicenseMap.KeySet()
 
 	// Emit no license or assertion-only warning into output
 	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
@@ -545,7 +545,7 @@ func DisplayLicenseListSummaryMarkdown(output io.Writer) {
 	var lineRow string
 
 	for _, licenseName := range licenseKeys {
-		arrLicenseInfo, _ := licenseMap.Get(licenseName)
+		arrLicenseInfo, _ := bom.LicenseMap.Get(licenseName)
 
 		for _, iInfo := range arrLicenseInfo {
 			licenseInfo = iInfo.(LicenseInfo)

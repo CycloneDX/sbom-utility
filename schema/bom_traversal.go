@@ -19,12 +19,6 @@ package schema
 
 func (bom *BOM) TrimJsonMap(key string) {
 	if key != "" {
-		bom.trimEntities(key)
-	}
-}
-
-func (bom *BOM) trimEntities(key string) {
-	if key != "" {
 		if jsonMap := bom.GetJSONMap(); jsonMap != nil {
 			bom.trimEntity(jsonMap, key)
 		}
@@ -37,6 +31,9 @@ func (bom *BOM) trimEntity(entity interface{}, key string) {
 		jsonMap := typedEntity
 		_, ok := jsonMap[key]
 		if ok {
+			// TODO: make it an option to just "nil" out the value
+			// as this is faster as well as sufficient for json.Marshal() purposes
+			// as keys with nil values are already omitted.
 			//jsonMap[key] = nil
 			delete(jsonMap, key)
 		}
