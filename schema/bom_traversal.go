@@ -17,19 +17,10 @@
 
 package schema
 
-import (
-	"github.com/jwangsadinata/go-multimap/slicemultimap"
-)
-
-func (bom *BOM) TrimJsonMap(key string) *slicemultimap.MultiMap {
-	// TODO: handle multiple hashmaps; for now, always overwrite existing
-	bom.EntityMap = slicemultimap.New()
-
+func (bom *BOM) TrimJsonMap(key string) {
 	if key != "" {
 		bom.trimEntities(key)
 	}
-
-	return bom.EntityMap
 }
 
 func (bom *BOM) trimEntities(key string) {
@@ -39,28 +30,6 @@ func (bom *BOM) trimEntities(key string) {
 		}
 	}
 }
-
-// func (bom *BOM) trimEntity(jsonMap map[string]interface{}, key string) {
-// 	_, ok := jsonMap[key]
-// 	if ok {
-// 		//bom.EntityMap.Put(key, value)
-// 		jsonMap[key] = nil
-// 		delete(jsonMap, key)
-// 	}
-// 	for mapKey, mapValue := range jsonMap {
-// 		switch t := mapValue.(type) {
-// 		case map[string]interface{}:
-// 			jsonMap := mapValue.(map[string]interface{})
-// 			bom.trimEntity(jsonMap, key)
-// 		case []interface{}:
-// 			// if type is other than above
-// 			getLogger().Tracef("slice: [%v]", mapKey)
-// 		default:
-// 			// if type is other than above
-// 			getLogger().Debugf("unhandled type: [%v]", t)
-// 		}
-// 	}
-// }
 
 func (bom *BOM) trimEntity(entity interface{}, key string) {
 	switch typedEntity := entity.(type) {
