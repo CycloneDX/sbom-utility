@@ -607,7 +607,7 @@ func TestLicensePolicyMatchByIdAllow(t *testing.T) {
 	ID := "Apache-2.0"
 	EXPECTED_POLICY := POLICY_ALLOW
 
-	value, policy := FindPolicyBySpdxId(ID)
+	value, policy := licensePolicyConfig.FindPolicyBySpdxId(ID)
 
 	if value != EXPECTED_POLICY {
 		t.Errorf("FindPolicyBySpdxId(): id: %s, returned: %v; expected: %v", ID, value, EXPECTED_POLICY)
@@ -620,7 +620,7 @@ func TestLicensePolicyMatchByIdDeny(t *testing.T) {
 	ID := "CC-BY-NC-1.0"
 	EXPECTED_POLICY := POLICY_DENY
 
-	value, policy := FindPolicyBySpdxId(ID)
+	value, policy := licensePolicyConfig.FindPolicyBySpdxId(ID)
 
 	if value != EXPECTED_POLICY {
 		t.Errorf("FindPolicyBySpdxId(): id: %s, returned: %v; expected: %v", ID, value, EXPECTED_POLICY)
@@ -633,7 +633,7 @@ func TestLicensePolicyMatchByIdFailureEmpty(t *testing.T) {
 	ID := ""
 	EXPECTED_POLICY := POLICY_UNDEFINED
 
-	value, policy := FindPolicyBySpdxId(ID)
+	value, policy := licensePolicyConfig.FindPolicyBySpdxId(ID)
 
 	if value != EXPECTED_POLICY {
 		t.Errorf("FindPolicyBySpdxId(): id: %s, returned: %v; expected: %v", ID, value, EXPECTED_POLICY)
@@ -646,7 +646,7 @@ func TestLicensePolicyMatchByIdFailureFoo(t *testing.T) {
 	ID := "Foo"
 	EXPECTED_POLICY := POLICY_UNDEFINED
 
-	value, policy := FindPolicyBySpdxId(ID)
+	value, policy := licensePolicyConfig.FindPolicyBySpdxId(ID)
 
 	if value != EXPECTED_POLICY {
 		t.Errorf("FindPolicyBySpdxId(): id: %s, returned: %v; expected: %v", ID, value, EXPECTED_POLICY)
@@ -665,7 +665,7 @@ func TestLicensePolicyMatchByFamilyNameBadExpression(t *testing.T) {
 	NAME := "CC-BY-NC-1.0 OR Apache-2.0"
 	EXPECTED_POLICY := POLICY_UNDEFINED
 
-	value, policy := FindPolicyByFamilyName(NAME)
+	value, policy := licensePolicyConfig.FindPolicyByFamilyName(NAME)
 	getLogger().Tracef("policy: %v", policy)
 
 	if value != EXPECTED_POLICY {
@@ -676,7 +676,7 @@ func TestLicensePolicyMatchByFamilyNameBadExpression(t *testing.T) {
 
 	// Assure AND appearance results in UNDEFINED
 	NAME = "CC-BY-NC-1.0 AND Apache-2.0"
-	value, policy = FindPolicyByFamilyName(NAME)
+	value, policy = licensePolicyConfig.FindPolicyByFamilyName(NAME)
 	getLogger().Tracef("policy: %v", policy)
 
 	if value != EXPECTED_POLICY {
@@ -687,7 +687,7 @@ func TestLicensePolicyMatchByFamilyNameBadExpression(t *testing.T) {
 
 	// Assure WITH appearance results in UNDEFINED
 	NAME = "CC-BY-NC-1.0 WITH some-clause"
-	value, policy = FindPolicyByFamilyName(NAME)
+	value, policy = licensePolicyConfig.FindPolicyByFamilyName(NAME)
 	getLogger().Tracef("policy: %v", policy)
 
 	if value != EXPECTED_POLICY {

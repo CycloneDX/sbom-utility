@@ -364,42 +364,149 @@ func (config *LicensePolicyConfig) filteredHashLicensePolicy(policy LicensePolic
 	return
 }
 
-//------------------------------------------------
-// CDX LicenseChoice "helper" functions
-//------------------------------------------------
+func (config *LicensePolicyConfig) FindPolicy(licenseInfo LicenseInfo) (matchedPolicy LicensePolicy, err error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
 
-// "getter" for compiled regex expression
-func getRegexForValidSpdxId() *regexp.Regexp {
-	if spdxIdRegexp == nil {
-		regex, err := regexp.Compile(REGEX_VALID_SPDX_ID)
-		if err != nil {
+	// Initialize to empty
+	matchedPolicy = LicensePolicy{}
+
+	switch licenseInfo.LicenseChoiceTypeValue {
+	case LC_TYPE_ID:
+		matchedPolicy.UsagePolicy, matchedPolicy = config.FindPolicyBySpdxId(licenseInfo.LicenseChoice.License.Id)
+	case LC_TYPE_NAME:
+		matchedPolicy.UsagePolicy, matchedPolicy = config.FindPolicyByFamilyName(licenseInfo.LicenseChoice.License.Name)
+	case LC_TYPE_EXPRESSION:
+		// Parse expression according to SPDX spec.
+		var expressionTree *CompoundExpression
+		expressionTree, err = parseExpression(licenseInfo.LicenseChoice.Expression)
+		getLogger().Debugf("Parsed expression:\n%v", expressionTree)
+		matchedPolicy.UsagePolicy = expressionTree.CompoundUsagePolicy
+	}
+
+	if matchedPolicy.UsagePolicy == "" {
+		matchedPolicy.UsagePolicy = POLICY_UNDEFINED
+	}
+	return matchedPolicy, err
+}
+
+func (config *LicensePolicyConfig) FindPolicyBySpdxId(id string) (policyValue string, matchedPolicy LicensePolicy) {
+	getLogger().Enter("id:", id)
+	defer getLogger().Exit()
+
+	var matched bool
+	var arrPolicies []interface{}
+
+	// Note: this will cause all policy hashmaps to be initialized (created), if it has not bee
+	licensePolicyIdMap, err := config.GetLicenseIdMap()
+
+	if err != nil {
+		getLogger().Errorf("license policy map error: `%w`", err)
+		os.Exit(ERROR_APPLICATION)
+	}
+
+	arrPolicies, matched = licensePolicyIdMap.Get(id)
+	getLogger().Tracef("licensePolicyMapById.Get(%s): (%v) matches", id, len(arrPolicies))
+
+	// There MUST be ONLY one policy per (discrete) license ID
+	if len(arrPolicies) > 1 {
+		getLogger().Errorf("Multiple (possibly conflicting) policies declared for SPDX ID=`%s`", id)
+		os.Exit(ERROR_APPLICATION)
+	}
+
+	if matched {
+		// retrieve the usage policy from the single (first) entry
+		matchedPolicy = arrPolicies[0].(LicensePolicy)
+		policyValue = matchedPolicy.UsagePolicy
+	} else {
+		getLogger().Tracef("No policy match found for SPDX ID=`%s` ", id)
+		policyValue = POLICY_UNDEFINED
+	}
+
+	return policyValue, matchedPolicy
+}
+
+// NOTE: for now, we will look for the "family" name encoded in the License.Name field
+// (until) we can get additional fields/properties added to the CDX LicenseChoice schema
+func (config *LicensePolicyConfig) FindPolicyByFamilyName(name string) (policyValue string, matchedPolicy LicensePolicy) {
+	getLogger().Enter("name:", name)
+	defer getLogger().Exit()
+
+	var matched bool
+	var key string
+	var arrPolicies []interface{}
+
+	// NOTE: we have found some SBOM authors have placed license expressions
+	// within the "name" field.  This prevents us from assigning policy
+	// return
+	if HasLogicalConjunctionOrPreposition(name) {
+		getLogger().Warningf("policy name contains logical conjunctions or preposition: `%s`", name)
+		policyValue = POLICY_UNDEFINED
+		return
+	}
+
+	// Note: this will cause all policy hashmaps to be initialized (created), if it has not been
+	familyNameMap, _ := config.GetFamilyNameMap()
+
+	// See if any of the policy family keys contain the family name
+	matched, key = config.searchForLicenseFamilyName(name)
+
+	if matched {
+		arrPolicies, _ = familyNameMap.Get(key)
+
+		if len(arrPolicies) == 0 {
+			getLogger().Errorf("No policy match found in hashmap for family name key: `%s`", key)
 			os.Exit(ERROR_APPLICATION)
 		}
-		spdxIdRegexp = regex
+
+		// NOTE: We can use the first policy (of a family) as they are
+		// verified to be consistent when loaded from the policy config. file
+		matchedPolicy = arrPolicies[0].(LicensePolicy)
+		policyValue = matchedPolicy.UsagePolicy
+
+		// If we have more than one license in the same family (name), then
+		// check if there are any "usage policy" conflicts to display in report
+		if len(arrPolicies) > 1 {
+			conflict := policyConflictExists(arrPolicies)
+			if conflict {
+				getLogger().Tracef("Usage policy conflict for license family name=`%s` ", name)
+				policyValue = POLICY_CONFLICT
+			}
+		}
+	} else {
+		getLogger().Tracef("No policy match found for license family name=`%s` ", name)
+		policyValue = POLICY_UNDEFINED
 	}
-	return spdxIdRegexp
+
+	return policyValue, matchedPolicy
 }
 
-func IsValidSpdxId(id string) bool {
-	return getRegexForValidSpdxId().MatchString(id)
-}
+// Loop through all known license family names (in hashMap) to see if any
+// appear in the CDX License "Name" field
+func (config *LicensePolicyConfig) searchForLicenseFamilyName(licenseName string) (found bool, familyName string) {
+	getLogger().Enter()
+	defer getLogger().Exit()
 
-func IsValidFamilyKey(key string) bool {
-	var BAD_KEYWORDS = []string{"CONFLICT", "UNKNOWN"}
+	familyNameMap, err := licensePolicyConfig.GetFamilyNameMap()
+	if err != nil {
+		getLogger().Error(err)
+		os.Exit(ERROR_APPLICATION)
+	}
 
-	// For now, valid family keys are subsets of SPDX IDs
-	// Therefore, pass result from that SPDX ID validation function
-	valid := IsValidSpdxId(key)
+	keys := familyNameMap.Keys()
 
-	// Test for keywords that we have seen set that clearly are not valid family names
-	// TODO: make keywords configurable
-	for _, keyword := range BAD_KEYWORDS {
-		if strings.Contains(strings.ToLower(key), strings.ToLower(keyword)) {
-			return false
+	for _, key := range keys {
+		familyName = key.(string)
+		getLogger().Debugf("Searching for familyName: '%s' in License Name: %s", familyName, licenseName)
+		found = containsFamilyName(licenseName, familyName)
+
+		if found {
+			getLogger().Debugf("Match found: familyName: '%s' in License Name: %s", familyName, licenseName)
+			return
 		}
 	}
 
-	return valid
+	return
 }
 
 //------------------------------------------------

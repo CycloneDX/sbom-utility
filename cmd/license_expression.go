@@ -168,7 +168,7 @@ func parseCompoundExpression(expression *CompoundExpression, tokens []string, in
 					// Also, check for the unary "plus" operator
 					expression.SimpleLeftHasPlus = hasUnaryPlusOperator(token)
 					// Lookup policy in hashmap
-					expression.LeftUsagePolicy, expression.LeftPolicy = FindPolicyBySpdxId(token)
+					expression.LeftUsagePolicy, expression.LeftPolicy = licensePolicyConfig.FindPolicyBySpdxId(token)
 				} else {
 					// this token is a preposition, for now overload its value
 					expression.PrepLeft = token
@@ -180,7 +180,7 @@ func parseCompoundExpression(expression *CompoundExpression, tokens []string, in
 					// Also, check for the unary "plus" operator
 					expression.SimpleRightHasPlus = hasUnaryPlusOperator(token)
 					// Lookup policy in hashmap
-					expression.RightUsagePolicy, expression.RightPolicy = FindPolicyBySpdxId(token)
+					expression.RightUsagePolicy, expression.RightPolicy = licensePolicyConfig.FindPolicyBySpdxId(token)
 				} else {
 					// this token is a preposition, for now overload its value
 					expression.PrepRight = token

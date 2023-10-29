@@ -206,7 +206,7 @@ func ListLicenses(writer io.Writer, persistentFlags utils.PersistentCommandFlags
 
 	// Find an hash all licenses within input BOM file
 	getLogger().Infof("Scanning document for licenses...")
-	err = loadDocumentLicenses(document, whereFilters)
+	err = loadDocumentLicenses(document, licensePolicyConfig, whereFilters)
 
 	if err != nil {
 		return

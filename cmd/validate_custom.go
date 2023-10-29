@@ -239,7 +239,7 @@ func validateLicenseData(document *schema.BOM) (err error) {
 	// Now we need to validate that the input file contains licenses
 	// the license "hash" function does this validation checking for us...
 	// TODO support []WhereFilter
-	err = loadDocumentLicenses(document, nil)
+	err = loadDocumentLicenses(document, licensePolicyConfig, nil)
 
 	if err != nil {
 		return
