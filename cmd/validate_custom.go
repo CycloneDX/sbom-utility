@@ -30,7 +30,7 @@ import (
 // 1. Composition - document elements are organized as required (even though allowed by schema)
 // 2. Metadata - Top-level, document metadata includes specific fields and/or values that match required criteria (e.g., regex)
 // 3. License data - Components, Services (or any object that carries a License) meets specified requirements
-func validateCustomCDXDocument(document *schema.BOM) (innerError error) {
+func validateCustomCDXDocument(document *schema.BOM, policyConfig *LicensePolicyConfig) (innerError error) {
 	getLogger().Enter()
 	defer getLogger().Exit(innerError)
 
@@ -48,7 +48,7 @@ func validateCustomCDXDocument(document *schema.BOM) (innerError error) {
 	}
 
 	// Validate that at least required (e.g., valid, approved) "License" data exists
-	if innerError = validateLicenseData(document); innerError != nil {
+	if innerError = validateLicenseData(document, policyConfig); innerError != nil {
 		return
 	}
 
@@ -232,14 +232,14 @@ func hashMetadataProperties(hashmap *slicemultimap.MultiMap, properties []schema
 // that at least one valid license is found
 // TODO: Assure top-level "metadata.component"
 // TODO support []WhereFilter
-func validateLicenseData(document *schema.BOM) (err error) {
+func validateLicenseData(document *schema.BOM, policyConfig *LicensePolicyConfig) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
 	// Now we need to validate that the input file contains licenses
 	// the license "hash" function does this validation checking for us...
 	// TODO support []WhereFilter
-	err = loadDocumentLicenses(document, licensePolicyConfig, nil)
+	err = loadDocumentLicenses(document, policyConfig, nil)
 
 	if err != nil {
 		return

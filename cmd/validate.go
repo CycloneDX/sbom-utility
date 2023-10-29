@@ -339,14 +339,14 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	// Perform additional validation in document composition/structure
 	// and "custom" required data within specified fields
 	if validateFlags.CustomValidation {
-		valid, err = validateCustom(document)
+		valid, err = validateCustom(document, licensePolicyConfig)
 	}
 
 	// All validation tests passed; return VALID
 	return
 }
 
-func validateCustom(document *schema.BOM) (valid bool, err error) {
+func validateCustom(document *schema.BOM, policyConfig *LicensePolicyConfig) (valid bool, err error) {
 
 	// If the validated BOM is of a known format, we can unmarshal it into
 	// more convenient typed structures for simplified custom validation
@@ -360,7 +360,7 @@ func validateCustom(document *schema.BOM) (valid bool, err error) {
 	// Perform all custom validation
 	// TODO Implement customValidation as an interface supported by the CDXDocument type
 	// and later supported by a SPDXDocument type.
-	err = validateCustomCDXDocument(document)
+	err = validateCustomCDXDocument(document, policyConfig)
 	if err != nil {
 		// Wrap any specific validation error in a single invalid BOM error
 		if !IsInvalidBOMError(err) {
