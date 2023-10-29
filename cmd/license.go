@@ -91,13 +91,6 @@ type LicenseInfo struct {
 	Service                schema.CDXService       // Do not marshal
 }
 
-// globals
-var licenseSlice []LicenseInfo
-
-func ClearGlobalLicenseData() {
-	licenseSlice = nil
-}
-
 func NewCommandLicense() *cobra.Command {
 	var command = new(cobra.Command)
 	command.Use = "license"
@@ -153,9 +146,6 @@ func loadDocumentLicenses(bom *schema.BOM, whereFilters []common.WhereFilter) (e
 			CMD_LICENSE, FORMAT_ANY)
 		return
 	}
-
-	// Clear out any old (global)hashmap data (NOTE: 'go test' needs this)
-	ClearGlobalLicenseData()
 
 	// Before looking for license data, fully unmarshal the SBOM
 	// into named structures
@@ -461,7 +451,6 @@ func HashLicenseInfo(bom *schema.BOM, key string, licenseInfo LicenseInfo, where
 	// Derive values for report filtering
 	licenseInfo.LicenseChoiceType = LC_TYPE_NAMES[licenseInfo.LicenseChoiceTypeValue]
 	licenseInfo.BOMLocation = CDX_LICENSE_LOCATION_NAMES[licenseInfo.BOMLocationValue]
-	licenseSlice = append(licenseSlice, licenseInfo)
 
 	var match bool = true
 	if len(whereFilters) > 0 {

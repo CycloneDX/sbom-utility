@@ -83,7 +83,7 @@ type LicensePolicy struct {
 	AltSPDXId         string `json:"spdx-id"`
 }
 
-type LicenseComplianceConfig struct {
+type LicensePolicyConfig struct {
 	PolicyList            []LicensePolicy   `json:"policies"`
 	Annotations           map[string]string `json:"annotations"`
 	policyConfigFile      string
@@ -94,7 +94,7 @@ type LicenseComplianceConfig struct {
 	filteredFamilyNameMap *slicemultimap.MultiMap
 }
 
-func (config *LicenseComplianceConfig) Reset() {
+func (config *LicensePolicyConfig) Reset() {
 	config.policyConfigFile = DEFAULT_LICENSE_POLICY_CONFIG
 	config.PolicyList = nil
 	config.Annotations = nil
@@ -106,21 +106,21 @@ func (config *LicenseComplianceConfig) Reset() {
 	}
 }
 
-func (config *LicenseComplianceConfig) GetFamilyNameMap() (hashmap *slicemultimap.MultiMap, err error) {
+func (config *LicensePolicyConfig) GetFamilyNameMap() (hashmap *slicemultimap.MultiMap, err error) {
 	if config.licenseFamilyNameMap == nil {
 		err = config.HashLicensePolicies()
 	}
 	return config.licenseFamilyNameMap, err
 }
 
-func (config *LicenseComplianceConfig) GetLicenseIdMap() (hashmap *slicemultimap.MultiMap, err error) {
+func (config *LicensePolicyConfig) GetLicenseIdMap() (hashmap *slicemultimap.MultiMap, err error) {
 	if config.licenseIdMap == nil {
 		err = config.HashLicensePolicies()
 	}
 	return config.licenseIdMap, err
 }
 
-func (config *LicenseComplianceConfig) GetFilteredFamilyNameMap(whereFilters []common.WhereFilter) (hashmap *slicemultimap.MultiMap, err error) {
+func (config *LicensePolicyConfig) GetFilteredFamilyNameMap(whereFilters []common.WhereFilter) (hashmap *slicemultimap.MultiMap, err error) {
 	// NOTE: This call is necessary as this will cause all `licensePolicyConfig.PolicyList`
 	// entries to have alternative field names to be mapped (e.g., `usagePolicy` -> `usage-policy`)
 	config.filteredFamilyNameMap, err = config.GetFamilyNameMap()
@@ -137,7 +137,7 @@ func (config *LicenseComplianceConfig) GetFilteredFamilyNameMap(whereFilters []c
 	return config.filteredFamilyNameMap, err
 }
 
-func (config *LicenseComplianceConfig) LoadLicensePolicies(filename string, defaultFilename string) (err error) {
+func (config *LicensePolicyConfig) LoadLicensePolicies(filename string, defaultFilename string) (err error) {
 	getLogger().Enter(filename)
 	defer getLogger().Exit()
 
@@ -149,7 +149,7 @@ func (config *LicenseComplianceConfig) LoadLicensePolicies(filename string, defa
 	return
 }
 
-func (config *LicenseComplianceConfig) innerLoadLicensePolicies(filename string, defaultFilename string) (err error) {
+func (config *LicensePolicyConfig) innerLoadLicensePolicies(filename string, defaultFilename string) (err error) {
 	getLogger().Enter(filename)
 	defer getLogger().Exit()
 
@@ -193,7 +193,7 @@ func (config *LicenseComplianceConfig) innerLoadLicensePolicies(filename string,
 	return
 }
 
-func (config *LicenseComplianceConfig) HashLicensePolicies() (hashError error) {
+func (config *LicensePolicyConfig) HashLicensePolicies() (hashError error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -203,7 +203,7 @@ func (config *LicenseComplianceConfig) HashLicensePolicies() (hashError error) {
 	return
 }
 
-func (config *LicenseComplianceConfig) innerHashLicensePolicies() (err error) {
+func (config *LicensePolicyConfig) innerHashLicensePolicies() (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -242,7 +242,7 @@ func (config *LicenseComplianceConfig) innerHashLicensePolicies() (err error) {
 // family policies as well as a discrete one for specific SPDX ID.  In such cases,
 // the policy MUST align (i.e., must not have both "allow" and "deny". Therefore,
 // when we hash we assure that such a conflict does NOT exist at time of creation.
-func (config *LicenseComplianceConfig) hashPolicy(policy LicensePolicy) (err error) {
+func (config *LicensePolicyConfig) hashPolicy(policy LicensePolicy) (err error) {
 	// ONLY hash valid policy records.
 	if !IsValidPolicyEntry(policy) {
 		// Do not add it to any hash table
@@ -300,7 +300,7 @@ func (config *LicenseComplianceConfig) hashPolicy(policy LicensePolicy) (err err
 	return
 }
 
-func (config *LicenseComplianceConfig) hashChildPolicies(policy LicensePolicy) (err error) {
+func (config *LicensePolicyConfig) hashChildPolicies(policy LicensePolicy) (err error) {
 
 	for _, childId := range policy.Children {
 		// Copy of the parent policy and overwrite its "id" with the child's
@@ -321,7 +321,7 @@ func (config *LicenseComplianceConfig) hashChildPolicies(policy LicensePolicy) (
 	return
 }
 
-func (config *LicenseComplianceConfig) filteredHashLicensePolicies(whereFilters []common.WhereFilter) (err error) {
+func (config *LicensePolicyConfig) filteredHashLicensePolicies(whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -338,7 +338,7 @@ func (config *LicenseComplianceConfig) filteredHashLicensePolicies(whereFilters 
 
 // Hash a CDX Component and recursively those of any "nested" components
 // TODO we should WARN if version is not a valid semver (e.g., examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json)
-func (config *LicenseComplianceConfig) filteredHashLicensePolicy(policy LicensePolicy, whereFilters []common.WhereFilter) (err error) {
+func (config *LicensePolicyConfig) filteredHashLicensePolicy(policy LicensePolicy, whereFilters []common.WhereFilter) (err error) {
 	var match bool = true
 	var mapPolicy map[string]interface{}
 

@@ -31,7 +31,7 @@ import (
 
 // Globals
 var ProjectLogger *log.MiniLogger
-var licensePolicyConfig *LicenseComplianceConfig
+var licensePolicyConfig *LicensePolicyConfig
 var SupportedFormatConfig schema.BOMFormatAndSchemaConfig
 
 // top-level commands
@@ -230,7 +230,7 @@ func initConfigurations() {
 
 	// License information and approval policies (customizable)
 	var licensePolicyFile = utils.GlobalFlags.ConfigLicensePolicyFile
-	licensePolicyConfig = new(LicenseComplianceConfig)
+	licensePolicyConfig = new(LicensePolicyConfig)
 	errLoadLicensePolicies := licensePolicyConfig.LoadLicensePolicies(licensePolicyFile, DEFAULT_LICENSE_POLICY_CONFIG)
 	if errLoadLicensePolicies != nil {
 		getLogger().Warning(errLoadLicensePolicies.Error())
