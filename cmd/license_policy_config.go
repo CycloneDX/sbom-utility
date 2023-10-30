@@ -582,3 +582,30 @@ func VerifyPoliciesMatch(testPolicy LicensePolicy, policies []interface{}) bool 
 
 	return true
 }
+
+// NOTE: caller assumes resp. for checking for empty input array
+func policyConflictExists(arrPolicies []interface{}) bool {
+	var currentUsagePolicy string
+	var policy LicensePolicy
+
+	// Init. usage policy to first entry in array
+	policy = arrPolicies[0].(LicensePolicy)
+	currentUsagePolicy = policy.UsagePolicy
+
+	// Check every subsequent usage policy in array to identify mismatch (i.e., a conflict)
+	for i := 1; i < len(arrPolicies); i++ {
+		policy = arrPolicies[i].(LicensePolicy)
+		if policy.UsagePolicy != currentUsagePolicy {
+			return true
+		}
+	}
+	return false
+}
+
+// Looks for an SPDX family (name) somewhere in the CDX License object "Name" field
+func containsFamilyName(name string, familyName string) bool {
+	// NOTE: we do not currently normalize as we assume family names
+	// are proper substring of SPDX IDs which are mixed case and
+	// should match exactly as encoded.
+	return strings.Contains(name, familyName)
+}
