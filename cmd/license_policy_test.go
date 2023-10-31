@@ -78,12 +78,6 @@ func innerTestLicensePolicyListCustomAndBuffered(t *testing.T, testInfo *License
 	// ensure all data is written to buffer before further validation
 	defer outputWriter.Flush()
 
-	// // Load and hash the specified license policy file ONLY FOR THIS TEST!
-	// if testInfo.PolicyFile != "" && testInfo.PolicyFile != DEFAULT_LICENSE_POLICY_CONFIG {
-	// 	// !!! IMPORTANT !!! restore default policy file to default for all other tests
-	// 	loadHashCustomPolicyFile(testInfo.PolicyFile)
-	// }
-
 	// Use the test data to set the BOM input file and output format
 	utils.GlobalFlags.ConfigLicensePolicyFile = testInfo.PolicyFile
 	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile
@@ -109,12 +103,6 @@ func innerTestLicensePolicyListCustomAndBuffered(t *testing.T, testInfo *License
 	err = ListLicensePolicies(outputWriter, policyConfig,
 		utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.LicenseFlags,
 		whereFilters)
-
-	// Restore default license policy file for subsequent tests
-	// if testInfo.PolicyFile != "" && testInfo.PolicyFile != DEFAULT_LICENSE_POLICY_CONFIG {
-	// 	// !!! IMPORTANT !!! restore default policy file to default for all other tests
-	// 	loadHashCustomPolicyFile(DEFAULT_LICENSE_POLICY_CONFIG)
-	// }
 
 	return
 }
@@ -154,7 +142,6 @@ func innerTestLicensePolicyList(t *testing.T, testInfo *LicenseTestInfo) (output
 // 6. schema.POLICY_ALLOW AND schema.POLICY_ALLOW
 func TestLicensePolicyUsageConjunctionsANDCombinations(t *testing.T) {
 	// Set the policy file to the reduced, 3-entry policy file used to test the 3 policy states
-	//err := loadHashCustomPolicyFile(POLICY_FILE_GOOD_BAD_MAYBE)
 	testPolicyConfig, err := LoadCustomPolicyFile(POLICY_FILE_GOOD_BAD_MAYBE)
 	if err != nil {
 		t.Errorf(err.Error())
@@ -231,9 +218,6 @@ func TestLicensePolicyUsageConjunctionsANDCombinations(t *testing.T) {
 	if resolvedPolicy != EXPECTED_USAGE_POLICY {
 		t.Errorf("schema.ParseExpression(): \"%s\" returned: `%s`; expected: `%s`", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
 	}
-
-	// !!! IMPORTANT !!! restore default policy file to default for all other tests
-	//loadHashCustomPolicyFile(DEFAULT_LICENSE_POLICY_CONFIG)
 }
 
 // The policy config. has 3 states: { "allow", "deny", "needs-review" }; n=3
@@ -248,7 +232,6 @@ func TestLicensePolicyUsageConjunctionsANDCombinations(t *testing.T) {
 // 6. schema.POLICY_DENY OR schema.POLICY_DENY
 func TestLicensePolicyUsageConjunctionsORCombinations(t *testing.T) {
 	// Set the policy file to the reduced, 3-entry policy file used to test the 3 policy states
-	//err := loadHashCustomPolicyFile(POLICY_FILE_GOOD_BAD_MAYBE)
 	testPolicyConfig, err := LoadCustomPolicyFile(POLICY_FILE_GOOD_BAD_MAYBE)
 	if err != nil {
 		t.Errorf(err.Error())
@@ -325,9 +308,6 @@ func TestLicensePolicyUsageConjunctionsORCombinations(t *testing.T) {
 	if resolvedPolicy != EXPECTED_USAGE_POLICY {
 		t.Errorf("schema.ParseExpression(): \"%s\" returned: `%s`; expected: `%s`", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
 	}
-
-	// !!! IMPORTANT !!! restore default policy file to default for all other tests
-	//loadHashCustomPolicyFile(DEFAULT_LICENSE_POLICY_CONFIG)
 }
 
 //--------------------------------------------------------------
@@ -338,16 +318,12 @@ func TestLicensePolicyUsageConjunctionsORCombinations(t *testing.T) {
 // TODO: to confirm this conflict is caught at hash time (not load time)
 func TestLicensePolicyFamilyUsagePolicyConflict(t *testing.T) {
 	// Load custom policy file that contains a license usage policy conflict
-	//err := loadHashCustomPolicyFile(POLICY_FILE_FAMILY_NAME_USAGE_CONFLICT)
 	_, err := LoadCustomPolicyFile(POLICY_FILE_FAMILY_NAME_USAGE_CONFLICT)
 
 	// Note: the conflict is only encountered on the "hash"; load only loads what policies are defined in the config.
 	if err != nil {
 		t.Errorf(err.Error())
 	}
-
-	// !!! IMPORTANT !!! restore default policy file to default for all other tests
-	//loadHashCustomPolicyFile(DEFAULT_LICENSE_POLICY_CONFIG)
 }
 
 func TestLicensePolicyCustomListGoodBadMaybe(t *testing.T) {

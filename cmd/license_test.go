@@ -99,7 +99,7 @@ func innerTestLicenseListBuffered(t *testing.T, testInfo *LicenseTestInfo, where
 	var policyConfig *schema.LicensePolicyConfig = LicensePolicyConfig
 	if testInfo.PolicyFile != "" && testInfo.PolicyFile != DEFAULT_LICENSE_POLICY_CONFIG {
 		policyConfig = new(schema.LicensePolicyConfig)
-		err = LicensePolicyConfig.LoadHashPolicyConfigurationFile(testInfo.PolicyFile, "")
+		err = policyConfig.LoadHashPolicyConfigurationFile(testInfo.PolicyFile, "")
 		if err != nil {
 			getLogger().Warningf("unable to load policy configuration file: %v", err.Error())
 			return
@@ -409,18 +409,14 @@ const (
 )
 
 // TODO: uncomment once we have a means to dynamically pass in the license config. object
-// func TestLicenseListPolicyCdx14CustomPolicy(t *testing.T) {
-// 	TEST_LICENSE_ID_OR_NAME := "(MIT OR CC0-1.0)"
+func TestLicenseListPolicyCdx14CustomPolicy(t *testing.T) {
+	TEST_LICENSE_ID_OR_NAME := "(MIT OR CC0-1.0)"
 
-// 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_TEXT_CDX_1_4_CUSTOM_POLICY_1, FORMAT_TEXT, true)
-// 	lti.ResultLineContainsValues = []string{schema.POLICY_ALLOW, LC_VALUE_EXPRESSION, TEST_LICENSE_ID_OR_NAME}
-// 	lti.ResultLineContainsValuesAtLineNum = 2
+	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_TEXT_CDX_1_4_CUSTOM_POLICY_1, FORMAT_TEXT, true)
+	lti.ResultLineContainsValues = []string{schema.POLICY_ALLOW, LC_VALUE_EXPRESSION, TEST_LICENSE_ID_OR_NAME}
+	lti.ResultLineContainsValuesAtLineNum = 2
+	lti.PolicyFile = TEST_CUSTOM_POLICY_1
 
-// 	// Load a custom policy file ONLY for the specific unit test
-// 	loadHashCustomPolicyFile(TEST_CUSTOM_POLICY_1)
-
-// 	innerTestLicenseList(t, lti)
-
-// 	// !!! IMPORTANT !!! restore default policy file to default for all other tests
-// 	loadHashCustomPolicyFile(DEFAULT_LICENSE_POLICY_CONFIG)
-// }
+	// Load a custom policy file ONLY for the specific unit test
+	innerTestLicenseList(t, lti)
+}
