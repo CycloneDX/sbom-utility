@@ -210,7 +210,9 @@ func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFi
 		resourceInfo.BOMRef = cdxService.BOMRef.String()
 	}
 	resourceInfo.Version = cdxService.Version
-	resourceInfo.SupplierProvider = cdxService.Provider
+	if cdxService.Provider != nil {
+		resourceInfo.SupplierProvider = *cdxService.Provider
+	}
 	resourceInfo.Properties = cdxService.Properties
 
 	var match bool = true

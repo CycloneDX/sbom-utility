@@ -125,6 +125,7 @@ func (config *LicensePolicyConfig) Reset() {
 func (config *LicensePolicyConfig) GetFamilyNameMap() (hashmap *slicemultimap.MultiMap, err error) {
 	if config.licenseFamilyNameMap == nil {
 		err = config.hashLicensePolicies()
+		fmt.Printf("!!!!!!!!!Not hashed!!!!!!!!!!")
 	}
 	return config.licenseFamilyNameMap, err
 }
@@ -155,13 +156,18 @@ func (config *LicensePolicyConfig) GetFilteredFamilyNameMap(whereFilters []commo
 
 func (config *LicensePolicyConfig) LoadHashPolicyConfigurationFile(policyFile string, defaultPolicyFile string) (err error) {
 	// Do not pass a default file, it should fail if custom policy cannot be loaded
-	err = config.innerLoadLicensePolicies(policyFile, defaultPolicyFile)
-	if err != nil {
-		return
-	}
-	// Note: the HashLicensePolicies function creates new id and name hashmaps
-	// therefore there is no need to clear them
-	err = config.hashLicensePolicies()
+	// Only load the policy config. once
+	config.loadOnce.Do(func() {
+		err = config.innerLoadLicensePolicies(policyFile, defaultPolicyFile)
+		if err != nil {
+			return
+		}
+
+		// Note: the HashLicensePolicies function creates new id and name hashmaps
+		// therefore there is no need to clear them
+		err = config.hashLicensePolicies()
+	})
+
 	return
 }
 
