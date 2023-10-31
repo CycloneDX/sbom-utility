@@ -24,6 +24,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/jwangsadinata/go-multimap/slicemultimap"
@@ -55,38 +56,30 @@ const (
 	COMPONENT_ID_SWID   = "swid"
 )
 
-type BOMComponentStats struct {
-	Total          int
-	MapIdentifiers map[string]int
-	MapTypes       map[string]int
-	MapMimeTypes   map[string]int
-	// Number w/o licenses
-	// Number not in dependency graph
-}
-
 const (
 	SERVICE_ID_NONE   = "None"
 	SERVICE_ID_BOMREF = "bom-ref"
 )
 
-type BOMServiceStats struct {
-	Total        int
-	MapEndpoints map[string]int // map["name"] len(endpoints)
-	// Number Unauthenticated
-	// Number w/o licenses
-}
+// Note: the SPDX spec. does not provide regex for an SPDX ID, but provides the following in ABNF:
+//
+//	string = 1*(ALPHA / DIGIT / "-" / "." )
+//
+// Currently, the regex below tests composition of of only
+// alphanum, "-", and "." characters and disallows empty strings
+// TODO:
+//   - First and last chars are not "-" or "."
+//   - Enforce reasonable min/max lengths
+//     In theory, we can check overall length with positive lookahead
+//     (e.g., min 3 max 128):  (?=.{3,128}$)
+//     However, this does not appear to be supported in `regexp` package
+//     or perhaps it must be a compiled expression TBD
+const (
+	REGEX_VALID_SPDX_ID = "^[a-zA-Z0-9.-]+$"
+)
 
-type BOMVulnerabilityStats struct {
-	Total int
-	// Number w/o mitigation or workaround or rejected
-	MapSeverities map[string]int
-}
-
-type StatisticsInfo struct {
-	ComponentStats     *BOMComponentStats
-	ServiceStats       *BOMServiceStats
-	VulnerabilityStats *BOMVulnerabilityStats
-}
+// compiled regexp. to save time
+var spdxIdRegexp *regexp.Regexp
 
 func (bom *BOM) GetRawBytes() []byte {
 	return bom.rawBytes

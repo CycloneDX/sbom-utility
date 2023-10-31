@@ -15,27 +15,10 @@
  * limitations under the License.
  */
 
-package cmd
+package schema
 
 import (
 	"strings"
-)
-
-// Supported conjunctions and prepositions
-const (
-	AND                   string = "AND"
-	OR                    string = "OR"
-	WITH                  string = "WITH"
-	CONJUNCTION_UNDEFINED string = ""
-)
-
-// Tokens
-const (
-	LEFT_PARENS                 string = "("
-	RIGHT_PARENS                string = ")"
-	LEFT_PARENS_WITH_SEPARATOR  string = "( "
-	RIGHT_PARENS_WITH_SEPARATOR string = " )"
-	PLUS_OPERATOR               string = "+"
 )
 
 type CompoundExpression struct {
@@ -55,15 +38,21 @@ type CompoundExpression struct {
 	CompoundUsagePolicy string
 }
 
-func HasLogicalConjunctionOrPreposition(value string) bool {
+// Tokens
+const (
+	LEFT_PARENS                 string = "("
+	RIGHT_PARENS                string = ")"
+	LEFT_PARENS_WITH_SEPARATOR  string = "( "
+	RIGHT_PARENS_WITH_SEPARATOR string = " )"
+	PLUS_OPERATOR               string = "+"
+)
 
-	if strings.Contains(value, AND) ||
-		strings.Contains(value, OR) ||
-		strings.Contains(value, WITH) {
-		return true
-	}
-	return false
-}
+const (
+	MSG_LICENSE_INVALID_EXPRESSION             = "invalid license expression"
+	MSG_LICENSE_EXPRESSION_INVALID_CONJUNCTION = "invalid conjunction"
+	MSG_LICENSE_EXPRESSION_UNDEFINED_POLICY    = "contains an undefined policy"
+	MSG_LICENSE_EXPRESSION                     = "license expression"
+)
 
 func NewCompoundExpression() *CompoundExpression {
 	ce := new(CompoundExpression)
@@ -82,7 +71,7 @@ func tokenizeExpression(expression string) (tokens []string) {
 	return
 }
 
-func parseExpression(rawExpression string) (ce *CompoundExpression, err error) {
+func ParseExpression(policyConfig *LicensePolicyConfig, rawExpression string) (ce *CompoundExpression, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -91,7 +80,7 @@ func parseExpression(rawExpression string) (ce *CompoundExpression, err error) {
 	tokens := tokenizeExpression(rawExpression)
 	getLogger().Debugf("Tokens: %v", tokens)
 
-	finalIndex, err := parseCompoundExpression(ce, tokens, 0)
+	finalIndex, err := parseCompoundExpression(policyConfig, ce, tokens, 0)
 	getLogger().Debugf("Parsed expression (%v): %v", finalIndex, ce)
 
 	return ce, err
@@ -101,7 +90,7 @@ func parseExpression(rawExpression string) (ce *CompoundExpression, err error) {
 // within a compound expression (e.g., Foo OR Bar AND Bqu) as this has not been endorsed
 // by the specification or any known examples.  However, we have put in place some
 // tests that shows the parser still works in these cases.
-func parseCompoundExpression(expression *CompoundExpression, tokens []string, index int) (i int, err error) {
+func parseCompoundExpression(policyConfig *LicensePolicyConfig, expression *CompoundExpression, tokens []string, index int) (i int, err error) {
 	getLogger().Enter("expression:", expression)
 	defer getLogger().Exit()
 	defer func() {
@@ -130,7 +119,10 @@ func parseCompoundExpression(expression *CompoundExpression, tokens []string, in
 				expression.CompoundRight = childExpression
 			}
 
-			index, err = parseCompoundExpression(childExpression, tokens, index+1)
+			index, err = parseCompoundExpression(policyConfig, childExpression, tokens, index+1)
+			if err != nil {
+				return
+			}
 
 			// retrieve the resolved policy from the child
 			childPolicy := childExpression.CompoundUsagePolicy
@@ -168,7 +160,10 @@ func parseCompoundExpression(expression *CompoundExpression, tokens []string, in
 					// Also, check for the unary "plus" operator
 					expression.SimpleLeftHasPlus = hasUnaryPlusOperator(token)
 					// Lookup policy in hashmap
-					expression.LeftUsagePolicy, expression.LeftPolicy = licensePolicyConfig.FindPolicyBySpdxId(token)
+					expression.LeftUsagePolicy, expression.LeftPolicy, err = policyConfig.FindPolicyBySpdxId(token)
+					if err != nil {
+						return
+					}
 				} else {
 					// this token is a preposition, for now overload its value
 					expression.PrepLeft = token
@@ -180,7 +175,10 @@ func parseCompoundExpression(expression *CompoundExpression, tokens []string, in
 					// Also, check for the unary "plus" operator
 					expression.SimpleRightHasPlus = hasUnaryPlusOperator(token)
 					// Lookup policy in hashmap
-					expression.RightUsagePolicy, expression.RightPolicy = licensePolicyConfig.FindPolicyBySpdxId(token)
+					expression.RightUsagePolicy, expression.RightPolicy, err = policyConfig.FindPolicyBySpdxId(token)
+					if err != nil {
+						return
+					}
 				} else {
 					// this token is a preposition, for now overload its value
 					expression.PrepRight = token
@@ -207,29 +205,6 @@ func FinalizeCompoundPolicy(expression *CompoundExpression) (err error) {
 		expression.LeftUsagePolicy,
 		expression.Conjunction,
 		expression.RightUsagePolicy)
-
-	// // Undefined Short-circuit
-	// // If either left or right policy is UNDEFINED with the AND conjunction
-	// // then the compound policy resolves to UNDEFINED
-	// if expression.Conjunction == AND {
-	// 	if expression.LeftUsagePolicy == POLICY_UNDEFINED ||
-	// 		expression.RightUsagePolicy == POLICY_UNDEFINED {
-	// 		expression.CompoundUsagePolicy = POLICY_UNDEFINED
-	// 		return nil
-	// 	}
-	// } else if expression.Conjunction == OR {
-	// 	if expression.LeftUsagePolicy == POLICY_UNDEFINED {
-	// 		// default to right policy (regardless of value)
-	// 		expression.CompoundUsagePolicy = expression.RightUsagePolicy
-	// 		getLogger().Debugf("Left usage policy is UNDEFINED")
-	// 		return nil
-	// 	} else if expression.RightUsagePolicy == POLICY_UNDEFINED {
-	// 		// default to left policy (regardless of value)
-	// 		expression.CompoundUsagePolicy = expression.LeftUsagePolicy
-	// 		getLogger().Debugf("Right usage policy is UNDEFINED")
-	// 		return nil
-	// 	}
-	// }
 
 	// The policy config. has 3 states: { "allow", "deny", "needs-review" }; n=3
 	// which are always paired with a conjunctions; r=2

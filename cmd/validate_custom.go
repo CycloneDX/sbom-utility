@@ -30,7 +30,7 @@ import (
 // 1. Composition - document elements are organized as required (even though allowed by schema)
 // 2. Metadata - Top-level, document metadata includes specific fields and/or values that match required criteria (e.g., regex)
 // 3. License data - Components, Services (or any object that carries a License) meets specified requirements
-func validateCustomCDXDocument(document *schema.BOM, policyConfig *LicensePolicyConfig) (innerError error) {
+func validateCustomCDXDocument(document *schema.BOM, policyConfig *schema.LicensePolicyConfig) (innerError error) {
 	getLogger().Enter()
 	defer getLogger().Exit(innerError)
 
@@ -232,7 +232,7 @@ func hashMetadataProperties(hashmap *slicemultimap.MultiMap, properties []schema
 // that at least one valid license is found
 // TODO: Assure top-level "metadata.component"
 // TODO support []WhereFilter
-func validateLicenseData(document *schema.BOM, policyConfig *LicensePolicyConfig) (err error) {
+func validateLicenseData(document *schema.BOM, policyConfig *schema.LicensePolicyConfig) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 

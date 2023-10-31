@@ -157,15 +157,6 @@ func initTestInfrastructure() {
 
 		// Leverage the root command's init function to populate schemas, policies, etc.
 		initConfigurations()
-
-		// initConfig() loads the policies from file; hash policies for tests
-		// Note: we hash policies (once) for all tests
-		getLogger().Debugf("Hashing license policies...")
-		errHash := licensePolicyConfig.HashLicensePolicies()
-		if errHash != nil {
-			getLogger().Error(errHash.Error())
-			os.Exit(ERROR_APPLICATION)
-		}
 	})
 }
 

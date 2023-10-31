@@ -26,6 +26,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/CycloneDX/sbom-utility/common"
+	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/jwangsadinata/go-multimap/slicemultimap"
 	"github.com/spf13/cobra"
@@ -175,10 +176,15 @@ func policyCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	// process filters supplied on the --where command flag
 	// TODO: validate if where clauses reference valid column names (filter keys)
 	whereFilters, err := processWhereFlag(cmd)
-
-	if err == nil {
-		err = ListLicensePolicies(writer, whereFilters, utils.GlobalFlags.LicenseFlags)
+	if err != nil {
+		return
 	}
+
+	// Use global license policy config. as loaded by initConfigurations() as
+	// using (optional) filename passed on command line OR the default, built-in config.
+	err = ListLicensePolicies(writer, LicensePolicyConfig,
+		utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.LicenseFlags,
+		whereFilters)
 
 	return
 }
@@ -190,7 +196,9 @@ func processLicensePolicyListResults(err error) {
 	}
 }
 
-func ListLicensePolicies(writer io.Writer, whereFilters []common.WhereFilter, licenseFlags utils.LicenseCommandFlags) (err error) {
+func ListLicensePolicies(writer io.Writer, policyConfig *schema.LicensePolicyConfig,
+	persistentFlags utils.PersistentCommandFlags, licenseFlags utils.LicenseCommandFlags,
+	whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -204,7 +212,7 @@ func ListLicensePolicies(writer io.Writer, whereFilters []common.WhereFilter, li
 	// Retrieve the subset of policies that match the where filters
 	// NOTE: This has the side-effect of mapping alt. policy field name values
 	var filteredMap *slicemultimap.MultiMap
-	filteredMap, err = licensePolicyConfig.GetFilteredFamilyNameMap(whereFilters)
+	filteredMap, err = policyConfig.GetFilteredFamilyNameMap(whereFilters)
 
 	if err != nil {
 		return
@@ -272,7 +280,7 @@ func DisplayLicensePoliciesTabbedText(output io.Writer, filteredPolicyMap *slice
 
 			// Wrap all column text (i.e. flag `--wrap=true`)
 			if utils.GlobalFlags.LicenseFlags.ListLineWrap {
-				policy := value.(LicensePolicy)
+				policy := value.(schema.LicensePolicy)
 
 				lines, err = wrapTableRowText(24, ",",
 					policy.UsagePolicy,
@@ -308,7 +316,7 @@ func DisplayLicensePoliciesTabbedText(output io.Writer, filteredPolicyMap *slice
 			} else {
 				// TODO surface error data to top-level command
 				line, _ = prepareReportLineData(
-					value.(LicensePolicy),
+					value.(schema.LicensePolicy),
 					LICENSE_POLICY_LIST_ROW_DATA,
 					flags.Summary,
 				)
@@ -359,7 +367,7 @@ func DisplayLicensePoliciesCSV(output io.Writer, filteredPolicyMap *slicemultima
 		for _, value := range values {
 			// TODO surface error data to top-level command
 			line, _ = prepareReportLineData(
-				value.(LicensePolicy),
+				value.(schema.LicensePolicy),
 				LICENSE_POLICY_LIST_ROW_DATA,
 				flags.Summary,
 			)
@@ -414,7 +422,7 @@ func DisplayLicensePoliciesMarkdown(output io.Writer, filteredPolicyMap *slicemu
 		for _, value := range values {
 			// TODO surface error data to top-level command
 			line, _ = prepareReportLineData(
-				value.(LicensePolicy),
+				value.(schema.LicensePolicy),
 				LICENSE_POLICY_LIST_ROW_DATA,
 				flags.Summary,
 			)

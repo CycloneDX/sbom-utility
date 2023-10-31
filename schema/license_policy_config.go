@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package cmd
+package schema
 
 import (
 	"encoding/json"
@@ -42,25 +42,29 @@ const (
 var VALID_USAGE_POLICIES = []string{POLICY_ALLOW, POLICY_DENY, POLICY_NEEDS_REVIEW}
 var ALL_USAGE_POLICIES = []string{POLICY_ALLOW, POLICY_DENY, POLICY_NEEDS_REVIEW, POLICY_UNDEFINED, POLICY_CONFLICT}
 
-// Note: the SPDX spec. does not provide regex for an SPDX ID, but provides the following in ABNF:
-//
-//	string = 1*(ALPHA / DIGIT / "-" / "." )
-//
-// Currently, the regex below tests composition of of only
-// alphanum, "-", and "." characters and disallows empty strings
-// TODO:
-//   - First and last chars are not "-" or "."
-//   - Enforce reasonable min/max lengths
-//     In theory, we can check overall length with positive lookahead
-//     (e.g., min 3 max 128):  (?=.{3,128}$)
-//     However, this does not appear to be supported in `regexp` package
-//     or perhaps it must be a compiled expression TBD
-const (
-	REGEX_VALID_SPDX_ID = "^[a-zA-Z0-9.-]+$"
-)
+// Note: the "License" property is used as hashmap key
+type LicenseInfo struct {
+	UsagePolicy            string           `json:"usage-policy"`
+	LicenseChoiceTypeValue int              `json:"license-type-value"`
+	LicenseChoiceType      string           `json:"license-type"`
+	License                string           `json:"license"`
+	ResourceName           string           `json:"resource-name"`
+	BOMRef                 CDXRefType       `json:"bom-ref"`
+	BOMLocationValue       int              `json:"bom-location-value"`
+	BOMLocation            string           `json:"bom-location"`
+	LicenseChoice          CDXLicenseChoice // Do not marshal
+	Policy                 LicensePolicy    // Do not marshal
+	Component              CDXComponent     // Do not marshal
+	Service                CDXService       // Do not marshal
+}
 
-// compiled regexp. to save time
-var spdxIdRegexp *regexp.Regexp
+// LicenseChoice - Choice type
+const (
+	LC_TYPE_INVALID = iota
+	LC_TYPE_ID
+	LC_TYPE_NAME
+	LC_TYPE_EXPRESSION
+)
 
 type LicensePolicy struct {
 	Id             string   `json:"id"`
@@ -84,18 +88,27 @@ type LicensePolicy struct {
 }
 
 type LicensePolicyConfig struct {
-	PolicyList            []LicensePolicy   `json:"policies"`
-	Annotations           map[string]string `json:"annotations"`
-	policyConfigFile      string
-	loadOnce              sync.Once
-	hashOnce              sync.Once
-	licenseFamilyNameMap  *slicemultimap.MultiMap
-	licenseIdMap          *slicemultimap.MultiMap
-	filteredFamilyNameMap *slicemultimap.MultiMap
+	PolicyList              []LicensePolicy   `json:"policies"`
+	Annotations             map[string]string `json:"annotations"`
+	defaultPolicyConfigFile string
+	policyConfigFile        string
+	loadOnce                sync.Once
+	hashOnce                sync.Once
+	licenseFamilyNameMap    *slicemultimap.MultiMap
+	licenseIdMap            *slicemultimap.MultiMap
+	filteredFamilyNameMap   *slicemultimap.MultiMap
+}
+
+func NewLicensePolicyConfig(configFile string) *LicensePolicyConfig {
+	temp := LicensePolicyConfig{
+		defaultPolicyConfigFile: configFile,
+		policyConfigFile:        configFile,
+	}
+	return &temp
 }
 
 func (config *LicensePolicyConfig) Reset() {
-	config.policyConfigFile = DEFAULT_LICENSE_POLICY_CONFIG
+	config.policyConfigFile = config.defaultPolicyConfigFile
 	config.PolicyList = nil
 	config.Annotations = nil
 	if config.licenseFamilyNameMap != nil {
@@ -104,18 +117,21 @@ func (config *LicensePolicyConfig) Reset() {
 	if config.licenseIdMap != nil {
 		config.licenseIdMap.Clear()
 	}
+	if config.filteredFamilyNameMap != nil {
+		config.filteredFamilyNameMap.Clear()
+	}
 }
 
 func (config *LicensePolicyConfig) GetFamilyNameMap() (hashmap *slicemultimap.MultiMap, err error) {
 	if config.licenseFamilyNameMap == nil {
-		err = config.HashLicensePolicies()
+		err = config.hashLicensePolicies()
 	}
 	return config.licenseFamilyNameMap, err
 }
 
 func (config *LicensePolicyConfig) GetLicenseIdMap() (hashmap *slicemultimap.MultiMap, err error) {
 	if config.licenseIdMap == nil {
-		err = config.HashLicensePolicies()
+		err = config.hashLicensePolicies()
 	}
 	return config.licenseIdMap, err
 }
@@ -131,26 +147,26 @@ func (config *LicensePolicyConfig) GetFilteredFamilyNameMap(whereFilters []commo
 
 	if len(whereFilters) > 0 {
 		// Always use a new filtered hashmap for each filtered list request
-		licensePolicyConfig.filteredFamilyNameMap = slicemultimap.New()
-		err = licensePolicyConfig.filteredHashLicensePolicies(whereFilters)
+		config.filteredFamilyNameMap = slicemultimap.New()
+		err = config.filteredHashLicensePolicies(whereFilters)
 	}
 	return config.filteredFamilyNameMap, err
 }
 
-func (config *LicensePolicyConfig) LoadLicensePolicies(filename string, defaultFilename string) (err error) {
-	getLogger().Enter(filename)
-	defer getLogger().Exit()
-
-	// Only load the policy config. once
-	config.loadOnce.Do(func() {
-		err = config.innerLoadLicensePolicies(filename, defaultFilename)
-	})
-
+func (config *LicensePolicyConfig) LoadHashPolicyConfigurationFile(policyFile string, defaultPolicyFile string) (err error) {
+	// Do not pass a default file, it should fail if custom policy cannot be loaded
+	err = config.innerLoadLicensePolicies(policyFile, defaultPolicyFile)
+	if err != nil {
+		return
+	}
+	// Note: the HashLicensePolicies function creates new id and name hashmaps
+	// therefore there is no need to clear them
+	err = config.hashLicensePolicies()
 	return
 }
 
-func (config *LicensePolicyConfig) innerLoadLicensePolicies(filename string, defaultFilename string) (err error) {
-	getLogger().Enter(filename)
+func (config *LicensePolicyConfig) innerLoadLicensePolicies(policyFile string, defaultPolicyFile string) (err error) {
+	getLogger().Enter(policyFile)
 	defer getLogger().Exit()
 
 	var buffer []byte
@@ -158,13 +174,12 @@ func (config *LicensePolicyConfig) innerLoadLicensePolicies(filename string, def
 	// Always reset the config if a new policy file is loaded
 	config.Reset()
 
-	if filename != "" {
-
+	if policyFile != "" {
 		// locate the license policy file
-		config.policyConfigFile, err = utils.FindVerifyConfigFileAbsPath(getLogger(), filename)
+		config.policyConfigFile, err = utils.FindVerifyConfigFileAbsPath(getLogger(), policyFile)
 
 		if err != nil {
-			return fmt.Errorf("unable to find license policy file: `%s`", filename)
+			return fmt.Errorf("unable to find license policy file: `%s`", policyFile)
 		}
 
 		// attempt to read in contents of the policy config.
@@ -175,11 +190,11 @@ func (config *LicensePolicyConfig) innerLoadLicensePolicies(filename string, def
 		}
 	} else {
 		// Attempt to load the default config file from embedded file resources
-		getLogger().Infof("Loading (embedded) default license policy file: `%s`...", defaultFilename)
-		buffer, err = resources.LoadConfigFile(defaultFilename)
+		getLogger().Infof("Loading (embedded) default license policy file: `%s`...", defaultPolicyFile)
+		buffer, err = resources.LoadConfigFile(defaultPolicyFile)
 		if err != nil {
 			return fmt.Errorf("unable to read schema config file: `%s` from embedded resources: `%s`",
-				defaultFilename, resources.RESOURCES_CONFIG_DIR)
+				defaultPolicyFile, resources.RESOURCES_CONFIG_DIR)
 		}
 	}
 
@@ -193,7 +208,7 @@ func (config *LicensePolicyConfig) innerLoadLicensePolicies(filename string, def
 	return
 }
 
-func (config *LicensePolicyConfig) HashLicensePolicies() (hashError error) {
+func (config *LicensePolicyConfig) hashLicensePolicies() (hashError error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -373,13 +388,19 @@ func (config *LicensePolicyConfig) FindPolicy(licenseInfo LicenseInfo) (matchedP
 
 	switch licenseInfo.LicenseChoiceTypeValue {
 	case LC_TYPE_ID:
-		matchedPolicy.UsagePolicy, matchedPolicy = config.FindPolicyBySpdxId(licenseInfo.LicenseChoice.License.Id)
+		matchedPolicy.UsagePolicy, matchedPolicy, err = config.FindPolicyBySpdxId(licenseInfo.LicenseChoice.License.Id)
+		if err != nil {
+			return
+		}
 	case LC_TYPE_NAME:
-		matchedPolicy.UsagePolicy, matchedPolicy = config.FindPolicyByFamilyName(licenseInfo.LicenseChoice.License.Name)
+		matchedPolicy.UsagePolicy, matchedPolicy, err = config.FindPolicyByFamilyName(licenseInfo.LicenseChoice.License.Name)
+		if err != nil {
+			return
+		}
 	case LC_TYPE_EXPRESSION:
 		// Parse expression according to SPDX spec.
 		var expressionTree *CompoundExpression
-		expressionTree, err = parseExpression(licenseInfo.LicenseChoice.Expression)
+		expressionTree, err = ParseExpression(config, licenseInfo.LicenseChoice.Expression)
 		getLogger().Debugf("Parsed expression:\n%v", expressionTree)
 		matchedPolicy.UsagePolicy = expressionTree.CompoundUsagePolicy
 	}
@@ -390,7 +411,7 @@ func (config *LicensePolicyConfig) FindPolicy(licenseInfo LicenseInfo) (matchedP
 	return matchedPolicy, err
 }
 
-func (config *LicensePolicyConfig) FindPolicyBySpdxId(id string) (policyValue string, matchedPolicy LicensePolicy) {
+func (config *LicensePolicyConfig) FindPolicyBySpdxId(id string) (policyValue string, matchedPolicy LicensePolicy, err error) {
 	getLogger().Enter("id:", id)
 	defer getLogger().Exit()
 
@@ -399,10 +420,9 @@ func (config *LicensePolicyConfig) FindPolicyBySpdxId(id string) (policyValue st
 
 	// Note: this will cause all policy hashmaps to be initialized (created), if it has not bee
 	licensePolicyIdMap, err := config.GetLicenseIdMap()
-
 	if err != nil {
-		getLogger().Errorf("license policy map error: `%w`", err)
-		os.Exit(ERROR_APPLICATION)
+		err = getLogger().Errorf("license policy map error: `%w`", err)
+		return
 	}
 
 	arrPolicies, matched = licensePolicyIdMap.Get(id)
@@ -410,8 +430,8 @@ func (config *LicensePolicyConfig) FindPolicyBySpdxId(id string) (policyValue st
 
 	// There MUST be ONLY one policy per (discrete) license ID
 	if len(arrPolicies) > 1 {
-		getLogger().Errorf("Multiple (possibly conflicting) policies declared for SPDX ID=`%s`", id)
-		os.Exit(ERROR_APPLICATION)
+		err = getLogger().Errorf("Multiple (possibly conflicting) policies declared for SPDX ID=`%s`", id)
+		return
 	}
 
 	if matched {
@@ -423,12 +443,12 @@ func (config *LicensePolicyConfig) FindPolicyBySpdxId(id string) (policyValue st
 		policyValue = POLICY_UNDEFINED
 	}
 
-	return policyValue, matchedPolicy
+	return
 }
 
 // NOTE: for now, we will look for the "family" name encoded in the License.Name field
 // (until) we can get additional fields/properties added to the CDX LicenseChoice schema
-func (config *LicensePolicyConfig) FindPolicyByFamilyName(name string) (policyValue string, matchedPolicy LicensePolicy) {
+func (config *LicensePolicyConfig) FindPolicyByFamilyName(name string) (policyValue string, matchedPolicy LicensePolicy, err error) {
 	getLogger().Enter("name:", name)
 	defer getLogger().Exit()
 
@@ -439,7 +459,7 @@ func (config *LicensePolicyConfig) FindPolicyByFamilyName(name string) (policyVa
 	// NOTE: we have found some SBOM authors have placed license expressions
 	// within the "name" field.  This prevents us from assigning policy
 	// return
-	if HasLogicalConjunctionOrPreposition(name) {
+	if hasLogicalConjunctionOrPreposition(name) {
 		getLogger().Warningf("policy name contains logical conjunctions or preposition: `%s`", name)
 		policyValue = POLICY_UNDEFINED
 		return
@@ -449,14 +469,17 @@ func (config *LicensePolicyConfig) FindPolicyByFamilyName(name string) (policyVa
 	familyNameMap, _ := config.GetFamilyNameMap()
 
 	// See if any of the policy family keys contain the family name
-	matched, key = config.searchForLicenseFamilyName(name)
+	matched, key, err = config.searchForLicenseFamilyName(name)
+	if err != nil {
+		return
+	}
 
 	if matched {
 		arrPolicies, _ = familyNameMap.Get(key)
 
 		if len(arrPolicies) == 0 {
-			getLogger().Errorf("No policy match found in hashmap for family name key: `%s`", key)
-			os.Exit(ERROR_APPLICATION)
+			err = getLogger().Errorf("No policy match found in hashmap for family name key: `%s`", key)
+			return
 		}
 
 		// NOTE: We can use the first policy (of a family) as they are
@@ -478,19 +501,19 @@ func (config *LicensePolicyConfig) FindPolicyByFamilyName(name string) (policyVa
 		policyValue = POLICY_UNDEFINED
 	}
 
-	return policyValue, matchedPolicy
+	return
 }
 
 // Loop through all known license family names (in hashMap) to see if any
 // appear in the CDX License "Name" field
-func (config *LicensePolicyConfig) searchForLicenseFamilyName(licenseName string) (found bool, familyName string) {
+func (config *LicensePolicyConfig) searchForLicenseFamilyName(licenseName string) (found bool, familyName string, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	familyNameMap, err := licensePolicyConfig.GetFamilyNameMap()
+	familyNameMap, err := config.GetFamilyNameMap()
 	if err != nil {
 		getLogger().Error(err)
-		os.Exit(ERROR_APPLICATION)
+		return
 	}
 
 	keys := familyNameMap.Keys()
@@ -608,4 +631,61 @@ func containsFamilyName(name string, familyName string) bool {
 	// are proper substring of SPDX IDs which are mixed case and
 	// should match exactly as encoded.
 	return strings.Contains(name, familyName)
+}
+
+// Supported conjunctions and prepositions
+const (
+	AND                   string = "AND"
+	OR                    string = "OR"
+	WITH                  string = "WITH"
+	CONJUNCTION_UNDEFINED string = ""
+)
+
+func hasLogicalConjunctionOrPreposition(value string) bool {
+
+	if strings.Contains(value, AND) ||
+		strings.Contains(value, OR) ||
+		strings.Contains(value, WITH) {
+		return true
+	}
+	return false
+}
+
+//------------------------------------------------
+// CDX LicenseChoice "helper" functions
+//------------------------------------------------
+
+// "getter" for compiled regex expression
+func getRegexForValidSpdxId() (regex *regexp.Regexp, err error) {
+	if spdxIdRegexp == nil {
+		regex, err = regexp.Compile(REGEX_VALID_SPDX_ID)
+	}
+	return
+}
+
+func IsValidSpdxId(id string) bool {
+	regex, err := getRegexForValidSpdxId()
+	if err != nil {
+		getLogger().Errorf("unable to invoke regex. %v", err)
+		return false
+	}
+	return regex.MatchString(id)
+}
+
+func IsValidFamilyKey(key string) bool {
+	var BAD_KEYWORDS = []string{"CONFLICT", "UNKNOWN"}
+
+	// For now, valid family keys are subsets of SPDX IDs
+	// Therefore, pass result from that SPDX ID validation function
+	valid := IsValidSpdxId(key)
+
+	// Test for keywords that we have seen set that clearly are not valid family names
+	// TODO: make keywords configurable
+	for _, keyword := range BAD_KEYWORDS {
+		if strings.Contains(strings.ToLower(key), strings.ToLower(keyword)) {
+			return false
+		}
+	}
+
+	return valid
 }

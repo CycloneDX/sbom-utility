@@ -339,14 +339,14 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	// Perform additional validation in document composition/structure
 	// and "custom" required data within specified fields
 	if validateFlags.CustomValidation {
-		valid, err = validateCustom(document, licensePolicyConfig)
+		valid, err = validateCustom(document, LicensePolicyConfig)
 	}
 
 	// All validation tests passed; return VALID
 	return
 }
 
-func validateCustom(document *schema.BOM, policyConfig *LicensePolicyConfig) (valid bool, err error) {
+func validateCustom(document *schema.BOM, policyConfig *schema.LicensePolicyConfig) (valid bool, err error) {
 
 	// If the validated BOM is of a known format, we can unmarshal it into
 	// more convenient typed structures for simplified custom validation

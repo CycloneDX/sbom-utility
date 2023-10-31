@@ -31,7 +31,7 @@ import (
 
 // Globals
 var ProjectLogger *log.MiniLogger
-var licensePolicyConfig *LicensePolicyConfig
+var LicensePolicyConfig *schema.LicensePolicyConfig
 var SupportedFormatConfig schema.BOMFormatAndSchemaConfig
 
 // top-level commands
@@ -157,10 +157,12 @@ func init() {
 	cobra.OnInitialize(initConfigurations)
 
 	// Declare top-level, persistent flags used for configuration of utility
+	// NOTE: we do not set the "default" config. filenames within Cobra
+	// as we want the init/load methods to work apart from Cobra.
 	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigSchemaFile, FLAG_CONFIG_SCHEMA, "", "", MSG_FLAG_CONFIG_SCHEMA)
 	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigLicensePolicyFile, FLAG_CONFIG_LICENSE_POLICY, "", "", MSG_FLAG_CONFIG_LICENSE)
-	utils.GlobalFlags.ConfigCustomValidationFile = DEFAULT_CUSTOM_VALIDATION_CONFIG
 	// TODO: Make configurable once we have organized the set of custom validation configurations
+	utils.GlobalFlags.ConfigCustomValidationFile = DEFAULT_CUSTOM_VALIDATION_CONFIG
 	//rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigCustomValidationFile, FLAG_CONFIG_CUSTOM_VALIDATION, "", DEFAULT_CUSTOM_VALIDATION_CONFIG, "TODO")
 
 	// Declare top-level, persistent flags and where to place the post-parse values
@@ -228,13 +230,13 @@ func initConfigurations() {
 		os.Exit(ERROR_APPLICATION)
 	}
 
-	// License information and approval policies (customizable)
+	// License Policy Configuration (customizable via command line, with default config.)
 	var licensePolicyFile = utils.GlobalFlags.ConfigLicensePolicyFile
-	licensePolicyConfig = new(LicensePolicyConfig)
-	errLoadLicensePolicies := licensePolicyConfig.LoadLicensePolicies(licensePolicyFile, DEFAULT_LICENSE_POLICY_CONFIG)
+	LicensePolicyConfig = new(schema.LicensePolicyConfig)
+	errLoadLicensePolicies := LicensePolicyConfig.LoadHashPolicyConfigurationFile(licensePolicyFile, DEFAULT_LICENSE_POLICY_CONFIG)
 	if errLoadLicensePolicies != nil {
 		getLogger().Warning(errLoadLicensePolicies.Error())
-		getLogger().Warningf("All license policies will default to `%s`.", POLICY_UNDEFINED)
+		getLogger().Warningf("All license policies will default to `%s`.", schema.POLICY_UNDEFINED)
 	}
 }
 
@@ -307,14 +309,11 @@ func createOutputFile(outputFilename string) (outputFile *os.File, writer io.Wri
 
 	// validate filename
 	if outputFilename != "" {
-
 		// Check to see of stdin is the BOM source data
 		var absFilename string
 		if outputFilename == schema.INPUT_TYPE_STDOUT {
 			outputFile = os.Stdout
-
 		} else { // load the BOM data from relative filename
-
 			// Conditionally append working directory if no abs. path detected
 			if len(outputFilename) > 0 && !filepath.IsAbs(outputFilename) {
 				absFilename = filepath.Join(utils.GlobalFlags.WorkingDir, outputFilename)
