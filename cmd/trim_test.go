@@ -20,6 +20,7 @@ package cmd
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -37,6 +38,8 @@ const (
 
 type TrimTestInfo struct {
 	CommonTestInfo
+	Keys  []string
+	Paths []string
 }
 
 func (ti *TrimTestInfo) String() string {
@@ -60,7 +63,7 @@ func innerBufferedTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer b
 	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile
 	utils.GlobalFlags.PersistentFlags.OutputFile = testInfo.OutputFile
 	utils.GlobalFlags.PersistentFlags.OutputFormat = testInfo.OutputFormat
-	var trimFlags utils.TrimCommandFlags
+	utils.GlobalFlags.TrimFlags.Keys = testInfo.Keys
 	var outputWriter io.Writer
 	var outputFile *os.File
 
@@ -73,7 +76,7 @@ func innerBufferedTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer b
 		// MUST ensure all data is written to buffer before further testing
 		defer bufferedWriter.Flush()
 	} else {
-		outputFile, outputWriter, err = createOutputFile(TEST_OUTPUT_PATH + testInfo.OutputFile)
+		outputFile, outputWriter, err = createOutputFile(testInfo.OutputFile)
 		getLogger().Tracef("outputFile: `%v`; writer: `%v`", testInfo.OutputFile, outputWriter)
 
 		// use function closure to assure consistent error output based upon error type
@@ -90,7 +93,7 @@ func innerBufferedTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer b
 		}
 	}
 
-	err = Trim(outputWriter, utils.GlobalFlags.PersistentFlags, trimFlags)
+	err = Trim(outputWriter, utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.TrimFlags)
 	return
 }
 
@@ -118,6 +121,10 @@ func innerTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer bytes.Buf
 	return
 }
 
+// ----------------------------------------
+// Trim "properties"
+// ----------------------------------------
+
 func TestTrimCdx15ComponentsOnlyProperties(t *testing.T) {
 	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_COMPS_ONLY, nil)
 	//outputBuffer, _ := innerBufferedTestTrim(t, ti)
@@ -129,11 +136,35 @@ func TestTrimCdx15ComponentsOnlyProperties(t *testing.T) {
 
 func TestTrimCdx15ComponentProperties(t *testing.T) {
 	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_COMP_PROPS_1, nil)
-	//outputBuffer, _ := innerBufferedTestTrim(t, ti)
-	ti.OutputFile = "output-comps-props.sbom.json"
+	ti.Keys = append(ti.Keys, "properties")
+	ti.OutputFile = createTemporaryFilename(TEST_TRIM_CDX_1_5_COMP_PROPS_1)
 	innerTestTrim(t, ti)
-	// TODO: verify "after" trim lengths and content have removed properties
-	//getLogger().Tracef("Len(outputBuffer): `%v`\n", outputBuffer.Len())
+
+	// Query temporary "trimmed" BOM to assure known fields were removed
+	request := QueryRequest{
+		selectFieldsRaw: QUERY_TOKEN_WILDCARD,
+		fromObjectsRaw:  "metadata.component",
+	}
+
+	result, err := innerQuery(t, ti.OutputFile, &request, false)
+
+	if err != nil {
+		t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
+		return
+	}
+
+	// if properties were still found post-trim, that is a failure
+	if result != nil {
+		switch typedValue := result.(type) {
+		case map[string]interface{}:
+			property := ti.Keys[0]
+			if _, ok := typedValue[property]; ok {
+				t.Errorf("trim failed. Key `%s`, found at path: `%s`", ti.Keys[0], request.fromObjectsRaw)
+			}
+		default:
+			fmt.Printf("boo")
+		}
+	}
 }
 
 func TestTrimCdx14ComponentPropertiesSampleXXL(t *testing.T) {
@@ -149,3 +180,7 @@ func TestTrimCdx14ComponentPropertiesSampleXXL2(t *testing.T) {
 	innerTestTrim(t, ti)
 	// TODO: verify output file was written and trimmed props.
 }
+
+// ----------------------------------------
+// Trim "externalReferences"
+// ----------------------------------------

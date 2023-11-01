@@ -96,7 +96,7 @@ func processTrimResults(err error) {
 }
 
 // NOTE: resourceType has already been validated
-func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, statsFlags utils.TrimCommandFlags) (err error) {
+func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFlags utils.TrimCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -114,9 +114,6 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, statsF
 		return
 	}
 
-	// TODO: use a parameter to obtain and normalize  object key names
-	document.TrimJsonMap("properties")
-
 	// At this time, fail SPDX format SBOMs as "unsupported" (for "any" format)
 	if !document.FormatInfo.IsCycloneDx() {
 		err = schema.NewUnsupportedFormatForCommandError(
@@ -126,13 +123,22 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, statsF
 		return
 	}
 
-	// Before looking for license data, fully unmarshal the SBOM into named structures
+	if len(trimFlags.Keys) == 0 {
+		// TODO create named error type in schema package
+		err = getLogger().Errorf("invalid parameter value: missing `keys` value from command")
+		return
+	}
+
+	// TODO: use a parameter to obtain and normalize  object key names
+	document.TrimJsonMap(trimFlags.Keys[0])
+
+	// fully unmarshal the SBOM into named structures
 	if err = document.UnmarshalCycloneDXBOM(); err != nil {
 		return
 	}
 
+	// Output the "trimmed" version of the Input BOM
 	format := persistentFlags.OutputFormat
-
 	getLogger().Infof("Outputting listing (`%s` format)...", format)
 	switch format {
 	case FORMAT_JSON:

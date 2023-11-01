@@ -21,6 +21,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -214,4 +215,9 @@ func prepareWhereFilters(t *testing.T, testInfo *CommonTestInfo) (whereFilters [
 		}
 	}
 	return
+}
+
+func createTemporaryFilename(baseFilename string) (tempFilename string) {
+	trimmedFilename := strings.TrimLeft(baseFilename, strconv.QuoteRune(os.PathSeparator))
+	return TEST_OUTPUT_PATH + trimmedFilename
 }

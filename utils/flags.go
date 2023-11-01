@@ -110,6 +110,8 @@ type StatsCommandFlags struct {
 }
 
 type TrimCommandFlags struct {
+	Keys  []string
+	Paths []string
 }
 
 type CustomValidationFlags struct {
