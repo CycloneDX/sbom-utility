@@ -182,11 +182,11 @@ func hashMetadataLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 	}
 
 	var licenseInfo schema.LicenseInfo
-	for _, lc := range *pLicenses {
+	for _, pLicenseChoice := range *pLicenses {
 		getLogger().Tracef("hashing license: id: `%s`, name: `%s`",
-			lc.License.Id, lc.License.Name)
+			pLicenseChoice.License.Id, pLicenseChoice.License.Name)
 
-		licenseInfo.LicenseChoice = lc
+		licenseInfo.LicenseChoice = pLicenseChoice
 		licenseInfo.BOMLocationValue = location
 		licenseInfo.ResourceName = LICENSE_LIST_NOT_APPLICABLE
 		licenseInfo.BOMRef = LICENSE_LIST_NOT_APPLICABLE
@@ -386,15 +386,15 @@ func hashLicenseInfoByLicenseType(bom *schema.BOM, policyConfig *schema.LicenseP
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
-	// TODO: make a pointer
 	licenseChoice := licenseInfo.LicenseChoice
+	pLicense := licenseChoice.License
 
-	if licenseChoice.License.Id != "" {
+	if pLicense != nil && pLicense.Id != "" {
 		licenseInfo.LicenseChoiceTypeValue = schema.LC_TYPE_ID
-		HashLicenseInfo(bom, policyConfig, licenseChoice.License.Id, licenseInfo, whereFilters)
-	} else if licenseChoice.License.Name != "" {
+		HashLicenseInfo(bom, policyConfig, pLicense.Id, licenseInfo, whereFilters)
+	} else if pLicense != nil && pLicense.Name != "" {
 		licenseInfo.LicenseChoiceTypeValue = schema.LC_TYPE_NAME
-		HashLicenseInfo(bom, policyConfig, licenseChoice.License.Name, licenseInfo, whereFilters)
+		HashLicenseInfo(bom, policyConfig, pLicense.Name, licenseInfo, whereFilters)
 	} else if licenseChoice.Expression != "" {
 		licenseInfo.LicenseChoiceTypeValue = schema.LC_TYPE_EXPRESSION
 		HashLicenseInfo(bom, policyConfig, licenseChoice.Expression, licenseInfo, whereFilters)
