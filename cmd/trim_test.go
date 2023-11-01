@@ -142,7 +142,8 @@ func VerifyTrimOutputFileResult(t *testing.T, ti *TrimTestInfo, fromPath string)
 
 	for _, key := range ti.Keys {
 		// use a buffered query on the temp. output file on the (parent) path
-		result, err := innerQuery(t, ti.OutputFile, &request, false)
+		var result interface{}
+		result, err = innerQuery(t, ti.OutputFile, &request, false)
 		if err != nil {
 			t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
 			break
@@ -156,11 +157,11 @@ func VerifyTrimOutputFileResult(t *testing.T, ti *TrimTestInfo, fromPath string)
 				//property := ti.Keys[0]
 				if _, ok := typedValue[key]; ok {
 					err = getLogger().Errorf("trim failed. Key `%s`, found at path: `%s`", ti.Keys[0], request.fromObjectsRaw)
-					break
+					return
 				}
 			default:
 				err = getLogger().Errorf("trim failed. map[string]interface{} expected; actual type: `%T`", typedValue)
-				break
+				return
 			}
 		}
 	}
