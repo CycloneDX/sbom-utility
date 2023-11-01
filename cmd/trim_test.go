@@ -20,7 +20,6 @@ package cmd
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -134,53 +133,79 @@ func TestTrimCdx15ComponentsOnlyProperties(t *testing.T) {
 	//getLogger().Tracef("Len(outputBuffer): `%v`\n", outputBuffer.Len())
 }
 
-func TestTrimCdx15ComponentProperties(t *testing.T) {
-	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_COMP_PROPS_1, nil)
-	ti.Keys = append(ti.Keys, "properties")
-	ti.OutputFile = createTemporaryFilename(TEST_TRIM_CDX_1_5_COMP_PROPS_1)
-	innerTestTrim(t, ti)
-
+func VerifyTrimOutputFileResult(t *testing.T, ti *TrimTestInfo, fromPath string) (err error) {
 	// Query temporary "trimmed" BOM to assure known fields were removed
 	request := QueryRequest{
 		selectFieldsRaw: QUERY_TOKEN_WILDCARD,
-		fromObjectsRaw:  "metadata.component",
+		fromObjectsRaw:  fromPath,
 	}
 
-	result, err := innerQuery(t, ti.OutputFile, &request, false)
+	for _, key := range ti.Keys {
+		// use a buffered query on the temp. output file on the (parent) path
+		result, err := innerQuery(t, ti.OutputFile, &request, false)
+		if err != nil {
+			t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
+			break
+		}
 
-	if err != nil {
-		t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
-		return
-	}
-
-	// if properties were still found post-trim, that is a failure
-	if result != nil {
-		switch typedValue := result.(type) {
-		case map[string]interface{}:
-			property := ti.Keys[0]
-			if _, ok := typedValue[property]; ok {
-				t.Errorf("trim failed. Key `%s`, found at path: `%s`", ti.Keys[0], request.fromObjectsRaw)
+		// verify the "key" was removed from the (parent) JSON map
+		if result != nil {
+			switch typedValue := result.(type) {
+			case map[string]interface{}:
+				// verify map key was removed
+				//property := ti.Keys[0]
+				if _, ok := typedValue[key]; ok {
+					err = getLogger().Errorf("trim failed. Key `%s`, found at path: `%s`", ti.Keys[0], request.fromObjectsRaw)
+					break
+				}
+			default:
+				err = getLogger().Errorf("trim failed. map[string]interface{} expected; actual type: `%T`", typedValue)
+				break
 			}
-		default:
-			fmt.Printf("boo")
 		}
 	}
+
+	return
 }
 
-func TestTrimCdx14ComponentPropertiesSampleXXL(t *testing.T) {
+func TestTrimCdx14ComponentPropertiesSampleXXLBuffered(t *testing.T) {
 	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_4_SAMPLE_XXL_1, nil)
 	outputBuffer, _ := innerBufferedTestTrim(t, ti)
 	// TODO: verify "after" trim lengths and content have removed properties
 	getLogger().Tracef("Len(outputBuffer): `%v`\n", outputBuffer.Len())
 }
 
-func TestTrimCdx14ComponentPropertiesSampleXXL2(t *testing.T) {
+func TestTrimCdx14ComponentPropertiesSampleXXL(t *testing.T) {
 	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_4_SAMPLE_XXL_1, nil)
-	ti.OutputFile = "output-xxl.sbom.json"
+	ti.Keys = append(ti.Keys, "properties")
+	ti.OutputFile = createTemporaryFilename(TEST_TRIM_CDX_1_4_SAMPLE_XXL_1)
 	innerTestTrim(t, ti)
-	// TODO: verify output file was written and trimmed props.
+	// Assure JSON map does not contain the trimmed key(s)
+	err := VerifyTrimOutputFileResult(t, ti, "metadata.component")
+	if err != nil {
+		t.Error(err)
+	}
 }
 
-// ----------------------------------------
-// Trim "externalReferences"
-// ----------------------------------------
+func TestTrimCdx15Properties(t *testing.T) {
+	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_COMP_PROPS_1, nil)
+	ti.Keys = append(ti.Keys, "properties")
+	ti.OutputFile = createTemporaryFilename(TEST_TRIM_CDX_1_5_COMP_PROPS_1)
+	innerTestTrim(t, ti)
+	// Assure JSON map does not contain the trimmed key(s)
+	// Document "root" properties
+	err := VerifyTrimOutputFileResult(t, ti, "") // document root
+	if err != nil {
+		t.Error(err)
+	}
+	// metadata properties
+	err = VerifyTrimOutputFileResult(t, ti, "metadata") // document root
+	if err != nil {
+		t.Error(err)
+	}
+	// metadata.component properties
+	err = VerifyTrimOutputFileResult(t, ti, "metadata.component") // document root
+	if err != nil {
+		t.Error(err)
+	}
+}
