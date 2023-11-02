@@ -1,0 +1,44 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f3",
+  "metadata": {
+    "component": {
+      "type": "application",
+      "bom-ref": "pkg:app/sample@1.0.0",
+      "purl": "pkg:app/sample@1.0.0",
+      "name": "ACME Application",
+      "version": "2.0.0",
+      "description": "ACME sample application"
+    }
+  },
+  "services":[
+    {
+      "name": "Min"
+    },
+    {
+      "bom-ref": "service:example.com/myservices/foo",
+      "name": "Foo",
+      "decription": "Foo service",
+      "endpoints": [
+          "https://example.com/myservice/foo"
+      ]
+    },
+    {
+      "bom-ref": "service:example.com/myservices/bar",
+      "name": "Bar",
+      "decription": "Bar service",
+      "endpoints": [
+          "https://example.com/myservice/bar"
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "ADSL"
+          }
+        }
+      ]
+    }
+  ]
+}

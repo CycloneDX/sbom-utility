@@ -1464,13 +1464,21 @@ The `Makefile` includes a `test` target for convenience which will use `go test`
 make test
 ```
 
+#### Running tests for a single package
+
 The `test_cmd` target will use run only the test found in the `cmd` package:
 
 ```bash
 make test_cmd
 ```
 
-#### Using go test
+The `test_schema` target will use run only the test found in the `schema` package:
+
+```bash
+make test_schema
+```
+
+#### Using `go test`
 
 Example: running all tests in the `cmd` package:
 
@@ -1478,7 +1486,16 @@ Example: running all tests in the `cmd` package:
 go test github.com/CycloneDX/sbom-utility/cmd -v
 ```
 
+Example: running all tests in the `schema` package:
+
+```bash
+go test github.com/CycloneDX/sbom-utility/schema -v
+```
+
+#### Running tests in quiet mode
+
 Run in "quiet" mode to not see error test output:
+
 ```bash
 go test github.com/CycloneDX/sbom-utility/cmd -v --quiet
 ```
@@ -1489,7 +1506,7 @@ run an individual test within the `cmd` package:
 go test github.com/CycloneDX/sbom-utility/cmd -v -run TestValidateCdx14MinRequiredBasic
 ```
 
-#### Debugging go tests
+##### Debugging `go test`
 
 Simply append the flags `--args --trace` or `--args --debug` to your `go test` command to enable trace or debug output for your designated test(s):
 

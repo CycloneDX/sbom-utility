@@ -32,7 +32,8 @@ const (
 	TEST_HASH_CDX_1_5_METADATA_COMPONENT_EMPTY     = "test/hash/hash-cdx-1-5-metadata-component-empty.sbom.json"
 	TEST_HASH_CDX_1_5_METADATA_COMPONENT_FULL      = "test/hash/hash-cdx-1-5-metadata-component-full.sbom.json"
 	TEST_HASH_CDX_1_5_METADATA_COMPONENT_NAME_ONLY = "test/hash/hash-cdx-1-5-metadata-component-name-only.sbom.json"
-	TEST_HASH_CDX_1_5_METADATA_COMPONENTS          = "test/hash/hash-cdx-1-5-components.sbom.json"
+	TEST_HASH_CDX_1_5_COMPONENTS                   = "test/hash/hash-cdx-1-5-components.sbom.json"
+	TEST_HASH_CDX_1_5_SERVICES                     = "test/hash/hahs-cdx-1-5-services.sbom.json"
 )
 
 type HashTestInfo struct {
@@ -198,17 +199,20 @@ func loadBOMFile(inputFile string) (document *BOM, err error) {
 func TestHashCDXComponentEmpty(t *testing.T) {
 	document, err := loadBOMFile(TEST_HASH_CDX_1_5_METADATA_COMPONENT_EMPTY)
 	if err != nil {
+		t.Error(err)
 		return
 	}
 
 	// need to unmarshal into CDX structures.
 	if err = document.UnmarshalCycloneDXBOM(); err != nil {
+		t.Error(err)
 		return
 	}
 
 	component := document.GetCdxMetadataComponent()
 	_, err = document.HashComponent(*component, nil, false)
 	if err != nil {
+		t.Error(err)
 		return
 	}
 }
@@ -216,17 +220,20 @@ func TestHashCDXComponentEmpty(t *testing.T) {
 func TestHashCDXComponentNameOnly(t *testing.T) {
 	document, err := loadBOMFile(TEST_HASH_CDX_1_5_METADATA_COMPONENT_NAME_ONLY)
 	if err != nil {
+		t.Error(err)
 		return
 	}
 
 	// need to unmarshal into CDX structures.
 	if err = document.UnmarshalCycloneDXBOM(); err != nil {
+		t.Error(err)
 		return
 	}
 
 	component := document.GetCdxMetadataComponent()
 	_, err = document.HashComponent(*component, nil, false)
 	if err != nil {
+		t.Error(err)
 		return
 	}
 }
@@ -234,18 +241,44 @@ func TestHashCDXComponentNameOnly(t *testing.T) {
 func TestHashCDXComponentFull(t *testing.T) {
 	document, err := loadBOMFile(TEST_HASH_CDX_1_5_METADATA_COMPONENT_FULL)
 	if err != nil {
+		t.Error(err)
 		return
 	}
 
 	// need to unmarshal into CDX structures.
 	if err = document.UnmarshalCycloneDXBOM(); err != nil {
+		t.Error(err)
 		return
 	}
 
 	component := document.GetCdxMetadataComponent()
 	_, err = document.HashComponent(*component, nil, false)
 	if err != nil {
+		t.Error(err)
 		return
+	}
+}
+
+func TestHashCDXComponentsSlice(t *testing.T) {
+	document, err := loadBOMFile(TEST_HASH_CDX_1_5_METADATA_COMPONENT_FULL)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// need to unmarshal into CDX structures.
+	if err = document.UnmarshalCycloneDXBOM(); err != nil {
+		t.Error(err)
+		return
+	}
+
+	components := document.GetCdxComponents()
+	if components != nil {
+		err = document.HashComponents(*components, nil, false)
+		if err != nil {
+			t.Error(err)
+			return
+		}
 	}
 }
 

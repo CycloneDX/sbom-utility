@@ -3,47 +3,7 @@
   "specVersion": "1.5",
   "version": 1,
   "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
-  "externalReferences": [
-    {
-      "url": "support@example.com",
-      "comment": "Support for questions about SBOM contents",
-      "type": "support"
-    }
-  ],
   "metadata": {
-    "timestamp": "2022-10-12T19:07:00Z",
-    "properties": [
-      {
-        "name": "urn:example.com:classification",
-        "value": "This SBOM is Confidential Information. Do not distribute."
-      },
-      {
-        "name": "urn:example.com:disclaimer",
-        "value": "This SBOM is current as of the date it was generated and is subject to change."
-      }
-    ],
-    "manufacture": {
-      "name": "Example Co.",
-      "url": [
-        "https://example.com"
-      ],
-      "contact": [
-        {
-          "email": "contact@example.com"
-        }
-      ]
-    },
-    "supplier": {
-      "name": "Example Co. Distribution Dept.",
-      "url": [
-        "https://example.com/software/"
-      ],
-      "contact": [
-        {
-          "email": "distribution@example.com"
-        }
-      ]
-    },
     "component": {
       "type": "application",
       "bom-ref": "pkg:oci/example.com/product/application@10.0.4.0",
@@ -142,12 +102,15 @@
   },
   "components": [
     {
+      "name": "Min"
+    },
+    {
       "type": "library",
-      "bom-ref": "pkg:npm/sample@2.0.0",
-      "purl": "pkg:npm/sample@2.0.0",
+      "bom-ref": "pkg:npm/foo@2.0.0",
+      "purl": "pkg:npm/foo@2.0.0",
       "name": "sample",
       "version": "2.0.0",
-      "description": "Node.js Sampler package",
+      "description": "Foo package",
       "licenses": [
         {
           "license": {
@@ -157,18 +120,18 @@
       ],
       "properties": [
         {
-          "name": "foo",
-          "value": "bar"
+          "name": "abc",
+          "value": "123"
         }
       ]
     },
     {
       "type": "library",
-      "bom-ref": "pkg:npm/body-parser@1.19.0",
-      "purl": "pkg:npm/body-parser@1.19.0",
+      "bom-ref": "pkg:npm/bar@3.0.0",
+      "purl": "pkg:npm/bar@3.0.0",
       "name": "body-parser",
-      "version": "1.19.0",
-      "description": "Node.js body parsing middleware",
+      "version": "3.0.0",
+      "description": "Bar package",
       "licenses": [
         {
           "license": {
@@ -182,12 +145,6 @@
           "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
         }
       ]
-    }
-  ],
-  "properties": [
-    {
-      "name": "abc",
-      "value": "123"
     }
   ]
 }
