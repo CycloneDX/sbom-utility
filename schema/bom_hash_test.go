@@ -165,19 +165,6 @@ func loadBOMFile(inputFile string) (document *BOM, err error) {
 		return nil, fmt.Errorf("invalid input file: `%s` ", inputFile)
 	}
 
-	// TODO: there MUST be a better way to share this method across packages...
-	// err = initTestApplicationDirectories()
-	// if err != nil {
-	// 	getLogger().Error(err.Error())
-	// 	return
-	// }
-
-	// err = TestFormatConfig.LoadSchemaConfigFile("", DEFAULT_TEST_SCHEMA_CONFIG)
-	// if err != nil {
-	// 	getLogger().Error(err.Error())
-	// 	return
-	// }
-
 	// Construct a BOM document object around the input file
 	document = NewBOM(inputFile)
 
@@ -208,7 +195,25 @@ func loadBOMFile(inputFile string) (document *BOM, err error) {
 // ---------------------------
 // Hash tests
 // ---------------------------
-func TestHashCDXComponent(t *testing.T) {
+func TestHashCDXComponentEmpty(t *testing.T) {
+	document, err := loadBOMFile(TEST_HASH_CDX_1_5_METADATA_COMPONENT_EMPTY)
+	if err != nil {
+		return
+	}
+
+	// need to unmarshal into CDX structures.
+	if err = document.UnmarshalCycloneDXBOM(); err != nil {
+		return
+	}
+
+	component := document.GetCdxMetadataComponent()
+	_, err = document.HashComponent(*component, nil, false)
+	if err != nil {
+		return
+	}
+}
+
+func TestHashCDXComponentNameOnly(t *testing.T) {
 	document, err := loadBOMFile(TEST_HASH_CDX_1_5_METADATA_COMPONENT_NAME_ONLY)
 	if err != nil {
 		return
@@ -225,3 +230,39 @@ func TestHashCDXComponent(t *testing.T) {
 		return
 	}
 }
+
+func TestHashCDXComponentFull(t *testing.T) {
+	document, err := loadBOMFile(TEST_HASH_CDX_1_5_METADATA_COMPONENT_FULL)
+	if err != nil {
+		return
+	}
+
+	// need to unmarshal into CDX structures.
+	if err = document.UnmarshalCycloneDXBOM(); err != nil {
+		return
+	}
+
+	component := document.GetCdxMetadataComponent()
+	_, err = document.HashComponent(*component, nil, false)
+	if err != nil {
+		return
+	}
+}
+
+// func TestHashCDXService(t *testing.T) {
+// 	document, err := loadBOMFile(TEST_HASH_CDX_1_5_METADATA_COMPONENT_NAME_ONLY)
+// 	if err != nil {
+// 		return
+// 	}
+
+// 	// need to unmarshal into CDX structures.
+// 	if err = document.UnmarshalCycloneDXBOM(); err != nil {
+// 		return
+// 	}
+
+// 	component := document.GetCdxMetadataComponent()
+// 	_, err = document.HashComponent(*component, nil, false)
+// 	if err != nil {
+// 		return
+// 	}
+// }

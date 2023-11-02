@@ -24,5 +24,9 @@ jobs:
     - name: Build
       run: go build -v ./...
 
-    - name: Test
+    - name: Test package ./schema
+      run: go test ./schema -v --args --quiet
+
+
+    - name: Test package ./cmd
       run: go test ./cmd -v --args --quiet
