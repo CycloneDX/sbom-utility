@@ -20,6 +20,7 @@ package cmd
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -137,25 +138,17 @@ func VerifyTrimOutputFileResult(t *testing.T, ti *TrimTestInfo, keys []string, f
 		pResult, err = innerQuery(t, ti.OutputFile, &request, false)
 		if err != nil {
 			t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
-			break
+			return
+		}
+
+		// short-circuit if the "from" path dereferenced to a non-existent key
+		if pResult == nil {
+			t.Errorf("empty (nil) found at from clause: %s", fromPath)
+			return
 		}
 
 		// verify the "key" was removed from the (parent) JSON map
 		err = VerifyTrimmed(pResult, key)
-		// if result != nil {
-		// 	switch typedValue := result.(type) {
-		// 	case map[string]interface{}:
-		// 		// verify map key was removed
-		// 		//property := ti.Keys[0]
-		// 		if _, ok := typedValue[key]; ok {
-		// 			err = getLogger().Errorf("trim failed. Key `%s`, found at path: `%s`", ti.Keys[0], request.fromObjectsRaw)
-		// 			return
-		// 		}
-		// 	default:
-		// 		err = getLogger().Errorf("trim failed. map[string]interface{} expected; actual type: `%T`", typedValue)
-		// 		return
-		// 	}
-		// }
 	}
 
 	return
@@ -173,8 +166,19 @@ func VerifyTrimmed(pResult interface{}, key string) (err error) {
 				err = getLogger().Errorf("trim failed. Key `%s`, found in: `%s`", key, formattedValue)
 				return
 			}
+		case []interface{}:
+			fmt.Printf("pResult: `%v` (%T)", pResult, pResult)
+			if len(typedValue) == 0 {
+				err = getLogger().Errorf("empty slice found at from clause.")
+				return
+			}
+
+			for _, value := range typedValue {
+				err = VerifyTrimmed(value, key)
+				return err
+			}
 		default:
-			err = getLogger().Errorf("trim failed. map[string]interface{} expected; actual type: `%T`", typedValue)
+			err = getLogger().Errorf("trim failed. Unexpected JSON type: `%T`", typedValue)
 			return
 		}
 	}
@@ -207,11 +211,15 @@ func TestTrimCdx15MultipleKeys(t *testing.T) {
 	ti.Keys = append(ti.Keys, "properties", "hashes", "version", "description", "name")
 	ti.OutputFile = createTemporaryFilename(TEST_TRIM_CDX_1_5_COMPS_ONLY)
 	innerTestTrim(t, ti)
-	// TODO: verify "after" trim lengths and content have removed properties
-	// err := VerifyTrimOutputFileResult(t, ti, []string{"hashes"}, "components")
-	// if err != nil {
-	// 	t.Error(err)
-	// }
+	// Assure JSON map does not contain the trimmed key(s)
+	err := VerifyTrimOutputFileResult(t, ti, []string{"hashes"}, "")
+	if err != nil {
+		t.Error(err)
+	}
+	err = VerifyTrimOutputFileResult(t, ti, []string{"version"}, "")
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestTrimCdx15Properties(t *testing.T) {
