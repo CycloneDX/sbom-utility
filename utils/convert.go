@@ -35,9 +35,9 @@ func IsValidJsonRaw(test []byte) bool {
 }
 
 // NOTE: simple wrapper method on json package to standardize parms
-func ConvertMapToJson(mapIn interface{}) (string, error) {
+func ConvertAnyToFormattedJson(any interface{}) (string, error) {
 	// Indent each level with 2 space chars.
-	byteMapOut, err := json.MarshalIndent(mapIn, "", "  ")
+	byteMapOut, err := json.MarshalIndent(any, "", "  ")
 	return string(byteMapOut), err
 }
 

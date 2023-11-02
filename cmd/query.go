@@ -420,7 +420,7 @@ func Query(writer io.Writer, request *QueryRequest, response *QueryResponse) (re
 	}
 
 	// Convert query results to formatted JSON for output
-	fResult, err := utils.ConvertMapToJson(resultJson)
+	fResult, err := utils.ConvertAnyToFormattedJson(resultJson)
 
 	if err != nil {
 		return
