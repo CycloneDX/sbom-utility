@@ -282,20 +282,20 @@ func TestHashCDXComponentsSlice(t *testing.T) {
 	}
 }
 
-// func TestHashCDXService(t *testing.T) {
-// 	document, err := loadBOMFile(TEST_HASH_CDX_1_5_METADATA_COMPONENT_NAME_ONLY)
-// 	if err != nil {
-// 		return
-// 	}
+func TestHashCDXServices(t *testing.T) {
+	document, err := loadBOMFile(TEST_HASH_CDX_1_5_SERVICES)
+	if err != nil {
+		return
+	}
 
-// 	// need to unmarshal into CDX structures.
-// 	if err = document.UnmarshalCycloneDXBOM(); err != nil {
-// 		return
-// 	}
+	// need to unmarshal into CDX structures.
+	if err = document.UnmarshalCycloneDXBOM(); err != nil {
+		return
+	}
 
-// 	component := document.GetCdxMetadataComponent()
-// 	_, err = document.HashComponent(*component, nil, false)
-// 	if err != nil {
-// 		return
-// 	}
-// }
+	services := document.GetCdxServices()
+	err = document.HashServices(*services, nil)
+	if err != nil {
+		return
+	}
+}

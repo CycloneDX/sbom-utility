@@ -198,7 +198,7 @@ func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFi
 		getLogger().Warningf("service named `%s` missing `version`", cdxService.Name)
 	}
 
-	if cdxService.BOMRef == nil && *cdxService.BOMRef != "" {
+	if cdxService.BOMRef == nil || *cdxService.BOMRef != "" {
 		getLogger().Warningf("service named `%s` missing `bom-ref`", cdxService.Name)
 	}
 
