@@ -135,7 +135,7 @@ func VerifyTrimOutputFileResult(t *testing.T, ti *TrimTestInfo, keys []string, f
 	for _, key := range keys {
 		// use a buffered query on the temp. output file on the (parent) path
 		var pResult interface{}
-		pResult, err = innerQuery(t, ti.OutputFile, &request, false)
+		pResult, err = innerQuery(t, ti.OutputFile, &request, true)
 		if err != nil {
 			t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
 			return
