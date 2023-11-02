@@ -123,16 +123,21 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 		return
 	}
 
+	// validate parameters
 	if len(trimFlags.Keys) == 0 {
 		// TODO create named error type in schema package
 		err = getLogger().Errorf("invalid parameter value: missing `keys` value from command")
 		return
 	}
 
-	// TODO: use a parameter to obtain and normalize  object key names
+	// TODO: use a parameter to obtain and normalize object key names
 	document.TrimJsonMap(trimFlags.Keys)
 
 	// fully unmarshal the SBOM into named structures
+	// TODO: we should NOT need to unmarshal into BOM structures;
+	// instead, see if we can simply Marshal the JSON map directly
+	// NOTE: if we do want to "validate" the data at some point we MAY
+	// need to unmarshal into CDX structures.
 	if err = document.UnmarshalCycloneDXBOM(); err != nil {
 		return
 	}

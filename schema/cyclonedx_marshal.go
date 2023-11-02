@@ -117,7 +117,7 @@ func (value *CDXAttachment) MarshalJSON() ([]byte, error) {
 func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
 	temp := map[string]interface{}{}
 
-	if value.BOMRef != "" {
+	if value.BOMRef != nil && *value.BOMRef != "" {
 		temp["bom-ref"] = value.BOMRef
 	}
 
@@ -150,8 +150,8 @@ func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
 	}
 
 	// CDXVulnerabilitySource
-	if value.Source != (CDXVulnerabilitySource{}) {
-		temp["source"] = &value.Source
+	if value.Source != nil && *value.Source != (CDXVulnerabilitySource{}) {
+		temp["source"] = value.Source
 	}
 
 	// CDXCredit (anon. type)

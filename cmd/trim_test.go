@@ -30,10 +30,10 @@ import (
 )
 
 const (
-	// Test "resource list" command
-	TEST_TRIM_CDX_1_5_COMPS_ONLY   = "test/trim/trim-cdx-1-5-comps-only.json"
-	TEST_TRIM_CDX_1_5_COMP_PROPS_1 = "test/trim/trim-cdx-1-5-comp-props-1.json"
-	TEST_TRIM_CDX_1_4_SAMPLE_XXL_1 = "test/trim/trim-cdx-1-4-sample-xxl-1.sbom.json"
+	// Trim test BOM files
+	TEST_TRIM_CDX_1_4_SAMPLE_XXL_1            = "test/trim/trim-cdx-1-4-sample-xxl-1.sbom.json"
+	TEST_TRIM_CDX_1_5_SAMPLE_SMALL_COMPS_ONLY = "test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json"
+	TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1         = "test/trim/trim-cdx-1-5-sample-medium-1.sbom..json"
 )
 
 type TrimTestInfo struct {
@@ -207,9 +207,9 @@ func TestTrimCdx14ComponentPropertiesSampleXXL(t *testing.T) {
 }
 
 func TestTrimCdx15MultipleKeys(t *testing.T) {
-	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_COMPS_ONLY, nil)
+	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_SAMPLE_SMALL_COMPS_ONLY, nil)
 	ti.Keys = append(ti.Keys, "properties", "hashes", "version", "description", "name")
-	ti.OutputFile = createTemporaryFilename(TEST_TRIM_CDX_1_5_COMPS_ONLY)
+	ti.OutputFile = createTemporaryFilename(TEST_TRIM_CDX_1_5_SAMPLE_SMALL_COMPS_ONLY)
 	innerTestTrim(t, ti)
 	// Assure JSON map does not contain the trimmed key(s)
 	err := VerifyTrimOutputFileResult(t, ti, []string{"hashes"}, "")
@@ -223,9 +223,9 @@ func TestTrimCdx15MultipleKeys(t *testing.T) {
 }
 
 func TestTrimCdx15Properties(t *testing.T) {
-	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_COMP_PROPS_1, nil)
+	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1, nil)
 	ti.Keys = append(ti.Keys, "properties")
-	ti.OutputFile = createTemporaryFilename(TEST_TRIM_CDX_1_5_COMP_PROPS_1)
+	ti.OutputFile = createTemporaryFilename(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1)
 	innerTestTrim(t, ti)
 	// Assure JSON map does not contain the trimmed key(s)
 	// Document "root" properties
