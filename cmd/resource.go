@@ -21,14 +21,13 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
-	"reflect"
 	"sort"
 	"strings"
 	"text/tabwriter"
 
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
-	"github.com/jwangsadinata/go-multimap/slicemultimap"
 	"github.com/spf13/cobra"
 )
 
@@ -39,6 +38,7 @@ const (
 var VALID_SUBCOMMANDS_RESOURCE = []string{SUBCOMMAND_RESOURCE_LIST}
 
 // filter keys
+// Note: these string values MUST match annotations for the ResourceInfo struct fields
 const (
 	RESOURCE_FILTER_KEY_TYPE    = "type"
 	RESOURCE_FILTER_KEY_NAME    = "name"
@@ -78,35 +78,6 @@ const (
 var RESOURCE_LIST_OUTPUT_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{FORMAT_TEXT, FORMAT_CSV, FORMAT_MARKDOWN}, ", ")
 
-// resource types
-const (
-	RESOURCE_TYPE_DEFAULT   = "" // i.e., all resource types
-	RESOURCE_TYPE_COMPONENT = "component"
-	RESOURCE_TYPE_SERVICE   = "service"
-)
-
-var VALID_RESOURCE_TYPES = []string{RESOURCE_TYPE_DEFAULT, RESOURCE_TYPE_COMPONENT, RESOURCE_TYPE_SERVICE}
-
-// TODO: need to strip `-` from `bom-ref` for where filter
-type ResourceInfo struct {
-	isRoot           bool
-	Type             string `json:"type"`
-	BOMRef           string `json:"bom-ref"`
-	Name             string `json:"name"`
-	Version          string `json:"version"`
-	SupplierProvider schema.CDXOrganizationalEntity
-	Properties       []schema.CDXProperty
-	Component        schema.CDXComponent
-	Service          schema.CDXService
-}
-
-// Holds resources (e.g., components, services) declared license(s)
-var resourceMap = slicemultimap.New()
-
-func ClearGlobalResourceData() {
-	resourceMap.Clear()
-}
-
 func NewCommandResource() *cobra.Command {
 	var command = new(cobra.Command)
 	command.Use = CMD_USAGE_RESOURCE_LIST
@@ -114,7 +85,7 @@ func NewCommandResource() *cobra.Command {
 	command.Long = "Report on resources found in BOM input file"
 	command.Flags().StringVarP(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
 		FLAG_RESOURCE_OUTPUT_FORMAT_HELP+RESOURCE_LIST_OUTPUT_SUPPORTED_FORMATS)
-	command.Flags().StringP(FLAG_RESOURCE_TYPE, "", RESOURCE_TYPE_DEFAULT, FLAG_RESOURCE_TYPE_HELP)
+	command.Flags().StringP(FLAG_RESOURCE_TYPE, "", schema.RESOURCE_TYPE_DEFAULT, FLAG_RESOURCE_TYPE_HELP)
 	command.Flags().StringP(FLAG_REPORT_WHERE, "", "", FLAG_REPORT_WHERE_HELP)
 	command.RunE = resourceCmdImpl
 	command.ValidArgs = VALID_SUBCOMMANDS_RESOURCE
@@ -150,16 +121,12 @@ func retrieveResourceType(cmd *cobra.Command) (resourceType string, err error) {
 		return
 	}
 
-	// validate value
-	for _, validType := range VALID_RESOURCE_TYPES {
-		if resourceType == validType {
-			// valid
-			return
-		}
+	// validate resource type is a known keyword
+	if !schema.IsValidResourceType(resourceType) {
+		// invalid
+		err = getLogger().Errorf("invalid resource `%s`: `%s`", FLAG_RESOURCE_TYPE, resourceType)
 	}
 
-	// invalid
-	err = getLogger().Errorf("invalid resource `type`: `%s`", resourceType)
 	return
 }
 
@@ -186,10 +153,12 @@ func resourceCmdImpl(cmd *cobra.Command, args []string) (err error) {
 
 	// Process flag: --type
 	var resourceType string
+	var resourceFlags utils.ResourceCommandFlags
 	resourceType, err = retrieveResourceType(cmd)
 
 	if err == nil {
-		err = ListResources(writer, utils.GlobalFlags.PersistentFlags.OutputFormat, resourceType, whereFilters)
+		resourceFlags.ResourceType = resourceType
+		err = ListResources(writer, utils.GlobalFlags.PersistentFlags, resourceFlags, whereFilters)
 	}
 
 	return
@@ -204,7 +173,7 @@ func processResourceListResults(err error) {
 }
 
 // NOTE: resourceType has already been validated
-func ListResources(output io.Writer, format string, resourceType string, whereFilters []WhereFilter) (err error) {
+func ListResources(writer io.Writer, persistentFlags utils.PersistentCommandFlags, resourceFlags utils.ResourceCommandFlags, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -225,31 +194,32 @@ func ListResources(output io.Writer, format string, resourceType string, whereFi
 
 	// Hash all licenses within input file
 	getLogger().Infof("Scanning document for licenses...")
-	err = loadDocumentResources(document, resourceType, whereFilters)
+	err = loadDocumentResources(document, resourceFlags.ResourceType, whereFilters)
 
 	if err != nil {
 		return
 	}
 
+	format := persistentFlags.OutputFormat
 	getLogger().Infof("Outputting listing (`%s` format)...", format)
 	switch format {
 	case FORMAT_TEXT:
-		DisplayResourceListText(output)
+		DisplayResourceListText(document, writer)
 	case FORMAT_CSV:
-		DisplayResourceListCSV(output)
+		DisplayResourceListCSV(document, writer)
 	case FORMAT_MARKDOWN:
-		DisplayResourceListMarkdown(output)
+		DisplayResourceListMarkdown(document, writer)
 	default:
 		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_TEXT)
-		DisplayResourceListText(output)
+		DisplayResourceListText(document, writer)
 	}
 
 	return
 }
 
-func loadDocumentResources(document *schema.BOM, resourceType string, whereFilters []WhereFilter) (err error) {
+func loadDocumentResources(document *schema.BOM, resourceType string, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -262,191 +232,32 @@ func loadDocumentResources(document *schema.BOM, resourceType string, whereFilte
 		return
 	}
 
-	// Clear out any old (global)hashmap data (NOTE: 'go test' needs this)
-	ClearGlobalResourceData()
-
 	// Before looking for license data, fully unmarshal the SBOM into named structures
 	if err = document.UnmarshalCycloneDXBOM(); err != nil {
 		return
 	}
 
 	// Add top-level SBOM component
-	if resourceType == RESOURCE_TYPE_DEFAULT || resourceType == RESOURCE_TYPE_COMPONENT {
-		_, err = hashComponentAsResource(*document.GetCdxMetadataComponent(), whereFilters, true)
-		if err != nil {
-			return
-		}
-
-		// Hash all components found in the (root).components[] (+ "nested" components)
-		if components := document.GetCdxComponents(); len(components) > 0 {
-			if err = hashComponents(components, whereFilters, false); err != nil {
-				return
-			}
-		}
-	}
-
-	if resourceType == RESOURCE_TYPE_DEFAULT || resourceType == RESOURCE_TYPE_SERVICE {
-		// Hash services found in the (root).services[] (array) (+ "nested" services)
-		if services := document.GetCdxServices(); len(services) > 0 {
-			if err = hashServices(services, whereFilters); err != nil {
-				return
-			}
-		}
-	}
-
-	return
-}
-
-func hashComponents(components []schema.CDXComponent, whereFilters []WhereFilter, root bool) (err error) {
-	getLogger().Enter()
-	defer getLogger().Exit(err)
-
-	for _, cdxComponent := range components {
-		_, err = hashComponentAsResource(cdxComponent, whereFilters, root)
+	if resourceType == schema.RESOURCE_TYPE_DEFAULT || resourceType == schema.RESOURCE_TYPE_COMPONENT {
+		err = document.HashComponentResources(whereFilters)
 		if err != nil {
 			return
 		}
 	}
-	return
-}
 
-// Hash a CDX Component and recursively those of any "nested" components
-// TODO we should WARN if version is not a valid semver (e.g., examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json)
-func hashComponentAsResource(cdxComponent schema.CDXComponent, whereFilters []WhereFilter, root bool) (ri *ResourceInfo, err error) {
-	getLogger().Enter()
-	defer getLogger().Exit(err)
-	var resourceInfo ResourceInfo
-	ri = &resourceInfo
-
-	if reflect.DeepEqual(cdxComponent, schema.CDXComponent{}) {
-		getLogger().Errorf("invalid component: missing or empty : %v ", cdxComponent)
-		return
-	}
-
-	if cdxComponent.Name == "" {
-		getLogger().Errorf("component missing required value `name` : %v ", cdxComponent)
-	}
-
-	if cdxComponent.Version == "" {
-		getLogger().Warningf("component named `%s` missing `version`", cdxComponent.Name)
-	}
-
-	if cdxComponent.BOMRef == "" {
-		getLogger().Warningf("component named `%s` missing `bom-ref`", cdxComponent.Name)
-	}
-
-	// hash any component w/o a license using special key name
-	resourceInfo.isRoot = root
-	resourceInfo.Type = RESOURCE_TYPE_COMPONENT
-	resourceInfo.Component = cdxComponent
-	resourceInfo.Name = cdxComponent.Name
-	resourceInfo.BOMRef = cdxComponent.BOMRef.String()
-	resourceInfo.Version = cdxComponent.Version
-	resourceInfo.SupplierProvider = cdxComponent.Supplier
-	resourceInfo.Properties = cdxComponent.Properties
-
-	var match bool = true
-	if len(whereFilters) > 0 {
-		mapResourceInfo, _ := utils.ConvertStructToMap(resourceInfo)
-		match, _ = whereFilterMatch(mapResourceInfo, whereFilters)
-	}
-
-	if match {
-		resourceMap.Put(resourceInfo.BOMRef, resourceInfo)
-
-		getLogger().Tracef("Put: %s (`%s`), `%s`)",
-			resourceInfo.Name,
-			resourceInfo.Version,
-			resourceInfo.BOMRef)
-	}
-
-	// Recursively hash licenses for all child components (i.e., hierarchical composition)
-	if len(cdxComponent.Components) > 0 {
-		err = hashComponents(cdxComponent.Components, whereFilters, root)
+	if resourceType == schema.RESOURCE_TYPE_DEFAULT || resourceType == schema.RESOURCE_TYPE_SERVICE {
+		err = document.HashServiceResources(whereFilters)
 		if err != nil {
 			return
 		}
 	}
-	return
-}
 
-func hashServices(services []schema.CDXService, whereFilters []WhereFilter) (err error) {
-	getLogger().Enter()
-	defer getLogger().Exit(err)
-
-	for _, cdxService := range services {
-		_, err = hashServiceAsResource(cdxService, whereFilters)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-// Hash a CDX Component and recursively those of any "nested" components
-func hashServiceAsResource(cdxService schema.CDXService, whereFilters []WhereFilter) (ri *ResourceInfo, err error) {
-	getLogger().Enter()
-	defer getLogger().Exit(err)
-	var resourceInfo ResourceInfo
-	ri = &resourceInfo
-
-	if reflect.DeepEqual(cdxService, schema.CDXService{}) {
-		getLogger().Errorf("invalid service: missing or empty : %v", cdxService)
-		return
-	}
-
-	if cdxService.Name == "" {
-		getLogger().Errorf("service missing required value `name` : %v ", cdxService)
-	}
-
-	if cdxService.Version == "" {
-		getLogger().Warningf("service named `%s` missing `version`", cdxService.Name)
-	}
-
-	if cdxService.BOMRef == "" {
-		getLogger().Warningf("service named `%s` missing `bom-ref`", cdxService.Name)
-	}
-
-	// hash any component w/o a license using special key name
-	resourceInfo.Type = RESOURCE_TYPE_SERVICE
-	resourceInfo.Service = cdxService
-	resourceInfo.Name = cdxService.Name
-	resourceInfo.BOMRef = cdxService.BOMRef.String()
-	resourceInfo.Version = cdxService.Version
-	resourceInfo.SupplierProvider = cdxService.Provider
-	resourceInfo.Properties = cdxService.Properties
-
-	var match bool = true
-	if len(whereFilters) > 0 {
-		mapResourceInfo, _ := utils.ConvertStructToMap(resourceInfo)
-		match, _ = whereFilterMatch(mapResourceInfo, whereFilters)
-	}
-
-	if match {
-		// TODO: AppendLicenseInfo(LICENSE_NONE, resourceInfo)
-		resourceMap.Put(resourceInfo.BOMRef, resourceInfo)
-
-		getLogger().Tracef("Put: [`%s`] %s (`%s`), `%s`)",
-			resourceInfo.Type,
-			resourceInfo.Name,
-			resourceInfo.Version,
-			resourceInfo.BOMRef,
-		)
-	}
-
-	// Recursively hash licenses for all child components (i.e., hierarchical composition)
-	if len(cdxService.Services) > 0 {
-		err = hashServices(cdxService.Services, whereFilters)
-		if err != nil {
-			return
-		}
-	}
 	return
 }
 
 // NOTE: This list is NOT de-duplicated
 // TODO: Add a --no-title flag to skip title output
-func DisplayResourceListText(output io.Writer) {
+func DisplayResourceListText(bom *schema.BOM, output io.Writer) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -465,7 +276,7 @@ func DisplayResourceListText(output io.Writer) {
 	fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
 	// Display a warning "missing" in the actual output and return (short-circuit)
-	entries := resourceMap.Entries()
+	entries := bom.ResourceMap.Entries()
 
 	// Emit no license warning into output
 	if len(entries) == 0 {
@@ -475,8 +286,8 @@ func DisplayResourceListText(output io.Writer) {
 
 	// Sort by Type then Name
 	sort.Slice(entries, func(i, j int) bool {
-		resource1 := (entries[i].Value).(ResourceInfo)
-		resource2 := (entries[j].Value).(ResourceInfo)
+		resource1 := (entries[i].Value).(schema.CDXResourceInfo)
+		resource2 := (entries[j].Value).(schema.CDXResourceInfo)
 		if resource1.Type != resource2.Type {
 			return resource1.Type < resource2.Type
 		}
@@ -484,11 +295,11 @@ func DisplayResourceListText(output io.Writer) {
 		return resource1.Name < resource2.Name
 	})
 
-	var resourceInfo ResourceInfo
+	var resourceInfo schema.CDXResourceInfo
 
 	for _, entry := range entries {
 		value := entry.Value
-		resourceInfo = value.(ResourceInfo)
+		resourceInfo = value.(schema.CDXResourceInfo)
 
 		// Format line and write to output
 		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
@@ -500,7 +311,7 @@ func DisplayResourceListText(output io.Writer) {
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplayResourceListCSV(output io.Writer) (err error) {
+func DisplayResourceListCSV(bom *schema.BOM, output io.Writer) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -513,7 +324,7 @@ func DisplayResourceListCSV(output io.Writer) (err error) {
 	}
 
 	// Display a warning "missing" in the actual output and return (short-circuit)
-	entries := resourceMap.Entries()
+	entries := bom.ResourceMap.Entries()
 
 	// Emit no resource found warning into output
 	if len(entries) == 0 {
@@ -527,8 +338,8 @@ func DisplayResourceListCSV(output io.Writer) (err error) {
 
 	// Sort by Type
 	sort.Slice(entries, func(i, j int) bool {
-		resource1 := (entries[i].Value).(ResourceInfo)
-		resource2 := (entries[j].Value).(ResourceInfo)
+		resource1 := (entries[i].Value).(schema.CDXResourceInfo)
+		resource2 := (entries[j].Value).(schema.CDXResourceInfo)
 		if resource1.Type != resource2.Type {
 			return resource1.Type < resource2.Type
 		}
@@ -536,12 +347,12 @@ func DisplayResourceListCSV(output io.Writer) (err error) {
 		return resource1.Name < resource2.Name
 	})
 
-	var resourceInfo ResourceInfo
+	var resourceInfo schema.CDXResourceInfo
 	var line []string
 
 	for _, entry := range entries {
 		value := entry.Value
-		resourceInfo = value.(ResourceInfo)
+		resourceInfo = value.(schema.CDXResourceInfo)
 		line = nil
 		line = append(line,
 			resourceInfo.Type,
@@ -559,7 +370,7 @@ func DisplayResourceListCSV(output io.Writer) (err error) {
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplayResourceListMarkdown(output io.Writer) (err error) {
+func DisplayResourceListMarkdown(bom *schema.BOM, output io.Writer) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -572,7 +383,7 @@ func DisplayResourceListMarkdown(output io.Writer) (err error) {
 	fmt.Fprintf(output, "%s\n", alignmentRow)
 
 	// Display a warning "missing" in the actual output and return (short-circuit)
-	entries := resourceMap.Entries()
+	entries := bom.ResourceMap.Entries()
 
 	// Emit no resource found warning into output
 	if len(entries) == 0 {
@@ -582,8 +393,8 @@ func DisplayResourceListMarkdown(output io.Writer) (err error) {
 
 	// Sort by Type
 	sort.Slice(entries, func(i, j int) bool {
-		resource1 := (entries[i].Value).(ResourceInfo)
-		resource2 := (entries[j].Value).(ResourceInfo)
+		resource1 := (entries[i].Value).(schema.CDXResourceInfo)
+		resource2 := (entries[j].Value).(schema.CDXResourceInfo)
 		if resource1.Type != resource2.Type {
 			return resource1.Type < resource2.Type
 		}
@@ -591,13 +402,13 @@ func DisplayResourceListMarkdown(output io.Writer) (err error) {
 		return resource1.Name < resource2.Name
 	})
 
-	var resourceInfo ResourceInfo
+	var resourceInfo schema.CDXResourceInfo
 	var line []string
 	var lineRow string
 
 	for _, entry := range entries {
 		value := entry.Value
-		resourceInfo = value.(ResourceInfo)
+		resourceInfo = value.(schema.CDXResourceInfo)
 		// reset current line
 		line = nil
 

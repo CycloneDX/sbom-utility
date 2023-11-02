@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/CycloneDX/sbom-utility/log"
 	"github.com/CycloneDX/sbom-utility/schema"
@@ -30,7 +31,7 @@ import (
 
 // Globals
 var ProjectLogger *log.MiniLogger
-var licensePolicyConfig *LicenseComplianceConfig
+var LicensePolicyConfig *schema.LicensePolicyConfig
 var SupportedFormatConfig schema.BOMFormatAndSchemaConfig
 
 // top-level commands
@@ -43,6 +44,8 @@ const (
 	CMD_VALIDATE      = "validate"
 	CMD_VERSION       = "version"
 	CMD_VULNERABILITY = "vulnerability"
+	CMD_STATS         = "stats"
+	CMD_TRIM          = "trim"
 )
 
 // WARNING!!! The ".Use" field of a Cobra command MUST have the first word be the actual command
@@ -56,6 +59,8 @@ const (
 	CMD_USAGE_SCHEMA_LIST        = CMD_SCHEMA + " [--where key=regex[,...]] [--format txt|csv|md]"
 	CMD_USAGE_VALIDATE           = CMD_VALIDATE + " --input-file <input_file> [--variant <variant_name>] [--format txt|json] [--force schema_file]"
 	CMD_USAGE_VULNERABILITY_LIST = CMD_VULNERABILITY + " " + SUBCOMMAND_VULNERABILITY_LIST + " --input-file <input_file> [--summary] [--where key=regex[,...]] [--format json|txt|csv|md]"
+	CMD_USAGE_STATS_LIST         = CMD_STATS + " --input-file <input_file> [--type component|service] [--format txt|csv|md]"
+	CMD_USAGE_TRIM               = CMD_TRIM + " --input-file <input_file>  --input-file <output_file>"
 )
 
 const (
@@ -152,10 +157,12 @@ func init() {
 	cobra.OnInitialize(initConfigurations)
 
 	// Declare top-level, persistent flags used for configuration of utility
+	// NOTE: we do not set the "default" config. filenames within Cobra
+	// as we want the init/load methods to work apart from Cobra.
 	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigSchemaFile, FLAG_CONFIG_SCHEMA, "", "", MSG_FLAG_CONFIG_SCHEMA)
 	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigLicensePolicyFile, FLAG_CONFIG_LICENSE_POLICY, "", "", MSG_FLAG_CONFIG_LICENSE)
-	utils.GlobalFlags.ConfigCustomValidationFile = DEFAULT_CUSTOM_VALIDATION_CONFIG
 	// TODO: Make configurable once we have organized the set of custom validation configurations
+	utils.GlobalFlags.ConfigCustomValidationFile = DEFAULT_CUSTOM_VALIDATION_CONFIG
 	//rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigCustomValidationFile, FLAG_CONFIG_CUSTOM_VALIDATION, "", DEFAULT_CUSTOM_VALIDATION_CONFIG, "TODO")
 
 	// Declare top-level, persistent flags and where to place the post-parse values
@@ -180,6 +187,9 @@ func init() {
 	rootCmd.AddCommand(NewCommandResource())
 	rootCmd.AddCommand(NewCommandVulnerability())
 	rootCmd.AddCommand(NewCommandDiff())
+	// TODO: when fully implemented uncomment:
+	//rootCmd.AddCommand(NewCommandTrim())
+	//rootCmd.AddCommand(NewCommandStats())
 
 	// Add license command its subcommands
 	licenseCmd := NewCommandLicense()
@@ -220,13 +230,13 @@ func initConfigurations() {
 		os.Exit(ERROR_APPLICATION)
 	}
 
-	// License information and approval policies (customizable)
+	// License Policy Configuration (customizable via command line, with default config.)
 	var licensePolicyFile = utils.GlobalFlags.ConfigLicensePolicyFile
-	licensePolicyConfig = new(LicenseComplianceConfig)
-	errLoadLicensePolicies := licensePolicyConfig.LoadLicensePolicies(licensePolicyFile, DEFAULT_LICENSE_POLICY_CONFIG)
+	LicensePolicyConfig = new(schema.LicensePolicyConfig)
+	errLoadLicensePolicies := LicensePolicyConfig.LoadHashPolicyConfigurationFile(licensePolicyFile, DEFAULT_LICENSE_POLICY_CONFIG)
 	if errLoadLicensePolicies != nil {
 		getLogger().Warning(errLoadLicensePolicies.Error())
-		getLogger().Warningf("All license policies will default to `%s`.", POLICY_UNDEFINED)
+		getLogger().Warningf("All license policies will default to `%s`.", schema.POLICY_UNDEFINED)
 	}
 }
 
@@ -291,18 +301,45 @@ func preRunTestForSubcommand(cmd *cobra.Command, validSubcommands []string, subc
 	return false
 }
 
+// NOTE: Caller must Close() any open io.Writer...
 func createOutputFile(outputFilename string) (outputFile *os.File, writer io.Writer, err error) {
+
 	// default to Stdout
 	writer = os.Stdout
 
-	// If command included an output file, attempt to create it and create a writer
+	// validate filename
 	if outputFilename != "" {
-		getLogger().Infof("Creating output file: `%s`...", outputFilename)
-		outputFile, err = os.Create(outputFilename)
-		if err != nil {
-			getLogger().Error(err)
+		// Check to see of stdin is the BOM source data
+		var absFilename string
+		if outputFilename == schema.INPUT_TYPE_STDOUT {
+			outputFile = os.Stdout
+		} else { // load the BOM data from relative filename
+			// Conditionally append working directory if no abs. path detected
+			if len(outputFilename) > 0 && !filepath.IsAbs(outputFilename) {
+				absFilename = filepath.Join(utils.GlobalFlags.WorkingDir, outputFilename)
+			} else {
+				absFilename = outputFilename
+			}
+
+			// If the (temporary, not persisted) "test" output directory does not exist, create it
+			path := filepath.Dir(absFilename)
+			if _, err := os.Stat(path); os.IsNotExist(err) {
+				os.MkdirAll(path, os.ModePerm)
+			}
+
+			// Open our jsonFile
+			outputFile, err = os.Create(absFilename)
+
+			// if input file cannot be opened, log it and terminate
+			if err != nil {
+				getLogger().Error(err)
+				return
+			}
 		}
+
+		// os.File implements the io.Writer interface
 		writer = outputFile
 	}
+
 	return
 }

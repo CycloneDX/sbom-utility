@@ -42,21 +42,19 @@ type CommandFlags struct {
 	// persistent flags (common to all commands)
 	PersistentFlags PersistentCommandFlags
 
-	// Diff flags
-	DiffFlags DiffCommandFlags
-
-	// License flags
-	LicenseFlags LicenseCommandFlags
-
-	// Vulnerability flags
-	VulnerabilityFlags VulnerabilityCommandFlags
-
-	// Validate (local) flags
-	ValidateFlags           ValidateCommandFlags
+	// Command-specific flags
 	CustomValidationOptions CustomValidationFlags
+	DiffFlags               DiffCommandFlags
+	LicenseFlags            LicenseCommandFlags
+	ResourceFlags           ResourceCommandFlags
+	SchemaFlags             SchemaCommandFlags
+	ValidateFlags           ValidateCommandFlags
+	VulnerabilityFlags      VulnerabilityCommandFlags
+	StatsFlags              StatsCommandFlags
+	TrimFlags               TrimCommandFlags
 
-	// Log indent
-	LogOutputIndentCallstack bool
+	// Misc flags
+	LogOutputIndentCallstack bool // Log indent
 }
 
 // NOTE: These flags are shared by both the list and policy subcommands
@@ -67,11 +65,6 @@ type PersistentCommandFlags struct {
 	InputFile    string
 	OutputFile   string // TODO: TODO: Note: not used by `validate` command, which emits a warning if supplied
 	OutputFormat string // e.g., "txt", "csv"", "md" (markdown) (normalized to lowercase)
-}
-
-type DiffCommandFlags struct {
-	Colorize    bool
-	RevisedFile string
 }
 
 type LicenseCommandFlags struct {
@@ -93,6 +86,32 @@ type ValidateCommandFlags struct {
 
 type VulnerabilityCommandFlags struct {
 	Summary bool
+}
+
+type DiffCommandFlags struct {
+	Colorize    bool
+	RevisedFile string
+}
+
+type ResourceCommandFlags struct {
+	ResourceType string
+}
+
+func NewResourceCommandFlags(resourceType string) ResourceCommandFlags {
+	return ResourceCommandFlags{
+		ResourceType: resourceType,
+	}
+}
+
+type SchemaCommandFlags struct {
+}
+
+type StatsCommandFlags struct {
+}
+
+type TrimCommandFlags struct {
+	Keys  []string
+	Paths []string
 }
 
 type CustomValidationFlags struct {

@@ -25,6 +25,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/spf13/cobra"
@@ -126,7 +127,7 @@ func schemaCmdImpl(cmd *cobra.Command, args []string) (err error) {
 		return
 	}
 
-	err = ListSchemas(writer, whereFilters)
+	err = ListSchemas(writer, utils.GlobalFlags.PersistentFlags, whereFilters)
 
 	return
 }
@@ -142,7 +143,7 @@ func flattenFormatSchemas(sliceFormatSchemas []schema.FormatSchema) (flattenedFo
 	return
 }
 
-func filterFormatSchemas(whereFilters []WhereFilter) (filteredFormats []schema.FormatSchemaInstance, err error) {
+func filterFormatSchemas(whereFilters []common.WhereFilter) (filteredFormats []schema.FormatSchemaInstance, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -193,7 +194,7 @@ func sortFormatSchemaInstances(filteredSchemas []schema.FormatSchemaInstance) []
 	return filteredSchemas
 }
 
-func ListSchemas(writer io.Writer, whereFilters []WhereFilter) (err error) {
+func ListSchemas(writer io.Writer, persistentFlags utils.PersistentCommandFlags, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -207,7 +208,7 @@ func ListSchemas(writer io.Writer, whereFilters []WhereFilter) (err error) {
 	}
 
 	// default output (writer) to standard out
-	format := utils.GlobalFlags.PersistentFlags.OutputFormat
+	format := persistentFlags.OutputFormat
 	switch format {
 	case FORMAT_DEFAULT:
 		// defaults to text if no explicit `--format` parameter

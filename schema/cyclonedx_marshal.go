@@ -82,8 +82,10 @@ func (value *CDXLicense) MarshalJSON() (bytes []byte, err error) {
 		temp["url"] = value.Url
 	}
 
-	if value.Text != (CDXAttachment{}) {
-		temp["text"] = &value.Text
+	if value != nil && value.Text != nil {
+		if *value.Text != (CDXAttachment{}) {
+			temp["text"] = value.Text
+		}
 	}
 
 	return json.Marshal(temp)

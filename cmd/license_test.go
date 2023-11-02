@@ -23,6 +23,7 @@ import (
 	"io/fs"
 	"testing"
 
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 )
@@ -36,10 +37,6 @@ const (
 	TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_ID    = "test/cyclonedx/cdx-1-4-license-policy-invalid-spdx-id.json"
 	TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_NAME  = "test/cyclonedx/cdx-1-4-license-policy-invalid-license-name.json"
 	TEST_LICENSE_LIST_CDX_1_4_LICENSE_EXPRESSION_IN_NAME = "test/cyclonedx/cdx-1-4-license-expression-in-name.json"
-
-	// Test custom license policy (with license expression)
-	TEST_CUSTOM_POLICY_1                           = "test/policy/license-policy-expression-outer-parens.policy.json"
-	TEST_LICENSE_LIST_TEXT_CDX_1_4_CUSTOM_POLICY_1 = "test/policy/license-policy-expression-outer-parens.bom.json"
 )
 
 // default ResourceTestInfo struct values
@@ -85,17 +82,32 @@ func NewLicenseTestInfoBasic(inputFile string, listFormat string, listSummary bo
 // license test helper functions
 // -------------------------------------------
 
-func innerTestLicenseListBuffered(t *testing.T, testInfo *LicenseTestInfo, whereFilters []WhereFilter) (outputBuffer bytes.Buffer, err error) {
+func innerTestLicenseListBuffered(t *testing.T, testInfo *LicenseTestInfo, whereFilters []common.WhereFilter) (outputBuffer bytes.Buffer, err error) {
 	// Declare an output outputBuffer/outputWriter to use used during tests
 	var outputWriter = bufio.NewWriter(&outputBuffer)
-	// ensure all data is written to buffer before further validation
+	// MUST ensure all data is written to buffer before further validation
 	defer outputWriter.Flush()
 
 	// Use a test input SBOM formatted in SPDX
+	// TODO: see if we can use global flags (i.e., policy filename as a persistent flag)
+	// >>> utils.GlobalFlags.ConfigLicensePolicyFile = testInfo.PolicyFile
 	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile
+	utils.GlobalFlags.PersistentFlags.OutputFormat = testInfo.OutputFormat
+	utils.GlobalFlags.LicenseFlags.Summary = testInfo.ListSummary
+
+	// set license policy config. per-test
+	var policyConfig *schema.LicensePolicyConfig = LicensePolicyConfig
+	if testInfo.PolicyFile != "" && testInfo.PolicyFile != DEFAULT_LICENSE_POLICY_CONFIG {
+		policyConfig = new(schema.LicensePolicyConfig)
+		err = policyConfig.LoadHashPolicyConfigurationFile(testInfo.PolicyFile, "")
+		if err != nil {
+			getLogger().Warningf("unable to load policy configuration file: %v", err.Error())
+			return
+		}
+	}
 
 	// Invoke the actual List command (API)
-	err = ListLicenses(outputWriter, testInfo.OutputFormat, whereFilters, testInfo.ListSummary)
+	err = ListLicenses(outputWriter, policyConfig, utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.LicenseFlags, whereFilters)
 
 	return
 }
@@ -117,6 +129,16 @@ func innerTestLicenseList(t *testing.T, testInfo *LicenseTestInfo) (outputBuffer
 	return
 }
 
+func innerTestLicenseExpressionParsing(t *testing.T, expression string, expectedPolicy string) (parsedExpression *schema.CompoundExpression, err error) {
+	parsedExpression, err = schema.ParseExpression(LicensePolicyConfig, expression)
+	getLogger().Infof("expression:\n%v", parsedExpression)
+	if parsedExpression.CompoundUsagePolicy != expectedPolicy {
+		t.Errorf("License Expression: expected `%s`, actual `%s`\n",
+			expectedPolicy, parsedExpression.CompoundUsagePolicy)
+	}
+	return
+}
+
 // ----------------------------------------
 // Command flag tests
 // ----------------------------------------
@@ -125,52 +147,6 @@ func TestLicenseListInvalidInputFileLoad(t *testing.T) {
 	lti := NewLicenseTestInfoBasic(TEST_INPUT_FILE_NON_EXISTENT, FORMAT_DEFAULT, false)
 	lti.ResultExpectedError = &fs.PathError{}
 	innerTestLicenseList(t, lti)
-}
-
-// -------------------------------------------
-// Test SPDX ID (validity)
-// -------------------------------------------
-
-func TestLicenseSpdxIdSimple(t *testing.T) {
-	ID := "MIT"
-	if !IsValidSpdxId(ID) {
-		t.Errorf("IsValidSpdxId(`%s`) == `false`: Expected `true`.", ID)
-	}
-}
-
-func TestLicenseSpdxIdComplex(t *testing.T) {
-	ID := "AGPL-3.0-or-later"
-	if !IsValidSpdxId(ID) {
-		t.Errorf("IsValidSpdxId(`%s`) == `false`: Expected `true`.", ID)
-	}
-}
-
-func TestLicenseSpdxIdFailEmptyString(t *testing.T) {
-	ID := ""
-	if IsValidSpdxId(ID) {
-		t.Errorf("IsValidSpdxId(`%s`) == `true`: Expected `false`.", ID)
-	}
-}
-
-func TestLicenseSpdxIdFailBadCharacter1(t *testing.T) {
-	ID := "?"
-	if IsValidSpdxId(ID) {
-		t.Errorf("IsValidSpdxId(`%s`) == `true`: Expected `false`.", ID)
-	}
-}
-
-func TestLicenseSpdxIdFailBadCharacter2(t *testing.T) {
-	ID := "MIT+Apache-2.0"
-	if IsValidSpdxId(ID) {
-		t.Errorf("IsValidSpdxId(`%s`) == `true`: Expected `false`.", ID)
-	}
-}
-
-func TestLicenseSpdxIdFailWhiteSpace(t *testing.T) {
-	ID := "Apache 2.0"
-	if IsValidSpdxId(ID) {
-		t.Errorf("IsValidSpdxId(`%s`) == `true`: Expected `false`.", ID)
-	}
 }
 
 // -------------------------------------------
@@ -267,7 +243,7 @@ func TestLicenseListSummaryCdx13Csv(t *testing.T) {
 func TestLicenseListTextSummaryCdx14ContainsUndefined(t *testing.T) {
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND, FORMAT_DEFAULT, true)
 	lti.ResultExpectedLineCount = 4 // 2 title, 2 with UNDEFINED
-	lti.ResultLineContainsValues = []string{POLICY_UNDEFINED, LC_TYPE_NAMES[LC_LOC_UNKNOWN], LICENSE_NO_ASSERTION, "package-lock.json"}
+	lti.ResultLineContainsValues = []string{schema.POLICY_UNDEFINED, LC_TYPE_NAMES[LC_LOC_UNKNOWN], LICENSE_NO_ASSERTION, "package-lock.json"}
 	lti.ResultLineContainsValuesAtLineNum = 3
 	innerTestLicenseList(t, lti)
 }
@@ -275,7 +251,7 @@ func TestLicenseListTextSummaryCdx14ContainsUndefined(t *testing.T) {
 func TestLicenseListPolicyCdx14InvalidLicenseId(t *testing.T) {
 	TEST_LICENSE_ID_OR_NAME := "foo"
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_ID, FORMAT_TEXT, true)
-	lti.ResultLineContainsValues = []string{POLICY_UNDEFINED, LC_VALUE_ID, TEST_LICENSE_ID_OR_NAME}
+	lti.ResultLineContainsValues = []string{schema.POLICY_UNDEFINED, LC_VALUE_ID, TEST_LICENSE_ID_OR_NAME}
 	lti.ResultLineContainsValuesAtLineNum = 3
 	innerTestLicenseList(t, lti)
 }
@@ -283,7 +259,7 @@ func TestLicenseListPolicyCdx14InvalidLicenseId(t *testing.T) {
 func TestLicenseListPolicyCdx14InvalidLicenseName(t *testing.T) {
 	TEST_LICENSE_ID_OR_NAME := "bar"
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_NAME, FORMAT_TEXT, true)
-	lti.ResultLineContainsValues = []string{POLICY_UNDEFINED, LC_VALUE_NAME, TEST_LICENSE_ID_OR_NAME}
+	lti.ResultLineContainsValues = []string{schema.POLICY_UNDEFINED, LC_VALUE_NAME, TEST_LICENSE_ID_OR_NAME}
 	lti.ResultLineContainsValuesAtLineNum = 3
 	innerTestLicenseList(t, lti)
 }
@@ -317,26 +293,10 @@ func TestLicenseListSummaryTextCdx14LicenseExpInName(t *testing.T) {
 		TEST_LICENSE_LIST_CDX_1_4_LICENSE_EXPRESSION_IN_NAME,
 		FORMAT_TEXT, true)
 	lti.WhereClause = "license-type=name"
-	lti.ResultLineContainsValues = []string{POLICY_UNDEFINED, "BSD-3-Clause OR MIT"}
+	lti.ResultLineContainsValues = []string{schema.POLICY_UNDEFINED, "BSD-3-Clause OR MIT"}
 	lti.ResultLineContainsValuesAtLineNum = 3
 	lti.ResultExpectedLineCount = 4 // title and data rows
 	innerTestLicenseList(t, lti)
-}
-
-func TestLicenseListPolicyCdx14CustomPolicy(t *testing.T) {
-	TEST_LICENSE_ID_OR_NAME := "(MIT OR CC0-1.0)"
-
-	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_TEXT_CDX_1_4_CUSTOM_POLICY_1, FORMAT_TEXT, true)
-	lti.ResultLineContainsValues = []string{POLICY_ALLOW, LC_VALUE_EXPRESSION, TEST_LICENSE_ID_OR_NAME}
-	lti.ResultLineContainsValuesAtLineNum = 2
-
-	// Load a custom policy file ONLY for the specific unit test
-	loadHashCustomPolicyFile(TEST_CUSTOM_POLICY_1)
-
-	innerTestLicenseList(t, lti)
-
-	// !!! IMPORTANT !!! restore default policy file to default for all other tests
-	loadHashCustomPolicyFile(utils.GlobalFlags.ConfigLicensePolicyFile)
 }
 
 // Test custom marshal of CDXLicense (empty CDXAttachment)
@@ -348,5 +308,115 @@ func TestLicenseListCdx13JsonEmptyAttachment(t *testing.T) {
 	lti.ResultExpectedLineCount = 36
 	lti.ResultLineContainsValues = []string{"\"content\": \"CiAgICAgICAgICAgICA...\""}
 	lti.ResultLineContainsValuesAtLineNum = -1 // JSON Hashmaps in Go are not ordered
+	innerTestLicenseList(t, lti)
+}
+
+// Tests for expression parser
+func TestLicenseExpressionParsingTestComplex1(t *testing.T) {
+	SPDX_LICENSE_EXPRESSION_TEST1 := "Apache-2.0 AND (MIT OR GPL-2.0-only)"
+	EXPECTED_POLICY := schema.POLICY_ALLOW
+	result, _ := innerTestLicenseExpressionParsing(t, SPDX_LICENSE_EXPRESSION_TEST1, EXPECTED_POLICY)
+	if result.LeftUsagePolicy != schema.POLICY_ALLOW && result.RightUsagePolicy != schema.POLICY_ALLOW {
+		t.Errorf("License Expression: expectedLeft `%s`, actualLeft `%s`, expectedRight `%s`, actualRight `%s`\n",
+			schema.POLICY_ALLOW, result.LeftUsagePolicy, schema.POLICY_ALLOW, result.RightUsagePolicy)
+	}
+}
+
+func TestLicenseExpressionParsingTestComplex2(t *testing.T) {
+	SPDX_LICENSE_EXPRESSION_TEST1 := "MPL-1.0 AND (MIT AND AGPL-3.0)"
+	EXPECTED_POLICY := schema.POLICY_NEEDS_REVIEW
+	result, _ := innerTestLicenseExpressionParsing(t, SPDX_LICENSE_EXPRESSION_TEST1, EXPECTED_POLICY)
+	if result.LeftUsagePolicy != schema.POLICY_ALLOW && result.RightUsagePolicy != schema.POLICY_ALLOW {
+		t.Errorf("License Expression: expectedLeft `%s`, actualLeft `%s`, expectedRight `%s`, actualRight `%s`\n",
+			schema.POLICY_ALLOW, result.LeftUsagePolicy, schema.POLICY_ALLOW, result.RightUsagePolicy)
+	}
+}
+
+func TestLicenseExpressionParsingCompoundRightSide(t *testing.T) {
+	EXP := "Apache-2.0 AND (MIT OR GPL-2.0-only )"
+	EXPECTED_POLICY := schema.POLICY_ALLOW
+	innerTestLicenseExpressionParsing(t, EXP, EXPECTED_POLICY)
+}
+
+func TestLicenseExpressionCompoundLeftSide(t *testing.T) {
+	EXP := "(Apache-1.0 OR Apache-1.1 ) AND 0BSD"
+	EXPECTED_POLICY := schema.POLICY_ALLOW
+	innerTestLicenseExpressionParsing(t, EXP, EXPECTED_POLICY)
+}
+
+// Test license expression entirely inside a logical group (i.e., outer parens)
+func TestLicenseExpressionSingleCompoundAllow(t *testing.T) {
+	EXP := "(MIT OR CC0-1.0)"
+	EXPECTED_POLICY := schema.POLICY_ALLOW
+	innerTestLicenseExpressionParsing(t, EXP, EXPECTED_POLICY)
+}
+
+func TestLicenseExpressionSingleCompoundUndefinedBoth(t *testing.T) {
+	EXP := "(FOO OR BAR)"
+	EXPECTED_POLICY := schema.POLICY_UNDEFINED
+	innerTestLicenseExpressionParsing(t, EXP, EXPECTED_POLICY)
+}
+
+func TestLicenseExpressionSingleCompoundUndefinedLeft(t *testing.T) {
+	EXP := "(FOO OR MIT)"
+	EXPECTED_POLICY := schema.POLICY_ALLOW
+	innerTestLicenseExpressionParsing(t, EXP, EXPECTED_POLICY)
+}
+
+func TestLicenseExpressionSingleCompoundUndefinedRight(t *testing.T) {
+	EXP := "(MIT OR BAR)"
+	EXPECTED_POLICY := schema.POLICY_ALLOW
+	innerTestLicenseExpressionParsing(t, EXP, EXPECTED_POLICY)
+}
+
+func TestLicenseExpressionSingleCompoundInvalid(t *testing.T) {
+	EXP := "()"
+	EXPECTED_POLICY := schema.POLICY_UNDEFINED
+	innerTestLicenseExpressionParsing(t, EXP, EXPECTED_POLICY)
+}
+
+func TestLicenseExpressionSingleCompoundInvalidAND(t *testing.T) {
+	EXP := "AND"
+	EXPECTED_POLICY := schema.POLICY_UNDEFINED
+	innerTestLicenseExpressionParsing(t, EXP, EXPECTED_POLICY)
+}
+
+func TestLicenseExpressionSingleCompoundInvalidOR(t *testing.T) {
+	EXP := "OR"
+	EXPECTED_POLICY := schema.POLICY_UNDEFINED
+	innerTestLicenseExpressionParsing(t, EXP, EXPECTED_POLICY)
+}
+
+func TestLicenseExpressionSingleCompoundInvalidAND2(t *testing.T) {
+	EXP := "AND GPL-2.0-only"
+	EXPECTED_POLICY := schema.POLICY_UNDEFINED
+	innerTestLicenseExpressionParsing(t, EXP, EXPECTED_POLICY)
+}
+
+func TestLicenseExpressionSingleCompoundInvalidOR2(t *testing.T) {
+	EXP := "OR GPL-2.0-only"
+	EXPECTED_POLICY := schema.POLICY_NEEDS_REVIEW
+	innerTestLicenseExpressionParsing(t, EXP, EXPECTED_POLICY)
+}
+
+// ---------------------------
+// License Policy Config tests
+// ---------------------------
+const (
+	// Test custom license policy (with license expression)
+	TEST_CUSTOM_POLICY_1                           = "test/policy/license-policy-expression-outer-parens.policy.json"
+	TEST_LICENSE_LIST_TEXT_CDX_1_4_CUSTOM_POLICY_1 = "test/policy/license-policy-expression-outer-parens.bom.json"
+)
+
+// TODO: uncomment once we have a means to dynamically pass in the license config. object
+func TestLicenseListPolicyCdx14CustomPolicy(t *testing.T) {
+	TEST_LICENSE_ID_OR_NAME := "(MIT OR CC0-1.0)"
+
+	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_TEXT_CDX_1_4_CUSTOM_POLICY_1, FORMAT_TEXT, true)
+	lti.ResultLineContainsValues = []string{schema.POLICY_ALLOW, LC_VALUE_EXPRESSION, TEST_LICENSE_ID_OR_NAME}
+	lti.ResultLineContainsValuesAtLineNum = 2
+	lti.PolicyFile = TEST_CUSTOM_POLICY_1
+
+	// Load a custom policy file ONLY for the specific unit test
 	innerTestLicenseList(t, lti)
 }

@@ -30,7 +30,7 @@ import (
 // 1. Composition - document elements are organized as required (even though allowed by schema)
 // 2. Metadata - Top-level, document metadata includes specific fields and/or values that match required criteria (e.g., regex)
 // 3. License data - Components, Services (or any object that carries a License) meets specified requirements
-func validateCustomCDXDocument(document *schema.BOM) (innerError error) {
+func validateCustomCDXDocument(document *schema.BOM, policyConfig *schema.LicensePolicyConfig) (innerError error) {
 	getLogger().Enter()
 	defer getLogger().Exit(innerError)
 
@@ -48,7 +48,7 @@ func validateCustomCDXDocument(document *schema.BOM) (innerError error) {
 	}
 
 	// Validate that at least required (e.g., valid, approved) "License" data exists
-	if innerError = validateLicenseData(document); innerError != nil {
+	if innerError = validateLicenseData(document, policyConfig); innerError != nil {
 		return
 	}
 
@@ -78,7 +78,8 @@ func validateCustomDocumentComposition(document *schema.BOM) (innerError error) 
 	}
 
 	// Generate a (composition) validation error
-	if len(component.Components) > 0 {
+	pComponent := component.Components
+	if pComponent != nil && len(*pComponent) > 0 {
 		var fields = []string{"metadata", "component", "components"}
 		innerError = NewSBOMCompositionError(
 			MSG_INVALID_METADATA_COMPONENT_COMPONENTS,
@@ -99,8 +100,8 @@ func validateCustomMetadata(document *schema.BOM) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
-	// validate that the top-level component is declared with all required values
-	if component := document.GetCdxMetadataComponent(); component == nil {
+	// validate that the top-level pComponent is declared with all required values
+	if pComponent := document.GetCdxMetadataComponent(); pComponent == nil {
 		err := NewSBOMMetadataError(
 			document,
 			MSG_INVALID_METADATA_COMPONENT,
@@ -129,10 +130,14 @@ func validateCustomMetadataProperties(document *schema.BOM) (err error) {
 		return
 	}
 
+	// TODO: move map to BOM object
 	hashmap := slicemultimap.New()
-	err = hashMetadataProperties(hashmap, document.GetCdxMetadataProperties())
-	if err != nil {
-		return
+	pProperties := document.GetCdxMetadataProperties()
+	if pProperties != nil {
+		err = hashMetadataProperties(hashmap, *pProperties)
+		if err != nil {
+			return
+		}
 	}
 
 	for _, checks := range validationProps {
@@ -197,6 +202,7 @@ func validateCustomMetadataProperties(document *schema.BOM) (err error) {
 	return err
 }
 
+// TODO: move to utils
 func compileRegex(test string) (expression *regexp.Regexp, err error) {
 	if test != "" {
 		expression, err = regexp.Compile(test)
@@ -226,14 +232,14 @@ func hashMetadataProperties(hashmap *slicemultimap.MultiMap, properties []schema
 // that at least one valid license is found
 // TODO: Assure top-level "metadata.component"
 // TODO support []WhereFilter
-func validateLicenseData(document *schema.BOM) (err error) {
+func validateLicenseData(document *schema.BOM, policyConfig *schema.LicensePolicyConfig) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
 	// Now we need to validate that the input file contains licenses
 	// the license "hash" function does this validation checking for us...
 	// TODO support []WhereFilter
-	err = loadDocumentLicenses(document, nil)
+	err = loadDocumentLicenses(document, policyConfig, nil)
 
 	if err != nil {
 		return

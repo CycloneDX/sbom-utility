@@ -26,6 +26,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 )
@@ -70,13 +71,17 @@ func NewResourceTestInfoBasic(inputFile string, listFormat string, resultExpecte
 // -------------------------------------------
 // resource list test helper functions
 // -------------------------------------------
-func innerBufferedTestResourceList(t *testing.T, testInfo *ResourceTestInfo, whereFilters []WhereFilter) (outputBuffer bytes.Buffer, err error) {
+func innerBufferedTestResourceList(t *testing.T, testInfo *ResourceTestInfo, whereFilters []common.WhereFilter) (outputBuffer bytes.Buffer, err error) {
 	// Declare an output outputBuffer/outputWriter to use used during tests
 	var outputWriter = bufio.NewWriter(&outputBuffer)
 	// ensure all data is written to buffer before further validation
 	defer outputWriter.Flush()
 
-	err = ListResources(outputWriter, testInfo.OutputFormat, testInfo.ResourceType, whereFilters)
+	var persistentFlags utils.PersistentCommandFlags
+	persistentFlags.OutputFormat = testInfo.OutputFormat
+	resourceFlags := utils.NewResourceCommandFlags(testInfo.ResourceType)
+
+	err = ListResources(outputWriter, persistentFlags, resourceFlags, whereFilters)
 	return
 }
 
@@ -125,7 +130,7 @@ func TestResourceListInvalidInputFileLoad(t *testing.T) {
 		TEST_INPUT_FILE_NON_EXISTENT,
 		FORMAT_DEFAULT,
 		&fs.PathError{},
-		RESOURCE_TYPE_DEFAULT,
+		schema.RESOURCE_TYPE_DEFAULT,
 	)
 
 	// verify correct error is returned
@@ -140,7 +145,7 @@ func TestResourceListFormatUnsupportedSPDXMinReq(t *testing.T) {
 		TEST_SPDX_2_2_MIN_REQUIRED,
 		FORMAT_DEFAULT,
 		&schema.UnsupportedFormatError{},
-		RESOURCE_TYPE_DEFAULT,
+		schema.RESOURCE_TYPE_DEFAULT,
 	)
 
 	// verify correct error is returned
@@ -152,7 +157,7 @@ func TestResourceListFormatUnsupportedSPDX22(t *testing.T) {
 		TEST_SPDX_2_2_EXAMPLE_1,
 		FORMAT_DEFAULT,
 		&schema.UnsupportedFormatError{},
-		RESOURCE_TYPE_DEFAULT,
+		schema.RESOURCE_TYPE_DEFAULT,
 	)
 
 	// verify correct error is returned
@@ -168,7 +173,7 @@ func TestResourceListTextCdx14NoServicesFound(t *testing.T) {
 		TEST_RESOURCE_LIST_CDX_1_3_NONE_FOUND,
 		FORMAT_TEXT,
 		nil, // no error
-		RESOURCE_TYPE_SERVICE,
+		schema.RESOURCE_TYPE_SERVICE,
 	)
 
 	// verify there is a (warning) message present when no resources are found
@@ -187,7 +192,7 @@ func TestResourceListTextCdx13(t *testing.T) {
 		TEST_RESOURCE_LIST_CDX_1_3,
 		FORMAT_TEXT,
 		nil, // no error
-		RESOURCE_TYPE_DEFAULT,
+		schema.RESOURCE_TYPE_DEFAULT,
 	)
 
 	innerTestResourceList(t, rti)
@@ -199,7 +204,7 @@ func TestResourceListTextCdx14SaaS(t *testing.T) {
 		TEST_RESOURCE_LIST_CDX_1_4_SAAS_1,
 		FORMAT_TEXT,
 		nil, // no error
-		RESOURCE_TYPE_COMPONENT,
+		schema.RESOURCE_TYPE_COMPONENT,
 	)
 
 	innerTestResourceList(t, rti)
@@ -221,7 +226,7 @@ func TestResourceListTextCdx13WhereClauseAndResultsByNameStartswith(t *testing.T
 		nil,
 		TEST_OUTPUT_LINES,
 		nil,
-		RESOURCE_TYPE_COMPONENT,
+		schema.RESOURCE_TYPE_COMPONENT,
 	)
 	rti.ResultLineContainsValues = TEST_OUTPUT_CONTAINS
 	rti.ResultLineContainsValuesAtLineNum = 2
@@ -241,7 +246,7 @@ func TestResourceListTextCdx13WhereClauseAndResultsByNameContains(t *testing.T) 
 		nil,
 		TEST_OUTPUT_LINES,
 		nil,
-		RESOURCE_TYPE_COMPONENT,
+		schema.RESOURCE_TYPE_COMPONENT,
 	)
 	rti.ResultLineContainsValues = TEST_OUTPUT_CONTAINS
 	rti.ResultLineContainsValuesAtLineNum = 2
@@ -261,7 +266,7 @@ func TestResourceListTextCdx13WhereClauseAndResultsBomRefContains(t *testing.T) 
 		nil,
 		TEST_OUTPUT_LINES,
 		nil,
-		RESOURCE_TYPE_COMPONENT,
+		schema.RESOURCE_TYPE_COMPONENT,
 	)
 	rti.ResultLineContainsValues = TEST_OUTPUT_CONTAINS
 	rti.ResultLineContainsValuesAtLineNum = 10
@@ -281,7 +286,7 @@ func TestResourceListTextCdx13WhereClauseAndResultsVersionStartswith(t *testing.
 		nil,
 		TEST_OUTPUT_LINES,
 		nil,
-		RESOURCE_TYPE_COMPONENT,
+		schema.RESOURCE_TYPE_COMPONENT,
 	)
 	rti.ResultLineContainsValues = TEST_OUTPUT_CONTAINS
 	rti.ResultLineContainsValuesAtLineNum = 2
@@ -301,7 +306,7 @@ func TestResourceListTextCdx13WhereClauseAndResultsNone(t *testing.T) {
 		nil,
 		TEST_OUTPUT_LINES,
 		nil,
-		RESOURCE_TYPE_SERVICE,
+		schema.RESOURCE_TYPE_SERVICE,
 	)
 	rti.ResultLineContainsValues = TEST_OUTPUT_CONTAINS
 	rti.ResultLineContainsValuesAtLineNum = 2
@@ -317,7 +322,7 @@ func TestResourceListUsingStdin(t *testing.T) {
 		TEST_RESOURCE_LIST_CDX_1_3,
 		FORMAT_TEXT,
 		nil, // no error
-		RESOURCE_TYPE_DEFAULT,
+		schema.RESOURCE_TYPE_DEFAULT,
 	)
 
 	rti.MockStdin = true

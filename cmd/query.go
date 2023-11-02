@@ -21,10 +21,11 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
-	"regexp"
+	"io"
 	"strconv"
 	"strings"
 
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/spf13/cobra"
@@ -87,24 +88,11 @@ type QueryRequest struct {
 	fromObjectSelectors []string
 	whereValuesRaw      string
 	whereExpressions    []string
-	whereFilters        []WhereFilter
+	whereFilters        []common.WhereFilter
 	orderByKeysRaw      string
 	//orderByKeys       []string // TODO
 	isFromObjectAMap    bool
 	isFromObjectAnArray bool
-}
-
-type WhereFilter struct {
-	key        string
-	Operand    string
-	Value      string
-	ValueRegEx *regexp.Regexp
-}
-
-func (filter *WhereFilter) GetNormalizeKey() (normalizedKey string) {
-	normalizedKey = strings.ToLower(filter.key)
-	normalizedKey = strings.Replace(normalizedKey, "-", "", -1)
-	return
 }
 
 // Implement the Stringer interface for QueryRequest
@@ -161,6 +149,20 @@ func queryCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
+	// Create output writer
+	outputFilename := utils.GlobalFlags.PersistentFlags.OutputFile
+	outputFile, writer, err := createOutputFile(outputFilename)
+	getLogger().Tracef("outputFile: `%v`; writer: `%v`", outputFilename, writer)
+
+	// use function closure to assure consistent error output based upon error type
+	defer func() {
+		// always close the output file
+		if outputFile != nil {
+			outputFile.Close()
+			getLogger().Infof("Closed output file: `%s`", outputFilename)
+		}
+	}()
+
 	// Parse flags into a query request struct
 	var queryRequest *QueryRequest = new(QueryRequest)
 	err = queryRequest.readQueryFlags(cmd)
@@ -177,23 +179,23 @@ func queryCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	var queryResult *QueryResponse = new(QueryResponse)
 
 	// Query using the request/response structures
-	result, errQuery := query(queryRequest, queryResult)
+	_, errQuery := Query(writer, queryRequest, queryResult)
 
 	if errQuery != nil {
 		return errQuery
 	}
 
-	// Convert query results to formatted JSON for output
-	fResult, errFormat := utils.ConvertMapToJson(result)
+	// // Convert query results to formatted JSON for output
+	// fResult, errFormat := utils.ConvertMapToJson(result)
 
-	if errFormat != nil {
-		return errFormat
-	}
+	// if errFormat != nil {
+	// 	return errFormat
+	// }
 
-	// Always, output the (JSON) formatted data directly to stdout (for now)
-	// NOTE: This output is NOT subject to log-level settings; use `fmt` package
-	// TODO: support --output to file
-	fmt.Printf("%s\n", fResult)
+	// // Always, output the (JSON) formatted data directly to stdout (for now)
+	// // NOTE: This output is NOT subject to log-level settings; use `fmt` package
+	// // TODO: support --output to file
+	// fmt.Printf("%s\n", fResult)
 
 	return
 }
@@ -277,7 +279,7 @@ func (qr *QueryRequest) parseWhereFilterExpressions() (err error) {
 		return NewQueryWhereClauseError(qr, qr.whereValuesRaw)
 	}
 
-	var filter *WhereFilter
+	var filter *common.WhereFilter
 	for _, clause := range qr.whereExpressions {
 
 		filter = parseWhereFilter(clause)
@@ -294,7 +296,7 @@ func (qr *QueryRequest) parseWhereFilterExpressions() (err error) {
 }
 
 // TODO: generate more specific error messages on why parsing failed
-func parseWhereFilter(rawExpression string) (pWhereSelector *WhereFilter) {
+func parseWhereFilter(rawExpression string) (pWhereSelector *common.WhereFilter) {
 
 	if rawExpression == "" {
 		return // nil
@@ -306,9 +308,9 @@ func parseWhereFilter(rawExpression string) (pWhereSelector *WhereFilter) {
 		return // nil
 	}
 
-	var whereFilter = WhereFilter{}
+	var whereFilter = common.WhereFilter{}
 	whereFilter.Operand = QUERY_WHERE_OPERAND_EQUALS
-	whereFilter.key = tokens[0]
+	whereFilter.Key = tokens[0]
 	whereFilter.Value = tokens[1]
 
 	if whereFilter.Value == "" {
@@ -332,9 +334,9 @@ func processQueryResults(err error) {
 	}
 }
 
-// query JSON map and return selected subset
-// i.e., use QueryRequest (syntax) to implement the query into the JSON document
-func query(request *QueryRequest, response *QueryResponse) (resultJson interface{}, err error) {
+// Query JSON map and return selected subset
+// i.e., use QueryRequest (syntax) to implement the Query into the JSON document
+func Query(writer io.Writer, request *QueryRequest, response *QueryResponse) (resultJson interface{}, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 	// use function closure to assure consistent error output based upon error type
@@ -405,7 +407,6 @@ func query(request *QueryRequest, response *QueryResponse) (resultJson interface
 		}
 	case []interface{}:
 		fromObjectSlice, _ := resultJson.([]interface{})
-		// TODO: resultJson, err = selectFieldsFromSlice(request, findObject)
 		resultJson, err = selectFieldsFromSlice(request, fromObjectSlice)
 	default:
 		// NOTE: this SHOULD never be invoked as the FROM logic should have caught this already
@@ -415,9 +416,18 @@ func query(request *QueryRequest, response *QueryResponse) (resultJson interface
 	}
 
 	if err != nil {
-		//getLogger().Debugf("%v, %v", pJsonData, err)
 		return
 	}
+
+	// Convert query results to formatted JSON for output
+	fResult, err := utils.ConvertMapToJson(resultJson)
+
+	if err != nil {
+		return
+	}
+
+	// Use the selected output device (e.g., default stdout or the specified --output-file)
+	fmt.Fprintf(writer, "%s\n", fResult)
 
 	return
 }
@@ -555,7 +565,7 @@ func selectFieldsFromSlice(request *QueryRequest, jsonSlice []interface{}) (slic
 // Note: Golang supports the RE2 regular exp. engine which does not support many
 // features such as lookahead, lookbehind, etc.
 // See: https://en.wikipedia.org/wiki/Comparison_of_regular_expression_engines
-func whereFilterMatch(mapObject map[string]interface{}, whereFilters []WhereFilter) (match bool, err error) {
+func whereFilterMatch(mapObject map[string]interface{}, whereFilters []common.WhereFilter) (match bool, err error) {
 	var buf bytes.Buffer
 	var key string
 
@@ -564,7 +574,7 @@ func whereFilterMatch(mapObject map[string]interface{}, whereFilters []WhereFilt
 
 	for _, filter := range whereFilters {
 
-		key = filter.key
+		key = filter.Key
 		value, present := mapObject[key]
 		getLogger().Debugf("testing object map[%s]: `%v`", key, value)
 

@@ -21,12 +21,17 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
 
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/utils"
 )
+
+// Default test output (i.e., --output) directory
+const TEST_OUTPUT_PATH = "temp/"
 
 // Test files that span commands
 const (
@@ -52,6 +57,7 @@ var TestLogQuiet = flag.Bool(FLAG_QUIET_MODE, false, "")
 
 type CommonTestInfo struct {
 	InputFile                         string
+	OutputFile                        string
 	OutputFormat                      string
 	ListSummary                       bool
 	WhereClause                       string
@@ -152,15 +158,6 @@ func initTestInfrastructure() {
 
 		// Leverage the root command's init function to populate schemas, policies, etc.
 		initConfigurations()
-
-		// initConfig() loads the policies from file; hash policies for tests
-		// Note: we hash policies (once) for all tests
-		getLogger().Debugf("Hashing license policies...")
-		errHash := licensePolicyConfig.HashLicensePolicies()
-		if errHash != nil {
-			getLogger().Error(errHash.Error())
-			os.Exit(ERROR_APPLICATION)
-		}
 	})
 }
 
@@ -208,7 +205,7 @@ func EvaluateErrorAndKeyPhrases(t *testing.T, err error, messages []string) (mat
 	return
 }
 
-func prepareWhereFilters(t *testing.T, testInfo *CommonTestInfo) (whereFilters []WhereFilter, err error) {
+func prepareWhereFilters(t *testing.T, testInfo *CommonTestInfo) (whereFilters []common.WhereFilter, err error) {
 
 	if testInfo.WhereClause != "" {
 		whereFilters, err = retrieveWhereFilters(testInfo.WhereClause)
@@ -218,4 +215,9 @@ func prepareWhereFilters(t *testing.T, testInfo *CommonTestInfo) (whereFilters [
 		}
 	}
 	return
+}
+
+func createTemporaryFilename(baseFilename string) (tempFilename string) {
+	trimmedFilename := strings.TrimLeft(baseFilename, strconv.QuoteRune(os.PathSeparator))
+	return TEST_OUTPUT_PATH + trimmedFilename
 }

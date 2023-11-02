@@ -17,7 +17,6 @@
 
 package cmd
 
-// "github.com/iancoleman/orderedmap"
 import (
 	"encoding/csv"
 	"fmt"
@@ -74,9 +73,6 @@ var VALIDATION_ERROR_TITLES = []string{
 	ERROR_DETAIL_KEY_CONTEXT,
 	ERROR_DETAIL_KEY_VALUE_DESCRIPTION,
 }
-
-// Holds resources (e.g., components, services) declared license(s)
-//var errorResultMap = slicemultimap.New()
 
 // JsonContext is a linked-list of JSON key strings
 type ValidationErrorResult struct {

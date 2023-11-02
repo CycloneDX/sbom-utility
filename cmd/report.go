@@ -22,6 +22,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/spf13/cobra"
 )
@@ -67,75 +68,6 @@ func truncateString(value string, maxLength int, showDetail bool) string {
 	return value
 }
 
-// Currently, truncate
-const REGEX_ISO_8601_DATE_TIME = "[0-9]{4}-[0-9]{2}-[0-9]{2}T([0-9]{2}:){2}[0-9]{2}[+|-][0-9]{2}:[0-9]{2}"
-const REGEX_ISO_8601_DATE = "[0-9]{4}-[0-9]{2}-[0-9]{2}"
-const ISO8601_TIME_SEPARATOR = 'T'
-
-// Validates a complete Date-Time ISO8601 timestamp
-// TODO verify it works for data, date-time, date-time-timezone formats
-func validateISO8601TimestampISO8601DateTime(timestamp string, regex string) (valid bool) {
-
-	compiledRegEx, errCompile := compileRegex(regex)
-
-	if errCompile != nil {
-		return false
-	}
-
-	// Test that the field value matches the regex supplied in the current filter
-	// Note: the regex compilation is performed during command param. processing
-	if match := compiledRegEx.Match([]byte(timestamp)); match {
-		return true
-	}
-
-	return false
-}
-
-// TODO we SHOULD normalize the timestamp to Z (0)
-func truncateTimeStampISO8601Date(fullTimestamp string) (date string, err error) {
-
-	// default to returning the original value
-	date = fullTimestamp
-
-	// TODO validate timestamp regex for yyy-mm-dd (minimum format)
-	if fullTimestamp == "" {
-		return
-	}
-
-	// if it appears to be date-only already, validate it
-	if len(fullTimestamp) == 10 {
-		if validateISO8601TimestampISO8601DateTime(fullTimestamp, REGEX_ISO_8601_DATE) {
-			// return the (now validated) value passed in
-			return
-		} else {
-			err = getLogger().Errorf("invalid ISO 8601 timestamp: `%s`\n", fullTimestamp)
-			// return what we were given
-			return
-		}
-	}
-
-	// Assume timestamp is date-time format; find where the date portion separator appears
-	iSep := strings.IndexByte(fullTimestamp, ISO8601_TIME_SEPARATOR)
-
-	if iSep == -1 {
-		err = getLogger().Errorf("invalid ISO 8601 timestamp: `%s`\n", fullTimestamp)
-		// return what we were given
-		return
-	}
-
-	// Slice out the date portion and validate what should be just the date portion
-	date = fullTimestamp[:iSep]
-
-	if !validateISO8601TimestampISO8601DateTime(date, REGEX_ISO_8601_DATE) {
-		err = getLogger().Errorf("invalid ISO 8601 timestamp: `%s`\n", fullTimestamp)
-		// return what we were given
-		date = fullTimestamp
-		return
-	}
-
-	return
-}
-
 func createMarkdownColumnAlignment(titles []string) (alignment []string) {
 	for range titles {
 		alignment = append(alignment, MD_ALIGN_LEFT)
@@ -150,7 +82,7 @@ func createMarkdownRow(data []string) string {
 }
 
 // Report processing helpers
-func processWhereFlag(cmd *cobra.Command) (whereFilters []WhereFilter, err error) {
+func processWhereFlag(cmd *cobra.Command) (whereFilters []common.WhereFilter, err error) {
 	// Process flag: --where
 	whereValues, errGet := cmd.Flags().GetString(FLAG_REPORT_WHERE)
 
@@ -164,13 +96,13 @@ func processWhereFlag(cmd *cobra.Command) (whereFilters []WhereFilter, err error
 	return
 }
 
-func retrieveWhereFilters(whereValues string) (whereFilters []WhereFilter, err error) {
+func retrieveWhereFilters(whereValues string) (whereFilters []common.WhereFilter, err error) {
 	var whereExpressions []string
 
 	if whereValues != "" {
 		whereExpressions = strings.Split(whereValues, QUERY_WHERE_EXPRESSION_SEP)
 
-		var filter *WhereFilter
+		var filter *common.WhereFilter
 		for _, clause := range whereExpressions {
 
 			filter = parseWhereFilter(clause)
@@ -251,10 +183,10 @@ const REPORT_REPLACE_LINE_FEEDS_TRUE = true
 const DEFAULT_COLUMN_TRUNCATE_LENGTH = -1
 
 // TODO: Support additional flags to:
-// - show number of chars shown vs. available when truncated (e.g., (x/y))
-// - provide "empty" value to display in column (e.g., "none" or "UNDEFINED")
-// - inform how to "summarize" (e.g., show-first-only) data if data type is a slice (e.g., []string)
-//   NOTE: if only a subset of entries are shown on a summary, an indication of (x) entries could be shown as well
+//   - show number of chars shown vs. available when truncated (e.g., (x/y))
+//   - provide "empty" value to display in column (e.g., "none" or "UNDEFINED")
+//   - inform how to "summarize" (e.g., show-first-only) data if data type is a slice (e.g., []string)
+//     NOTE: if only a subset of entries are shown on a summary, an indication of (x) entries could be shown as well
 type ColumnFormatData struct {
 	DataKey               string // Note: data key is the column label (where possible)
 	DefaultTruncateLength int    // truncate data when `--format txt`

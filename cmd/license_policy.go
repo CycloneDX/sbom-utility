@@ -21,11 +21,12 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
-	"os"
 	"sort"
 	"strings"
 	"text/tabwriter"
 
+	"github.com/CycloneDX/sbom-utility/common"
+	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/jwangsadinata/go-multimap/slicemultimap"
 	"github.com/spf13/cobra"
@@ -175,10 +176,15 @@ func policyCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	// process filters supplied on the --where command flag
 	// TODO: validate if where clauses reference valid column names (filter keys)
 	whereFilters, err := processWhereFlag(cmd)
-
-	if err == nil {
-		err = ListLicensePolicies(writer, whereFilters, utils.GlobalFlags.LicenseFlags)
+	if err != nil {
+		return
 	}
+
+	// Use global license policy config. as loaded by initConfigurations() as
+	// using (optional) filename passed on command line OR the default, built-in config.
+	err = ListLicensePolicies(writer, LicensePolicyConfig,
+		utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.LicenseFlags,
+		whereFilters)
 
 	return
 }
@@ -190,7 +196,9 @@ func processLicensePolicyListResults(err error) {
 	}
 }
 
-func ListLicensePolicies(writer io.Writer, whereFilters []WhereFilter, flags utils.LicenseCommandFlags) (err error) {
+func ListLicensePolicies(writer io.Writer, policyConfig *schema.LicensePolicyConfig,
+	persistentFlags utils.PersistentCommandFlags, licenseFlags utils.LicenseCommandFlags,
+	whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -204,7 +212,7 @@ func ListLicensePolicies(writer io.Writer, whereFilters []WhereFilter, flags uti
 	// Retrieve the subset of policies that match the where filters
 	// NOTE: This has the side-effect of mapping alt. policy field name values
 	var filteredMap *slicemultimap.MultiMap
-	filteredMap, err = licensePolicyConfig.GetFilteredFamilyNameMap(whereFilters)
+	filteredMap, err = policyConfig.GetFilteredFamilyNameMap(whereFilters)
 
 	if err != nil {
 		return
@@ -214,191 +222,19 @@ func ListLicensePolicies(writer io.Writer, whereFilters []WhereFilter, flags uti
 	switch utils.GlobalFlags.PersistentFlags.OutputFormat {
 	case FORMAT_DEFAULT:
 		// defaults to text if no explicit `--format` parameter
-		err = DisplayLicensePoliciesTabbedText(writer, filteredMap, flags)
+		err = DisplayLicensePoliciesTabbedText(writer, filteredMap, licenseFlags)
 	case FORMAT_TEXT:
-		err = DisplayLicensePoliciesTabbedText(writer, filteredMap, flags)
+		err = DisplayLicensePoliciesTabbedText(writer, filteredMap, licenseFlags)
 	case FORMAT_CSV:
-		err = DisplayLicensePoliciesCSV(writer, filteredMap, flags)
+		err = DisplayLicensePoliciesCSV(writer, filteredMap, licenseFlags)
 	case FORMAT_MARKDOWN:
-		err = DisplayLicensePoliciesMarkdown(writer, filteredMap, flags)
+		err = DisplayLicensePoliciesMarkdown(writer, filteredMap, licenseFlags)
 	default:
 		// default to text format for anything else
 		getLogger().Warningf("Unsupported format: `%s`; using default format.",
 			utils.GlobalFlags.PersistentFlags.OutputFormat)
-		err = DisplayLicensePoliciesTabbedText(writer, filteredMap, flags)
+		err = DisplayLicensePoliciesTabbedText(writer, filteredMap, licenseFlags)
 	}
-	return
-}
-
-func FindPolicyBySpdxId(id string) (policyValue string, matchedPolicy LicensePolicy) {
-	getLogger().Enter("id:", id)
-	defer getLogger().Exit()
-
-	var matched bool
-	var arrPolicies []interface{}
-
-	// Note: this will cause all policy hashmaps to be initialized (created), if it has not bee
-	licensePolicyIdMap, err := licensePolicyConfig.GetLicenseIdMap()
-
-	if err != nil {
-		getLogger().Errorf("license policy map error: `%w`", err)
-		os.Exit(ERROR_APPLICATION)
-	}
-
-	arrPolicies, matched = licensePolicyIdMap.Get(id)
-	getLogger().Tracef("licensePolicyMapById.Get(%s): (%v) matches", id, len(arrPolicies))
-
-	// There MUST be ONLY one policy per (discrete) license ID
-	if len(arrPolicies) > 1 {
-		getLogger().Errorf("Multiple (possibly conflicting) policies declared for SPDX ID=`%s`", id)
-		os.Exit(ERROR_APPLICATION)
-	}
-
-	if matched {
-		// retrieve the usage policy from the single (first) entry
-		matchedPolicy = arrPolicies[0].(LicensePolicy)
-		policyValue = matchedPolicy.UsagePolicy
-	} else {
-		getLogger().Tracef("No policy match found for SPDX ID=`%s` ", id)
-		policyValue = POLICY_UNDEFINED
-	}
-
-	return policyValue, matchedPolicy
-}
-
-// NOTE: for now, we will look for the "family" name encoded in the License.Name field
-// (until) we can get additional fields/properties added to the CDX LicenseChoice schema
-func FindPolicyByFamilyName(name string) (policyValue string, matchedPolicy LicensePolicy) {
-	getLogger().Enter("name:", name)
-	defer getLogger().Exit()
-
-	var matched bool
-	var key string
-	var arrPolicies []interface{}
-
-	// NOTE: we have found some SBOM authors have placed license expressions
-	// within the "name" field.  This prevents us from assigning policy
-	// return
-	if HasLogicalConjunctionOrPreposition(name) {
-		getLogger().Warningf("policy name contains logical conjunctions or preposition: `%s`", name)
-		policyValue = POLICY_UNDEFINED
-		return
-	}
-
-	// Note: this will cause all policy hashmaps to be initialized (created), if it has not been
-	familyNameMap, _ := licensePolicyConfig.GetFamilyNameMap()
-
-	// See if any of the policy family keys contain the family name
-	matched, key = searchForLicenseFamilyName(name)
-
-	if matched {
-		arrPolicies, _ = familyNameMap.Get(key)
-
-		if len(arrPolicies) == 0 {
-			getLogger().Errorf("No policy match found in hashmap for family name key: `%s`", key)
-			os.Exit(ERROR_APPLICATION)
-		}
-
-		// NOTE: We can use the first policy (of a family) as they are
-		// verified to be consistent when loaded from the policy config. file
-		matchedPolicy = arrPolicies[0].(LicensePolicy)
-		policyValue = matchedPolicy.UsagePolicy
-
-		// If we have more than one license in the same family (name), then
-		// check if there are any "usage policy" conflicts to display in report
-		if len(arrPolicies) > 1 {
-			conflict := policyConflictExists(arrPolicies)
-			if conflict {
-				getLogger().Tracef("Usage policy conflict for license family name=`%s` ", name)
-				policyValue = POLICY_CONFLICT
-			}
-		}
-	} else {
-		getLogger().Tracef("No policy match found for license family name=`%s` ", name)
-		policyValue = POLICY_UNDEFINED
-	}
-
-	return policyValue, matchedPolicy
-}
-
-// NOTE: caller assumes resp. for checking for empty input array
-func policyConflictExists(arrPolicies []interface{}) bool {
-	var currentUsagePolicy string
-	var policy LicensePolicy
-
-	// Init. usage policy to first entry in array
-	policy = arrPolicies[0].(LicensePolicy)
-	currentUsagePolicy = policy.UsagePolicy
-
-	// Check every subsequent usage policy in array to identify mismatch (i.e., a conflict)
-	for i := 1; i < len(arrPolicies); i++ {
-		policy = arrPolicies[i].(LicensePolicy)
-		if policy.UsagePolicy != currentUsagePolicy {
-			return true
-		}
-	}
-	return false
-}
-
-func FindPolicy(licenseInfo LicenseInfo) (matchedPolicy LicensePolicy, err error) {
-	getLogger().Enter()
-	defer getLogger().Exit()
-
-	// Initialize to empty
-	matchedPolicy = LicensePolicy{}
-
-	switch licenseInfo.LicenseChoiceTypeValue {
-	case LC_TYPE_ID:
-		matchedPolicy.UsagePolicy, matchedPolicy = FindPolicyBySpdxId(licenseInfo.LicenseChoice.License.Id)
-	case LC_TYPE_NAME:
-		matchedPolicy.UsagePolicy, matchedPolicy = FindPolicyByFamilyName(licenseInfo.LicenseChoice.License.Name)
-	case LC_TYPE_EXPRESSION:
-		// Parse expression according to SPDX spec.
-		var expressionTree *CompoundExpression
-		expressionTree, err = parseExpression(licenseInfo.LicenseChoice.Expression)
-		getLogger().Debugf("Parsed expression:\n%v", expressionTree)
-		matchedPolicy.UsagePolicy = expressionTree.CompoundUsagePolicy
-	}
-
-	if matchedPolicy.UsagePolicy == "" {
-		matchedPolicy.UsagePolicy = POLICY_UNDEFINED
-	}
-	return matchedPolicy, err
-}
-
-// Looks for an SPDX family (name) somewhere in the CDX License object "Name" field
-func containsFamilyName(name string, familyName string) bool {
-	// NOTE: we do not currently normalize as we assume family names
-	// are proper substring of SPDX IDs which are mixed case and
-	// should match exactly as encoded.
-	return strings.Contains(name, familyName)
-}
-
-// Loop through all known license family names (in hashMap) to see if any
-// appear in the CDX License "Name" field
-func searchForLicenseFamilyName(licenseName string) (found bool, familyName string) {
-	getLogger().Enter()
-	defer getLogger().Exit()
-
-	familyNameMap, err := licensePolicyConfig.GetFamilyNameMap()
-	if err != nil {
-		getLogger().Error(err)
-		os.Exit(ERROR_APPLICATION)
-	}
-
-	keys := familyNameMap.Keys()
-
-	for _, key := range keys {
-		familyName = key.(string)
-		getLogger().Debugf("Searching for familyName: '%s' in License Name: %s", familyName, licenseName)
-		found = containsFamilyName(licenseName, familyName)
-
-		if found {
-			getLogger().Debugf("Match found: familyName: '%s' in License Name: %s", familyName, licenseName)
-			return
-		}
-	}
-
 	return
 }
 
@@ -444,7 +280,7 @@ func DisplayLicensePoliciesTabbedText(output io.Writer, filteredPolicyMap *slice
 
 			// Wrap all column text (i.e. flag `--wrap=true`)
 			if utils.GlobalFlags.LicenseFlags.ListLineWrap {
-				policy := value.(LicensePolicy)
+				policy := value.(schema.LicensePolicy)
 
 				lines, err = wrapTableRowText(24, ",",
 					policy.UsagePolicy,
@@ -480,7 +316,7 @@ func DisplayLicensePoliciesTabbedText(output io.Writer, filteredPolicyMap *slice
 			} else {
 				// TODO surface error data to top-level command
 				line, _ = prepareReportLineData(
-					value.(LicensePolicy),
+					value.(schema.LicensePolicy),
 					LICENSE_POLICY_LIST_ROW_DATA,
 					flags.Summary,
 				)
@@ -531,7 +367,7 @@ func DisplayLicensePoliciesCSV(output io.Writer, filteredPolicyMap *slicemultima
 		for _, value := range values {
 			// TODO surface error data to top-level command
 			line, _ = prepareReportLineData(
-				value.(LicensePolicy),
+				value.(schema.LicensePolicy),
 				LICENSE_POLICY_LIST_ROW_DATA,
 				flags.Summary,
 			)
@@ -586,7 +422,7 @@ func DisplayLicensePoliciesMarkdown(output io.Writer, filteredPolicyMap *slicemu
 		for _, value := range values {
 			// TODO surface error data to top-level command
 			line, _ = prepareReportLineData(
-				value.(LicensePolicy),
+				value.(schema.LicensePolicy),
 				LICENSE_POLICY_LIST_ROW_DATA,
 				flags.Summary,
 			)

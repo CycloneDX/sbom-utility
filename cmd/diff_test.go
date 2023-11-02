@@ -53,7 +53,7 @@ func innerDiffError(t *testing.T, baseFilename string, revisedFilename string, f
 	utils.GlobalFlags.DiffFlags.RevisedFile = revisedFilename
 	utils.GlobalFlags.DiffFlags.Colorize = true
 
-	actualError = Diff(utils.GlobalFlags)
+	actualError = Diff(utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.DiffFlags)
 
 	getLogger().Tracef("baseFilename: `%s`, revisedFilename=`%s`, actualError=`%T`",
 		utils.GlobalFlags.PersistentFlags.InputFile,

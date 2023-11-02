@@ -105,7 +105,6 @@ func innerRunReportResultTests(t *testing.T, testInfo *CommonTestInfo, outputBuf
 func lineContainsValues(buffer bytes.Buffer, lineNum int, values ...string) (int, bool) {
 	lines := strings.Split(buffer.String(), "\n")
 	getLogger().Tracef("output: %s", lines)
-	//var lineContainsValue bool = false
 
 	for curLineNum, line := range lines {
 
