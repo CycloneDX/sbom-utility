@@ -181,7 +181,7 @@ func TestTrimCdx14ComponentPropertiesSampleXXL(t *testing.T) {
 
 func TestTrimCdx15ComponentsOnlyProperties(t *testing.T) {
 	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_COMPS_ONLY, nil)
-	ti.Keys = append(ti.Keys, "hashes")
+	ti.Keys = append(ti.Keys, "properties", "hashes")
 	ti.OutputFile = createTemporaryFilename(TEST_TRIM_CDX_1_5_COMPS_ONLY)
 	innerTestTrim(t, ti)
 	// TODO: verify "after" trim lengths and content have removed properties

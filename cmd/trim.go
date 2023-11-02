@@ -130,7 +130,7 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 	}
 
 	// TODO: use a parameter to obtain and normalize  object key names
-	document.TrimJsonMap(trimFlags.Keys[0])
+	document.TrimJsonMap(trimFlags.Keys)
 
 	// fully unmarshal the SBOM into named structures
 	if err = document.UnmarshalCycloneDXBOM(); err != nil {
