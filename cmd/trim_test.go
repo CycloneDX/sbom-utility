@@ -124,15 +124,6 @@ func innerTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer bytes.Buf
 // Trim "properties"
 // ----------------------------------------
 
-func TestTrimCdx15ComponentsOnlyProperties(t *testing.T) {
-	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_COMPS_ONLY, nil)
-	//outputBuffer, _ := innerBufferedTestTrim(t, ti)
-	ti.OutputFile = "output-comps-only.sbom.json"
-	innerTestTrim(t, ti)
-	// TODO: verify "after" trim lengths and content have removed properties
-	//getLogger().Tracef("Len(outputBuffer): `%v`\n", outputBuffer.Len())
-}
-
 func VerifyTrimOutputFileResult(t *testing.T, ti *TrimTestInfo, fromPath string) (err error) {
 	// Query temporary "trimmed" BOM to assure known fields were removed
 	request := QueryRequest{
@@ -186,6 +177,15 @@ func TestTrimCdx14ComponentPropertiesSampleXXL(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+}
+
+func TestTrimCdx15ComponentsOnlyProperties(t *testing.T) {
+	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_COMPS_ONLY, nil)
+	ti.Keys = append(ti.Keys, "hashes")
+	ti.OutputFile = createTemporaryFilename(TEST_TRIM_CDX_1_5_COMPS_ONLY)
+	innerTestTrim(t, ti)
+	// TODO: verify "after" trim lengths and content have removed properties
+	//getLogger().Tracef("Len(outputBuffer): `%v`\n", outputBuffer.Len())
 }
 
 func TestTrimCdx15Properties(t *testing.T) {
