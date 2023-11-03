@@ -296,8 +296,8 @@ func hashComponentLicense(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 
 		getLogger().Warningf("%s: %s (name:`%s`, version: `%s`, package-url: `%s`)",
 			"No license found for component. bomRef",
-			cdxComponent.BOMRef,
-			cdxComponent.Name,
+			licenseInfo.BOMRef,
+			licenseInfo.ResourceName,
 			cdxComponent.Version,
 			cdxComponent.Purl)
 		// No actual licenses to process

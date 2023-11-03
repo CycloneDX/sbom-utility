@@ -43,6 +43,7 @@ var VALID_USAGE_POLICIES = []string{POLICY_ALLOW, POLICY_DENY, POLICY_NEEDS_REVI
 var ALL_USAGE_POLICIES = []string{POLICY_ALLOW, POLICY_DENY, POLICY_NEEDS_REVIEW, POLICY_UNDEFINED, POLICY_CONFLICT}
 
 // Note: the "License" property is used as hashmap key
+// NOTE: CDXRefType is a named `string` type as of v1.5
 type LicenseInfo struct {
 	UsagePolicy            string           `json:"usage-policy"`
 	LicenseChoiceTypeValue int              `json:"license-type-value"`

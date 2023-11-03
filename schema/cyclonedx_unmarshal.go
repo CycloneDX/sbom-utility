@@ -110,8 +110,7 @@ func UnMarshalComponent(data interface{}) (CDXComponent, error) {
 		return CDXComponent{}, errMarshal
 	}
 
-	// optimistically, prepare the receiving structure
-	// and unmarshal
+	// optimistically, prepare the receiving structure and unmarshal
 	component := CDXComponent{}
 	errUnmarshal := json.Unmarshal(jsonString, &component)
 

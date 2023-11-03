@@ -196,6 +196,7 @@ func loadBOMFile(inputFile string) (document *BOM, err error) {
 // ---------------------------
 // Hash tests
 // ---------------------------
+
 func TestHashCDXComponentEmpty(t *testing.T) {
 	document, err := loadBOMFile(TEST_HASH_CDX_1_5_METADATA_COMPONENT_EMPTY)
 	if err != nil {

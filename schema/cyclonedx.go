@@ -78,6 +78,7 @@ type CDXMetadata struct {
 // Note: "bom-ref" is a "refType" which is a constrained `string`
 // TODO: "mime-type" SHOULD become "media-type" which is more modern/inclusive
 // TODO: Remove "service" from "Type" enum. as "service" now exists (deprecate in future versions)
+// NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXComponent struct {
 	Primary            bool                     `json:"-"`              // Proprietary: do NOT marshal/unmarshal
 	Type               string                   `json:"type,omitempty"` // Constraint: enum [see schema]
@@ -157,6 +158,7 @@ type CDXDataGovernanceResponsibleParty struct {
 // TODO: Should support OpenAPI specification (documents) as canonical descriptors
 // TODO: v1.2 "licenses" used to be an anon. type until v1.3 intro. the `LicenseChoice` def.
 // validate a v1.2 SBOM wit the anon. type parses properly
+// NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXService struct {
 	BOMRef             *CDXRefType              `json:"bom-ref,omitempty"`
 	Provider           *CDXOrganizationalEntity `json:"provider,omitempty"`
@@ -219,6 +221,7 @@ type CDXSwid struct {
 // v1.2: was an anon. type in schema
 // v1.3: created explicit schema object type
 // Note: "oneOf": ["license", "expression"] is required
+// NOTE: CDXLicenseExpression is a named `string` type as of v1.5
 type CDXLicenseChoice struct {
 	License *CDXLicense `json:"license,omitempty"`
 	//Expression string     `json:"expression,omitempty"` // v1.5: changed
@@ -226,6 +229,7 @@ type CDXLicenseChoice struct {
 }
 
 // v1.5: added
+// NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXLicenseExpression struct {
 	Expression string      `json:"expression,omitempty"`
 	BOMRef     *CDXRefType `json:"bom-ref,omitempty"`
@@ -235,6 +239,7 @@ type CDXLicenseExpression struct {
 // v1.3: created
 // Note: "id" SHOULD be an SPDX license ID
 // Note: "oneOf": ["id", "name"] is required
+// NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXLicense struct {
 	Id         string         `json:"id,omitempty"`
 	Name       string         `json:"name,omitempty"`
@@ -360,6 +365,7 @@ type CDXComponentEvidence struct {
 // v1.5: added "bom-ref", "vulnerabilities"
 // Note: "aggregate" is type `aggregateType` which is a constrained string
 // TODO: Should not be plural; open issue against v2.0 schema
+// NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXCompositions struct {
 	Aggregate       string              `json:"aggregate,omitempty"`
 	Assemblies      *[]string           `json:"assemblies,omitempty"`

@@ -111,11 +111,12 @@ func (bom *BOM) HashComponent(cdxComponent CDXComponent, whereFilters []common.W
 	resourceInfo.Component = cdxComponent
 	resourceInfo.Name = cdxComponent.Name
 	if cdxComponent.BOMRef != nil {
-		resourceInfo.BOMRef = (*cdxComponent.BOMRef).String()
+		ref := *cdxComponent.BOMRef
+		resourceInfo.BOMRef = ref.String()
 	}
 	resourceInfo.Version = cdxComponent.Version
 	if cdxComponent.Supplier != nil {
-		resourceInfo.SupplierProvider = *cdxComponent.Supplier
+		resourceInfo.SupplierProvider = cdxComponent.Supplier
 	}
 	resourceInfo.Properties = cdxComponent.Properties
 
@@ -211,7 +212,7 @@ func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFi
 	}
 	resourceInfo.Version = cdxService.Version
 	if cdxService.Provider != nil {
-		resourceInfo.SupplierProvider = *cdxService.Provider
+		resourceInfo.SupplierProvider = cdxService.Provider
 	}
 	resourceInfo.Properties = cdxService.Properties
 
@@ -290,6 +291,7 @@ func (bom *BOM) HashVulnerability(cdxVulnerability CDXVulnerability, whereFilter
 	var vulnInfo VulnerabilityInfo
 	vi = &vulnInfo
 
+	// Note: the CDX Vulnerability type has no required fields
 	if reflect.DeepEqual(cdxVulnerability, CDXVulnerability{}) {
 		err = getLogger().Errorf("invalid vulnerability info: missing or empty : %v ", cdxVulnerability)
 		return
@@ -313,7 +315,7 @@ func (bom *BOM) HashVulnerability(cdxVulnerability CDXVulnerability, whereFilter
 
 	// hash any component w/o a license using special key name
 	vulnInfo.Vulnerability = cdxVulnerability
-	if cdxVulnerability.BOMRef != nil {
+	if cdxVulnerability.BOMRef != nil && *&cdxVulnerability.BOMRef != nil {
 		vulnInfo.BOMRef = cdxVulnerability.BOMRef.String()
 	}
 	vulnInfo.Id = cdxVulnerability.Id
