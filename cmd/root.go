@@ -187,8 +187,8 @@ func init() {
 	rootCmd.AddCommand(NewCommandResource())
 	rootCmd.AddCommand(NewCommandVulnerability())
 	rootCmd.AddCommand(NewCommandDiff())
+	rootCmd.AddCommand(NewCommandTrim())
 	// TODO: when fully implemented uncomment:
-	//rootCmd.AddCommand(NewCommandTrim())
 	//rootCmd.AddCommand(NewCommandStats())
 
 	// Add license command its subcommands

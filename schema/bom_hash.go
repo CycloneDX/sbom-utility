@@ -293,7 +293,7 @@ func (bom *BOM) HashVulnerability(cdxVulnerability CDXVulnerability, whereFilter
 
 	// Note: the CDX Vulnerability type has no required fields
 	if reflect.DeepEqual(cdxVulnerability, CDXVulnerability{}) {
-		getLogger().Warning("vulnerability empty")
+		getLogger().Warning("empty vulnerability object found")
 		return
 	}
 

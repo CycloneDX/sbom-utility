@@ -26,40 +26,42 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// parent objects
+// flag help
 const (
-	SUBCOMMAND_TRIM_DOCUMENT_ROOT       = "root"
-	SUBCOMMAND_TRIM_DOCUMENT_COMPONENT  = "component"  // e.g., metadata
-	SUBCOMMAND_TRIM_DOCUMENT_COMPONENTS = "components" // e.g., root, tools
-	SUBCOMMAND_TRIM_DOCUMENT_SERVICES   = "services"   // e.g., root, tools
-	// others: license, releaseNotes, vulnerability, modelCard,
-	// (componentData) contents, formula, task, step, command,
-	// workspace, volume, trigger, event, inputType, outputType, condition
+	FLAG_TRIM_OUTPUT_FORMAT_HELP = "format output using the specified type"
+	FLAG_TRIM_FROM               = "from"
+	FLAG_TRIM_FROM_HELP          = "dot-separated list of JSON key names used to dereference into the JSON document" +
+		"\n - if not present, the default `--from` path is the document \"root\""
+	FLAG_TRIM_KEYS      = "keys"
+	FLAG_TRIM_KEYS_HELP = "comma-separated list of `keys=<key1,key2,...,keyN>` that will be trimmed from the JSON document"
 )
 
-// informational decorators
-const (
-	SUBCOMMAND_TRIM_EXT_PROPERTIES = "properties"
-	// TODO: SUBCOMMAND_TRIM_EXT_EXTERNAL_REFERENCES = "externalReferences"
-)
-
-var TRIM_LIST_OUTPUT_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
+var TRIM_OUTPUT_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{FORMAT_JSON}, ", ")
 
 func NewCommandTrim() *cobra.Command {
 	var command = new(cobra.Command)
 	command.Use = CMD_USAGE_TRIM
-	command.Short = "Trim elements from the BOM input file and write to output file"
-	command.Long = "Trim elements from the BOM input file and write to output file"
-	command.Flags().StringVarP(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
-		TRIM_LIST_OUTPUT_SUPPORTED_FORMATS)
+	command.Short = "(experimental) Trim elements from the BOM input file and write to output file"
+	command.Long = "(experimental) Trim elements from the BOM input file and write to output file"
 	command.RunE = trimCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		// Test for required flags (parameters)
 		err = preRunTestForInputFile(cmd, args)
 		return
 	}
+	initCommandTrimFlags(command)
 	return command
+}
+
+func initCommandTrimFlags(command *cobra.Command) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	command.PersistentFlags().StringVar(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_OUTPUT_FORMAT, FORMAT_JSON,
+		FLAG_TRIM_OUTPUT_FORMAT_HELP+TRIM_OUTPUT_SUPPORTED_FORMATS)
+	command.Flags().StringP(FLAG_TRIM_FROM, "", "", FLAG_TRIM_FROM_HELP)
+	command.Flags().StringP(FLAG_TRIM_KEYS, "", "", FLAG_TRIM_KEYS_HELP)
 }
 
 func trimCmdImpl(cmd *cobra.Command, args []string) (err error) {
