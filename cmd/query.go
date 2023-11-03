@@ -185,18 +185,6 @@ func queryCmdImpl(cmd *cobra.Command, args []string) (err error) {
 		return errQuery
 	}
 
-	// // Convert query results to formatted JSON for output
-	// fResult, errFormat := utils.ConvertMapToJson(result)
-
-	// if errFormat != nil {
-	// 	return errFormat
-	// }
-
-	// // Always, output the (JSON) formatted data directly to stdout (for now)
-	// // NOTE: This output is NOT subject to log-level settings; use `fmt` package
-	// // TODO: support --output to file
-	// fmt.Printf("%s\n", fResult)
-
 	return
 }
 

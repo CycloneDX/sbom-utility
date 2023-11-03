@@ -26,18 +26,30 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// flag help
+// flags (do not translate)
+const (
+	FLAG_TRIM_PATHS = "paths"
+	FLAG_TRIM_KEYS  = "keys"
+)
+
+// flag help (translate)
 const (
 	FLAG_TRIM_OUTPUT_FORMAT_HELP = "format output using the specified type"
-	FLAG_TRIM_FROM               = "from"
-	FLAG_TRIM_FROM_HELP          = "dot-separated list of JSON key names used to dereference into the JSON document" +
+	FLAG_TRIM_FROM_PATHS         = "comma-separated list of dot-separated JSON document paths used to scope where trim is applied" +
 		"\n - if not present, the default `--from` path is the document \"root\""
-	FLAG_TRIM_KEYS      = "keys"
 	FLAG_TRIM_KEYS_HELP = "comma-separated list of `keys=<key1,key2,...,keyN>` that will be trimmed from the JSON document"
+	MSG_TRIM_FLAG_KEYS  = "JSON map keys to trim (delete) (e.g., \"key1,key2,...,keyN\")"
 )
 
 var TRIM_OUTPUT_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{FORMAT_JSON}, ", ")
+
+const (
+	TRIM_KEYS_SEP            = ","
+	TRIM_PATH_SEP            = "."
+	TRIM_PATHS_SEP           = ","
+	TRIM_FROM_TOKEN_WILDCARD = "*"
+)
 
 func NewCommandTrim() *cobra.Command {
 	var command = new(cobra.Command)
@@ -51,17 +63,24 @@ func NewCommandTrim() *cobra.Command {
 		return
 	}
 	initCommandTrimFlags(command)
+
 	return command
 }
 
-func initCommandTrimFlags(command *cobra.Command) {
+func initCommandTrimFlags(command *cobra.Command) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	command.PersistentFlags().StringVar(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_OUTPUT_FORMAT, FORMAT_JSON,
 		FLAG_TRIM_OUTPUT_FORMAT_HELP+TRIM_OUTPUT_SUPPORTED_FORMATS)
-	command.Flags().StringP(FLAG_TRIM_FROM, "", "", FLAG_TRIM_FROM_HELP)
-	command.Flags().StringP(FLAG_TRIM_KEYS, "", "", FLAG_TRIM_KEYS_HELP)
+	command.Flags().StringP(FLAG_TRIM_PATHS, "", "", FLAG_TRIM_FROM_PATHS)
+	//command.Flags().StringP(FLAG_TRIM_KEYS, "", "", FLAG_TRIM_KEYS_HELP)
+	command.Flags().StringVarP(&utils.GlobalFlags.TrimFlags.RawKeys, FLAG_TRIM_KEYS, "", "", MSG_TRIM_FLAG_KEYS)
+	err = command.MarkFlagRequired(FLAG_TRIM_KEYS)
+	if err != nil {
+		err = getLogger().Errorf("unable to mark flag `%s` as required: %s", FLAG_TRIM_KEYS, err)
+	}
+	return
 }
 
 func trimCmdImpl(cmd *cobra.Command, args []string) (err error) {
@@ -81,6 +100,33 @@ func trimCmdImpl(cmd *cobra.Command, args []string) (err error) {
 			getLogger().Infof("Closed output file: `%s`", outputFilename)
 		}
 	}()
+
+	var fromClause string
+	//keys, err = cmd.Flags().GetString(FLAG_TRIM_KEYS)
+	// if err != nil {
+	// 	getLogger().Tracef("Trim: '%s' flag NOT found", FLAG_TRIM_KEYS)
+	// } else {
+	// 	getLogger().Tracef("Trim: '%s' flag found: %s", FLAG_TRIM_KEYS, keys)
+	// 	utils.GlobalFlags.TrimFlags.RawKeys = keys
+	// }
+
+	if keys := utils.GlobalFlags.TrimFlags.RawKeys; keys != "" {
+		utils.GlobalFlags.TrimFlags.Keys = strings.Split(keys, TRIM_KEYS_SEP)
+		getLogger().Tracef("Trim: keys: %v\n", keys)
+	} else {
+		getLogger().Tracef("Trim: keys NOT found on `%s` flag", FLAG_TRIM_KEYS)
+	}
+
+	// TODO: limit the "trim" scope using Query() command parameters
+	// TODO: i.e., Parse flags into a query request struct:
+	// 		var queryRequest *QueryRequest = new(QueryRequest)
+	// 		err = queryRequest.readQueryFlags(cmd)
+	fromClause, err = cmd.Flags().GetString(FLAG_TRIM_PATHS)
+	if err != nil {
+		getLogger().Tracef("Trim: '%s' flag NOT found", FLAG_TRIM_PATHS)
+	} else {
+		getLogger().Tracef("Trim: '%s' flag found: %s", FLAG_TRIM_PATHS, fromClause)
+	}
 
 	if err == nil {
 		err = Trim(writer, utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.TrimFlags)
