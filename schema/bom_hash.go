@@ -89,12 +89,12 @@ func (bom *BOM) HashComponent(cdxComponent CDXComponent, whereFilters []common.W
 	ri = &resourceInfo
 
 	if reflect.DeepEqual(cdxComponent, CDXComponent{}) {
-		getLogger().Errorf("invalid component: missing or empty : %v ", cdxComponent)
+		getLogger().Warning("empty component object found")
 		return
 	}
 
 	if cdxComponent.Name == "" {
-		getLogger().Errorf("component missing required value `name` : %v ", cdxComponent)
+		getLogger().Warningf("component missing required value `name` : %v ", cdxComponent)
 	}
 
 	if cdxComponent.Version == "" {
@@ -187,12 +187,12 @@ func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFi
 	ri = &resourceInfo
 
 	if reflect.DeepEqual(cdxService, CDXService{}) {
-		getLogger().Errorf("invalid service: missing or empty : %v", cdxService)
+		getLogger().Warning("empty service object found")
 		return
 	}
 
 	if cdxService.Name == "" {
-		getLogger().Errorf("service missing required value `name` : %v ", cdxService)
+		getLogger().Warningf("service missing required value `name` : %v ", cdxService)
 	}
 
 	if cdxService.Version == "" {

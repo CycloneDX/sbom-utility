@@ -75,75 +75,102 @@ func innerDiffError(t *testing.T, baseFilename string, revisedFilename string, f
 }
 
 func TestDiffCdx14MatureDeltaDefault(t *testing.T) {
-	innerDiffError(t,
+	err := innerDiffError(t,
 		TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE,
 		TEST_CDX_1_4_MATURITY_EXAMPLE_1_DELTA,
 		FORMAT_DEFAULT,
 		nil)
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestDiffCdx14MatureDeltaText(t *testing.T) {
-	innerDiffError(t,
+	err := innerDiffError(t,
 		TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE,
 		TEST_CDX_1_4_MATURITY_EXAMPLE_1_DELTA,
 		FORMAT_TEXT,
 		nil)
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestDiffCdx14MatureDeltaJson(t *testing.T) {
-	innerDiffError(t,
+	err := innerDiffError(t,
 		TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE,
 		TEST_CDX_1_4_MATURITY_EXAMPLE_1_DELTA,
 		FORMAT_JSON,
 		nil)
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestDiffJsonArrayOrderMove2ObjectsFormatJson(t *testing.T) {
-	innerDiffError(t,
+	err := innerDiffError(t,
 		TEST_ARRAY_ORDER_2_CHANGES_BASE,
 		TEST_ARRAY_ORDER_2_CHANGES_DELTA,
 		FORMAT_JSON,
 		nil)
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestDiffJsonArrayOrderMove1ObjectFormatJson(t *testing.T) {
-	innerDiffError(t,
+	err := innerDiffError(t,
 		TEST_ARRAY_ORDER_CHANGE_BASE,
 		TEST_ARRAY_ORDER_CHANGE_DELTA,
 		FORMAT_JSON,
 		nil)
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestDiffJsonArrayOrderMove1ObjectFormatText(t *testing.T) {
-	innerDiffError(t,
+	err := innerDiffError(t,
 		TEST_ARRAY_ORDER_CHANGE_BASE,
 		TEST_ARRAY_ORDER_CHANGE_DELTA,
 		FORMAT_TEXT,
 		nil)
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestDiffJsonArrayOrderMove1ObjectWithDeleteFormatText(t *testing.T) {
-	innerDiffError(t,
+	err := innerDiffError(t,
 		TEST_ARRAY_ORDER_CHANGE_WITH_DELETE_BASE,
 		TEST_ARRAY_ORDER_CHANGE_WITH_DELETE_DELTA,
 		FORMAT_TEXT,
 		nil)
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestDiffJsonArrayOrderMove1ObjectWithAddFormatText(t *testing.T) {
-	innerDiffError(t,
+	err := innerDiffError(t,
 		TEST_ARRAY_ORDER_CHANGE_WITH_ADD_BASE,
 		TEST_ARRAY_ORDER_CHANGE_WITH_ADD_DELTA,
 		FORMAT_TEXT,
 		nil)
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestDiffJsonArrayOrderMove1ObjectWithAddAndDeleteFormatText(t *testing.T) {
-	innerDiffError(t,
+	err := innerDiffError(t,
 		TEST_ARRAY_ORDER_CHANGE_WITH_ADD_AND_DELETE_BASE,
 		TEST_ARRAY_ORDER_CHANGE_WITH_ADD_AND_DELETE_DELTA,
 		FORMAT_TEXT,
 		nil)
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 // func debugDeltas(deltas []diff.Delta, indent string) (err error) {
