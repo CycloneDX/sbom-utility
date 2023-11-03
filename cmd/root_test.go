@@ -132,7 +132,10 @@ func TestMain(m *testing.M) {
 
 	// Load configs, create logger, etc.
 	// NOTE: Be sure ALL "go test" flags are parsed/processed BEFORE initializing
-	initTestInfrastructure()
+	err := initTestInfrastructure()
+	if err != nil {
+		os.Exit(ERROR_APPLICATION)
+	}
 
 	// Run test
 	exitCode := m.Run()
@@ -145,7 +148,7 @@ func TestMain(m *testing.M) {
 // NOTE: if we need to override test setup in our own "main" routine, you can create
 // a function named "TestMain" (and you will need to manage Init() and other setup)
 // See: https://pkg.go.dev/testing
-func initTestInfrastructure() {
+func initTestInfrastructure() (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -154,11 +157,16 @@ func initTestInfrastructure() {
 
 		// Assures we are loading relative to the application's executable directory
 		// which may vary if using IDEs or "go test"
-		initTestApplicationDirectories()
+		err = initTestApplicationDirectories()
+		if err != nil {
+			return
+		}
 
 		// Leverage the root command's init function to populate schemas, policies, etc.
+		// Note: This method cannot return values as it is used as a callback by the Cobra framework
 		initConfigurations()
 	})
+	return
 }
 
 // Set the working directory to match where the executable is being called from
