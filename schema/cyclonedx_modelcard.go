@@ -22,6 +22,7 @@ package schema
 // https://github.com/tensorflow/model-card-toolkit/blob/main/model_card_toolkit/schema/v0.0.2/model_card.schema.json. In addition, CycloneDX model card support includes portions of VerifyML, also released under the Apache 2.0 license and available from https://github.com/cylynx/verifyml/blob/main/verifyml/model_card_toolkit/schema/v0.0.4/model_card.schema.json.",
 
 // v1.5: added
+// NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXModelCard struct {
 	BOMRef               CDXRefType              `json:"bom-ref,omitempty"`              // v1.5
 	ModelParameters      CDXModelParameters      `json:"modelParameters,omitempty"`      // v1.5

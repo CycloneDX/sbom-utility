@@ -18,6 +18,7 @@
 package schema
 
 // v1.5: added
+// NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXFormula struct {
 	BOMRef     CDXRefType     `json:"bom-ref,omitempty"`    // v1.5
 	Components []CDXComponent `json:"components,omitempty"` // v1.5
@@ -27,6 +28,7 @@ type CDXFormula struct {
 }
 
 // v1.5: added
+// NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXWorkflow struct {
 	BOMRef             CDXRefType                   `json:"bom-ref,omitempty"`            // v1.5
 	Uid                string                       `json:"uid,omitempty"`                // v1.5
@@ -48,6 +50,7 @@ type CDXWorkflow struct {
 }
 
 // v1.5: added
+// NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXTask struct {
 	BOMRef             CDXRefType                   `json:"bom-ref,omitempty"`            // v1.5
 	Uid                string                       `json:"uid,omitempty"`                // v1.5
@@ -85,6 +88,7 @@ type CDXCommand struct {
 }
 
 // v1.5: added
+// NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXWorkspace struct {
 	BOMRef             CDXRefType                   `json:"bom-ref,omitempty"`            // v1.5
 	Uid                string                       `json:"uid,omitempty"`                // v1.5
@@ -101,6 +105,7 @@ type CDXWorkspace struct {
 }
 
 // v1.5: added
+// NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXVolume struct {
 	Uid           string        `json:"uid,omitempty"`           // v1.5
 	Name          string        `json:"name,omitempty"`          // v1.5

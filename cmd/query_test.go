@@ -138,7 +138,7 @@ func VerifySelectedFieldsInJsonMap(t *testing.T, request *QueryRequest, results 
 func printResult(iResult interface{}) {
 	if !*TestLogQuiet {
 		// Format results in JSON
-		fResult, _ := utils.ConvertMapToJson(iResult)
+		fResult, _ := utils.ConvertAnyToFormattedJson(iResult)
 		// Output the JSON data directly to stdout (not subject to log-level)
 		fmt.Printf("%s\n", fResult)
 	}

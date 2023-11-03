@@ -48,8 +48,8 @@ const (
 func NewCommandDiff() *cobra.Command {
 	var command = new(cobra.Command)
 	command.Use = CMD_USAGE_DIFF
-	command.Short = "Report on differences between two BOM files using RFC 6902 format"
-	command.Long = "Report on differences between two BOM files using RFC 6902 format"
+	command.Short = "(experimental) Report on differences between two similar BOM files using RFC 6902 format"
+	command.Long = "(experimental) Report on differences between two similar BOM files using RFC 6902 format"
 	command.Flags().StringVarP(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
 		FLAG_DIFF_OUTPUT_FORMAT_HELP+DIFF_OUTPUT_SUPPORTED_FORMATS)
 	command.Flags().StringVarP(&utils.GlobalFlags.DiffFlags.RevisedFile,

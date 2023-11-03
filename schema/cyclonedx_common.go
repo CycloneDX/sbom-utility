@@ -27,6 +27,7 @@ func (ref CDXRefType) String() string {
 }
 
 // v1.5 added
+// NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXRefLinkType CDXRefType // "allOf": [{"$ref": "#/definitions/refType"}]
 
 // v1.5 added Stringer interface
@@ -88,6 +89,7 @@ type CDXNote struct {
 
 // v1.2: existed
 // v1.5: added "bom-ref"
+// NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXOrganizationalEntity struct {
 	Name    string                      `json:"name,omitempty"`
 	Url     []string                    `json:"url,omitempty"`
@@ -97,6 +99,7 @@ type CDXOrganizationalEntity struct {
 
 // v1.2: existed
 // v1.5: added "bom-ref"
+// NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXOrganizationalContact struct {
 	Name   string      `json:"name,omitempty"`
 	Email  string      `json:"email,omitempty"`

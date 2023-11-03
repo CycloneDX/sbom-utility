@@ -17,10 +17,14 @@
 
 package schema
 
-func (bom *BOM) TrimJsonMap(key string) {
-	if key != "" {
+func (bom *BOM) TrimJsonMap(keys []string) {
+	if len(keys) > 0 {
 		if jsonMap := bom.GetJSONMap(); jsonMap != nil {
-			bom.trimEntity(jsonMap, key)
+			for _, key := range keys {
+				if key != "" {
+					bom.trimEntity(jsonMap, key)
+				}
+			}
 		}
 	}
 }
@@ -49,11 +53,12 @@ func (bom *BOM) trimEntity(entity interface{}, key string) {
 	case []interface{}:
 		// if type is other than above
 		sliceValue := typedEntity
-		for i := range sliceValue {
-			bom.trimEntity(sliceValue[i], key)
+		for iSlice := range sliceValue {
+			bom.trimEntity(sliceValue[iSlice], key)
 		}
 	default:
 		// if type is other than above
 		getLogger().Debugf("unhandled type: [%T]", typedEntity)
 	}
+
 }

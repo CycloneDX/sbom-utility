@@ -78,6 +78,11 @@ test: test_clean
 test_cmd: test_clean
 	@echo "Testing `cmd` package"
 	go test ./cmd -v --args --quiet
+	go test ./schema -v --args --quiet
+
+test_schema: test_clean
+	@echo "Testing `schema` package"
+	go test ./schema -v --args --quiet
 
 # Run the unit tests
 unit_tests: test_clean
@@ -96,6 +101,11 @@ format:
 lint: format
 	@echo "Linting"
 	golint .
+
+# install: go install github.com/golangci/golangci-lint/cmd/golangci-lint@x.y.z
+ci-lint:
+	@echo "golangci-lint run"
+	golangci-lint run
 
 install:
 	go install

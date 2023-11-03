@@ -54,8 +54,8 @@ type CDXResourceInfo struct {
 	BOMRef           string `json:"bom-ref"`
 	Name             string `json:"name"`
 	Version          string `json:"version"`
-	SupplierProvider CDXOrganizationalEntity
-	Properties       *([]CDXProperty)
+	SupplierProvider *CDXOrganizationalEntity
+	Properties       *[]CDXProperty
 	Component        CDXComponent
 	Service          CDXService
 }

@@ -191,7 +191,7 @@ func (schemaConfig *BOMFormatAndSchemaConfig) FindFormatAndSchema(bom *BOM) (err
 			// Copy format info into Sbom context
 			bom.FormatInfo = format
 			err = bom.findSchemaVersionWithVariant(format, version, utils.GlobalFlags.ValidateFlags.SchemaVariant)
-			return
+			return // success
 		}
 	}
 

@@ -53,7 +53,6 @@ var ENCODED_EMPTY_SLICE_OF_STRUCT = []byte("[{}]")
 // CDXLicenseChoice structs
 // --------------------------
 
-// TODO: v1.5: no longer works with addition of "Licensing" object (requires deep compare/copy)
 func (value *CDXLicenseChoice) MarshalJSON() (marshalled []byte, err error) {
 	temp := map[string]interface{}{}
 	if value.Expression != "" {
@@ -61,7 +60,7 @@ func (value *CDXLicenseChoice) MarshalJSON() (marshalled []byte, err error) {
 	}
 
 	if !reflect.ValueOf(value.License).IsZero() {
-		temp["license"] = &value.License
+		temp["license"] = value.License
 	}
 
 	return json.Marshal(temp)
@@ -82,10 +81,22 @@ func (value *CDXLicense) MarshalJSON() (bytes []byte, err error) {
 		temp["url"] = value.Url
 	}
 
-	if value != nil && value.Text != nil {
-		if *value.Text != (CDXAttachment{}) {
-			temp["text"] = value.Text
-		}
+	// CDXAttachment
+	if !reflect.ValueOf(value.Text).IsZero() {
+		temp["text"] = value.Text
+	}
+
+	// v1.5 properties follow:
+	if value.BOMRef != nil && *value.BOMRef != "" {
+		temp["bom-ref"] = value.BOMRef
+	}
+
+	if value.Properties != nil && len(*value.Properties) > 0 {
+		temp["properties"] = value.Properties
+	}
+
+	if value.Licensing != nil {
+		temp["licensing"] = value.Licensing
 	}
 
 	return json.Marshal(temp)
@@ -117,7 +128,7 @@ func (value *CDXAttachment) MarshalJSON() ([]byte, error) {
 func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
 	temp := map[string]interface{}{}
 
-	if value.BOMRef != "" {
+	if value.BOMRef != nil && *value.BOMRef != "" {
 		temp["bom-ref"] = value.BOMRef
 	}
 
@@ -150,8 +161,8 @@ func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
 	}
 
 	// CDXVulnerabilitySource
-	if value.Source != (CDXVulnerabilitySource{}) {
-		temp["source"] = &value.Source
+	if value.Source != nil && *value.Source != (CDXVulnerabilitySource{}) {
+		temp["source"] = value.Source
 	}
 
 	// CDXCredit (anon. type)
@@ -205,7 +216,7 @@ func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
 	}
 
 	if len(value.Properties) > 0 {
-		temp["properties"] = &value.Properties
+		temp["properties"] = value.Properties
 	}
 
 	// v1.5 properties follow

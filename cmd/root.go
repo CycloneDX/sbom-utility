@@ -187,8 +187,8 @@ func init() {
 	rootCmd.AddCommand(NewCommandResource())
 	rootCmd.AddCommand(NewCommandVulnerability())
 	rootCmd.AddCommand(NewCommandDiff())
+	rootCmd.AddCommand(NewCommandTrim())
 	// TODO: when fully implemented uncomment:
-	//rootCmd.AddCommand(NewCommandTrim())
 	//rootCmd.AddCommand(NewCommandStats())
 
 	// Add license command its subcommands
@@ -203,6 +203,7 @@ func init() {
 // config.json (SBOM format/schema definitions),
 // license.json (license policy definitions),
 // custom.json (custom validation settings)
+// Note: This method cannot return values as it is used as a callback by the Cobra framework
 func initConfigurations() {
 	getLogger().Enter()
 	defer getLogger().Exit()
@@ -211,9 +212,9 @@ func initConfigurations() {
 	getLogger().Tracef("Working Directory`: `%s`", utils.GlobalFlags.WorkingDir)
 
 	// Print global flags in debug mode
-	flagInfo, err := getLogger().FormatStructE(utils.GlobalFlags)
-	if err != nil {
-		getLogger().Error(err.Error())
+	flagInfo, errFormat := getLogger().FormatStructE(utils.GlobalFlags)
+	if errFormat != nil {
+		getLogger().Error(errFormat.Error())
 	} else {
 		getLogger().Debugf("%s: \n%s", "utils.Flags", flagInfo)
 	}
@@ -224,18 +225,18 @@ func initConfigurations() {
 
 	// Load application configuration file (i.e., primarily SBOM supported Formats/Schemas)
 	var schemaConfigFile = utils.GlobalFlags.ConfigSchemaFile
-	errorLoadSchemaConfig := SupportedFormatConfig.LoadSchemaConfigFile(schemaConfigFile, DEFAULT_SCHEMA_CONFIG)
-	if errorLoadSchemaConfig != nil {
-		getLogger().Error(errorLoadSchemaConfig.Error())
+	err := SupportedFormatConfig.LoadSchemaConfigFile(schemaConfigFile, DEFAULT_SCHEMA_CONFIG)
+	if err != nil {
+		getLogger().Error(err.Error())
 		os.Exit(ERROR_APPLICATION)
 	}
 
 	// License Policy Configuration (customizable via command line, with default config.)
 	var licensePolicyFile = utils.GlobalFlags.ConfigLicensePolicyFile
 	LicensePolicyConfig = new(schema.LicensePolicyConfig)
-	errLoadLicensePolicies := LicensePolicyConfig.LoadHashPolicyConfigurationFile(licensePolicyFile, DEFAULT_LICENSE_POLICY_CONFIG)
-	if errLoadLicensePolicies != nil {
-		getLogger().Warning(errLoadLicensePolicies.Error())
+	err = LicensePolicyConfig.LoadHashPolicyConfigurationFile(licensePolicyFile, DEFAULT_LICENSE_POLICY_CONFIG)
+	if err != nil {
+		getLogger().Warning(err.Error())
 		getLogger().Warningf("All license policies will default to `%s`.", schema.POLICY_UNDEFINED)
 	}
 }
@@ -323,8 +324,11 @@ func createOutputFile(outputFilename string) (outputFile *os.File, writer io.Wri
 
 			// If the (temporary, not persisted) "test" output directory does not exist, create it
 			path := filepath.Dir(absFilename)
-			if _, err := os.Stat(path); os.IsNotExist(err) {
-				os.MkdirAll(path, os.ModePerm)
+			if _, err = os.Stat(path); os.IsNotExist(err) {
+				err = os.MkdirAll(path, os.ModePerm)
+				if err != nil {
+					return
+				}
 			}
 
 			// Open our jsonFile

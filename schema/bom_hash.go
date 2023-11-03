@@ -89,12 +89,12 @@ func (bom *BOM) HashComponent(cdxComponent CDXComponent, whereFilters []common.W
 	ri = &resourceInfo
 
 	if reflect.DeepEqual(cdxComponent, CDXComponent{}) {
-		getLogger().Errorf("invalid component: missing or empty : %v ", cdxComponent)
+		getLogger().Warning("empty component object found")
 		return
 	}
 
 	if cdxComponent.Name == "" {
-		getLogger().Errorf("component missing required value `name` : %v ", cdxComponent)
+		getLogger().Warningf("component missing required value `name` : %v ", cdxComponent)
 	}
 
 	if cdxComponent.Version == "" {
@@ -111,11 +111,12 @@ func (bom *BOM) HashComponent(cdxComponent CDXComponent, whereFilters []common.W
 	resourceInfo.Component = cdxComponent
 	resourceInfo.Name = cdxComponent.Name
 	if cdxComponent.BOMRef != nil {
-		resourceInfo.BOMRef = (*cdxComponent.BOMRef).String()
+		ref := *cdxComponent.BOMRef
+		resourceInfo.BOMRef = ref.String()
 	}
 	resourceInfo.Version = cdxComponent.Version
 	if cdxComponent.Supplier != nil {
-		resourceInfo.SupplierProvider = *cdxComponent.Supplier
+		resourceInfo.SupplierProvider = cdxComponent.Supplier
 	}
 	resourceInfo.Properties = cdxComponent.Properties
 
@@ -186,19 +187,19 @@ func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFi
 	ri = &resourceInfo
 
 	if reflect.DeepEqual(cdxService, CDXService{}) {
-		getLogger().Errorf("invalid service: missing or empty : %v", cdxService)
+		getLogger().Warning("empty service object found")
 		return
 	}
 
 	if cdxService.Name == "" {
-		getLogger().Errorf("service missing required value `name` : %v ", cdxService)
+		getLogger().Warningf("service missing required value `name` : %v ", cdxService)
 	}
 
 	if cdxService.Version == "" {
 		getLogger().Warningf("service named `%s` missing `version`", cdxService.Name)
 	}
 
-	if cdxService.BOMRef == nil && *cdxService.BOMRef != "" {
+	if cdxService.BOMRef == nil || *cdxService.BOMRef != "" {
 		getLogger().Warningf("service named `%s` missing `bom-ref`", cdxService.Name)
 	}
 
@@ -211,7 +212,7 @@ func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFi
 	}
 	resourceInfo.Version = cdxService.Version
 	if cdxService.Provider != nil {
-		resourceInfo.SupplierProvider = *cdxService.Provider
+		resourceInfo.SupplierProvider = cdxService.Provider
 	}
 	resourceInfo.Properties = cdxService.Properties
 
@@ -290,8 +291,9 @@ func (bom *BOM) HashVulnerability(cdxVulnerability CDXVulnerability, whereFilter
 	var vulnInfo VulnerabilityInfo
 	vi = &vulnInfo
 
+	// Note: the CDX Vulnerability type has no required fields
 	if reflect.DeepEqual(cdxVulnerability, CDXVulnerability{}) {
-		err = getLogger().Errorf("invalid vulnerability info: missing or empty : %v ", cdxVulnerability)
+		getLogger().Warning("empty vulnerability object found")
 		return
 	}
 
@@ -313,7 +315,9 @@ func (bom *BOM) HashVulnerability(cdxVulnerability CDXVulnerability, whereFilter
 
 	// hash any component w/o a license using special key name
 	vulnInfo.Vulnerability = cdxVulnerability
-	vulnInfo.BOMRef = cdxVulnerability.BOMRef.String()
+	if cdxVulnerability.BOMRef != nil && *cdxVulnerability.BOMRef != "" {
+		vulnInfo.BOMRef = cdxVulnerability.BOMRef.String()
+	}
 	vulnInfo.Id = cdxVulnerability.Id
 
 	// Truncate dates from 2023-02-02T00:00:00.000Z to 2023-02-02
@@ -334,9 +338,12 @@ func (bom *BOM) HashVulnerability(cdxVulnerability CDXVulnerability, whereFilter
 	vulnInfo.Description = cdxVulnerability.Description
 
 	// Source object: retrieve report fields from nested objects
-	vulnInfo.Source = cdxVulnerability.Source
-	vulnInfo.SourceName = cdxVulnerability.Source.Name
-	vulnInfo.SourceUrl = cdxVulnerability.Source.Url
+	if cdxVulnerability.Source != nil {
+		source := *cdxVulnerability.Source
+		vulnInfo.Source = source
+		vulnInfo.SourceName = source.Name
+		vulnInfo.SourceUrl = source.Url
+	}
 
 	// TODO: replace empty Analysis values with "UNDEFINED"
 	vulnInfo.AnalysisState = cdxVulnerability.Analysis.State
