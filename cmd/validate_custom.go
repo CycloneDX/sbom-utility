@@ -207,7 +207,7 @@ func compileRegex(test string) (expression *regexp.Regexp, err error) {
 	if test != "" {
 		expression, err = regexp.Compile(test)
 		if err != nil {
-			getLogger().Errorf("invalid regular expression: `%s`", test)
+			err = getLogger().Errorf("invalid regular expression: `%s`", test)
 		}
 	}
 	return
