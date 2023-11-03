@@ -34,6 +34,7 @@ const (
 	TEST_HASH_CDX_1_5_METADATA_COMPONENT_NAME_ONLY = "test/hash/hash-cdx-1-5-metadata-component-name-only.sbom.json"
 	TEST_HASH_CDX_1_5_COMPONENTS                   = "test/hash/hash-cdx-1-5-components.sbom.json"
 	TEST_HASH_CDX_1_5_SERVICES                     = "test/hash/hash-cdx-1-5-services.sbom.json"
+	TEST_HASH_CDX_1_5_VULNERABILITIES              = "test/hash/hash-cdx-1-5-vulnerabilities.sbom.json"
 )
 
 type HashTestInfo struct {
@@ -216,6 +217,12 @@ func TestHashCDXComponentEmpty(t *testing.T) {
 	}
 
 	component := document.GetCdxMetadataComponent()
+	if component == nil {
+		err = getLogger().Errorf("invalid test case. No component declared in BOM metadata.")
+		t.Error(err)
+		return
+	}
+
 	_, err = document.HashComponent(*component, nil, false)
 	if err != nil {
 		t.Error(err)
@@ -237,6 +244,12 @@ func TestHashCDXComponentNameOnly(t *testing.T) {
 	}
 
 	component := document.GetCdxMetadataComponent()
+	if component == nil {
+		err = getLogger().Errorf("invalid test case. No component declared in BOM metadata.")
+		t.Error(err)
+		return
+	}
+
 	_, err = document.HashComponent(*component, nil, false)
 	if err != nil {
 		t.Error(err)
@@ -258,6 +271,12 @@ func TestHashCDXComponentFull(t *testing.T) {
 	}
 
 	component := document.GetCdxMetadataComponent()
+	if component == nil {
+		err = getLogger().Errorf("invalid test case. No component declared in BOM metadata.")
+		t.Error(err)
+		return
+	}
+
 	_, err = document.HashComponent(*component, nil, false)
 	if err != nil {
 		t.Error(err)
@@ -266,7 +285,7 @@ func TestHashCDXComponentFull(t *testing.T) {
 }
 
 func TestHashCDXComponentsSlice(t *testing.T) {
-	document, err := loadBOMFile(TEST_HASH_CDX_1_5_METADATA_COMPONENT_FULL)
+	document, err := loadBOMFile(TEST_HASH_CDX_1_5_COMPONENTS)
 	if err != nil {
 		t.Error(err)
 		return
@@ -279,6 +298,12 @@ func TestHashCDXComponentsSlice(t *testing.T) {
 	}
 
 	components := document.GetCdxComponents()
+	if components == nil || len(*components) == 0 {
+		err = getLogger().Errorf("invalid test case. No components declared in BOM.")
+		t.Error(err)
+		return
+	}
+
 	if components != nil {
 		err = document.HashComponents(*components, nil, false)
 		if err != nil {
@@ -288,20 +313,56 @@ func TestHashCDXComponentsSlice(t *testing.T) {
 	}
 }
 
-func TestHashCDXServices(t *testing.T) {
+func TestHashCDXServicesSlice(t *testing.T) {
 	document, err := loadBOMFile(TEST_HASH_CDX_1_5_SERVICES)
 	if err != nil {
+		t.Error(err)
 		return
 	}
 
 	// need to unmarshal into CDX structures.
 	if err = document.UnmarshalCycloneDXBOM(); err != nil {
+		t.Error(err)
 		return
 	}
 
 	services := document.GetCdxServices()
+	if services == nil || len(*services) == 0 {
+		err = getLogger().Errorf("invalid test case. No services declared in BOM.")
+		t.Error(err)
+		return
+	}
+
 	err = document.HashServices(*services, nil)
 	if err != nil {
+		t.Error(err)
+		return
+	}
+}
+
+func TestHashCDXVulnerabilitiesSlice(t *testing.T) {
+	document, err := loadBOMFile(TEST_HASH_CDX_1_5_VULNERABILITIES)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// need to unmarshal into CDX structures.
+	if err = document.UnmarshalCycloneDXBOM(); err != nil {
+		t.Error(err)
+		return
+	}
+
+	vulnerabilities := document.GetCdxVulnerabilities()
+	if vulnerabilities == nil || len(*vulnerabilities) == 0 {
+		err = getLogger().Errorf("invalid test case. No vulnerabilities declared in BOM.")
+		t.Error(err)
+		return
+	}
+
+	err = document.HashVulnerabilities(*vulnerabilities, nil)
+	if err != nil {
+		t.Error(err)
 		return
 	}
 }
