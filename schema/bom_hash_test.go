@@ -33,7 +33,7 @@ const (
 	TEST_HASH_CDX_1_5_METADATA_COMPONENT_FULL      = "test/hash/hash-cdx-1-5-metadata-component-full.sbom.json"
 	TEST_HASH_CDX_1_5_METADATA_COMPONENT_NAME_ONLY = "test/hash/hash-cdx-1-5-metadata-component-name-only.sbom.json"
 	TEST_HASH_CDX_1_5_COMPONENTS                   = "test/hash/hash-cdx-1-5-components.sbom.json"
-	TEST_HASH_CDX_1_5_SERVICES                     = "test/hash/hahs-cdx-1-5-services.sbom.json"
+	TEST_HASH_CDX_1_5_SERVICES                     = "test/hash/hash-cdx-1-5-services.sbom.json"
 )
 
 type HashTestInfo struct {
@@ -119,11 +119,14 @@ func initTestInfrastructure() {
 
 		// Assures we are loading relative to the application's executable directory
 		// which may vary if using IDEs or "go test"
-		initTestApplicationDirectories()
+		err := initTestApplicationDirectories()
 
 		// Leverage the root command's init function to populate schemas, policies, etc.
 		// TODO: initConfigurations()
-		err := TestFormatConfig.LoadSchemaConfigFile("", DEFAULT_TEST_SCHEMA_CONFIG)
+		if err != nil {
+			err = TestFormatConfig.LoadSchemaConfigFile("", DEFAULT_TEST_SCHEMA_CONFIG)
+		}
+
 		if err != nil {
 			getLogger().Error(err.Error())
 			//	ERROR_APPLICATION = 1

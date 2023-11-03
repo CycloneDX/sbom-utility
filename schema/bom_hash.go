@@ -315,7 +315,7 @@ func (bom *BOM) HashVulnerability(cdxVulnerability CDXVulnerability, whereFilter
 
 	// hash any component w/o a license using special key name
 	vulnInfo.Vulnerability = cdxVulnerability
-	if cdxVulnerability.BOMRef != nil && *&cdxVulnerability.BOMRef != nil {
+	if cdxVulnerability.BOMRef != nil && *cdxVulnerability.BOMRef != "" {
 		vulnInfo.BOMRef = cdxVulnerability.BOMRef.String()
 	}
 	vulnInfo.Id = cdxVulnerability.Id

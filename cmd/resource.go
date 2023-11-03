@@ -362,7 +362,7 @@ func DisplayResourceListCSV(bom *schema.BOM, output io.Writer) (err error) {
 		)
 
 		if err = w.Write(line); err != nil {
-			getLogger().Errorf("csv.Write: %w", err)
+			err = getLogger().Errorf("csv.Write: %w", err)
 		}
 	}
 

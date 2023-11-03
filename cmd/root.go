@@ -323,8 +323,11 @@ func createOutputFile(outputFilename string) (outputFile *os.File, writer io.Wri
 
 			// If the (temporary, not persisted) "test" output directory does not exist, create it
 			path := filepath.Dir(absFilename)
-			if _, err := os.Stat(path); os.IsNotExist(err) {
-				os.MkdirAll(path, os.ModePerm)
+			if _, err = os.Stat(path); os.IsNotExist(err) {
+				err = os.MkdirAll(path, os.ModePerm)
+				if err != nil {
+					return
+				}
 			}
 
 			// Open our jsonFile
