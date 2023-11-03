@@ -121,16 +121,17 @@ func initTestInfrastructure() {
 		// which may vary if using IDEs or "go test"
 		err := initTestApplicationDirectories()
 
-		// Leverage the root command's init function to populate schemas, policies, etc.
-		// TODO: initConfigurations()
-		if err != nil {
+		if err == nil {
+			// Leverage the root command's init function to populate schemas, policies, etc.
+			// TODO: initConfigurations()
 			err = TestFormatConfig.LoadSchemaConfigFile("", DEFAULT_TEST_SCHEMA_CONFIG)
 		}
 
 		if err != nil {
 			getLogger().Error(err.Error())
 			//	ERROR_APPLICATION = 1
-			//os.Exit(ERROR_APPLICATION)
+			//TODO: move ERROR constants to common package
+			// os.Exit(ERROR_APPLICATION)
 			os.Exit(1)
 		}
 	})
@@ -171,6 +172,7 @@ func loadBOMFile(inputFile string) (document *BOM, err error) {
 
 	// Construct a BOM document object around the input file
 	document = NewBOM(inputFile)
+	document.filename = inputFile
 
 	// Load the raw, candidate BOM (file) as JSON data
 	getLogger().Infof("Attempting to load and unmarshal data from: `%s`...", document.GetFilenameInterpolated())
