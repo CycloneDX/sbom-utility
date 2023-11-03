@@ -73,8 +73,7 @@ func initCommandTrimFlags(command *cobra.Command) (err error) {
 
 	command.PersistentFlags().StringVar(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_OUTPUT_FORMAT, FORMAT_JSON,
 		FLAG_TRIM_OUTPUT_FORMAT_HELP+TRIM_OUTPUT_SUPPORTED_FORMATS)
-	command.Flags().StringP(FLAG_TRIM_PATHS, "", "", FLAG_TRIM_FROM_PATHS)
-	//command.Flags().StringP(FLAG_TRIM_KEYS, "", "", FLAG_TRIM_KEYS_HELP)
+	command.Flags().StringVarP(&utils.GlobalFlags.TrimFlags.RawPaths, FLAG_TRIM_PATHS, "", "", FLAG_TRIM_FROM_PATHS)
 	command.Flags().StringVarP(&utils.GlobalFlags.TrimFlags.RawKeys, FLAG_TRIM_KEYS, "", "", MSG_TRIM_FLAG_KEYS)
 	err = command.MarkFlagRequired(FLAG_TRIM_KEYS)
 	if err != nil {
@@ -101,33 +100,26 @@ func trimCmdImpl(cmd *cobra.Command, args []string) (err error) {
 		}
 	}()
 
-	var fromClause string
-	//keys, err = cmd.Flags().GetString(FLAG_TRIM_KEYS)
-	// if err != nil {
-	// 	getLogger().Tracef("Trim: '%s' flag NOT found", FLAG_TRIM_KEYS)
-	// } else {
-	// 	getLogger().Tracef("Trim: '%s' flag found: %s", FLAG_TRIM_KEYS, keys)
-	// 	utils.GlobalFlags.TrimFlags.RawKeys = keys
-	// }
-
+	// --keys parameter
 	if keys := utils.GlobalFlags.TrimFlags.RawKeys; keys != "" {
 		utils.GlobalFlags.TrimFlags.Keys = strings.Split(keys, TRIM_KEYS_SEP)
-		getLogger().Tracef("Trim: keys: %v\n", keys)
+		getLogger().Tracef("Trim: keys: `%v`\n", keys)
 	} else {
-		getLogger().Tracef("Trim: keys NOT found on `%s` flag", FLAG_TRIM_KEYS)
+		getLogger().Tracef("Trim: required parameter NOT found for `%s` flag", FLAG_TRIM_KEYS)
+	}
+
+	// --paths parameter
+	if paths := utils.GlobalFlags.TrimFlags.RawPaths; paths != "" {
+		utils.GlobalFlags.TrimFlags.Paths = strings.Split(paths, TRIM_PATHS_SEP)
+		getLogger().Tracef("Trim: paths: `%v`\n", paths)
+	} else {
+		getLogger().Tracef("Trim: required parameter NOT found for `%s` flag", FLAG_TRIM_PATHS)
 	}
 
 	// TODO: limit the "trim" scope using Query() command parameters
 	// TODO: i.e., Parse flags into a query request struct:
 	// 		var queryRequest *QueryRequest = new(QueryRequest)
 	// 		err = queryRequest.readQueryFlags(cmd)
-	fromClause, err = cmd.Flags().GetString(FLAG_TRIM_PATHS)
-	if err != nil {
-		getLogger().Tracef("Trim: '%s' flag NOT found", FLAG_TRIM_PATHS)
-	} else {
-		getLogger().Tracef("Trim: '%s' flag found: %s", FLAG_TRIM_PATHS, fromClause)
-	}
-
 	if err == nil {
 		err = Trim(writer, utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.TrimFlags)
 	}
