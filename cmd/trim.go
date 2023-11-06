@@ -171,7 +171,7 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 	}
 
 	// TODO: use a parameter to obtain and normalize object key names
-	document.TrimJsonMap(trimFlags.Keys)
+	document.TrimJsonMap(trimFlags.Keys, trimFlags.Paths)
 
 	// fully unmarshal the SBOM into named structures
 	// TODO: we should NOT need to unmarshal into BOM structures;

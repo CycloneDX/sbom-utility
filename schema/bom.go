@@ -339,14 +339,28 @@ func (bom *BOM) MarshalCycloneDXBOM(writer io.Writer, prefix string, indent stri
 		return
 	}
 
-	// TODO: Marshal escapes certain characters which is not desireable
-	// the only alternative is to use an Encoder, but then we lose formatting/indent
-	// TODO: unescape: \u0026 &, \u003c <, \u003e >
+	// NOTE: The JSON Marshal(), by default, encodes chars (assumes JSON docs are being transmitted over HTML streams)
+	// which is not true for BOM documents as stream (wire) transmission encodings
+	// are specified for both formats.  We need to assure any commands that
+	// rewrite BOMs (after edits) preserve original characters.
+
+	// This following does NOT work:
+	// // (i.e., unescape: \u0026 (`&), \u003c (`<`), \u003e (`>`))
 	// unescaped := bytes.Replace(jsonBytes, []byte("\u0026"), []byte("&"), -1)
 	// unescaped = bytes.Replace(unescaped, []byte("\u003c"), []byte("<"), -1)
 	// unescaped = bytes.Replace(unescaped, []byte("\u003e"), []byte(">"), -1)
 
-	// write our opened jsonFile as a byte array.
+	// TODO: Specifically, Marshal() escapes certain characters which is not desireable
+	// the only alternative is to use a custom Encoder that both turns escaping off and also
+	// indents...
+	// See: https://stackoverflow.com/questions/28595664/how-to-stop-json-marshal-from-escaping-and
+	// encoder := json.NewEncoder(&bom.CdxBom)
+	// encoder.SetEscapeHTML(false)
+	// encoder.SetIndent(prefix, indent)
+	// err = encoder.Encode(t)
+	// 	OR: err := encoder.marshal(v, encOpts{escapeHTML: true})
+	//return buffer.Bytes(), err
+
 	numBytes, errWrite := writer.Write(jsonBytes)
 	if errWrite != nil {
 		return errWrite

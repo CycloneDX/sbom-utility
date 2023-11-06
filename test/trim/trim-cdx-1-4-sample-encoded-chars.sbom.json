@@ -1,0 +1,34 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "serialNumber": "urn:uuid:3b452e6b-34d2-4e6a-84f2-f85585824d6a",
+  "version": 1,
+  "metadata": {
+    "component": {
+      "type": "application",
+      "group": "Sample",
+      "name": "Sample App",
+      "version": "1.0.0"
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "pkg:deb/debian/acl@2.2.53-4?arch=amd64&distro=debian-10&package-id=3fcaa2363534185d",
+      "publisher": "Guillem Jover <guillem@debian.org>",
+      "name": "acl",
+      "version": "2.2.53-4",
+      "cpe": "cpe:2.3:a:acl:acl:2.2.53-4:*:*:*:*:*:*:*",
+      "purl": "pkg:deb/debian/acl@2.2.53-4?arch=amd64&distro=debian-10"
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:deb/debian/adduser@3.118?arch=all&distro=debian-10&package-id=3e9282034226b93f",
+      "publisher": "Debian Adduser Developers <adduser@packages.debian.org>",
+      "name": "adduser",
+      "version": "3.118",
+      "cpe": "cpe:2.3:a:adduser:adduser:3.118:*:*:*:*:*:*:*",
+      "purl": "pkg:deb/debian/adduser@3.118?arch=all&distro=debian-10"
+    }
+  ]
+}

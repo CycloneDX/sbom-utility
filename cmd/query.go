@@ -105,6 +105,15 @@ func (qr *QueryRequest) String() string {
 	return sb.String()
 }
 
+func NewQueryRequestParseRaw(rawSelect string, rawFrom string, rawWhere string) (qr *QueryRequest) {
+	qr = new(QueryRequest)
+	qr.selectFieldsRaw = rawSelect
+	qr.fromObjectsRaw = rawFrom
+	qr.whereValuesRaw = rawWhere
+	qr.parseQueryClauses()
+	return
+}
+
 type QueryResponse struct {
 	resultMap map[string]interface{}
 }

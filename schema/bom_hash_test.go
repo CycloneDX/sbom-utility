@@ -203,6 +203,9 @@ func loadBOMFile(inputFile string) (document *BOM, err error) {
 // Hash tests
 // ---------------------------
 
+// -------------------
+// Component Hashing
+// -------------------
 func TestHashCDXComponentEmpty(t *testing.T) {
 	document, err := loadBOMFile(TEST_HASH_CDX_1_5_METADATA_COMPONENT_EMPTY)
 	if err != nil {
@@ -313,6 +316,24 @@ func TestHashCDXComponentsSlice(t *testing.T) {
 	}
 }
 
+func TestHashZeroCDXComponentStruct(t *testing.T) {
+	cdxComponent := new(CDXComponent)
+	document := NewBOM("")
+	hashed, err := document.HashComponent(*cdxComponent, nil, false)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// NOTE: we do not want to hash empty (zero) structures
+	if hashed {
+		t.Error(getLogger().Errorf("hashed an empty (zero) structure."))
+	}
+}
+
+// -------------------
+// Service Hashing
+// -------------------
 func TestHashCDXServicesSlice(t *testing.T) {
 	document, err := loadBOMFile(TEST_HASH_CDX_1_5_SERVICES)
 	if err != nil {
@@ -337,6 +358,21 @@ func TestHashCDXServicesSlice(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 		return
+	}
+}
+
+func TestHashZeroCDXServiceStruct(t *testing.T) {
+	cdxService := new(CDXService)
+	document := NewBOM("")
+	hashed, err := document.HashService(*cdxService, nil)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// NOTE: we do not want to hash empty (zero) structures
+	if hashed {
+		t.Error(getLogger().Errorf("hashed an empty (zero) structure."))
 	}
 }
 
@@ -366,3 +402,42 @@ func TestHashCDXVulnerabilitiesSlice(t *testing.T) {
 		return
 	}
 }
+
+// ----------------------
+// Vulnerability Hashing
+// ----------------------
+
+func TestHashZeroCDXVulnerabilityStruct(t *testing.T) {
+	cdxVulnerability := new(CDXVulnerability)
+	document := NewBOM("")
+	hashed, err := document.HashVulnerability(*cdxVulnerability, nil)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// NOTE: we do not want to hash empty (zero) structures
+	if hashed {
+		t.Error(getLogger().Errorf("hashed an empty (zero) structure."))
+	}
+}
+
+// ----------------------
+// TODO: License Hashing
+// ----------------------
+
+// func TestHashZeroCDXLicenseInfoStruct(t *testing.T) {
+// 	cdxVulnerability := new(CDXLicense)
+// 	document := NewBOM("")
+// 	hashed, err := document.HashLicenseInfo(*cdxVulnerability, nil)
+// 	// HashLicenseInfo(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, key string, licenseInfo schema.LicenseInfo, whereFilters []common.WhereFilter) (hashed bool)
+// 	if err != nil {
+// 		t.Error(err)
+// 		return
+// 	}
+
+// 	// NOTE: we do not want to hash empty (zero) structures
+// 	if hashed {
+// 		t.Error(getLogger().Errorf("hashed an empty (zero) structure."))
+// 	}
+// }

@@ -18,12 +18,9 @@
 package schema
 
 import (
-	"bytes"
-	"encoding/gob"
 	"fmt"
 	"reflect"
 	"runtime/debug"
-	"strconv"
 	"strings"
 
 	"github.com/CycloneDX/sbom-utility/common"
@@ -82,11 +79,10 @@ func (bom *BOM) HashComponents(components []CDXComponent, whereFilters []common.
 // Hash a CDX Component and recursively those of any "nested" components
 // TODO: we should WARN if version is not a valid semver (e.g., examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json)
 // TODO: Use pointer for CDXComponent
-func (bom *BOM) HashComponent(cdxComponent CDXComponent, whereFilters []common.WhereFilter, root bool) (ri *CDXResourceInfo, err error) {
+func (bom *BOM) HashComponent(cdxComponent CDXComponent, whereFilters []common.WhereFilter, root bool) (hashed bool, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 	var resourceInfo CDXResourceInfo
-	ri = &resourceInfo
 
 	if reflect.DeepEqual(cdxComponent, CDXComponent{}) {
 		getLogger().Warning("empty component object found")
@@ -127,6 +123,7 @@ func (bom *BOM) HashComponent(cdxComponent CDXComponent, whereFilters []common.W
 	}
 
 	if match {
+		hashed = true
 		bom.ComponentMap.Put(resourceInfo.BOMRef, resourceInfo)
 		bom.ResourceMap.Put(resourceInfo.BOMRef, resourceInfo)
 
@@ -180,11 +177,10 @@ func (bom *BOM) HashServices(services []CDXService, whereFilters []common.WhereF
 
 // Hash a CDX Component and recursively those of any "nested" components
 // TODO: use pointer for CDXService
-func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFilter) (ri *CDXResourceInfo, err error) {
+func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFilter) (hashed bool, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 	var resourceInfo CDXResourceInfo
-	ri = &resourceInfo
 
 	if reflect.DeepEqual(cdxService, CDXService{}) {
 		getLogger().Warning("empty service object found")
@@ -224,6 +220,7 @@ func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFi
 
 	if match {
 		// TODO: AppendLicenseInfo(LICENSE_NONE, resourceInfo)
+		hashed = true
 		bom.ServiceMap.Put(resourceInfo.BOMRef, resourceInfo)
 		bom.ResourceMap.Put(resourceInfo.BOMRef, resourceInfo)
 
@@ -247,7 +244,7 @@ func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFi
 }
 
 // -------------------
-// Licenses
+// TODO: Licenses
 // -------------------
 
 // -------------------
@@ -285,11 +282,10 @@ func (bom *BOM) HashVulnerabilities(vulnerabilities []CDXVulnerability, whereFil
 
 // Hash a CDX Component and recursively those of any "nested" components
 // TODO we should WARN if version is not a valid semver (e.g., examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json)
-func (bom *BOM) HashVulnerability(cdxVulnerability CDXVulnerability, whereFilters []common.WhereFilter) (vi *VulnerabilityInfo, err error) {
+func (bom *BOM) HashVulnerability(cdxVulnerability CDXVulnerability, whereFilters []common.WhereFilter) (hashed bool, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 	var vulnInfo VulnerabilityInfo
-	vi = &vulnInfo
 
 	// Note: the CDX Vulnerability type has no required fields
 	if reflect.DeepEqual(cdxVulnerability, CDXVulnerability{}) {
@@ -402,70 +398,10 @@ func (bom *BOM) HashVulnerability(cdxVulnerability CDXVulnerability, whereFilter
 	}
 
 	if match {
+		hashed = true
 		bom.VulnerabilityMap.Put(vulnInfo.Id, vulnInfo)
-
 		getLogger().Tracef("Put: %s (`%s`), `%s`)",
 			vulnInfo.Id, vulnInfo.Description, vulnInfo.BOMRef)
-	}
-
-	return
-}
-
-// -------------------
-// Misc
-// -------------------
-
-// Note: Golang supports the RE2 regular exp. engine which does not support many
-// features such as lookahead, lookbehind, etc.
-// See: https://en.wikipedia.org/wiki/Comparison_of_regular_expression_engines
-func whereFilterMatch(mapObject map[string]interface{}, whereFilters []common.WhereFilter) (match bool, err error) {
-	var buf bytes.Buffer
-	var key string
-
-	// create a byte encoder
-	enc := gob.NewEncoder(&buf)
-
-	for _, filter := range whereFilters {
-
-		key = filter.Key
-		value, present := mapObject[key]
-		getLogger().Debugf("testing object map[%s]: `%v`", key, value)
-
-		if !present {
-			match = false
-			err = getLogger().Errorf("key `%s` not found ib object map", key)
-			break
-		}
-
-		// Reset the encoder'a byte buffer on each iteration and
-		// convert the value (an interface{}) to []byte we can use on regex. eval.
-		buf.Reset()
-
-		// Do not encode nil pointer values; replace with empty string
-		if value == nil {
-			value = ""
-		}
-
-		// Handle non-string data types in the map by converting them to string
-		switch data := value.(type) {
-		case bool:
-			value = strconv.FormatBool(data)
-		case int:
-			value = strconv.Itoa(data)
-		}
-
-		err = enc.Encode(value)
-
-		if err != nil {
-			err = getLogger().Errorf("Unable to convert value: `%v`, to []byte", value)
-			return
-		}
-
-		// Test that the field value matches the regex supplied in the current filter
-		// Note: the regex compilation is performed during command param. processing
-		if match = filter.ValueRegEx.Match(buf.Bytes()); !match {
-			break
-		}
 	}
 
 	return

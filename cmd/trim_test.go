@@ -31,6 +31,7 @@ import (
 
 const (
 	// Trim test BOM files
+	TEST_TRIM_CDX_1_4_ENCODED_CHARS           = "test/trim/trim-cdx-1-4-sample-encoded-chars.sbom.json"
 	TEST_TRIM_CDX_1_4_SAMPLE_XXL_1            = "test/trim/trim-cdx-1-4-sample-xxl-1.sbom.json"
 	TEST_TRIM_CDX_1_5_SAMPLE_SMALL_COMPS_ONLY = "test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json"
 	TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1         = "test/trim/trim-cdx-1-5-sample-medium-1.sbom..json"
@@ -121,10 +122,6 @@ func innerTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer bytes.Buf
 	return
 }
 
-// ----------------------------------------
-// Trim "properties"
-// ----------------------------------------
-
 func VerifyTrimOutputFileResult(t *testing.T, ti *TrimTestInfo, keys []string, fromPath string) (err error) {
 	// Query temporary "trimmed" BOM to assure known fields were removed
 	request := QueryRequest{
@@ -185,6 +182,35 @@ func VerifyTrimmed(pResult interface{}, key string) (err error) {
 	return
 }
 
+// ----------------------------------------
+// Trim with encoded chars
+// ----------------------------------------
+
+// NOTE: The JSON Marshal(), by default, encodes chars (assumes JSON docs are being transmitted over HTML streams)
+// which is not true for BOM documents as stream (wire) transmission encodings
+// are specified for both formats.  We need to assure any commands that
+// rewrite BOMs (after edits) preserve original characters.
+func TestTrimCdx14PreserveUnencodedChars(t *testing.T) {
+	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_4_ENCODED_CHARS, nil)
+	ti.Keys = append(ti.Keys, "name")
+	outputBuffer, _ := innerBufferedTestTrim(t, ti)
+	SLICE := []byte("<guillem@debian.org>")
+	if bytes.Contains(outputBuffer.Bytes(), SLICE) {
+		t.Errorf("removed unencoded character: `%s`", SLICE)
+	}
+
+	SLICE = []byte("<adduser@packages.debian.org>")
+	if bytes.Contains(outputBuffer.Bytes(), SLICE) {
+		t.Errorf("removed unencoded character: `%s`", SLICE)
+	}
+
+	ti.OutputFile = createTemporaryFilename(TEST_TRIM_CDX_1_4_ENCODED_CHARS)
+	innerTestTrim(t, ti)
+}
+
+// ----------------------------------------
+// Trim "keys"
+// ----------------------------------------
 func TestTrimCdx14ComponentPropertiesSampleXXLBuffered(t *testing.T) {
 	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_4_SAMPLE_XXL_1, nil)
 	ti.Keys = append(ti.Keys, "properties")

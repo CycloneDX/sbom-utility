@@ -412,7 +412,7 @@ func hashLicenseInfoByLicenseType(bom *schema.BOM, policyConfig *schema.LicenseP
 	return
 }
 
-func HashLicenseInfo(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, key string, licenseInfo schema.LicenseInfo, whereFilters []common.WhereFilter) {
+func HashLicenseInfo(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, key string, licenseInfo schema.LicenseInfo, whereFilters []common.WhereFilter) (hashed bool) {
 	// Find license usage policy by either license Id, Name or Expression
 	policy, err := policyConfig.FindPolicy(licenseInfo)
 
@@ -435,6 +435,7 @@ func HashLicenseInfo(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, 
 	}
 
 	if match {
+		hashed = true
 		// Hash LicenseInfo by license key (i.e., id|name|expression)
 		bom.LicenseMap.Put(key, licenseInfo)
 
@@ -443,4 +444,5 @@ func HashLicenseInfo(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, 
 			licenseInfo.UsagePolicy,
 			licenseInfo.BOMRef)
 	}
+	return
 }

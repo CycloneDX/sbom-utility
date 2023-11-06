@@ -17,7 +17,7 @@
 
 package schema
 
-func (bom *BOM) TrimJsonMap(keys []string) {
+func (bom *BOM) TrimJsonMap(keys []string, paths []string) {
 	if len(keys) > 0 {
 		if jsonMap := bom.GetJSONMap(); jsonMap != nil {
 			for _, key := range keys {
