@@ -24,6 +24,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/CycloneDX/sbom-utility/utils"
@@ -192,20 +193,21 @@ func VerifyTrimmed(pResult interface{}, key string) (err error) {
 // rewrite BOMs (after edits) preserve original characters.
 func TestTrimCdx14PreserveUnencodedChars(t *testing.T) {
 	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_4_ENCODED_CHARS, nil)
+	ti.OutputFile = createTemporaryFilename(TEST_TRIM_CDX_1_4_ENCODED_CHARS)
 	ti.Keys = append(ti.Keys, "name")
 	outputBuffer, _ := innerBufferedTestTrim(t, ti)
-	SLICE := []byte("<guillem@debian.org>")
-	if bytes.Contains(outputBuffer.Bytes(), SLICE) {
-		t.Errorf("removed unencoded character: `%s`", SLICE)
+	TEST1 := "<guillem@debian.org>"
+	TEST2 := "<adduser@packages.debian.org>"
+
+	outputString := outputBuffer.String()
+
+	if strings.Contains(outputString, TEST1) {
+		t.Errorf("removed expected utf8 characters from string: `%s`", TEST1)
 	}
 
-	SLICE = []byte("<adduser@packages.debian.org>")
-	if bytes.Contains(outputBuffer.Bytes(), SLICE) {
-		t.Errorf("removed unencoded character: `%s`", SLICE)
+	if strings.Contains(outputString, TEST2) {
+		t.Errorf("removed expected utf8 characters from string: `%s`", TEST2)
 	}
-
-	ti.OutputFile = createTemporaryFilename(TEST_TRIM_CDX_1_4_ENCODED_CHARS)
-	innerTestTrim(t, ti)
 }
 
 // ----------------------------------------

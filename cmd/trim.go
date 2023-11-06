@@ -187,12 +187,12 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 	getLogger().Infof("Outputting listing (`%s` format)...", format)
 	switch format {
 	case FORMAT_JSON:
-		err = document.MarshalCycloneDXBOM(writer, "", "  ")
+		err = document.EncodeJsonCycloneDX(writer, "", "  ")
 	default:
 		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Stats not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_TEXT)
-		err = document.MarshalCycloneDXBOM(writer, "", "  ")
+		err = document.EncodeJsonCycloneDX(writer, "", "  ")
 	}
 
 	return

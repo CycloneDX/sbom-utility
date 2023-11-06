@@ -38,6 +38,8 @@ func (bom *BOM) trimEntity(entity interface{}, key string) {
 			// TODO: make it an option to just "nil" out the value
 			// as this is faster as well as sufficient for json.Marshal() purposes
 			// as keys with nil values are already omitted.
+			// To be clear, using delete() is MUCH better as it works for all
+			// our existing use cases; whereas using nil may cause other issues.
 			//jsonMap[key] = nil
 			delete(jsonMap, key)
 		}
