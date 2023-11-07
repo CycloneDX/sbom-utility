@@ -65,20 +65,15 @@ const (
 
 // Query error messages
 const (
-	ERR_TYPE_INVALID_QUERY            = "invalid query"
-	MSG_QUERY_CLAUSE_NOT_FOUND        = "required clause not found"
-	MSG_QUERY_INVALID_DATATYPE        = "invalid data type"
-	MSG_QUERY_INVALID_FROM_CLAUSE     = "invalid FROM clause"
-	MSG_QUERY_INVALID_SELECT_CLAUSE   = "invalid SELECT clause"
-	MSG_QUERY_INVALID_WHERE_CLAUSE    = "invalid WHERE clause"
-	MSG_QUERY_INVALID_ORDER_BY_CLAUSE = "invalid ORDERBY clause"
-	MSG_QUERY_INVALID_REQUEST         = "invalid query request"
-	MSG_QUERY_INVALID_RESPONSE        = "invalid query response"
+	MSG_QUERY_CLAUSE_NOT_FOUND = "required clause not found"
+	MSG_QUERY_INVALID_REQUEST  = "invalid query request"
+	MSG_QUERY_INVALID_RESPONSE = "invalid query response"
+	MSG_QUERY_INVALID_DATATYPE = "invalid data type"
 )
 
 // Query error details
 const (
-	MSG_QUERY_ERROR_FROM_KEY_INVALID_OBJECT    = "key does not reference a valid JSON object"
+	//MSG_QUERY_ERROR_FROM_KEY_INVALID_OBJECT    = "key does not reference a valid JSON object"
 	MSG_QUERY_ERROR_FROM_KEY_NOT_FOUND         = "key not found in path"
 	MSG_QUERY_ERROR_FROM_KEY_SLICE_DEREFERENCE = "key attempts to dereference into an array"
 	MSG_QUERY_ERROR_SELECT_WILDCARD            = "wildcard cannot be used with other values"
@@ -132,56 +127,6 @@ func NewUtilityError(t string, m string, f string, errIn error) *UtilityError {
 }
 
 // ------------------------------------------------
-// Query error type
-// ------------------------------------------------
-
-type QueryError struct {
-	BaseError
-	request *QueryRequest
-	detail  string
-}
-
-func NewQueryError(qr *QueryRequest, m string, d string) *QueryError {
-	var err = new(QueryError)
-	err.Type = ERR_TYPE_INVALID_QUERY
-	err.request = qr
-	err.Message = m
-	err.detail = d
-	return err
-}
-
-func NewQueryFromClauseError(qr *QueryRequest, detail string) *QueryError {
-	var err = NewQueryError(qr, MSG_QUERY_INVALID_FROM_CLAUSE, detail)
-	return err
-}
-
-func NewQuerySelectClauseError(qr *QueryRequest, detail string) *QueryError {
-	var err = NewQueryError(qr, MSG_QUERY_INVALID_SELECT_CLAUSE, detail)
-	return err
-}
-
-func NewQueryWhereClauseError(qr *QueryRequest, detail string) *QueryError {
-	var err = NewQueryError(qr, MSG_QUERY_INVALID_WHERE_CLAUSE, detail)
-	return err
-}
-
-// QueryError error interface
-func (err QueryError) Error() string {
-	// TODO: use a string buffer to build error message
-	var detail string
-	if err.detail != "" {
-		detail = fmt.Sprintf("%s%s", ERR_FORMAT_DETAIL_SEP, err.detail)
-	}
-	formattedMessage := fmt.Sprintf("%s: %s%s", err.Type, err.Message, detail)
-
-	// NOTE: the QueryRequest has a custom String() interface to self format
-	if err.request != nil {
-		formattedMessage = fmt.Sprintf("%s\n%s", formattedMessage, err.request)
-	}
-	return formattedMessage
-}
-
-// ------------------------------------------------
 // SBOM error types
 // ------------------------------------------------
 
@@ -200,7 +145,7 @@ type SBOMCompositionError struct {
 
 // NOTE: Current sub-type is "no license found"; other, more specific subtypes may be created
 type SBOMLicenseError struct {
-	SBOMCompositionError
+	InvalidSBOMError
 }
 
 // Define more specific invalid SBOM errors

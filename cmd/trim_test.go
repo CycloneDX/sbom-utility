@@ -27,6 +27,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/utils"
 )
 
@@ -125,9 +126,9 @@ func innerTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer bytes.Buf
 
 func VerifyTrimOutputFileResult(t *testing.T, ti *TrimTestInfo, keys []string, fromPath string) (err error) {
 	// Query temporary "trimmed" BOM to assure known fields were removed
-	request := QueryRequest{
-		selectFieldsRaw: QUERY_TOKEN_WILDCARD,
-		fromObjectsRaw:  fromPath,
+	request := common.QueryRequest{
+		SelectFieldsRaw: common.QUERY_TOKEN_WILDCARD,
+		FromObjectsRaw:  fromPath,
 	}
 
 	for _, key := range keys {

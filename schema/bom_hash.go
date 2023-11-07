@@ -244,8 +244,48 @@ func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFi
 }
 
 // -------------------
-// TODO: Licenses
+// Licenses
 // -------------------
+
+func (bom *BOM) HashLicenseInfo(policyConfig *LicensePolicyConfig, key string, licenseInfo LicenseInfo, whereFilters []common.WhereFilter) (hashed bool, err error) {
+
+	if reflect.DeepEqual(licenseInfo, LicenseInfo{}) {
+		getLogger().Warning("empty license object found")
+		return
+	}
+
+	// Find license usage policy by either license Id, Name or Expression
+	if policyConfig != nil {
+		licenseInfo.Policy, err = policyConfig.FindPolicy(licenseInfo)
+		if err != nil {
+			return
+		}
+		// Note: FindPolicy(), at worst, will return an empty LicensePolicy object
+		licenseInfo.UsagePolicy = licenseInfo.Policy.UsagePolicy
+	}
+	licenseInfo.License = key
+	// Derive values for report filtering
+	licenseInfo.LicenseChoiceType = common.LC_TYPE_NAMES[licenseInfo.LicenseChoiceTypeValue]
+	licenseInfo.BOMLocation = common.CDX_LICENSE_LOCATION_NAMES[licenseInfo.BOMLocationValue]
+
+	var match bool = true
+	if len(whereFilters) > 0 {
+		mapInfo, _ := utils.ConvertStructToMap(licenseInfo)
+		match, _ = whereFilterMatch(mapInfo, whereFilters)
+	}
+
+	if match {
+		hashed = true
+		// Hash LicenseInfo by license key (i.e., id|name|expression)
+		bom.LicenseMap.Put(key, licenseInfo)
+
+		getLogger().Tracef("Put: %s (`%s`), `%s`)",
+			licenseInfo.ResourceName,
+			licenseInfo.UsagePolicy,
+			licenseInfo.BOMRef)
+	}
+	return
+}
 
 // -------------------
 // Vulnerabilities

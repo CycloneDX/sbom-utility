@@ -112,7 +112,7 @@ func innerTestLicenseListBuffered(t *testing.T, testInfo *LicenseTestInfo, where
 	return
 }
 
-func innerTestLicenseList(t *testing.T, testInfo *LicenseTestInfo) (outputBuffer bytes.Buffer, err error) {
+func innerTestLicenseList(t *testing.T, testInfo *LicenseTestInfo) (outputBuffer bytes.Buffer) {
 
 	// Parse out --where filters and exit out if error detected
 	whereFilters, err := prepareWhereFilters(t, &testInfo.CommonTestInfo)
@@ -125,12 +125,20 @@ func innerTestLicenseList(t *testing.T, testInfo *LicenseTestInfo) (outputBuffer
 
 	// Run all common tests against "result" values in the CommonTestInfo struct
 	err = innerRunReportResultTests(t, &testInfo.CommonTestInfo, outputBuffer, err)
+	if err != nil {
+		getLogger().Tracef("%s", err)
+	}
 
 	return
 }
 
-func innerTestLicenseExpressionParsing(t *testing.T, expression string, expectedPolicy string) (parsedExpression *schema.CompoundExpression, err error) {
+func innerTestLicenseExpressionParsing(t *testing.T, expression string, expectedPolicy string) (parsedExpression *schema.CompoundExpression) {
+	var err error
 	parsedExpression, err = schema.ParseExpression(LicensePolicyConfig, expression)
+	if err != nil {
+		t.Errorf("unable to parse expression: `%s`\n", expression)
+	}
+
 	getLogger().Infof("expression:\n%v", parsedExpression)
 	if parsedExpression.CompoundUsagePolicy != expectedPolicy {
 		t.Errorf("License Expression: expected `%s`, actual `%s`\n",
@@ -243,7 +251,7 @@ func TestLicenseListSummaryCdx13Csv(t *testing.T) {
 func TestLicenseListTextSummaryCdx14ContainsUndefined(t *testing.T) {
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND, FORMAT_DEFAULT, true)
 	lti.ResultExpectedLineCount = 4 // 2 title, 2 with UNDEFINED
-	lti.ResultLineContainsValues = []string{schema.POLICY_UNDEFINED, LC_TYPE_NAMES[LC_LOC_UNKNOWN], LICENSE_NO_ASSERTION, "package-lock.json"}
+	lti.ResultLineContainsValues = []string{schema.POLICY_UNDEFINED, common.LC_TYPE_NAMES[common.LC_LOC_UNKNOWN], LICENSE_NO_ASSERTION, "package-lock.json"}
 	lti.ResultLineContainsValuesAtLineNum = 3
 	innerTestLicenseList(t, lti)
 }
@@ -251,7 +259,7 @@ func TestLicenseListTextSummaryCdx14ContainsUndefined(t *testing.T) {
 func TestLicenseListPolicyCdx14InvalidLicenseId(t *testing.T) {
 	TEST_LICENSE_ID_OR_NAME := "foo"
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_ID, FORMAT_TEXT, true)
-	lti.ResultLineContainsValues = []string{schema.POLICY_UNDEFINED, LC_VALUE_ID, TEST_LICENSE_ID_OR_NAME}
+	lti.ResultLineContainsValues = []string{schema.POLICY_UNDEFINED, common.LC_VALUE_ID, TEST_LICENSE_ID_OR_NAME}
 	lti.ResultLineContainsValuesAtLineNum = 3
 	innerTestLicenseList(t, lti)
 }
@@ -259,7 +267,7 @@ func TestLicenseListPolicyCdx14InvalidLicenseId(t *testing.T) {
 func TestLicenseListPolicyCdx14InvalidLicenseName(t *testing.T) {
 	TEST_LICENSE_ID_OR_NAME := "bar"
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_NAME, FORMAT_TEXT, true)
-	lti.ResultLineContainsValues = []string{schema.POLICY_UNDEFINED, LC_VALUE_NAME, TEST_LICENSE_ID_OR_NAME}
+	lti.ResultLineContainsValues = []string{schema.POLICY_UNDEFINED, common.LC_VALUE_NAME, TEST_LICENSE_ID_OR_NAME}
 	lti.ResultLineContainsValuesAtLineNum = 3
 	innerTestLicenseList(t, lti)
 }
@@ -315,7 +323,7 @@ func TestLicenseListCdx13JsonEmptyAttachment(t *testing.T) {
 func TestLicenseExpressionParsingTestComplex1(t *testing.T) {
 	SPDX_LICENSE_EXPRESSION_TEST1 := "Apache-2.0 AND (MIT OR GPL-2.0-only)"
 	EXPECTED_POLICY := schema.POLICY_ALLOW
-	result, _ := innerTestLicenseExpressionParsing(t, SPDX_LICENSE_EXPRESSION_TEST1, EXPECTED_POLICY)
+	result := innerTestLicenseExpressionParsing(t, SPDX_LICENSE_EXPRESSION_TEST1, EXPECTED_POLICY)
 	if result.LeftUsagePolicy != schema.POLICY_ALLOW && result.RightUsagePolicy != schema.POLICY_ALLOW {
 		t.Errorf("License Expression: expectedLeft `%s`, actualLeft `%s`, expectedRight `%s`, actualRight `%s`\n",
 			schema.POLICY_ALLOW, result.LeftUsagePolicy, schema.POLICY_ALLOW, result.RightUsagePolicy)
@@ -325,7 +333,7 @@ func TestLicenseExpressionParsingTestComplex1(t *testing.T) {
 func TestLicenseExpressionParsingTestComplex2(t *testing.T) {
 	SPDX_LICENSE_EXPRESSION_TEST1 := "MPL-1.0 AND (MIT AND AGPL-3.0)"
 	EXPECTED_POLICY := schema.POLICY_NEEDS_REVIEW
-	result, _ := innerTestLicenseExpressionParsing(t, SPDX_LICENSE_EXPRESSION_TEST1, EXPECTED_POLICY)
+	result := innerTestLicenseExpressionParsing(t, SPDX_LICENSE_EXPRESSION_TEST1, EXPECTED_POLICY)
 	if result.LeftUsagePolicy != schema.POLICY_ALLOW && result.RightUsagePolicy != schema.POLICY_ALLOW {
 		t.Errorf("License Expression: expectedLeft `%s`, actualLeft `%s`, expectedRight `%s`, actualRight `%s`\n",
 			schema.POLICY_ALLOW, result.LeftUsagePolicy, schema.POLICY_ALLOW, result.RightUsagePolicy)
@@ -413,7 +421,7 @@ func TestLicenseListPolicyCdx14CustomPolicy(t *testing.T) {
 	TEST_LICENSE_ID_OR_NAME := "(MIT OR CC0-1.0)"
 
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_TEXT_CDX_1_4_CUSTOM_POLICY_1, FORMAT_TEXT, true)
-	lti.ResultLineContainsValues = []string{schema.POLICY_ALLOW, LC_VALUE_EXPRESSION, TEST_LICENSE_ID_OR_NAME}
+	lti.ResultLineContainsValues = []string{schema.POLICY_ALLOW, common.LC_VALUE_EXPRESSION, TEST_LICENSE_ID_OR_NAME}
 	lti.ResultLineContainsValuesAtLineNum = 2
 	lti.PolicyFile = TEST_CUSTOM_POLICY_1
 

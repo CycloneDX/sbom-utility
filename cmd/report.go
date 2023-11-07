@@ -100,15 +100,15 @@ func retrieveWhereFilters(whereValues string) (whereFilters []common.WhereFilter
 	var whereExpressions []string
 
 	if whereValues != "" {
-		whereExpressions = strings.Split(whereValues, QUERY_WHERE_EXPRESSION_SEP)
+		whereExpressions = strings.Split(whereValues, common.QUERY_WHERE_EXPRESSION_SEP)
 
 		var filter *common.WhereFilter
 		for _, clause := range whereExpressions {
 
-			filter = parseWhereFilter(clause)
+			filter = common.ParseWhereFilter(clause)
 
 			if filter == nil {
-				err = NewQueryWhereClauseError(nil, clause)
+				err = common.NewQueryWhereClauseError(nil, clause)
 				return
 			}
 

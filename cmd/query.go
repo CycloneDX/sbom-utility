@@ -51,78 +51,8 @@ const (
 	FLAG_QUERY_ORDER_BY_HELP = "key name that appears in the SELECT result set used to order the result records"
 )
 
-// Named tokens
-const (
-	QUERY_TOKEN_WILDCARD       = "*"
-	QUERY_FROM_CLAUSE_SEP      = "."
-	QUERY_SELECT_CLAUSE_SEP    = ","
-	QUERY_WHERE_EXPRESSION_SEP = ","
-	QUERY_WHERE_OPERAND_EQUALS = "="
-)
-
 var QUERY_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{FORMAT_JSON}, ", ")
-
-// query JSON map and return selected subset
-// SELECT
-//
-//	<key.1>, <key.2>, ... // "firstname, lastname, email" || * (default)
-//
-// FROM
-//
-//	<key path>            // "product.customers"
-//
-// WHERE
-//
-//	<key.X> == <value>    // "country='Germany'"
-//
-// ORDER BY
-//
-//	<key.N>               // "lastname"
-//
-// e.g.,SELECT * FROM product.customers WHERE country="Germany";
-type QueryRequest struct {
-	selectFieldsRaw     string
-	selectFields        []string
-	fromObjectsRaw      string
-	fromObjectSelectors []string
-	whereValuesRaw      string
-	whereExpressions    []string
-	whereFilters        []common.WhereFilter
-	orderByKeysRaw      string
-	//orderByKeys       []string // TODO
-	isFromObjectAMap    bool
-	isFromObjectAnArray bool
-}
-
-// Implement the Stringer interface for QueryRequest
-func (qr *QueryRequest) String() string {
-	sb := new(strings.Builder)
-	sb.WriteString(fmt.Sprintf("--select: %s\n", qr.selectFieldsRaw))
-	sb.WriteString(fmt.Sprintf("--from: %s\n", qr.fromObjectsRaw))
-	sb.WriteString(fmt.Sprintf("--where: %s\n", qr.whereValuesRaw))
-	sb.WriteString(fmt.Sprintf("--orderby: %s\n", qr.orderByKeysRaw))
-	return sb.String()
-}
-
-func NewQueryRequestParseRaw(rawSelect string, rawFrom string, rawWhere string) (qr *QueryRequest) {
-	qr = new(QueryRequest)
-	qr.selectFieldsRaw = rawSelect
-	qr.fromObjectsRaw = rawFrom
-	qr.whereValuesRaw = rawWhere
-	qr.parseQueryClauses()
-	return
-}
-
-type QueryResponse struct {
-	resultMap map[string]interface{}
-}
-
-func NewQueryResponse() *QueryResponse {
-	qr := new(QueryResponse)
-	qr.resultMap = make(map[string]interface{})
-	return qr
-}
 
 func NewCommandQuery() *cobra.Command {
 	var command = new(cobra.Command)
@@ -144,7 +74,7 @@ func initCommandQuery(command *cobra.Command) {
 	// Add local flags to command
 	command.PersistentFlags().StringVar(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_OUTPUT_FORMAT, FORMAT_JSON,
 		FLAG_QUERY_OUTPUT_FORMAT_HELP+QUERY_SUPPORTED_FORMATS)
-	command.Flags().StringP(FLAG_QUERY_SELECT, "", QUERY_TOKEN_WILDCARD, FLAG_QUERY_SELECT_HELP)
+	command.Flags().StringP(FLAG_QUERY_SELECT, "", common.QUERY_TOKEN_WILDCARD, FLAG_QUERY_SELECT_HELP)
 	// NOTE: TODO: There appears to be a bug in Cobra where the type of the `from`` flag is `--from` (i.e., not string)
 	// This bug does not exhibit on any other flags
 	command.Flags().StringP(FLAG_QUERY_FROM, "", "", FLAG_QUERY_FROM_HELP)
@@ -173,19 +103,19 @@ func queryCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	}()
 
 	// Parse flags into a query request struct
-	var queryRequest *QueryRequest = new(QueryRequest)
-	err = queryRequest.readQueryFlags(cmd)
+	var queryRequest *common.QueryRequest = new(common.QueryRequest)
+	err = readQueryFlags(queryRequest, cmd)
 	if err != nil {
 		return
 	}
 
-	err = queryRequest.parseQueryClauses()
+	err = queryRequest.ParseQueryClauses()
 	if err != nil {
 		return
 	}
 
 	// allocate the result structure
-	var queryResult *QueryResponse = new(QueryResponse)
+	var queryResult *common.QueryResponse = new(common.QueryResponse)
 
 	// Query using the request/response structures
 	_, errQuery := Query(writer, queryRequest, queryResult)
@@ -197,132 +127,46 @@ func queryCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	return
 }
 
-func (qr *QueryRequest) readQueryFlags(cmd *cobra.Command) (err error) {
+func readQueryFlags(qr *common.QueryRequest, cmd *cobra.Command) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	// Read '--from` flag first as its result is required for any other field to operate on
-	qr.fromObjectsRaw, err = cmd.Flags().GetString(FLAG_QUERY_FROM)
+	qr.FromObjectsRaw, err = cmd.Flags().GetString(FLAG_QUERY_FROM)
 	if err != nil {
 		getLogger().Tracef("Query: '%s' flag NOT found", FLAG_QUERY_FROM)
 	} else {
-		getLogger().Tracef("Query: '%s' flag found: %s", FLAG_QUERY_FROM, qr.fromObjectsRaw)
+		getLogger().Tracef("Query: '%s' flag found: %s", FLAG_QUERY_FROM, qr.FromObjectsRaw)
 	}
 
 	// Read '--select' flag second as it is the next highly likely field (used to
 	// reduce the result set from querying the "FROM" JSON object)
-	qr.selectFieldsRaw, err = cmd.Flags().GetString(FLAG_QUERY_SELECT)
+	qr.SelectFieldsRaw, err = cmd.Flags().GetString(FLAG_QUERY_SELECT)
 	if err != nil {
 		getLogger().Tracef("Query: '%s' flag NOT found", FLAG_QUERY_SELECT)
 	} else {
-		getLogger().Tracef("Query: '%s' flag found: %s", FLAG_QUERY_SELECT, qr.selectFieldsRaw)
+		getLogger().Tracef("Query: '%s' flag found: %s", FLAG_QUERY_SELECT, qr.SelectFieldsRaw)
 	}
 
 	// Read '--where' flag second as it is the next likely field
 	// (used to further reduce the set of results from field value "matches"
 	// as part of the SELECT processing)
-	qr.whereValuesRaw, err = cmd.Flags().GetString(FLAG_QUERY_WHERE)
+	qr.WhereValuesRaw, err = cmd.Flags().GetString(FLAG_QUERY_WHERE)
 	if err != nil {
 		getLogger().Tracef("Query: '%s' flag NOT found", FLAG_QUERY_WHERE)
 	} else {
-		getLogger().Tracef("Query: '%s' flag found: %s", FLAG_QUERY_WHERE, qr.whereValuesRaw)
+		getLogger().Tracef("Query: '%s' flag found: %s", FLAG_QUERY_WHERE, qr.WhereValuesRaw)
 	}
 
 	// Read '--orderby' flag to be used to order by field (keys) data in the "output" phase
-	qr.orderByKeysRaw, err = cmd.Flags().GetString(FLAG_QUERY_ORDER_BY)
+	qr.OrderByKeysRaw, err = cmd.Flags().GetString(FLAG_QUERY_ORDER_BY)
 	if err != nil {
 		getLogger().Tracef("Query: '%s' flag NOT found", FLAG_QUERY_ORDER_BY)
 	} else {
-		getLogger().Tracef("Query: '%s' flag found: %s", FLAG_QUERY_ORDER_BY, qr.orderByKeysRaw)
+		getLogger().Tracef("Query: '%s' flag found: %s", FLAG_QUERY_ORDER_BY, qr.OrderByKeysRaw)
 	}
 
 	return
-}
-
-func (qr *QueryRequest) parseQueryClauses() (err error) {
-	getLogger().Enter()
-	defer getLogger().Exit()
-
-	// parse out path (selectors) to JSON object from raw '--from' flag's value
-	if qr.fromObjectsRaw != "" {
-		qr.fromObjectSelectors = strings.Split(qr.fromObjectsRaw, QUERY_FROM_CLAUSE_SEP)
-		getLogger().Tracef("FROM json object (path): %v\n", qr.fromObjectSelectors)
-	}
-
-	// parse out field (keys) from raw '--select' flag's value
-	if qr.selectFieldsRaw != "" {
-		qr.selectFields = strings.Split(qr.selectFieldsRaw, QUERY_SELECT_CLAUSE_SEP)
-		getLogger().Tracef("SELECT keys (fields): %v\n", qr.selectFields)
-	}
-
-	// parse out `key=<regex>` filters from raw `-where` flag's value
-	if qr.whereValuesRaw != "" {
-		qr.whereExpressions = strings.Split(qr.whereValuesRaw, QUERY_WHERE_EXPRESSION_SEP)
-		getLogger().Tracef("WHERE selectors (key=value): %v\n", qr.whereExpressions)
-		err = qr.parseWhereFilterExpressions()
-		// NOTE: we return here on error as more logic may follow for orderby
-		if err != nil {
-			return
-		}
-	}
-
-	return
-}
-
-// Parse/validate each key=<regex> expression found on WHERE clause
-func (qr *QueryRequest) parseWhereFilterExpressions() (err error) {
-
-	if len(qr.whereExpressions) == 0 {
-		return NewQueryWhereClauseError(qr, qr.whereValuesRaw)
-	}
-
-	var filter *common.WhereFilter
-	for _, clause := range qr.whereExpressions {
-
-		filter = parseWhereFilter(clause)
-
-		if filter == nil {
-			err = NewQueryWhereClauseError(qr, clause)
-			return
-		}
-
-		qr.whereFilters = append(qr.whereFilters, *filter)
-	}
-
-	return
-}
-
-// TODO: generate more specific error messages on why parsing failed
-func parseWhereFilter(rawExpression string) (pWhereSelector *common.WhereFilter) {
-
-	if rawExpression == "" {
-		return // nil
-	}
-
-	tokens := strings.Split(rawExpression, QUERY_WHERE_OPERAND_EQUALS)
-
-	if len(tokens) != 2 {
-		return // nil
-	}
-
-	var whereFilter = common.WhereFilter{}
-	whereFilter.Operand = QUERY_WHERE_OPERAND_EQUALS
-	whereFilter.Key = tokens[0]
-	whereFilter.Value = tokens[1]
-
-	if whereFilter.Value == "" {
-		return // nil
-	}
-
-	var errCompile error
-	whereFilter.ValueRegEx, errCompile = compileRegex(whereFilter.Value)
-	getLogger().Debugf(">> Regular expression: `%v`...", whereFilter.ValueRegEx)
-
-	if errCompile != nil {
-		return // nil
-	}
-
-	return &whereFilter
 }
 
 func processQueryResults(err error) {
@@ -333,7 +177,7 @@ func processQueryResults(err error) {
 
 // Query JSON map and return selected subset
 // i.e., use QueryRequest (syntax) to implement the Query into the JSON document
-func Query(writer io.Writer, request *QueryRequest, response *QueryResponse) (resultJson interface{}, err error) {
+func Query(writer io.Writer, request *common.QueryRequest, response *common.QueryResponse) (resultJson interface{}, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 	// use function closure to assure consistent error output based upon error type
@@ -379,7 +223,7 @@ func Query(writer io.Writer, request *QueryRequest, response *QueryResponse) (re
 
 	// Query set of FROM objects
 	// if a FROM select object is not provided, assume "root" search
-	if len(request.fromObjectSelectors) == 0 {
+	if len(request.FromObjectSelectors) == 0 {
 		getLogger().Tracef("request object FROM selector empty; assume query uses document \"root\".")
 	}
 
@@ -398,16 +242,16 @@ func Query(writer io.Writer, request *QueryRequest, response *QueryResponse) (re
 			return
 		}
 		// Warn WHERE clause cannot be applied; still return values (for now)
-		if request.whereValuesRaw != "" {
+		if request.WhereValuesRaw != "" {
 			getLogger().Warningf("Cannot apply WHERE filter to a singleton FROM object (%s)",
-				request.fromObjectsRaw)
+				request.FromObjectsRaw)
 		}
 	case []interface{}:
 		fromObjectSlice, _ := resultJson.([]interface{})
 		resultJson, err = selectFieldsFromSlice(request, fromObjectSlice)
 	default:
 		// NOTE: this SHOULD never be invoked as the FROM logic should have caught this already
-		err = NewQueryFromClauseError(request,
+		err = common.NewQueryFromClauseError(request,
 			fmt.Sprintf("%s: %T", MSG_QUERY_INVALID_DATATYPE, t))
 		return
 	}
@@ -429,25 +273,24 @@ func Query(writer io.Writer, request *QueryRequest, response *QueryResponse) (re
 	return
 }
 
-func findFromObject(request *QueryRequest, jsonMap map[string]interface{}) (pResults interface{}, err error) {
+func findFromObject(request *common.QueryRequest, jsonMap map[string]interface{}) (pResults interface{}, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	// initialize local map pointer and return value to starting JSON map
 	var tempMap map[string]interface{} = jsonMap
 	pResults = jsonMap
-	request.isFromObjectAMap = true
+	request.IsFromObjectAMap = true
 
-	getLogger().Tracef("Finding JSON object using path key(s): %v\n", request.fromObjectSelectors)
+	getLogger().Tracef("Finding JSON object using path key(s): %v\n", request.FromObjectSelectors)
 
-	for i, key := range request.fromObjectSelectors {
+	for i, key := range request.FromObjectSelectors {
 		pResults = tempMap[key]
 
 		// if we find a nil value, this means we failed to find the object
 		if pResults == nil {
-			err = NewQueryError(
+			err = common.NewQueryFromClauseError(
 				request,
-				MSG_QUERY_INVALID_FROM_CLAUSE,
 				fmt.Sprintf("%s: (%s)", MSG_QUERY_ERROR_FROM_KEY_NOT_FOUND, key))
 			return
 		}
@@ -456,27 +299,25 @@ func findFromObject(request *QueryRequest, jsonMap map[string]interface{}) (pRes
 		case map[string]interface{}:
 			// If the resulting value is indeed another map type, we expect for a Json Map
 			// we preserve that pointer for the next iteration
-			request.isFromObjectAMap = true
+			request.IsFromObjectAMap = true
 			tempMap = pResults.(map[string]interface{})
 		case []interface{}:
 			// TODO: We only support an array (i.e., []interface{}) as the last selector
 			// in theory, we could support arrays (perhaps array notation) in the FROM clause
 			// at any point (e.g., "metadata.component.properties[0]").
 			// we should still be able to support implicit arrays as well.
-			request.isFromObjectAnArray = true
+			request.IsFromObjectAnArray = true
 			// We no longer have a map to dereference into
 			// So if there are more keys left as selectors it is an error
-			if len(request.fromObjectSelectors) > i+1 {
-				err = NewQueryFromClauseError(request,
+			if len(request.FromObjectSelectors) > i+1 {
+				err = common.NewQueryFromClauseError(request,
 					fmt.Sprintf("%s: (%s)", MSG_QUERY_ERROR_FROM_KEY_SLICE_DEREFERENCE, key))
 				return
 			}
 		default:
 			getLogger().Debugf("Invalid datatype of query: key: %s (%t)", key, t)
-			err = NewQueryError(
-				request,
-				MSG_QUERY_INVALID_DATATYPE,
-				fmt.Sprintf("%s: (%s)", MSG_QUERY_ERROR_FROM_KEY_INVALID_OBJECT, key))
+			err = common.NewQueryFromClauseError(request,
+				fmt.Sprintf("%s: %T", MSG_QUERY_INVALID_DATATYPE, t))
 			return
 		}
 	}
@@ -485,11 +326,11 @@ func findFromObject(request *QueryRequest, jsonMap map[string]interface{}) (pRes
 
 // NOTE: it is the caller's responsibility to convert to other output formats
 // based upon other flag values
-func selectFieldsFromMap(request *QueryRequest, jsonMap map[string]interface{}) (mapSelectedFields map[string]interface{}, err error) {
+func selectFieldsFromMap(request *common.QueryRequest, jsonMap map[string]interface{}) (mapSelectedFields map[string]interface{}, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	selectors := request.selectFields
+	selectors := request.SelectFields
 
 	// Default to wildcard behavior
 	// NOTE: The default set by the CLI framework SHOULD be QUERY_TOKEN_WILDCARD
@@ -498,7 +339,7 @@ func selectFieldsFromMap(request *QueryRequest, jsonMap map[string]interface{}) 
 	}
 
 	// Check for wildcard; if it is the only selector, return
-	if len(selectors) == 1 && selectors[0] == QUERY_TOKEN_WILDCARD {
+	if len(selectors) == 1 && selectors[0] == common.QUERY_TOKEN_WILDCARD {
 		return jsonMap, nil
 	}
 
@@ -508,10 +349,9 @@ func selectFieldsFromMap(request *QueryRequest, jsonMap map[string]interface{}) 
 	// copy selected fields into output map
 	for _, fieldKey := range selectors {
 		// validate wildcard not used with other fields; if so, that is a conflict
-		if fieldKey == QUERY_TOKEN_WILDCARD {
-			err = NewQueryError(
+		if fieldKey == common.QUERY_TOKEN_WILDCARD {
+			err = common.NewQuerySelectClauseError(
 				request,
-				MSG_QUERY_INVALID_SELECT_CLAUSE,
 				MSG_QUERY_ERROR_SELECT_WILDCARD)
 			getLogger().Trace(err)
 			return
@@ -525,11 +365,11 @@ func selectFieldsFromMap(request *QueryRequest, jsonMap map[string]interface{}) 
 
 // NOTE: it is the caller's responsibility to convert to other output formats
 // based upon other flag values
-func selectFieldsFromSlice(request *QueryRequest, jsonSlice []interface{}) (sliceSelectedFields []interface{}, err error) {
+func selectFieldsFromSlice(request *common.QueryRequest, jsonSlice []interface{}) (sliceSelectedFields []interface{}, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	whereFilters := request.whereFilters
+	whereFilters := request.WhereFilters
 	getLogger().Debugf("whereFilters: %v", whereFilters)
 
 	for _, iObject := range jsonSlice {

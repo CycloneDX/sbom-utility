@@ -423,21 +423,21 @@ func TestHashZeroCDXVulnerabilityStruct(t *testing.T) {
 }
 
 // ----------------------
-// TODO: License Hashing
+// License Hashing
 // ----------------------
 
-// func TestHashZeroCDXLicenseInfoStruct(t *testing.T) {
-// 	cdxVulnerability := new(CDXLicense)
-// 	document := NewBOM("")
-// 	hashed, err := document.HashLicenseInfo(*cdxVulnerability, nil)
-// 	// HashLicenseInfo(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, key string, licenseInfo schema.LicenseInfo, whereFilters []common.WhereFilter) (hashed bool)
-// 	if err != nil {
-// 		t.Error(err)
-// 		return
-// 	}
+func TestHashZeroCDXLicenseInfoStruct(t *testing.T) {
+	cdxLicenseInfo := new(LicenseInfo)
+	document := NewBOM("")
+	hashed, err := document.HashLicenseInfo(nil, "foo", *cdxLicenseInfo, nil)
+	// HashLicenseInfo(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, key string, licenseInfo schema.LicenseInfo, whereFilters []common.WhereFilter) (hashed bool)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
-// 	// NOTE: we do not want to hash empty (zero) structures
-// 	if hashed {
-// 		t.Error(getLogger().Errorf("hashed an empty (zero) structure."))
-// 	}
-// }
+	// NOTE: we do not want to hash empty (zero) structures
+	if hashed {
+		t.Error(getLogger().Errorf("hashed an empty (zero) structure."))
+	}
+}

@@ -408,6 +408,9 @@ func (config *LicensePolicyConfig) FindPolicy(licenseInfo LicenseInfo) (matchedP
 		// Parse expression according to SPDX spec.
 		var expressionTree *CompoundExpression
 		expressionTree, err = ParseExpression(config, licenseInfo.LicenseChoice.Expression)
+		if err != nil {
+			return
+		}
 		getLogger().Debugf("Parsed expression:\n%v", expressionTree)
 		matchedPolicy.UsagePolicy = expressionTree.CompoundUsagePolicy
 	}
@@ -415,7 +418,8 @@ func (config *LicensePolicyConfig) FindPolicy(licenseInfo LicenseInfo) (matchedP
 	if matchedPolicy.UsagePolicy == "" {
 		matchedPolicy.UsagePolicy = POLICY_UNDEFINED
 	}
-	return matchedPolicy, err
+	//return matchedPolicy, err
+	return
 }
 
 func (config *LicensePolicyConfig) FindPolicyBySpdxId(id string) (policyValue string, matchedPolicy LicensePolicy, err error) {
@@ -673,7 +677,7 @@ func getRegexForValidSpdxId() (regex *regexp.Regexp, err error) {
 func IsValidSpdxId(id string) bool {
 	regex, err := getRegexForValidSpdxId()
 	if err != nil {
-		getLogger().Errorf("unable to invoke regex. %v", err)
+		getLogger().Error(fmt.Errorf("unable to invoke regex. %v", err))
 		return false
 	}
 	return regex.MatchString(id)
