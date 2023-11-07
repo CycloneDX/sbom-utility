@@ -103,19 +103,19 @@ func loadDocumentLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 	// 1. Hash all licenses in the SBOM metadata (i.e., (root).metadata.component)
 	// Note: this SHOULD represent a summary of all licenses that apply
 	// to the component being described in the SBOM
-	if err = hashMetadataLicenses(bom, policyConfig, common.LC_LOC_METADATA, whereFilters); err != nil {
+	if err = hashMetadataLicenses(bom, policyConfig, schema.LC_LOC_METADATA, whereFilters); err != nil {
 		return
 	}
 
 	// 2. Hash all licenses in (root).metadata.component (+ "nested" components)
-	if err = hashMetadataComponentLicenses(bom, policyConfig, common.LC_LOC_METADATA_COMPONENT, whereFilters); err != nil {
+	if err = hashMetadataComponentLicenses(bom, policyConfig, schema.LC_LOC_METADATA_COMPONENT, whereFilters); err != nil {
 		return
 	}
 
 	// 3. Hash all component licenses found in the (root).components[] (+ "nested" components)
 	pComponents := bom.GetCdxComponents()
 	if pComponents != nil && len(*pComponents) > 0 {
-		if err = hashComponentsLicenses(bom, policyConfig, *pComponents, common.LC_LOC_COMPONENTS, whereFilters); err != nil {
+		if err = hashComponentsLicenses(bom, policyConfig, *pComponents, schema.LC_LOC_COMPONENTS, whereFilters); err != nil {
 			return
 		}
 	}
@@ -123,7 +123,7 @@ func loadDocumentLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 	// 4. Hash all service licenses found in the (root).services[] (array) (+ "nested" services)
 	pServices := bom.GetCdxServices()
 	if pServices != nil && len(*pServices) > 0 {
-		if err = hashServicesLicenses(bom, policyConfig, *pServices, common.LC_LOC_SERVICES, whereFilters); err != nil {
+		if err = hashServicesLicenses(bom, policyConfig, *pServices, schema.LC_LOC_SERVICES, whereFilters); err != nil {
 			return
 		}
 	}
@@ -142,7 +142,7 @@ func hashMetadataLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 			bom,
 			fmt.Sprintf("%s (%s)",
 				MSG_LICENSES_NOT_FOUND,
-				common.CDX_LICENSE_LOCATION_NAMES[location]),
+				schema.LC_LICENSE_LOCATION_NAMES[location]),
 			nil, nil)
 		// Issue a warning as an SBOM without at least one, top-level license
 		// (in the metadata license summary) SHOULD be noted.
@@ -181,7 +181,7 @@ func hashMetadataComponentLicenses(bom *schema.BOM, policyConfig *schema.License
 			bom,
 			fmt.Sprintf("%s (%s)",
 				MSG_LICENSES_NOT_FOUND,
-				common.CDX_LICENSE_LOCATION_NAMES[location]),
+				schema.LC_LICENSE_LOCATION_NAMES[location]),
 			nil, nil)
 		// Issue a warning as an SBOM without at least one
 		// top-level component license declared SHOULD be noted.
@@ -389,38 +389,3 @@ func hashLicenseInfoByLicenseType(bom *schema.BOM, policyConfig *schema.LicenseP
 	}
 	return
 }
-
-// func HashLicenseInfo(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, key string, licenseInfo schema.LicenseInfo, whereFilters []common.WhereFilter) (hashed bool) {
-// 	// Find license usage policy by either license Id, Name or Expression
-// 	policy, err := policyConfig.FindPolicy(licenseInfo)
-
-// 	if err != nil {
-// 		// Show intent to not check for error returns as there is no recovery
-// 		_ = getLogger().Errorf("%s", MSG_LICENSE_INVALID_DATA)
-// 		os.Exit(ERROR_VALIDATION)
-// 	}
-// 	licenseInfo.License = key
-// 	licenseInfo.Policy = policy
-// 	licenseInfo.UsagePolicy = policy.UsagePolicy
-// 	// Derive values for report filtering
-// 	licenseInfo.LicenseChoiceType = common.LC_TYPE_NAMES[licenseInfo.LicenseChoiceTypeValue]
-// 	licenseInfo.BOMLocation = common.CDX_LICENSE_LOCATION_NAMES[licenseInfo.BOMLocationValue]
-
-// 	var match bool = true
-// 	if len(whereFilters) > 0 {
-// 		mapInfo, _ := utils.ConvertStructToMap(licenseInfo)
-// 		match, _ = whereFilterMatch(mapInfo, whereFilters)
-// 	}
-
-// 	if match {
-// 		hashed = true
-// 		// Hash LicenseInfo by license key (i.e., id|name|expression)
-// 		bom.LicenseMap.Put(key, licenseInfo)
-
-// 		getLogger().Tracef("Put: %s (`%s`), `%s`)",
-// 			licenseInfo.ResourceName,
-// 			licenseInfo.UsagePolicy,
-// 			licenseInfo.BOMRef)
-// 	}
-// 	return
-// }

@@ -8,33 +8,6 @@ import (
 	"github.com/CycloneDX/sbom-utility/utils"
 )
 
-// LicenseChoice - corresponding (name) values for license choice types
-const (
-	LC_VALUE_INVALID    = "invalid"
-	LC_VALUE_ID         = "id"
-	LC_VALUE_NAME       = "name"
-	LC_VALUE_EXPRESSION = "expression"
-)
-
-// Declare a fixed-sized array for LC type name indexed lookup
-var LC_TYPE_NAMES = [...]string{LC_VALUE_INVALID, LC_VALUE_ID, LC_VALUE_NAME, LC_VALUE_EXPRESSION}
-
-const (
-	LC_LOC_UNKNOWN = iota
-	LC_LOC_METADATA_COMPONENT
-	LC_LOC_METADATA
-	LC_LOC_COMPONENTS
-	LC_LOC_SERVICES
-)
-
-var CDX_LICENSE_LOCATION_NAMES = map[int]string{
-	LC_LOC_UNKNOWN:            "unknown",
-	LC_LOC_METADATA_COMPONENT: "metadata.component",
-	LC_LOC_METADATA:           "metadata.licenses",
-	LC_LOC_COMPONENTS:         "components",
-	LC_LOC_SERVICES:           "services",
-}
-
 // ------------------------------------------------
 // Query error type
 // ------------------------------------------------
@@ -259,6 +232,9 @@ type WhereFilter struct {
 	ValueRegEx *regexp.Regexp
 }
 
+// Note: Used to normalize key lookups in maps accounting for changes in
+// key names on CDX structures created from annotations during JSON unmarshal
+// TODO: unused as of now
 func (filter *WhereFilter) GetNormalizeKey() (normalizedKey string) {
 	normalizedKey = strings.ToLower(filter.Key)
 	// Note: accounts for changes in JSON annotations (e.g., "bom-ref", etc.)

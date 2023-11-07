@@ -73,7 +73,6 @@ const (
 
 // Query error details
 const (
-	//MSG_QUERY_ERROR_FROM_KEY_INVALID_OBJECT    = "key does not reference a valid JSON object"
 	MSG_QUERY_ERROR_FROM_KEY_NOT_FOUND         = "key not found in path"
 	MSG_QUERY_ERROR_FROM_KEY_SLICE_DEREFERENCE = "key attempts to dereference into an array"
 	MSG_QUERY_ERROR_SELECT_WILDCARD            = "wildcard cannot be used with other values"

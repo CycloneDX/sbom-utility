@@ -42,31 +42,6 @@ const (
 var VALID_USAGE_POLICIES = []string{POLICY_ALLOW, POLICY_DENY, POLICY_NEEDS_REVIEW}
 var ALL_USAGE_POLICIES = []string{POLICY_ALLOW, POLICY_DENY, POLICY_NEEDS_REVIEW, POLICY_UNDEFINED, POLICY_CONFLICT}
 
-// Note: the "License" property is used as hashmap key
-// NOTE: CDXRefType is a named `string` type as of v1.5
-type LicenseInfo struct {
-	UsagePolicy            string           `json:"usage-policy"`
-	LicenseChoiceTypeValue int              `json:"license-type-value"`
-	LicenseChoiceType      string           `json:"license-type"`
-	License                string           `json:"license"`
-	ResourceName           string           `json:"resource-name"`
-	BOMRef                 CDXRefType       `json:"bom-ref"`
-	BOMLocationValue       int              `json:"bom-location-value"`
-	BOMLocation            string           `json:"bom-location"`
-	LicenseChoice          CDXLicenseChoice // Do not marshal
-	Policy                 LicensePolicy    // Do not marshal
-	Component              CDXComponent     // Do not marshal
-	Service                CDXService       // Do not marshal
-}
-
-// LicenseChoice - Choice type
-const (
-	LC_TYPE_INVALID = iota
-	LC_TYPE_ID
-	LC_TYPE_NAME
-	LC_TYPE_EXPRESSION
-)
-
 type LicensePolicy struct {
 	Id             string   `json:"id"`
 	Reference      string   `json:"reference"`

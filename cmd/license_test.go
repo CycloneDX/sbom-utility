@@ -251,7 +251,8 @@ func TestLicenseListSummaryCdx13Csv(t *testing.T) {
 func TestLicenseListTextSummaryCdx14ContainsUndefined(t *testing.T) {
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND, FORMAT_DEFAULT, true)
 	lti.ResultExpectedLineCount = 4 // 2 title, 2 with UNDEFINED
-	lti.ResultLineContainsValues = []string{schema.POLICY_UNDEFINED, common.LC_TYPE_NAMES[common.LC_LOC_UNKNOWN], LICENSE_NO_ASSERTION, "package-lock.json"}
+	unknownLCValue := schema.GetLicenseChoiceTypeName(schema.LC_LOC_UNKNOWN)
+	lti.ResultLineContainsValues = []string{schema.POLICY_UNDEFINED, unknownLCValue, LICENSE_NO_ASSERTION, "package-lock.json"}
 	lti.ResultLineContainsValuesAtLineNum = 3
 	innerTestLicenseList(t, lti)
 }
@@ -259,7 +260,7 @@ func TestLicenseListTextSummaryCdx14ContainsUndefined(t *testing.T) {
 func TestLicenseListPolicyCdx14InvalidLicenseId(t *testing.T) {
 	TEST_LICENSE_ID_OR_NAME := "foo"
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_ID, FORMAT_TEXT, true)
-	lti.ResultLineContainsValues = []string{schema.POLICY_UNDEFINED, common.LC_VALUE_ID, TEST_LICENSE_ID_OR_NAME}
+	lti.ResultLineContainsValues = []string{schema.POLICY_UNDEFINED, schema.LC_VALUE_ID, TEST_LICENSE_ID_OR_NAME}
 	lti.ResultLineContainsValuesAtLineNum = 3
 	innerTestLicenseList(t, lti)
 }
@@ -267,7 +268,7 @@ func TestLicenseListPolicyCdx14InvalidLicenseId(t *testing.T) {
 func TestLicenseListPolicyCdx14InvalidLicenseName(t *testing.T) {
 	TEST_LICENSE_ID_OR_NAME := "bar"
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_NAME, FORMAT_TEXT, true)
-	lti.ResultLineContainsValues = []string{schema.POLICY_UNDEFINED, common.LC_VALUE_NAME, TEST_LICENSE_ID_OR_NAME}
+	lti.ResultLineContainsValues = []string{schema.POLICY_UNDEFINED, schema.LC_VALUE_NAME, TEST_LICENSE_ID_OR_NAME}
 	lti.ResultLineContainsValuesAtLineNum = 3
 	innerTestLicenseList(t, lti)
 }
@@ -421,7 +422,7 @@ func TestLicenseListPolicyCdx14CustomPolicy(t *testing.T) {
 	TEST_LICENSE_ID_OR_NAME := "(MIT OR CC0-1.0)"
 
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_TEXT_CDX_1_4_CUSTOM_POLICY_1, FORMAT_TEXT, true)
-	lti.ResultLineContainsValues = []string{schema.POLICY_ALLOW, common.LC_VALUE_EXPRESSION, TEST_LICENSE_ID_OR_NAME}
+	lti.ResultLineContainsValues = []string{schema.POLICY_ALLOW, schema.LC_VALUE_EXPRESSION, TEST_LICENSE_ID_OR_NAME}
 	lti.ResultLineContainsValuesAtLineNum = 2
 	lti.PolicyFile = TEST_CUSTOM_POLICY_1
 
