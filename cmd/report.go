@@ -96,26 +96,11 @@ func processWhereFlag(cmd *cobra.Command) (whereFilters []common.WhereFilter, er
 	return
 }
 
-// TODO: REMOVE: this is nearly a duplicate of parseWhereFilter() method on QueryRequest
+// Parse "--where" flags on behalf of utility commands that filter output reports (lists)
 func retrieveWhereFilters(whereValues string) (whereFilters []common.WhereFilter, err error) {
-	var whereClauses []string
-
-	if whereValues != "" {
-		whereClauses = strings.Split(whereValues, common.QUERY_WHERE_EXPRESSION_SEP)
-
-		var filter *common.WhereFilter
-		for _, clause := range whereClauses {
-
-			filter = common.ParseWhereFilter(clause)
-
-			if filter == nil {
-				err = common.NewQueryWhereClauseError(nil, clause)
-				return
-			}
-
-			whereFilters = append(whereFilters, *filter)
-		}
-	}
+	// Use common functions for parsing query request clauses
+	wherePredicates := common.ParseWherePredicates(whereValues)
+	whereFilters, err = common.ParseWhereFilters(wherePredicates)
 	return
 }
 
