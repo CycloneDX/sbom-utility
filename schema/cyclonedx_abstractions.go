@@ -114,7 +114,7 @@ const (
 // Declare a fixed-sized array for LC type name indexed lookup
 // Note: this is a "Composite Literal" which forces an array of string that
 // matches the size of the declaration
-var LC_TYPE_NAMES = [...]string{LC_VALUE_INVALID, LC_VALUE_ID, LC_VALUE_NAME, LC_VALUE_EXPRESSION}
+var arrayLicenseTypeNames = [...]string{LC_VALUE_INVALID, LC_VALUE_ID, LC_VALUE_NAME, LC_VALUE_EXPRESSION}
 
 const (
 	LC_LOC_UNKNOWN = iota
@@ -124,7 +124,7 @@ const (
 	LC_LOC_SERVICES
 )
 
-var LC_LICENSE_LOCATION_NAMES = map[int]string{
+var mapLicenseLocationNames = map[int]string{
 	LC_LOC_UNKNOWN:            "unknown",
 	LC_LOC_METADATA_COMPONENT: "metadata.component",
 	LC_LOC_METADATA:           "metadata.licenses",
@@ -155,11 +155,22 @@ func (licenseInfo *LicenseInfo) SetLicenseChoiceTypeValue(value int) {
 }
 
 // TODO: look to remove once we uniformly use get/set methods on structure fields
-func GetLicenseChoiceTypeName(value int) (name string) {
-	if value < len(LC_TYPE_NAMES) {
-		name = LC_TYPE_NAMES[value]
+func GetLicenseChoiceLocationName(value int) (name string) {
+	if _, ok := mapLicenseLocationNames[value]; ok {
+		name = mapLicenseLocationNames[value]
 	} else {
-		name = LC_TYPE_NAMES[LC_TYPE_INVALID]
+		name = mapLicenseLocationNames[LC_TYPE_INVALID]
+		getLogger().Warningf("invalid license choice location value (out of range): %v", value)
+	}
+	return
+}
+
+// TODO: look to remove once we uniformly use get/set methods on structure fields
+func GetLicenseChoiceTypeName(value int) (name string) {
+	if value < len(arrayLicenseTypeNames) {
+		name = arrayLicenseTypeNames[value]
+	} else {
+		name = arrayLicenseTypeNames[LC_TYPE_INVALID]
 		getLogger().Warningf("invalid license choice type value (out of range): %v", value)
 	}
 	return

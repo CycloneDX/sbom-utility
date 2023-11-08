@@ -96,14 +96,15 @@ func processWhereFlag(cmd *cobra.Command) (whereFilters []common.WhereFilter, er
 	return
 }
 
+// TODO: REMOVE: this is nearly a duplicate of parseWhereFilter() method on QueryRequest
 func retrieveWhereFilters(whereValues string) (whereFilters []common.WhereFilter, err error) {
-	var whereExpressions []string
+	var whereClauses []string
 
 	if whereValues != "" {
-		whereExpressions = strings.Split(whereValues, common.QUERY_WHERE_EXPRESSION_SEP)
+		whereClauses = strings.Split(whereValues, common.QUERY_WHERE_EXPRESSION_SEP)
 
 		var filter *common.WhereFilter
-		for _, clause := range whereExpressions {
+		for _, clause := range whereClauses {
 
 			filter = common.ParseWhereFilter(clause)
 

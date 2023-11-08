@@ -266,7 +266,7 @@ func (bom *BOM) HashLicenseInfo(policyConfig *LicensePolicyConfig, key string, l
 	licenseInfo.License = key
 	// Derive values for report filtering
 	licenseInfo.LicenseChoiceType = GetLicenseChoiceTypeName(licenseInfo.LicenseChoiceTypeValue)
-	licenseInfo.BOMLocation = LC_LICENSE_LOCATION_NAMES[licenseInfo.BOMLocationValue]
+	licenseInfo.BOMLocation = GetLicenseChoiceLocationName(licenseInfo.BOMLocationValue)
 
 	var match bool = true
 	if len(whereFilters) > 0 {

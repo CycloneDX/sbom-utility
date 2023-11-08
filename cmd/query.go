@@ -103,13 +103,8 @@ func queryCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	}()
 
 	// Parse flags into a query request struct
-	var queryRequest *common.QueryRequest = new(common.QueryRequest)
-	err = readQueryFlags(queryRequest, cmd)
-	if err != nil {
-		return
-	}
-
-	err = queryRequest.ParseQueryClauses()
+	var queryRequest *common.QueryRequest
+	queryRequest, err = readQueryFlags(cmd)
 	if err != nil {
 		return
 	}
@@ -127,44 +122,30 @@ func queryCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	return
 }
 
-func readQueryFlags(qr *common.QueryRequest, cmd *cobra.Command) (err error) {
+func readQueryFlags(cmd *cobra.Command) (qr *common.QueryRequest, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	// Read '--from` flag first as its result is required for any other field to operate on
-	qr.FromObjectsRaw, err = cmd.Flags().GetString(FLAG_QUERY_FROM)
-	if err != nil {
-		getLogger().Tracef("Query: '%s' flag NOT found", FLAG_QUERY_FROM)
-	} else {
-		getLogger().Tracef("Query: '%s' flag found: %s", FLAG_QUERY_FROM, qr.FromObjectsRaw)
-	}
-
 	// Read '--select' flag second as it is the next highly likely field (used to
 	// reduce the result set from querying the "FROM" JSON object)
-	qr.SelectFieldsRaw, err = cmd.Flags().GetString(FLAG_QUERY_SELECT)
-	if err != nil {
-		getLogger().Tracef("Query: '%s' flag NOT found", FLAG_QUERY_SELECT)
-	} else {
-		getLogger().Tracef("Query: '%s' flag found: %s", FLAG_QUERY_SELECT, qr.SelectFieldsRaw)
-	}
+	rawSelect, errGetString := cmd.Flags().GetString(FLAG_QUERY_SELECT)
+	getLogger().Tracef("Query: '%s' flag: %s, err: %s", FLAG_QUERY_SELECT, rawSelect, errGetString)
+
+	// Read '--from` flag first as its result is required for any other field to operate on
+	rawFrom, errGetString := cmd.Flags().GetString(FLAG_QUERY_FROM)
+	getLogger().Tracef("Query: '%s' flag: %s, err: %s", FLAG_QUERY_FROM, rawFrom, errGetString)
 
 	// Read '--where' flag second as it is the next likely field
 	// (used to further reduce the set of results from field value "matches"
 	// as part of the SELECT processing)
-	qr.WhereValuesRaw, err = cmd.Flags().GetString(FLAG_QUERY_WHERE)
-	if err != nil {
-		getLogger().Tracef("Query: '%s' flag NOT found", FLAG_QUERY_WHERE)
-	} else {
-		getLogger().Tracef("Query: '%s' flag found: %s", FLAG_QUERY_WHERE, qr.WhereValuesRaw)
-	}
+	rawWhere, errGetString := cmd.Flags().GetString(FLAG_QUERY_WHERE)
+	getLogger().Tracef("Query: '%s' flag: %s, err: %s", FLAG_QUERY_WHERE, rawWhere, errGetString)
 
-	// Read '--orderby' flag to be used to order by field (keys) data in the "output" phase
-	qr.OrderByKeysRaw, err = cmd.Flags().GetString(FLAG_QUERY_ORDER_BY)
-	if err != nil {
-		getLogger().Tracef("Query: '%s' flag NOT found", FLAG_QUERY_ORDER_BY)
-	} else {
-		getLogger().Tracef("Query: '%s' flag found: %s", FLAG_QUERY_ORDER_BY, qr.OrderByKeysRaw)
-	}
+	// TODO: Read '--orderby' flag to be used to order by field (keys) data in the "output" phase
+	//rawOrderBy, errGetString := cmd.Flags().GetString(FLAG_QUERY_ORDER_BY)
+	//getLogger().Tracef("Query: '%s' flag: %s, err: %s", FLAG_QUERY_ORDER_BY, rawOrderBy, errGetString)
+
+	qr, err = common.NewQueryRequestSelectFromWhere(rawSelect, rawFrom, rawWhere)
 
 	return
 }
@@ -223,7 +204,7 @@ func Query(writer io.Writer, request *common.QueryRequest, response *common.Quer
 
 	// Query set of FROM objects
 	// if a FROM select object is not provided, assume "root" search
-	if len(request.FromObjectSelectors) == 0 {
+	if len(request.GetFromKeys()) == 0 {
 		getLogger().Tracef("request object FROM selector empty; assume query uses document \"root\".")
 	}
 
@@ -242,9 +223,11 @@ func Query(writer io.Writer, request *common.QueryRequest, response *common.Quer
 			return
 		}
 		// Warn WHERE clause cannot be applied; still return values (for now)
-		if request.WhereValuesRaw != "" {
-			getLogger().Warningf("Cannot apply WHERE filter to a singleton FROM object (%s)",
-				request.FromObjectsRaw)
+		whereFilters, _ := request.GetWhereFilters()
+		if len(whereFilters) > 0 {
+			getLogger().Warningf("Cannot apply WHERE filter (%v) to a singleton FROM object (%v)",
+				whereFilters,
+				request.GetFromKeys())
 		}
 	case []interface{}:
 		fromObjectSlice, _ := resultJson.([]interface{})
@@ -280,11 +263,11 @@ func findFromObject(request *common.QueryRequest, jsonMap map[string]interface{}
 	// initialize local map pointer and return value to starting JSON map
 	var tempMap map[string]interface{} = jsonMap
 	pResults = jsonMap
-	request.IsFromObjectAMap = true
+	//request.IsFromObjectAMap = true
 
-	getLogger().Tracef("Finding JSON object using path key(s): %v\n", request.FromObjectSelectors)
+	getLogger().Tracef("Finding JSON object using path key(s): %v\n", request.GetFromKeys())
 
-	for i, key := range request.FromObjectSelectors {
+	for i, key := range request.GetFromKeys() {
 		pResults = tempMap[key]
 
 		// if we find a nil value, this means we failed to find the object
@@ -309,7 +292,7 @@ func findFromObject(request *common.QueryRequest, jsonMap map[string]interface{}
 			request.IsFromObjectAnArray = true
 			// We no longer have a map to dereference into
 			// So if there are more keys left as selectors it is an error
-			if len(request.FromObjectSelectors) > i+1 {
+			if len(request.GetFromKeys()) > i+1 {
 				err = common.NewQueryFromClauseError(request,
 					fmt.Sprintf("%s: (%s)", MSG_QUERY_ERROR_FROM_KEY_SLICE_DEREFERENCE, key))
 				return
@@ -330,7 +313,7 @@ func selectFieldsFromMap(request *common.QueryRequest, jsonMap map[string]interf
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	selectors := request.SelectFields
+	selectors := request.GetSelectKeys()
 
 	// Default to wildcard behavior
 	// NOTE: The default set by the CLI framework SHOULD be QUERY_TOKEN_WILDCARD
@@ -338,7 +321,7 @@ func selectFieldsFromMap(request *common.QueryRequest, jsonMap map[string]interf
 		return jsonMap, nil
 	}
 
-	// Check for wildcard; if it is the only selector, return
+	// Check for wildcard; if it is the only selector, return the original map
 	if len(selectors) == 1 && selectors[0] == common.QUERY_TOKEN_WILDCARD {
 		return jsonMap, nil
 	}
@@ -346,7 +329,8 @@ func selectFieldsFromMap(request *common.QueryRequest, jsonMap map[string]interf
 	// allocate map to hold selected fields
 	mapSelectedFields = make(map[string]interface{})
 
-	// copy selected fields into output map
+	// Copy selected fields into output map
+	// NOTE: wildcard "short-circuit" returns original map above
 	for _, fieldKey := range selectors {
 		// validate wildcard not used with other fields; if so, that is a conflict
 		if fieldKey == common.QUERY_TOKEN_WILDCARD {
@@ -369,8 +353,12 @@ func selectFieldsFromSlice(request *common.QueryRequest, jsonSlice []interface{}
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	whereFilters := request.WhereFilters
+	var whereFilters []common.WhereFilter
+	whereFilters, err = request.GetWhereFilters()
 	getLogger().Debugf("whereFilters: %v", whereFilters)
+	if err != nil {
+		return
+	}
 
 	for _, iObject := range jsonSlice {
 		mapObject, ok := iObject.(map[string]interface{})

@@ -126,15 +126,19 @@ func innerTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer bytes.Buf
 
 func VerifyTrimOutputFileResult(t *testing.T, ti *TrimTestInfo, keys []string, fromPath string) (err error) {
 	// Query temporary "trimmed" BOM to assure known fields were removed
-	request := common.QueryRequest{
-		SelectFieldsRaw: common.QUERY_TOKEN_WILDCARD,
-		FromObjectsRaw:  fromPath,
+	request, err := common.NewQueryRequestSelectFromWhere(
+		common.QUERY_TOKEN_WILDCARD,
+		fromPath,
+		"")
+	if err != nil {
+		t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
+		return
 	}
 
 	for _, key := range keys {
 		// use a buffered query on the temp. output file on the (parent) path
 		var pResult interface{}
-		pResult, err = innerQuery(t, ti.OutputFile, &request, true)
+		pResult, err = innerQuery(t, ti.OutputFile, request, true)
 		if err != nil {
 			t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
 			return

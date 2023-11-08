@@ -142,7 +142,7 @@ func hashMetadataLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 			bom,
 			fmt.Sprintf("%s (%s)",
 				MSG_LICENSES_NOT_FOUND,
-				schema.LC_LICENSE_LOCATION_NAMES[location]),
+				schema.GetLicenseChoiceLocationName(location)),
 			nil, nil)
 		// Issue a warning as an SBOM without at least one, top-level license
 		// (in the metadata license summary) SHOULD be noted.
@@ -181,7 +181,7 @@ func hashMetadataComponentLicenses(bom *schema.BOM, policyConfig *schema.License
 			bom,
 			fmt.Sprintf("%s (%s)",
 				MSG_LICENSES_NOT_FOUND,
-				schema.LC_LICENSE_LOCATION_NAMES[location]),
+				schema.GetLicenseChoiceLocationName(location)),
 			nil, nil)
 		// Issue a warning as an SBOM without at least one
 		// top-level component license declared SHOULD be noted.

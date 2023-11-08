@@ -214,7 +214,6 @@ func EvaluateErrorAndKeyPhrases(t *testing.T, err error, messages []string) (mat
 }
 
 func prepareWhereFilters(t *testing.T, testInfo *CommonTestInfo) (whereFilters []common.WhereFilter, err error) {
-
 	if testInfo.WhereClause != "" {
 		whereFilters, err = retrieveWhereFilters(testInfo.WhereClause)
 		if err != nil {
