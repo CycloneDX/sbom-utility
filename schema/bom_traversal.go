@@ -17,19 +17,31 @@
 
 package schema
 
-func (bom *BOM) TrimJsonMap(keys []string, paths []string) {
-	if len(keys) > 0 {
-		if jsonMap := bom.GetJSONMap(); jsonMap != nil {
-			for _, key := range keys {
-				if key != "" {
-					bom.trimEntity(jsonMap, key)
-				}
+func (bom *BOM) TrimBOM(keys []string) {
+	// initialize map to root of BOM document
+	// ALWAYS default to document root for trim operation
+	if jsonMap := bom.GetJSONMap(); jsonMap != nil {
+		for _, key := range keys {
+			if key != "" {
+				bom.TrimEntity(jsonMap, key)
 			}
 		}
 	}
 }
 
-func (bom *BOM) trimEntity(entity interface{}, key string) {
+func (bom *BOM) TrimKeys(jsonMap interface{}, keys []string) {
+	// initialize map to root of BOM document
+	// ALWAYS default to document root for trim operation
+	if jsonMap != nil {
+		for _, key := range keys {
+			if key != "" {
+				bom.TrimEntity(jsonMap, key)
+			}
+		}
+	}
+}
+
+func (bom *BOM) TrimEntity(entity interface{}, key string) {
 	switch typedEntity := entity.(type) {
 	case map[string]interface{}:
 		jsonMap := typedEntity
@@ -47,16 +59,16 @@ func (bom *BOM) trimEntity(entity interface{}, key string) {
 			// avoid making costly function calls for primitive types
 			switch typedValue := mapValue.(type) {
 			case map[string]interface{}:
-				bom.trimEntity(typedValue, key)
+				bom.TrimEntity(typedValue, key)
 			case []interface{}:
-				bom.trimEntity(typedValue, key)
+				bom.TrimEntity(typedValue, key)
 			}
 		}
 	case []interface{}:
 		// if type is other than above
 		sliceValue := typedEntity
 		for iSlice := range sliceValue {
-			bom.trimEntity(sliceValue[iSlice], key)
+			bom.TrimEntity(sliceValue[iSlice], key)
 		}
 	default:
 		// if type is other than above

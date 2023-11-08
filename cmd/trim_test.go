@@ -36,13 +36,13 @@ const (
 	TEST_TRIM_CDX_1_4_ENCODED_CHARS           = "test/trim/trim-cdx-1-4-sample-encoded-chars.sbom.json"
 	TEST_TRIM_CDX_1_4_SAMPLE_XXL_1            = "test/trim/trim-cdx-1-4-sample-xxl-1.sbom.json"
 	TEST_TRIM_CDX_1_5_SAMPLE_SMALL_COMPS_ONLY = "test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json"
-	TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1         = "test/trim/trim-cdx-1-5-sample-medium-1.sbom..json"
+	TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1         = "test/trim/trim-cdx-1-5-sample-medium-1.sbom.json"
 )
 
 type TrimTestInfo struct {
 	CommonTestInfo
-	Keys  []string
-	Paths []string
+	Keys      []string
+	FromPaths []string
 }
 
 func (ti *TrimTestInfo) String() string {
@@ -67,6 +67,7 @@ func innerBufferedTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer b
 	utils.GlobalFlags.PersistentFlags.OutputFile = testInfo.OutputFile
 	utils.GlobalFlags.PersistentFlags.OutputFormat = testInfo.OutputFormat
 	utils.GlobalFlags.TrimFlags.Keys = testInfo.Keys
+	utils.GlobalFlags.TrimFlags.FromPaths = testInfo.FromPaths
 	var outputWriter io.Writer
 	var outputFile *os.File
 
@@ -136,6 +137,7 @@ func VerifyTrimOutputFileResult(t *testing.T, ti *TrimTestInfo, keys []string, f
 	}
 
 	for _, key := range keys {
+
 		// use a buffered query on the temp. output file on the (parent) path
 		var pResult interface{}
 		pResult, err = innerQuery(t, ti.OutputFile, request, true)
@@ -273,6 +275,19 @@ func TestTrimCdx15Properties(t *testing.T) {
 	}
 	// metadata.component properties
 	err = VerifyTrimOutputFileResult(t, ti, ti.Keys, "metadata.component") // document root
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestTrimCdx15PropertiesFrom(t *testing.T) {
+	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1, nil)
+	ti.Keys = append(ti.Keys, "properties")
+	ti.FromPaths = []string{"metadata.component"}
+	ti.OutputFile = createTemporaryFilename(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1)
+	innerTestTrim(t, ti)
+	// Assure JSON map does not contain the trimmed key(s)
+	err := VerifyTrimOutputFileResult(t, ti, ti.Keys, "metadata.component") // document root
 	if err != nil {
 		t.Error(err)
 	}

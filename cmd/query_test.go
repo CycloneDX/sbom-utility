@@ -38,15 +38,6 @@ func innerQuery(t *testing.T, filename string, queryRequest *common.QueryRequest
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	// Parse normalized query clauses
-	// err = queryRequest.ParseQueryClauses()
-	// if err != nil {
-	// 	if autofail {
-	// 		t.Errorf("invalid query parameters: %s: query:\n%s", err, queryRequest)
-	// 	}
-	// 	return
-	// }
-
 	// Copy the test filename to the command line flags were the code looks for it
 	utils.GlobalFlags.PersistentFlags.InputFile = filename
 

@@ -111,10 +111,10 @@ type StatsCommandFlags struct {
 
 // TODO: write a "parse" method for the struct (i.e., from "raw" to slice)
 type TrimCommandFlags struct {
-	RawKeys  string
-	RawPaths string
-	Keys     []string
-	Paths    []string
+	RawKeys   string
+	RawPaths  string
+	Keys      []string
+	FromPaths []string
 }
 
 type CustomValidationFlags struct {

@@ -245,14 +245,59 @@ func Query(writer io.Writer, request *common.QueryRequest, response *common.Quer
 
 	// Convert query results to formatted JSON for output
 	fResult, err := utils.ConvertAnyToFormattedJson(resultJson)
-
 	if err != nil {
+		getLogger().Tracef("error: %s", err)
 		return
 	}
 
 	// Use the selected output device (e.g., default stdout or the specified --output-file)
 	fmt.Fprintf(writer, "%s\n", fResult)
 
+	return
+}
+
+func QueryJSONMap(jsonMap map[string]interface{}, request *common.QueryRequest) (resultJson interface{}, err error) {
+	// Query set of FROM objects
+	// if a FROM select object is not provided, assume "root" search
+	if len(request.GetFromKeys()) == 0 {
+		getLogger().Tracef("request object FROM selector empty; assume query uses document \"root\".")
+	}
+
+	resultJson, err = findFromObject(request, jsonMap)
+	if err != nil {
+		return
+	}
+
+	// SELECT specific fields from the FROM object(s)
+	// logic varies depending on data type of FROM object (i.e., map or slice)
+	switch t := resultJson.(type) {
+	case map[string]interface{}:
+		// TODO: return this (map) output instead of the one from the "find" stage
+		resultJson, err = selectFieldsFromMap(request, resultJson.(map[string]interface{}))
+		if err != nil {
+			return
+		}
+		// Warn WHERE clause cannot be applied; still return values (for now)
+		whereFilters, _ := request.GetWhereFilters()
+		if len(whereFilters) > 0 {
+			getLogger().Warningf("Cannot apply WHERE filter (%v) to a singleton FROM object (%v)",
+				whereFilters,
+				request.GetFromKeys())
+		}
+	case []interface{}:
+		fromObjectSlice, _ := resultJson.([]interface{})
+		resultJson, err = selectFieldsFromSlice(request, fromObjectSlice)
+	default:
+		// NOTE: this SHOULD never be invoked as the FROM logic should have caught this already
+		err = common.NewQueryFromClauseError(request,
+			fmt.Sprintf("%s: %T", MSG_QUERY_INVALID_DATATYPE, t))
+		return
+	}
+
+	if err != nil {
+		getLogger().Tracef("error: %s", err)
+		return
+	}
 	return
 }
 

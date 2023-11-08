@@ -37,6 +37,11 @@ type QueryRequest struct {
 	IsFromObjectAnArray bool
 }
 
+func NewQueryRequest() (qr *QueryRequest) {
+	qr = new(QueryRequest)
+	return
+}
+
 func NewQueryRequestSelectFromWhere(rawSelect string, rawFrom string, rawWhere string) (qr *QueryRequest, err error) {
 	qr = new(QueryRequest)
 	qr.selectKeysRaw = rawSelect

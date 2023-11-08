@@ -18,9 +18,14 @@
 package cmd
 
 import (
+	"bufio"
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"io"
 	"strings"
 
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/spf13/cobra"
@@ -28,14 +33,14 @@ import (
 
 // flags (do not translate)
 const (
-	FLAG_TRIM_PATHS = "paths"
-	FLAG_TRIM_KEYS  = "keys"
+	FLAG_TRIM_FROM_PATHS = "from"
+	FLAG_TRIM_MAP_KEYS   = "keys"
 )
 
 // flag help (translate)
 const (
 	FLAG_TRIM_OUTPUT_FORMAT_HELP = "format output using the specified type"
-	FLAG_TRIM_FROM_PATHS         = "comma-separated list of dot-separated JSON document paths used to scope where trim is applied" +
+	FLAG_TRIM_FROM_PATHS_HELP    = "comma-separated list of dot-separated JSON document paths used to scope where trim is applied" +
 		"\n - if not present, the default `--from` path is the document \"root\""
 	FLAG_TRIM_KEYS_HELP = "comma-separated list of `keys=<key1,key2,...,keyN>` that will be trimmed from the JSON document"
 	MSG_TRIM_FLAG_KEYS  = "JSON map keys to trim (delete) (e.g., \"key1,key2,...,keyN\")"
@@ -73,11 +78,11 @@ func initCommandTrimFlags(command *cobra.Command) (err error) {
 
 	command.PersistentFlags().StringVar(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_OUTPUT_FORMAT, FORMAT_JSON,
 		FLAG_TRIM_OUTPUT_FORMAT_HELP+TRIM_OUTPUT_SUPPORTED_FORMATS)
-	command.Flags().StringVarP(&utils.GlobalFlags.TrimFlags.RawPaths, FLAG_TRIM_PATHS, "", "", FLAG_TRIM_FROM_PATHS)
-	command.Flags().StringVarP(&utils.GlobalFlags.TrimFlags.RawKeys, FLAG_TRIM_KEYS, "", "", MSG_TRIM_FLAG_KEYS)
-	err = command.MarkFlagRequired(FLAG_TRIM_KEYS)
+	command.Flags().StringVarP(&utils.GlobalFlags.TrimFlags.RawPaths, FLAG_TRIM_FROM_PATHS, "", "", FLAG_TRIM_FROM_PATHS_HELP)
+	command.Flags().StringVarP(&utils.GlobalFlags.TrimFlags.RawKeys, FLAG_TRIM_MAP_KEYS, "", "", MSG_TRIM_FLAG_KEYS)
+	err = command.MarkFlagRequired(FLAG_TRIM_MAP_KEYS)
 	if err != nil {
-		err = getLogger().Errorf("unable to mark flag `%s` as required: %s", FLAG_TRIM_KEYS, err)
+		err = getLogger().Errorf("unable to mark flag `%s` as required: %s", FLAG_TRIM_MAP_KEYS, err)
 	}
 	return
 }
@@ -105,21 +110,17 @@ func trimCmdImpl(cmd *cobra.Command, args []string) (err error) {
 		utils.GlobalFlags.TrimFlags.Keys = strings.Split(keys, TRIM_KEYS_SEP)
 		getLogger().Tracef("Trim: keys: `%v`\n", keys)
 	} else {
-		getLogger().Tracef("Trim: required parameter NOT found for `%s` flag", FLAG_TRIM_KEYS)
+		getLogger().Tracef("Trim: required parameter NOT found for `%s` flag", FLAG_TRIM_MAP_KEYS)
 	}
 
-	// --paths parameter
+	// --from parameter
 	if paths := utils.GlobalFlags.TrimFlags.RawPaths; paths != "" {
-		utils.GlobalFlags.TrimFlags.Paths = strings.Split(paths, TRIM_PATHS_SEP)
+		utils.GlobalFlags.TrimFlags.FromPaths = common.ParseFromPaths(paths)
 		getLogger().Tracef("Trim: paths: `%v`\n", paths)
 	} else {
-		getLogger().Tracef("Trim: required parameter NOT found for `%s` flag", FLAG_TRIM_PATHS)
+		getLogger().Tracef("Trim: required parameter NOT found for `%s` flag", FLAG_TRIM_FROM_PATHS)
 	}
 
-	// TODO: limit the "trim" scope using Query() command parameters
-	// TODO: i.e., Parse flags into a query request struct:
-	// 		var queryRequest *QueryRequest = new(QueryRequest)
-	// 		err = queryRequest.readQueryFlags(cmd)
 	if err == nil {
 		err = Trim(writer, utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.TrimFlags)
 	}
@@ -171,7 +172,31 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 	}
 
 	// TODO: use a parameter to obtain and normalize object key names
-	document.TrimJsonMap(trimFlags.Keys, trimFlags.Paths)
+	if len(trimFlags.FromPaths) == 0 {
+		document.TrimBOM(trimFlags.Keys)
+	} else {
+
+		qr := common.NewQueryRequest()
+		// query document subsets (as JSON maps) using --from path values
+		for _, path := range trimFlags.FromPaths {
+			qr.SetRawFromPaths(path)
+			result, _ := QueryJSONMap(document.GetJSONMap(), qr)
+
+			var outputBuffer bytes.Buffer
+			bufferedWriter := bufio.NewWriter(&outputBuffer)
+			encoder := json.NewEncoder(bufferedWriter)
+			encoder.SetEscapeHTML(false)
+			encoder.SetIndent("", "    ")
+			err = encoder.Encode(result)
+
+			// MUST ensure all data is written to buffer before further testing
+			bufferedWriter.Flush()
+			fmt.Printf("result: %s", outputBuffer.String())
+			keys := trimFlags.Keys
+			document.TrimKeys(result, keys)
+		}
+
+	}
 
 	// fully unmarshal the SBOM into named structures
 	// TODO: we should NOT need to unmarshal into BOM structures;
