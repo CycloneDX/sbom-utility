@@ -118,7 +118,7 @@ func (bom *BOM) HashComponent(cdxComponent CDXComponent, whereFilters []common.W
 
 	var match bool = true
 	if len(whereFilters) > 0 {
-		mapResourceInfo, _ := utils.ConvertStructToMap(resourceInfo)
+		mapResourceInfo, _ := utils.MarshalStructToJsonMap(resourceInfo)
 		match, _ = whereFilterMatch(mapResourceInfo, whereFilters)
 	}
 
@@ -214,7 +214,7 @@ func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFi
 
 	var match bool = true
 	if len(whereFilters) > 0 {
-		mapResourceInfo, _ := utils.ConvertStructToMap(resourceInfo)
+		mapResourceInfo, _ := utils.MarshalStructToJsonMap(resourceInfo)
 		match, _ = whereFilterMatch(mapResourceInfo, whereFilters)
 	}
 
@@ -270,7 +270,7 @@ func (bom *BOM) HashLicenseInfo(policyConfig *LicensePolicyConfig, key string, l
 
 	var match bool = true
 	if len(whereFilters) > 0 {
-		mapInfo, _ := utils.ConvertStructToMap(licenseInfo)
+		mapInfo, _ := utils.MarshalStructToJsonMap(licenseInfo)
 		match, _ = whereFilterMatch(mapInfo, whereFilters)
 	}
 
@@ -433,7 +433,7 @@ func (bom *BOM) HashVulnerability(cdxVulnerability CDXVulnerability, whereFilter
 
 	var match bool = true
 	if len(whereFilters) > 0 {
-		mapVulnInfo, _ := utils.ConvertStructToMap(vulnInfo)
+		mapVulnInfo, _ := utils.MarshalStructToJsonMap(vulnInfo)
 		match, _ = whereFilterMatch(mapVulnInfo, whereFilters)
 	}
 

@@ -18,6 +18,8 @@
 package utils
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -35,15 +37,18 @@ func IsValidJsonRaw(test []byte) bool {
 }
 
 // NOTE: simple wrapper method on json package to standardize parms
-func ConvertAnyToFormattedJson(any interface{}) (string, error) {
+// WARNING: By default, json.Marshal() methods will use a unicode encoding
+// which will encode utf8 characters such as: '@', '<', '>', etc.
+func MarshalAnyToFormattedJsonString(any interface{}) (string, error) {
 	// Indent each level with 2 space chars.
 	byteMapOut, err := json.MarshalIndent(any, "", "  ")
 	return string(byteMapOut), err
 }
 
-func ConvertStructToMap(structIn interface{}) (mapOut map[string]interface{}, err error) {
+func MarshalStructToJsonMap(any interface{}) (mapOut map[string]interface{}, err error) {
+	// TODO: validate input parameter is a struct
 	var bytesOut []byte
-	bytesOut, err = json.Marshal(structIn)
+	bytesOut, err = json.Marshal(any)
 
 	if err != nil {
 		return
@@ -52,8 +57,25 @@ func ConvertStructToMap(structIn interface{}) (mapOut map[string]interface{}, er
 	return
 }
 
+// NOTE: Using this custom encoder avoids the json.Marshal() default
+// behavior of encoding utf8 characters such as: '@', '<', '>', etc.
+// as unicode.
+func EncodeAnyToIndentedJSON(any interface{}) (output string, err error) {
+	var outputBuffer bytes.Buffer
+	bufferedWriter := bufio.NewWriter(&outputBuffer)
+	encoder := json.NewEncoder(bufferedWriter)
+	encoder.SetEscapeHTML(false)
+	encoder.SetIndent("", "    ")
+	err = encoder.Encode(any)
+	// MUST ensure all data is written to buffer before further testing
+	bufferedWriter.Flush()
+	output = outputBuffer.String()
+	return
+}
+
 // TODO: function NOT complete, only placeholder type switch
-func ConvertAnyToAny(values ...interface{}) {
+// TODO: allow generic function to be applied to types
+func PrintTypes(values ...interface{}) {
 	//fmt.Printf("values=%v\n", values)
 	for index, value := range values {
 		fmt.Printf("value[%d] (%T): %+v\n", index, value, value)

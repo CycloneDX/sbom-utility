@@ -208,7 +208,7 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 	var sliceString []string
 	var joinedData string
 
-	mapStruct, err = utils.ConvertStructToMap(structIn)
+	mapStruct, err = utils.MarshalStructToJsonMap(structIn)
 
 	for _, columnData := range formatData {
 

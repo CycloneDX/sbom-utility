@@ -341,7 +341,7 @@ func (config *LicensePolicyConfig) filteredHashLicensePolicy(policy LicensePolic
 
 	// See if the policy matches where filters criteria
 	if len(whereFilters) > 0 {
-		mapPolicy, err = utils.ConvertStructToMap(policy)
+		mapPolicy, err = utils.MarshalStructToJsonMap(policy)
 		if err != nil {
 			return
 		}

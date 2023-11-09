@@ -20,7 +20,6 @@ package cmd
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -165,19 +164,17 @@ func VerifyTrimmed(pResult interface{}, key string) (err error) {
 		switch typedValue := pResult.(type) {
 		case map[string]interface{}:
 			// verify map key was removed
-			//property := ti.Keys[0]
 			if _, ok := typedValue[key]; ok {
-				formattedValue, _ := utils.ConvertAnyToFormattedJson(typedValue)
+				formattedValue, _ := utils.MarshalAnyToFormattedJsonString(typedValue)
 				err = getLogger().Errorf("trim failed. Key `%s`, found in: `%s`", key, formattedValue)
 				return
 			}
 		case []interface{}:
-			fmt.Printf("pResult: `%v` (%T)", pResult, pResult)
 			if len(typedValue) == 0 {
 				err = getLogger().Errorf("empty slice found at from clause.")
 				return
 			}
-
+			// Verify all elements of slice
 			for _, value := range typedValue {
 				err = VerifyTrimmed(value, key)
 				return err
@@ -200,7 +197,7 @@ func VerifyTrimmed(pResult interface{}, key string) (err error) {
 // rewrite BOMs (after edits) preserve original characters.
 func TestTrimCdx14PreserveUnencodedChars(t *testing.T) {
 	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_4_ENCODED_CHARS, nil)
-	ti.OutputFile = createTemporaryFilename(TEST_TRIM_CDX_1_4_ENCODED_CHARS)
+	ti.OutputFile = ti.CreateTemporaryFilename(TEST_TRIM_CDX_1_4_ENCODED_CHARS)
 	ti.Keys = append(ti.Keys, "name")
 	outputBuffer, _ := innerBufferedTestTrim(t, ti)
 	TEST1 := "<guillem@debian.org>"
@@ -218,7 +215,7 @@ func TestTrimCdx14PreserveUnencodedChars(t *testing.T) {
 }
 
 // ----------------------------------------
-// Trim "keys"
+// Trim "keys" globally (entire BOM)
 // ----------------------------------------
 func TestTrimCdx14ComponentPropertiesSampleXXLBuffered(t *testing.T) {
 	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_4_SAMPLE_XXL_1, nil)
@@ -232,7 +229,7 @@ func TestTrimCdx14ComponentPropertiesSampleXXLBuffered(t *testing.T) {
 func TestTrimCdx14ComponentPropertiesSampleXXL(t *testing.T) {
 	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_4_SAMPLE_XXL_1, nil)
 	ti.Keys = append(ti.Keys, "properties")
-	ti.OutputFile = createTemporaryFilename(TEST_TRIM_CDX_1_4_SAMPLE_XXL_1)
+	ti.OutputFile = ti.CreateTemporaryFilename(TEST_TRIM_CDX_1_4_SAMPLE_XXL_1)
 	innerTestTrim(t, ti)
 	// Assure JSON map does not contain the trimmed key(s)
 	err := VerifyTrimOutputFileResult(t, ti, ti.Keys, "metadata.component")
@@ -244,7 +241,7 @@ func TestTrimCdx14ComponentPropertiesSampleXXL(t *testing.T) {
 func TestTrimCdx15MultipleKeys(t *testing.T) {
 	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_SAMPLE_SMALL_COMPS_ONLY, nil)
 	ti.Keys = append(ti.Keys, "properties", "hashes", "version", "description", "name")
-	ti.OutputFile = createTemporaryFilename(TEST_TRIM_CDX_1_5_SAMPLE_SMALL_COMPS_ONLY)
+	ti.OutputFile = ti.CreateTemporaryFilename(TEST_TRIM_CDX_1_5_SAMPLE_SMALL_COMPS_ONLY)
 	innerTestTrim(t, ti)
 	// Assure JSON map does not contain the trimmed key(s)
 	err := VerifyTrimOutputFileResult(t, ti, []string{"hashes"}, "")
@@ -260,7 +257,7 @@ func TestTrimCdx15MultipleKeys(t *testing.T) {
 func TestTrimCdx15Properties(t *testing.T) {
 	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1, nil)
 	ti.Keys = append(ti.Keys, "properties")
-	ti.OutputFile = createTemporaryFilename(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1)
+	ti.OutputFile = ti.CreateTemporaryFilename(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1)
 	innerTestTrim(t, ti)
 	// Assure JSON map does not contain the trimmed key(s)
 	// Document "root" properties
@@ -280,11 +277,30 @@ func TestTrimCdx15Properties(t *testing.T) {
 	}
 }
 
-func TestTrimCdx15PropertiesFrom(t *testing.T) {
+// ----------------------------------------
+// Trim "keys" only under specified "paths"
+// ----------------------------------------
+
+func TestTrimCdx15PropertiesFromMetadataComponent(t *testing.T) {
 	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1, nil)
 	ti.Keys = append(ti.Keys, "properties")
 	ti.FromPaths = []string{"metadata.component"}
-	ti.OutputFile = createTemporaryFilename(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1)
+	ti.TestOutputVariantName = utils.GetCallerFunctionName(2)
+	ti.OutputFile = ti.CreateTemporaryFilename(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1)
+	innerTestTrim(t, ti)
+	// Assure JSON map does not contain the trimmed key(s)
+	err := VerifyTrimOutputFileResult(t, ti, ti.Keys, "metadata.component") // document root
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestTrimCdx15From(t *testing.T) {
+	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1, nil)
+	ti.Keys = append(ti.Keys, "properties")
+	ti.FromPaths = []string{"metadata.component"}
+	ti.TestOutputVariantName = utils.GetCallerFunctionName(2)
+	ti.OutputFile = ti.CreateTemporaryFilename(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1)
 	innerTestTrim(t, ti)
 	// Assure JSON map does not contain the trimmed key(s)
 	err := VerifyTrimOutputFileResult(t, ti, ti.Keys, "metadata.component") // document root

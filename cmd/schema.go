@@ -158,7 +158,7 @@ func filterFormatSchemas(whereFilters []common.WhereFilter) (filteredFormats []s
 		var match bool = true
 
 		if len(whereFilters) > 0 {
-			mapFormat, _ := utils.ConvertStructToMap(schema)
+			mapFormat, _ := utils.MarshalStructToJsonMap(schema)
 			match, _ = whereFilterMatch(mapFormat, whereFilters)
 		}
 

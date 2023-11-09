@@ -125,7 +125,7 @@ func VerifySelectedFieldsInJsonMap(t *testing.T, keys []string, results interfac
 func printResult(iResult interface{}) {
 	if !*TestLogQuiet {
 		// Format results in JSON
-		fResult, _ := utils.ConvertAnyToFormattedJson(iResult)
+		fResult, _ := utils.MarshalAnyToFormattedJsonString(iResult)
 		// Output the JSON data directly to stdout (not subject to log-level)
 		fmt.Printf("%s\n", fResult)
 	}

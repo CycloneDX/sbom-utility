@@ -374,13 +374,13 @@ func (bom *BOM) EncodeJsonCycloneDX(writer io.Writer, prefix string, indent stri
 	getLogger().Enter()
 	defer getLogger().Exit()
 
+	// TODO: use method in utils package instead...
 	var outputBuffer bytes.Buffer
 	bufferedWriter := bufio.NewWriter(&outputBuffer)
 	encoder := json.NewEncoder(bufferedWriter)
 	encoder.SetEscapeHTML(false)
 	encoder.SetIndent(prefix, indent)
 	err = encoder.Encode(bom.CdxBom)
-
 	// MUST ensure all data is written to buffer before further testing
 	bufferedWriter.Flush()
 

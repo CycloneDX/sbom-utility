@@ -31,7 +31,7 @@ import (
 )
 
 // Default test output (i.e., --output) directory
-const TEST_OUTPUT_PATH = "temp/"
+const DEFAULT_TEMP_OUTPUT_PATH = "temp/"
 
 // Test files that span commands
 const (
@@ -66,6 +66,7 @@ type CommonTestInfo struct {
 	ResultLineContainsValuesAtLineNum int
 	ResultLineContainsValues          []string
 	MockStdin                         bool
+	TestOutputVariantName             string
 }
 
 func NewCommonTestInfo() *CommonTestInfo {
@@ -112,6 +113,20 @@ func (ti *CommonTestInfo) InitBasic(inputFile string, format string, expectedErr
 	ti.Init(inputFile, format, TI_LIST_SUMMARY_FALSE, TI_DEFAULT_WHERE_CLAUSE,
 		nil, TI_DEFAULT_LINE_COUNT, expectedError)
 	return ti
+}
+
+func (ti *CommonTestInfo) CreateTemporaryFilename(relativeFilename string) (tempFilename string) {
+	trimmedFilename := strings.TrimLeft(relativeFilename, strconv.QuoteRune(os.PathSeparator))
+	if ti.TestOutputVariantName != "" {
+		lastIndex := strings.LastIndex(trimmedFilename, string(os.PathSeparator))
+		// insert variant as last path...
+		if lastIndex > 0 {
+			path := trimmedFilename[0:lastIndex]
+			base := trimmedFilename[lastIndex:]
+			trimmedFilename = path + string(os.PathSeparator) + ti.TestOutputVariantName + base
+		}
+	}
+	return DEFAULT_TEMP_OUTPUT_PATH + trimmedFilename
 }
 
 func TestMain(m *testing.M) {
@@ -222,9 +237,4 @@ func prepareWhereFilters(t *testing.T, testInfo *CommonTestInfo) (whereFilters [
 		}
 	}
 	return
-}
-
-func createTemporaryFilename(baseFilename string) (tempFilename string) {
-	trimmedFilename := strings.TrimLeft(baseFilename, strconv.QuoteRune(os.PathSeparator))
-	return TEST_OUTPUT_PATH + trimmedFilename
 }

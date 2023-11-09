@@ -18,10 +18,6 @@
 package cmd
 
 import (
-	"bufio"
-	"bytes"
-	"encoding/json"
-	"fmt"
 	"io"
 	"strings"
 
@@ -173,27 +169,25 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 
 	// TODO: use a parameter to obtain and normalize object key names
 	if len(trimFlags.FromPaths) == 0 {
-		document.TrimBOM(trimFlags.Keys)
+		document.TrimBOMKeys(trimFlags.Keys)
 	} else {
 
 		qr := common.NewQueryRequest()
 		// query document subsets (as JSON maps) using --from path values
 		for _, path := range trimFlags.FromPaths {
 			qr.SetRawFromPaths(path)
-			result, _ := QueryJSONMap(document.GetJSONMap(), qr)
+			result, errQuery := QueryJSONMap(document.GetJSONMap(), qr)
 
-			var outputBuffer bytes.Buffer
-			bufferedWriter := bufio.NewWriter(&outputBuffer)
-			encoder := json.NewEncoder(bufferedWriter)
-			encoder.SetEscapeHTML(false)
-			encoder.SetIndent("", "    ")
-			err = encoder.Encode(result)
+			if errQuery != nil {
+				getLogger().Errorf("query error: invalid path: %s", path)
+				temp, errEncode := utils.EncodeAnyToIndentedJSON(result)
+				if errEncode != nil {
+					getLogger().Tracef("result: %s", temp)
+				}
+			}
 
-			// MUST ensure all data is written to buffer before further testing
-			bufferedWriter.Flush()
-			fmt.Printf("result: %s", outputBuffer.String())
 			keys := trimFlags.Keys
-			document.TrimKeys(result, keys)
+			document.TrimEntityKeys(result, keys)
 		}
 
 	}

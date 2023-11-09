@@ -244,7 +244,8 @@ func Query(writer io.Writer, request *common.QueryRequest, response *common.Quer
 	}
 
 	// Convert query results to formatted JSON for output
-	fResult, err := utils.ConvertAnyToFormattedJson(resultJson)
+	// TODO: we MAY want to use a JSON Encoder to avoid unicode encoding
+	fResult, err := utils.MarshalAnyToFormattedJsonString(resultJson)
 	if err != nil {
 		getLogger().Tracef("error: %s", err)
 		return
