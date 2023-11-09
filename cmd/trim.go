@@ -167,13 +167,15 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 		return
 	}
 
-	// TODO: use a parameter to obtain and normalize object key names
+	// If no paths are passed, use BOM document root
 	if len(trimFlags.FromPaths) == 0 {
 		document.TrimBOMKeys(trimFlags.Keys)
 	} else {
-
+		// TODO: see if we can make this logic a method on BOM object
+		// else, loop through document paths provided by caller
 		qr := common.NewQueryRequest()
-		// query document subsets (as JSON maps) using --from path values
+		// Use query function to obtain BOM document subsets (as JSON maps)
+		// using --from path values
 		for _, path := range trimFlags.FromPaths {
 			qr.SetRawFromPaths(path)
 			result, errQuery := QueryJSONMap(document.GetJSONMap(), qr)
@@ -189,7 +191,6 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 			keys := trimFlags.Keys
 			document.TrimEntityKeys(result, keys)
 		}
-
 	}
 
 	// fully unmarshal the SBOM into named structures

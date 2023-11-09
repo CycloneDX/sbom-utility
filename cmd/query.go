@@ -278,7 +278,8 @@ func QueryJSONMap(jsonMap map[string]interface{}, request *common.QueryRequest) 
 		if err != nil {
 			return
 		}
-		// Warn WHERE clause cannot be applied; still return values (for now)
+		// Warn WHERE clause cannot be applied to a single map object; it was
+		// intended only for slices of objects... still return values (for now)
 		whereFilters, _ := request.GetWhereFilters()
 		if len(whereFilters) > 0 {
 			getLogger().Warningf("Cannot apply WHERE filter (%v) to a singleton FROM object (%v)",
@@ -288,6 +289,9 @@ func QueryJSONMap(jsonMap map[string]interface{}, request *common.QueryRequest) 
 	case []interface{}:
 		fromObjectSlice, _ := resultJson.([]interface{})
 		resultJson, err = selectFieldsFromSlice(request, fromObjectSlice)
+		if err != nil {
+			return
+		}
 	default:
 		// NOTE: this SHOULD never be invoked as the FROM logic should have caught this already
 		err = common.NewQueryFromClauseError(request,
@@ -406,6 +410,8 @@ func selectFieldsFromSlice(request *common.QueryRequest, jsonSlice []interface{}
 		return
 	}
 
+	// See if
+	var match bool
 	for _, iObject := range jsonSlice {
 		mapObject, ok := iObject.(map[string]interface{})
 
@@ -414,16 +420,19 @@ func selectFieldsFromSlice(request *common.QueryRequest, jsonSlice []interface{}
 			return
 		}
 
-		match, errMatch := whereFilterMatch(mapObject, whereFilters)
-
-		if errMatch != nil {
-			err = errMatch
-			return
+		// If where filters exist, apply them to the map object
+		// to see if it should be included in the result
+		if whereFilters != nil {
+			match, err = whereFilterMatch(mapObject, whereFilters)
+			if err != nil {
+				return
+			}
 		}
 
-		// If ALL WHERE filters matched the regexp. provided,
-		// add the entirety of the matching object to the (selected) result set
-		if match {
+		// If no WHERE filters were provided OR we matched all the regex comparisons,
+		// against the original map object, then add a new map object with only the
+		// SELECT(ed) fields requested.
+		if whereFilters == nil || match {
 			mapObject, err = selectFieldsFromMap(request, mapObject)
 			// Reduce result object to only the requested SELECT fields
 			sliceSelectedFields = append(sliceSelectedFields, mapObject)
