@@ -18,7 +18,6 @@
 package schema
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -370,19 +369,15 @@ func (bom *BOM) MarshalCycloneDXBOM(writer io.Writer, prefix string, indent stri
 // '<' is encoded as: \u003c
 // '>' is encoded as: \u003e
 // Instead, this custom encoder method dutifully preserves the input byte values
-func (bom *BOM) EncodeJsonCycloneDX(writer io.Writer, prefix string, indent string) (err error) {
+func (bom *BOM) EncodeAsFormattedJSON(writer io.Writer, prefix string, indent string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	// TODO: use method in utils package instead...
 	var outputBuffer bytes.Buffer
-	bufferedWriter := bufio.NewWriter(&outputBuffer)
-	encoder := json.NewEncoder(bufferedWriter)
-	encoder.SetEscapeHTML(false)
-	encoder.SetIndent(prefix, indent)
-	err = encoder.Encode(bom.CdxBom)
-	// MUST ensure all data is written to buffer before further testing
-	bufferedWriter.Flush()
+	outputBuffer, err = utils.EncodeAnyToIndentedJSON(bom.CdxBom)
+	if err != nil {
+		return
+	}
 
 	numBytes, errWrite := writer.Write(outputBuffer.Bytes())
 	if errWrite != nil {

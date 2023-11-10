@@ -313,7 +313,6 @@ func findFromObject(request *common.QueryRequest, jsonMap map[string]interface{}
 	// initialize local map pointer and return value to starting JSON map
 	var tempMap map[string]interface{} = jsonMap
 	pResults = jsonMap
-	//request.IsFromObjectAMap = true
 
 	getLogger().Tracef("Finding JSON object using path key(s): %v\n", request.GetFromKeys())
 

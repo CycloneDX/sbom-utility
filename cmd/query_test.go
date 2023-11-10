@@ -324,6 +324,8 @@ func TestQueryCdx14InvalidWhereClauseNoRegex(t *testing.T) {
 		common.QUERY_TOKEN_WILDCARD,
 		"metadata.properties",
 		"name")
+	// Note: this tests the parameter parsing function
+	// TODO: move to "common" package
 	if !ErrorTypesMatch(err, &common.QueryError{}) {
 		t.Errorf("expected error type: `%T`, actual type: `%T`", &common.QueryError{}, err)
 	}
@@ -395,8 +397,20 @@ func TestQueryCdx14InvalidWhereClauseOnFromSingleton(t *testing.T) {
 		common.QUERY_TOKEN_WILDCARD,
 		"metadata.component",
 		"name=foo")
+	// Note: this produces a warning, not an error
 	_, err := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, nil)
 	if err != nil {
 		t.Error(err)
 	}
 }
+
+// func TestQueryCdx14MetadataToolsSlice(t *testing.T) {
+// 	request, _ := common.NewQueryRequestSelectFromWhere(
+// 		common.QUERY_TOKEN_WILDCARD,
+// 		"metadata.tools",
+// 		"")
+// 	_, err := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, nil)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// }

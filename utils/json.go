@@ -21,7 +21,6 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"fmt"
 )
 
 func IsValidJsonMap(test string) bool {
@@ -60,8 +59,7 @@ func MarshalStructToJsonMap(any interface{}) (mapOut map[string]interface{}, err
 // NOTE: Using this custom encoder avoids the json.Marshal() default
 // behavior of encoding utf8 characters such as: '@', '<', '>', etc.
 // as unicode.
-func EncodeAnyToIndentedJSON(any interface{}) (output string, err error) {
-	var outputBuffer bytes.Buffer
+func EncodeAnyToIndentedJSON(any interface{}) (outputBuffer bytes.Buffer, err error) {
 	bufferedWriter := bufio.NewWriter(&outputBuffer)
 	encoder := json.NewEncoder(bufferedWriter)
 	encoder.SetEscapeHTML(false)
@@ -69,34 +67,33 @@ func EncodeAnyToIndentedJSON(any interface{}) (output string, err error) {
 	err = encoder.Encode(any)
 	// MUST ensure all data is written to buffer before further testing
 	bufferedWriter.Flush()
-	output = outputBuffer.String()
 	return
 }
 
 // TODO: function NOT complete, only placeholder type switch
 // TODO: allow generic function to be applied to types
-func PrintTypes(values ...interface{}) {
-	//fmt.Printf("values=%v\n", values)
-	for index, value := range values {
-		fmt.Printf("value[%d] (%T): %+v\n", index, value, value)
-		switch t := value.(type) {
-		case nil:
-			fmt.Println("Type is nil.")
-		case int:
-		case uint:
-		case int32:
-		case int64:
-		case uint64:
-			fmt.Println("Type is an integer:", t)
-		case float32:
-		case float64:
-			fmt.Println("Type is a float:", t)
-		case string:
-			fmt.Println("Type is a string:", t)
-		case bool:
-			fmt.Println("Type is a bool:", t)
-		default:
-			fmt.Printf("Type is unknown!: %v\n", t)
-		}
-	}
-}
+// func PrintTypes(values ...interface{}) {
+// 	//fmt.Printf("values=%v\n", values)
+// 	for index, value := range values {
+// 		fmt.Printf("value[%d] (%T): %+v\n", index, value, value)
+// 		switch t := value.(type) {
+// 		case nil:
+// 			fmt.Println("Type is nil.")
+// 		case int:
+// 		case uint:
+// 		case int32:
+// 		case int64:
+// 		case uint64:
+// 			fmt.Println("Type is an integer:", t)
+// 		case float32:
+// 		case float64:
+// 			fmt.Println("Type is a float:", t)
+// 		case string:
+// 			fmt.Println("Type is a string:", t)
+// 		case bool:
+// 			fmt.Println("Type is a bool:", t)
+// 		default:
+// 			fmt.Printf("Type is unknown!: %v\n", t)
+// 		}
+// 	}
+// }

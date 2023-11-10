@@ -146,8 +146,7 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 
 	// Note: returns error if either file load or unmarshal to JSON map fails
 	var document *schema.BOM
-	document, err = LoadInputBOMFileAndDetectSchema()
-	if err != nil {
+	if document, err = LoadInputBOMFileAndDetectSchema(); err != nil {
 		return
 	}
 
@@ -182,9 +181,9 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 
 			if errQuery != nil {
 				getLogger().Errorf("query error: invalid path: %s", path)
-				temp, errEncode := utils.EncodeAnyToIndentedJSON(result)
+				buffer, errEncode := utils.EncodeAnyToIndentedJSON(result)
 				if errEncode != nil {
-					getLogger().Tracef("result: %s", temp)
+					getLogger().Tracef("result: %s", buffer.String())
 				}
 			}
 
@@ -193,26 +192,28 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 		}
 	}
 
-	// fully unmarshal the SBOM into named structures
-	// TODO: we should NOT need to unmarshal into BOM structures;
-	// instead, see if we can simply Marshal the JSON map directly
-	// NOTE: if we do want to "validate" the data at some point we MAY
-	// need to unmarshal into CDX structures.
+	// TODO: Investigate if we can simply Marshal the JSON map directly (performance).
+	// NOTE: Today we unmarshal() to ensure empty/zero fields are omitted via
+	// the custom marshal/unmarshal functions for CycloneDX.
+	// NOTE: If we do want to "validate" the BOM data at some point we MAY
+	// need to unmarshal into CDX structures regardless.
+	// Fully unmarshal the SBOM into named structures
 	if err = document.UnmarshalCycloneDXBOM(); err != nil {
 		return
 	}
 
+	// TODO: include formatting (i.e., prefix, indent) as command line flags
 	// Output the "trimmed" version of the Input BOM
 	format := persistentFlags.OutputFormat
 	getLogger().Infof("Outputting listing (`%s` format)...", format)
 	switch format {
 	case FORMAT_JSON:
-		err = document.EncodeJsonCycloneDX(writer, "", "  ")
+		err = document.EncodeAsFormattedJSON(writer, "", "  ")
 	default:
 		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Stats not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_TEXT)
-		err = document.EncodeJsonCycloneDX(writer, "", "  ")
+		err = document.EncodeAsFormattedJSON(writer, "", "  ")
 	}
 
 	return
