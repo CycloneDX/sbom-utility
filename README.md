@@ -27,6 +27,14 @@ The utility supports the following commands:
 
 - **[vulnerability](#vulnerability)** produce filterable listings or summarized reports of vulnerabilities from BOM data (i.e., CycloneDX Vulnerability Exploitability eXchange (**VEX**)) data or independently stored CycloneDX Vulnerability Disclosure Report (**VDR**) data.
 
+**Experimental commands**:
+
+Feedback and helpful commits appreciated on the following commands which will be moved to non-experimental after two point releases:
+
+- **[diff](#diff)** : Shows the delta between two similar BOM versions in
+
+- **[trim](#trim)** provide the ability to remove JSON information, by field key and limited query syntax, from the input JSON BOM document.
+
 ---
 
 ## Index
@@ -45,7 +53,8 @@ The utility supports the following commands:
   - [`schema` command](#schema): list supported BOM formats, versions, variants
   - [`validate` command](#validate): BOM against declared or required schema
   - [`vulnerability` command](#vulnerability): lists vulnerability summary information included in the BOM or VEX
-  - [`diff` command](#diff): *experimental*: shows the delta between two BOM versions
+  - [`diff` command](#diff): *experimental*: shows the delta between two similar BOM versions
+  - [`trim` command](#diff): *experimental*: remove specified fields from JSON BOM documents and output smaller BOMs that are appropriate sized for different use cases and analysis
 - [Design considerations](#design-considerations)
 - [Development](#development)
   - [Prerequisites](#prerequisites)
@@ -564,6 +573,8 @@ If the result set is an array, the array entries can be reduced by applying the 
 
 The `query` command only supports JSON output.
 
+- `json` (default)
+
 #### Query result sorting
 
 The `query` command does not support output results.
@@ -680,8 +691,7 @@ In this example, the `--from` filter will return the entire JSON components arra
     "description": "Node.js body parsing middleware",
     "hashes": [
       {
-        "alg": "SHA-1",
-        "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+        ...
       }
     ],
     "licenses": [
@@ -699,7 +709,7 @@ In this example, the `--from` filter will return the entire JSON components arra
 ]
 ```
 
-**Note**: The command only used the `--from` flag and did not need to supply `--select '*'` as this us the default.
+**Note**: The command for this example only used the `--from` flag and did not need to supply `--select '*'` as this us the default.
 
 ##### Example: Filter result entries with a specified value
 
@@ -857,6 +867,16 @@ For details see the "[Adding SBOM formats, schema versions and variants](#adding
 #### Embedding schemas
 
 If you wish to have the new schema *embedded in the executable*, simply add it to the project's `resources` subdirectory following the format and version-based directory structure.
+
+### Trim
+
+This command is able to "trim" one or more JSON keys (fields) from specified JSON BOM documents effectively "pruning" the JSON document.  This functionality helps consumers of large-sized BOMs that need to analyze specific types of data in large BOMs in reducing the BOM data to just what is needed for their use cases or needs.
+
+#### Trim supported output formats
+
+This command is used to output, using the `--output-file` or `-o` flag, a "trimmed" BOM in JSON format.
+
+- `json` (default)
 
 ---
 
