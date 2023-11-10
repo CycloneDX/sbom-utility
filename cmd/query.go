@@ -328,7 +328,7 @@ func selectFieldsFromMap(request *common.QueryRequest, jsonMap map[string]interf
 
 	selectors := request.GetSelectKeys()
 
-	// Default to wildcard behavior
+	// Default to wildcard behavior (i.e., if request had no "select keys")
 	// NOTE: The default set by the CLI framework SHOULD be QUERY_TOKEN_WILDCARD
 	if len(selectors) == 0 {
 		return jsonMap, nil
@@ -373,7 +373,9 @@ func selectFieldsFromSlice(request *common.QueryRequest, jsonSlice []interface{}
 		return
 	}
 
-	// See if
+	// Add only those objects whose field values match provided WhereFilters
+	// and add them to a new "result" slice for further SELECT operations.
+	// If no WhereFilters were provided, then add the object to the "result" slice.
 	var match bool
 	for _, iObject := range jsonSlice {
 		mapObject, ok := iObject.(map[string]interface{})
@@ -384,7 +386,7 @@ func selectFieldsFromSlice(request *common.QueryRequest, jsonSlice []interface{}
 		}
 
 		// If where filters exist, apply them to the map object
-		// to see if it should be included in the result
+		// to see if it should be included in the result map
 		if whereFilters != nil {
 			if match, err = whereFilterMatch(mapObject, whereFilters); err != nil {
 				return
@@ -420,11 +422,9 @@ func whereFilterMatch(mapObject map[string]interface{}, whereFilters []common.Wh
 
 		key = filter.Key
 		value, present := mapObject[key]
-		getLogger().Debugf("testing object map[%s]: `%v`", key, value)
-
 		if !present {
 			match = false
-			err = getLogger().Errorf("key `%s` not found ib object map", key)
+			err = getLogger().Errorf("key `%s` not found in object map", key)
 			break
 		}
 

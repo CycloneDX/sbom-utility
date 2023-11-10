@@ -404,13 +404,15 @@ func TestQueryCdx14InvalidWhereClauseOnFromSingleton(t *testing.T) {
 	}
 }
 
-// func TestQueryCdx14MetadataToolsSlice(t *testing.T) {
-// 	request, _ := common.NewQueryRequestSelectFromWhere(
-// 		common.QUERY_TOKEN_WILDCARD,
-// 		"metadata.tools",
-// 		"")
-// 	_, err := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, nil)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// }
+func TestQueryCdx14MetadataToolsSlice(t *testing.T) {
+	request, _ := common.NewQueryRequestSelectFromWhere(
+		common.QUERY_TOKEN_WILDCARD,
+		"metadata.tools",
+		"")
+	_, err := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	// fResult, _ := utils.EncodeAnyToIndentedJSON(result)
+	// fmt.Printf("result: %s", fResult.String())
+}
