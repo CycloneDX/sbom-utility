@@ -23,6 +23,16 @@ import (
 	"encoding/json"
 )
 
+func IsJsonMapType(any interface{}) (isMapType bool) {
+	_, isMapType = any.(map[string]interface{})
+	return
+}
+
+func IsJsonSliceType(any interface{}) (isSliceType bool) {
+	_, isSliceType = any.([]interface{})
+	return
+}
+
 func IsValidJsonMap(test string) bool {
 	var js map[string]interface{}
 	err := json.Unmarshal([]byte(test), &js)
