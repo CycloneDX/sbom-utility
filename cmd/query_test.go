@@ -425,5 +425,27 @@ func TestQueryCdx14MetadataToolsSlice(t *testing.T) {
 		fResult, _ := utils.EncodeAnyToIndentedJSON(result)
 		t.Error(fmt.Errorf("expected slice length: %v, actual length: %v. Actual result: %s", EXPECTED_SLICE_LENGTH, actualLength, fResult.String()))
 	}
+}
 
+func TestQueryCdx14MetadataToolsSliceWhereName(t *testing.T) {
+	request, _ := common.NewQueryRequestSelectFromWhere(
+		common.QUERY_TOKEN_WILDCARD,
+		"components",
+		"name=body-parser")
+	result, err := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	if !utils.IsJsonSliceType(result) {
+		fResult, _ := utils.EncodeAnyToIndentedJSON(result)
+		t.Error(fmt.Errorf("expected JSON slice. Actual result: %s", fResult.String()))
+	}
+
+	// verify slice length and contents
+	slice := result.([]interface{})
+	EXPECTED_SLICE_LENGTH := 1
+	if actualLength := len(slice); actualLength != EXPECTED_SLICE_LENGTH {
+		fResult, _ := utils.EncodeAnyToIndentedJSON(result)
+		t.Error(fmt.Errorf("expected slice length: %v, actual length: %v. Actual result: %s", EXPECTED_SLICE_LENGTH, actualLength, fResult.String()))
+	}
 }
