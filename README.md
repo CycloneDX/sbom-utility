@@ -1165,7 +1165,7 @@ CVE-2020-25649           611      CVSSv31: 7.5 (high), CVSSv31: 8.2 (high), CVSS
 
 ### Diff
 
-This *experimental* command will compare two BOMs and return the delta (or "diff") in JSON (diff-patch format) or text.
+This *experimental* command will compare two *similar* BOMs and return the delta (or "diff") in JSON (diff-patch format) or text. This functionality is based upon code ancestral to that used to report file diffs between `git commit`s.
 
 ##### Notes
 

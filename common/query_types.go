@@ -33,8 +33,6 @@ type QueryRequest struct {
 	whereFilters       []WhereFilter
 	orderByKeysRaw     string
 	//orderByKeys       []string // TODO
-	IsFromObjectAMap    bool
-	IsFromObjectAnArray bool
 }
 
 func NewQueryRequest() (qr *QueryRequest) {

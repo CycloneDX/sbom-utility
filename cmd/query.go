@@ -331,14 +331,13 @@ func findFromObject(request *common.QueryRequest, jsonMap map[string]interface{}
 		case map[string]interface{}:
 			// If the resulting value is indeed another map type, we expect for a Json Map
 			// we preserve that pointer for the next iteration
-			request.IsFromObjectAMap = true
 			tempMap = pResults.(map[string]interface{})
 		case []interface{}:
 			// TODO: We only support an array (i.e., []interface{}) as the last selector
 			// in theory, we could support arrays (perhaps array notation) in the FROM clause
 			// at any point (e.g., "metadata.component.properties[0]").
 			// we should still be able to support implicit arrays as well.
-			request.IsFromObjectAnArray = true
+
 			// We no longer have a map to dereference into
 			// So if there are more keys left as selectors it is an error
 			if len(request.GetFromKeys()) > i+1 {
