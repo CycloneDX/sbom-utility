@@ -202,57 +202,20 @@ func Query(writer io.Writer, request *common.QueryRequest, response *common.Quer
 		return
 	}
 
-	// Query set of FROM objects
-	// if a FROM select object is not provided, assume "root" search
-	if len(request.GetFromKeys()) == 0 {
-		getLogger().Tracef("request object FROM selector empty; assume query uses document \"root\".")
-	}
-
-	resultJson, err = findFromObject(request, document.GetJSONMap())
-	if err != nil {
-		return
-	}
-
-	// SELECT specific fields from the FROM object(s)
-	// logic varies depending on data type of FROM object (i.e., map or slice)
-	switch t := resultJson.(type) {
-	case map[string]interface{}:
-		// TODO: return this (map) output instead of the one from the "find" stage
-		resultJson, err = selectFieldsFromMap(request, resultJson.(map[string]interface{}))
-		if err != nil {
-			return
-		}
-		// Warn WHERE clause cannot be applied; still return values (for now)
-		whereFilters, _ := request.GetWhereFilters()
-		if len(whereFilters) > 0 {
-			getLogger().Warningf("Cannot apply WHERE filter (%v) to a singleton FROM object (%v)",
-				whereFilters,
-				request.GetFromKeys())
-		}
-	case []interface{}:
-		fromObjectSlice, _ := resultJson.([]interface{})
-		resultJson, err = selectFieldsFromSlice(request, fromObjectSlice)
-	default:
-		// NOTE: this SHOULD never be invoked as the FROM logic should have caught this already
-		err = common.NewQueryFromClauseError(request,
-			fmt.Sprintf("%s: %T", MSG_QUERY_INVALID_DATATYPE, t))
-		return
-	}
-
-	if err != nil {
+	if resultJson, err = QueryJSONMap(document.GetJSONMap(), request); err != nil {
 		return
 	}
 
 	// Convert query results to formatted JSON for output
 	// TODO: we MAY want to use a JSON Encoder to avoid unicode encoding
-	fResult, err := utils.MarshalAnyToFormattedJsonString(resultJson)
-	if err != nil {
-		getLogger().Tracef("error: %s", err)
+	var formattedResult string
+	if formattedResult, err = utils.MarshalAnyToFormattedJsonString(resultJson); err != nil {
+		getLogger().Debugf("unhandled error: %s, QueryRequest: %s", err, request.String())
 		return
 	}
 
 	// Use the selected output device (e.g., default stdout or the specified --output-file)
-	fmt.Fprintf(writer, "%s\n", fResult)
+	fmt.Fprintf(writer, "%s\n", formattedResult)
 
 	return
 }
@@ -279,7 +242,7 @@ func QueryJSONMap(jsonMap map[string]interface{}, request *common.QueryRequest) 
 			return
 		}
 		// Warn WHERE clause cannot be applied to a single map object; it was
-		// intended only for slices of objects... still return values (for now)
+		// intended only for slices of objects... ignore and return ALL fields
 		whereFilters, _ := request.GetWhereFilters()
 		if len(whereFilters) > 0 {
 			getLogger().Warningf("Cannot apply WHERE filter (%v) to a singleton FROM object (%v)",
@@ -312,7 +275,7 @@ func findFromObject(request *common.QueryRequest, jsonMap map[string]interface{}
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	// initialize local map pointer and return value to starting JSON map
+	// initialize local map pointer and its return value to starting JSON map
 	var tempMap map[string]interface{} = jsonMap
 	pResults = jsonMap
 
