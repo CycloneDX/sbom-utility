@@ -75,6 +75,8 @@ var DEFAULT_LEVEL = INFO
 var DEFAULT_INDENT_RUNE = []rune("")
 var DEFAULT_INCREMENT_RUNE = []rune("")
 
+// TODO: Support Unwrap() interface (i.e., %w) on all formatted output commands;
+// however, it is a necessity for error-type output (e.g., Errorf(), Warningf())
 // TODO: allow timestamps to be turned on/off regardless of defaults
 // TODO: allow colors to be set for each constituent part of the (TRACE) output
 // TODO: allow multiple tags (with diff. colors) that can be enabled/disabled from the calling code

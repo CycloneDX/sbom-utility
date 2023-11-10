@@ -264,8 +264,7 @@ func QueryJSONMap(jsonMap map[string]interface{}, request *common.QueryRequest) 
 		getLogger().Tracef("request object FROM selector empty; assume query uses document \"root\".")
 	}
 
-	resultJson, err = findFromObject(request, jsonMap)
-	if err != nil {
+	if resultJson, err = findFromObject(request, jsonMap); err != nil {
 		return
 	}
 
@@ -276,6 +275,7 @@ func QueryJSONMap(jsonMap map[string]interface{}, request *common.QueryRequest) 
 		// TODO: return this (map) output instead of the one from the "find" stage
 		resultJson, err = selectFieldsFromMap(request, resultJson.(map[string]interface{}))
 		if err != nil {
+			getLogger().Debugf("selectFieldsFromMap() failed. QueryRequest: %s", request.String())
 			return
 		}
 		// Warn WHERE clause cannot be applied to a single map object; it was
@@ -290,6 +290,7 @@ func QueryJSONMap(jsonMap map[string]interface{}, request *common.QueryRequest) 
 		fromObjectSlice, _ := resultJson.([]interface{})
 		resultJson, err = selectFieldsFromSlice(request, fromObjectSlice)
 		if err != nil {
+			getLogger().Debugf("selectFieldsFromSlice() failed. QueryRequest: %s", request.String())
 			return
 		}
 	default:
@@ -300,7 +301,8 @@ func QueryJSONMap(jsonMap map[string]interface{}, request *common.QueryRequest) 
 	}
 
 	if err != nil {
-		getLogger().Tracef("error: %s", err)
+		// TODO: use %w once supported by logging package
+		getLogger().Debugf("unhandled error: %s, QueryRequest: %s", err, request.String())
 		return
 	}
 	return
@@ -333,10 +335,10 @@ func findFromObject(request *common.QueryRequest, jsonMap map[string]interface{}
 			// we preserve that pointer for the next iteration
 			tempMap = pResults.(map[string]interface{})
 		case []interface{}:
-			// TODO: We only support an array (i.e., []interface{}) as the last selector
+			// TODO: We only support a slice (i.e., []interface{}) as the last selector
 			// in theory, we could support arrays (perhaps array notation) in the FROM clause
 			// at any point (e.g., "metadata.component.properties[0]").
-			// we should still be able to support implicit arrays as well.
+			// TODO: we should still be able to support implicit arrays as well.
 
 			// We no longer have a map to dereference into
 			// So if there are more keys left as selectors it is an error
@@ -421,8 +423,7 @@ func selectFieldsFromSlice(request *common.QueryRequest, jsonSlice []interface{}
 		// If where filters exist, apply them to the map object
 		// to see if it should be included in the result
 		if whereFilters != nil {
-			match, err = whereFilterMatch(mapObject, whereFilters)
-			if err != nil {
+			if match, err = whereFilterMatch(mapObject, whereFilters); err != nil {
 				return
 			}
 		}
@@ -431,7 +432,9 @@ func selectFieldsFromSlice(request *common.QueryRequest, jsonSlice []interface{}
 		// against the original map object, then add a new map object with only the
 		// SELECT(ed) fields requested.
 		if whereFilters == nil || match {
-			mapObject, err = selectFieldsFromMap(request, mapObject)
+			if mapObject, err = selectFieldsFromMap(request, mapObject); err != nil {
+				return
+			}
 			// Reduce result object to only the requested SELECT fields
 			sliceSelectedFields = append(sliceSelectedFields, mapObject)
 		}

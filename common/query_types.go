@@ -17,6 +17,10 @@ const (
 	QUERY_WHERE_OPERAND_EQUALS = "="
 )
 
+// ==================================================================
+// QueryRequest
+// ==================================================================
+
 // query JSON map and return selected subset using SQL-like syntax:
 // SELECT: <key.1>, <key.2>, ... // "firstname, lastname, email" || * (default)
 // FROM: <key path>              // "product.customers"
@@ -33,6 +37,21 @@ type QueryRequest struct {
 	whereFilters       []WhereFilter
 	orderByKeysRaw     string
 	//orderByKeys       []string // TODO
+}
+
+// Implement the Stringer interface for QueryRequest
+func (qr *QueryRequest) String() string {
+	buffer, _ := utils.EncodeAnyToIndentedJSON(qr)
+	return buffer.String()
+}
+
+func (qr *QueryRequest) StringAsParameters() string {
+	sb := new(strings.Builder)
+	sb.WriteString(fmt.Sprintf("--select: %s\n", qr.selectKeysRaw))
+	sb.WriteString(fmt.Sprintf("--from: %s\n", qr.fromPathsRaw))
+	sb.WriteString(fmt.Sprintf("--where: %s\n", qr.wherePredicatesRaw))
+	sb.WriteString(fmt.Sprintf("--orderby: %s\n", qr.orderByKeysRaw))
+	return sb.String()
 }
 
 func NewQueryRequest() (qr *QueryRequest) {
@@ -59,16 +78,6 @@ func NewQueryRequestSelectWildcardFrom(rawFrom string) (qr *QueryRequest, err er
 
 func NewQueryRequestSelectWildcardFromWhere(rawFrom string, rawWhere string) (qr *QueryRequest, err error) {
 	return NewQueryRequestSelectFromWhere(QUERY_TOKEN_WILDCARD, rawFrom, rawWhere)
-}
-
-// Implement the Stringer interface for QueryRequest
-func (qr *QueryRequest) String() string {
-	sb := new(strings.Builder)
-	sb.WriteString(fmt.Sprintf("--select: %s\n", qr.selectKeysRaw))
-	sb.WriteString(fmt.Sprintf("--from: %s\n", qr.fromPathsRaw))
-	sb.WriteString(fmt.Sprintf("--where: %s\n", qr.wherePredicatesRaw))
-	sb.WriteString(fmt.Sprintf("--orderby: %s\n", qr.orderByKeysRaw))
-	return sb.String()
 }
 
 // ------------
@@ -243,8 +252,17 @@ func (qr *QueryRequest) parseWhereFilterClauses() (err error) {
 	return
 }
 
+// ==================================================================
+// QueryResponse
+// ==================================================================
 type QueryResponse struct {
 	resultMap map[string]interface{}
+}
+
+// Implement the Stringer interface for QueryRequest
+func (qr *QueryResponse) String() string {
+	buffer, _ := utils.EncodeAnyToIndentedJSON(qr)
+	return buffer.String()
 }
 
 func NewQueryResponse() *QueryResponse {
@@ -253,11 +271,20 @@ func NewQueryResponse() *QueryResponse {
 	return qr
 }
 
+// ==================================================================
+// WhereFilter
+// ==================================================================
 type WhereFilter struct {
 	Key        string
 	Operand    string
 	Value      string
 	ValueRegEx *regexp.Regexp
+}
+
+// Implement the Stringer interface for QueryRequest
+func (filter *WhereFilter) String() string {
+	buffer, _ := utils.EncodeAnyToIndentedJSON(filter)
+	return buffer.String()
 }
 
 // Note: Used to normalize key lookups in maps accounting for changes in
