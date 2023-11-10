@@ -959,7 +959,7 @@ Original BOM with properties:
 }
 ```
 
-Output BOM results without properties:
+Output BOM results without `properties``:
 
 ```json
 {
@@ -989,6 +989,100 @@ Output BOM results without properties:
                 }
             ],
             "purl": "pkg:npm/body-parser@1.19.0"
+        }
+    ]
+}
+```
+
+##### Example: Trim `name` and `description` from entire JSON BOM
+
+```bash
+./sbom-utility trim -i test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json --keys=name,description --quiet
+```
+
+Output BOM results without `name` or `description`:
+
+```json
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
+    "version": 1,
+    "components": [
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/sample@2.0.0",
+            "version": "2.0.0",
+            "purl": "pkg:npm/sample@2.0.0",
+            "properties": [
+                {
+                    "value": "bar"
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/body-parser@1.19.0",
+            "version": "1.19.0",
+            "hashes": [
+                {
+                    "alg": "SHA-1",
+                    "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+                }
+            ],
+            "purl": "pkg:npm/body-parser@1.19.0"
+        }
+    ],
+    "properties": [
+        {
+            "value": "123"
+        }
+    ]
+}
+```
+
+##### Example: Trim `properties` from only `components` path
+
+```bash
+./sbom-utility trim -i test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json --keys=properties --from components --quiet
+```
+
+Output BOM results with `properties` removed from all `components`:
+
+```json
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
+    "version": 1,
+    "components": [
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/sample@2.0.0",
+            "name": "sample",
+            "version": "2.0.0",
+            "description": "Node.js Sampler package",
+            "purl": "pkg:npm/sample@2.0.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/body-parser@1.19.0",
+            "name": "body-parser",
+            "version": "1.19.0",
+            "description": "Node.js body parsing middleware",
+            "hashes": [
+                {
+                    "alg": "SHA-1",
+                    "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+                }
+            ],
+            "purl": "pkg:npm/body-parser@1.19.0"
+        }
+    ],
+    "properties": [
+        {
+            "name": "abc",
+            "value": "123"
         }
     ]
 }
