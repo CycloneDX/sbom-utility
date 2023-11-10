@@ -650,6 +650,57 @@ In this example, the `--from` clause references the singleton JSON object `compo
 }
 ```
 
+##### Example: Return the JSON array of components
+
+In this example, the `--from` filter will return the entire JSON components array.
+
+```bash
+./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from components --quiet
+```
+
+```json
+[
+  {
+    "bom-ref": "pkg:npm/sample@2.0.0",
+    "description": "Node.js Sampler package",
+    "licenses": [
+      {
+        "license": {
+          "id": "MIT"
+        }
+      }
+    ],
+    "name": "sample",
+    "purl": "pkg:npm/sample@2.0.0",
+    "type": "library",
+    "version": "2.0.0"
+  },
+  {
+    "bom-ref": "pkg:npm/body-parser@1.19.0",
+    "description": "Node.js body parsing middleware",
+    "hashes": [
+      {
+        "alg": "SHA-1",
+        "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+      }
+    ],
+    "licenses": [
+      {
+        "license": {
+          "id": "MIT"
+        }
+      }
+    ],
+    "name": "body-parser",
+    "purl": "pkg:npm/body-parser@1.19.0",
+    "type": "library",
+    "version": "1.19.0"
+  }
+]
+```
+
+**Note**: The command only used the `--from` flag and did not need to supply `--select '*'` as this us the default.
+
 ##### Example: Filter result entries with a specified value
 
 In this example, the `--where` filter will be applied to a set of `properties` results to only include entries that match the specified regex.
