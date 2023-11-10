@@ -561,9 +561,17 @@ allow         Artistic  Artistic-2.0   Artistic License 2.0          true    tru
 
 This command allows you to perform SQL-like queries into JSON format SBOMs.  Currently, the command recognizes the `--select` and `--from` as well as the `--where` filter.
 
+#### Query flags
+
+##### Query `--from` flag
+
 The `--from` clause value is applied to the JSON document object model and can return either a singleton JSON object or an array of JSON objects as a result.  This is determined by the last property value's type as declared in the schema.
 
+##### Query `--select` flag
+
 The `--select` clause is then applied to the `--from` result set to only return the specified properties (names and their values).
+
+##### Query `--where` flag
 
 If the result set is an array, the array entries can be reduced by applying the `--where` filter to ony return those entries whose specified field names match the supplied regular expression (regex).
 
@@ -577,7 +585,7 @@ The `query` command only supports JSON output.
 
 #### Query result sorting
 
-The `query` command does not support output results.
+The `query` command does not support formatting of output results as JSON format is always returned.
 
 #### Query examples
 
@@ -874,9 +882,117 @@ This command is able to "trim" one or more JSON keys (fields) from specified JSO
 
 #### Trim supported output formats
 
-This command is used to output, using the `--output-file` or `-o` flag, a "trimmed" BOM in JSON format.
+This command is used to output, using the [`--output-file` flag](#output-flag), a "trimmed" BOM in JSON format.
 
 - `json` (default)
+
+#### Trim flags
+
+Trim operates on a JSON BOM input file (see [`--input-file` flag](#input-flag)) and produces a trimmed JSON BOM output file using the following flags:
+
+##### Trim `--keys` flag
+
+A comma-separated list of JSON map keys. Similar to the [query command's `--select` flag](#query---select-flag) syntax.
+
+##### Trim `--from` flag
+
+A comma-separated list of JSON document paths using the same syntax as the [query command's `--from` flag](#query---from-flag).
+
+#### Trim examples
+
+The original BOM used for these examples can be found here:
+
+- [test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json](test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json)
+
+##### Example: Trim `properties` from entire JSON BOM
+
+Validating the "juice shop" SBOM (CycloneDX 1.2) example provided in this repository.
+
+```bash
+./sbom-utility trim -i ./sbom-utility trim -i test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json --keys=properties
+```
+
+Original BOM with properties:
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/sample@2.0.0",
+      "purl": "pkg:npm/sample@2.0.0",
+      "name": "sample",
+      "version": "2.0.0",
+      "description": "Node.js Sampler package",
+      "properties": [
+        {
+          "name": "foo",
+          "value": "bar"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/body-parser@1.19.0",
+      "purl": "pkg:npm/body-parser@1.19.0",
+      "name": "body-parser",
+      "version": "1.19.0",
+      "description": "Node.js body parsing middleware",
+      "hashes": [
+        {
+          "alg": "SHA-1",
+          "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+        }
+      ]
+    }
+  ],
+  "properties": [
+    {
+      "name": "abc",
+      "value": "123"
+    }
+  ]
+}
+```
+
+Output BOM results without properties:
+
+```json
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
+    "version": 1,
+    "components": [
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/sample@2.0.0",
+            "name": "sample",
+            "version": "2.0.0",
+            "description": "Node.js Sampler package",
+            "purl": "pkg:npm/sample@2.0.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/body-parser@1.19.0",
+            "name": "body-parser",
+            "version": "1.19.0",
+            "description": "Node.js body parsing middleware",
+            "hashes": [
+                {
+                    "alg": "SHA-1",
+                    "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+                }
+            ],
+            "purl": "pkg:npm/body-parser@1.19.0"
+        }
+    ]
+}
+```
 
 ---
 
