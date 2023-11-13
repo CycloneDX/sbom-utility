@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -304,7 +305,6 @@ func preRunTestForSubcommand(cmd *cobra.Command, validSubcommands []string, subc
 
 // NOTE: Caller must Close() any open io.Writer...
 func createOutputFile(outputFilename string) (outputFile *os.File, writer io.Writer, err error) {
-
 	// default to Stdout
 	writer = os.Stdout
 

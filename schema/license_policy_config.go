@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -41,31 +42,6 @@ const (
 
 var VALID_USAGE_POLICIES = []string{POLICY_ALLOW, POLICY_DENY, POLICY_NEEDS_REVIEW}
 var ALL_USAGE_POLICIES = []string{POLICY_ALLOW, POLICY_DENY, POLICY_NEEDS_REVIEW, POLICY_UNDEFINED, POLICY_CONFLICT}
-
-// Note: the "License" property is used as hashmap key
-// NOTE: CDXRefType is a named `string` type as of v1.5
-type LicenseInfo struct {
-	UsagePolicy            string           `json:"usage-policy"`
-	LicenseChoiceTypeValue int              `json:"license-type-value"`
-	LicenseChoiceType      string           `json:"license-type"`
-	License                string           `json:"license"`
-	ResourceName           string           `json:"resource-name"`
-	BOMRef                 CDXRefType       `json:"bom-ref"`
-	BOMLocationValue       int              `json:"bom-location-value"`
-	BOMLocation            string           `json:"bom-location"`
-	LicenseChoice          CDXLicenseChoice // Do not marshal
-	Policy                 LicensePolicy    // Do not marshal
-	Component              CDXComponent     // Do not marshal
-	Service                CDXService       // Do not marshal
-}
-
-// LicenseChoice - Choice type
-const (
-	LC_TYPE_INVALID = iota
-	LC_TYPE_ID
-	LC_TYPE_NAME
-	LC_TYPE_EXPRESSION
-)
 
 type LicensePolicy struct {
 	Id             string   `json:"id"`
@@ -366,7 +342,7 @@ func (config *LicensePolicyConfig) filteredHashLicensePolicy(policy LicensePolic
 
 	// See if the policy matches where filters criteria
 	if len(whereFilters) > 0 {
-		mapPolicy, err = utils.ConvertStructToMap(policy)
+		mapPolicy, err = utils.MarshalStructToJsonMap(policy)
 		if err != nil {
 			return
 		}
@@ -408,6 +384,9 @@ func (config *LicensePolicyConfig) FindPolicy(licenseInfo LicenseInfo) (matchedP
 		// Parse expression according to SPDX spec.
 		var expressionTree *CompoundExpression
 		expressionTree, err = ParseExpression(config, licenseInfo.LicenseChoice.Expression)
+		if err != nil {
+			return
+		}
 		getLogger().Debugf("Parsed expression:\n%v", expressionTree)
 		matchedPolicy.UsagePolicy = expressionTree.CompoundUsagePolicy
 	}
@@ -415,7 +394,8 @@ func (config *LicensePolicyConfig) FindPolicy(licenseInfo LicenseInfo) (matchedP
 	if matchedPolicy.UsagePolicy == "" {
 		matchedPolicy.UsagePolicy = POLICY_UNDEFINED
 	}
-	return matchedPolicy, err
+	//return matchedPolicy, err
+	return
 }
 
 func (config *LicensePolicyConfig) FindPolicyBySpdxId(id string) (policyValue string, matchedPolicy LicensePolicy, err error) {
@@ -673,7 +653,7 @@ func getRegexForValidSpdxId() (regex *regexp.Regexp, err error) {
 func IsValidSpdxId(id string) bool {
 	regex, err := getRegexForValidSpdxId()
 	if err != nil {
-		getLogger().Errorf("unable to invoke regex. %v", err)
+		getLogger().Error(fmt.Errorf("unable to invoke regex. %v", err))
 		return false
 	}
 	return regex.MatchString(id)

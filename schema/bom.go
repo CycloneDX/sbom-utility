@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,6 +19,7 @@
 package schema
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -329,6 +331,14 @@ func (bom *BOM) UnmarshalCycloneDXBOM() (err error) {
 	return
 }
 
+// NOTE: This method uses JSON Marshal() (i.e, from the json/encoding package)
+// which, by default, encodes characters using Unicode for HTML transmission
+// (assuming its primary use is for HTML servers).
+// For example, this means the following characters are translated to Unicode
+// if marshall() method is used:
+// '&' is encoded as: \u0026
+// '<' is encoded as: \u003c
+// '>' is encoded as: \u003e
 func (bom *BOM) MarshalCycloneDXBOM(writer io.Writer, prefix string, indent string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
@@ -339,15 +349,38 @@ func (bom *BOM) MarshalCycloneDXBOM(writer io.Writer, prefix string, indent stri
 		return
 	}
 
-	// TODO: Marshal escapes certain characters which is not desireable
-	// the only alternative is to use an Encoder, but then we lose formatting/indent
-	// TODO: unescape: \u0026 &, \u003c <, \u003e >
-	// unescaped := bytes.Replace(jsonBytes, []byte("\u0026"), []byte("&"), -1)
-	// unescaped = bytes.Replace(unescaped, []byte("\u003c"), []byte("<"), -1)
-	// unescaped = bytes.Replace(unescaped, []byte("\u003e"), []byte(">"), -1)
-
-	// write our opened jsonFile as a byte array.
 	numBytes, errWrite := writer.Write(jsonBytes)
+	if errWrite != nil {
+		return errWrite
+	}
+	getLogger().Tracef("wrote [%v] bytes to output", numBytes)
+
+	return
+}
+
+// This method ensures the preservation of original characters (after any edits)
+//
+// It is needed because JSON Marshal() (i.e., the json/encoding package), by default,
+// encodes chars (assumes JSON docs are being transmitted over HTML streams).
+// This assumption by json/encoding is not true for BOM documents as stream (wire)
+// transmission encodings are specified for both formats which do not use HTML encoding.
+//
+// For example, the following characters are lost using json/encoding:
+// '&' is encoded as: \u0026
+// '<' is encoded as: \u003c
+// '>' is encoded as: \u003e
+// Instead, this custom encoder method dutifully preserves the input byte values
+func (bom *BOM) EncodeAsFormattedJSON(writer io.Writer, prefix string, indent string) (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	var outputBuffer bytes.Buffer
+	outputBuffer, err = utils.EncodeAnyToIndentedJSON(bom.CdxBom)
+	if err != nil {
+		return
+	}
+
+	numBytes, errWrite := writer.Write(outputBuffer.Bytes())
 	if errWrite != nil {
 		return errWrite
 	}

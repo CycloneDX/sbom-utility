@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,6 +19,7 @@
 package cmd
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"os"
@@ -31,7 +33,7 @@ import (
 )
 
 // Default test output (i.e., --output) directory
-const TEST_OUTPUT_PATH = "temp/"
+const DEFAULT_TEMP_OUTPUT_PATH = "temp/"
 
 // Test files that span commands
 const (
@@ -66,6 +68,8 @@ type CommonTestInfo struct {
 	ResultLineContainsValuesAtLineNum int
 	ResultLineContainsValues          []string
 	MockStdin                         bool
+	TestOutputVariantName             string
+	TestOutputExpectedByteSize        int
 }
 
 func NewCommonTestInfo() *CommonTestInfo {
@@ -112,6 +116,20 @@ func (ti *CommonTestInfo) InitBasic(inputFile string, format string, expectedErr
 	ti.Init(inputFile, format, TI_LIST_SUMMARY_FALSE, TI_DEFAULT_WHERE_CLAUSE,
 		nil, TI_DEFAULT_LINE_COUNT, expectedError)
 	return ti
+}
+
+func (ti *CommonTestInfo) CreateTemporaryFilename(relativeFilename string) (tempFilename string) {
+	trimmedFilename := strings.TrimLeft(relativeFilename, strconv.QuoteRune(os.PathSeparator))
+	if ti.TestOutputVariantName != "" {
+		lastIndex := strings.LastIndex(trimmedFilename, string(os.PathSeparator))
+		// insert variant as last path...
+		if lastIndex > 0 {
+			path := trimmedFilename[0:lastIndex]
+			base := trimmedFilename[lastIndex:]
+			trimmedFilename = path + string(os.PathSeparator) + ti.TestOutputVariantName + base
+		}
+	}
+	return DEFAULT_TEMP_OUTPUT_PATH + trimmedFilename
 }
 
 func TestMain(m *testing.M) {
@@ -214,7 +232,6 @@ func EvaluateErrorAndKeyPhrases(t *testing.T, err error, messages []string) (mat
 }
 
 func prepareWhereFilters(t *testing.T, testInfo *CommonTestInfo) (whereFilters []common.WhereFilter, err error) {
-
 	if testInfo.WhereClause != "" {
 		whereFilters, err = retrieveWhereFilters(testInfo.WhereClause)
 		if err != nil {
@@ -225,7 +242,44 @@ func prepareWhereFilters(t *testing.T, testInfo *CommonTestInfo) (whereFilters [
 	return
 }
 
-func createTemporaryFilename(baseFilename string) (tempFilename string) {
-	trimmedFilename := strings.TrimLeft(baseFilename, strconv.QuoteRune(os.PathSeparator))
-	return TEST_OUTPUT_PATH + trimmedFilename
+const RESULT_LINE_CONTAINS_ANY = -1
+
+func lineContainsValues(buffer bytes.Buffer, lineNum int, values ...string) (int, bool) {
+	lines := strings.Split(buffer.String(), "\n")
+	getLogger().Tracef("output: %s", lines)
+
+	for curLineNum, line := range lines {
+
+		// if ths is a line we need to test
+		if lineNum == RESULT_LINE_CONTAINS_ANY || curLineNum == lineNum {
+			// test that all values occur in the current line
+			for iValue, value := range values {
+				if !strings.Contains(line, value) {
+					// if we failed to match all values on the specified line return failure
+					if curLineNum == lineNum {
+						return curLineNum, false
+					}
+					// else, keep checking next line
+					break
+				}
+
+				// If this is the last value to test for, then all values have matched
+				if iValue+1 == len(values) {
+					return curLineNum, true
+				}
+			}
+		}
+	}
+	return RESULT_LINE_CONTAINS_ANY, false
+}
+
+func bufferContainsValues(buffer bytes.Buffer, values ...string) bool {
+	sBuffer := buffer.String()
+	// test that all values occur in the current line
+	for _, value := range values {
+		if !strings.Contains(sBuffer, value) {
+			return false
+		}
+	}
+	return true
 }

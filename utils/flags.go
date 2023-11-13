@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -111,10 +112,10 @@ type StatsCommandFlags struct {
 
 // TODO: write a "parse" method for the struct (i.e., from "raw" to slice)
 type TrimCommandFlags struct {
-	RawKeys  string
-	RawPaths string
-	Keys     []string
-	Paths    []string
+	RawKeys   string
+	RawPaths  string
+	Keys      []string
+	FromPaths []string
 }
 
 type CustomValidationFlags struct {

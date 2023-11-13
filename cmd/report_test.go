@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,8 +25,6 @@ import (
 
 	"github.com/CycloneDX/sbom-utility/utils"
 )
-
-const REPORT_LINE_CONTAINS_ANY = -1
 
 func innerRunReportResultTests(t *testing.T, testInfo *CommonTestInfo, outputBuffer bytes.Buffer, outputError error) (err error) {
 	getLogger().Tracef("TestInfo: %s", testInfo)
@@ -100,33 +99,4 @@ func innerRunReportResultTests(t *testing.T, testInfo *CommonTestInfo, outputBuf
 	}
 
 	return
-}
-
-func lineContainsValues(buffer bytes.Buffer, lineNum int, values ...string) (int, bool) {
-	lines := strings.Split(buffer.String(), "\n")
-	getLogger().Tracef("output: %s", lines)
-
-	for curLineNum, line := range lines {
-
-		// if ths is a line we need to test
-		if lineNum == REPORT_LINE_CONTAINS_ANY || curLineNum == lineNum {
-			// test that all values occur in the current line
-			for iValue, value := range values {
-				if !strings.Contains(line, value) {
-					// if we failed to match all values on the specified line return failure
-					if curLineNum == lineNum {
-						return curLineNum, false
-					}
-					// else, keep checking next line
-					break
-				}
-
-				// If this is the last value to test for, then all values have matched
-				if iValue+1 == len(values) {
-					return curLineNum, true
-				}
-			}
-		}
-	}
-	return REPORT_LINE_CONTAINS_ANY, false
 }

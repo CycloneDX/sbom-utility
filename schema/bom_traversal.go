@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,19 +18,27 @@
 
 package schema
 
-func (bom *BOM) TrimJsonMap(keys []string) {
+func (bom *BOM) TrimBOMKeys(keys []string) {
+	// initialize map to root of BOM document
 	if len(keys) > 0 {
-		if jsonMap := bom.GetJSONMap(); jsonMap != nil {
-			for _, key := range keys {
-				if key != "" {
-					bom.trimEntity(jsonMap, key)
-				}
+		bom.TrimEntityKeys(bom.GetJSONMap(), keys)
+	}
+}
+
+func (bom *BOM) TrimEntityKeys(jsonMap interface{}, keys []string) {
+	// initialize map to root of BOM document
+	// ALWAYS default to document root for trim operation
+	if jsonMap != nil {
+		for _, key := range keys {
+			if key != "" {
+				bom.TrimEntityKey(jsonMap, key)
 			}
 		}
 	}
 }
 
-func (bom *BOM) trimEntity(entity interface{}, key string) {
+// Note: this method is recursive
+func (bom *BOM) TrimEntityKey(entity interface{}, key string) {
 	switch typedEntity := entity.(type) {
 	case map[string]interface{}:
 		jsonMap := typedEntity
@@ -38,6 +47,8 @@ func (bom *BOM) trimEntity(entity interface{}, key string) {
 			// TODO: make it an option to just "nil" out the value
 			// as this is faster as well as sufficient for json.Marshal() purposes
 			// as keys with nil values are already omitted.
+			// To be clear, using delete() is MUCH better as it works for all
+			// our existing/planned use cases; whereas using nil may cause other issues.
 			//jsonMap[key] = nil
 			delete(jsonMap, key)
 		}
@@ -45,16 +56,16 @@ func (bom *BOM) trimEntity(entity interface{}, key string) {
 			// avoid making costly function calls for primitive types
 			switch typedValue := mapValue.(type) {
 			case map[string]interface{}:
-				bom.trimEntity(typedValue, key)
+				bom.TrimEntityKey(typedValue, key)
 			case []interface{}:
-				bom.trimEntity(typedValue, key)
+				bom.TrimEntityKey(typedValue, key)
 			}
 		}
 	case []interface{}:
 		// if type is other than above
 		sliceValue := typedEntity
 		for iSlice := range sliceValue {
-			bom.trimEntity(sliceValue[iSlice], key)
+			bom.TrimEntityKey(sliceValue[iSlice], key)
 		}
 	default:
 		// if type is other than above

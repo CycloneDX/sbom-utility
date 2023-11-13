@@ -8,7 +8,7 @@ The utility has now grown to include a rich set of commands, listed below, that 
 
 ## Command Overview
 
-The utility supports the following commands:
+The utility supports the following BOM-related commands:
 
 - **[license](#license)**
   - **[list](#license-list-subcommand)** produce listings or summarized reports of license data contained in a BOM along with license "usage policy" determinations using the policies declared in the `license.json` file.
@@ -26,6 +26,14 @@ The utility supports the following commands:
   - You can override an BOM's declared BOM version using the `--force` flag (e.g., verify a BOM against a newer specification version).
 
 - **[vulnerability](#vulnerability)** produce filterable listings or summarized reports of vulnerabilities from BOM data (i.e., CycloneDX Vulnerability Exploitability eXchange (**VEX**)) data or independently stored CycloneDX Vulnerability Disclosure Report (**VDR**) data.
+
+**Experimental commands**:
+
+Feedback and helpful commits appreciated on the following commands which will be moved to non-experimental after two point releases:
+
+- **[diff](#diff)** : Shows the delta between two similar BOM versions in
+
+- **[trim](#trim)** provide the ability to remove JSON information, by field key and limited query syntax, from the input JSON BOM document.
 
 ---
 
@@ -45,7 +53,9 @@ The utility supports the following commands:
   - [`schema` command](#schema): list supported BOM formats, versions, variants
   - [`validate` command](#validate): BOM against declared or required schema
   - [`vulnerability` command](#vulnerability): lists vulnerability summary information included in the BOM or VEX
-  - [`diff` command](#diff): *experimental*: shows the delta between two BOM versions
+  - [`diff` command](#diff): *experimental*: shows the delta between two similar BOM versions
+  - [`trim` command](#diff): *experimental*: remove specified fields from JSON BOM documents and output smaller BOMs that are appropriate sized for different use cases and analysis
+  - [`completion` command](#completion): generates command-line completion scripts for the utility
 - [Design considerations](#design-considerations)
 - [Development](#development)
   - [Prerequisites](#prerequisites)
@@ -110,9 +120,8 @@ For convenience, links to each command's section are here:
 - [schema](#schema)
 - [vulnerability](#vulnerability)
 - [validate](#validate)
+- [completion](#completion)
 - [help](#help)
-
-### General command information
 
 #### Exit codes
 
@@ -552,9 +561,17 @@ allow         Artistic  Artistic-2.0   Artistic License 2.0          true    tru
 
 This command allows you to perform SQL-like queries into JSON format SBOMs.  Currently, the command recognizes the `--select` and `--from` as well as the `--where` filter.
 
+#### Query flags
+
+##### Query `--from` flag
+
 The `--from` clause value is applied to the JSON document object model and can return either a singleton JSON object or an array of JSON objects as a result.  This is determined by the last property value's type as declared in the schema.
 
+##### Query `--select` flag
+
 The `--select` clause is then applied to the `--from` result set to only return the specified properties (names and their values).
+
+##### Query `--where` flag
 
 If the result set is an array, the array entries can be reduced by applying the `--where` filter to ony return those entries whose specified field names match the supplied regular expression (regex).
 
@@ -564,9 +581,11 @@ If the result set is an array, the array entries can be reduced by applying the 
 
 The `query` command only supports JSON output.
 
+- `json` (default)
+
 #### Query result sorting
 
-The `query` command does not support output results.
+The `query` command does not support formatting of output results as JSON format is always returned.
 
 #### Query examples
 
@@ -649,6 +668,56 @@ In this example, the `--from` clause references the singleton JSON object `compo
   "version": "11.1.2"
 }
 ```
+
+##### Example: Return the JSON array of components
+
+In this example, the `--from` filter will return the entire JSON components array.
+
+```bash
+./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from components --quiet
+```
+
+```json
+[
+  {
+    "bom-ref": "pkg:npm/sample@2.0.0",
+    "description": "Node.js Sampler package",
+    "licenses": [
+      {
+        "license": {
+          "id": "MIT"
+        }
+      }
+    ],
+    "name": "sample",
+    "purl": "pkg:npm/sample@2.0.0",
+    "type": "library",
+    "version": "2.0.0"
+  },
+  {
+    "bom-ref": "pkg:npm/body-parser@1.19.0",
+    "description": "Node.js body parsing middleware",
+    "hashes": [
+      {
+        ...
+      }
+    ],
+    "licenses": [
+      {
+        "license": {
+          "id": "MIT"
+        }
+      }
+    ],
+    "name": "body-parser",
+    "purl": "pkg:npm/body-parser@1.19.0",
+    "type": "library",
+    "version": "1.19.0"
+  }
+]
+```
+
+**Note**: The command for this example only used the `--from` flag and did not need to supply `--select '*'` as this us the default.
 
 ##### Example: Filter result entries with a specified value
 
@@ -806,6 +875,218 @@ For details see the "[Adding SBOM formats, schema versions and variants](#adding
 #### Embedding schemas
 
 If you wish to have the new schema *embedded in the executable*, simply add it to the project's `resources` subdirectory following the format and version-based directory structure.
+
+### Trim
+
+This command is able to "trim" one or more JSON keys (fields) from specified JSON BOM documents effectively "pruning" the JSON document.  This functionality helps consumers of large-sized BOMs that need to analyze specific types of data in large BOMs in reducing the BOM data to just what is needed for their use cases or needs.
+
+#### Trim supported output formats
+
+This command is used to output, using the [`--output-file` flag](#output-flag), a "trimmed" BOM in JSON format.
+
+- `json` (default)
+
+#### Trim flags
+
+Trim operates on a JSON BOM input file (see [`--input-file` flag](#input-flag)) and produces a trimmed JSON BOM output file using the following flags:
+
+##### Trim `--keys` flag
+
+A comma-separated list of JSON map keys. Similar to the [query command's `--select` flag](#query---select-flag) syntax.
+
+##### Trim `--from` flag
+
+A comma-separated list of JSON document paths using the same syntax as the [query command's `--from` flag](#query---from-flag).
+
+#### Trim examples
+
+The original BOM used for these examples can be found here:
+
+- [test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json](test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json)
+
+##### Example: Trim `properties` from entire JSON BOM
+
+Validating the "juice shop" SBOM (CycloneDX 1.2) example provided in this repository.
+
+```bash
+./sbom-utility trim -i ./sbom-utility trim -i test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json --keys=properties
+```
+
+Original BOM with properties:
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/sample@2.0.0",
+      "purl": "pkg:npm/sample@2.0.0",
+      "name": "sample",
+      "version": "2.0.0",
+      "description": "Node.js Sampler package",
+      "properties": [
+        {
+          "name": "foo",
+          "value": "bar"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/body-parser@1.19.0",
+      "purl": "pkg:npm/body-parser@1.19.0",
+      "name": "body-parser",
+      "version": "1.19.0",
+      "description": "Node.js body parsing middleware",
+      "hashes": [
+        {
+          "alg": "SHA-1",
+          "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+        }
+      ]
+    }
+  ],
+  "properties": [
+    {
+      "name": "abc",
+      "value": "123"
+    }
+  ]
+}
+```
+
+Output BOM results without `properties``:
+
+```json
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
+    "version": 1,
+    "components": [
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/sample@2.0.0",
+            "name": "sample",
+            "version": "2.0.0",
+            "description": "Node.js Sampler package",
+            "purl": "pkg:npm/sample@2.0.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/body-parser@1.19.0",
+            "name": "body-parser",
+            "version": "1.19.0",
+            "description": "Node.js body parsing middleware",
+            "hashes": [
+                {
+                    "alg": "SHA-1",
+                    "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+                }
+            ],
+            "purl": "pkg:npm/body-parser@1.19.0"
+        }
+    ]
+}
+```
+
+##### Example: Trim `name` and `description` from entire JSON BOM
+
+```bash
+./sbom-utility trim -i test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json --keys=name,description --quiet
+```
+
+Output BOM results without `name` or `description`:
+
+```json
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
+    "version": 1,
+    "components": [
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/sample@2.0.0",
+            "version": "2.0.0",
+            "purl": "pkg:npm/sample@2.0.0",
+            "properties": [
+                {
+                    "value": "bar"
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/body-parser@1.19.0",
+            "version": "1.19.0",
+            "hashes": [
+                {
+                    "alg": "SHA-1",
+                    "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+                }
+            ],
+            "purl": "pkg:npm/body-parser@1.19.0"
+        }
+    ],
+    "properties": [
+        {
+            "value": "123"
+        }
+    ]
+}
+```
+
+##### Example: Trim `properties` from only `components` path
+
+```bash
+./sbom-utility trim -i test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json --keys=properties --from components --quiet
+```
+
+Output BOM results with `properties` removed from all `components`:
+
+```json
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
+    "version": 1,
+    "components": [
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/sample@2.0.0",
+            "name": "sample",
+            "version": "2.0.0",
+            "description": "Node.js Sampler package",
+            "purl": "pkg:npm/sample@2.0.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/body-parser@1.19.0",
+            "name": "body-parser",
+            "version": "1.19.0",
+            "description": "Node.js body parsing middleware",
+            "hashes": [
+                {
+                    "alg": "SHA-1",
+                    "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+                }
+            ],
+            "purl": "pkg:npm/body-parser@1.19.0"
+        }
+    ],
+    "properties": [
+        {
+            "name": "abc",
+            "value": "123"
+        }
+    ]
+}
+```
 
 ---
 
@@ -1165,7 +1446,7 @@ CVE-2020-25649           611      CVSSv31: 7.5 (high), CVSSv31: 8.2 (high), CVSS
 
 ### Diff
 
-This *experimental* command will compare two BOMs and return the delta (or "diff") in JSON (diff-patch format) or text.
+This *experimental* command will compare two *similar* BOMs and return the delta (or "diff") in JSON (diff-patch format) or text. This functionality is based upon code ancestral to that used to report file diffs between `git commit`s.
 
 ##### Notes
 
@@ -1214,6 +1495,25 @@ Use the `--format` flag on the to choose one of the supported output formats:
    ]
  }
 ```
+
+---
+
+#### Completion
+
+This command will generate command-line completion scripts, for the this utility, customized for various supported shells.
+
+The completion command can be invoked as follows:
+
+```bash
+./sbom_utility completion [shell]
+```
+
+where valid values for `shell` are:
+
+- bash
+- fish
+- powershell
+- zsh
 
 ---
 

@@ -103,7 +103,7 @@ lint: format
 	golint .
 
 # install: go install github.com/golangci/golangci-lint/cmd/golangci-lint@x.y.z
-ci-lint:
+golangci_lint:
 	@echo "golangci-lint run"
 	golangci-lint run
 

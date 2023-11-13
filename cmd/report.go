@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -96,25 +97,11 @@ func processWhereFlag(cmd *cobra.Command) (whereFilters []common.WhereFilter, er
 	return
 }
 
+// Parse "--where" flags on behalf of utility commands that filter output reports (lists)
 func retrieveWhereFilters(whereValues string) (whereFilters []common.WhereFilter, err error) {
-	var whereExpressions []string
-
-	if whereValues != "" {
-		whereExpressions = strings.Split(whereValues, QUERY_WHERE_EXPRESSION_SEP)
-
-		var filter *common.WhereFilter
-		for _, clause := range whereExpressions {
-
-			filter = parseWhereFilter(clause)
-
-			if filter == nil {
-				err = NewQueryWhereClauseError(nil, clause)
-				return
-			}
-
-			whereFilters = append(whereFilters, *filter)
-		}
-	}
+	// Use common functions for parsing query request clauses
+	wherePredicates := common.ParseWherePredicates(whereValues)
+	whereFilters, err = common.ParseWhereFilters(wherePredicates)
 	return
 }
 
@@ -222,7 +209,7 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 	var sliceString []string
 	var joinedData string
 
-	mapStruct, err = utils.ConvertStructToMap(structIn)
+	mapStruct, err = utils.MarshalStructToJsonMap(structIn)
 
 	for _, columnData := range formatData {
 

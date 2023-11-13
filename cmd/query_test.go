@@ -24,9 +24,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
-	"strings"
 	"testing"
 
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 )
@@ -34,18 +34,9 @@ import (
 // TODO: Consolidate query request declarations here
 
 // NOTE: This function "mocks" what the "queryCmdImpl()" function would do
-func innerQuery(t *testing.T, filename string, queryRequest *QueryRequest, autofail bool) (result interface{}, err error) {
+func innerQuery(t *testing.T, filename string, queryRequest *common.QueryRequest, autofail bool) (result interface{}, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
-
-	// Parse normalized query clauses
-	err = queryRequest.parseQueryClauses()
-	if err != nil {
-		if autofail {
-			t.Errorf("invalid query parameters: %s: query:\n%s", err, queryRequest)
-		}
-		return
-	}
 
 	// Copy the test filename to the command line flags were the code looks for it
 	utils.GlobalFlags.PersistentFlags.InputFile = filename
@@ -57,7 +48,7 @@ func innerQuery(t *testing.T, filename string, queryRequest *QueryRequest, autof
 	defer outputWriter.Flush()
 
 	// allocate response/result object and invoke query
-	var response = new(QueryResponse)
+	var response = new(common.QueryResponse)
 	result, err = Query(outputWriter, queryRequest, response)
 
 	// if the query resulted in a failure
@@ -74,7 +65,7 @@ func innerQuery(t *testing.T, filename string, queryRequest *QueryRequest, autof
 	return
 }
 
-func innerQueryError(t *testing.T, filename string, queryRequest *QueryRequest, expectedError error) (result interface{}, actualError error) {
+func innerQueryError(t *testing.T, filename string, queryRequest *common.QueryRequest, expectedError error) (result interface{}, actualError error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -110,9 +101,7 @@ func UnmarshalResultsToMap(results interface{}) (resultMap map[string]interface{
 }
 
 // Used to verify fields specified on a SELECT clause appear in JSON results (map)
-func VerifySelectedFieldsInJsonMap(t *testing.T, request *QueryRequest, results interface{}) (exists bool, err error) {
-
-	getLogger().Tracef("Testing for keys: \"%s\"", request.selectFieldsRaw)
+func VerifySelectedFieldsInJsonMap(t *testing.T, keys []string, results interface{}) (exists bool, err error) {
 
 	if results == nil {
 		t.Errorf("invalid results: %v", results)
@@ -123,8 +112,6 @@ func VerifySelectedFieldsInJsonMap(t *testing.T, request *QueryRequest, results 
 		getLogger().Tracef("results: %v", resultMap)
 		t.Errorf("invalid JSON: %s: %v", err, resultMap)
 	}
-
-	keys := strings.Split(request.selectFieldsRaw, QUERY_SELECT_CLAUSE_SEP)
 
 	for _, key := range keys {
 		_, exists = resultMap[key]
@@ -138,7 +125,7 @@ func VerifySelectedFieldsInJsonMap(t *testing.T, request *QueryRequest, results 
 func printResult(iResult interface{}) {
 	if !*TestLogQuiet {
 		// Format results in JSON
-		fResult, _ := utils.ConvertAnyToFormattedJson(iResult)
+		fResult, _ := utils.MarshalAnyToFormattedJsonString(iResult)
 		// Output the JSON data directly to stdout (not subject to log-level)
 		fmt.Printf("%s\n", fResult)
 	}
@@ -149,12 +136,10 @@ func printResult(iResult interface{}) {
 // ----------------------------------------
 
 func TestQueryFailInvalidInputFileLoad(t *testing.T) {
-	request := QueryRequest{
-		selectFieldsRaw: QUERY_TOKEN_WILDCARD,
-		fromObjectsRaw:  "metadata.properties",
-	}
+	request, _ := common.NewQueryRequestSelectWildcardFrom(
+		"metadata.properties")
 	// Assure we return path error
-	_, _ = innerQueryError(t, TEST_INPUT_FILE_NON_EXISTENT, &request, &fs.PathError{})
+	_, _ = innerQueryError(t, TEST_INPUT_FILE_NON_EXISTENT, request, &fs.PathError{})
 }
 
 // ----------------------------------------
@@ -162,125 +147,101 @@ func TestQueryFailInvalidInputFileLoad(t *testing.T) {
 // ----------------------------------------
 
 func TestQueryCdx14BomFormatSpecVersion(t *testing.T) {
-	request := QueryRequest{
-		selectFieldsRaw: "bomFormat,specVersion",
-		fromObjectsRaw:  "",
-	}
-	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, &request, nil)
-	_, _ = VerifySelectedFieldsInJsonMap(t, &request, results)
+	request, _ := common.NewQueryRequestSelectFrom(
+		"bomFormat,specVersion",
+		"")
+	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, nil)
+	_, _ = VerifySelectedFieldsInJsonMap(t, request.GetSelectKeys(), results)
 }
 
 func TestQueryCdx14MetadataTimestampField(t *testing.T) {
-	request := QueryRequest{
-		selectFieldsRaw: "timestamp",
-		fromObjectsRaw:  "metadata",
-	}
-	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, &request, nil)
-	_, _ = VerifySelectedFieldsInJsonMap(t, &request, results)
+	request, _ := common.NewQueryRequestSelectFrom(
+		"timestamp",
+		"metadata")
+	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, nil)
+	_, _ = VerifySelectedFieldsInJsonMap(t, request.GetSelectKeys(), results)
 }
 
 func TestQueryCdx14MetadataComponentAll(t *testing.T) {
-	request := QueryRequest{
-		selectFieldsRaw: QUERY_TOKEN_WILDCARD,
-		fromObjectsRaw:  "metadata.component",
-	}
-	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, &request, nil)
+	request, _ := common.NewQueryRequestSelectWildcardFrom(
+		"metadata.component")
+	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, nil)
 	// Test for concrete keys that SHOULD have been found using wildcard
-	request.selectFieldsRaw = "type,bom-ref,purl,version,externalReferences,name,description,licenses,properties,hashes,supplier,publisher"
-	_, _ = VerifySelectedFieldsInJsonMap(t, &request, results)
+	fields := []string{
+		"type", "bom-ref", "purl", "version", "externalReferences",
+		"name", "description", "licenses", "properties", "hashes",
+		"supplier", "publisher"}
+	_, _ = VerifySelectedFieldsInJsonMap(t, fields, results)
 }
 
 func TestQueryCdx14MetadataComponentNameDescriptionVersion(t *testing.T) {
-	request := QueryRequest{
-		selectFieldsRaw: "name,description,version",
-		fromObjectsRaw:  "metadata.component",
-	}
-	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, &request, nil)
-	_, _ = VerifySelectedFieldsInJsonMap(t, &request, results)
+	request, _ := common.NewQueryRequestSelectFrom(
+		"name,description,version",
+		"metadata.component")
+	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, nil)
+	_, _ = VerifySelectedFieldsInJsonMap(t, request.GetSelectKeys(), results)
 }
 
 func TestQueryCdx14MetadataSupplier(t *testing.T) {
-	request := QueryRequest{
-		selectFieldsRaw: QUERY_TOKEN_WILDCARD,
-		fromObjectsRaw:  "metadata.supplier",
-	}
-	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, &request, nil)
+	request, _ := common.NewQueryRequestSelectFrom(
+		common.QUERY_TOKEN_WILDCARD,
+		"metadata.supplier")
+	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, nil)
 	// Test for concrete keys that SHOULD have been found using wildcard
-	request.selectFieldsRaw = "name,url,contact"
-	_, _ = VerifySelectedFieldsInJsonMap(t, &request, results)
+	fields := []string{"name", "url", "contact"}
+	_, _ = VerifySelectedFieldsInJsonMap(t, fields, results)
 }
 
 func TestQueryCdx14MetadataManufacturer(t *testing.T) {
-	request := QueryRequest{
-		selectFieldsRaw: QUERY_TOKEN_WILDCARD,
-		fromObjectsRaw:  "metadata.manufacture",
-	}
-	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, &request, nil)
+	request, _ := common.NewQueryRequestSelectFrom(
+		common.QUERY_TOKEN_WILDCARD,
+		"metadata.manufacture")
+	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, nil)
 	// Test for concrete keys that SHOULD have been found using wildcard
-	request.selectFieldsRaw = "name,url,contact"
-	match, _ := VerifySelectedFieldsInJsonMap(t, &request, results)
-	if !match {
-		getLogger().Tracef("Expected fields not matched: %s", request.selectFieldsRaw)
-	}
+	fields := []string{"name", "url", "contact"}
+	_, _ = VerifySelectedFieldsInJsonMap(t, fields, results)
 }
 
 func TestQueryCdx14MetadataComponentLicenses(t *testing.T) {
-	request := QueryRequest{
-		selectFieldsRaw: "licenses",
-		fromObjectsRaw:  "metadata.component",
-	}
-	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, &request, nil)
-	_, _ = VerifySelectedFieldsInJsonMap(t, &request, results)
+	request, _ := common.NewQueryRequestSelectFrom(
+		"licenses",
+		"metadata.component")
+	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, nil)
+	_, _ = VerifySelectedFieldsInJsonMap(t, request.GetSelectKeys(), results)
 }
 
 func TestQueryCdx14MetadataComponentSupplier(t *testing.T) {
-	request := QueryRequest{
-		selectFieldsRaw: "supplier",
-		fromObjectsRaw:  "metadata.component",
-	}
-	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, &request, nil)
-	_, _ = VerifySelectedFieldsInJsonMap(t, &request, results)
+	request, _ := common.NewQueryRequestSelectFrom(
+		"supplier",
+		"metadata.component")
+	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, nil)
+	_, _ = VerifySelectedFieldsInJsonMap(t, request.GetSelectKeys(), results)
 }
 
 func TestQueryCdx14MetadataComponentPublisher(t *testing.T) {
-	request := QueryRequest{
-		selectFieldsRaw: "publisher",
-		fromObjectsRaw:  "metadata.component",
-	}
-	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, &request, nil)
-	_, _ = VerifySelectedFieldsInJsonMap(t, &request, results)
+	request, _ := common.NewQueryRequestSelectFrom(
+		"publisher",
+		"metadata.component")
+	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, nil)
+	_, _ = VerifySelectedFieldsInJsonMap(t, request.GetSelectKeys(), results)
 }
 
 func TestQueryCdx14MetadataAllWithWildcard(t *testing.T) {
-	request := QueryRequest{
-		selectFieldsRaw: "*",
-		fromObjectsRaw:  "metadata.component",
-	}
-	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, &request, nil)
-
-	// Check for all known values
-	request.selectFieldsRaw = "type,bom-ref,licenses,properties,publisher,purl,name,description,version,externalReferences"
-	_, _ = VerifySelectedFieldsInJsonMap(t, &request, results)
+	request, _ := common.NewQueryRequestSelectWildcardFrom(
+		"metadata.component")
+	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, nil)
+	// Check for all known values that should be on the FROM object
+	fields := []string{"type", "bom-ref", "licenses", "properties", "publisher", "purl", "name", "description", "version", "externalReferences"}
+	_, _ = VerifySelectedFieldsInJsonMap(t, fields, results)
 }
-
-// // NOTE: licenses is an []interface
-// TODO: Look into supporting reducing array result objects (not maps) to strictly selected fields
-// func TestQueryCdx14MetadataComponentLicenseExpression(t *testing.T) {
-// 	request := QueryRequest{
-// 		selectFieldsRaw: "license,expression",
-// 		fromObjectsRaw:  "metadata.component.licenses",
-// 	}
-// 	innerQuery(t, TEST_CDX_1_4_MATURITY_BASE, &request, true)
-// }
 
 // NOTE: properties is an []interface
 func TestQueryCdx14MetadataComponentProperties(t *testing.T) {
-	request := QueryRequest{
-		selectFieldsRaw: "properties",
-		fromObjectsRaw:  "metadata.component",
-	}
-	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, &request, nil)
-	_, _ = VerifySelectedFieldsInJsonMap(t, &request, results)
+	request, _ := common.NewQueryRequestSelectFrom(
+		"properties",
+		"metadata.component")
+	results, _ := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, nil)
+	_, _ = VerifySelectedFieldsInJsonMap(t, request.GetSelectKeys(), results)
 }
 
 // ----------------------------------------
@@ -288,82 +249,67 @@ func TestQueryCdx14MetadataComponentProperties(t *testing.T) {
 // ----------------------------------------
 
 func TestQueryFailSpdx22Metadata(t *testing.T) {
-	request := QueryRequest{
-		selectFieldsRaw: QUERY_TOKEN_WILDCARD,
-		fromObjectsRaw:  "metadata",
-	}
-
+	request, _ := common.NewQueryRequestSelectFrom(
+		common.QUERY_TOKEN_WILDCARD,
+		"metadata")
 	// Expect a QueryError
-	_, _ = innerQueryError(t, TEST_SPDX_2_2_MIN_REQUIRED, &request, &schema.UnsupportedFormatError{})
+	_, _ = innerQueryError(t, TEST_SPDX_2_2_MIN_REQUIRED, request, &schema.UnsupportedFormatError{})
 }
 
 func TestQueryFailCdx14MetadataComponentInvalidKey(t *testing.T) {
-	request := QueryRequest{
-		selectFieldsRaw: QUERY_TOKEN_WILDCARD,
-		fromObjectsRaw:  "metadata.component.foo",
-	}
-
+	request, _ := common.NewQueryRequestSelectFrom(
+		common.QUERY_TOKEN_WILDCARD,
+		"metadata.component.foo")
 	expectedErrorStrings := []string{
-		MSG_QUERY_INVALID_FROM_CLAUSE,
+		common.MSG_QUERY_INVALID_FROM_CLAUSE,
 		MSG_QUERY_ERROR_FROM_KEY_NOT_FOUND,
 	}
 
 	// Expect a QueryError
-	_, err := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, &request, &QueryError{})
+	_, err := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, &common.QueryError{})
 
 	// Assure we received an error with the expected key phrases
 	EvaluateErrorAndKeyPhrases(t, err, expectedErrorStrings)
 }
 
 func TestQueryFailCdx14MetadataComponentInvalidDataType(t *testing.T) {
-	request := QueryRequest{
-		selectFieldsRaw: QUERY_TOKEN_WILDCARD,
-		fromObjectsRaw:  "metadata.component.name",
-	}
+	request, _ := common.NewQueryRequestSelectFrom(
+		common.QUERY_TOKEN_WILDCARD,
+		"metadata.component.name")
 	expectedErrorStrings := []string{
+		common.MSG_QUERY_INVALID_FROM_CLAUSE,
 		MSG_QUERY_INVALID_DATATYPE,
-		MSG_QUERY_ERROR_FROM_KEY_INVALID_OBJECT,
 	}
-
 	// Expect a QueryError
-	_, err := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, &request, &QueryError{})
-
+	_, err := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, &common.QueryError{})
 	// Assure we received an error with the expected key phrases
 	EvaluateErrorAndKeyPhrases(t, err, expectedErrorStrings)
 }
 
 func TestQueryFailCdx14MetadataComponentInvalidSelectClause(t *testing.T) {
-	request := QueryRequest{
-		selectFieldsRaw: "name,*",
-		fromObjectsRaw:  "metadata.component",
-	}
-
+	request, _ := common.NewQueryRequestSelectFrom(
+		"name,*",
+		"metadata.component")
 	expectedErrorStrings := []string{
-		MSG_QUERY_INVALID_SELECT_CLAUSE,
+		common.MSG_QUERY_INVALID_SELECT_CLAUSE,
 		MSG_QUERY_ERROR_SELECT_WILDCARD,
 	}
-
 	// Expect a QueryError
-	_, err := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, &request, &QueryError{})
-
+	_, err := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, &common.QueryError{})
 	// Assure we received an error with the expected key phrases
 	EvaluateErrorAndKeyPhrases(t, err, expectedErrorStrings)
 }
 
 func TestQueryFailCdx14InvalidFromClauseWithArray(t *testing.T) {
-	request := QueryRequest{
-		selectFieldsRaw: QUERY_TOKEN_WILDCARD,
-		fromObjectsRaw:  "metadata.properties.name",
-	}
-
+	request, _ := common.NewQueryRequestSelectFrom(
+		common.QUERY_TOKEN_WILDCARD,
+		"metadata.properties.name")
 	expectedErrorStrings := []string{
-		MSG_QUERY_INVALID_FROM_CLAUSE,
+		common.MSG_QUERY_INVALID_FROM_CLAUSE,
 		MSG_QUERY_ERROR_FROM_KEY_SLICE_DEREFERENCE,
 	}
-
 	// Expect a QueryError
-	_, err := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, &request, &QueryError{})
-
+	_, err := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, &common.QueryError{})
 	// Assure we received an error with the expected key phrases
 	EvaluateErrorAndKeyPhrases(t, err, expectedErrorStrings)
 }
@@ -372,68 +318,65 @@ func TestQueryFailCdx14InvalidFromClauseWithArray(t *testing.T) {
 // WHERE clause tests
 // ----------------------------------------
 
+// Force a bad WHERE clause; expect a QueryError
 func TestQueryCdx14InvalidWhereClauseNoRegex(t *testing.T) {
-	request := QueryRequest{
-		selectFieldsRaw: QUERY_TOKEN_WILDCARD,
-		fromObjectsRaw:  "metadata.properties",
-		whereValuesRaw:  "name",
+	_, err := common.NewQueryRequestSelectFromWhere(
+		common.QUERY_TOKEN_WILDCARD,
+		"metadata.properties",
+		"name")
+	// Note: this tests the parameter parsing function
+	// TODO: move to "common" package
+	if !ErrorTypesMatch(err, &common.QueryError{}) {
+		t.Errorf("expected error type: `%T`, actual type: `%T`", &common.QueryError{}, err)
 	}
-
-	// Expect a QueryError
-	_, err := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, &request, &QueryError{})
-
 	expectedErrorStrings := []string{
-		MSG_QUERY_INVALID_WHERE_CLAUSE,
+		common.MSG_QUERY_INVALID_WHERE_CLAUSE,
 	}
-
 	// Assure we received an error with the expected key phrases
 	EvaluateErrorAndKeyPhrases(t, err, expectedErrorStrings)
 }
 
 func TestQueryCdx14InvalidWhereClauseMultipleRegex(t *testing.T) {
-	request := QueryRequest{
-		selectFieldsRaw: QUERY_TOKEN_WILDCARD,
-		fromObjectsRaw:  "metadata.properties",
-		whereValuesRaw:  "name=foo,value=bar=idk",
+	_, err := common.NewQueryRequestSelectFromWhere(
+		common.QUERY_TOKEN_WILDCARD,
+		"metadata.properties",
+		"name=foo,value=bar=idk")
+	if !ErrorTypesMatch(err, &common.QueryError{}) {
+		t.Errorf("expected error type: `%T`, actual type: `%T`", &common.QueryError{}, err)
 	}
-
-	_, err := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, &request, &QueryError{})
-
 	expectedErrorStrings := []string{
-		MSG_QUERY_INVALID_WHERE_CLAUSE,
+		common.MSG_QUERY_INVALID_WHERE_CLAUSE,
 	}
-
 	// Assure we received an error with the expected key phrases
 	EvaluateErrorAndKeyPhrases(t, err, expectedErrorStrings)
 }
 
 func TestQueryCdx14InvalidWhereClauseEmptyRegex(t *testing.T) {
-	request := QueryRequest{
-		selectFieldsRaw: QUERY_TOKEN_WILDCARD,
-		fromObjectsRaw:  "metadata.properties",
-		whereValuesRaw:  "name=foo,value=",
+	_, err := common.NewQueryRequestSelectFromWhere(
+		common.QUERY_TOKEN_WILDCARD,
+		"metadata.properties",
+		"name=foo,value=")
+	if !ErrorTypesMatch(err, &common.QueryError{}) {
+		t.Errorf("expected error type: `%T`, actual type: `%T`", &common.QueryError{}, err)
 	}
-
-	_, err := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, &request, &QueryError{})
-
 	expectedErrorStrings := []string{
-		MSG_QUERY_INVALID_WHERE_CLAUSE,
+		common.MSG_QUERY_INVALID_WHERE_CLAUSE,
 	}
-
 	// Assure we received an error with the expected key phrases
 	EvaluateErrorAndKeyPhrases(t, err, expectedErrorStrings)
 }
 
 func TestQueryCdx14RequiredDataLegalDisclaimer(t *testing.T) {
-	request := QueryRequest{
-		selectFieldsRaw: QUERY_TOKEN_WILDCARD,
-		fromObjectsRaw:  "metadata.properties",
-		whereValuesRaw:  "name=urn:example.com:classification",
+	request, errNew := common.NewQueryRequestSelectFromWhere(
+		common.QUERY_TOKEN_WILDCARD,
+		"metadata.properties",
+		"name=urn:example.com:classification")
+	if errNew != nil {
+		t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, errNew)
 	}
 
 	// WARN!!!! TODO: handle error tests locally until code is complete
-	result, err := innerQuery(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, &request, false)
-
+	result, err := innerQuery(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, false)
 	if err != nil {
 		t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
 	}
@@ -447,4 +390,62 @@ func TestQueryCdx14RequiredDataLegalDisclaimer(t *testing.T) {
 
 	// TODO: verify WHERE clause props. are returned
 	getLogger().Debugf("%v", properties)
+}
+
+func TestQueryCdx14InvalidWhereClauseOnFromSingleton(t *testing.T) {
+	request, _ := common.NewQueryRequestSelectFromWhere(
+		common.QUERY_TOKEN_WILDCARD,
+		"metadata.component",
+		"name=foo")
+	// Note: this produces a warning, not an error
+	_, err := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, nil)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestQueryCdx14MetadataToolsSlice(t *testing.T) {
+	request, _ := common.NewQueryRequestSelectFromWhere(
+		common.QUERY_TOKEN_WILDCARD,
+		"metadata.tools",
+		"")
+	result, err := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	if !utils.IsJsonSliceType(result) {
+		fResult, _ := utils.EncodeAnyToIndentedJSON(result)
+		t.Error(fmt.Errorf("expected JSON slice. Actual result: %s", fResult.String()))
+	}
+
+	// verify slice length and contents
+	slice := result.([]interface{})
+	EXPECTED_SLICE_LENGTH := 2
+	if actualLength := len(slice); actualLength != EXPECTED_SLICE_LENGTH {
+		fResult, _ := utils.EncodeAnyToIndentedJSON(result)
+		t.Error(fmt.Errorf("expected slice length: %v, actual length: %v. Actual result: %s", EXPECTED_SLICE_LENGTH, actualLength, fResult.String()))
+	}
+}
+
+func TestQueryCdx14MetadataToolsSliceWhereName(t *testing.T) {
+	request, _ := common.NewQueryRequestSelectFromWhere(
+		common.QUERY_TOKEN_WILDCARD,
+		"components",
+		"name=body-parser")
+	result, err := innerQueryError(t, TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, request, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	if !utils.IsJsonSliceType(result) {
+		fResult, _ := utils.EncodeAnyToIndentedJSON(result)
+		t.Error(fmt.Errorf("expected JSON slice. Actual result: %s", fResult.String()))
+	}
+
+	// verify slice length and contents
+	slice := result.([]interface{})
+	EXPECTED_SLICE_LENGTH := 1
+	if actualLength := len(slice); actualLength != EXPECTED_SLICE_LENGTH {
+		fResult, _ := utils.EncodeAnyToIndentedJSON(result)
+		t.Error(fmt.Errorf("expected slice length: %v, actual length: %v. Actual result: %s", EXPECTED_SLICE_LENGTH, actualLength, fResult.String()))
+	}
 }

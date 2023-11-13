@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -89,4 +90,89 @@ type VulnerabilityInfo struct {
 	CweIds                []string               `json:"cwe-ids"`
 	Source                CDXVulnerabilitySource `json:"source"`
 	Vulnerability         CDXVulnerability
+}
+
+// -------------------
+// Licenses
+// -------------------
+
+// LicenseChoice - Choice type
+const (
+	LC_TYPE_INVALID = iota
+	LC_TYPE_ID
+	LC_TYPE_NAME
+	LC_TYPE_EXPRESSION
+)
+
+// LicenseChoice - corresponding (name) values for license choice types
+const (
+	LC_VALUE_INVALID    = "invalid"
+	LC_VALUE_ID         = "id"
+	LC_VALUE_NAME       = "name"
+	LC_VALUE_EXPRESSION = "expression"
+)
+
+// Declare a fixed-sized array for LC type name indexed lookup
+// Note: this is a "Composite Literal" which forces an array of string that
+// matches the size of the declaration
+var arrayLicenseTypeNames = [...]string{LC_VALUE_INVALID, LC_VALUE_ID, LC_VALUE_NAME, LC_VALUE_EXPRESSION}
+
+const (
+	LC_LOC_UNKNOWN = iota
+	LC_LOC_METADATA_COMPONENT
+	LC_LOC_METADATA
+	LC_LOC_COMPONENTS
+	LC_LOC_SERVICES
+)
+
+var mapLicenseLocationNames = map[int]string{
+	LC_LOC_UNKNOWN:            "unknown",
+	LC_LOC_METADATA_COMPONENT: "metadata.component",
+	LC_LOC_METADATA:           "metadata.licenses",
+	LC_LOC_COMPONENTS:         "components",
+	LC_LOC_SERVICES:           "services",
+}
+
+// Note: the "License" property is used as hashmap key
+// NOTE: CDXRefType is a named `string` type as of v1.5
+type LicenseInfo struct {
+	UsagePolicy            string           `json:"usage-policy"`
+	LicenseChoiceTypeValue int              `json:"license-type-value"`
+	LicenseChoiceType      string           `json:"license-type"`
+	License                string           `json:"license"`
+	ResourceName           string           `json:"resource-name"`
+	BOMRef                 CDXRefType       `json:"bom-ref"`
+	BOMLocationValue       int              `json:"bom-location-value"`
+	BOMLocation            string           `json:"bom-location"`
+	LicenseChoice          CDXLicenseChoice // Do not marshal
+	Policy                 LicensePolicy    // Do not marshal
+	Component              CDXComponent     // Do not marshal
+	Service                CDXService       // Do not marshal
+}
+
+func (licenseInfo *LicenseInfo) SetLicenseChoiceTypeValue(value int) {
+	licenseInfo.LicenseChoiceTypeValue = value
+	licenseInfo.LicenseChoiceType = GetLicenseChoiceTypeName(value)
+}
+
+// TODO: look to remove once we uniformly use get/set methods on structure fields
+func GetLicenseChoiceLocationName(value int) (name string) {
+	if _, ok := mapLicenseLocationNames[value]; ok {
+		name = mapLicenseLocationNames[value]
+	} else {
+		name = mapLicenseLocationNames[LC_TYPE_INVALID]
+		getLogger().Warningf("invalid license choice location value (out of range): %v", value)
+	}
+	return
+}
+
+// TODO: look to remove once we uniformly use get/set methods on structure fields
+func GetLicenseChoiceTypeName(value int) (name string) {
+	if value < len(arrayLicenseTypeNames) {
+		name = arrayLicenseTypeNames[value]
+	} else {
+		name = arrayLicenseTypeNames[LC_TYPE_INVALID]
+		getLogger().Warningf("invalid license choice type value (out of range): %v", value)
+	}
+	return
 }

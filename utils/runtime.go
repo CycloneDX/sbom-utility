@@ -16,24 +16,24 @@
  * limitations under the License.
  */
 
-package cmd
+package utils
 
 import (
-	"fmt"
-
-	"github.com/CycloneDX/sbom-utility/utils"
-	"github.com/spf13/cobra"
+	"os"
+	"runtime"
+	"strings"
 )
 
-func NewCommandVersion() *cobra.Command {
-	var command = new(cobra.Command)
-	command.Use = CMD_VERSION
-	command.Short = "Display program, binary and version information"
-	command.Long = "Display program, binary and version information in SemVer format (e.g., `<project> version <x.y.z>`)"
-	command.Run = func(cmd *cobra.Command, args []string) {
-		getLogger().Enter()
-		defer getLogger().Exit()
-		fmt.Printf("%s version %s\n", utils.GlobalFlags.Project, utils.GlobalFlags.Version)
+func GetCallerFunctionName(index uint64) (fxName string) {
+	pCallers := make([]uintptr, 4)
+	// Note: immediate caller is at index "2" on the stack
+	runtime.Callers(2, pCallers)
+	if len(pCallers) > 0 {
+		fx := runtime.FuncForPC(pCallers[0])
+		fxName = fx.Name()
+		if index := strings.LastIndex(fxName, string(os.PathSeparator)); index > -1 {
+			fxName = fxName[index:]
+		}
 	}
-	return command
+	return
 }

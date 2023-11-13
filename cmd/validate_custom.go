@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +19,6 @@
 package cmd
 
 import (
-	"regexp"
-
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/jwangsadinata/go-multimap/slicemultimap"
@@ -168,7 +167,7 @@ func validateCustomMetadataProperties(document *schema.BOM) (err error) {
 
 		if checks.CheckRegex != "" {
 			getLogger().Tracef("CheckRegex: field: `%s`, regex: `%v`...", checks.CheckRegex, checks.Value)
-			compiledRegex, errCompile := compileRegex(checks.Value)
+			compiledRegex, errCompile := utils.CompileRegex(checks.Value)
 			if errCompile != nil {
 				return errCompile
 			}
@@ -200,17 +199,6 @@ func validateCustomMetadataProperties(document *schema.BOM) (err error) {
 	}
 
 	return err
-}
-
-// TODO: move to utils
-func compileRegex(test string) (expression *regexp.Regexp, err error) {
-	if test != "" {
-		expression, err = regexp.Compile(test)
-		if err != nil {
-			err = getLogger().Errorf("invalid regular expression: `%s`", test)
-		}
-	}
-	return
 }
 
 func hashMetadataProperties(hashmap *slicemultimap.MultiMap, properties []schema.CDXProperty) (err error) {

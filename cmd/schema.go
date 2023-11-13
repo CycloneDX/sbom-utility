@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -158,7 +159,7 @@ func filterFormatSchemas(whereFilters []common.WhereFilter) (filteredFormats []s
 		var match bool = true
 
 		if len(whereFilters) > 0 {
-			mapFormat, _ := utils.ConvertStructToMap(schema)
+			mapFormat, _ := utils.MarshalStructToJsonMap(schema)
 			match, _ = whereFilterMatch(mapFormat, whereFilters)
 		}
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -21,6 +22,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/spf13/cobra"
@@ -28,14 +30,14 @@ import (
 
 // flags (do not translate)
 const (
-	FLAG_TRIM_PATHS = "paths"
-	FLAG_TRIM_KEYS  = "keys"
+	FLAG_TRIM_FROM_PATHS = "from"
+	FLAG_TRIM_MAP_KEYS   = "keys"
 )
 
 // flag help (translate)
 const (
 	FLAG_TRIM_OUTPUT_FORMAT_HELP = "format output using the specified type"
-	FLAG_TRIM_FROM_PATHS         = "comma-separated list of dot-separated JSON document paths used to scope where trim is applied" +
+	FLAG_TRIM_FROM_PATHS_HELP    = "comma-separated list of dot-separated JSON document paths used to scope where trim is applied" +
 		"\n - if not present, the default `--from` path is the document \"root\""
 	FLAG_TRIM_KEYS_HELP = "comma-separated list of `keys=<key1,key2,...,keyN>` that will be trimmed from the JSON document"
 	MSG_TRIM_FLAG_KEYS  = "JSON map keys to trim (delete) (e.g., \"key1,key2,...,keyN\")"
@@ -73,12 +75,11 @@ func initCommandTrimFlags(command *cobra.Command) (err error) {
 
 	command.PersistentFlags().StringVar(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_OUTPUT_FORMAT, FORMAT_JSON,
 		FLAG_TRIM_OUTPUT_FORMAT_HELP+TRIM_OUTPUT_SUPPORTED_FORMATS)
-	command.Flags().StringP(FLAG_TRIM_PATHS, "", "", FLAG_TRIM_FROM_PATHS)
-	//command.Flags().StringP(FLAG_TRIM_KEYS, "", "", FLAG_TRIM_KEYS_HELP)
-	command.Flags().StringVarP(&utils.GlobalFlags.TrimFlags.RawKeys, FLAG_TRIM_KEYS, "", "", MSG_TRIM_FLAG_KEYS)
-	err = command.MarkFlagRequired(FLAG_TRIM_KEYS)
+	command.Flags().StringVarP(&utils.GlobalFlags.TrimFlags.RawPaths, FLAG_TRIM_FROM_PATHS, "", "", FLAG_TRIM_FROM_PATHS_HELP)
+	command.Flags().StringVarP(&utils.GlobalFlags.TrimFlags.RawKeys, FLAG_TRIM_MAP_KEYS, "", "", MSG_TRIM_FLAG_KEYS)
+	err = command.MarkFlagRequired(FLAG_TRIM_MAP_KEYS)
 	if err != nil {
-		err = getLogger().Errorf("unable to mark flag `%s` as required: %s", FLAG_TRIM_KEYS, err)
+		err = getLogger().Errorf("unable to mark flag `%s` as required: %s", FLAG_TRIM_MAP_KEYS, err)
 	}
 	return
 }
@@ -101,31 +102,20 @@ func trimCmdImpl(cmd *cobra.Command, args []string) (err error) {
 		}
 	}()
 
-	var fromClause string
-	//keys, err = cmd.Flags().GetString(FLAG_TRIM_KEYS)
-	// if err != nil {
-	// 	getLogger().Tracef("Trim: '%s' flag NOT found", FLAG_TRIM_KEYS)
-	// } else {
-	// 	getLogger().Tracef("Trim: '%s' flag found: %s", FLAG_TRIM_KEYS, keys)
-	// 	utils.GlobalFlags.TrimFlags.RawKeys = keys
-	// }
-
+	// --keys parameter
 	if keys := utils.GlobalFlags.TrimFlags.RawKeys; keys != "" {
 		utils.GlobalFlags.TrimFlags.Keys = strings.Split(keys, TRIM_KEYS_SEP)
-		getLogger().Tracef("Trim: keys: %v\n", keys)
+		getLogger().Tracef("Trim: keys: `%v`\n", keys)
 	} else {
-		getLogger().Tracef("Trim: keys NOT found on `%s` flag", FLAG_TRIM_KEYS)
+		getLogger().Tracef("Trim: required parameter NOT found for `%s` flag", FLAG_TRIM_MAP_KEYS)
 	}
 
-	// TODO: limit the "trim" scope using Query() command parameters
-	// TODO: i.e., Parse flags into a query request struct:
-	// 		var queryRequest *QueryRequest = new(QueryRequest)
-	// 		err = queryRequest.readQueryFlags(cmd)
-	fromClause, err = cmd.Flags().GetString(FLAG_TRIM_PATHS)
-	if err != nil {
-		getLogger().Tracef("Trim: '%s' flag NOT found", FLAG_TRIM_PATHS)
+	// --from parameter
+	if paths := utils.GlobalFlags.TrimFlags.RawPaths; paths != "" {
+		utils.GlobalFlags.TrimFlags.FromPaths = common.ParseFromPaths(paths)
+		getLogger().Tracef("Trim: paths: `%v`\n", paths)
 	} else {
-		getLogger().Tracef("Trim: '%s' flag found: %s", FLAG_TRIM_PATHS, fromClause)
+		getLogger().Tracef("Trim: required parameter NOT found for `%s` flag", FLAG_TRIM_FROM_PATHS)
 	}
 
 	if err == nil {
@@ -157,8 +147,7 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 
 	// Note: returns error if either file load or unmarshal to JSON map fails
 	var document *schema.BOM
-	document, err = LoadInputBOMFileAndDetectSchema()
-	if err != nil {
+	if document, err = LoadInputBOMFileAndDetectSchema(); err != nil {
 		return
 	}
 
@@ -178,29 +167,52 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 		return
 	}
 
-	// TODO: use a parameter to obtain and normalize object key names
-	document.TrimJsonMap(trimFlags.Keys)
+	// If no paths are passed, use BOM document root
+	if len(trimFlags.FromPaths) == 0 {
+		document.TrimBOMKeys(trimFlags.Keys)
+	} else {
+		// TODO: see if we can make this logic a method on BOM object
+		// else, loop through document paths provided by caller
+		qr := common.NewQueryRequest()
+		// Use query function to obtain BOM document subsets (as JSON maps)
+		// using --from path values
+		for _, path := range trimFlags.FromPaths {
+			qr.SetRawFromPaths(path)
+			result, errQuery := QueryJSONMap(document.GetJSONMap(), qr)
 
-	// fully unmarshal the SBOM into named structures
-	// TODO: we should NOT need to unmarshal into BOM structures;
-	// instead, see if we can simply Marshal the JSON map directly
-	// NOTE: if we do want to "validate" the data at some point we MAY
-	// need to unmarshal into CDX structures.
+			if errQuery != nil {
+				getLogger().Errorf("query error: invalid path: %s", path)
+				buffer, errEncode := utils.EncodeAnyToIndentedJSON(result)
+				if errEncode != nil {
+					getLogger().Tracef("result: %s", buffer.String())
+				}
+			}
+			document.TrimEntityKeys(result, trimFlags.Keys)
+		}
+	}
+
+	// TODO: Investigate if we can simply Marshal the JSON map directly (performance).
+	// NOTE: Today we unmarshal() to ensure empty/zero fields are omitted via
+	// the custom marshal/unmarshal functions for CycloneDX.
+	// NOTE: If we do want to "validate" the BOM data at some point we MAY
+	// need to unmarshal into CDX structures regardless.
+	// Fully unmarshal the SBOM into named structures
 	if err = document.UnmarshalCycloneDXBOM(); err != nil {
 		return
 	}
 
+	// TODO: include formatting (i.e., prefix, indent) as command line flags
 	// Output the "trimmed" version of the Input BOM
 	format := persistentFlags.OutputFormat
 	getLogger().Infof("Outputting listing (`%s` format)...", format)
 	switch format {
 	case FORMAT_JSON:
-		err = document.MarshalCycloneDXBOM(writer, "", "  ")
+		err = document.EncodeAsFormattedJSON(writer, "", "  ")
 	default:
 		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Stats not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_TEXT)
-		err = document.MarshalCycloneDXBOM(writer, "", "  ")
+		err = document.EncodeAsFormattedJSON(writer, "", "  ")
 	}
 
 	return
