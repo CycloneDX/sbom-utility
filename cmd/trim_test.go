@@ -333,8 +333,8 @@ func TestTrimCdx15FooFromTools(t *testing.T) {
 	ti.TestOutputVariantName = utils.GetCallerFunctionName(2)
 	ti.OutputFile = "" // ti.CreateTemporaryFilename(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1)
 	ti.TestOutputExpectedByteSize = 5351
-	buffer, _, err := innerTestTrim(t, ti)
 
+	buffer, _, err := innerTestTrim(t, ti)
 	if err != nil {
 		t.Error(err)
 	}
@@ -343,4 +343,12 @@ func TestTrimCdx15FooFromTools(t *testing.T) {
 	if actualSize := buffer.Len(); actualSize != ti.TestOutputExpectedByteSize {
 		t.Error(fmt.Errorf("invalid trim result (output size (byte)): expected size: %v, actual size: %v", ti.TestOutputExpectedByteSize, actualSize))
 	}
+
+	// validate test-specific strings still exist
+	TEST_STRING_1 := "\"name\": \"urn:example.com:identifier:product\""
+	contains := bufferContainsValues(buffer, TEST_STRING_1)
+	if !contains {
+		t.Error(fmt.Errorf("invalid trim result: string not found: %s", TEST_STRING_1))
+	}
+
 }

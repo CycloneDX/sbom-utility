@@ -8,7 +8,7 @@ The utility has now grown to include a rich set of commands, listed below, that 
 
 ## Command Overview
 
-The utility supports the following commands:
+The utility supports the following BOM-related commands:
 
 - **[license](#license)**
   - **[list](#license-list-subcommand)** produce listings or summarized reports of license data contained in a BOM along with license "usage policy" determinations using the policies declared in the `license.json` file.
@@ -55,6 +55,7 @@ Feedback and helpful commits appreciated on the following commands which will be
   - [`vulnerability` command](#vulnerability): lists vulnerability summary information included in the BOM or VEX
   - [`diff` command](#diff): *experimental*: shows the delta between two similar BOM versions
   - [`trim` command](#diff): *experimental*: remove specified fields from JSON BOM documents and output smaller BOMs that are appropriate sized for different use cases and analysis
+  - [`completion` command](#completion): generates command-line completion scripts for the utility
 - [Design considerations](#design-considerations)
 - [Development](#development)
   - [Prerequisites](#prerequisites)
@@ -119,9 +120,8 @@ For convenience, links to each command's section are here:
 - [schema](#schema)
 - [vulnerability](#vulnerability)
 - [validate](#validate)
+- [completion](#completion)
 - [help](#help)
-
-### General command information
 
 #### Exit codes
 
@@ -1495,6 +1495,25 @@ Use the `--format` flag on the to choose one of the supported output formats:
    ]
  }
 ```
+
+---
+
+#### Completion
+
+This command will generate command-line completion scripts, for the this utility, customized for various supported shells.
+
+The completion command can be invoked as follows:
+
+```bash
+./sbom_utility completion [shell]
+```
+
+where valid values for `shell` are:
+
+- bash
+- fish
+- powershell
+- zsh
 
 ---
 
