@@ -331,11 +331,13 @@ func selectFieldsFromMap(request *common.QueryRequest, jsonMap map[string]interf
 	// Default to wildcard behavior (i.e., if request had no "select keys")
 	// NOTE: The default set by the CLI framework SHOULD be QUERY_TOKEN_WILDCARD
 	if len(selectors) == 0 {
+		getLogger().Tracef("no query selectors found (i.e., length=0); defaulting to wildcard behavior. ")
 		return jsonMap, nil
 	}
 
 	// Check for wildcard; if it is the only selector, return the original map
 	if len(selectors) == 1 && selectors[0] == common.QUERY_TOKEN_WILDCARD {
+		getLogger().Tracef("wildcard only selector found; returning entire map.")
 		return jsonMap, nil
 	}
 

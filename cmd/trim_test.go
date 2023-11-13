@@ -20,6 +20,7 @@ package cmd
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -120,7 +121,6 @@ func innerTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer bytes.Buf
 
 	// invoke resource list command with a byte buffer
 	outputBuffer, err = innerBufferedTestTrim(t, testInfo)
-
 	return
 }
 
@@ -303,8 +303,44 @@ func TestTrimCdx15HashesFromTools(t *testing.T) {
 	ti.OutputFile = ti.CreateTemporaryFilename(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1)
 	innerTestTrim(t, ti)
 	// Assure JSON map does not contain the trimmed key(s)
-	// err := VerifyTrimOutputFileResult(t, ti, ti.Keys, "metadata.component") // document root
-	// if err != nil {
-	// 	t.Error(err)
-	// }
+	err := VerifyTrimOutputFileResult(t, ti, ti.Keys, "metadata.tools") // document root
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestTrimCdx15AllIncrementallyFromSmallSample(t *testing.T) {
+	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_SAMPLE_SMALL_COMPS_ONLY, nil)
+	ti.Keys = append(ti.Keys, "type", "purl", "bom-ref", "serialNumber", "components", "name", "description", "properties")
+	ti.FromPaths = []string{""}
+	ti.TestOutputVariantName = utils.GetCallerFunctionName(2)
+	ti.OutputFile = ti.CreateTemporaryFilename(TEST_TRIM_CDX_1_5_SAMPLE_SMALL_COMPS_ONLY)
+	_, _, err := innerTestTrim(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	// Assure JSON map does not contain the trimmed key(s)
+	err = VerifyTrimOutputFileResult(t, ti, ti.Keys, "") // document root
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestTrimCdx15FooFromTools(t *testing.T) {
+	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1, nil)
+	ti.Keys = append(ti.Keys, "foo")
+	ti.FromPaths = []string{"metadata.tools"}
+	ti.TestOutputVariantName = utils.GetCallerFunctionName(2)
+	ti.OutputFile = "" // ti.CreateTemporaryFilename(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1)
+	ti.TestOutputExpectedByteSize = 5351
+	buffer, _, err := innerTestTrim(t, ti)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Validate expected output file size in bytes (assumes 4 space indent)
+	if actualSize := buffer.Len(); actualSize != ti.TestOutputExpectedByteSize {
+		t.Error(fmt.Errorf("invalid trim result (output size (byte)): expected size: %v, actual size: %v", ti.TestOutputExpectedByteSize, actualSize))
+	}
 }

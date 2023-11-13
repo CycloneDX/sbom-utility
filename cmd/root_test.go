@@ -67,6 +67,7 @@ type CommonTestInfo struct {
 	ResultLineContainsValues          []string
 	MockStdin                         bool
 	TestOutputVariantName             string
+	TestOutputExpectedByteSize        int
 }
 
 func NewCommonTestInfo() *CommonTestInfo {

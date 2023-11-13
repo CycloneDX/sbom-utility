@@ -186,9 +186,7 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 					getLogger().Tracef("result: %s", buffer.String())
 				}
 			}
-
-			keys := trimFlags.Keys
-			document.TrimEntityKeys(result, keys)
+			document.TrimEntityKeys(result, trimFlags.Keys)
 		}
 	}
 
