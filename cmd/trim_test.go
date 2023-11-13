@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -350,5 +351,4 @@ func TestTrimCdx15FooFromTools(t *testing.T) {
 	if !contains {
 		t.Error(fmt.Errorf("invalid trim result: string not found: %s", TEST_STRING_1))
 	}
-
 }
