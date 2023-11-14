@@ -346,7 +346,7 @@ func (bom *BOM) HashVulnerability(cdxVulnerability CDXVulnerability, whereFilter
 		getLogger().Warningf("vulnerability (`%s`) missing `created` date", cdxVulnerability.Id)
 	}
 
-	if len(cdxVulnerability.Ratings) == 0 {
+	if cdxVulnerability.Ratings == nil || len(*cdxVulnerability.Ratings) == 0 {
 		getLogger().Warningf("vulnerability (`%s`) missing `ratings`", cdxVulnerability.Id)
 	}
 
@@ -383,24 +383,32 @@ func (bom *BOM) HashVulnerability(cdxVulnerability CDXVulnerability, whereFilter
 	}
 
 	// TODO: replace empty Analysis values with "UNDEFINED"
-	vulnInfo.AnalysisState = cdxVulnerability.Analysis.State
-	if vulnInfo.AnalysisState == "" {
-		vulnInfo.AnalysisState = VULN_ANALYSIS_STATE_EMPTY
-	}
+	if cdxVulnerability.Analysis != nil {
+		vulnInfo.AnalysisState = cdxVulnerability.Analysis.State
+		if vulnInfo.AnalysisState == "" {
+			vulnInfo.AnalysisState = VULN_ANALYSIS_STATE_EMPTY
+		}
 
-	vulnInfo.AnalysisJustification = cdxVulnerability.Analysis.Justification
-	if vulnInfo.AnalysisJustification == "" {
+		vulnInfo.AnalysisJustification = cdxVulnerability.Analysis.Justification
+		if vulnInfo.AnalysisJustification == "" {
+			vulnInfo.AnalysisJustification = VULN_ANALYSIS_STATE_EMPTY
+		}
+
+		vulnInfo.AnalysisResponse = *cdxVulnerability.Analysis.Response
+		if len(vulnInfo.AnalysisResponse) == 0 {
+			vulnInfo.AnalysisResponse = []string{VULN_ANALYSIS_STATE_EMPTY}
+		}
+	} else {
+		vulnInfo.AnalysisState = VULN_ANALYSIS_STATE_EMPTY
 		vulnInfo.AnalysisJustification = VULN_ANALYSIS_STATE_EMPTY
-	}
-	vulnInfo.AnalysisResponse = cdxVulnerability.Analysis.Response
-	if len(vulnInfo.AnalysisResponse) == 0 {
 		vulnInfo.AnalysisResponse = []string{VULN_ANALYSIS_STATE_EMPTY}
 	}
 
 	// Convert []int to []string for --where filter
 	// TODO see if we can eliminate this conversion and handle while preparing report data
 	// as this SHOULD appear there as []interface{}
-	if len(cdxVulnerability.Cwes) > 0 {
+	if cdxVulnerability.Cwes != nil && len(*cdxVulnerability.Cwes) > 0 {
+		// strip off slice/array brackets
 		vulnInfo.CweIds = strings.Fields(strings.Trim(fmt.Sprint(cdxVulnerability.Cwes), "[]"))
 	}
 
@@ -412,10 +420,9 @@ func (bom *BOM) HashVulnerability(cdxVulnerability CDXVulnerability, whereFilter
 	// 9.0 – 10.0 	Critical
 
 	// TODO: if summary report, see if more than one severity can be shown without clogging up column data
-	numRatings := len(cdxVulnerability.Ratings)
-	if numRatings > 0 {
+	if cdxVulnerability.Ratings != nil && len(*cdxVulnerability.Ratings) > 0 {
 		//var sourceMatch int
-		for _, rating := range cdxVulnerability.Ratings {
+		for _, rating := range *cdxVulnerability.Ratings {
 			// defer to same source as the top-level vuln. declares
 			fSeverity := fmt.Sprintf("%s: %v (%s)", rating.Method, rating.Score, rating.Severity)
 			// give listing priority to ratings that matches top-level vuln. reporting source
@@ -426,7 +433,6 @@ func (bom *BOM) HashVulnerability(cdxVulnerability CDXVulnerability, whereFilter
 			}
 			vulnInfo.CvssSeverity = append(vulnInfo.CvssSeverity, fSeverity)
 		}
-
 	} else {
 		// Set first entry to empty value (i.e., "none")
 		vulnInfo.CvssSeverity = append(vulnInfo.CvssSeverity, VULN_RATING_EMPTY)

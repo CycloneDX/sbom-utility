@@ -59,8 +59,8 @@ type CDXBom struct {
 // v1.3: added "licenses", "properties"
 // v1.5: added "lifecycles"
 type CDXMetadata struct {
-	Timestamp    string                      `json:"timestamp,omitempty"`
-	Tools        interface{}                 `json:"tools,omitempty"` // v1.2: added.v1.5: "tools" is now an interface{}
+	Timestamp    string                      `json:"timestamp,omitempty" scvs:"bom:core:timestamp"` // urn:owasp:scvs:bom:core:timestamp
+	Tools        interface{}                 `json:"tools,omitempty"`                               // v1.2: added.v1.5: "tools" is now an interface{}
 	Authors      *[]CDXOrganizationalContact `json:"authors,omitempty"`
 	Component    *CDXComponent               `json:"component,omitempty"`
 	Manufacturer *CDXOrganizationalEntity    `json:"manufacturer,omitempty"`
@@ -96,10 +96,10 @@ type CDXComponent struct {
 	Hashes             *[]CDXHash               `json:"hashes,omitempty"`
 	Licenses           *[]CDXLicenseChoice      `json:"licenses,omitempty"`
 	Copyright          string                   `json:"copyright,omitempty"`
-	Cpe                string                   `json:"cpe,omitempty"`      // See: https://nvd.nist.gov/products/cpe
-	Purl               string                   `json:"purl,omitempty"`     // See: https://github.com/package-url/purl-spec
-	Swid               *CDXSwid                 `json:"swid,omitempty"`     // See: https://www.iso.org/standard/65666.html
-	Pedigree           *CDXPedigree             `json:"pedigree,omitempty"` // anon. type
+	Cpe                string                   `json:"cpe,omitempty"`                                       // See: https://nvd.nist.gov/products/cpe
+	Purl               string                   `json:"purl,omitempty" scvs:"bom:resource:identifiers:purl"` // See: https://github.com/package-url/purl-spec
+	Swid               *CDXSwid                 `json:"swid,omitempty"`                                      // See: https://www.iso.org/standard/65666.html
+	Pedigree           *CDXPedigree             `json:"pedigree,omitempty"`                                  // anon. type
 	ExternalReferences *[]CDXExternalReference  `json:"externalReferences,omitempty"`
 	Components         *[]CDXComponent          `json:"components,omitempty"`
 	Evidence           *CDXComponentEvidence    `json:"evidence,omitempty"`                  // v1.3: added

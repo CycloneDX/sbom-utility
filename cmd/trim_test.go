@@ -37,6 +37,7 @@ const (
 	TEST_TRIM_CDX_1_4_ENCODED_CHARS           = "test/trim/trim-cdx-1-4-sample-encoded-chars.sbom.json"
 	TEST_TRIM_CDX_1_4_SAMPLE_XXL_1            = "test/trim/trim-cdx-1-4-sample-xxl-1.sbom.json"
 	TEST_TRIM_CDX_1_5_SAMPLE_SMALL_COMPS_ONLY = "test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json"
+	TEST_TRIM_CDX_1_4_SAMPLE_VEX              = "test/trim/trim-cdx-1-4-sample-vex.json"
 	TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1         = "test/trim/trim-cdx-1-5-sample-medium-1.sbom.json"
 )
 
@@ -350,5 +351,26 @@ func TestTrimCdx15FooFromTools(t *testing.T) {
 	contains := bufferContainsValues(buffer, TEST_STRING_1)
 	if !contains {
 		t.Error(fmt.Errorf("invalid trim result: string not found: %s", TEST_STRING_1))
+	}
+}
+
+func TestTrimCdx14SourceFromVulnerabilities(t *testing.T) {
+	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_4_SAMPLE_VEX, nil)
+	ti.Keys = append(ti.Keys, "source")
+	ti.FromPaths = []string{"vulnerabilities"}
+	ti.TestOutputVariantName = utils.GetCallerFunctionName(2)
+	ti.OutputFile = ti.CreateTemporaryFilename(TEST_TRIM_CDX_1_4_SAMPLE_VEX)
+
+	buffer, _, err := innerTestTrim(t, ti)
+	s := buffer.String()
+	if err != nil {
+		getLogger().Debugf("result: %s", s)
+		t.Error(err)
+	}
+
+	// Assure JSON map does not contain the trimmed key(s)
+	err = VerifyTrimOutputFileResult(t, ti, ti.Keys, ti.FromPaths[0])
+	if err != nil {
+		t.Error(err)
 	}
 }
