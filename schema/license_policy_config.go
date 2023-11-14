@@ -102,7 +102,6 @@ func (config *LicensePolicyConfig) Reset() {
 func (config *LicensePolicyConfig) GetFamilyNameMap() (hashmap *slicemultimap.MultiMap, err error) {
 	if config.licenseFamilyNameMap == nil {
 		err = config.hashLicensePolicies()
-		fmt.Printf("!!!!!!!!!Not hashed!!!!!!!!!!")
 	}
 	return config.licenseFamilyNameMap, err
 }

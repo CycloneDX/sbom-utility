@@ -84,27 +84,18 @@ func EncodeAnyToIndentedJSON(any interface{}) (outputBuffer bytes.Buffer, err er
 // TODO: function NOT complete, only placeholder type switch
 // TODO: allow generic function to be applied to types
 // func PrintTypes(values ...interface{}) {
-// 	//fmt.Printf("values=%v\n", values)
 // 	for index, value := range values {
-// 		fmt.Printf("value[%d] (%T): %+v\n", index, value, value)
 // 		switch t := value.(type) {
 // 		case nil:
-// 			fmt.Println("Type is nil.")
 // 		case int:
 // 		case uint:
 // 		case int32:
 // 		case int64:
 // 		case uint64:
-// 			fmt.Println("Type is an integer:", t)
 // 		case float32:
 // 		case float64:
-// 			fmt.Println("Type is a float:", t)
 // 		case string:
-// 			fmt.Println("Type is a string:", t)
 // 		case bool:
-// 			fmt.Println("Type is a bool:", t)
-// 		default:
-// 			fmt.Printf("Type is unknown!: %v\n", t)
 // 		}
 // 	}
 // }

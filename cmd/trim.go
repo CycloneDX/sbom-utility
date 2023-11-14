@@ -34,6 +34,12 @@ const (
 	FLAG_TRIM_MAP_KEYS   = "keys"
 )
 
+// TODO: make flag configurable:
+const (
+	TRIM_OUTPUT_PREFIX = ""
+	TRIM_OUTPUT_INDENT = "  "
+)
+
 // flag help (translate)
 const (
 	FLAG_TRIM_OUTPUT_FORMAT_HELP = "format output using the specified type"
@@ -207,12 +213,12 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 	getLogger().Infof("Outputting listing (`%s` format)...", format)
 	switch format {
 	case FORMAT_JSON:
-		err = document.EncodeAsFormattedJSON(writer, "", "  ")
+		err = document.EncodeAsFormattedJSON(writer, TRIM_OUTPUT_PREFIX, TRIM_OUTPUT_INDENT)
 	default:
 		// Default to Text output for anything else (set as flag default)
-		getLogger().Warningf("Stats not supported for `%s` format; defaulting to `%s` format...",
-			format, FORMAT_TEXT)
-		err = document.EncodeAsFormattedJSON(writer, "", "  ")
+		getLogger().Warningf("Trim not supported for `%s` format; defaulting to `%s` format...",
+			format, FORMAT_JSON)
+		err = document.EncodeAsFormattedJSON(writer, TRIM_OUTPUT_PREFIX, TRIM_OUTPUT_INDENT)
 	}
 
 	return

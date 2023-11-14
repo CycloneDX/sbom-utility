@@ -394,7 +394,7 @@ func (bom *BOM) HashVulnerability(cdxVulnerability CDXVulnerability, whereFilter
 			vulnInfo.AnalysisJustification = VULN_ANALYSIS_STATE_EMPTY
 		}
 
-		vulnInfo.AnalysisResponse = cdxVulnerability.Analysis.Response
+		vulnInfo.AnalysisResponse = *cdxVulnerability.Analysis.Response
 		if len(vulnInfo.AnalysisResponse) == 0 {
 			vulnInfo.AnalysisResponse = []string{VULN_ANALYSIS_STATE_EMPTY}
 		}

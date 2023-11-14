@@ -47,7 +47,7 @@ func IsInterfaceASlice(testValue interface{}) bool {
 //   all struct fields are marshalled regardless of such constraints.
 // --------------------------------------------------------------------------------
 
-var ENCODED_EMPTY_STRUCT = []byte("{}")
+var BYTE_ENCODED_ZERO_STRUCT = []byte("{}")
 var ENCODED_EMPTY_SLICE_OF_STRUCT = []byte("[{}]")
 
 // --------------------------
@@ -163,14 +163,17 @@ func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
 	}
 
 	// CDXVulnerabilitySource
-	if value.Source != nil && *value.Source != (CDXVulnerabilitySource{}) {
-		temp["source"] = value.Source
+	if value.Source != nil {
+		testEmpty, _ = json.Marshal(value.Source)
+		if !bytes.Equal(testEmpty, BYTE_ENCODED_ZERO_STRUCT) {
+			temp["source"] = value.Source
+		}
 	}
 
 	// CDXCredit (anon. type)
 	if value.Credits != nil {
 		testEmpty, _ = json.Marshal(value.Credits)
-		if !bytes.Equal(testEmpty, ENCODED_EMPTY_STRUCT) {
+		if !bytes.Equal(testEmpty, BYTE_ENCODED_ZERO_STRUCT) {
 			temp["credits"] = value.Credits
 		}
 	}
@@ -178,7 +181,7 @@ func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
 	// CDXAnalysis (anon. type)
 	if value.Analysis != nil {
 		testEmpty, _ = json.Marshal(value.Analysis)
-		if !bytes.Equal(testEmpty, ENCODED_EMPTY_STRUCT) {
+		if !bytes.Equal(testEmpty, BYTE_ENCODED_ZERO_STRUCT) {
 			temp["analysis"] = value.Analysis
 		}
 	}
@@ -221,7 +224,7 @@ func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
 		}
 	}
 
-	if len(value.Properties) > 0 {
+	if value.Properties != nil && len(*value.Properties) > 0 {
 		temp["properties"] = value.Properties
 	}
 
@@ -237,10 +240,10 @@ func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
 func (value *CDXVulnerabilityReference) MarshalJSON() ([]byte, error) {
 	temp := map[string]interface{}{}
 	if len(value.Id) > 0 {
-		temp["id"] = &value.Id
+		temp["id"] = value.Id
 	}
-	if value.Source != (CDXVulnerabilitySource{}) {
-		temp["source"] = &value.Source
+	if value.Source != nil && *value.Source != (CDXVulnerabilitySource{}) {
+		temp["source"] = value.Source
 	}
 	// reuse built-in json encoder, which accepts a map primitive
 	return json.Marshal(temp)
@@ -249,10 +252,10 @@ func (value *CDXVulnerabilityReference) MarshalJSON() ([]byte, error) {
 func (value *CDXVulnerabilitySource) MarshalJSON() ([]byte, error) {
 	temp := map[string]interface{}{}
 	if len(value.Url) > 0 {
-		temp["url"] = &value.Url
+		temp["url"] = value.Url
 	}
 	if len(value.Name) > 0 {
-		temp["name"] = &value.Name
+		temp["name"] = value.Name
 	}
 	// reuse built-in json encoder, which accepts a map primitive
 	return json.Marshal(temp)
@@ -260,14 +263,14 @@ func (value *CDXVulnerabilitySource) MarshalJSON() ([]byte, error) {
 
 func (value *CDXCredit) MarshalJSON() ([]byte, error) {
 	temp := map[string]interface{}{}
-	if len(value.Individuals) > 0 {
-		temp["individuals"] = &value.Individuals
+	if value.Individuals != nil && len(*value.Individuals) > 0 {
+		temp["individuals"] = value.Individuals
 	}
-	if len(value.Organizations) > 0 {
-		temp["organizations"] = &value.Organizations
+	if value.Organizations != nil && len(*value.Organizations) > 0 {
+		temp["organizations"] = value.Organizations
 	}
 	if len(temp) == 0 {
-		return ENCODED_EMPTY_STRUCT, nil
+		return BYTE_ENCODED_ZERO_STRUCT, nil
 	}
 	// reuse built-in json encoder, which accepts a map primitive
 	return json.Marshal(temp)
@@ -275,11 +278,65 @@ func (value *CDXCredit) MarshalJSON() ([]byte, error) {
 
 func (value *CDXAffect) MarshalJSON() ([]byte, error) {
 	temp := map[string]interface{}{}
-	if len(value.Versions) > 0 {
-		temp["versions"] = &value.Versions
+	if value.Versions != nil && len(*value.Versions) > 0 {
+		temp["versions"] = value.Versions
 	}
 	if len(temp) == 0 {
-		return ENCODED_EMPTY_STRUCT, nil
+		return BYTE_ENCODED_ZERO_STRUCT, nil
+	}
+	// reuse built-in json encoder, which accepts a map primitive
+	return json.Marshal(temp)
+}
+
+//	type CDXOrganizationalEntity struct {
+//		Name    string                      `json:"name,omitempty"`
+//		Url     []string                    `json:"url,omitempty"`
+//		Contact *[]CDXOrganizationalContact `json:"contact,omitempty"`
+//		BOMRef  *CDXRefType                 `json:"bom-ref,omitempty"` // v1.5 added
+//	}
+func (value *CDXOrganizationalEntity) MarshalJSON() ([]byte, error) {
+	temp := map[string]interface{}{}
+	if value.Name != "" {
+		temp["name"] = value.Name
+	}
+	if len(value.Url) > 0 {
+		temp["url"] = value.Url
+	}
+	if value.Contact != nil && len(*value.Contact) > 0 {
+		temp["contact"] = value.Contact
+	}
+	if value.BOMRef != nil && *value.BOMRef != "" {
+		temp["bom-ref"] = value.BOMRef
+	}
+	if len(temp) == 0 {
+		return BYTE_ENCODED_ZERO_STRUCT, nil
+	}
+	// reuse built-in json encoder, which accepts a map primitive
+	return json.Marshal(temp)
+}
+
+//	type CDXOrganizationalContact struct {
+//		Name   string      `json:"name,omitempty"`
+//		Email  string      `json:"email,omitempty"`
+//		Phone  string      `json:"phone,omitempty"`
+//		BOMRef *CDXRefType `json:"bom-ref,omitempty"` // v1.5 added
+//	}
+func (value *CDXOrganizationalContact) MarshalJSON() ([]byte, error) {
+	temp := map[string]interface{}{}
+	if value.Name != "" {
+		temp["name"] = value.Name
+	}
+	if value.Email != "" {
+		temp["email"] = value.Email
+	}
+	if value.Phone != "" {
+		temp["phone"] = value.Phone
+	}
+	if value.BOMRef != nil && *value.BOMRef != "" {
+		temp["bom-ref"] = value.BOMRef
+	}
+	if len(temp) == 0 {
+		return BYTE_ENCODED_ZERO_STRUCT, nil
 	}
 	// reuse built-in json encoder, which accepts a map primitive
 	return json.Marshal(temp)
