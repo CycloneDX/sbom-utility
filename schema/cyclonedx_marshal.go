@@ -127,6 +127,7 @@ func (value *CDXAttachment) MarshalJSON() ([]byte, error) {
 
 // recreate a representation of the struct, but only include values in map that are not empty
 func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
+	var testEmpty []byte
 	temp := map[string]interface{}{}
 
 	if value.BOMRef != nil && *value.BOMRef != "" {
@@ -167,39 +168,43 @@ func (value *CDXVulnerability) MarshalJSON() ([]byte, error) {
 	}
 
 	// CDXCredit (anon. type)
-	testEmpty, _ := json.Marshal(&value.Credits)
-	if !bytes.Equal(testEmpty, ENCODED_EMPTY_STRUCT) {
-		temp["credits"] = &value.Credits
-	}
-
-	// CDXAnalysis (anon. type)
-	testEmpty, _ = json.Marshal(&value.Analysis)
-	if !bytes.Equal(testEmpty, ENCODED_EMPTY_STRUCT) {
-		temp["analysis"] = &value.Analysis
-	}
-
-	// CDXAffects
-	if len(value.Affects) > 0 {
-		testEmpty, _ = json.Marshal(&value.Affects)
-		if !bytes.Equal(testEmpty, ENCODED_EMPTY_SLICE_OF_STRUCT) {
-			temp["affects"] = &value.Affects
+	if value.Credits != nil {
+		testEmpty, _ = json.Marshal(value.Credits)
+		if !bytes.Equal(testEmpty, ENCODED_EMPTY_STRUCT) {
+			temp["credits"] = value.Credits
 		}
 	}
 
-	if len(value.References) > 0 {
-		temp["references"] = &value.References
+	// CDXAnalysis (anon. type)
+	if value.Analysis != nil {
+		testEmpty, _ = json.Marshal(value.Analysis)
+		if !bytes.Equal(testEmpty, ENCODED_EMPTY_STRUCT) {
+			temp["analysis"] = value.Analysis
+		}
 	}
 
-	if len(value.Ratings) > 0 {
-		temp["ratings"] = &value.Ratings
+	// CDXAffects
+	if value.Affects != nil && len(*value.Affects) > 0 {
+		testEmpty, _ = json.Marshal(value.Affects)
+		if !bytes.Equal(testEmpty, ENCODED_EMPTY_SLICE_OF_STRUCT) {
+			temp["affects"] = value.Affects
+		}
 	}
 
-	if len(value.Advisories) > 0 {
-		temp["advisories"] = &value.Advisories
+	if value.References != nil && len(*value.References) > 0 {
+		temp["references"] = value.References
 	}
 
-	if len(value.Cwes) > 0 {
-		temp["cwes"] = &value.Cwes
+	if value.Ratings != nil && len(*value.Ratings) > 0 {
+		temp["ratings"] = value.Ratings
+	}
+
+	if value.Advisories != nil && len(*value.Advisories) > 0 {
+		temp["advisories"] = value.Advisories
+	}
+
+	if value.Cwes != nil && len(*value.Cwes) > 0 {
+		temp["cwes"] = value.Cwes
 	}
 
 	// v1.5 allows tools to be either an array of (legacy) tool object or a new tool object
