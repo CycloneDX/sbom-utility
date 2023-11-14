@@ -35,9 +35,11 @@ const (
 )
 
 // TODO: make flag configurable:
+// NOTE: 4-space indent is accepted convention:
+// https://docs.openstack.org/doc-contrib-guide/json-conv.html
 const (
 	TRIM_OUTPUT_PREFIX = ""
-	TRIM_OUTPUT_INDENT = "  "
+	TRIM_OUTPUT_INDENT = "    "
 )
 
 // flag help (translate)
