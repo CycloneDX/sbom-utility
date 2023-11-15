@@ -405,7 +405,7 @@ func TestQueryCdx14MetadataToolsSlice(t *testing.T) {
 		t.Error(err)
 	}
 	if !utils.IsJsonSliceType(result) {
-		fResult, _ := utils.EncodeAnyToIndentedJSON(result)
+		fResult, _ := utils.EncodeAnyToIndentedJSON(result, utils.DEFAULT_JSON_INDENT_STRING)
 		t.Error(fmt.Errorf("expected JSON slice. Actual result: %s", fResult.String()))
 	}
 
@@ -413,7 +413,7 @@ func TestQueryCdx14MetadataToolsSlice(t *testing.T) {
 	slice := result.([]interface{})
 	EXPECTED_SLICE_LENGTH := 2
 	if actualLength := len(slice); actualLength != EXPECTED_SLICE_LENGTH {
-		fResult, _ := utils.EncodeAnyToIndentedJSON(result)
+		fResult, _ := utils.EncodeAnyToIndentedJSON(result, utils.DEFAULT_JSON_INDENT_STRING)
 		t.Error(fmt.Errorf("expected slice length: %v, actual length: %v. Actual result: %s", EXPECTED_SLICE_LENGTH, actualLength, fResult.String()))
 	}
 }
@@ -428,7 +428,7 @@ func TestQueryCdx14MetadataToolsSliceWhereName(t *testing.T) {
 		t.Error(err)
 	}
 	if !utils.IsJsonSliceType(result) {
-		fResult, _ := utils.EncodeAnyToIndentedJSON(result)
+		fResult, _ := utils.EncodeAnyToIndentedJSON(result, utils.DEFAULT_JSON_INDENT_STRING)
 		t.Error(fmt.Errorf("expected JSON slice. Actual result: %s", fResult.String()))
 	}
 
@@ -436,7 +436,7 @@ func TestQueryCdx14MetadataToolsSliceWhereName(t *testing.T) {
 	slice := result.([]interface{})
 	EXPECTED_SLICE_LENGTH := 1
 	if actualLength := len(slice); actualLength != EXPECTED_SLICE_LENGTH {
-		fResult, _ := utils.EncodeAnyToIndentedJSON(result)
+		fResult, _ := utils.EncodeAnyToIndentedJSON(result, utils.DEFAULT_JSON_INDENT_STRING)
 		t.Error(fmt.Errorf("expected slice length: %v, actual length: %v. Actual result: %s", EXPECTED_SLICE_LENGTH, actualLength, fResult.String()))
 	}
 }

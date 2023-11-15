@@ -60,6 +60,7 @@ var TestLogQuiet = flag.Bool(FLAG_QUIET_MODE, false, "")
 type CommonTestInfo struct {
 	InputFile                         string
 	OutputFile                        string
+	OutputIndent                      uint8
 	OutputFormat                      string
 	ListSummary                       bool
 	WhereClause                       string

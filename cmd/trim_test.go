@@ -68,6 +68,7 @@ func innerBufferedTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer b
 	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile
 	utils.GlobalFlags.PersistentFlags.OutputFile = testInfo.OutputFile
 	utils.GlobalFlags.PersistentFlags.OutputFormat = testInfo.OutputFormat
+	utils.GlobalFlags.PersistentFlags.OutputIndent = testInfo.OutputIndent
 	utils.GlobalFlags.TrimFlags.Keys = testInfo.Keys
 	utils.GlobalFlags.TrimFlags.FromPaths = testInfo.FromPaths
 	var outputWriter io.Writer
@@ -333,15 +334,16 @@ func TestTrimCdx15FooFromTools(t *testing.T) {
 	ti.Keys = append(ti.Keys, "foo")
 	ti.FromPaths = []string{"metadata.tools"}
 	ti.TestOutputVariantName = utils.GetCallerFunctionName(2)
-	ti.OutputFile = "" // ti.CreateTemporaryFilename(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1)
-	ti.TestOutputExpectedByteSize = 5351
+	ti.OutputFile = ""  // ti.CreateTemporaryFilename(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1)
+	ti.OutputIndent = 2 // Matches the space indent of the test input file
+	ti.TestOutputExpectedByteSize = 4292
 
 	buffer, _, err := innerTestTrim(t, ti)
 	if err != nil {
 		t.Error(err)
 	}
 
-	// Validate expected output file size in bytes (assumes 4 space indent)
+	// Validate expected output file size in bytes (assumes 2-space indent)
 	if actualSize := buffer.Len(); actualSize != ti.TestOutputExpectedByteSize {
 		t.Error(fmt.Errorf("invalid trim result (output size (byte)): expected size: %v, actual size: %v", ti.TestOutputExpectedByteSize, actualSize))
 	}
@@ -359,6 +361,7 @@ func TestTrimCdx14SourceFromVulnerabilities(t *testing.T) {
 	ti.Keys = append(ti.Keys, "source")
 	ti.FromPaths = []string{"vulnerabilities"}
 	ti.TestOutputVariantName = utils.GetCallerFunctionName(2)
+
 	ti.OutputFile = ti.CreateTemporaryFilename(TEST_TRIM_CDX_1_4_SAMPLE_VEX)
 
 	buffer, _, err := innerTestTrim(t, ti)

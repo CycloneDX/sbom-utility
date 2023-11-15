@@ -22,6 +22,12 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"strings"
+)
+
+const (
+	DEFAULT_JSON_INDENT_STRING = "    "
+	DEFAULT_JSON_PREFIX_STRING = ""
 )
 
 func IsJsonMapType(any interface{}) (isMapType bool) {
@@ -70,15 +76,24 @@ func MarshalStructToJsonMap(any interface{}) (mapOut map[string]interface{}, err
 // NOTE: Using this custom encoder avoids the json.Marshal() default
 // behavior of encoding utf8 characters such as: '@', '<', '>', etc.
 // as unicode.
-func EncodeAnyToIndentedJSON(any interface{}) (outputBuffer bytes.Buffer, err error) {
+func EncodeAnyToIndentedJSON(any interface{}, indent string) (outputBuffer bytes.Buffer, err error) {
 	bufferedWriter := bufio.NewWriter(&outputBuffer)
 	encoder := json.NewEncoder(bufferedWriter)
 	encoder.SetEscapeHTML(false)
-	encoder.SetIndent("", "    ")
+	encoder.SetIndent("", indent)
 	err = encoder.Encode(any)
 	// MUST ensure all data is written to buffer before further testing
 	bufferedWriter.Flush()
 	return
+}
+
+func GenerateIndentString(length int) (prefix string) {
+	var sb strings.Builder
+
+	for i := 0; i < length; i++ {
+		sb.WriteString(" ")
+	}
+	return sb.String()
 }
 
 // TODO: function NOT complete, only placeholder type switch

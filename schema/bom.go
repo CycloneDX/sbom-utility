@@ -375,7 +375,7 @@ func (bom *BOM) EncodeAsFormattedJSON(writer io.Writer, prefix string, indent st
 	defer getLogger().Exit()
 
 	var outputBuffer bytes.Buffer
-	outputBuffer, err = utils.EncodeAnyToIndentedJSON(bom.CdxBom)
+	outputBuffer, err = utils.EncodeAnyToIndentedJSON(bom.CdxBom, indent)
 	if err != nil {
 		return
 	}
