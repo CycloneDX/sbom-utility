@@ -284,3 +284,14 @@ func bufferContainsValues(buffer bytes.Buffer, values ...string) bool {
 	}
 	return true
 }
+
+func numberOfLeadingSpaces(line string) (numSpaces int) {
+	for _, ch := range line {
+		if ch == ' ' {
+			numSpaces++
+		} else {
+			break
+		}
+	}
+	return
+}

@@ -155,15 +155,77 @@ which returns `0` (zero) or "no error":
 
 ### Persistent flags
 
-This section describes some of the important command line flags that apply to most commands that have a `list` subcommand for generating columnar, report-styled output (e.g., `schema`, `license`, `vulnerability`, etc.).
+This section describes some of the important command line flags that apply to most of the utility's commands.
 
+- [format flag](#format-flag): with `--format`
+- [indent flag](#indent-flag): with `--indent`
 - [input flag](#input-flag): with `--input` or `-i`
 - [output flag](#output-flag): with `--output` or `-o`
-- [format flag](#format-flag): with `--format`
 - [quiet flag](#quiet-flag): with `--quiet` or `-q`
 - [where flag](#where-flag-output-filtering): with `--where`
 
-**Note**: The `validate` command does not have a `list` subcommand and ignores the `format` and  `where` flags.
+#### Format flag
+
+All `list` subcommands support the `--format` flag with the following values:
+
+- `txt`: text (tabbed tables)
+- `csv`: Comma Separated Value (CSV), e.g., for spreadsheets
+- `md`: Markdown, e.g., for GitHub
+
+Some commands, which can output lists of JSON objects, also support JSON format using the `json` value.
+
+##### Example: `--format` flag
+
+This example uses the `--format` flag on the `schema` command to output in markdown:
+
+```bash
+./sbom-utility schema --format md -q
+```
+
+```md
+|name|format|version|variant|file (local)|url (remote)|
+|:--|:--|:--|:--|:--|:--|
+|CycloneDX v1.5|CycloneDX|1.5|(latest)|schema/cyclonedx/1.5/bom-1.5.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.5.schema.json|
+|CycloneDX v1.4|CycloneDX|1.4|(latest)|schema/cyclonedx/1.4/bom-1.4.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json|
+|CycloneDX/specification/master/schema/bom-1.3-strict.schema.json|
+|CycloneDX v1.3|CycloneDX|1.3|(latest)|schema/cyclonedx/1.3/bom-1.3.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3.schema.json|
+|CycloneDX/specification/master/schema/bom-1.2-strict.schema.json|
+|CycloneDX v1.2|CycloneDX|1.2|(latest)|schema/cyclonedx/1.2/bom-1.2.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2.schema.json|
+|SPDX v2.3.1 (development)|SPDX|SPDX-2.3|development|schema/spdx/2.3.1/spdx-schema.json|https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3.1/schemas/spdx-schema.json|
+|SPDX v2.3|SPDX|SPDX-2.3|(latest)|schema/spdx/2.3/spdx-schema.json|https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3/schemas/spdx-schema.json|
+|SPDX v2.2.2|SPDX|SPDX-2.2|(latest)|schema/spdx/2.2.2/spdx-schema.json|https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.2/schemas/spdx-schema.json|
+|SPDX v2.2.1|SPDX|SPDX-2.2|2.2.1|schema/spdx/2.2.1/spdx-schema.json|https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json|
+```
+
+### Indent flag
+
+This flag supplies an integer to any command that encodes JSON output to determine how many spaces to indent nested JSON elements.  If not specified, the default indent is `4` (spaces).
+
+#### Example: indent flag on the query command
+
+```bash
+./sbom-utility query --select name,version --from metadata.component -i examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json --indent 2 --quiet
+```
+
+output with `indent 2`:
+```
+{
+  "name": "juice-shop",
+  "version": "11.1.2"
+}
+```
+
+```bash
+./sbom-utility query --select name,version --from metadata.component -i examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json --indent 6 --quiet
+```
+
+output with `indent 6`:
+```
+{
+      "name": "juice-shop",
+      "version": "11.1.2"
+}
+```
 
 #### Input flag
 
@@ -216,39 +278,6 @@ SPDX v2.2.1,SPDX,SPDX-2.2,2.2.1,schema/spdx/2.2.1/spdx-schema.json,https://raw.g
 ```
 
 - **Note**: You can verify that `output.csv` loads within a spreadsheet app like MS Excel.
-
-#### Format flag
-
-All `list` subcommands support the `--format` flag with the following values:
-
-- `txt`: text (tabbed tables)
-- `csv`: Comma Separated Value (CSV), e.g., for spreadsheets
-- `md`: Markdown, e.g., for GitHub
-
-Some commands, which can output lists of JSON objects, also support JSON format using the `json` value.
-
-##### Example: `--format` flag
-
-This example uses the `--format` flag on the `schema` command to output in markdown:
-
-```bash
-./sbom-utility schema --format md -q
-```
-
-```md
-|name|format|version|variant|file (local)|url (remote)|
-|:--|:--|:--|:--|:--|:--|
-|CycloneDX v1.5|CycloneDX|1.5|(latest)|schema/cyclonedx/1.5/bom-1.5.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.5.schema.json|
-|CycloneDX v1.4|CycloneDX|1.4|(latest)|schema/cyclonedx/1.4/bom-1.4.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json|
-|CycloneDX/specification/master/schema/bom-1.3-strict.schema.json|
-|CycloneDX v1.3|CycloneDX|1.3|(latest)|schema/cyclonedx/1.3/bom-1.3.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3.schema.json|
-|CycloneDX/specification/master/schema/bom-1.2-strict.schema.json|
-|CycloneDX v1.2|CycloneDX|1.2|(latest)|schema/cyclonedx/1.2/bom-1.2.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2.schema.json|
-|SPDX v2.3.1 (development)|SPDX|SPDX-2.3|development|schema/spdx/2.3.1/spdx-schema.json|https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3.1/schemas/spdx-schema.json|
-|SPDX v2.3|SPDX|SPDX-2.3|(latest)|schema/spdx/2.3/spdx-schema.json|https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3/schemas/spdx-schema.json|
-|SPDX v2.2.2|SPDX|SPDX-2.2|(latest)|schema/spdx/2.2.2/spdx-schema.json|https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.2/schemas/spdx-schema.json|
-|SPDX v2.2.1|SPDX|SPDX-2.2|2.2.1|schema/spdx/2.2.1/spdx-schema.json|https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json|
-```
 
 #### Quiet flag
 
