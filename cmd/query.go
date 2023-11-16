@@ -207,16 +207,11 @@ func Query(writer io.Writer, request *common.QueryRequest, response *common.Quer
 		return
 	}
 
-	// Convert query results to formatted JSON for output
-	// TODO: we MAY want to use a JSON Encoder to avoid unicode encoding
-	var formattedResult string
-	if formattedResult, err = utils.MarshalAnyToFormattedJsonString(resultJson); err != nil {
-		getLogger().Debugf("unhandled error: %s, QueryRequest: %s", err, request.String())
-		return
-	}
-
+	// Convert query results to encoded JSON for output
+	indent := utils.GenerateIndentString(int(utils.GlobalFlags.PersistentFlags.OutputIndent))
+	buffer, err := utils.EncodeAnyToIndentedJSON(resultJson, indent)
 	// Use the selected output device (e.g., default stdout or the specified --output-file)
-	fmt.Fprintf(writer, "%s\n", formattedResult)
+	writer.Write(buffer.Bytes())
 
 	return
 }

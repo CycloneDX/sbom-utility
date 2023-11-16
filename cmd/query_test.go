@@ -60,8 +60,14 @@ func innerQuery(t *testing.T, filename string, queryRequest *common.QueryRequest
 		return
 	}
 
-	// This will print results ONLY if --quiet mode is `false`
-	printMarshaledResultOnlyIfNotQuiet(result)
+	// Log results if trace enabled
+	var buffer bytes.Buffer
+	buffer, err = utils.EncodeAnyToIndentedJSON(
+		result, utils.DEFAULT_JSON_INDENT_STRING)
+	if err != nil {
+		// Output the JSON data directly to stdout (not subject to log-level)
+		getLogger().Tracef("%s\n", buffer.String())
+	}
 	return
 }
 

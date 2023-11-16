@@ -284,13 +284,3 @@ func bufferContainsValues(buffer bytes.Buffer, values ...string) bool {
 	}
 	return true
 }
-
-// TODO: find a better way using some log package feature
-func printMarshaledResultOnlyIfNotQuiet(iResult interface{}) {
-	if !*TestLogQuiet {
-		// Format results in JSON
-		fResult, _ := utils.MarshalAnyToFormattedJsonString(iResult)
-		// Output the JSON data directly to stdout (not subject to log-level)
-		fmt.Printf("%s\n", fResult)
-	}
-}

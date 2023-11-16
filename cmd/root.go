@@ -190,7 +190,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&utils.GlobalFlags.LogOutputIndentCallstack, FLAG_LOG_OUTPUT_INDENT, "", false, MSG_FLAG_LOG_INDENT)
 
 	// Output (JSON) indent
-	rootCmd.Flags().Uint8VarP(&utils.GlobalFlags.PersistentFlags.OutputIndent, FLAG_OUTPUT_INDENT, "", DEFAULT_OUTPUT_INDENT_LENGTH, MSG_FLAG_OUTPUT_INDENT)
+	rootCmd.PersistentFlags().Uint8VarP(&utils.GlobalFlags.PersistentFlags.OutputIndent, FLAG_OUTPUT_INDENT, "", DEFAULT_OUTPUT_INDENT_LENGTH, MSG_FLAG_OUTPUT_INDENT)
 
 	// Add root commands
 	rootCmd.AddCommand(NewCommandVersion())
