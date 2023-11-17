@@ -71,5 +71,4 @@ func (bom *BOM) TrimEntityKey(entity interface{}, key string) {
 		// if type is other than above
 		getLogger().Debugf("unhandled type: [%T]", typedEntity)
 	}
-
 }

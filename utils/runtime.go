@@ -24,15 +24,18 @@ import (
 	"strings"
 )
 
-func GetCallerFunctionName(index uint64) (fxName string) {
+func GetCallerFunctionName(skip int) (fxName string) {
 	pCallers := make([]uintptr, 4)
 	// Note: immediate caller is at index "2" on the stack
-	runtime.Callers(2, pCallers)
+	runtime.Callers(skip, pCallers)
 	if len(pCallers) > 0 {
 		fx := runtime.FuncForPC(pCallers[0])
 		fxName = fx.Name()
 		if index := strings.LastIndex(fxName, string(os.PathSeparator)); index > -1 {
-			fxName = fxName[index:]
+			fxName = fxName[index+1:]
+		}
+		if index := strings.LastIndex(fxName, "."); index > -1 {
+			fxName = fxName[index+1:]
 		}
 	}
 	return

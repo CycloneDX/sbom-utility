@@ -95,7 +95,7 @@ const (
 	MSG_FLAG_LOG_INDENT     = "enable log indentation of functional callstack"
 	MSG_FLAG_CONFIG_SCHEMA  = "provide custom application schema configuration file (i.e., overrides default `config.json`)"
 	MSG_FLAG_CONFIG_LICENSE = "provide custom application license policy configuration file (i.e., overrides default `license.json`)"
-	MSG_FLAG_OUTPUT_INDENT  = "number of space characters used to indent JSON formatted output files"
+	MSG_FLAG_OUTPUT_INDENT  = "number of space characters used to indent JSON formatted output"
 )
 
 const (

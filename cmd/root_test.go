@@ -65,12 +65,13 @@ type CommonTestInfo struct {
 	ListSummary                       bool
 	WhereClause                       string
 	ResultExpectedError               error
+	ResultExpectedByteSize            int
 	ResultExpectedLineCount           int
 	ResultLineContainsValuesAtLineNum int
 	ResultLineContainsValues          []string
+	ResultExpectedIndent              int
 	MockStdin                         bool
-	TestOutputVariantName             string
-	TestOutputExpectedByteSize        int
+	Autofail                          bool
 }
 
 func NewCommonTestInfo() *CommonTestInfo {
@@ -78,7 +79,13 @@ func NewCommonTestInfo() *CommonTestInfo {
 	return ti
 }
 
-func NewCommonTestInfoBasic(inputFile string, whereClause string, listFormat string, listSummary bool) *CommonTestInfo {
+func NewCommonTestInfoBasic(inputFile string) *CommonTestInfo {
+	var ti = NewCommonTestInfo()
+	ti.InputFile = inputFile
+	return ti
+}
+
+func NewCommonTestInfoBasicList(inputFile string, whereClause string, listFormat string, listSummary bool) *CommonTestInfo {
 	var ti = NewCommonTestInfo()
 	ti.InputFile = inputFile
 	ti.WhereClause = whereClause
@@ -106,6 +113,7 @@ func (ti *CommonTestInfo) Init(inputFile string, listFormat string, listSummary 
 	resultContainsValues []string, resultExpectedLineCount int, resultExpectedError error) *CommonTestInfo {
 	ti.InputFile = inputFile
 	ti.OutputFormat = listFormat
+	ti.OutputIndent = DEFAULT_OUTPUT_INDENT_LENGTH // 4
 	ti.ListSummary = listSummary
 	ti.WhereClause = whereClause
 	ti.ResultExpectedLineCount = resultExpectedLineCount
@@ -119,15 +127,16 @@ func (ti *CommonTestInfo) InitBasic(inputFile string, format string, expectedErr
 	return ti
 }
 
-func (ti *CommonTestInfo) CreateTemporaryFilename(relativeFilename string) (tempFilename string) {
+func (ti *CommonTestInfo) CreateTemporaryTestOutputFilename(relativeFilename string) (tempFilename string) {
+	testFunctionName := utils.GetCallerFunctionName(3)
 	trimmedFilename := strings.TrimLeft(relativeFilename, strconv.QuoteRune(os.PathSeparator))
-	if ti.TestOutputVariantName != "" {
+	if testFunctionName != "" {
 		lastIndex := strings.LastIndex(trimmedFilename, string(os.PathSeparator))
 		// insert variant as last path...
 		if lastIndex > 0 {
 			path := trimmedFilename[0:lastIndex]
 			base := trimmedFilename[lastIndex:]
-			trimmedFilename = path + string(os.PathSeparator) + ti.TestOutputVariantName + base
+			trimmedFilename = path + string(os.PathSeparator) + testFunctionName + base
 		}
 	}
 	return DEFAULT_TEMP_OUTPUT_PATH + trimmedFilename
