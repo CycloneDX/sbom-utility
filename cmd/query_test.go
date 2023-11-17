@@ -528,3 +528,15 @@ func TestQueryCdx14MetadataComponentIndent(t *testing.T) {
 		}
 	}
 }
+
+func TestQueryCdx14MetadataComponentIndentedFileWrite(t *testing.T) {
+	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti.OutputFile = cti.CreateTemporaryTestOutputFilename(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	request, _ := common.NewQueryRequestSelectFrom(
+		"name,description,version",
+		"metadata.component")
+	_, err := innerQueryError(t, cti, request, nil)
+	if err != nil {
+		t.Error(err)
+	}
+}

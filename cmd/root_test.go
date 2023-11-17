@@ -77,6 +77,7 @@ type CommonTestInfo struct {
 
 func NewCommonTestInfo() *CommonTestInfo {
 	var ti = new(CommonTestInfo)
+	ti.OutputIndent = TI_DEFAULT_JSON_INDENT
 	return ti
 }
 
@@ -102,6 +103,7 @@ const (
 	TI_DEFAULT_WHERE_CLAUSE = ""
 	TI_DEFAULT_LINE_COUNT   = -1
 	TI_DEFAULT_POLICY_FILE  = ""
+	TI_DEFAULT_JSON_INDENT  = DEFAULT_OUTPUT_INDENT_LENGTH // 4
 )
 
 // Stringer interface for ResourceTestInfo (just display subset of key values)
@@ -114,7 +116,6 @@ func (ti *CommonTestInfo) Init(inputFile string, listFormat string, listSummary 
 	resultContainsValues []string, resultExpectedLineCount int, resultExpectedError error) *CommonTestInfo {
 	ti.InputFile = inputFile
 	ti.OutputFormat = listFormat
-	ti.OutputIndent = DEFAULT_OUTPUT_INDENT_LENGTH // 4
 	ti.ListSummary = listSummary
 	ti.WhereClause = whereClause
 	ti.ResultExpectedLineCount = resultExpectedLineCount
