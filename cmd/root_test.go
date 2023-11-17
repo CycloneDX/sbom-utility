@@ -59,19 +59,20 @@ var TestLogQuiet = flag.Bool(FLAG_QUIET_MODE, false, "")
 
 type CommonTestInfo struct {
 	InputFile                         string
-	OutputFile                        string
-	OutputIndent                      uint8
-	OutputFormat                      string
 	ListSummary                       bool
+	OutputFile                        string
+	OutputFormat                      string
+	OutputIndent                      uint8
 	WhereClause                       string
-	ResultExpectedError               error
 	ResultExpectedByteSize            int
+	ResultExpectedError               error
+	ResultExpectedIndentLength        int
+	ResultExpectedIntentAtLineNum     int
 	ResultExpectedLineCount           int
-	ResultLineContainsValuesAtLineNum int
 	ResultLineContainsValues          []string
-	ResultExpectedIndent              int
-	MockStdin                         bool
+	ResultLineContainsValuesAtLineNum int
 	Autofail                          bool
+	MockStdin                         bool
 }
 
 func NewCommonTestInfo() *CommonTestInfo {

@@ -23,7 +23,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/fs"
+	"os"
 	"strings"
 	"testing"
 
@@ -31,8 +33,6 @@ import (
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 )
-
-// TODO: Consolidate query request declarations here
 
 // -------------------------------------------
 // test helper functions
@@ -49,7 +49,6 @@ func innerQueryError(t *testing.T, cti *CommonTestInfo, queryRequest *common.Que
 		getLogger().Tracef("expected error type: `%T`, actual type: `%T`", expectedError, actualError)
 		t.Errorf("expected error type: `%T`, actual type: `%T`", expectedError, actualError)
 	}
-
 	return
 }
 
@@ -61,22 +60,16 @@ func innerQuery(t *testing.T, cti *CommonTestInfo, queryRequest *common.QueryReq
 	// Copy the test filename to the command line flags were the code looks for it
 	utils.GlobalFlags.PersistentFlags.InputFile = cti.InputFile
 
-	// Declare an output outputBuffer/outputWriter to use used during tests
-	//var outputBuffer bytes.Buffer
-	var outputWriter = bufio.NewWriter(&outputBuffer)
-	// ensure all data is written to buffer before further validation
-	defer outputWriter.Flush()
-
 	// allocate response/result object and invoke query
 	var queryResponse = new(common.QueryResponse)
-	resultJson, err = Query(outputWriter, queryRequest, queryResponse)
-	//resultJson, outputBuffer, err = innerBufferedTestQuery(t, cti, queryRequest, queryResponse)
+	resultJson, outputBuffer, err = innerBufferedTestQuery(t, cti, queryRequest, queryResponse)
 
-	// if the query resulted in a failure
+	// if the command resulted in a failure
 	if err != nil {
 		// if tests asks us to report a FAIL to the test framework
 		if cti.Autofail {
-			t.Errorf("%s: failed: %v\nquery:\n%s", cti.InputFile, err, queryRequest)
+			encodedTestInfo, _ := utils.EncodeAnyToIndentedJSON(queryRequest, utils.DEFAULT_JSON_INDENT_STRING)
+			t.Errorf("%s: failed: %v\nQueryRequest:\n%s", cti.InputFile, err, encodedTestInfo.String())
 		}
 		return
 	}
@@ -92,45 +85,45 @@ func innerQuery(t *testing.T, cti *CommonTestInfo, queryRequest *common.QueryReq
 	return
 }
 
-// func innerBufferedTestQuery(t *testing.T, testInfo *CommonTestInfo, queryRequest *common.QueryRequest, queryResponse *common.QueryResponse) (resultJson interface{}, outputBuffer bytes.Buffer, err error) {
+func innerBufferedTestQuery(t *testing.T, testInfo *CommonTestInfo, queryRequest *common.QueryRequest, queryResponse *common.QueryResponse) (resultJson interface{}, outputBuffer bytes.Buffer, err error) {
 
-// 	// The command looks for the input & output filename in global flags struct
-// 	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile
-// 	utils.GlobalFlags.PersistentFlags.OutputFile = testInfo.OutputFile
-// 	utils.GlobalFlags.PersistentFlags.OutputFormat = testInfo.OutputFormat
-// 	utils.GlobalFlags.PersistentFlags.OutputIndent = testInfo.OutputIndent
-// 	var outputWriter io.Writer
-// 	var outputFile *os.File
+	// The command looks for the input & output filename in global flags struct
+	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile
+	utils.GlobalFlags.PersistentFlags.OutputFile = testInfo.OutputFile
+	utils.GlobalFlags.PersistentFlags.OutputFormat = testInfo.OutputFormat
+	utils.GlobalFlags.PersistentFlags.OutputIndent = testInfo.OutputIndent
+	var outputWriter io.Writer
+	var outputFile *os.File
 
-// 	// TODO: centralize this logic to a function all Commands can use...
-// 	// Note: Any "Mocking" of os.Stdin/os.Stdout should be done in functions that call this one
-// 	if testInfo.OutputFile == "" {
-// 		// Declare an output outputBuffer/outputWriter to use used during tests
-// 		bufferedWriter := bufio.NewWriter(&outputBuffer)
-// 		outputWriter = bufferedWriter
-// 		// MUST ensure all data is written to buffer before further testing
-// 		defer bufferedWriter.Flush()
-// 	} else {
-// 		outputFile, outputWriter, err = createOutputFile(testInfo.OutputFile)
-// 		getLogger().Tracef("outputFile: `%v`; writer: `%v`", testInfo.OutputFile, outputWriter)
+	// TODO: centralize this logic to a function all Commands can use...
+	// Note: Any "Mocking" of os.Stdin/os.Stdout should be done in functions that call this one
+	if testInfo.OutputFile == "" {
+		// Declare an output outputBuffer/outputWriter to use used during tests
+		bufferedWriter := bufio.NewWriter(&outputBuffer)
+		outputWriter = bufferedWriter
+		// MUST ensure all data is written to buffer before further testing
+		defer bufferedWriter.Flush()
+	} else {
+		outputFile, outputWriter, err = createOutputFile(testInfo.OutputFile)
+		getLogger().Tracef("outputFile: `%v`; writer: `%v`", testInfo.OutputFile, outputWriter)
 
-// 		// use function closure to assure consistent error output based upon error type
-// 		defer func() {
-// 			// always close the output file (even if error, as long as file handle returned)
-// 			if outputFile != nil {
-// 				outputFile.Close()
-// 				getLogger().Infof("Closed output file: `%s`", testInfo.OutputFile)
-// 			}
-// 		}()
+		// use function closure to assure consistent error output based upon error type
+		defer func() {
+			// always close the output file (even if error, as long as file handle returned)
+			if outputFile != nil {
+				outputFile.Close()
+				getLogger().Infof("Closed output file: `%s`", testInfo.OutputFile)
+			}
+		}()
 
-// 		if err != nil {
-// 			return
-// 		}
-// 	}
+		if err != nil {
+			return
+		}
+	}
 
-// 	resultJson, err = Query(outputWriter, queryRequest, queryResponse)
-// 	return
-// }
+	resultJson, err = Query(outputWriter, queryRequest, queryResponse)
+	return
+}
 
 // Used to help verify query results
 func UnmarshalResultsToMap(results interface{}) (resultMap map[string]interface{}, err error) {
@@ -517,7 +510,7 @@ func TestQueryCdx14MetadataToolsSliceWhereName(t *testing.T) {
 func TestQueryCdx14MetadataComponentIndent(t *testing.T) {
 	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
 	cti.ResultExpectedLineCount = 6
-	cti.ResultExpectedIndent = 4
+	cti.ResultExpectedIndentLength = 4
 	request, _ := common.NewQueryRequestSelectFrom(
 		"name,description,version",
 		"metadata.component")
@@ -530,8 +523,8 @@ func TestQueryCdx14MetadataComponentIndent(t *testing.T) {
 	}
 	if numLines := len(lines); numLines > 1 {
 		line := lines[1]
-		if spaceCount := numberOfLeadingSpaces(line); spaceCount != cti.ResultExpectedIndent {
-			t.Errorf("invalid test result: expected indent:`%v`, actual: `%v", cti.ResultExpectedIndent, spaceCount)
+		if spaceCount := numberOfLeadingSpaces(line); spaceCount != cti.ResultExpectedIndentLength {
+			t.Errorf("invalid test result: expected indent:`%v`, actual: `%v", cti.ResultExpectedIndentLength, spaceCount)
 		}
 	}
 }

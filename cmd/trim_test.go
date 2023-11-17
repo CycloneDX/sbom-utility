@@ -62,6 +62,41 @@ func NewTrimTestInfoBasic(inputFile string, resultExpectedError error) *TrimTest
 // -------------------------------------------
 // test helper functions
 // -------------------------------------------
+
+func innerTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer bytes.Buffer, basicTestInfo string, err error) {
+	getLogger().Tracef("TestInfo: %s", testInfo)
+
+	// Mock stdin if requested
+	if testInfo.MockStdin == true {
+		utils.GlobalFlags.PersistentFlags.InputFile = INPUT_TYPE_STDIN
+		file, err := os.Open(testInfo.InputFile) // For read access.
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// convert byte slice to io.Reader
+		savedStdIn := os.Stdin
+		// !!!Important restore stdin
+		defer func() { os.Stdin = savedStdIn }()
+		os.Stdin = file
+	}
+
+	// invoke resource list command with a byte buffer
+	outputBuffer, err = innerBufferedTestTrim(t, testInfo)
+	// if the command resulted in a failure
+	if err != nil {
+		// if tests asks us to report a FAIL to the test framework
+		cti := &testInfo.CommonTestInfo
+		if cti.Autofail {
+			encodedTestInfo, _ := utils.EncodeAnyToIndentedJSON(testInfo, utils.DEFAULT_JSON_INDENT_STRING)
+			t.Errorf("%s: failed: %v\n%s", cti.InputFile, err, encodedTestInfo.String())
+		}
+		return
+	}
+
+	return
+}
+
 func innerBufferedTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer bytes.Buffer, err error) {
 
 	// The command looks for the input & output filename in global flags struct
@@ -101,29 +136,6 @@ func innerBufferedTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer b
 	}
 
 	err = Trim(outputWriter, utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.TrimFlags)
-	return
-}
-
-func innerTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer bytes.Buffer, basicTestInfo string, err error) {
-	getLogger().Tracef("TestInfo: %s", testInfo)
-
-	// Mock stdin if requested
-	if testInfo.MockStdin == true {
-		utils.GlobalFlags.PersistentFlags.InputFile = INPUT_TYPE_STDIN
-		file, err := os.Open(testInfo.InputFile) // For read access.
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		// convert byte slice to io.Reader
-		savedStdIn := os.Stdin
-		// !!!Important restore stdin
-		defer func() { os.Stdin = savedStdIn }()
-		os.Stdin = file
-	}
-
-	// invoke resource list command with a byte buffer
-	outputBuffer, err = innerBufferedTestTrim(t, testInfo)
 	return
 }
 
