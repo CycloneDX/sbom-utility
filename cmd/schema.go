@@ -229,7 +229,7 @@ func ListSchemas(writer io.Writer, persistentFlags utils.PersistentCommandFlags,
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplaySchemasTabbedText(output io.Writer, filteredSchemas []schema.FormatSchemaInstance) (err error) {
+func DisplaySchemasTabbedText(writer io.Writer, filteredSchemas []schema.FormatSchemaInstance) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -237,7 +237,7 @@ func DisplaySchemasTabbedText(output io.Writer, filteredSchemas []schema.FormatS
 	w := new(tabwriter.Writer)
 
 	// min-width, tab-width, padding, pad-char, flags
-	w.Init(output, 8, 2, 2, ' ', 0)
+	w.Init(writer, 8, 2, 2, ' ', 0)
 	defer w.Flush()
 
 	// Emit no schemas found warning into output
@@ -275,7 +275,7 @@ func DisplaySchemasTabbedText(output io.Writer, filteredSchemas []schema.FormatS
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplaySchemasMarkdown(output io.Writer, filteredSchemas []schema.FormatSchemaInstance) (err error) {
+func DisplaySchemasMarkdown(writer io.Writer, filteredSchemas []schema.FormatSchemaInstance) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -284,12 +284,12 @@ func DisplaySchemasMarkdown(output io.Writer, filteredSchemas []schema.FormatSch
 	titleRow := createMarkdownRow(titles)
 	alignments := createMarkdownColumnAlignment(titles)
 	alignmentRow := createMarkdownRow(alignments)
-	fmt.Fprintf(output, "%s\n", titleRow)
-	fmt.Fprintf(output, "%s\n", alignmentRow)
+	fmt.Fprintf(writer, "%s\n", titleRow)
+	fmt.Fprintf(writer, "%s\n", alignmentRow)
 
 	// Emit no schemas found warning into output
 	if len(filteredSchemas) == 0 {
-		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_SCHEMAS_FOUND)
+		fmt.Fprintf(writer, "%s\n", MSG_OUTPUT_NO_SCHEMAS_FOUND)
 		return fmt.Errorf(MSG_OUTPUT_NO_SCHEMAS_FOUND)
 	}
 
@@ -315,18 +315,18 @@ func DisplaySchemasMarkdown(output io.Writer, filteredSchemas []schema.FormatSch
 		)
 
 		lineRow = createMarkdownRow(line)
-		fmt.Fprintf(output, "%s\n", lineRow)
+		fmt.Fprintf(writer, "%s\n", lineRow)
 	}
 	return
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplaySchemasCSV(output io.Writer, filteredSchemas []schema.FormatSchemaInstance) (err error) {
+func DisplaySchemasCSV(writer io.Writer, filteredSchemas []schema.FormatSchemaInstance) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	// initialize writer and prepare the list of entries (i.e., the "rows")
-	w := csv.NewWriter(output)
+	w := csv.NewWriter(writer)
 	defer w.Flush()
 
 	// create title row from slices of optional and compulsory titles

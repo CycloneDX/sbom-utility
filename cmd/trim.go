@@ -182,7 +182,7 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 
 			if errQuery != nil {
 				getLogger().Errorf("query error: invalid path: %s", path)
-				buffer, errEncode := utils.EncodeAnyToIndentedJSON(result, utils.DEFAULT_JSON_INDENT_STRING)
+				buffer, errEncode := utils.EncodeAnyToIndentedJSONStr(result, utils.DEFAULT_JSON_INDENT_STRING)
 				if errEncode != nil {
 					getLogger().Tracef("result: %s", buffer.String())
 				}

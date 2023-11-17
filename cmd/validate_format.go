@@ -154,22 +154,22 @@ func (result *ValidationErrorResult) MapItemsMustBeUniqueError(flags utils.Valid
 	}
 }
 
-func FormatSchemaErrors(output io.Writer, schemaErrors []gojsonschema.ResultError, flags utils.ValidateCommandFlags, format string) (formattedSchemaErrors string) {
+func FormatSchemaErrors(writer io.Writer, schemaErrors []gojsonschema.ResultError, flags utils.ValidateCommandFlags, format string) (formattedSchemaErrors string) {
 
 	if lenErrs := len(schemaErrors); lenErrs > 0 {
 		getLogger().Infof(MSG_INFO_SCHEMA_ERRORS_DETECTED, lenErrs)
 		getLogger().Infof(MSG_INFO_FORMATTING_ERROR_RESULTS, format)
 		switch format {
 		case FORMAT_JSON:
-			DisplaySchemaErrorsJson(output, schemaErrors, utils.GlobalFlags.ValidateFlags)
+			DisplaySchemaErrorsJson(writer, schemaErrors, utils.GlobalFlags.ValidateFlags)
 		case FORMAT_TEXT:
-			DisplaySchemaErrorsText(output, schemaErrors, utils.GlobalFlags.ValidateFlags)
+			DisplaySchemaErrorsText(writer, schemaErrors, utils.GlobalFlags.ValidateFlags)
 		case FORMAT_CSV:
-			DisplaySchemaErrorsCsv(output, schemaErrors, utils.GlobalFlags.ValidateFlags)
+			DisplaySchemaErrorsCsv(writer, schemaErrors, utils.GlobalFlags.ValidateFlags)
 		default:
 			getLogger().Warningf(MSG_WARN_INVALID_FORMAT, format, FORMAT_TEXT)
-			DisplaySchemaErrorsText(output, schemaErrors, utils.GlobalFlags.ValidateFlags)
-			fmt.Fprintf(output, "%s", formattedSchemaErrors)
+			DisplaySchemaErrorsText(writer, schemaErrors, utils.GlobalFlags.ValidateFlags)
+			fmt.Fprintf(writer, "%s", formattedSchemaErrors)
 		}
 	}
 
@@ -251,7 +251,7 @@ func (result *ValidationErrorResult) formatResultMap(flags utils.ValidateCommand
 	return formattedResult
 }
 
-func DisplaySchemaErrorsJson(output io.Writer, errs []gojsonschema.ResultError, flags utils.ValidateCommandFlags) {
+func DisplaySchemaErrorsJson(writer io.Writer, errs []gojsonschema.ResultError, flags utils.ValidateCommandFlags) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -293,10 +293,10 @@ func DisplaySchemaErrorsJson(output io.Writer, errs []gojsonschema.ResultError, 
 	}
 
 	// Note: JSON data files MUST ends in a newline as this is a POSIX standard
-	fmt.Fprintf(output, "%s\n", sb.String())
+	fmt.Fprintf(writer, "%s\n", sb.String())
 }
 
-func DisplaySchemaErrorsText(output io.Writer, errs []gojsonschema.ResultError, flags utils.ValidateCommandFlags) {
+func DisplaySchemaErrorsText(writer io.Writer, errs []gojsonschema.ResultError, flags utils.ValidateCommandFlags) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -334,16 +334,16 @@ func DisplaySchemaErrorsText(output io.Writer, errs []gojsonschema.ResultError, 
 		}
 	}
 
-	fmt.Fprintf(output, "%s", sb.String())
+	fmt.Fprintf(writer, "%s", sb.String())
 }
 
-func DisplaySchemaErrorsCsv(output io.Writer, errs []gojsonschema.ResultError, flags utils.ValidateCommandFlags) {
+func DisplaySchemaErrorsCsv(writer io.Writer, errs []gojsonschema.ResultError, flags utils.ValidateCommandFlags) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	var currentRow []string
 
-	w := csv.NewWriter(output)
+	w := csv.NewWriter(writer)
 	defer w.Flush()
 
 	// Emit title row

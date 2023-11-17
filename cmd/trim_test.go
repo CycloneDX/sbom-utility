@@ -88,7 +88,7 @@ func innerTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer bytes.Buf
 		// if tests asks us to report a FAIL to the test framework
 		cti := &testInfo.CommonTestInfo
 		if cti.Autofail {
-			encodedTestInfo, _ := utils.EncodeAnyToIndentedJSON(testInfo, utils.DEFAULT_JSON_INDENT_STRING)
+			encodedTestInfo, _ := utils.EncodeAnyToIndentedJSONStr(testInfo, utils.DEFAULT_JSON_INDENT_STRING)
 			t.Errorf("%s: failed: %v\n%s", cti.InputFile, err, encodedTestInfo.String())
 		}
 		return

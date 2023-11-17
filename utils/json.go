@@ -22,6 +22,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"io"
 	"strings"
 )
 
@@ -73,27 +74,40 @@ func MarshalStructToJsonMap(any interface{}) (mapOut map[string]interface{}, err
 	return
 }
 
+// Creates strings of spaces based upon provided integer length (e.g., the --indent <length> flag)
+func GenerateIndentString(length int) (prefix string) {
+	var sb strings.Builder
+	for i := 0; i < length; i++ {
+		sb.WriteString(" ")
+	}
+	return sb.String()
+}
+
 // NOTE: Using this custom encoder avoids the json.Marshal() default
 // behavior of encoding utf8 characters such as: '@', '<', '>', etc.
 // as unicode.
-func EncodeAnyToIndentedJSON(any interface{}, indent string) (outputBuffer bytes.Buffer, err error) {
+func EncodeAnyToIndentedJSONStr(any interface{}, indent string) (outputBuffer bytes.Buffer, err error) {
 	bufferedWriter := bufio.NewWriter(&outputBuffer)
 	encoder := json.NewEncoder(bufferedWriter)
 	encoder.SetEscapeHTML(false)
-	encoder.SetIndent("", indent)
+	encoder.SetIndent(DEFAULT_JSON_PREFIX_STRING, indent)
 	err = encoder.Encode(any)
 	// MUST ensure all data is written to buffer before further testing
 	bufferedWriter.Flush()
 	return
 }
 
-func GenerateIndentString(length int) (prefix string) {
-	var sb strings.Builder
+func EncodeAnyToIndentedJSONInt(any interface{}, numSpaces int) (outputBuffer bytes.Buffer, err error) {
+	indentString := GenerateIndentString(numSpaces)
+	return EncodeAnyToIndentedJSONStr(any, indentString)
+}
 
-	for i := 0; i < length; i++ {
-		sb.WriteString(" ")
+func WriteAnyAsEncodedJSONInt(writer io.Writer, any interface{}, numSpaces int) (outputBuffer bytes.Buffer, err error) {
+	outputBuffer, err = EncodeAnyToIndentedJSONInt(any, numSpaces)
+	if writer != nil && err == nil {
+		_, err = writer.Write(outputBuffer.Bytes())
 	}
-	return sb.String()
+	return
 }
 
 // TODO: function NOT complete, only placeholder type switch

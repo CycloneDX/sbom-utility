@@ -207,15 +207,11 @@ func Query(writer io.Writer, request *common.QueryRequest, response *common.Quer
 		return
 	}
 
-	// Convert query results to encoded JSON for output
-	indent := utils.GenerateIndentString(int(utils.GlobalFlags.PersistentFlags.OutputIndent))
-	buffer, err := utils.EncodeAnyToIndentedJSON(resultJson, indent)
-	if err != nil {
-		return
-	}
-
 	// Use the selected output device (e.g., default stdout or the specified --output-file)
-	_, err = writer.Write(buffer.Bytes())
+	// Note: JSON data files MUST ends in a newline as this is a POSIX standard
+	// which is already accounted for by the JSON encoder.
+	_, err = utils.WriteAnyAsEncodedJSONInt(writer, resultJson,
+		utils.GlobalFlags.PersistentFlags.GetOutputIndentInt())
 
 	// NOTE: previously, query results defaulted to an indent of 2 spaces which could be done
 	// just for this command as follows:

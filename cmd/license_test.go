@@ -90,10 +90,10 @@ func innerTestLicenseListBuffered(t *testing.T, testInfo *LicenseTestInfo, where
 	defer outputWriter.Flush()
 
 	// Use a test input SBOM formatted in SPDX
-	// TODO: see if we can use global flags (i.e., policy filename as a persistent flag)
-	// >>> utils.GlobalFlags.ConfigLicensePolicyFile = testInfo.PolicyFile
 	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile
 	utils.GlobalFlags.PersistentFlags.OutputFormat = testInfo.OutputFormat
+	// TODO: utils.GlobalFlags.PersistentFlags.OutputFile = testInfo.OutputFile
+	// TODO: utils.GlobalFlags.PersistentFlags.OutputIndent = testInfo.OutputIndent
 	utils.GlobalFlags.LicenseFlags.Summary = testInfo.ListSummary
 
 	// set license policy config. per-test
@@ -123,11 +123,16 @@ func innerTestLicenseList(t *testing.T, testInfo *LicenseTestInfo) (outputBuffer
 
 	// Perform the test with buffered output
 	outputBuffer, err = innerTestLicenseListBuffered(t, testInfo, whereFilters)
+	if err != nil {
+		getLogger().Tracef("%s", err)
+		return
+	}
 
 	// Run all common tests against "result" values in the CommonTestInfo struct
 	err = innerRunReportResultTests(t, &testInfo.CommonTestInfo, outputBuffer, err)
 	if err != nil {
 		getLogger().Tracef("%s", err)
+		return
 	}
 
 	return

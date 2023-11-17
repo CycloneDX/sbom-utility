@@ -28,7 +28,6 @@ import (
 	"text/tabwriter"
 
 	"github.com/CycloneDX/sbom-utility/common"
-	"github.com/CycloneDX/sbom-utility/log"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/spf13/cobra"
@@ -266,7 +265,7 @@ func ListLicenses(writer io.Writer, policyConfig *schema.LicensePolicyConfig,
 // NOTE: if no license are found, the "json.Marshal" method(s) will return a value of "null"
 // which is valid JSON (and not an empty array)
 // TODO: Support de-duplication (flag) (which MUST be exact using deep comparison)
-func DisplayLicenseListJson(bom *schema.BOM, output io.Writer) {
+func DisplayLicenseListJson(bom *schema.BOM, writer io.Writer) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -283,21 +282,21 @@ func DisplayLicenseListJson(bom *schema.BOM, output io.Writer) {
 			}
 		}
 	}
-	json, _ := log.FormatInterfaceAsJson(lc)
 
 	// Note: JSON data files MUST ends in a newline as this is a POSIX standard
-	fmt.Fprintf(output, "%s\n", json)
+	// which is already accounted for by the JSON encoder.
+	utils.WriteAnyAsEncodedJSONInt(writer, lc, utils.GlobalFlags.PersistentFlags.GetOutputIndentInt())
 }
 
 // NOTE: This list is NOT de-duplicated
-func DisplayLicenseListCSV(bom *schema.BOM, output io.Writer) (err error) {
+func DisplayLicenseListCSV(bom *schema.BOM, writer io.Writer) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	var licenseInfo schema.LicenseInfo
 	var currentRow []string
 
-	w := csv.NewWriter(output)
+	w := csv.NewWriter(writer)
 	defer w.Flush()
 
 	// Emit title row
@@ -343,7 +342,7 @@ func DisplayLicenseListCSV(bom *schema.BOM, output io.Writer) (err error) {
 }
 
 // NOTE: This list is NOT de-duplicated
-func DisplayLicenseListMarkdown(bom *schema.BOM, output io.Writer) {
+func DisplayLicenseListMarkdown(bom *schema.BOM, writer io.Writer) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -351,11 +350,11 @@ func DisplayLicenseListMarkdown(bom *schema.BOM, output io.Writer) {
 
 	// create title row
 	titleRow := createMarkdownRow(LICENSE_LIST_TITLES_LICENSE_CHOICE)
-	fmt.Fprintf(output, "%s\n", titleRow)
+	fmt.Fprintf(writer, "%s\n", titleRow)
 
 	alignments := createMarkdownColumnAlignment(LICENSE_LIST_TITLES_LICENSE_CHOICE)
 	alignmentRow := createMarkdownRow(alignments)
-	fmt.Fprintf(output, "%s\n", alignmentRow)
+	fmt.Fprintf(writer, "%s\n", alignmentRow)
 
 	// Display a warning messing in the actual output and return (short-circuit)
 	licenseKeys := bom.LicenseMap.KeySet()
@@ -395,7 +394,7 @@ func DisplayLicenseListMarkdown(bom *schema.BOM, output io.Writer) {
 					content)
 
 				lineRow = createMarkdownRow(line)
-				fmt.Fprintf(output, "%s\n", lineRow)
+				fmt.Fprintf(writer, "%s\n", lineRow)
 			}
 
 		}
@@ -406,7 +405,7 @@ func DisplayLicenseListMarkdown(bom *schema.BOM, output io.Writer) {
 // TODO: Make policy column optional
 // TODO: Add a --no-title flag to skip title output
 // TODO: Support a new --sort <column> flag
-func DisplayLicenseListSummaryText(bom *schema.BOM, output io.Writer) {
+func DisplayLicenseListSummaryText(bom *schema.BOM, writer io.Writer) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -415,7 +414,7 @@ func DisplayLicenseListSummaryText(bom *schema.BOM, output io.Writer) {
 	defer w.Flush()
 
 	// min-width, tab-width, padding, pad-char, flags
-	w.Init(output, 8, 2, 2, ' ', 0)
+	w.Init(writer, 8, 2, 2, ' ', 0)
 
 	var licenseInfo schema.LicenseInfo
 
@@ -458,12 +457,12 @@ func DisplayLicenseListSummaryText(bom *schema.BOM, output io.Writer) {
 // TODO: Make policy column optional
 // TODO: Add a --no-title flag to skip title output
 // TODO: Support a new --sort <column> flag
-func DisplayLicenseListSummaryCSV(bom *schema.BOM, output io.Writer) (err error) {
+func DisplayLicenseListSummaryCSV(bom *schema.BOM, writer io.Writer) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	// initialize writer and prepare the list of entries (i.e., the "rows")
-	w := csv.NewWriter(output)
+	w := csv.NewWriter(writer)
 	defer w.Flush()
 
 	var currentRow []string
@@ -526,7 +525,7 @@ func DisplayLicenseListSummaryCSV(bom *schema.BOM, output io.Writer) (err error)
 // TODO: Make policy column optional
 // TODO: Add a --no-title flag to skip title output
 // TODO: Support a new --sort <column> flag
-func DisplayLicenseListSummaryMarkdown(bom *schema.BOM, output io.Writer) {
+func DisplayLicenseListSummaryMarkdown(bom *schema.BOM, writer io.Writer) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -534,11 +533,11 @@ func DisplayLicenseListSummaryMarkdown(bom *schema.BOM, output io.Writer) {
 
 	// create title row
 	titleRow := createMarkdownRow(LICENSE_SUMMARY_TITLES)
-	fmt.Fprintf(output, "%s\n", titleRow)
+	fmt.Fprintf(writer, "%s\n", titleRow)
 
 	alignments := createMarkdownColumnAlignment(LICENSE_SUMMARY_TITLES)
 	alignmentRow := createMarkdownRow(alignments)
-	fmt.Fprintf(output, "%s\n", alignmentRow)
+	fmt.Fprintf(writer, "%s\n", alignmentRow)
 
 	// Display a warning messing in the actual output and return (short-circuit)
 	licenseKeys := bom.LicenseMap.KeySet()
@@ -572,7 +571,7 @@ func DisplayLicenseListSummaryMarkdown(bom *schema.BOM, output io.Writer) {
 			)
 
 			lineRow = createMarkdownRow(line)
-			fmt.Fprintf(output, "%s\n", lineRow)
+			fmt.Fprintf(writer, "%s\n", lineRow)
 		}
 	}
 }

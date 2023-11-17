@@ -67,7 +67,7 @@ type CommonTestInfo struct {
 	ResultExpectedByteSize            int
 	ResultExpectedError               error
 	ResultExpectedIndentLength        int
-	ResultExpectedIntentAtLineNum     int
+	ResultExpectedIndentAtLineNum     int
 	ResultExpectedLineCount           int
 	ResultLineContainsValues          []string
 	ResultLineContainsValuesAtLineNum int
@@ -75,9 +75,22 @@ type CommonTestInfo struct {
 	MockStdin                         bool
 }
 
+// defaults for TestInfo struct values
+const (
+	TI_LIST_SUMMARY_FALSE           = false
+	TI_LIST_LINE_WRAP               = false
+	TI_DEFAULT_WHERE_CLAUSE         = ""
+	TI_DEFAULT_POLICY_FILE          = ""
+	TI_DEFAULT_JSON_INDENT          = DEFAULT_OUTPUT_INDENT_LENGTH // 4
+	TI_RESULT_DEFAULT_LINE_COUNT    = -1
+	TI_RESULT_DEFAULT_LINE_CONTAINS = -1 // NOTE: -1 means "any" line
+)
+
 func NewCommonTestInfo() *CommonTestInfo {
 	var ti = new(CommonTestInfo)
 	ti.OutputIndent = TI_DEFAULT_JSON_INDENT
+	ti.ResultExpectedLineCount = TI_RESULT_DEFAULT_LINE_COUNT
+	ti.ResultLineContainsValuesAtLineNum = TI_RESULT_DEFAULT_LINE_CONTAINS
 	return ti
 }
 
@@ -96,16 +109,6 @@ func NewCommonTestInfoBasicList(inputFile string, whereClause string, listFormat
 	return ti
 }
 
-// default (empty) TestInfo struct values
-const (
-	TI_LIST_SUMMARY_FALSE   = false
-	TI_LIST_LINE_WRAP       = false
-	TI_DEFAULT_WHERE_CLAUSE = ""
-	TI_DEFAULT_LINE_COUNT   = -1
-	TI_DEFAULT_POLICY_FILE  = ""
-	TI_DEFAULT_JSON_INDENT  = DEFAULT_OUTPUT_INDENT_LENGTH // 4
-)
-
 // Stringer interface for ResourceTestInfo (just display subset of key values)
 func (ti *CommonTestInfo) String() string {
 	return fmt.Sprintf("InputFile: `%s`, Format: `%s`, WhereClause: `%s`, ListSummary: `%v`",
@@ -118,6 +121,7 @@ func (ti *CommonTestInfo) Init(inputFile string, listFormat string, listSummary 
 	ti.OutputFormat = listFormat
 	ti.ListSummary = listSummary
 	ti.WhereClause = whereClause
+	ti.ResultLineContainsValuesAtLineNum = TI_RESULT_DEFAULT_LINE_CONTAINS
 	ti.ResultExpectedLineCount = resultExpectedLineCount
 	ti.ResultExpectedError = resultExpectedError
 	return ti
@@ -125,7 +129,7 @@ func (ti *CommonTestInfo) Init(inputFile string, listFormat string, listSummary 
 
 func (ti *CommonTestInfo) InitBasic(inputFile string, format string, expectedError error) *CommonTestInfo {
 	ti.Init(inputFile, format, TI_LIST_SUMMARY_FALSE, TI_DEFAULT_WHERE_CLAUSE,
-		nil, TI_DEFAULT_LINE_COUNT, expectedError)
+		nil, TI_RESULT_DEFAULT_LINE_COUNT, expectedError)
 	return ti
 }
 
@@ -256,7 +260,8 @@ func prepareWhereFilters(t *testing.T, testInfo *CommonTestInfo) (whereFilters [
 
 const RESULT_LINE_CONTAINS_ANY = -1
 
-func lineContainsValues(buffer bytes.Buffer, lineNum int, values ...string) (int, bool) {
+func bufferLineContainsValues(buffer bytes.Buffer, lineNum int, values ...string) (int, bool) {
+
 	lines := strings.Split(buffer.String(), "\n")
 	getLogger().Tracef("output: %s", lines)
 
@@ -303,6 +308,14 @@ func numberOfLeadingSpaces(line string) (numSpaces int) {
 		} else {
 			break
 		}
+	}
+	return
+}
+
+func getBufferLinesAndCount(buffer bytes.Buffer) (numLines int, lines []string) {
+	if buffer.Len() > 0 {
+		lines = strings.Split(buffer.String(), "\n")
+		numLines = len(lines)
 	}
 	return
 }

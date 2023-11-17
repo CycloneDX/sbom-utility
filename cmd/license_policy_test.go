@@ -341,7 +341,7 @@ func TestLicensePolicyCustomListGoodBadMaybe(t *testing.T) {
 	// test for sep. row
 	TEST_LINE_NUM := 1
 	TEST_VALUES := []string{REPORT_LIST_TITLE_ROW_SEPARATOR}
-	matchFoundLine, matchFound := lineContainsValues(outputBuffer, TEST_LINE_NUM, TEST_VALUES...)
+	matchFoundLine, matchFound := bufferLineContainsValues(outputBuffer, TEST_LINE_NUM, TEST_VALUES...)
 	if !matchFound {
 		t.Errorf("policy file does not contain expected values: `%v` at line: %v\n", TEST_VALUES, TEST_LINE_NUM)
 		return
@@ -352,7 +352,7 @@ func TestLicensePolicyCustomListGoodBadMaybe(t *testing.T) {
 	// Assure "bad" policy has usage "deny"
 	TEST_LINE_NUM = 2
 	TEST_VALUES = []string{LICENSE_ID_BAD, schema.POLICY_DENY}
-	matchFoundLine, matchFound = lineContainsValues(outputBuffer, TEST_LINE_NUM, TEST_VALUES...)
+	matchFoundLine, matchFound = bufferLineContainsValues(outputBuffer, TEST_LINE_NUM, TEST_VALUES...)
 	if !matchFound {
 		t.Errorf("policy file does not contain expected values: `%v` at line: %v\n", TEST_VALUES, TEST_LINE_NUM)
 		return
@@ -363,7 +363,7 @@ func TestLicensePolicyCustomListGoodBadMaybe(t *testing.T) {
 	// Assure "good" policy has usage "allow"
 	TEST_LINE_NUM = 3
 	TEST_VALUES = []string{LICENSE_ID_GOOD, schema.POLICY_ALLOW}
-	matchFoundLine, matchFound = lineContainsValues(outputBuffer, TEST_LINE_NUM, TEST_VALUES...)
+	matchFoundLine, matchFound = bufferLineContainsValues(outputBuffer, TEST_LINE_NUM, TEST_VALUES...)
 	if !matchFound {
 		t.Errorf("policy file does not contain expected values: `%v` at line: %v\n", TEST_VALUES, TEST_LINE_NUM)
 		return
@@ -374,7 +374,7 @@ func TestLicensePolicyCustomListGoodBadMaybe(t *testing.T) {
 	// Assure "maybe" policy has usage "needs-review"
 	TEST_LINE_NUM = 4
 	TEST_VALUES = []string{LICENSE_ID_MAYBE, schema.POLICY_NEEDS_REVIEW}
-	matchFoundLine, matchFound = lineContainsValues(outputBuffer, TEST_LINE_NUM, TEST_VALUES...)
+	matchFoundLine, matchFound = bufferLineContainsValues(outputBuffer, TEST_LINE_NUM, TEST_VALUES...)
 	if !matchFound {
 		t.Errorf("policy file does not contain expected values: `%v` at line: %v\n", TEST_VALUES, TEST_LINE_NUM)
 		return

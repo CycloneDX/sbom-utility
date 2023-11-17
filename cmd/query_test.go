@@ -26,7 +26,6 @@ import (
 	"io"
 	"io/fs"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/CycloneDX/sbom-utility/common"
@@ -68,7 +67,7 @@ func innerQuery(t *testing.T, cti *CommonTestInfo, queryRequest *common.QueryReq
 	if err != nil {
 		// if tests asks us to report a FAIL to the test framework
 		if cti.Autofail {
-			encodedTestInfo, _ := utils.EncodeAnyToIndentedJSON(queryRequest, utils.DEFAULT_JSON_INDENT_STRING)
+			encodedTestInfo, _ := utils.EncodeAnyToIndentedJSONStr(queryRequest, utils.DEFAULT_JSON_INDENT_STRING)
 			t.Errorf("%s: failed: %v\nQueryRequest:\n%s", cti.InputFile, err, encodedTestInfo.String())
 		}
 		return
@@ -77,7 +76,7 @@ func innerQuery(t *testing.T, cti *CommonTestInfo, queryRequest *common.QueryReq
 	// Log results if trace enabled
 	if err != nil {
 		var buffer bytes.Buffer
-		buffer, err = utils.EncodeAnyToIndentedJSON(
+		buffer, err = utils.EncodeAnyToIndentedJSONStr(
 			resultJson, utils.DEFAULT_JSON_INDENT_STRING)
 		// Output the JSON data directly to stdout (not subject to log-level)
 		getLogger().Tracef("%s\n", buffer.String())
@@ -470,7 +469,7 @@ func TestQueryCdx14MetadataToolsSlice(t *testing.T) {
 		t.Error(err)
 	}
 	if !utils.IsJsonSliceType(result) {
-		fResult, _ := utils.EncodeAnyToIndentedJSON(result, utils.DEFAULT_JSON_INDENT_STRING)
+		fResult, _ := utils.EncodeAnyToIndentedJSONStr(result, utils.DEFAULT_JSON_INDENT_STRING)
 		t.Error(fmt.Errorf("expected JSON slice. Actual result: %s", fResult.String()))
 	}
 
@@ -478,7 +477,7 @@ func TestQueryCdx14MetadataToolsSlice(t *testing.T) {
 	slice := result.([]interface{})
 	EXPECTED_SLICE_LENGTH := 2
 	if actualLength := len(slice); actualLength != EXPECTED_SLICE_LENGTH {
-		fResult, _ := utils.EncodeAnyToIndentedJSON(result, utils.DEFAULT_JSON_INDENT_STRING)
+		fResult, _ := utils.EncodeAnyToIndentedJSONStr(result, utils.DEFAULT_JSON_INDENT_STRING)
 		t.Error(fmt.Errorf("expected slice length: %v, actual length: %v. Actual result: %s", EXPECTED_SLICE_LENGTH, actualLength, fResult.String()))
 	}
 }
@@ -494,7 +493,7 @@ func TestQueryCdx14MetadataToolsSliceWhereName(t *testing.T) {
 		t.Error(err)
 	}
 	if !utils.IsJsonSliceType(result) {
-		fResult, _ := utils.EncodeAnyToIndentedJSON(result, utils.DEFAULT_JSON_INDENT_STRING)
+		fResult, _ := utils.EncodeAnyToIndentedJSONStr(result, utils.DEFAULT_JSON_INDENT_STRING)
 		t.Error(fmt.Errorf("expected JSON slice. Actual result: %s", fResult.String()))
 	}
 
@@ -502,7 +501,7 @@ func TestQueryCdx14MetadataToolsSliceWhereName(t *testing.T) {
 	slice := result.([]interface{})
 	EXPECTED_SLICE_LENGTH := 1
 	if actualLength := len(slice); actualLength != EXPECTED_SLICE_LENGTH {
-		fResult, _ := utils.EncodeAnyToIndentedJSON(result, utils.DEFAULT_JSON_INDENT_STRING)
+		fResult, _ := utils.EncodeAnyToIndentedJSONStr(result, utils.DEFAULT_JSON_INDENT_STRING)
 		t.Error(fmt.Errorf("expected slice length: %v, actual length: %v. Actual result: %s", EXPECTED_SLICE_LENGTH, actualLength, fResult.String()))
 	}
 }
@@ -511,18 +510,20 @@ func TestQueryCdx14MetadataComponentIndent(t *testing.T) {
 	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
 	cti.ResultExpectedLineCount = 6
 	cti.ResultExpectedIndentLength = 4
+	cti.ResultExpectedIndentAtLineNum = 1
 	request, _ := common.NewQueryRequestSelectFrom(
 		"name,description,version",
 		"metadata.component")
 	results, _ := innerQueryError(t, cti, request, nil)
-	buffer, _ := utils.EncodeAnyToIndentedJSON(results, utils.DEFAULT_JSON_INDENT_STRING)
-	lines := strings.Split(buffer.String(), "\n")
-	getLogger().Tracef("results: %s", lines)
-	if numLines := len(lines); numLines != cti.ResultExpectedLineCount {
+	buffer, _ := utils.EncodeAnyToIndentedJSONStr(results, utils.DEFAULT_JSON_INDENT_STRING)
+
+	numLines, lines := getBufferLinesAndCount(buffer)
+
+	if numLines != cti.ResultExpectedLineCount {
 		t.Errorf("invalid test result: expected: `%v` lines, actual: `%v", cti.ResultExpectedLineCount, numLines)
 	}
-	if numLines := len(lines); numLines > 1 {
-		line := lines[1]
+	if numLines > cti.ResultExpectedIndentAtLineNum {
+		line := lines[cti.ResultExpectedIndentAtLineNum]
 		if spaceCount := numberOfLeadingSpaces(line); spaceCount != cti.ResultExpectedIndentLength {
 			t.Errorf("invalid test result: expected indent:`%v`, actual: `%v", cti.ResultExpectedIndentLength, spaceCount)
 		}

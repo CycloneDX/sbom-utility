@@ -69,6 +69,10 @@ type PersistentCommandFlags struct {
 	OutputIndent uint8
 }
 
+func (persistentFlags PersistentCommandFlags) GetOutputIndentInt() int {
+	return int(persistentFlags.OutputIndent)
+}
+
 type LicenseCommandFlags struct {
 	Summary      bool
 	ListLineWrap bool

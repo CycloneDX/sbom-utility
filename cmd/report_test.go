@@ -51,7 +51,7 @@ func innerRunReportResultTests(t *testing.T, testInfo *CommonTestInfo, outputBuf
 	// TEST: Line contains a set of string values
 	// TODO: support any number of row/values in test info. structure
 	if len(testInfo.ResultLineContainsValues) > 0 {
-		matchFoundLine, matchFound := lineContainsValues(outputBuffer, testInfo.ResultLineContainsValuesAtLineNum, testInfo.ResultLineContainsValues...)
+		matchFoundLine, matchFound := bufferLineContainsValues(outputBuffer, testInfo.ResultLineContainsValuesAtLineNum, testInfo.ResultLineContainsValues...)
 		if !matchFound {
 			err = getLogger().Errorf("output does not contain expected values: `%v` at line: %v\n", strings.Join(testInfo.ResultLineContainsValues, ","), testInfo.ResultLineContainsValuesAtLineNum)
 			t.Error(err.Error())
@@ -61,7 +61,7 @@ func innerRunReportResultTests(t *testing.T, testInfo *CommonTestInfo, outputBuf
 	}
 
 	// TEST: Line Count
-	if testInfo.ResultExpectedLineCount != TI_DEFAULT_LINE_COUNT {
+	if testInfo.ResultExpectedLineCount != TI_RESULT_DEFAULT_LINE_COUNT {
 		outputResults := outputBuffer.String()
 		outputLineCount := strings.Count(outputResults, "\n")
 		if outputLineCount != testInfo.ResultExpectedLineCount {
