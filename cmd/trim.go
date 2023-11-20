@@ -56,8 +56,8 @@ const (
 func NewCommandTrim() *cobra.Command {
 	var command = new(cobra.Command)
 	command.Use = CMD_USAGE_TRIM
-	command.Short = "(experimental) Trim elements from the BOM input file and write to output file"
-	command.Long = "(experimental) Trim elements from the BOM input file and write to output file"
+	command.Short = "(experimental) Trim elements from the BOM input file and write resultant BOM to output"
+	command.Long = "(experimental) Trim elements from the BOM input file and write resultant BOM to output"
 	command.RunE = trimCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		// Test for required flags (parameters)
