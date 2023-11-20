@@ -84,8 +84,7 @@ func GenerateIndentString(length int) (prefix string) {
 }
 
 // NOTE: Using this custom encoder avoids the json.Marshal() default
-// behavior of encoding utf8 characters such as: '@', '<', '>', etc.
-// as unicode.
+// behavior of encoding utf8 characters such as: '@', '<', '>', etc. as unicode.
 func EncodeAnyToIndentedJSONStr(any interface{}, indent string) (outputBuffer bytes.Buffer, err error) {
 	bufferedWriter := bufio.NewWriter(&outputBuffer)
 	encoder := json.NewEncoder(bufferedWriter)
@@ -113,22 +112,3 @@ func WriteAnyAsEncodedJSONInt(writer io.Writer, any interface{}, numSpaces int) 
 	}
 	return
 }
-
-// TODO: function NOT complete, only placeholder type switch
-// TODO: allow generic function to be applied to types
-// func PrintTypes(values ...interface{}) {
-// 	for index, value := range values {
-// 		switch t := value.(type) {
-// 		case nil:
-// 		case int:
-// 		case uint:
-// 		case int32:
-// 		case int64:
-// 		case uint64:
-// 		case float32:
-// 		case float64:
-// 		case string:
-// 		case bool:
-// 		}
-// 	}
-// }
