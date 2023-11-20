@@ -67,7 +67,7 @@ func innerQuery(t *testing.T, cti *CommonTestInfo, queryRequest *common.QueryReq
 	if err != nil {
 		// if tests asks us to report a FAIL to the test framework
 		if cti.Autofail {
-			encodedTestInfo, _ := utils.EncodeAnyToIndentedJSONStr(queryRequest, utils.DEFAULT_JSON_INDENT_STRING)
+			encodedTestInfo, _ := utils.EncodeAnyToDefaultIndentedJSONStr(queryRequest)
 			t.Errorf("%s: failed: %v\nQueryRequest:\n%s", cti.InputFile, err, encodedTestInfo.String())
 		}
 		return
@@ -76,8 +76,7 @@ func innerQuery(t *testing.T, cti *CommonTestInfo, queryRequest *common.QueryReq
 	// Log results if trace enabled
 	if err != nil {
 		var buffer bytes.Buffer
-		buffer, err = utils.EncodeAnyToIndentedJSONStr(
-			resultJson, utils.DEFAULT_JSON_INDENT_STRING)
+		buffer, err = utils.EncodeAnyToDefaultIndentedJSONStr(resultJson)
 		// Output the JSON data directly to stdout (not subject to log-level)
 		getLogger().Tracef("%s\n", buffer.String())
 	}
@@ -469,7 +468,7 @@ func TestQueryCdx14MetadataToolsSlice(t *testing.T) {
 		t.Error(err)
 	}
 	if !utils.IsJsonSliceType(result) {
-		fResult, _ := utils.EncodeAnyToIndentedJSONStr(result, utils.DEFAULT_JSON_INDENT_STRING)
+		fResult, _ := utils.EncodeAnyToDefaultIndentedJSONStr(result)
 		t.Error(fmt.Errorf("expected JSON slice. Actual result: %s", fResult.String()))
 	}
 
@@ -477,7 +476,7 @@ func TestQueryCdx14MetadataToolsSlice(t *testing.T) {
 	slice := result.([]interface{})
 	EXPECTED_SLICE_LENGTH := 2
 	if actualLength := len(slice); actualLength != EXPECTED_SLICE_LENGTH {
-		fResult, _ := utils.EncodeAnyToIndentedJSONStr(result, utils.DEFAULT_JSON_INDENT_STRING)
+		fResult, _ := utils.EncodeAnyToDefaultIndentedJSONStr(result)
 		t.Error(fmt.Errorf("expected slice length: %v, actual length: %v. Actual result: %s", EXPECTED_SLICE_LENGTH, actualLength, fResult.String()))
 	}
 }
@@ -493,7 +492,7 @@ func TestQueryCdx14MetadataToolsSliceWhereName(t *testing.T) {
 		t.Error(err)
 	}
 	if !utils.IsJsonSliceType(result) {
-		fResult, _ := utils.EncodeAnyToIndentedJSONStr(result, utils.DEFAULT_JSON_INDENT_STRING)
+		fResult, _ := utils.EncodeAnyToDefaultIndentedJSONStr(result)
 		t.Error(fmt.Errorf("expected JSON slice. Actual result: %s", fResult.String()))
 	}
 
@@ -501,7 +500,7 @@ func TestQueryCdx14MetadataToolsSliceWhereName(t *testing.T) {
 	slice := result.([]interface{})
 	EXPECTED_SLICE_LENGTH := 1
 	if actualLength := len(slice); actualLength != EXPECTED_SLICE_LENGTH {
-		fResult, _ := utils.EncodeAnyToIndentedJSONStr(result, utils.DEFAULT_JSON_INDENT_STRING)
+		fResult, _ := utils.EncodeAnyToDefaultIndentedJSONStr(result)
 		t.Error(fmt.Errorf("expected slice length: %v, actual length: %v. Actual result: %s", EXPECTED_SLICE_LENGTH, actualLength, fResult.String()))
 	}
 }
@@ -514,9 +513,10 @@ func TestQueryCdx14MetadataComponentIndent(t *testing.T) {
 	request, _ := common.NewQueryRequestSelectFrom(
 		"name,description,version",
 		"metadata.component")
+
+	// Verify that JSON returned by the query command is able to apply default space indent
 	results, _ := innerQueryError(t, cti, request, nil)
 	buffer, _ := utils.EncodeAnyToIndentedJSONStr(results, utils.DEFAULT_JSON_INDENT_STRING)
-
 	numLines, lines := getBufferLinesAndCount(buffer)
 
 	if numLines != cti.ResultExpectedLineCount {

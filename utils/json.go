@@ -97,6 +97,10 @@ func EncodeAnyToIndentedJSONStr(any interface{}, indent string) (outputBuffer by
 	return
 }
 
+func EncodeAnyToDefaultIndentedJSONStr(any interface{}) (outputBuffer bytes.Buffer, err error) {
+	return EncodeAnyToIndentedJSONStr(any, DEFAULT_JSON_INDENT_STRING)
+}
+
 func EncodeAnyToIndentedJSONInt(any interface{}, numSpaces int) (outputBuffer bytes.Buffer, err error) {
 	indentString := GenerateIndentString(numSpaces)
 	return EncodeAnyToIndentedJSONStr(any, indentString)
