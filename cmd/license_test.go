@@ -52,24 +52,24 @@ type LicenseTestInfo struct {
 }
 
 func (ti *LicenseTestInfo) String() string {
-	pParent := &ti.CommonTestInfo
-	return pParent.String()
+	pCommon := &ti.CommonTestInfo
+	return pCommon.String()
 }
 
-func NewLicenseTestInfo(inputFile string, listFormat string, listSummary bool, whereClause string,
-	resultContainsValues []string, resultExpectedLineCount int, resultExpectedError error,
-	listLineWrap bool, policyFile string) *LicenseTestInfo {
+// func NewLicenseTestInfo(inputFile string, listFormat string, listSummary bool, whereClause string,
+// 	resultContainsValues []string, resultExpectedLineCount int, resultExpectedError error,
+// 	listLineWrap bool, policyFile string) *LicenseTestInfo {
 
-	var ti = new(LicenseTestInfo)
-	var pCommon = &ti.CommonTestInfo
-	// initialize common fields
-	pCommon.Init(inputFile, listFormat, listSummary, whereClause,
-		resultContainsValues, resultExpectedLineCount, resultExpectedError)
-	// Initialize resource-unique fields
-	ti.ListLineWrap = listLineWrap
-	ti.PolicyFile = policyFile
-	return ti
-}
+// 	var ti = new(LicenseTestInfo)
+// 	var pCommon = &ti.CommonTestInfo
+// 	// initialize common fields
+// 	pCommon.Init(inputFile, listFormat, listSummary, whereClause,
+// 		resultContainsValues, resultExpectedLineCount, resultExpectedError)
+// 	// Initialize resource-unique fields
+// 	ti.ListLineWrap = listLineWrap
+// 	ti.PolicyFile = policyFile
+// 	return ti
+// }
 
 func NewLicenseTestInfoBasic(inputFile string, listFormat string, listSummary bool) *LicenseTestInfo {
 	var ti = new(LicenseTestInfo)
@@ -92,8 +92,8 @@ func innerTestLicenseListBuffered(t *testing.T, testInfo *LicenseTestInfo, where
 	// Use a test input SBOM formatted in SPDX
 	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile
 	utils.GlobalFlags.PersistentFlags.OutputFormat = testInfo.OutputFormat
-	// TODO: utils.GlobalFlags.PersistentFlags.OutputFile = testInfo.OutputFile
-	// TODO: utils.GlobalFlags.PersistentFlags.OutputIndent = testInfo.OutputIndent
+	utils.GlobalFlags.PersistentFlags.OutputFile = testInfo.OutputFile
+	utils.GlobalFlags.PersistentFlags.OutputIndent = testInfo.OutputIndent
 	utils.GlobalFlags.LicenseFlags.Summary = testInfo.ListSummary
 
 	// set license policy config. per-test
@@ -228,7 +228,20 @@ func TestLicenseListCdx14MarkdownNoneFound(t *testing.T) {
 func TestLicenseListCdx13Json(t *testing.T) {
 	lti := NewLicenseTestInfoBasic(TEST_LICENSE_LIST_CDX_1_3, FORMAT_JSON, false)
 	lti.ResultExpectedLineCount = 92 // array of LicenseChoice JSON objects
-	innerTestLicenseList(t, lti)
+	lti.OutputIndent = 6
+	buffer := innerTestLicenseList(t, lti)
+
+	numLines, lines := getBufferLinesAndCount(buffer)
+
+	// if numLines != cti.ResultExpectedLineCount {
+	// 	t.Errorf("invalid test result: expected: `%v` lines, actual: `%v", cti.ResultExpectedLineCount, numLines)
+	// }
+	if numLines > lti.ResultExpectedIndentAtLineNum {
+		line := lines[lti.ResultExpectedIndentAtLineNum]
+		if spaceCount := numberOfLeadingSpaces(line); spaceCount != lti.ResultExpectedIndentLength {
+			t.Errorf("invalid test result: expected indent:`%v`, actual: `%v", lti.ResultExpectedIndentLength, spaceCount)
+		}
+	}
 }
 
 //---------------------------
@@ -322,7 +335,7 @@ func TestLicenseListCdx13JsonEmptyAttachment(t *testing.T) {
 		false)
 	lti.ResultExpectedLineCount = 36
 	lti.ResultLineContainsValues = []string{"\"content\": \"CiAgICAgICAgICAgICA...\""}
-	lti.ResultLineContainsValuesAtLineNum = -1 // JSON Hashmaps in Go are not ordered
+	lti.ResultLineContainsValuesAtLineNum = -1 // JSON Hashmaps in Go are not ordered, match any line
 	innerTestLicenseList(t, lti)
 }
 

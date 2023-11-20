@@ -119,6 +119,7 @@ func (ti *CommonTestInfo) Init(inputFile string, listFormat string, listSummary 
 	resultContainsValues []string, resultExpectedLineCount int, resultExpectedError error) *CommonTestInfo {
 	ti.InputFile = inputFile
 	ti.OutputFormat = listFormat
+	ti.OutputIndent = TI_DEFAULT_JSON_INDENT
 	ti.ListSummary = listSummary
 	ti.WhereClause = whereClause
 	ti.ResultLineContainsValuesAtLineNum = TI_RESULT_DEFAULT_LINE_CONTAINS
