@@ -201,7 +201,6 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 		return
 	}
 
-	// TODO: include formatting (i.e., prefix, indent) as command line flags
 	// Output the "trimmed" version of the Input BOM
 	format := persistentFlags.OutputFormat
 	getLogger().Infof("Outputting listing (`%s` format)...", format)
