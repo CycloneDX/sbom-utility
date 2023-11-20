@@ -42,8 +42,8 @@ const (
 func NewCommandLicense() *cobra.Command {
 	var command = new(cobra.Command)
 	command.Use = "license"
-	command.Short = "Process licenses found in SBOM input file"
-	command.Long = "Process licenses found in SBOM input file"
+	command.Short = "Process licenses found in the BOM input file"
+	command.Long = "Process licenses found in the BOM input file"
 	command.RunE = licenseCmdImpl
 	command.ValidArgs = VALID_SUBCOMMANDS_LICENSE
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
