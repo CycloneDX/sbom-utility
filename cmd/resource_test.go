@@ -21,7 +21,6 @@ package cmd
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io/fs"
 	"log"
 	"os"
@@ -45,8 +44,8 @@ type ResourceTestInfo struct {
 }
 
 func (ti *ResourceTestInfo) String() string {
-	pParent := &ti.CommonTestInfo
-	return fmt.Sprintf("%s, %s", pParent.String(), ti.ResourceType)
+	buffer, _ := utils.EncodeAnyToDefaultIndentedJSONStr(ti)
+	return buffer.String()
 }
 
 func NewResourceTestInfo(inputFile string, outputFormat string, listSummary bool, whereClause string,

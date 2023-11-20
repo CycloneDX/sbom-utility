@@ -52,8 +52,8 @@ type LicenseTestInfo struct {
 }
 
 func (ti *LicenseTestInfo) String() string {
-	pCommon := &ti.CommonTestInfo
-	return pCommon.String()
+	buffer, _ := utils.EncodeAnyToDefaultIndentedJSONStr(ti)
+	return buffer.String()
 }
 
 func NewLicenseTestInfo(inputFile string, listFormat string, listSummary bool) *LicenseTestInfo {

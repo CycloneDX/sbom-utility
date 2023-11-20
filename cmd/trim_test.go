@@ -48,8 +48,8 @@ type TrimTestInfo struct {
 }
 
 func (ti *TrimTestInfo) String() string {
-	pParent := &ti.CommonTestInfo
-	return pParent.String()
+	buffer, _ := utils.EncodeAnyToDefaultIndentedJSONStr(ti)
+	return buffer.String()
 }
 
 func NewTrimTestInfo(inputFile string, resultExpectedError error) *TrimTestInfo {

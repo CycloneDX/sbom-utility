@@ -21,7 +21,6 @@ package cmd
 import (
 	"bytes"
 	"flag"
-	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -111,8 +110,8 @@ func NewCommonTestInfoBasicList(inputFile string, whereClause string, listFormat
 
 // Stringer interface for ResourceTestInfo (just display subset of key values)
 func (ti *CommonTestInfo) String() string {
-	return fmt.Sprintf("InputFile: `%s`, Format: `%s`, WhereClause: `%s`, ListSummary: `%v`",
-		ti.InputFile, ti.OutputFormat, ti.WhereClause, ti.ListSummary)
+	buffer, _ := utils.EncodeAnyToDefaultIndentedJSONStr(ti)
+	return buffer.String()
 }
 
 func (ti *CommonTestInfo) Init(inputFile string, listFormat string, listSummary bool, whereClause string,
@@ -252,7 +251,7 @@ func prepareWhereFilters(t *testing.T, testInfo *CommonTestInfo) (whereFilters [
 	if testInfo.WhereClause != "" {
 		whereFilters, err = retrieveWhereFilters(testInfo.WhereClause)
 		if err != nil {
-			t.Errorf("test failed: %s: detail: %s ", testInfo.String(), err.Error())
+			t.Errorf("test failed: %s: detail: %s ", testInfo, err.Error())
 			return
 		}
 	}

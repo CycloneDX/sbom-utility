@@ -57,8 +57,8 @@ type ValidateTestInfo struct {
 }
 
 func (ti *ValidateTestInfo) String() string {
-	pParent := &ti.CommonTestInfo
-	return fmt.Sprintf("%s, %s, %s", pParent.String(), ti.SchemaVariant, ti.CustomSchema)
+	buffer, _ := utils.EncodeAnyToDefaultIndentedJSONStr(ti)
+	return buffer.String()
 }
 
 func NewValidateTestInfoMinimum(inputFile string) *ValidateTestInfo {
