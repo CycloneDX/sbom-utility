@@ -86,7 +86,7 @@ const (
 
 const (
 	MSG_APP_NAME            = "Bill-of-Materials (BOM) utility."
-	MSG_APP_DESCRIPTION     = "This utility serves as centralized command line interface for various Bill-of-Materials (BOM) helper utilities (e.g., SBOM, HBOM, etc.)."
+	MSG_APP_DESCRIPTION     = "This utility serves as centralized command-line interface for various Bill-of-Materials (BOM) helper utilities."
 	MSG_FLAG_TRACE          = "enable trace logging"
 	MSG_FLAG_DEBUG          = "enable debug logging"
 	MSG_FLAG_INPUT          = "input filename (e.g., \"path/sbom.json\")"
