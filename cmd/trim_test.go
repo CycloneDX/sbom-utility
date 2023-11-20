@@ -52,7 +52,7 @@ func (ti *TrimTestInfo) String() string {
 	return pParent.String()
 }
 
-func NewTrimTestInfoBasic(inputFile string, resultExpectedError error) *TrimTestInfo {
+func NewTrimTestInfo(inputFile string, resultExpectedError error) *TrimTestInfo {
 	var ti = new(TrimTestInfo)
 	var pCommon = &ti.CommonTestInfo
 	pCommon.InitBasic(inputFile, FORMAT_JSON, resultExpectedError)
@@ -221,7 +221,7 @@ func VerifyTrimmed(pResult interface{}, key string) (err error) {
 // are specified for both formats.  We need to assure any commands that
 // rewrite BOMs (after edits) preserve original characters.
 func TestTrimCdx14PreserveUnencodedChars(t *testing.T) {
-	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_4_ENCODED_CHARS, nil)
+	ti := NewTrimTestInfo(TEST_TRIM_CDX_1_4_ENCODED_CHARS, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_TRIM_CDX_1_4_ENCODED_CHARS)
 	ti.Keys = append(ti.Keys, "name")
 	outputBuffer, _ := innerBufferedTestTrim(t, ti)
@@ -243,7 +243,7 @@ func TestTrimCdx14PreserveUnencodedChars(t *testing.T) {
 // Trim "keys" globally (entire BOM)
 // ----------------------------------------
 func TestTrimCdx14ComponentPropertiesSampleXXLBuffered(t *testing.T) {
-	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_4_SAMPLE_XXL_1, nil)
+	ti := NewTrimTestInfo(TEST_TRIM_CDX_1_4_SAMPLE_XXL_1, nil)
 	ti.Keys = append(ti.Keys, "properties")
 	outputBuffer, _ := innerBufferedTestTrim(t, ti)
 	// TODO: verify "after" trim lengths and content have removed properties
@@ -252,7 +252,7 @@ func TestTrimCdx14ComponentPropertiesSampleXXLBuffered(t *testing.T) {
 
 // TODO: enable for when we have a "from" parameter to limit trim scope
 func TestTrimCdx14ComponentPropertiesSampleXXL(t *testing.T) {
-	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_4_SAMPLE_XXL_1, nil)
+	ti := NewTrimTestInfo(TEST_TRIM_CDX_1_4_SAMPLE_XXL_1, nil)
 	ti.Keys = append(ti.Keys, "properties")
 	ti.FromPaths = []string{"metadata.component"}
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_TRIM_CDX_1_4_SAMPLE_XXL_1)
@@ -265,7 +265,7 @@ func TestTrimCdx14ComponentPropertiesSampleXXL(t *testing.T) {
 }
 
 func TestTrimCdx15MultipleKeys(t *testing.T) {
-	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_SAMPLE_SMALL_COMPS_ONLY, nil)
+	ti := NewTrimTestInfo(TEST_TRIM_CDX_1_5_SAMPLE_SMALL_COMPS_ONLY, nil)
 	ti.Keys = append(ti.Keys, "properties", "hashes", "version", "description", "name")
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_TRIM_CDX_1_5_SAMPLE_SMALL_COMPS_ONLY)
 	innerTestTrim(t, ti)
@@ -281,7 +281,7 @@ func TestTrimCdx15MultipleKeys(t *testing.T) {
 }
 
 func TestTrimCdx15Properties(t *testing.T) {
-	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1, nil)
+	ti := NewTrimTestInfo(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1, nil)
 	ti.Keys = append(ti.Keys, "properties")
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1)
 	innerTestTrim(t, ti)
@@ -297,7 +297,7 @@ func TestTrimCdx15Properties(t *testing.T) {
 // ----------------------------------------
 
 func TestTrimCdx15PropertiesFromMetadataComponent(t *testing.T) {
-	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1, nil)
+	ti := NewTrimTestInfo(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1, nil)
 	ti.Keys = append(ti.Keys, "properties")
 	ti.FromPaths = []string{"metadata.component"}
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1)
@@ -310,7 +310,7 @@ func TestTrimCdx15PropertiesFromMetadataComponent(t *testing.T) {
 }
 
 func TestTrimCdx15HashesFromTools(t *testing.T) {
-	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1, nil)
+	ti := NewTrimTestInfo(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1, nil)
 	ti.Keys = append(ti.Keys, "hashes")
 	ti.FromPaths = []string{"metadata.tools"}
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1)
@@ -323,7 +323,7 @@ func TestTrimCdx15HashesFromTools(t *testing.T) {
 }
 
 func TestTrimCdx15AllIncrementallyFromSmallSample(t *testing.T) {
-	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_SAMPLE_SMALL_COMPS_ONLY, nil)
+	ti := NewTrimTestInfo(TEST_TRIM_CDX_1_5_SAMPLE_SMALL_COMPS_ONLY, nil)
 	ti.Keys = append(ti.Keys, "type", "purl", "bom-ref", "serialNumber", "components", "name", "description", "properties")
 	ti.FromPaths = []string{""}
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_TRIM_CDX_1_5_SAMPLE_SMALL_COMPS_ONLY)
@@ -339,7 +339,7 @@ func TestTrimCdx15AllIncrementallyFromSmallSample(t *testing.T) {
 }
 
 func TestTrimCdx15FooFromTools(t *testing.T) {
-	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1, nil)
+	ti := NewTrimTestInfo(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1, nil)
 	ti.Keys = append(ti.Keys, "foo")
 	ti.FromPaths = []string{"metadata.tools"}
 	ti.OutputFile = ""  // ti.CreateTemporaryFilename(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1)
@@ -365,7 +365,7 @@ func TestTrimCdx15FooFromTools(t *testing.T) {
 }
 
 func TestTrimCdx14SourceFromVulnerabilities(t *testing.T) {
-	ti := NewTrimTestInfoBasic(TEST_TRIM_CDX_1_4_SAMPLE_VEX, nil)
+	ti := NewTrimTestInfo(TEST_TRIM_CDX_1_4_SAMPLE_VEX, nil)
 	ti.Keys = append(ti.Keys, "source")
 	ti.FromPaths = []string{"vulnerabilities"}
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_TRIM_CDX_1_4_SAMPLE_VEX)

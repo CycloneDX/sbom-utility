@@ -55,7 +55,7 @@ const (
 // -------------------------------------------
 
 func NewLicensePolicyTestInfoBasic(format string, listLineWrap bool) *LicenseTestInfo {
-	lti := NewLicenseTestInfoBasic("", format, TI_LIST_SUMMARY_FALSE)
+	lti := NewLicenseTestInfo("", format, TI_LIST_SUMMARY_FALSE)
 	lti.ListLineWrap = listLineWrap
 	return lti
 }
