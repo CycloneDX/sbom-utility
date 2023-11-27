@@ -258,7 +258,7 @@ func loadDocumentResources(document *schema.BOM, resourceType string, whereFilte
 
 // NOTE: This list is NOT de-duplicated
 // TODO: Add a --no-title flag to skip title output
-func DisplayResourceListText(bom *schema.BOM, output io.Writer) {
+func DisplayResourceListText(bom *schema.BOM, writer io.Writer) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -267,7 +267,7 @@ func DisplayResourceListText(bom *schema.BOM, output io.Writer) {
 	defer w.Flush()
 
 	// min-width, tab-width, padding, pad-char, flags
-	w.Init(output, 8, 2, 2, ' ', 0)
+	w.Init(writer, 8, 2, 2, ' ', 0)
 
 	// create underline row from compulsory titles
 	underlines := createTitleTextSeparators(RESOURCE_LIST_TITLES)
@@ -312,12 +312,12 @@ func DisplayResourceListText(bom *schema.BOM, output io.Writer) {
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplayResourceListCSV(bom *schema.BOM, output io.Writer) (err error) {
+func DisplayResourceListCSV(bom *schema.BOM, writer io.Writer) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	// initialize writer and prepare the list of entries (i.e., the "rows")
-	w := csv.NewWriter(output)
+	w := csv.NewWriter(writer)
 	defer w.Flush()
 
 	if err = w.Write(RESOURCE_LIST_TITLES); err != nil {
@@ -371,24 +371,24 @@ func DisplayResourceListCSV(bom *schema.BOM, output io.Writer) (err error) {
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplayResourceListMarkdown(bom *schema.BOM, output io.Writer) (err error) {
+func DisplayResourceListMarkdown(bom *schema.BOM, writer io.Writer) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	// create title row
 	titleRow := createMarkdownRow(RESOURCE_LIST_TITLES)
-	fmt.Fprintf(output, "%s\n", titleRow)
+	fmt.Fprintf(writer, "%s\n", titleRow)
 
 	alignments := createMarkdownColumnAlignment(RESOURCE_LIST_TITLES)
 	alignmentRow := createMarkdownRow(alignments)
-	fmt.Fprintf(output, "%s\n", alignmentRow)
+	fmt.Fprintf(writer, "%s\n", alignmentRow)
 
 	// Display a warning "missing" in the actual output and return (short-circuit)
 	entries := bom.ResourceMap.Entries()
 
 	// Emit no resource found warning into output
 	if len(entries) == 0 {
-		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_RESOURCES_FOUND)
+		fmt.Fprintf(writer, "%s\n", MSG_OUTPUT_NO_RESOURCES_FOUND)
 		return fmt.Errorf(MSG_OUTPUT_NO_RESOURCES_FOUND)
 	}
 
@@ -421,7 +421,7 @@ func DisplayResourceListMarkdown(bom *schema.BOM, output io.Writer) (err error) 
 		)
 
 		lineRow = createMarkdownRow(line)
-		fmt.Fprintf(output, "%s\n", lineRow)
+		fmt.Fprintf(writer, "%s\n", lineRow)
 	}
 
 	return

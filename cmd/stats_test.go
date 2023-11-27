@@ -40,8 +40,8 @@ type StatsTestInfo struct {
 }
 
 func (ti *StatsTestInfo) String() string {
-	pParent := &ti.CommonTestInfo
-	return pParent.String()
+	buffer, _ := utils.EncodeAnyToDefaultIndentedJSONStr(ti)
+	return buffer.String()
 }
 
 func NewStatsTestInfoBasic(inputFile string, listFormat string, resultExpectedError error) *StatsTestInfo {

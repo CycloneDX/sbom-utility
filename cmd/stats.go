@@ -201,7 +201,7 @@ func loadDocumentStatisticalEntities(document *schema.BOM, statsFlags utils.Stat
 
 // NOTE: This list is NOT de-duplicated
 // TODO: Add a --no-title flag to skip title output
-func DisplayStatsText(bom *schema.BOM, output io.Writer) {
+func DisplayStatsText(bom *schema.BOM, writer io.Writer) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -210,7 +210,7 @@ func DisplayStatsText(bom *schema.BOM, output io.Writer) {
 	defer w.Flush()
 
 	// min-width, tab-width, padding, pad-char, flags
-	w.Init(output, 8, 2, 2, ' ', 0)
+	w.Init(writer, 8, 2, 2, ' ', 0)
 
 	// create underline row from compulsory titles
 	underlines := createTitleTextSeparators(RESOURCE_LIST_TITLES)

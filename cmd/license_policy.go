@@ -245,7 +245,7 @@ func ListLicensePolicies(writer io.Writer, policyConfig *schema.LicensePolicyCon
 // NOTE: assumes all entries in the policy config file MUST have family names
 // TODO: Allow caller to pass flag to truncate or not (perhaps with value)
 // TODO: Add a --no-title flag to skip title output
-func DisplayLicensePoliciesTabbedText(output io.Writer, filteredPolicyMap *slicemultimap.MultiMap, flags utils.LicenseCommandFlags) (err error) {
+func DisplayLicensePoliciesTabbedText(writer io.Writer, filteredPolicyMap *slicemultimap.MultiMap, flags utils.LicenseCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -254,7 +254,7 @@ func DisplayLicensePoliciesTabbedText(output io.Writer, filteredPolicyMap *slice
 	defer w.Flush()
 
 	// min-width, tab-width, padding, pad-char, flags
-	w.Init(output, 8, 2, 2, ' ', 0)
+	w.Init(writer, 8, 2, 2, ' ', 0)
 
 	// create title row and underline row from slices of optional and compulsory titles
 	titles, underlines := prepareReportTitleData(LICENSE_POLICY_LIST_ROW_DATA, flags.Summary)
@@ -330,12 +330,12 @@ func DisplayLicensePoliciesTabbedText(output io.Writer, filteredPolicyMap *slice
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplayLicensePoliciesCSV(output io.Writer, filteredPolicyMap *slicemultimap.MultiMap, flags utils.LicenseCommandFlags) (err error) {
+func DisplayLicensePoliciesCSV(writer io.Writer, filteredPolicyMap *slicemultimap.MultiMap, flags utils.LicenseCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	// initialize writer and prepare the list of entries (i.e., the "rows")
-	w := csv.NewWriter(output)
+	w := csv.NewWriter(writer)
 	defer w.Flush()
 
 	// Create title row data as []string
@@ -351,7 +351,7 @@ func DisplayLicensePoliciesCSV(output io.Writer, filteredPolicyMap *slicemultima
 	// Emit no schemas found warning into output
 	// TODO Use only for Warning messages, do not emit in output table
 	if len(keyNames) == 0 {
-		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_POLICIES_FOUND)
+		fmt.Fprintf(writer, "%s\n", MSG_OUTPUT_NO_POLICIES_FOUND)
 		return fmt.Errorf(MSG_OUTPUT_NO_POLICIES_FOUND)
 	}
 
@@ -382,7 +382,7 @@ func DisplayLicensePoliciesCSV(output io.Writer, filteredPolicyMap *slicemultima
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplayLicensePoliciesMarkdown(output io.Writer, filteredPolicyMap *slicemultimap.MultiMap, flags utils.LicenseCommandFlags) (err error) {
+func DisplayLicensePoliciesMarkdown(writer io.Writer, filteredPolicyMap *slicemultimap.MultiMap, flags utils.LicenseCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -391,11 +391,11 @@ func DisplayLicensePoliciesMarkdown(output io.Writer, filteredPolicyMap *slicemu
 
 	// create title row
 	titleRow := createMarkdownRow(titles)
-	fmt.Fprintf(output, "%s\n", titleRow)
+	fmt.Fprintf(writer, "%s\n", titleRow)
 
 	alignments := createMarkdownColumnAlignment(titles)
 	alignmentRow := createMarkdownRow(alignments)
-	fmt.Fprintf(output, "%s\n", alignmentRow)
+	fmt.Fprintf(writer, "%s\n", alignmentRow)
 
 	// Retrieve keys for policies to list
 	keyNames := filteredPolicyMap.KeySet()
@@ -404,7 +404,7 @@ func DisplayLicensePoliciesMarkdown(output io.Writer, filteredPolicyMap *slicemu
 	// Emit no schemas found warning into output
 	// TODO Use only for Warning messages, do not emit in output table
 	if len(keyNames) == 0 {
-		fmt.Fprintf(output, "%s\n", MSG_OUTPUT_NO_POLICIES_FOUND)
+		fmt.Fprintf(writer, "%s\n", MSG_OUTPUT_NO_POLICIES_FOUND)
 		return fmt.Errorf(MSG_OUTPUT_NO_POLICIES_FOUND)
 	}
 
@@ -428,7 +428,7 @@ func DisplayLicensePoliciesMarkdown(output io.Writer, filteredPolicyMap *slicemu
 				flags.Summary,
 			)
 			lineRow = createMarkdownRow(line)
-			fmt.Fprintf(output, "%s\n", lineRow)
+			fmt.Fprintf(writer, "%s\n", lineRow)
 		}
 	}
 	return

@@ -63,7 +63,7 @@ type CDXMetadata struct {
 	Tools        interface{}                 `json:"tools,omitempty"`                               // v1.2: added.v1.5: "tools" is now an interface{}
 	Authors      *[]CDXOrganizationalContact `json:"authors,omitempty"`
 	Component    *CDXComponent               `json:"component,omitempty"`
-	Manufacturer *CDXOrganizationalEntity    `json:"manufacturer,omitempty"`
+	Manufacturer *CDXOrganizationalEntity    `json:"manufacture,omitempty"` // NOTE: Typo is in spec.
 	Supplier     *CDXOrganizationalEntity    `json:"supplier,omitempty"`
 	Licenses     *[]CDXLicenseChoice         `json:"licenses,omitempty"`   // v1.3 added
 	Properties   *[]CDXProperty              `json:"properties,omitempty"` // v1.3 added

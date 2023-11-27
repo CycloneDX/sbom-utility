@@ -59,7 +59,7 @@ type QueryRequest struct {
 
 // Implement the Stringer interface for QueryRequest
 func (qr *QueryRequest) String() string {
-	buffer, _ := utils.EncodeAnyToIndentedJSON(qr)
+	buffer, _ := utils.EncodeAnyToDefaultIndentedJSONStr(qr)
 	return buffer.String()
 }
 
@@ -279,7 +279,7 @@ type QueryResponse struct {
 
 // Implement the Stringer interface for QueryRequest
 func (qr *QueryResponse) String() string {
-	buffer, _ := utils.EncodeAnyToIndentedJSON(qr)
+	buffer, _ := utils.EncodeAnyToDefaultIndentedJSONStr(qr)
 	return buffer.String()
 }
 
@@ -301,7 +301,7 @@ type WhereFilter struct {
 
 // Implement the Stringer interface for QueryRequest
 func (filter *WhereFilter) String() string {
-	buffer, _ := utils.EncodeAnyToIndentedJSON(filter)
+	buffer, _ := utils.EncodeAnyToDefaultIndentedJSONStr(filter)
 	return buffer.String()
 }
 

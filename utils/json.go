@@ -22,6 +22,13 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"io"
+	"strings"
+)
+
+const (
+	DEFAULT_JSON_INDENT_STRING = "    "
+	DEFAULT_JSON_PREFIX_STRING = ""
 )
 
 func IsJsonMapType(any interface{}) (isMapType bool) {
@@ -67,35 +74,41 @@ func MarshalStructToJsonMap(any interface{}) (mapOut map[string]interface{}, err
 	return
 }
 
+// Creates strings of spaces based upon provided integer length (e.g., the --indent <length> flag)
+func GenerateIndentString(length int) (prefix string) {
+	var sb strings.Builder
+	for i := 0; i < length; i++ {
+		sb.WriteString(" ")
+	}
+	return sb.String()
+}
+
 // NOTE: Using this custom encoder avoids the json.Marshal() default
-// behavior of encoding utf8 characters such as: '@', '<', '>', etc.
-// as unicode.
-func EncodeAnyToIndentedJSON(any interface{}) (outputBuffer bytes.Buffer, err error) {
+// behavior of encoding utf8 characters such as: '@', '<', '>', etc. as unicode.
+func EncodeAnyToIndentedJSONStr(any interface{}, indent string) (outputBuffer bytes.Buffer, err error) {
 	bufferedWriter := bufio.NewWriter(&outputBuffer)
 	encoder := json.NewEncoder(bufferedWriter)
 	encoder.SetEscapeHTML(false)
-	encoder.SetIndent("", "    ")
+	encoder.SetIndent(DEFAULT_JSON_PREFIX_STRING, indent)
 	err = encoder.Encode(any)
 	// MUST ensure all data is written to buffer before further testing
 	bufferedWriter.Flush()
 	return
 }
 
-// TODO: function NOT complete, only placeholder type switch
-// TODO: allow generic function to be applied to types
-// func PrintTypes(values ...interface{}) {
-// 	for index, value := range values {
-// 		switch t := value.(type) {
-// 		case nil:
-// 		case int:
-// 		case uint:
-// 		case int32:
-// 		case int64:
-// 		case uint64:
-// 		case float32:
-// 		case float64:
-// 		case string:
-// 		case bool:
-// 		}
-// 	}
-// }
+func EncodeAnyToDefaultIndentedJSONStr(any interface{}) (outputBuffer bytes.Buffer, err error) {
+	return EncodeAnyToIndentedJSONStr(any, DEFAULT_JSON_INDENT_STRING)
+}
+
+func EncodeAnyToIndentedJSONInt(any interface{}, numSpaces int) (outputBuffer bytes.Buffer, err error) {
+	indentString := GenerateIndentString(numSpaces)
+	return EncodeAnyToIndentedJSONStr(any, indentString)
+}
+
+func WriteAnyAsEncodedJSONInt(writer io.Writer, any interface{}, numSpaces int) (outputBuffer bytes.Buffer, err error) {
+	outputBuffer, err = EncodeAnyToIndentedJSONInt(any, numSpaces)
+	if writer != nil && err == nil {
+		_, err = writer.Write(outputBuffer.Bytes())
+	}
+	return
+}

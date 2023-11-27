@@ -21,7 +21,6 @@ package cmd
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io/fs"
 	"log"
 	"os"
@@ -45,18 +44,18 @@ type ResourceTestInfo struct {
 }
 
 func (ti *ResourceTestInfo) String() string {
-	pParent := &ti.CommonTestInfo
-	return fmt.Sprintf("%s, %s", pParent.String(), ti.ResourceType)
+	buffer, _ := utils.EncodeAnyToDefaultIndentedJSONStr(ti)
+	return buffer.String()
 }
 
 func NewResourceTestInfo(inputFile string, outputFormat string, listSummary bool, whereClause string,
-	resultContainsValues []string, resultExpectedLineCount int, resultExpectedError error, resourceType string) *ResourceTestInfo {
+	resultExpectedLineCount int, resourceType string) *ResourceTestInfo {
 
 	var ti = new(ResourceTestInfo)
 	var pCommon = &ti.CommonTestInfo
 	// initialize common fields
 	pCommon.Init(inputFile, outputFormat, listSummary, whereClause,
-		resultContainsValues, resultExpectedLineCount, resultExpectedError)
+		nil, resultExpectedLineCount, nil)
 	// Initialize resource-unique fields
 	ti.ResourceType = resourceType
 	return ti
@@ -205,8 +204,7 @@ func TestResourceListTextCdx14SaaS(t *testing.T) {
 		TEST_RESOURCE_LIST_CDX_1_4_SAAS_1,
 		FORMAT_TEXT,
 		nil, // no error
-		schema.RESOURCE_TYPE_COMPONENT,
-	)
+		schema.RESOURCE_TYPE_COMPONENT)
 
 	innerTestResourceList(t, rti)
 }
@@ -224,11 +222,8 @@ func TestResourceListTextCdx13WhereClauseAndResultsByNameStartswith(t *testing.T
 		FORMAT_TEXT,
 		TI_LIST_SUMMARY_FALSE,
 		TEST_INPUT_WHERE_CLAUSE,
-		nil,
 		TEST_OUTPUT_LINES,
-		nil,
-		schema.RESOURCE_TYPE_COMPONENT,
-	)
+		schema.RESOURCE_TYPE_COMPONENT)
 	rti.ResultLineContainsValues = TEST_OUTPUT_CONTAINS
 	rti.ResultLineContainsValuesAtLineNum = 2
 	innerTestResourceList(t, rti)
@@ -244,11 +239,8 @@ func TestResourceListTextCdx13WhereClauseAndResultsByNameContains(t *testing.T) 
 		FORMAT_TEXT,
 		TI_LIST_SUMMARY_FALSE,
 		TEST_INPUT_WHERE_CLAUSE,
-		nil,
 		TEST_OUTPUT_LINES,
-		nil,
-		schema.RESOURCE_TYPE_COMPONENT,
-	)
+		schema.RESOURCE_TYPE_COMPONENT)
 	rti.ResultLineContainsValues = TEST_OUTPUT_CONTAINS
 	rti.ResultLineContainsValuesAtLineNum = 2
 	innerTestResourceList(t, rti)
@@ -264,11 +256,8 @@ func TestResourceListTextCdx13WhereClauseAndResultsBomRefContains(t *testing.T) 
 		FORMAT_TEXT,
 		TI_LIST_SUMMARY_FALSE,
 		TEST_INPUT_WHERE_CLAUSE,
-		nil,
 		TEST_OUTPUT_LINES,
-		nil,
-		schema.RESOURCE_TYPE_COMPONENT,
-	)
+		schema.RESOURCE_TYPE_COMPONENT)
 	rti.ResultLineContainsValues = TEST_OUTPUT_CONTAINS
 	rti.ResultLineContainsValuesAtLineNum = 10
 	innerTestResourceList(t, rti)
@@ -284,11 +273,8 @@ func TestResourceListTextCdx13WhereClauseAndResultsVersionStartswith(t *testing.
 		FORMAT_TEXT,
 		TI_LIST_SUMMARY_FALSE,
 		TEST_INPUT_WHERE_CLAUSE,
-		nil,
 		TEST_OUTPUT_LINES,
-		nil,
-		schema.RESOURCE_TYPE_COMPONENT,
-	)
+		schema.RESOURCE_TYPE_COMPONENT)
 	rti.ResultLineContainsValues = TEST_OUTPUT_CONTAINS
 	rti.ResultLineContainsValuesAtLineNum = 2
 	innerTestResourceList(t, rti)
@@ -304,11 +290,8 @@ func TestResourceListTextCdx13WhereClauseAndResultsNone(t *testing.T) {
 		FORMAT_TEXT,
 		TI_LIST_SUMMARY_FALSE,
 		TEST_INPUT_WHERE_CLAUSE,
-		nil,
 		TEST_OUTPUT_LINES,
-		nil,
-		schema.RESOURCE_TYPE_SERVICE,
-	)
+		schema.RESOURCE_TYPE_SERVICE)
 	rti.ResultLineContainsValues = TEST_OUTPUT_CONTAINS
 	rti.ResultLineContainsValuesAtLineNum = 2
 

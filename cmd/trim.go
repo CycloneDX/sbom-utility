@@ -34,14 +34,6 @@ const (
 	FLAG_TRIM_MAP_KEYS   = "keys"
 )
 
-// TODO: make flag configurable:
-// NOTE: 4-space indent is accepted convention:
-// https://docs.openstack.org/doc-contrib-guide/json-conv.html
-const (
-	TRIM_OUTPUT_PREFIX = ""
-	TRIM_OUTPUT_INDENT = "    "
-)
-
 // flag help (translate)
 const (
 	FLAG_TRIM_OUTPUT_FORMAT_HELP = "format output using the specified type"
@@ -64,8 +56,8 @@ const (
 func NewCommandTrim() *cobra.Command {
 	var command = new(cobra.Command)
 	command.Use = CMD_USAGE_TRIM
-	command.Short = "(experimental) Trim elements from the BOM input file and write to output file"
-	command.Long = "(experimental) Trim elements from the BOM input file and write to output file"
+	command.Short = "(experimental) Trim elements from the BOM input file and write resultant BOM to output"
+	command.Long = "(experimental) Trim elements from the BOM input file and write resultant BOM to output"
 	command.RunE = trimCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		// Test for required flags (parameters)
@@ -190,7 +182,7 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 
 			if errQuery != nil {
 				getLogger().Errorf("query error: invalid path: %s", path)
-				buffer, errEncode := utils.EncodeAnyToIndentedJSON(result)
+				buffer, errEncode := utils.EncodeAnyToDefaultIndentedJSONStr(result)
 				if errEncode != nil {
 					getLogger().Tracef("result: %s", buffer.String())
 				}
@@ -209,18 +201,18 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 		return
 	}
 
-	// TODO: include formatting (i.e., prefix, indent) as command line flags
 	// Output the "trimmed" version of the Input BOM
 	format := persistentFlags.OutputFormat
 	getLogger().Infof("Outputting listing (`%s` format)...", format)
+	indentString := utils.GenerateIndentString(int(utils.GlobalFlags.PersistentFlags.OutputIndent))
 	switch format {
 	case FORMAT_JSON:
-		err = document.EncodeAsFormattedJSON(writer, TRIM_OUTPUT_PREFIX, TRIM_OUTPUT_INDENT)
+		err = document.EncodeAsFormattedJSON(writer, utils.DEFAULT_JSON_PREFIX_STRING, indentString)
 	default:
 		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Trim not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_JSON)
-		err = document.EncodeAsFormattedJSON(writer, TRIM_OUTPUT_PREFIX, TRIM_OUTPUT_INDENT)
+		err = document.EncodeAsFormattedJSON(writer, utils.DEFAULT_JSON_PREFIX_STRING, indentString)
 	}
 
 	return

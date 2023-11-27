@@ -78,14 +78,15 @@ const (
 	FLAG_FILENAME_OUTPUT_SHORT    = "o"
 	FLAG_QUIET_MODE               = "quiet"
 	FLAG_QUIET_MODE_SHORT         = "q"
-	FLAG_LOG_OUTPUT_INDENT        = "indent"
+	FLAG_OUTPUT_INDENT            = "indent"
+	FLAG_LOG_OUTPUT_INDENT        = "log-indent"
 	FLAG_FILE_OUTPUT_FORMAT       = "format"
 	FLAG_COLORIZE_OUTPUT          = "colorize"
 )
 
 const (
 	MSG_APP_NAME            = "Bill-of-Materials (BOM) utility."
-	MSG_APP_DESCRIPTION     = "This utility serves as centralized command line interface into various Software Bill-of-Materials (SBOM) helper utilities."
+	MSG_APP_DESCRIPTION     = "This utility serves as centralized command-line interface for various Bill-of-Materials (BOM) helper utilities."
 	MSG_FLAG_TRACE          = "enable trace logging"
 	MSG_FLAG_DEBUG          = "enable debug logging"
 	MSG_FLAG_INPUT          = "input filename (e.g., \"path/sbom.json\")"
@@ -94,6 +95,7 @@ const (
 	MSG_FLAG_LOG_INDENT     = "enable log indentation of functional callstack"
 	MSG_FLAG_CONFIG_SCHEMA  = "provide custom application schema configuration file (i.e., overrides default `config.json`)"
 	MSG_FLAG_CONFIG_LICENSE = "provide custom application license policy configuration file (i.e., overrides default `license.json`)"
+	MSG_FLAG_OUTPUT_INDENT  = "number of space characters used to indent JSON formatted output"
 )
 
 const (
@@ -115,6 +117,13 @@ const (
 	FORMAT_CSV      = "csv"
 	FORMAT_MARKDOWN = "md"
 	FORMAT_ANY      = "<any>" // Used for test errors
+)
+
+// TODO: make flag configurable:
+// NOTE: 4-space indent is accepted convention:
+// https://docs.openstack.org/doc-contrib-guide/json-conv.html
+const (
+	DEFAULT_OUTPUT_INDENT_LENGTH = 4
 )
 
 // Command reserved values
@@ -179,6 +188,9 @@ func init() {
 
 	// Optionally, allow log callstack trace to be indented
 	rootCmd.PersistentFlags().BoolVarP(&utils.GlobalFlags.LogOutputIndentCallstack, FLAG_LOG_OUTPUT_INDENT, "", false, MSG_FLAG_LOG_INDENT)
+
+	// Output (JSON) indent
+	rootCmd.PersistentFlags().Uint8VarP(&utils.GlobalFlags.PersistentFlags.OutputIndent, FLAG_OUTPUT_INDENT, "", DEFAULT_OUTPUT_INDENT_LENGTH, MSG_FLAG_OUTPUT_INDENT)
 
 	// Add root commands
 	rootCmd.AddCommand(NewCommandVersion())

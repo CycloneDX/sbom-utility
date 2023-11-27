@@ -21,7 +21,6 @@ package cmd
 import (
 	"bytes"
 	"flag"
-	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -59,25 +58,48 @@ var TestLogQuiet = flag.Bool(FLAG_QUIET_MODE, false, "")
 
 type CommonTestInfo struct {
 	InputFile                         string
+	ListSummary                       bool
 	OutputFile                        string
 	OutputFormat                      string
-	ListSummary                       bool
+	OutputIndent                      uint8
 	WhereClause                       string
+	ResultExpectedByteSize            int
 	ResultExpectedError               error
+	ResultExpectedIndentLength        int
+	ResultExpectedIndentAtLineNum     int
 	ResultExpectedLineCount           int
-	ResultLineContainsValuesAtLineNum int
 	ResultLineContainsValues          []string
+	ResultLineContainsValuesAtLineNum int
+	Autofail                          bool
 	MockStdin                         bool
-	TestOutputVariantName             string
-	TestOutputExpectedByteSize        int
 }
+
+// defaults for TestInfo struct values
+const (
+	TI_LIST_SUMMARY_FALSE           = false
+	TI_LIST_LINE_WRAP               = false
+	TI_DEFAULT_WHERE_CLAUSE         = ""
+	TI_DEFAULT_POLICY_FILE          = ""
+	TI_DEFAULT_JSON_INDENT          = DEFAULT_OUTPUT_INDENT_LENGTH // 4
+	TI_RESULT_DEFAULT_LINE_COUNT    = -1
+	TI_RESULT_DEFAULT_LINE_CONTAINS = -1 // NOTE: -1 means "any" line
+)
 
 func NewCommonTestInfo() *CommonTestInfo {
 	var ti = new(CommonTestInfo)
+	ti.OutputIndent = TI_DEFAULT_JSON_INDENT
+	ti.ResultExpectedLineCount = TI_RESULT_DEFAULT_LINE_COUNT
+	ti.ResultLineContainsValuesAtLineNum = TI_RESULT_DEFAULT_LINE_CONTAINS
 	return ti
 }
 
-func NewCommonTestInfoBasic(inputFile string, whereClause string, listFormat string, listSummary bool) *CommonTestInfo {
+func NewCommonTestInfoBasic(inputFile string) *CommonTestInfo {
+	var ti = NewCommonTestInfo()
+	ti.InputFile = inputFile
+	return ti
+}
+
+func NewCommonTestInfoBasicList(inputFile string, whereClause string, listFormat string, listSummary bool) *CommonTestInfo {
 	var ti = NewCommonTestInfo()
 	ti.InputFile = inputFile
 	ti.WhereClause = whereClause
@@ -86,27 +108,20 @@ func NewCommonTestInfoBasic(inputFile string, whereClause string, listFormat str
 	return ti
 }
 
-// default (empty) TestInfo struct values
-const (
-	TI_LIST_SUMMARY_FALSE   = false
-	TI_LIST_LINE_WRAP       = false
-	TI_DEFAULT_WHERE_CLAUSE = ""
-	TI_DEFAULT_LINE_COUNT   = -1
-	TI_DEFAULT_POLICY_FILE  = ""
-)
-
 // Stringer interface for ResourceTestInfo (just display subset of key values)
 func (ti *CommonTestInfo) String() string {
-	return fmt.Sprintf("InputFile: `%s`, Format: `%s`, WhereClause: `%s`, ListSummary: `%v`",
-		ti.InputFile, ti.OutputFormat, ti.WhereClause, ti.ListSummary)
+	buffer, _ := utils.EncodeAnyToDefaultIndentedJSONStr(ti)
+	return buffer.String()
 }
 
 func (ti *CommonTestInfo) Init(inputFile string, listFormat string, listSummary bool, whereClause string,
 	resultContainsValues []string, resultExpectedLineCount int, resultExpectedError error) *CommonTestInfo {
 	ti.InputFile = inputFile
 	ti.OutputFormat = listFormat
+	ti.OutputIndent = TI_DEFAULT_JSON_INDENT
 	ti.ListSummary = listSummary
 	ti.WhereClause = whereClause
+	ti.ResultLineContainsValuesAtLineNum = TI_RESULT_DEFAULT_LINE_CONTAINS
 	ti.ResultExpectedLineCount = resultExpectedLineCount
 	ti.ResultExpectedError = resultExpectedError
 	return ti
@@ -114,19 +129,20 @@ func (ti *CommonTestInfo) Init(inputFile string, listFormat string, listSummary 
 
 func (ti *CommonTestInfo) InitBasic(inputFile string, format string, expectedError error) *CommonTestInfo {
 	ti.Init(inputFile, format, TI_LIST_SUMMARY_FALSE, TI_DEFAULT_WHERE_CLAUSE,
-		nil, TI_DEFAULT_LINE_COUNT, expectedError)
+		nil, TI_RESULT_DEFAULT_LINE_COUNT, expectedError)
 	return ti
 }
 
-func (ti *CommonTestInfo) CreateTemporaryFilename(relativeFilename string) (tempFilename string) {
+func (ti *CommonTestInfo) CreateTemporaryTestOutputFilename(relativeFilename string) (tempFilename string) {
+	testFunctionName := utils.GetCallerFunctionName(3)
 	trimmedFilename := strings.TrimLeft(relativeFilename, strconv.QuoteRune(os.PathSeparator))
-	if ti.TestOutputVariantName != "" {
+	if testFunctionName != "" {
 		lastIndex := strings.LastIndex(trimmedFilename, string(os.PathSeparator))
 		// insert variant as last path...
 		if lastIndex > 0 {
 			path := trimmedFilename[0:lastIndex]
 			base := trimmedFilename[lastIndex:]
-			trimmedFilename = path + string(os.PathSeparator) + ti.TestOutputVariantName + base
+			trimmedFilename = path + string(os.PathSeparator) + testFunctionName + base
 		}
 	}
 	return DEFAULT_TEMP_OUTPUT_PATH + trimmedFilename
@@ -235,7 +251,7 @@ func prepareWhereFilters(t *testing.T, testInfo *CommonTestInfo) (whereFilters [
 	if testInfo.WhereClause != "" {
 		whereFilters, err = retrieveWhereFilters(testInfo.WhereClause)
 		if err != nil {
-			t.Errorf("test failed: %s: detail: %s ", testInfo.String(), err.Error())
+			t.Errorf("test failed: %s: detail: %s ", testInfo, err.Error())
 			return
 		}
 	}
@@ -244,7 +260,8 @@ func prepareWhereFilters(t *testing.T, testInfo *CommonTestInfo) (whereFilters [
 
 const RESULT_LINE_CONTAINS_ANY = -1
 
-func lineContainsValues(buffer bytes.Buffer, lineNum int, values ...string) (int, bool) {
+func bufferLineContainsValues(buffer bytes.Buffer, lineNum int, values ...string) (int, bool) {
+
 	lines := strings.Split(buffer.String(), "\n")
 	getLogger().Tracef("output: %s", lines)
 
@@ -284,12 +301,21 @@ func bufferContainsValues(buffer bytes.Buffer, values ...string) bool {
 	return true
 }
 
-// TODO: find a better way using some log package feature
-func printMarshaledResultOnlyIfNotQuiet(iResult interface{}) {
-	if !*TestLogQuiet {
-		// Format results in JSON
-		fResult, _ := utils.MarshalAnyToFormattedJsonString(iResult)
-		// Output the JSON data directly to stdout (not subject to log-level)
-		fmt.Printf("%s\n", fResult)
+func numberOfLeadingSpaces(line string) (numSpaces int) {
+	for _, ch := range line {
+		if ch == ' ' {
+			numSpaces++
+		} else {
+			break
+		}
 	}
+	return
+}
+
+func getBufferLinesAndCount(buffer bytes.Buffer) (numLines int, lines []string) {
+	if buffer.Len() > 0 {
+		lines = strings.Split(buffer.String(), "\n")
+		numLines = len(lines)
+	}
+	return
 }
