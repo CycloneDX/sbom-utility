@@ -370,7 +370,7 @@ func (bom *BOM) MarshalCycloneDXBOM(writer io.Writer, prefix string, indent stri
 // '<' is encoded as: \u003c
 // '>' is encoded as: \u003e
 // Instead, this custom encoder method dutifully preserves the input byte values
-func (bom *BOM) EncodeAsFormattedJSON(writer io.Writer, prefix string, indent string) (err error) {
+func (bom *BOM) WriteAsEncodedJSON(writer io.Writer, prefix string, indent string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 

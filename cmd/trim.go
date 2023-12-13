@@ -56,8 +56,8 @@ const (
 func NewCommandTrim() *cobra.Command {
 	var command = new(cobra.Command)
 	command.Use = CMD_USAGE_TRIM
-	command.Short = "(experimental) Trim elements from the BOM input file and write resultant BOM to output"
-	command.Long = "(experimental) Trim elements from the BOM input file and write resultant BOM to output"
+	command.Short = "Trim elements from the BOM input file and write resultant BOM to output"
+	command.Long = "Trim elements from the BOM input file and write resultant BOM to output"
 	command.RunE = trimCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		// Test for required flags (parameters)
@@ -207,12 +207,12 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 	indentString := utils.GenerateIndentString(int(utils.GlobalFlags.PersistentFlags.OutputIndent))
 	switch format {
 	case FORMAT_JSON:
-		err = document.EncodeAsFormattedJSON(writer, utils.DEFAULT_JSON_PREFIX_STRING, indentString)
+		err = document.WriteAsEncodedJSON(writer, utils.DEFAULT_JSON_PREFIX_STRING, indentString)
 	default:
 		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Trim not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_JSON)
-		err = document.EncodeAsFormattedJSON(writer, utils.DEFAULT_JSON_PREFIX_STRING, indentString)
+		err = document.WriteAsEncodedJSON(writer, utils.DEFAULT_JSON_PREFIX_STRING, indentString)
 	}
 
 	return
