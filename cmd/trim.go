@@ -194,7 +194,7 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 	// TODO: Investigate if we can simply Marshal the JSON map directly (performance).
 	// NOTE: Today we unmarshal() to ensure empty/zero fields are omitted via
 	// the custom marshal/unmarshal functions for CycloneDX.
-	// NOTE: If we do want to "validate" the BOM data at some point we MAY
+	// NOTE: If we do want to "validate" the BOM data at some point, we MAY
 	// need to unmarshal into CDX structures regardless.
 	// Fully unmarshal the SBOM into named structures
 	if err = document.UnmarshalCycloneDXBOM(); err != nil {
@@ -203,16 +203,18 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 
 	// Output the "trimmed" version of the Input BOM
 	format := persistentFlags.OutputFormat
-	getLogger().Infof("Outputting listing (`%s` format)...", format)
-	indentString := utils.GenerateIndentString(int(utils.GlobalFlags.PersistentFlags.OutputIndent))
+	getLogger().Infof("Writing trimmed BOM (`%s` format)...", format)
+	//indentString := utils.GenerateIndentString(utils.GlobalFlags.PersistentFlags.GetOutputIndentInt())
 	switch format {
 	case FORMAT_JSON:
-		err = document.WriteAsEncodedJSON(writer, utils.DEFAULT_JSON_PREFIX_STRING, indentString)
+		//err = document.WriteAsEncodedJSON(writer, utils.DEFAULT_JSON_PREFIX_STRING, indentString)
+		err = document.WriteAsEncodedJSONInt(writer, utils.GlobalFlags.PersistentFlags.GetOutputIndentInt())
 	default:
 		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Trim not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_JSON)
-		err = document.WriteAsEncodedJSON(writer, utils.DEFAULT_JSON_PREFIX_STRING, indentString)
+		//err = document.WriteAsEncodedJSON(writer, utils.DEFAULT_JSON_PREFIX_STRING, indentString)
+		err = document.WriteAsEncodedJSONInt(writer, utils.GlobalFlags.PersistentFlags.GetOutputIndentInt())
 	}
 
 	return

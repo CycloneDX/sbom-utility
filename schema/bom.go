@@ -370,6 +370,7 @@ func (bom *BOM) MarshalCycloneDXBOM(writer io.Writer, prefix string, indent stri
 // '<' is encoded as: \u003c
 // '>' is encoded as: \u003e
 // Instead, this custom encoder method dutifully preserves the input byte values
+// TODO: Support "--prefix string"; prefix parameter currently ignored
 func (bom *BOM) WriteAsEncodedJSON(writer io.Writer, prefix string, indent string) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
@@ -386,5 +387,10 @@ func (bom *BOM) WriteAsEncodedJSON(writer io.Writer, prefix string, indent strin
 	}
 	getLogger().Tracef("wrote [%v] bytes to output", numBytes)
 
+	return
+}
+
+func (bom *BOM) WriteAsEncodedJSONInt(writer io.Writer, numSpaces int) (err error) {
+	_, err = utils.WriteAnyAsEncodedJSONInt(writer, bom.CdxBom, numSpaces)
 	return
 }
