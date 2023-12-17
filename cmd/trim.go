@@ -204,16 +204,13 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 	// Output the "trimmed" version of the Input BOM
 	format := persistentFlags.OutputFormat
 	getLogger().Infof("Writing trimmed BOM (`%s` format)...", format)
-	//indentString := utils.GenerateIndentString(utils.GlobalFlags.PersistentFlags.GetOutputIndentInt())
 	switch format {
 	case FORMAT_JSON:
-		//err = document.WriteAsEncodedJSON(writer, utils.DEFAULT_JSON_PREFIX_STRING, indentString)
 		err = document.WriteAsEncodedJSONInt(writer, utils.GlobalFlags.PersistentFlags.GetOutputIndentInt())
 	default:
 		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Trim not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_JSON)
-		//err = document.WriteAsEncodedJSON(writer, utils.DEFAULT_JSON_PREFIX_STRING, indentString)
 		err = document.WriteAsEncodedJSONInt(writer, utils.GlobalFlags.PersistentFlags.GetOutputIndentInt())
 	}
 
