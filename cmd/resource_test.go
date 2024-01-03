@@ -216,13 +216,13 @@ func TestResourceListTextCdx14SaaS(t *testing.T) {
 func TestResourceListTextCdx13WhereClauseAndResultsByNameStartswith(t *testing.T) {
 	TEST_INPUT_WHERE_CLAUSE := "name=Library A"
 	TEST_OUTPUT_CONTAINS := []string{"component", "Library A", "1.0.0", "pkg:lib/libraryA@1.0.0"}
-	TEST_OUTPUT_LINES := 3
+	EXPECTED_OUTPUT_LINE_COUNT := 4
 	rti := NewResourceTestInfo(
 		TEST_RESOURCE_LIST_CDX_1_3,
 		FORMAT_TEXT,
 		TI_LIST_SUMMARY_FALSE,
 		TEST_INPUT_WHERE_CLAUSE,
-		TEST_OUTPUT_LINES,
+		EXPECTED_OUTPUT_LINE_COUNT,
 		schema.RESOURCE_TYPE_COMPONENT)
 	rti.ResultLineContainsValues = TEST_OUTPUT_CONTAINS
 	rti.ResultLineContainsValuesAtLineNum = 2
@@ -232,14 +232,14 @@ func TestResourceListTextCdx13WhereClauseAndResultsByNameStartswith(t *testing.T
 func TestResourceListTextCdx13WhereClauseAndResultsByNameContains(t *testing.T) {
 	TEST_INPUT_WHERE_CLAUSE := "name=^.*\\sF.*$"
 	TEST_OUTPUT_CONTAINS := []string{"component", "Library F", "1.0.0", "pkg:lib/libraryF@1.0.0"}
-	TEST_OUTPUT_LINES := 3
+	EXPECTED_OUTPUT_LINE_COUNT := 4
 
 	rti := NewResourceTestInfo(
 		TEST_RESOURCE_LIST_CDX_1_3,
 		FORMAT_TEXT,
 		TI_LIST_SUMMARY_FALSE,
 		TEST_INPUT_WHERE_CLAUSE,
-		TEST_OUTPUT_LINES,
+		EXPECTED_OUTPUT_LINE_COUNT,
 		schema.RESOURCE_TYPE_COMPONENT)
 	rti.ResultLineContainsValues = TEST_OUTPUT_CONTAINS
 	rti.ResultLineContainsValuesAtLineNum = 2
@@ -249,14 +249,14 @@ func TestResourceListTextCdx13WhereClauseAndResultsByNameContains(t *testing.T) 
 func TestResourceListTextCdx13WhereClauseAndResultsBomRefContains(t *testing.T) {
 	TEST_INPUT_WHERE_CLAUSE := "bom-ref=^.*library.*$"
 	TEST_OUTPUT_CONTAINS := []string{"component", "Library J", "1.0.0", "pkg:lib/libraryJ@1.0.0"}
-	TEST_OUTPUT_LINES := 12
+	EXPECTED_OUTPUT_LINE_COUNT := 13
 
 	rti := NewResourceTestInfo(
 		TEST_RESOURCE_LIST_CDX_1_3,
 		FORMAT_TEXT,
 		TI_LIST_SUMMARY_FALSE,
 		TEST_INPUT_WHERE_CLAUSE,
-		TEST_OUTPUT_LINES,
+		EXPECTED_OUTPUT_LINE_COUNT,
 		schema.RESOURCE_TYPE_COMPONENT)
 	rti.ResultLineContainsValues = TEST_OUTPUT_CONTAINS
 	rti.ResultLineContainsValuesAtLineNum = 10
@@ -266,14 +266,14 @@ func TestResourceListTextCdx13WhereClauseAndResultsBomRefContains(t *testing.T) 
 func TestResourceListTextCdx13WhereClauseAndResultsVersionStartswith(t *testing.T) {
 	TEST_INPUT_WHERE_CLAUSE := "version=2.0"
 	TEST_OUTPUT_CONTAINS := []string{"component", "ACME Application", "2.0.0", "pkg:app/sample@1.0.0"}
-	TEST_OUTPUT_LINES := 3
+	EXPECTED_OUTPUT_LINE_COUNT := 4
 
 	rti := NewResourceTestInfo(
 		TEST_RESOURCE_LIST_CDX_1_3,
 		FORMAT_TEXT,
 		TI_LIST_SUMMARY_FALSE,
 		TEST_INPUT_WHERE_CLAUSE,
-		TEST_OUTPUT_LINES,
+		EXPECTED_OUTPUT_LINE_COUNT,
 		schema.RESOURCE_TYPE_COMPONENT)
 	rti.ResultLineContainsValues = TEST_OUTPUT_CONTAINS
 	rti.ResultLineContainsValuesAtLineNum = 2
@@ -283,14 +283,14 @@ func TestResourceListTextCdx13WhereClauseAndResultsVersionStartswith(t *testing.
 func TestResourceListTextCdx13WhereClauseAndResultsNone(t *testing.T) {
 	TEST_INPUT_WHERE_CLAUSE := "version=2.0"
 	TEST_OUTPUT_CONTAINS := []string{MSG_OUTPUT_NO_RESOURCES_FOUND}
-	TEST_OUTPUT_LINES := 3
+	EXPECTED_OUTPUT_LINE_COUNT := 4
 
 	rti := NewResourceTestInfo(
 		TEST_RESOURCE_LIST_CDX_1_3,
 		FORMAT_TEXT,
 		TI_LIST_SUMMARY_FALSE,
 		TEST_INPUT_WHERE_CLAUSE,
-		TEST_OUTPUT_LINES,
+		EXPECTED_OUTPUT_LINE_COUNT,
 		schema.RESOURCE_TYPE_SERVICE)
 	rti.ResultLineContainsValues = TEST_OUTPUT_CONTAINS
 	rti.ResultLineContainsValuesAtLineNum = 2

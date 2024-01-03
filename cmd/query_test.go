@@ -508,7 +508,7 @@ func TestQueryCdx14MetadataToolsSliceWhereName(t *testing.T) {
 func TestQueryCdx14MetadataComponentIndent(t *testing.T) {
 	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
 	cti.ResultExpectedLineCount = 6
-	cti.ResultExpectedIndentLength = 4
+	cti.ResultExpectedIndentLength = DEFAULT_OUTPUT_INDENT_LENGTH
 	cti.ResultExpectedIndentAtLineNum = 1
 	request, _ := common.NewQueryRequestSelectFrom(
 		"name,description,version",
@@ -517,22 +517,16 @@ func TestQueryCdx14MetadataComponentIndent(t *testing.T) {
 	// Verify that JSON returned by the query command is able to apply default space indent
 	results, _ := innerQueryError(t, cti, request, nil)
 	buffer, _ := utils.EncodeAnyToIndentedJSONStr(results, utils.DEFAULT_JSON_INDENT_STRING)
-	numLines, lines := getBufferLinesAndCount(buffer)
-
-	if numLines != cti.ResultExpectedLineCount {
-		t.Errorf("invalid test result: expected: `%v` lines, actual: `%v", cti.ResultExpectedLineCount, numLines)
-	}
-	if numLines > cti.ResultExpectedIndentAtLineNum {
-		line := lines[cti.ResultExpectedIndentAtLineNum]
-		if spaceCount := numberOfLeadingSpaces(line); spaceCount != cti.ResultExpectedIndentLength {
-			t.Errorf("invalid test result: expected indent:`%v`, actual: `%v", cti.ResultExpectedIndentLength, spaceCount)
-		}
-	}
+	// Validate output data
+	verifyFileLineCountAndIndentation(t, buffer, cti)
 }
 
 func TestQueryCdx14MetadataComponentIndentedFileWrite(t *testing.T) {
 	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
 	cti.OutputFile = cti.CreateTemporaryTestOutputFilename(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti.ResultExpectedLineCount = 6
+	cti.ResultExpectedIndentLength = DEFAULT_OUTPUT_INDENT_LENGTH
+	cti.ResultExpectedIndentAtLineNum = 1
 	request, _ := common.NewQueryRequestSelectFrom(
 		"name,description,version",
 		"metadata.component")
@@ -540,4 +534,12 @@ func TestQueryCdx14MetadataComponentIndentedFileWrite(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
+	var pBuffer *bytes.Buffer
+	pBuffer, err = bufferFile(cti.OutputFile)
+	if err != nil {
+		t.Error(err)
+	}
+	// Validate output data
+	verifyFileLineCountAndIndentation(t, *pBuffer, cti)
 }

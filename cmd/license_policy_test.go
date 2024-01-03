@@ -510,7 +510,7 @@ func TestLicensePolicyMatchByFamilyNameBadExpression(t *testing.T) {
 
 func TestLicensePolicyListWrapFalse(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
-	lti.ResultExpectedLineCount = 249 // title and data rows
+	lti.ResultExpectedLineCount = 250 // title and data rows
 	// Verify first data row has expected values
 	// sanity (spot) check row values
 	lti.ResultLineContainsValuesAtLineNum = 2
@@ -523,7 +523,7 @@ func TestLicensePolicyListWrapFalse(t *testing.T) {
 
 func TestLicensePolicyListWrapTrue(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, true)
-	lti.ResultExpectedLineCount = 376 // title and data rows
+	lti.ResultExpectedLineCount = 377 // title and data rows
 	// sanity (spot) check row values
 	lti.ResultLineContainsValuesAtLineNum = 2
 	lti.ResultLineContainsValues = []string{"0BSD", schema.POLICY_ALLOW}
@@ -542,7 +542,7 @@ func TestLicensePolicyCustomListWhereTestUsagePolicyAllow(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
 	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
 	lti.WhereClause = "usage-policy=allow"
-	lti.ResultExpectedLineCount = 3
+	lti.ResultExpectedLineCount = 4
 	_, err := innerTestLicensePolicyList(t, lti)
 	if err != nil {
 		t.Error(err)
@@ -554,7 +554,7 @@ func TestLicensePolicyListCustomWhereTestUsagePolicyDeny(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
 	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
 	lti.WhereClause = "usage-policy=deny"
-	lti.ResultExpectedLineCount = 3
+	lti.ResultExpectedLineCount = 4
 	_, err := innerTestLicensePolicyList(t, lti)
 	if err != nil {
 		t.Error(err)
@@ -566,7 +566,7 @@ func TestLicensePolicyListCustomWhereTestUsagePolicyNeedsReview(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
 	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
 	lti.WhereClause = "usage-policy=needs-review"
-	lti.ResultExpectedLineCount = 3
+	lti.ResultExpectedLineCount = 4
 	_, err := innerTestLicensePolicyList(t, lti)
 	if err != nil {
 		t.Error(err)
@@ -578,7 +578,7 @@ func TestLicensePolicyListCustomCSVWhereTestUsagePolicyAllow(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_CSV, false)
 	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
 	lti.WhereClause = "usage-policy=allow"
-	lti.ResultExpectedLineCount = 2
+	lti.ResultExpectedLineCount = 3
 	_, err := innerTestLicensePolicyList(t, lti)
 	if err != nil {
 		t.Error(err)
@@ -590,7 +590,7 @@ func TestLicensePolicyListCustomMarkdownWhereTestUsagePolicyAllow(t *testing.T) 
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_MARKDOWN, false)
 	lti.PolicyFile = POLICY_FILE_GOOD_BAD_MAYBE
 	lti.WhereClause = "usage-policy=allow"
-	lti.ResultExpectedLineCount = 3
+	lti.ResultExpectedLineCount = 4
 	_, err := innerTestLicensePolicyList(t, lti)
 	if err != nil {
 		t.Error(err)
@@ -605,7 +605,7 @@ func TestLicensePolicyListTextWhereId0BSD(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
 	lti.WhereClause = "id=0B"
 	lti.ResultLineContainsValuesAtLineNum = 3
-	lti.ResultExpectedLineCount = 3
+	lti.ResultExpectedLineCount = 4
 	_, err := innerTestLicensePolicyList(t, lti)
 	if err != nil {
 		t.Error(err)
@@ -615,7 +615,7 @@ func TestLicensePolicyListTextWhereId0BSD(t *testing.T) {
 func TestLicensePolicyListWhereUsagePolicyDeny(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
 	lti.WhereClause = "usage-policy=deny"
-	lti.ResultExpectedLineCount = 5
+	lti.ResultExpectedLineCount = 6
 	_, err := innerTestLicensePolicyList(t, lti)
 	if err != nil {
 		t.Error(err)
@@ -625,7 +625,7 @@ func TestLicensePolicyListWhereUsagePolicyDeny(t *testing.T) {
 func TestLicensePolicyListWhereAnnotationNeedsIPApproval(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
 	lti.WhereClause = "annotations=NEEDS-IP"
-	lti.ResultExpectedLineCount = 22
+	lti.ResultExpectedLineCount = 23
 	// sanity (spot) check row values
 	lti.ResultLineContainsValuesAtLineNum = 2
 	lti.ResultLineContainsValues = []string{"BSD-2-Clause", schema.POLICY_NEEDS_REVIEW}
@@ -639,7 +639,7 @@ func TestLicensePolicyListWhereAnnotationNeedsIPApproval(t *testing.T) {
 func TestLicensePolicyListWhereAnnotation0BSDNeedsIPApproval(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
 	lti.WhereClause = "annotations=NEEDS-IP,id=BSD-4"
-	lti.ResultExpectedLineCount = 6
+	lti.ResultExpectedLineCount = 7
 	// sanity (spot) check row values
 	lti.ResultLineContainsValuesAtLineNum = 2
 	lti.ResultLineContainsValues = []string{"BSD-4-Clause", schema.POLICY_NEEDS_REVIEW}
@@ -653,7 +653,7 @@ func TestLicensePolicyListWhereAnnotation0BSDNeedsIPApproval(t *testing.T) {
 func TestLicensePolicyListWhereFamilyApache(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
 	lti.WhereClause = "family=Apache"
-	lti.ResultExpectedLineCount = 5
+	lti.ResultExpectedLineCount = 6
 	// sanity (spot) check row values
 	lti.ResultLineContainsValuesAtLineNum = 2
 	lti.ResultLineContainsValues = []string{"Apache v1.0", schema.POLICY_ALLOW}
@@ -666,7 +666,7 @@ func TestLicensePolicyListWhereFamilyApache(t *testing.T) {
 func TestLicensePolicyListWhereAliases(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
 	lti.WhereClause = "aliases=Apache"
-	lti.ResultExpectedLineCount = 3
+	lti.ResultExpectedLineCount = 4
 	_, err := innerTestLicensePolicyList(t, lti)
 	if err != nil {
 		t.Error(err)
@@ -676,7 +676,7 @@ func TestLicensePolicyListWhereAliases(t *testing.T) {
 func TestLicensePolicyListWhereDeprecatedTrue(t *testing.T) {
 	lti := NewLicensePolicyTestInfoBasic(FORMAT_TEXT, false)
 	lti.WhereClause = "deprecated=true"
-	lti.ResultExpectedLineCount = 17 // 15 matches + 2 title rows
+	lti.ResultExpectedLineCount = 18 // 15 matches + 2 title rows + newline
 	_, err := innerTestLicensePolicyList(t, lti)
 	if err != nil {
 		t.Error(err)

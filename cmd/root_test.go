@@ -21,6 +21,7 @@ package cmd
 import (
 	"bytes"
 	"flag"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -317,5 +318,32 @@ func getBufferLinesAndCount(buffer bytes.Buffer) (numLines int, lines []string) 
 		lines = strings.Split(buffer.String(), "\n")
 		numLines = len(lines)
 	}
+	return
+}
+
+func bufferFile(fullFileName string) (buffer *bytes.Buffer, err error) {
+	sBytes, err := os.ReadFile(fullFileName)
+	if err != nil {
+		return
+	}
+	buffer = bytes.NewBuffer(sBytes)
+	return
+}
+
+func verifyFileLineCountAndIndentation(t *testing.T, buffer bytes.Buffer, cti *CommonTestInfo) (err error) {
+	numLines, lines := getBufferLinesAndCount(buffer)
+	if numLines != cti.ResultExpectedLineCount {
+		err = fmt.Errorf("invalid test output result: expected: `%v` lines, actual: `%v", cti.ResultExpectedLineCount, numLines)
+		t.Error(err)
+	}
+	getLogger().Tracef("success: output contained expected line count: %v", cti.ResultExpectedLineCount)
+
+	if numLines > cti.ResultExpectedIndentAtLineNum {
+		line := lines[cti.ResultExpectedIndentAtLineNum]
+		if spaceCount := numberOfLeadingSpaces(line); spaceCount != cti.ResultExpectedIndentLength {
+			t.Errorf("invalid test result: expected indent:`%v`, actual: `%v", cti.ResultExpectedIndentLength, spaceCount)
+		}
+	}
+	getLogger().Tracef("success: output contained expected indent length: %v, at line: %v", cti.ResultExpectedIndentLength, cti.ResultLineContainsValuesAtLineNum)
 	return
 }
