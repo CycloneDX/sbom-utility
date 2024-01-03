@@ -332,14 +332,18 @@ func bufferFile(fullFileName string) (buffer *bytes.Buffer, err error) {
 
 func verifyFileLineCountAndIndentation(t *testing.T, buffer bytes.Buffer, cti *CommonTestInfo) (err error) {
 	numLines, lines := getBufferLinesAndCount(buffer)
-	if numLines != cti.ResultExpectedLineCount {
-		err = fmt.Errorf("invalid test output result: expected: `%v` lines, actual: `%v", cti.ResultExpectedLineCount, numLines)
-		t.Error(err)
+
+	if cti.ResultExpectedLineCount != TI_RESULT_DEFAULT_LINE_COUNT {
+		if numLines != cti.ResultExpectedLineCount {
+			err = fmt.Errorf("invalid test output result: expected: `%v` lines, actual: `%v", cti.ResultExpectedLineCount, numLines)
+			t.Error(err)
+		}
+		getLogger().Tracef("success: output contained expected line count: %v", cti.ResultExpectedLineCount)
 	}
-	getLogger().Tracef("success: output contained expected line count: %v", cti.ResultExpectedLineCount)
 
 	if numLines > cti.ResultExpectedIndentAtLineNum {
 		line := lines[cti.ResultExpectedIndentAtLineNum]
+		//fmt.Printf("testing indent: %v at %v\n", cti.ResultExpectedIndentLength, cti.ResultExpectedIndentAtLineNum)
 		if spaceCount := numberOfLeadingSpaces(line); spaceCount != cti.ResultExpectedIndentLength {
 			t.Errorf("invalid test result: expected indent:`%v`, actual: `%v", cti.ResultExpectedIndentLength, spaceCount)
 		}

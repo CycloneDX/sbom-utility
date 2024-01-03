@@ -40,11 +40,6 @@ const (
 	TEST_LICENSE_LIST_CDX_1_4_LICENSE_EXPRESSION_IN_NAME = "test/cyclonedx/cdx-1-4-license-expression-in-name.json"
 )
 
-// default ResourceTestInfo struct values
-const (
-	LTI_DEFAULT_LINE_COUNT = -1
-)
-
 type LicenseTestInfo struct {
 	CommonTestInfo
 	ListLineWrap bool

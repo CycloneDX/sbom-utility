@@ -483,6 +483,7 @@ func TestQueryCdx14MetadataToolsSlice(t *testing.T) {
 
 func TestQueryCdx14MetadataToolsSliceWhereName(t *testing.T) {
 	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti.ResultExpectedLineCount = 24
 	request, _ := common.NewQueryRequestSelectFromWhere(
 		common.QUERY_TOKEN_WILDCARD,
 		"components",
@@ -503,6 +504,8 @@ func TestQueryCdx14MetadataToolsSliceWhereName(t *testing.T) {
 		fResult, _ := utils.EncodeAnyToDefaultIndentedJSONStr(result)
 		t.Error(fmt.Errorf("expected slice length: %v, actual length: %v. Actual result: %s", EXPECTED_SLICE_LENGTH, actualLength, fResult.String()))
 	}
+	buffer, _ := utils.EncodeAnyToIndentedJSONStr(result, utils.DEFAULT_JSON_INDENT_STRING)
+	verifyFileLineCountAndIndentation(t, buffer, cti)
 }
 
 func TestQueryCdx14MetadataComponentIndent(t *testing.T) {

@@ -301,7 +301,6 @@ func TestResourceListTextCdx13WhereClauseAndResultsNone(t *testing.T) {
 }
 
 func TestResourceListUsingStdin(t *testing.T) {
-
 	rti := NewResourceTestInfoBasic(
 		TEST_RESOURCE_LIST_CDX_1_3,
 		FORMAT_TEXT,
@@ -310,6 +309,5 @@ func TestResourceListUsingStdin(t *testing.T) {
 	)
 
 	rti.MockStdin = true
-
 	innerTestResourceList(t, rti)
 }

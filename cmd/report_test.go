@@ -62,18 +62,6 @@ func innerRunReportResultTests(t *testing.T, testInfo *CommonTestInfo, outputBuf
 
 	// TEST: Line Count
 	if testInfo.ResultExpectedLineCount != TI_RESULT_DEFAULT_LINE_COUNT {
-		//outputResults := outputBuffer.String()
-		// outputLineCount := strings.Count(outputResults, "\n")
-		// if outputLineCount != testInfo.ResultExpectedLineCount {
-		// 	err = getLogger().Errorf("output did not contain expected line count: %v/%v (expected/actual)", testInfo.ResultExpectedLineCount, outputLineCount)
-		// 	t.Errorf("%s: format: `%s`, summary: `%v`, where clause: `%s`",
-		// 		err.Error(),
-		// 		testInfo.OutputFormat,
-		// 		testInfo.ListSummary,
-		// 		testInfo.WhereClause)
-		// 	return
-		// }
-		// getLogger().Tracef("success: output contained expected line count: %v", testInfo.ResultExpectedLineCount)
 		verifyFileLineCountAndIndentation(t, outputBuffer, testInfo)
 	}
 
