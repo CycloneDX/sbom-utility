@@ -245,9 +245,15 @@ func TestTrimCdx14PreserveUnencodedChars(t *testing.T) {
 func TestTrimCdx14ComponentPropertiesSampleXXLBuffered(t *testing.T) {
 	ti := NewTrimTestInfo(TEST_TRIM_CDX_1_4_SAMPLE_XXL_1, nil)
 	ti.Keys = append(ti.Keys, "properties")
+	ti.ResultExpectedByteSize = 8123018
 	outputBuffer, _ := innerBufferedTestTrim(t, ti)
-	// TODO: verify "after" trim lengths and content have removed properties
+	// verify "after" trim lengths and content have removed properties
 	getLogger().Tracef("Len(outputBuffer): `%v`\n", outputBuffer.Len())
+	if ti.ResultExpectedByteSize > 0 {
+		if outputBuffer.Len() != ti.ResultExpectedByteSize {
+			t.Error(fmt.Errorf("invalid trim result size (bytes): expected: %v, actual: %v", ti.ResultExpectedByteSize, outputBuffer.Len()))
+		}
+	}
 }
 
 // TODO: enable for when we have a "from" parameter to limit trim scope
@@ -271,10 +277,6 @@ func TestTrimCdx15MultipleKeys(t *testing.T) {
 	innerTestTrim(t, ti)
 	// Assure JSON map does not contain the trimmed key(s)
 	err := VerifyTrimOutputFileResult(t, *ti)
-	if err != nil {
-		t.Error(err)
-	}
-	err = VerifyTrimOutputFileResult(t, *ti)
 	if err != nil {
 		t.Error(err)
 	}
@@ -338,13 +340,16 @@ func TestTrimCdx15AllIncrementallyFromSmallSample(t *testing.T) {
 	}
 }
 
-func TestTrimCdx15FooFromTools(t *testing.T) {
+func TestTrimCdx15FooFromToolsAndTestJsonIndent(t *testing.T) {
 	ti := NewTrimTestInfo(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1, nil)
 	ti.Keys = append(ti.Keys, "foo")
 	ti.FromPaths = []string{"metadata.tools"}
-	ti.OutputFile = ""  // ti.CreateTemporaryFilename(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1)
+	//ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1)
 	ti.OutputIndent = 2 // Matches the space indent of the test input file
 	ti.ResultExpectedByteSize = 4292
+	ti.ResultExpectedLineCount = 194
+	ti.ResultExpectedIndentLength = 2
+	ti.ResultExpectedIndentAtLineNum = 1
 
 	buffer, _, err := innerTestTrim(t, ti)
 	if err != nil {
@@ -362,6 +367,19 @@ func TestTrimCdx15FooFromTools(t *testing.T) {
 	if !contains {
 		t.Error(fmt.Errorf("invalid trim result: string not found: %s", TEST_STRING_1))
 	}
+
+	verifyFileLineCountAndIndentation(t, buffer, &ti.CommonTestInfo)
+
+	// verify indent continues to use multiples of 2
+	ti.ResultExpectedIndentLength = 4
+	ti.ResultExpectedIndentAtLineNum = 6
+	verifyFileLineCountAndIndentation(t, buffer, &ti.CommonTestInfo)
+	ti.ResultExpectedIndentLength = 6
+	ti.ResultExpectedIndentAtLineNum = 8
+	verifyFileLineCountAndIndentation(t, buffer, &ti.CommonTestInfo)
+	ti.ResultExpectedIndentLength = 4
+	ti.ResultExpectedIndentAtLineNum = 30
+	verifyFileLineCountAndIndentation(t, buffer, &ti.CommonTestInfo)
 }
 
 func TestTrimCdx14SourceFromVulnerabilities(t *testing.T) {
