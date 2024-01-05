@@ -249,6 +249,10 @@ func (value *CDXVulnerabilityReference) MarshalJSON() ([]byte, error) {
 	return json.Marshal(temp)
 }
 
+//	type CDXVulnerabilitySource struct {
+//		Url  string `json:"url,omitempty"`  // v1.4
+//		Name string `json:"name,omitempty"` // v1.4
+//	}
 func (value *CDXVulnerabilitySource) MarshalJSON() ([]byte, error) {
 	temp := map[string]interface{}{}
 	if len(value.Url) > 0 {
@@ -276,10 +280,17 @@ func (value *CDXCredit) MarshalJSON() ([]byte, error) {
 	return json.Marshal(temp)
 }
 
+//	type CDXAffect struct {
+//		Versions *[]CDXVersionRange `json:"versions,omitempty"` // v1.4: anon. type
+//		Ref      *CDXRefLinkType    `json:"ref,omitempty"`      // v1.5: added
+//	}
 func (value *CDXAffect) MarshalJSON() ([]byte, error) {
 	temp := map[string]interface{}{}
 	if value.Versions != nil && len(*value.Versions) > 0 {
 		temp["versions"] = value.Versions
+	}
+	if value.Ref != nil && *value.Ref != "" {
+		temp["ref"] = value.Ref
 	}
 	if len(temp) == 0 {
 		return BYTE_ENCODED_ZERO_STRUCT, nil

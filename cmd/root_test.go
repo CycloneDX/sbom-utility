@@ -21,6 +21,7 @@ package cmd
 import (
 	"bytes"
 	"flag"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -138,7 +139,7 @@ func (ti *CommonTestInfo) CreateTemporaryTestOutputFilename(relativeFilename str
 	trimmedFilename := strings.TrimLeft(relativeFilename, strconv.QuoteRune(os.PathSeparator))
 	if testFunctionName != "" {
 		lastIndex := strings.LastIndex(trimmedFilename, string(os.PathSeparator))
-		// insert variant as last path...
+		// insert test function name (as a variant since test files are reused) as last path...
 		if lastIndex > 0 {
 			path := trimmedFilename[0:lastIndex]
 			base := trimmedFilename[lastIndex:]
@@ -317,5 +318,36 @@ func getBufferLinesAndCount(buffer bytes.Buffer) (numLines int, lines []string) 
 		lines = strings.Split(buffer.String(), "\n")
 		numLines = len(lines)
 	}
+	return
+}
+
+func bufferFile(fullFileName string) (buffer *bytes.Buffer, err error) {
+	sBytes, err := os.ReadFile(fullFileName)
+	if err != nil {
+		return
+	}
+	buffer = bytes.NewBuffer(sBytes)
+	return
+}
+
+func verifyFileLineCountAndIndentation(t *testing.T, buffer bytes.Buffer, cti *CommonTestInfo) (err error) {
+	numLines, lines := getBufferLinesAndCount(buffer)
+
+	if cti.ResultExpectedLineCount != TI_RESULT_DEFAULT_LINE_COUNT {
+		if numLines != cti.ResultExpectedLineCount {
+			err = fmt.Errorf("invalid test output result: expected: %v lines, actual: %v", cti.ResultExpectedLineCount, numLines)
+			t.Error(err)
+		}
+		getLogger().Tracef("success: output contained expected line count: %v", cti.ResultExpectedLineCount)
+	}
+
+	if numLines > cti.ResultExpectedIndentAtLineNum {
+		line := lines[cti.ResultExpectedIndentAtLineNum]
+		//fmt.Printf("testing indent: %v at %v\n", cti.ResultExpectedIndentLength, cti.ResultExpectedIndentAtLineNum)
+		if spaceCount := numberOfLeadingSpaces(line); spaceCount != cti.ResultExpectedIndentLength {
+			t.Errorf("invalid test result: expected indent: %v, actual: %v", cti.ResultExpectedIndentLength, spaceCount)
+		}
+	}
+	getLogger().Tracef("success: output contained expected indent length: %v, at line: %v", cti.ResultExpectedIndentLength, cti.ResultLineContainsValuesAtLineNum)
 	return
 }

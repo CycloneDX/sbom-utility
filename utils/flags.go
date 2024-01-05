@@ -18,12 +18,6 @@
 
 package utils
 
-import (
-	"fmt"
-
-	"github.com/CycloneDX/sbom-utility/log"
-)
-
 // Globals
 var GlobalFlags CommandFlags
 
@@ -131,10 +125,6 @@ type CustomValidationFlags struct {
 
 // format and output the MyFlags struct as a string using Go's Stringer interface
 func (flags *CommandFlags) String() string {
-	value, err := log.FormatStruct(flags)
-
-	if err != nil {
-		return fmt.Sprintf("%s\n", err.Error())
-	}
-	return value
+	buffer, _ := EncodeAnyToDefaultIndentedJSONStr(flags)
+	return buffer.String()
 }
