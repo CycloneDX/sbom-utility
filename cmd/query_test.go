@@ -527,8 +527,9 @@ func TestQueryCdx14MetadataComponentIndent(t *testing.T) {
 func TestQueryCdx14MetadataComponentIndentedFileWrite(t *testing.T) {
 	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
 	cti.OutputFile = cti.CreateTemporaryTestOutputFilename(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti.OutputIndent = 3
 	cti.ResultExpectedLineCount = 6
-	cti.ResultExpectedIndentLength = DEFAULT_OUTPUT_INDENT_LENGTH
+	cti.ResultExpectedIndentLength = int(cti.OutputIndent)
 	cti.ResultExpectedIndentAtLineNum = 1
 	request, _ := common.NewQueryRequestSelectFrom(
 		"name,description,version",

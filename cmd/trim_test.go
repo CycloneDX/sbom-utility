@@ -344,11 +344,10 @@ func TestTrimCdx15FooFromToolsAndTestJsonIndent(t *testing.T) {
 	ti := NewTrimTestInfo(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1, nil)
 	ti.Keys = append(ti.Keys, "foo")
 	ti.FromPaths = []string{"metadata.tools"}
-	//ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1)
 	ti.OutputIndent = 2 // Matches the space indent of the test input file
 	ti.ResultExpectedByteSize = 4292
 	ti.ResultExpectedLineCount = 194
-	ti.ResultExpectedIndentLength = 2
+	ti.ResultExpectedIndentLength = int(ti.OutputIndent)
 	ti.ResultExpectedIndentAtLineNum = 1
 
 	buffer, _, err := innerTestTrim(t, ti)
