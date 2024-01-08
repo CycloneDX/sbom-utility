@@ -145,7 +145,7 @@ func VerifyTrimOutputFileResult(t *testing.T, originalTest TrimTestInfo) (err er
 	queryTestInfo := NewCommonTestInfo()
 	queryTestInfo.InputFile = originalTest.OutputFile
 
-	// Load an Query temporary "trimmed" output BOM file using the "from" path
+	// Load and Query temporary "trimmed" output BOM file using the "from" path
 	// Default to "root" (i.e,, "") path if none selected.
 	fromPath := ""
 	if len(originalTest.FromPaths) > 0 {

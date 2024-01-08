@@ -20,6 +20,7 @@ package cmd
 
 import (
 	"io"
+	"os"
 	"strings"
 
 	"github.com/CycloneDX/sbom-utility/schema"
@@ -40,15 +41,38 @@ const (
 var PATCH_OUTPUT_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{FORMAT_JSON}, ", ")
 
+// Command PreRunE helper function to test for patch file
+func preRunTestForPatchFile(cmd *cobra.Command, args []string) error {
+	getLogger().Enter()
+	defer getLogger().Exit()
+	getLogger().Tracef("args: %v", args)
+
+	// Make sure the input filename is present and exists
+	patchFilename := utils.GlobalFlags.PatchFlags.PatchFile
+	if patchFilename == "" {
+		return getLogger().Errorf("Missing required argument(s): %s", FLAG_PATCH_FILE)
+	} else if _, err := os.Stat(patchFilename); err != nil {
+		return getLogger().Errorf("File not found: `%s`", patchFilename)
+	}
+	return nil
+}
+
 func NewCommandPatch() *cobra.Command {
 	var command = new(cobra.Command)
-	command.Use = CMD_USAGE_TRIM
+	command.Use = CMD_USAGE_PATCH
 	command.Short = "Apply an IETF RFC 6902 patch file to a JSON BOM file"
-	command.Long = "Apply an IETF 6902 patch file to a JSON BOM file"
+	command.Long = "Apply an IETF RFC 6902 patch file to a JSON BOM file"
 	command.RunE = patchCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		// Test for required flags (parameters)
 		err = preRunTestForInputFile(cmd, args)
+		if err != nil {
+			return
+		}
+		err = preRunTestForPatchFile(cmd, args)
+		if err != nil {
+			return
+		}
 		return
 	}
 	initCommandPatchFlags(command)
