@@ -47,6 +47,7 @@ type CommandFlags struct {
 	VulnerabilityFlags      VulnerabilityCommandFlags
 	StatsFlags              StatsCommandFlags
 	TrimFlags               TrimCommandFlags
+	PatchFlags              PatchCommandFlags
 
 	// Misc flags
 	LogOutputIndentCallstack bool // Log indent
@@ -115,6 +116,10 @@ type TrimCommandFlags struct {
 	RawPaths  string
 	Keys      []string
 	FromPaths []string
+}
+
+type PatchCommandFlags struct {
+	PatchFile string
 }
 
 type CustomValidationFlags struct {

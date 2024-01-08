@@ -33,7 +33,7 @@ The utility supports the following BOM-related commands:
 
 Feedback and helpful commits appreciated on the following commands which will be moved to non-experimental after two point releases:
 
-- **[diff](#diff)** : Shows the delta between two similar BOM versions in JSON diff format.
+- **[diff](#diff)** : Shows the delta between two similar BOM versions in JSON (diff) patch format as defined by [RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902/).
 
 ---
 

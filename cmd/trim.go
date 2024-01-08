@@ -36,11 +36,9 @@ const (
 
 // flag help (translate)
 const (
-	FLAG_TRIM_OUTPUT_FORMAT_HELP = "format output using the specified type"
-	FLAG_TRIM_FROM_PATHS_HELP    = "comma-separated list of dot-separated JSON document paths used to scope where trim is applied" +
+	MSG_FLAG_TRIM_FROM_PATHS = "comma-separated list of dot-separated JSON document paths used to scope where trim is applied" +
 		"\n - if not present, the default `--from` path is the document \"root\""
-	FLAG_TRIM_KEYS_HELP = "comma-separated list of `keys=<key1,key2,...,keyN>` that will be trimmed from the JSON document"
-	MSG_TRIM_FLAG_KEYS  = "JSON map keys to trim (delete) (e.g., \"key1,key2,...,keyN\")"
+	MSG_FLAG_TRIM_KEYS = "JSON map keys to trim (delete) (e.g., \"key1,key2,...,keyN\")"
 )
 
 var TRIM_OUTPUT_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
@@ -74,9 +72,9 @@ func initCommandTrimFlags(command *cobra.Command) (err error) {
 	defer getLogger().Exit()
 
 	command.PersistentFlags().StringVar(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_OUTPUT_FORMAT, FORMAT_JSON,
-		FLAG_TRIM_OUTPUT_FORMAT_HELP+TRIM_OUTPUT_SUPPORTED_FORMATS)
-	command.Flags().StringVarP(&utils.GlobalFlags.TrimFlags.RawPaths, FLAG_TRIM_FROM_PATHS, "", "", FLAG_TRIM_FROM_PATHS_HELP)
-	command.Flags().StringVarP(&utils.GlobalFlags.TrimFlags.RawKeys, FLAG_TRIM_MAP_KEYS, "", "", MSG_TRIM_FLAG_KEYS)
+		MSG_FLAG_OUTPUT_FORMAT+TRIM_OUTPUT_SUPPORTED_FORMATS)
+	command.Flags().StringVarP(&utils.GlobalFlags.TrimFlags.RawPaths, FLAG_TRIM_FROM_PATHS, "", "", MSG_FLAG_TRIM_FROM_PATHS)
+	command.Flags().StringVarP(&utils.GlobalFlags.TrimFlags.RawKeys, FLAG_TRIM_MAP_KEYS, "", "", MSG_FLAG_TRIM_KEYS)
 	err = command.MarkFlagRequired(FLAG_TRIM_MAP_KEYS)
 	if err != nil {
 		err = getLogger().Errorf("unable to mark flag `%s` as required: %s", FLAG_TRIM_MAP_KEYS, err)
