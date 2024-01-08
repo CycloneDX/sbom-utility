@@ -43,8 +43,8 @@ var PATCH_OUTPUT_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 func NewCommandPatch() *cobra.Command {
 	var command = new(cobra.Command)
 	command.Use = CMD_USAGE_TRIM
-	command.Short = "Apply an ISO 6901 patch file to a JSON BOM file"
-	command.Long = "Apply an ISO 6901 patch file to a JSON BOM file"
+	command.Short = "Apply an IETF RFC 6902 patch file to a JSON BOM file"
+	command.Long = "Apply an IETF 6902 patch file to a JSON BOM file"
 	command.RunE = patchCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		// Test for required flags (parameters)
