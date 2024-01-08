@@ -91,6 +91,7 @@ const (
 	MSG_FLAG_DEBUG          = "enable debug logging"
 	MSG_FLAG_INPUT          = "input filename (e.g., \"path/sbom.json\")"
 	MSG_FLAG_OUTPUT         = "output filename"
+	MSG_FLAG_OUTPUT_FORMAT  = "format output using the specified type"
 	MSG_FLAG_LOG_QUIET      = "enable quiet logging mode (removes all informational messages from console output); overrides other logging commands"
 	MSG_FLAG_LOG_INDENT     = "enable log indentation of functional callstack"
 	MSG_FLAG_CONFIG_SCHEMA  = "provide custom application schema configuration file (i.e., overrides default `config.json`)"
