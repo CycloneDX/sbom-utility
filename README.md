@@ -4,7 +4,7 @@
 
 This utility was designed to be an API platform used initially to **validate CycloneDX** or **SPDX Software Bills-of-Materials (BOMs)** against versioned JSON schemas, as published by their respective communities, as well as customized schema variants provided by companies or organizations that have stricter BOM compliance requirements.
 
-The utility has now grown to include a rich set of commands, listed below, that can be used for create filtered reports in many formats (e.g., csv, md) using the utility's powerful, SQL-like **query** capability. These commands can  extract data from BOMs that enables verification of information supporting [BOM use cases](#cyclonedx-use-cases) or any custom security and compliance requirements.
+The utility has now grown to include a rich set of commands, listed below, that can be used for creating filtered BOM-data reports in many formats (e.g., txt, csv, md) using the utility's powerful, SQL-like **query** capability. These commands can  extract data from BOMs that enables verification of information supporting [BOM use cases](#cyclonedx-use-cases) or any custom security and compliance requirements.
 
 ## Command Overview
 
@@ -33,7 +33,9 @@ The utility supports the following BOM-related commands:
 
 Feedback and helpful commits appreciated on the following commands which will be moved to non-experimental after two point releases:
 
-- **[diff](#diff)** : Shows the delta between two similar BOM versions in JSON (diff) patch format as defined by [RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902/).
+- **[diff](#diff)** : Shows the delta between two similar BOM versions in JSON (diff) patch format as defined by [IETF RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902/).
+
+- **[patch](#patch)** : Applies a JSON patch file, as defined by [IETF RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902/), to an input JSON BOM file.
 
 ---
 
@@ -1115,6 +1117,57 @@ Output BOM results with `properties` removed from all `components`:
         }
     ]
 }
+```
+
+---
+
+### Patch
+
+This command is able to "patch" an input JSON BOM document using an IETF RFC 6902 JSON "patch" file.
+
+#### Patch supported output formats
+
+This command is used to output, using the [`--output-file` flag](#output-flag), a "patched" BOM in JSON format.
+
+- `json` (default)
+
+#### Patch flags
+
+The patch command operates on a JSON BOM input file (see [`--input-file` flag](#input-flag)) as well as an IETF RFC 6902-formatted "patch' file and produces a "patched" version of the input JSON BOM as output using the following flags:
+
+##### Patch `--patch-filename` flag
+
+
+#### Patch examples
+
+The original BOM used for these examples can be found here:
+
+- TODO
+
+##### Example: Patch 1
+
+TODO
+
+```bash
+TODO
+```
+
+Original BOM:
+
+```json
+TODO
+```
+
+IETF RFC 6902 Patch file:
+
+```json
+TODO
+```
+
+Output BOM results after patch:
+
+```json
+TODO
 ```
 
 ---
