@@ -20,6 +20,8 @@ package schema
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -47,6 +49,10 @@ type BOM struct {
 	ServiceMap       *slicemultimap.MultiMap
 	VulnerabilityMap *slicemultimap.MultiMap
 	LicenseMap       *slicemultimap.MultiMap
+	GobDecodeBuffer  bytes.Buffer
+	GobEncodeBuffer  bytes.Buffer
+	GobDecoder       *gob.Decoder
+	GobEncoder       *gob.Encoder
 }
 
 const (
@@ -99,6 +105,10 @@ func NewBOM(inputFile string) *BOM {
 	temp.ServiceMap = slicemultimap.New()
 	temp.VulnerabilityMap = slicemultimap.New()
 	temp.LicenseMap = slicemultimap.New()
+
+	// Create a GOB Encoder/Decoder
+	temp.GobDecoder = gob.NewDecoder(&temp.GobDecodeBuffer)
+	temp.GobEncoder = gob.NewEncoder(&temp.GobEncodeBuffer)
 
 	// Stats
 	temp.Statistics = new(StatisticsInfo)
@@ -394,3 +404,49 @@ func (bom *BOM) WriteAsEncodedJSONInt(writer io.Writer, numSpaces int) (err erro
 	_, err = utils.WriteAnyAsEncodedJSONInt(writer, bom.CdxBom, numSpaces)
 	return
 }
+
+// Approach 1
+func (bom *BOM) HashEntity(entity interface{}) (sha string) {
+	bom.GobEncoder.Encode(entity)
+	sha256 := sha256.Sum256(bom.GobEncodeBuffer.Bytes())
+	return fmt.Sprintf("%x\n", sha256)
+}
+
+func (bom *BOM) HashJsonMap(entity interface{}) (sha string, err error) {
+	bom.GobEncoder.Encode(entity)
+
+	// Verify entity is a JSON map type
+	if !utils.IsJsonMapType(entity) {
+		err = fmt.Errorf("invalid type. Cannot hash non-struct type (%T)", entity)
+		return
+	}
+
+	sha = bom.HashEntity(entity)
+	return
+}
+
+func (bom *BOM) HashStruct(entity interface{}) (sha string, err error) {
+	bom.GobEncoder.Encode(entity)
+
+	// Verify entity is a Go struct type
+	kind := reflect.ValueOf(entity).Kind()
+	if kind != reflect.Struct {
+		err = fmt.Errorf("invalid type. Cannot hash non-struct type (%T); kind: %v", entity, kind)
+		return
+	}
+
+	sha = bom.HashEntity(entity)
+	return
+}
+
+// Approach 2
+// NOTE: Not yet needed
+// TODO: allow multiple "writes" of a slice of entities
+// func (bom *BOM) HashEntities(entities []interface{}) (sha []byte, err error) {
+
+// 	bom.GobEncoder.Encode(entities)
+// 	hasher := sha256.New()
+// 	hasher.Write(bom.GobEncodeBuffer.Bytes())
+// 	fmt.Printf("%x\n", hasher.Sum(nil))
+// 	return
+// }

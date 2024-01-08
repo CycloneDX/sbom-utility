@@ -49,6 +49,7 @@
             "gojsonschema",
             "gomod",
             "GTPL",
+            "hasher",
             "hashstructure",
             "HBOM",
             "hokaccha",

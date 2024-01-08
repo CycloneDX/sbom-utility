@@ -408,6 +408,7 @@ func TestHashCDXVulnerabilitiesSlice(t *testing.T) {
 // Vulnerability Hashing
 // ----------------------
 
+// Note: unused function
 func TestHashZeroCDXVulnerabilityStruct(t *testing.T) {
 	cdxVulnerability := new(CDXVulnerability)
 	document := NewBOM("")
@@ -426,7 +427,7 @@ func TestHashZeroCDXVulnerabilityStruct(t *testing.T) {
 // ----------------------
 // License Hashing
 // ----------------------
-
+// Note: unused function
 func TestHashZeroCDXLicenseInfoStruct(t *testing.T) {
 	cdxLicenseInfo := new(LicenseInfo)
 	document := NewBOM("")
