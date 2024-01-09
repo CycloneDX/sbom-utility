@@ -248,33 +248,15 @@ func DisplayJSONErrorDetails(data []byte, err error) {
 	defer getLogger().Exit()
 
 	if jsonError, ok := err.(*json.SyntaxError); ok {
-		line, character := CalcLineAndCharacterPos(data, jsonError.Offset)
+		line, character := utils.CalcLineAndCharacterPos(data, jsonError.Offset)
 		// Show intent to not check for error returns as there is no recovery
 		_ = getLogger().Errorf("JSON Syntax error: offset: %d, line %d, character %d: %v", jsonError.Offset, line, character, jsonError.Error())
 
 	} else if jsonError, ok := err.(*json.UnmarshalTypeError); ok {
-		line, character := CalcLineAndCharacterPos(data, jsonError.Offset)
+		line, character := utils.CalcLineAndCharacterPos(data, jsonError.Offset)
 		// Show intent to not check for error returns as there is no recovery
 		_ = getLogger().Errorf("JSON Unmarshal error: offset: %d, line %d, character %d: %v", jsonError.Offset, line, character, jsonError.Error())
 	}
-}
-
-func CalcLineAndCharacterPos(data []byte, offset int64) (lineNum int, charNum int) {
-	const LF byte = 0x0a
-	lineNum = 1
-	charNum = 0
-	intOffset := int(offset)
-
-	for i := 0; i < len(data) && i < intOffset; i, charNum = i+1, charNum+1 {
-
-		if data[i] == LF {
-			lineNum++
-			//fmt.Printf("NEWLINE (%v): total: %d, offset: %d\n", LF, line, char)
-			charNum = 0
-		}
-	}
-
-	return lineNum, charNum - 1
 }
 
 func FormatSchemaVariant(variant string) (formattedVariant string) {

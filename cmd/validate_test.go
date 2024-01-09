@@ -239,7 +239,7 @@ func innerValidateSyntaxError(t *testing.T, filename string, variant string, exp
 	// within the (test) input file
 	// Note: Uses the offset from JSON syntax errors return "encoding/json.SyntaxError"
 	rawBytes := document.GetRawBytes()
-	actualLineNum, actualCharNum := schema.CalcLineAndCharacterPos(rawBytes, syntaxError.Offset)
+	actualLineNum, actualCharNum := utils.CalcLineAndCharacterPos(rawBytes, syntaxError.Offset)
 	if actualLineNum != expectedLineNum || actualCharNum != expectedCharNum {
 		t.Errorf("syntax error found at line,char=[%d,%d], expected=[%d,%d]", actualLineNum, actualCharNum, expectedLineNum, expectedCharNum)
 	}

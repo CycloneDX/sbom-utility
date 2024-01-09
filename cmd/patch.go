@@ -19,6 +19,7 @@
 package cmd
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -155,11 +156,21 @@ func Patch(writer io.Writer, persistentFlags utils.PersistentCommandFlags, patch
 	}
 
 	// validate parameters
-	// TODO
+	patchFile := utils.GlobalFlags.PatchFlags.PatchFile
+	if patchFile == "" {
+		err = fmt.Errorf("invalid patch file")
+		return
+	}
+
+	patchDocument := NewPatchDocument(patchFile)
+	err = patchDocument.UnmarshalIETFRFC6903Document()
+	if err != nil {
+		return
+	}
 
 	// Output the "patched" version of the Input BOM
 	format := persistentFlags.OutputFormat
-	getLogger().Infof("Writing trimmed BOM (`%s` format)...", format)
+	getLogger().Infof("Writing patched BOM (`%s` format)...", format)
 	switch format {
 	case FORMAT_JSON:
 		err = document.WriteAsEncodedJSONInt(writer, utils.GlobalFlags.PersistentFlags.GetOutputIndentInt())

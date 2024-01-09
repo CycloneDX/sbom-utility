@@ -21,6 +21,7 @@ package cmd
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -30,11 +31,13 @@ import (
 )
 
 const (
-// Patch test BOM files
+	// Patch test BOM files
+	TEST_PATCH_BOM_1_5_MATURE_BASE = "test/patch/cdx-1-5-mature-base.json"
 )
 
 const (
-// Patch test RFC 6901 patch files
+	// Patch test RFC 6901 patch files
+	TEST_PATCH_METADATA_PROPERTIES = "test/patch/cdx-patch-metadata-properties.json"
 )
 
 type PatchTestInfo struct {
@@ -176,6 +179,11 @@ func VerifyPatchedOutputFileResult(t *testing.T, originalTest PatchTestInfo) (er
 }
 
 func TestPatchCdx15(t *testing.T) {
-	ti := NewPatchTestInfo(TEST_TRIM_CDX_1_4_SAMPLE_VEX, "TODO", nil)
-	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_TRIM_CDX_1_4_SAMPLE_VEX)
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_MATURE_BASE, TEST_PATCH_METADATA_PROPERTIES, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_MATURE_BASE)
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Printf("%s\n", buffer.String())
 }

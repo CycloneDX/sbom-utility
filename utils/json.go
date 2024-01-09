@@ -74,6 +74,24 @@ func MarshalStructToJsonMap(any interface{}) (mapOut map[string]interface{}, err
 	return
 }
 
+func CalcLineAndCharacterPos(data []byte, offset int64) (lineNum int, charNum int) {
+	const LF byte = 0x0a
+	lineNum = 1
+	charNum = 0
+	intOffset := int(offset)
+
+	for i := 0; i < len(data) && i < intOffset; i, charNum = i+1, charNum+1 {
+
+		if data[i] == LF {
+			lineNum++
+			//fmt.Printf("NEWLINE (%v): total: %d, offset: %d\n", LF, line, char)
+			charNum = 0
+		}
+	}
+
+	return lineNum, charNum - 1
+}
+
 // Creates strings of spaces based upon provided integer length (e.g., the --indent <length> flag)
 func GenerateIndentString(length int) (prefix string) {
 	var sb strings.Builder

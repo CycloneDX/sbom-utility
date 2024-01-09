@@ -309,7 +309,7 @@ func (bom *BOM) UnmarshalBOMAsJSONMap() (err error) {
 	if errUnmarshal != nil {
 		getLogger().Trace(errUnmarshal)
 		if syntaxError, ok := errUnmarshal.(*json.SyntaxError); ok {
-			line, character := CalcLineAndCharacterPos(bom.rawBytes, syntaxError.Offset)
+			line, character := utils.CalcLineAndCharacterPos(bom.rawBytes, syntaxError.Offset)
 			getLogger().Tracef("syntax error found at line,char=[%d,%d]", line, character)
 		}
 		return errUnmarshal
