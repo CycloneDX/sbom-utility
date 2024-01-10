@@ -162,9 +162,12 @@ func Patch(writer io.Writer, persistentFlags utils.PersistentCommandFlags, patch
 		return
 	}
 
-	patchDocument := NewPatchDocument(patchFile)
-	err = patchDocument.UnmarshalIETFRFC6903Document()
-	if err != nil {
+	patchDocument := NewIETFRFC6902PatchDocument(patchFile)
+	// if err = patchDocument.UnmarshalIETFRFC6903Document(); err != nil {
+	// 	return
+	// }
+
+	if err = patchDocument.UnmarshalRecords(); err != nil {
 		return
 	}
 
