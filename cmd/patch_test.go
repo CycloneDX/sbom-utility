@@ -38,8 +38,9 @@ const (
 const (
 	// Patch test RFC 6901 patch files
 	TEST_PATCH_METADATA_PROPERTIES_1 = "test/patch/cdx-patch-metadata-properties-1.json"
-
-	TEST_PATCH_ERR_MISSING_VALUE = "test/patch/cdx-patch-add-err-missing-value.json"
+	// Error tests
+	TEST_PATCH_ERR_ADD_MISSING_VALUE = "test/patch/cdx-patch-add-err-missing-value.json"
+	TEST_PATCH_ERR_OP_PATH_EMPTY     = "test/patch/cdx-patch-op-err-empty-path.json"
 )
 
 type PatchTestInfo struct {
@@ -191,7 +192,17 @@ func TestPatchCdx15(t *testing.T) {
 }
 
 func TestPatchAddErrorMissingValue(t *testing.T) {
-	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_MATURE_BASE, TEST_PATCH_ERR_MISSING_VALUE, nil)
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_MATURE_BASE, TEST_PATCH_ERR_ADD_MISSING_VALUE, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_MATURE_BASE)
+	_, _, err := innerTestPatch(t, ti)
+	// Expected an error
+	if err == nil {
+		t.Error(err)
+	}
+}
+
+func TestPatchOpErrorPathEmpty(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_MATURE_BASE, TEST_PATCH_ERR_OP_PATH_EMPTY, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_MATURE_BASE)
 	_, _, err := innerTestPatch(t, ti)
 	// Expected an error

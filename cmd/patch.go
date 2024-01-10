@@ -198,6 +198,18 @@ func processPatchRecords(bomDocument *schema.BOM, patchDocument *IETF6902Documen
 		fmt.Printf("patch: %s\n", record.String())
 		getLogger().Tracef("patch: %s\n", record.String())
 
+		// operation objects MUST have exactly one "path" member.
+		// That member's value is a string containing a JSON-Pointer value
+		// [RFC6901] that references a location within the target document
+		// (the "target location") where the operation is performed.
+		// NOTE: RFC 6901 indicates an "empty" path means a pointer to the
+		// entire document which effectively mean patch the entire document
+		// which does not make sense...
+		if record.Path == "" {
+			// TODO: make this a declared error type that can be tested
+			return fmt.Errorf("invalid IETF RFC 6902 patch operation. \"path\" is empty")
+		}
+
 		switch record.Operation {
 		case IETF_RFC6902_OP_ADD:
 			// var mapRecord map[string]interface{}
