@@ -171,6 +171,9 @@ func Patch(writer io.Writer, persistentFlags utils.PersistentCommandFlags, patch
 		return
 	}
 
+	// TODO: write out "patched" BOM
+	// TODO: allow user to change document serial # and/or version
+
 	// Output the "patched" version of the Input BOM
 	format := persistentFlags.OutputFormat
 	getLogger().Infof("Writing patched BOM (`%s` format)...", format)
@@ -192,9 +195,42 @@ func processPatchRecords(bomDocument *schema.BOM, patchDocument *IETF6902Documen
 	patchRecords := patchDocument.Records
 
 	for _, record := range patchRecords {
-
 		fmt.Printf("patch: %s\n", record.String())
+		getLogger().Tracef("patch: %s\n", record.String())
+
+		switch record.Operation {
+		case IETF_RFC6902_OP_ADD:
+			if err = addValue(bomDocument.JsonMap, record.Path, record.Value); err != nil {
+				return
+			}
+		case IETF_RFC6902_OP_REMOVE:
+		case IETF_RFC6902_OP_REPLACE:
+		case IETF_RFC6902_OP_MOVE:
+		case IETF_RFC6902_OP_COPY:
+		case IETF_RFC6902_OP_TEST:
+		default:
+			return fmt.Errorf("invalid IETF RFC 6902 operation: %s", record.Operation)
+		}
 	}
 
+	return
+}
+
+// The "add" operation performs one of the following functions,
+// depending upon what the target location references:
+//
+//   - If the target location specifies an array index, a new value is
+//     inserted into the array at the specified index.
+//
+//   - If the target location specifies an object member that does not
+//     already exist, a new member is added to the object.
+//
+//   - If the target location specifies an object member that does exist,
+//     that member's value is replaced.
+func addValue(jsonMap map[string]interface{}, path string, value interface{}) (err error) {
+
+	// parse path returns index (-1 if not specified) and either a slice or json map
+	// if path is a slice, verify that the value matches the expected type
+	// if path is a map, assure value matches the expected type
 	return
 }
