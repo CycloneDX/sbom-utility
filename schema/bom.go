@@ -246,8 +246,8 @@ func (bom *BOM) GetKeyValueAsString(key string) (sValue string, err error) {
 		getLogger().Error(err)
 		return "", err
 	}
-	value := bom.JsonMap[key]
 
+	value := bom.JsonMap[key]
 	if value == nil {
 		getLogger().Tracef("key: `%s` not found in document map", key)
 		return "", nil
@@ -257,19 +257,15 @@ func (bom *BOM) GetKeyValueAsString(key string) (sValue string, err error) {
 	return value.(string), nil
 }
 
-func (bom *BOM) UnmarshalBOMAsJSONMap() (err error) {
-	getLogger().Enter()
-	defer getLogger().Exit()
-
+func (bom *BOM) ReadRawBytes() (err error) {
 	// validate filename
 	if len(bom.filename) == 0 {
-		return fmt.Errorf("schema: invalid BOM filename: `%s`", bom.filename)
+		return fmt.Errorf("schema: invalid filename: `%s`", bom.filename)
 	}
 
 	// Check to see of stdin is the BOM source data
 	if bom.filename == INPUT_TYPE_STDIN {
-		bom.rawBytes, err = io.ReadAll(os.Stdin)
-		if err != nil {
+		if bom.rawBytes, err = io.ReadAll(os.Stdin); err != nil {
 			return
 		}
 	} else { // load the BOM data from relative filename
@@ -281,27 +277,32 @@ func (bom *BOM) UnmarshalBOMAsJSONMap() (err error) {
 		}
 
 		// Open our jsonFile
-		jsonFile, errOpen := os.Open(bom.absFilename)
-
-		// if input file cannot be opened, log it and terminate
-		if errOpen != nil {
-			getLogger().Error(errOpen)
-			return errOpen
+		var jsonFile *os.File
+		if jsonFile, err = os.Open(bom.absFilename); err != nil {
+			return
 		}
 
 		// defer the closing of our jsonFile
 		defer jsonFile.Close()
 
 		// read our opened jsonFile as a byte array.
-		var errReadAll error
-		bom.rawBytes, errReadAll = io.ReadAll(jsonFile)
-		if errReadAll != nil {
-			getLogger().Error(errReadAll)
+		if bom.rawBytes, err = io.ReadAll(jsonFile); err != nil {
+			return
 		}
 	}
 
 	getLogger().Tracef("read data from: `%s`", bom.filename)
 	getLogger().Tracef("\n  >> rawBytes[:100]=[%s]", bom.rawBytes[:100])
+	return
+}
+
+func (bom *BOM) UnmarshalBOMAsJSONMap() (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	if err = bom.ReadRawBytes(); err != nil {
+		return
+	}
 
 	// Attempt to unmarshal the prospective JSON document to a map
 	bom.JsonMap = make(map[string]interface{})
@@ -333,8 +334,7 @@ func (bom *BOM) UnmarshalCycloneDXBOM() (err error) {
 	}
 
 	// Use the JSON Map to unmarshal to CDX-specific types
-	bom.CdxBom, err = UnMarshalDocument(bom.JsonMap)
-	if err != nil {
+	if bom.CdxBom, err = UnMarshalDocument(bom.JsonMap); err != nil {
 		return
 	}
 

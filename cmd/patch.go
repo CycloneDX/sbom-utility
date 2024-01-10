@@ -158,16 +158,16 @@ func Patch(writer io.Writer, persistentFlags utils.PersistentCommandFlags, patch
 	// validate parameters
 	patchFile := utils.GlobalFlags.PatchFlags.PatchFile
 	if patchFile == "" {
-		err = fmt.Errorf("invalid patch file")
+		err = fmt.Errorf("invalid patch file: %s", patchFile)
 		return
 	}
 
 	patchDocument := NewIETFRFC6902PatchDocument(patchFile)
-	// if err = patchDocument.UnmarshalIETFRFC6903Document(); err != nil {
-	// 	return
-	// }
-
 	if err = patchDocument.UnmarshalRecords(); err != nil {
+		return
+	}
+
+	if err = processPatchRecords(document, patchDocument); err != nil {
 		return
 	}
 
@@ -182,6 +182,18 @@ func Patch(writer io.Writer, persistentFlags utils.PersistentCommandFlags, patch
 		getLogger().Warningf("Trim not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_JSON)
 		err = document.WriteAsEncodedJSONInt(writer, utils.GlobalFlags.PersistentFlags.GetOutputIndentInt())
+	}
+
+	return
+}
+
+func processPatchRecords(bomDocument *schema.BOM, patchDocument *IETF6902Document) (err error) {
+
+	patchRecords := patchDocument.Records
+
+	for _, record := range patchRecords {
+
+		fmt.Printf("patch: %s\n", record.String())
 	}
 
 	return

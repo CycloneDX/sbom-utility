@@ -59,6 +59,11 @@ type IETF6902Record struct {
 	From      string      `json:"from,omitempty"`
 }
 
+func (record *IETF6902Record) String() string {
+	buffer, _ := utils.EncodeAnyToDefaultIndentedJSONStr(record)
+	return buffer.String()
+}
+
 func NewIETFRFC6902PatchDocument(patchFilename string) (document *IETF6902Document) {
 	temp := IETF6902Document{
 		filename: patchFilename,
@@ -85,12 +90,8 @@ func (document *IETF6902Document) ReadRawBytes() (err error) {
 		}
 
 		// Open our jsonFile
-		jsonFile, errOpen := os.Open(document.absFilename)
-
-		// if input file cannot be opened, log it and terminate
-		if errOpen != nil {
-			err = errOpen
-			getLogger().Error(err)
+		var jsonFile *os.File
+		if jsonFile, err = os.Open(document.absFilename); err != nil {
 			return
 		}
 
@@ -98,9 +99,7 @@ func (document *IETF6902Document) ReadRawBytes() (err error) {
 		defer jsonFile.Close()
 
 		// read our opened jsonFile as a byte array.
-		document.rawBytes, err = io.ReadAll(jsonFile)
-		if err != nil {
-			getLogger().Error(err)
+		if document.rawBytes, err = io.ReadAll(jsonFile); err != nil {
 			return
 		}
 
@@ -120,9 +119,7 @@ func (document *IETF6902Document) UnmarshalRecords() (err error) {
 	}
 
 	// optimistically, prepare the receiving structure and unmarshal
-	err = json.Unmarshal(document.rawBytes, &document.Records)
-
-	if err != nil {
+	if err = json.Unmarshal(document.rawBytes, &document.Records); err != nil {
 		getLogger().Warningf("unmarshal failed: %v", err)
 		return
 	}
