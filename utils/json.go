@@ -41,11 +41,12 @@ func IsJsonSliceType(any interface{}) (isSliceType bool) {
 	return
 }
 
-func IsValidJsonMap(test string) bool {
-	var js map[string]interface{}
-	err := json.Unmarshal([]byte(test), &js)
-	return err == nil
-}
+// NOTE: currently, an unused function
+// func IsValidJsonMap(test string) bool {
+// 	var js map[string]interface{}
+// 	err := json.Unmarshal([]byte(test), &js)
+// 	return err == nil
+// }
 
 func IsValidJsonRaw(test []byte) bool {
 	var js interface{}

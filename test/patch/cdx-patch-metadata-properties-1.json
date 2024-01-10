@@ -1,5 +1,6 @@
 [
     { "op": "add", "path": "/metadata/properties/-", "value": { "name": "foo", "value": "bar" } },
-    { "op": "add", "path": "/metadata/properties/-", "value": { "name": "abc", "value": "123" } },
-    { "op": "add", "path": "/metadata/properties/1", "value": { "name": "rush", "value": "yyz" } }
+    { "op": "add", "path": "/metadata/properties/1", "value": { "name": "rush", "value": "yyz" } },
+    { "op": "add", "path": "/version", "value": 1 },
+    { "op": "add", "path": "/modified", "value": true }
 ]

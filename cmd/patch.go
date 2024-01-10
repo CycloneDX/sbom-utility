@@ -200,6 +200,10 @@ func processPatchRecords(bomDocument *schema.BOM, patchDocument *IETF6902Documen
 
 		switch record.Operation {
 		case IETF_RFC6902_OP_ADD:
+			// var mapRecord map[string]interface{}
+			// recordBytes, _ := json.Marshal(record)
+			// json.Unmarshal(recordBytes, &mapRecord)
+			// delete(mapRecord, "value")
 			if err = addValue(bomDocument.JsonMap, record.Path, record.Value); err != nil {
 				return
 			}
@@ -227,10 +231,21 @@ func processPatchRecords(bomDocument *schema.BOM, patchDocument *IETF6902Documen
 //
 //   - If the target location specifies an object member that does exist,
 //     that member's value is replaced.
+//
+// The operation object MUST contain a "value" member whose content
+// specifies the value to be added.
 func addValue(jsonMap map[string]interface{}, path string, value interface{}) (err error) {
+
+	// The operation object MUST contain a "value" member whose content
+	// specifies the value to be added.
+	if value == nil {
+		// TODO: make this a declared error type that can be tested
+		return fmt.Errorf("invalid IETF RFC 6902 patch operation. \"value\" missing")
+	}
 
 	// parse path returns index (-1 if not specified) and either a slice or json map
 	// if path is a slice, verify that the value matches the expected type
 	// if path is a map, assure value matches the expected type
+
 	return
 }

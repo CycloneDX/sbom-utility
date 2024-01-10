@@ -38,6 +38,8 @@ const (
 const (
 	// Patch test RFC 6901 patch files
 	TEST_PATCH_METADATA_PROPERTIES_1 = "test/patch/cdx-patch-metadata-properties-1.json"
+
+	TEST_PATCH_ERR_MISSING_VALUE = "test/patch/cdx-patch-add-err-missing-value.json"
 )
 
 type PatchTestInfo struct {
@@ -186,4 +188,14 @@ func TestPatchCdx15(t *testing.T) {
 		t.Error(err)
 	}
 	fmt.Printf("%s\n", buffer.String())
+}
+
+func TestPatchAddErrorMissingValue(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_MATURE_BASE, TEST_PATCH_ERR_MISSING_VALUE, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_MATURE_BASE)
+	_, _, err := innerTestPatch(t, ti)
+	// Expected an error
+	if err == nil {
+		t.Error(err)
+	}
 }
