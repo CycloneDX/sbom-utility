@@ -31,17 +31,31 @@ import (
 )
 
 const (
-	// Patch test BOM files
+	// "base" JSON files for patching from IETF RFC 6902 Appendix A
+	TEST_PATCH_RFC_6902_APPX_A_1_BASE = "test/patch/rfc6902/rfc6902-appendix-a-1-base.json"
+	TEST_PATCH_RFC_6902_APPX_A_2_BASE = "test/patch/rfc6902/rfc6902-appendix-a-2-base.json"
+	TEST_PATCH_RFC_6902_APPX_A_3_BASE = "test/patch/rfc6902/rfc6902-appendix-a-3-base.json"
+
+	// "base" BOM files for patching
 	TEST_PATCH_BOM_1_5_SLICE_BASE  = "test/patch/cdx-1-5-slice-base.json"
 	TEST_PATCH_BOM_1_5_SIMPLE_BASE = "test/patch/cdx-1-5-simple-base.json"
 	TEST_PATCH_BOM_1_5_MATURE_BASE = "test/patch/cdx-1-5-mature-base.json"
 )
 
 const (
-	// Patch test RFC 6901 patch files
-	TEST_PATCH_SLICE_ADD             = "test/patch/cdx-patch-slice-add.json"
+	// RFC 6901 "patch" files
+	TEST_PATCH_RFC_6902_APPX_A_1_PATCH_1 = "test/patch/rfc6902/rfc6902-appendix-a-1-patch-1.json"
+	TEST_PATCH_RFC_6902_APPX_A_2_PATCH_1 = "test/patch/rfc6902/rfc6902-appendix-a-2-patch-1.json"
+	TEST_PATCH_RFC_6902_APPX_A_2_PATCH_2 = "test/patch/rfc6902/rfc6902-appendix-a-2-patch-2.json"
+	TEST_PATCH_RFC_6902_APPX_A_2_PATCH_3 = "test/patch/rfc6902/rfc6902-appendix-a-2-patch-3.json"
+	TEST_PATCH_RFC_6902_APPX_A_2_PATCH_4 = "test/patch/rfc6902/rfc6902-appendix-a-2-patch-4.json"
+	TEST_PATCH_RFC_6902_APPX_A_3_PATCH_1 = "test/patch/rfc6902/rfc6902-appendix-a-3-patch-1.json"
+
+	// CycloneDX BOM "patch" files
+	TEST_PATCH_BOM_ADD_SLICE_1       = "test/patch/cdx-patch-add-slice-1.json"
 	TEST_PATCH_METADATA_PROPERTIES_1 = "test/patch/cdx-patch-metadata-properties-1.json"
-	// Error tests
+
+	// CycloneDX BOM "patch" files (error tests)
 	TEST_PATCH_ERR_ADD_MISSING_VALUE = "test/patch/cdx-patch-add-err-missing-value.json"
 	TEST_PATCH_ERR_OP_PATH_EMPTY     = "test/patch/cdx-patch-op-err-empty-path.json"
 )
@@ -215,7 +229,7 @@ func TestPatchCdx15(t *testing.T) {
 }
 
 func TestPatchCdx15SliceAdd(t *testing.T) {
-	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SLICE_BASE, TEST_PATCH_SLICE_ADD, nil)
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SLICE_BASE, TEST_PATCH_BOM_ADD_SLICE_1, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SLICE_BASE)
 	buffer, _, err := innerTestPatch(t, ti)
 	if err != nil {
@@ -223,3 +237,15 @@ func TestPatchCdx15SliceAdd(t *testing.T) {
 	}
 	fmt.Printf("%s\n", buffer.String())
 }
+
+// func TestPatchRFC6902AppendixA2(t *testing.T) {
+// 	ti := NewPatchTestInfo(
+// 		TEST_PATCH_RFC_6902_APPX_A_2_BASE,
+// 		TEST_PATCH_RFC_6902_APPX_A_2_PATCH_1, nil)
+// 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_RFC_6902_APPX_A_2_BASE)
+// 	buffer, _, err := innerTestPatch(t, ti)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+// 	fmt.Printf("%s\n", buffer.String())
+// }

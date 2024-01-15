@@ -40,6 +40,11 @@ const (
 	MSG_PATCH_FILE = "patch filename"
 )
 
+// The "-" character is used to index the end of the array (see [RFC6901])
+const (
+	RFC6901_END_OF_ARRAY = "-"
+)
+
 var PATCH_OUTPUT_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{FORMAT_JSON}, ", ")
 
@@ -274,8 +279,13 @@ func addValue(parentMap map[string]interface{}, keys []string, value interface{}
 		return fmt.Errorf("invalid parent document path (nil)")
 	}
 
-	lKeys := len(keys)
-	if lKeys == 0 {
+	if value == nil {
+		// TODO: make this a declared error type that can be tested
+		return fmt.Errorf("invalid IETF RFC 6902 patch operation. \"value\" missing")
+	}
+
+	lengthKeys := len(keys)
+	if lengthKeys == 0 {
 		return fmt.Errorf("invalid map key (nil)")
 	}
 	nextNodeKey := keys[0]
@@ -285,31 +295,49 @@ func addValue(parentMap map[string]interface{}, keys []string, value interface{}
 	case map[string]interface{}:
 		// If the resulting value is indeed another map type, we expect for a Json Map
 		// we preserve that pointer for the next iteration
-		sNode, _ := utils.MarshalAnyToFormattedJsonString(typedNode)
-		fmt.Printf("map:\n\"%s\"\n", sNode)
-		if lKeys > 1 {
+		if lengthKeys > 1 { // TODO: > 2 ???
 			err = addValue(typedNode, keys[1:], value)
 			return
 		} else {
-			// TODO: add value to nextNode's map
+			// add value to nextNode's map
 			typedNode[keys[0]] = value
 		}
 	case []interface{}:
+		if lengthKeys != 2 {
+			err = fmt.Errorf("invalid path. IETF RFC 6901 does not permit paths after array indices")
+			return
+		}
+
 		// TODO: get index (or '-') to use for insert into slice
-		sNode, _ := utils.MarshalAnyToFormattedJsonString(typedNode)
-		fmt.Printf("mapNode:\n\"%s\"\n", sNode)
-		sliceNode := nextNode.([]interface{})
-		sliceNode = append(sliceNode, value)
-		parentMap[nextNodeKey] = sliceNode
+		// newSlice := nextNode.([]interface{})
+		// newSlice = append(newSlice, value)
+		var arrayIndex int
+		indexPath := keys[1]
+		arrayIndex, err = parseIndex(indexPath)
+		if err != nil {
+			return
+		}
+		newSlice := insertValueIntoSlice(nextNode.([]interface{}), arrayIndex, value)
+		parentMap[nextNodeKey] = newSlice
+	case float64:
+		// NOTE: It is a conscious decision of tbe encoding/json package to
+		// decode all Number values to float64
+		parentMap[nextNodeKey] = value
+	case bool:
+		parentMap[nextNodeKey] = value
 	default:
-		err = getLogger().Errorf("Invalid document node type: (%T)", nextNode)
+		// Optimistically, assign the value and emit a warning of the unexpected JSON type
+		parentMap[nextNodeKey] = value
+		getLogger().Warningf("Invalid document node type: (%T)", nextNode)
 		return
 	}
 
 	return
 }
 
-func insertIntoSlice(slice []interface{}, index int, value interface{}) []interface{} {
+// sNode, _ := utils.MarshalAnyToFormattedJsonString(typedNode)
+// fmt.Printf("map:\n\"%s\"\n", sNode)
+func insertValueIntoSlice(slice []interface{}, index int, value interface{}) []interface{} {
 	if index == -1 || index > len(slice) {
 		return append(slice, value)
 	}
@@ -318,39 +346,51 @@ func insertIntoSlice(slice []interface{}, index int, value interface{}) []interf
 	return slice
 }
 
+func parseIndex(indexPath string) (arrayIndex int, err error) {
+
+	// Check for RFC6901 end-of-array character
+	if indexPath == RFC6901_END_OF_ARRAY {
+		arrayIndex = -1
+		return
+	}
+	// otherwise, the path should be convertible to an integer
+	arrayIndex, err = strconv.Atoi(indexPath)
+	return
+}
+
 // =================================================================
 // =================================================================
 
 // parse path returns index (-1 if not specified) and either a slice or json map
 // if path is a slice, verify that the value matches the expected type
 // if path is a map, assure value matches the expected type
-func parsePathOld(path string) (queryPath string, arrayIndex int, err error) {
-	// NOTE: return parm. "queryPath" is empty, which defaults to "root" of document
-	arrayIndex = -1 // default to insert "last"
+// func parsePathOld(path string) (queryPath string, arrayIndex int, err error) {
+// 	// NOTE: return parm. "queryPath" is empty, which defaults to "root" of document
+// 	arrayIndex = -1 // default to insert "last"
 
-	// first char SHOULD be a forward slash, if not error else remove it for processing
-	if path[0] != '/' {
-		err = fmt.Errorf("invalid path. Path must begin with forward slash")
-		return
-	}
+// 	// first char SHOULD be a forward slash, if not error else remove it for processing
+// 	if path[0] != '/' {
+// 		err = fmt.Errorf("invalid path. Path must begin with forward slash")
+// 		return
+// 	}
 
-	if len(path) > 1 {
-		// parse out paths ignoring leading forward slash character
-		paths := strings.Split(path[1:], "/")
+// 	if len(path) > 1 {
+// 		// parse out paths ignoring leading forward slash character
+// 		paths := strings.Split(path[1:], "/")
 
-		if lengthPaths := len(paths); lengthPaths > 1 {
-			lastPath := paths[lengthPaths-1]
-			if lastPath == "-" {
-				arrayIndex = -1 // default
-				paths = paths[0 : lengthPaths-1]
-			} else if arrayIndex, err = strconv.Atoi(lastPath); err == nil {
-				paths = paths[0 : lengthPaths-1]
-			}
-			queryPath = strings.Join(paths, ".")
-		}
-	}
-	return
-}
+// 		if lengthPaths := len(paths); lengthPaths > 1 {
+// 			lastPath := paths[lengthPaths-1]
+// 			if lastPath == "-" {
+// 				arrayIndex = -1 // default
+// 				paths = paths[0 : lengthPaths-1]
+// 			} else if arrayIndex, err = strconv.Atoi(lastPath); err == nil {
+// 				paths = paths[0 : lengthPaths-1]
+// 			}
+// 			queryPath = strings.Join(paths, ".")
+// 		}
+// 	}
+// 	return
+// }
 
 // The "add" operation performs one of the following functions,
 // depending upon what the target location references:
@@ -366,109 +406,109 @@ func parsePathOld(path string) (queryPath string, arrayIndex int, err error) {
 //
 // The operation object MUST contain a "value" member whose content
 // specifies the value to be added.
-func addValueOld(document *schema.BOM, path string, value interface{}) (err error) {
+// func addValueOld(document *schema.BOM, path string, value interface{}) (err error) {
 
-	// The operation object MUST contain a "value" member whose content
-	// specifies the value to be added.
-	if value == nil {
-		// TODO: make this a declared error type that can be tested
-		return fmt.Errorf("invalid IETF RFC 6902 patch operation. \"value\" missing")
-	}
+// 	// The operation object MUST contain a "value" member whose content
+// 	// specifies the value to be added.
+// 	if value == nil {
+// 		// TODO: make this a declared error type that can be tested
+// 		return fmt.Errorf("invalid IETF RFC 6902 patch operation. \"value\" missing")
+// 	}
 
-	var queryPath string
-	var index int
-	queryPath, index, err = parsePathOld(path)
-	if err != nil {
-		return
-	}
-	fmt.Printf("index: %v\n", index)
+// 	var queryPath string
+// 	var index int
+// 	queryPath, index, err = parsePathOld(path)
+// 	if err != nil {
+// 		return
+// 	}
+// 	fmt.Printf("index: %v\n", index)
 
-	// out = append(out, value)
-	itfcProperties := document.JsonMap["properties"]
-	fmt.Printf("B4: pProperties (interface{}): %p\n", itfcProperties)
-	sliceProperties := itfcProperties.([]interface{})
-	fmt.Printf("B4: iProperties ([]interface{}): %p\n", sliceProperties)
+// 	// out = append(out, value)
+// 	itfcProperties := document.JsonMap["properties"]
+// 	fmt.Printf("B4: pProperties (interface{}): %p\n", itfcProperties)
+// 	sliceProperties := itfcProperties.([]interface{})
+// 	fmt.Printf("B4: iProperties ([]interface{}): %p\n", sliceProperties)
 
-	newMap1 := map[string]interface{}{"name": "BBB", "value": "222"}
-	// Append the new map to the slice
-	sliceProperties = append(sliceProperties, newMap1)
-	fmt.Printf("Appended: iProperties ([]interface{}): %p\n", sliceProperties)
+// 	newMap1 := map[string]interface{}{"name": "BBB", "value": "222"}
+// 	// Append the new map to the slice
+// 	sliceProperties = append(sliceProperties, newMap1)
+// 	fmt.Printf("Appended: iProperties ([]interface{}): %p\n", sliceProperties)
 
-	sliceProperties = append(sliceProperties, value)
-	fmt.Printf("Appended: iProperties ([]interface{}): %p\n", sliceProperties)
+// 	sliceProperties = append(sliceProperties, value)
+// 	fmt.Printf("Appended: iProperties ([]interface{}): %p\n", sliceProperties)
 
-	itfcProperties = sliceProperties
-	fmt.Printf("Appended: pProperties ([]interface{}): %p\n", sliceProperties)
+// 	itfcProperties = sliceProperties
+// 	fmt.Printf("Appended: pProperties ([]interface{}): %p\n", sliceProperties)
 
-	document.JsonMap["properties"] = itfcProperties
+// 	document.JsonMap["properties"] = itfcProperties
 
-	var pResults interface{}
-	var pointer interface{}
-	pointer = document.JsonMap
-	fmt.Printf("B4: pointer (JsonMap): %p\n", pointer)
+// 	var pResults interface{}
+// 	var pointer interface{}
+// 	pointer = document.JsonMap
+// 	fmt.Printf("B4: pointer (JsonMap): %p\n", pointer)
 
-	pointer = document.GetJSONMap()
-	fmt.Printf("B4: pointer (GetJsonMap()): %p\n", pointer)
-	pResults, _ = retrievePathPointer(document, strings.Split(queryPath, "."))
-	fmt.Printf("pResults: %v (%T) (%p)\n", pResults, pResults, pResults)
-	s, _ := utils.MarshalAnyToFormattedJsonString(pResults)
-	fmt.Printf("pResults: %s\n", s)
+// 	pointer = document.GetJSONMap()
+// 	fmt.Printf("B4: pointer (GetJsonMap()): %p\n", pointer)
+// 	pResults, _ = retrievePathPointer(document, strings.Split(queryPath, "."))
+// 	fmt.Printf("pResults: %v (%T) (%p)\n", pResults, pResults, pResults)
+// 	s, _ := utils.MarshalAnyToFormattedJsonString(pResults)
+// 	fmt.Printf("pResults: %s\n", s)
 
-	// Create a new map with the desired values
-	newMap2 := map[string]interface{}{"name": "AAA", "value": "111"}
+// 	// Create a new map with the desired values
+// 	newMap2 := map[string]interface{}{"name": "AAA", "value": "111"}
 
-	// Append the new map to the slice
-	slice := pResults.([]interface{})
-	slice = append(slice, newMap2)
-	slice = append(slice, value)
-	fmt.Printf("After: slice pointer: %p\n", slice)
-	pResults = &slice
+// 	// Append the new map to the slice
+// 	slice := pResults.([]interface{})
+// 	slice = append(slice, newMap2)
+// 	slice = append(slice, value)
+// 	fmt.Printf("After: slice pointer: %p\n", slice)
+// 	pResults = &slice
 
-	// valueOf := reflect.ValueOf(pResults)
-	// if valueOf.Kind() == reflect.Slice {
-	// 	fmt.Printf("pResults: Kind: %v\n", valueOf.Kind())
-	// 	fmt.Printf("value (type:%T): %v\n", value, value)
-	// 	pResults = append(pResults.([]interface{}), value)
-	// }
+// 	// valueOf := reflect.ValueOf(pResults)
+// 	// if valueOf.Kind() == reflect.Slice {
+// 	// 	fmt.Printf("pResults: Kind: %v\n", valueOf.Kind())
+// 	// 	fmt.Printf("value (type:%T): %v\n", value, value)
+// 	// 	pResults = append(pResults.([]interface{}), value)
+// 	// }
 
-	// j, _ := utils.MarshalAnyToFormattedJsonString(document.JsonMap)
-	// fmt.Printf("JsonMap: %s\n", j)
+// 	// j, _ := utils.MarshalAnyToFormattedJsonString(document.JsonMap)
+// 	// fmt.Printf("JsonMap: %s\n", j)
 
-	return
-}
+// 	return
+// }
 
-func retrievePathPointer(document *schema.BOM, paths []string) (pointer interface{}, err error) {
-	getLogger().Enter()
-	defer getLogger().Exit()
+// func retrievePathPointer(document *schema.BOM, paths []string) (pointer interface{}, err error) {
+// 	getLogger().Enter()
+// 	defer getLogger().Exit()
 
-	pointer = document.JsonMap
-	fmt.Printf("pointer (JsonMap): %p\n", pointer)
+// 	pointer = document.JsonMap
+// 	fmt.Printf("pointer (JsonMap): %p\n", pointer)
 
-	pointer = document.GetJSONMap()
-	fmt.Printf("pointer (GetJsonMap()): %p\n", pointer)
+// 	pointer = document.GetJSONMap()
+// 	fmt.Printf("pointer (GetJsonMap()): %p\n", pointer)
 
-	for i, key := range paths {
-		switch t := pointer.(type) {
-		case map[string]interface{}:
-			// If the resulting value is indeed another map type, we expect for a Json Map
-			// we preserve that pointer for the next iteration
-			pointer = pointer.(map[string]interface{})[key]
-			fmt.Printf("key: \"%s\", pointer: %p (pointer.(map[string]interface{})[key])\n", key, pointer)
-		case []interface{}:
-			// TODO: are slices diff?
-			// We no longer have a map to dereference into
-			// So if there are more keys left as selectors it is an error
-			if len(paths) > i+1 {
-				err = fmt.Errorf("Boo")
-				return
-			}
-		default:
-			getLogger().Debugf("Invalid datatype of query: key: %s (%t)", key, t)
-			err = fmt.Errorf("Hiss")
-			return
-		}
-	}
-	fmt.Printf("returning pointer: %p\n", pointer)
+// 	for i, key := range paths {
+// 		switch t := pointer.(type) {
+// 		case map[string]interface{}:
+// 			// If the resulting value is indeed another map type, we expect for a Json Map
+// 			// we preserve that pointer for the next iteration
+// 			pointer = pointer.(map[string]interface{})[key]
+// 			fmt.Printf("key: \"%s\", pointer: %p (pointer.(map[string]interface{})[key])\n", key, pointer)
+// 		case []interface{}:
+// 			// TODO: are slices diff?
+// 			// We no longer have a map to dereference into
+// 			// So if there are more keys left as selectors it is an error
+// 			if len(paths) > i+1 {
+// 				err = fmt.Errorf("Boo")
+// 				return
+// 			}
+// 		default:
+// 			getLogger().Debugf("Invalid datatype of query: key: %s (%t)", key, t)
+// 			err = fmt.Errorf("Hiss")
+// 			return
+// 		}
+// 	}
+// 	fmt.Printf("returning pointer: %p\n", pointer)
 
-	return
-}
+// 	return
+// }
