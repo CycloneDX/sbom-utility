@@ -32,11 +32,14 @@ import (
 
 const (
 	// Patch test BOM files
+	TEST_PATCH_BOM_1_5_SLICE_BASE  = "test/patch/cdx-1-5-slice-base.json"
+	TEST_PATCH_BOM_1_5_SIMPLE_BASE = "test/patch/cdx-1-5-simple-base.json"
 	TEST_PATCH_BOM_1_5_MATURE_BASE = "test/patch/cdx-1-5-mature-base.json"
 )
 
 const (
 	// Patch test RFC 6901 patch files
+	TEST_PATCH_SLICE_ADD             = "test/patch/cdx-patch-slice-add.json"
 	TEST_PATCH_METADATA_PROPERTIES_1 = "test/patch/cdx-patch-metadata-properties-1.json"
 	// Error tests
 	TEST_PATCH_ERR_ADD_MISSING_VALUE = "test/patch/cdx-patch-add-err-missing-value.json"
@@ -181,16 +184,6 @@ func VerifyPatchedOutputFileResult(t *testing.T, originalTest PatchTestInfo) (er
 	return
 }
 
-func TestPatchCdx15(t *testing.T) {
-	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_MATURE_BASE, TEST_PATCH_METADATA_PROPERTIES_1, nil)
-	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_MATURE_BASE)
-	buffer, _, err := innerTestPatch(t, ti)
-	if err != nil {
-		t.Error(err)
-	}
-	fmt.Printf("%s\n", buffer.String())
-}
-
 func TestPatchAddErrorMissingValue(t *testing.T) {
 	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_MATURE_BASE, TEST_PATCH_ERR_ADD_MISSING_VALUE, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_MATURE_BASE)
@@ -209,4 +202,24 @@ func TestPatchOpErrorPathEmpty(t *testing.T) {
 	if err == nil {
 		t.Error(err)
 	}
+}
+
+func TestPatchCdx15(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLE_BASE, TEST_PATCH_METADATA_PROPERTIES_1, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLE_BASE)
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Printf("%s\n", buffer.String())
+}
+
+func TestPatchCdx15SliceAdd(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SLICE_BASE, TEST_PATCH_SLICE_ADD, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SLICE_BASE)
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Printf("%s\n", buffer.String())
 }

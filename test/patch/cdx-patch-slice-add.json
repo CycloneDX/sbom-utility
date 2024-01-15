@@ -1,0 +1,3 @@
+[
+    { "op": "add", "path": "/properties/-", "value": { "name": "foo", "value": "bar" } }
+]

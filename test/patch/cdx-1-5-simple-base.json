@@ -1,0 +1,98 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
+  "externalReferences": [
+    {
+      "url": "support@example.com",
+      "comment": "Support for questions about SBOM contents",
+      "type": "support"
+    }
+  ],
+  "metadata": {
+    "timestamp": "2022-10-12T19:07:00Z",
+    "properties": [
+      {
+        "name": "Name 1",
+        "value": "Value 1"
+      },
+      {
+        "name": "Name 2",
+        "value": "Value 2"
+      }
+    ],
+    "manufacture": {
+      "name": "Example Co.",
+      "url": [
+        "https://example.com"
+      ],
+      "contact": [
+        {
+          "email": "contact@example.com"
+        }
+      ]
+    },
+    "supplier": {
+      "name": "Example Co. Distribution Dept.",
+      "url": [
+        "https://example.com/software/"
+      ]
+    },
+    "component": {
+      "type": "application",
+      "bom-ref": "pkg:oci/example.com/product/application@10.0.4.0",
+      "purl": "pkg:oci/example.com/product/application@10.0.4.0",
+      "name": "Example Application v10.0.4",
+      "version": "10.0.4.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://example.com/application"
+        }
+      ],
+      "properties": [
+        {
+          "name": "urn:example.com:identifier:product",
+          "value": "71C22290D7DB11EBAA175CFD3E629A2A"
+        },
+        {
+          "name": "urn:example.com:identifier:distribution",
+          "value": "5737-I23"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-1",
+          "content": "1111aaaa2222cccc3333dddd4444eeee5555ffff"
+        }
+      ],
+      "supplier": {
+        "name": "Example Co. Distribution Dept.",
+        "url": [
+          "https://example.com"
+        ],
+        "contact": [
+          {
+            "email": "distribution@example.com"
+          }
+        ]
+      },
+      "publisher": "Example Inc. EMEA"
+    },
+    "licenses": [
+      {
+        "license": {
+          "id": "MIT"
+        }
+      }
+    ]
+  }
+}
