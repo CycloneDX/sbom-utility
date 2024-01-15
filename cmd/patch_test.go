@@ -224,6 +224,8 @@ func TestPatchCdx15(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	// NOTE: patch record: { "op": "add", "path": "/modified", "value": true }
+	// will NOT be written to the output BOM as "modified" is not a CycloneDX key
 	getLogger().Tracef("%s\n", buffer.String())
 }
 
