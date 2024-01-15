@@ -21,7 +21,6 @@ package cmd
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -225,7 +224,7 @@ func TestPatchCdx15(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	fmt.Printf("%s\n", buffer.String())
+	getLogger().Tracef("%s\n", buffer.String())
 }
 
 func TestPatchCdx15SliceAdd(t *testing.T) {
@@ -235,7 +234,7 @@ func TestPatchCdx15SliceAdd(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	fmt.Printf("%s\n", buffer.String())
+	getLogger().Tracef("%s\n", buffer.String())
 }
 
 // func TestPatchRFC6902AppendixA2(t *testing.T) {
