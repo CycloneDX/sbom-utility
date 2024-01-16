@@ -303,8 +303,20 @@ func addValue(parentMap map[string]interface{}, keys []string, value interface{}
 	if lengthKeys == 0 {
 		return fmt.Errorf("invalid map key (nil)")
 	}
-	nextNodeKey := keys[0]
-	nextNode := parentMap[nextNodeKey]
+
+	// if lengthKeys
+	var nextNodeKey string   // := keys[0]
+	var nextNode interface{} // := parentMap[nextNodeKey]
+
+	switch lengthKeys {
+	case 0:
+		return fmt.Errorf("invalid map key (nil)")
+	case 1: // special case of adding new key/value to document root
+		nextNode = parentMap
+	default: // adding keys/values along document path
+		nextNodeKey := keys[0]
+		nextNode = parentMap[nextNodeKey]
+	}
 
 	switch typedNode := nextNode.(type) {
 	case map[string]interface{}:

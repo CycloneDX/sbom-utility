@@ -254,6 +254,22 @@ func TestPatchCdx15SliceAdd(t *testing.T) {
 	getLogger().Tracef("%s\n", buffer.String())
 }
 
+func TestPatchRFC6902AppendixA1Patch1(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_1_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_1_PATCH_1, nil)
+	ti.IsInputJSON = true
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
+	// lineNum, _ := bufferLineContainsValues(buffer, -1, "qux")
+	// if lineNum != 3 {
+	// 	t.Errorf("invalid output. Expected added value: \"qux\" at line: 3")
+	// }
+}
+
 func TestPatchRFC6902AppendixA2Patch1(t *testing.T) {
 	ti := NewPatchTestInfo(
 		TEST_PATCH_RFC_6902_APPX_A_2_BASE,
