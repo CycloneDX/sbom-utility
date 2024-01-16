@@ -59,10 +59,14 @@ const (
 	TEST_PATCH_RFC_6902_APPX_A_2_PATCH_ADD_ARRAY_4    = "test/patch/rfc6902/rfc6902-appendix-a-2-patch-add-array-4.json"
 	TEST_PATCH_RFC_6902_APPX_A_3_PATCH_REMOVE_OBJ_1   = "test/patch/rfc6902/rfc6902-appendix-a-3-patch-remove-obj-1.json"
 	TEST_PATCH_RFC_6902_APPX_A_4_PATCH_REMOVE_ARRAY_1 = "test/patch/rfc6902/rfc6902-appendix-a-4-patch-remove-array-1.json"
+	TEST_PATCH_RFC_6902_APPX_A_10_PATCH_ADD_NESTED_1  = "test/patch/rfc6902/rfc6902-appendix-a-10-patch-add-nested-1.json"
 	TEST_PATCH_RFC_6902_APPX_A_16_PATCH_ADD_ARRAY_1   = "test/patch/rfc6902/rfc6902-appendix-a-16-patch-add-array-1.json"
 
 	// NOTE: Currently unsupported patch operations (i.e., should return consistent error)
+	TEST_PATCH_RFC_6902_APPX_A_6_PATCH_1 = "test/patch/rfc6902/rfc6902-appendix-a-6-patch-1.json"
 	TEST_PATCH_RFC_6902_APPX_A_7_PATCH_1 = "test/patch/rfc6902/rfc6902-appendix-a-7-patch-1.json"
+	TEST_PATCH_RFC_6902_APPX_A_8_PATCH_1 = "test/patch/rfc6902/rfc6902-appendix-a-8-patch-1.json"
+	TEST_PATCH_RFC_6902_APPX_A_9_PATCH_1 = "test/patch/rfc6902/rfc6902-appendix-a-9-patch-1.json"
 
 	// CycloneDX BOM "patch" files
 	TEST_PATCH_BOM_ADD_SLICE_1       = "test/patch/cdx-patch-add-slice-1.json"
@@ -186,47 +190,6 @@ func innerBufferedTestPatch(t *testing.T, testInfo *PatchTestInfo) (outputBuffer
 	return
 }
 
-func VerifyPatchedOutputFileResult(t *testing.T, originalTest PatchTestInfo) (err error) {
-
-	// Create a new test info. structure copying in data from the original test
-	queryTestInfo := NewCommonTestInfo()
-	queryTestInfo.InputFile = originalTest.OutputFile
-
-	// Load an Query output BOM file using the "patch" records
-	// NOTE: Default to "root" (i.e,, "") path if none selected.
-
-	// TODO: logic
-	// request, err := common.NewQueryRequestSelectFromWhere(
-	// 	common.QUERY_TOKEN_WILDCARD, fromPath, "")
-	// if err != nil {
-	// 	t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
-	// 	return
-	// }
-
-	// Verify each patch record was applied
-	// var pResult interface{}
-	// for _, key := range originalTest.Keys {
-
-	// 	// use a buffered query on the temp. output file on the (parent) path
-	// 	pResult, _, err = innerQuery(t, queryTestInfo, request)
-	// 	if err != nil {
-	// 		t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
-	// 		return
-	// 	}
-
-	// 	// short-circuit if the "from" path dereferenced to a non-existent key
-	// 	if pResult == nil {
-	// 		t.Errorf("empty (nil) found at from clause: %s", fromPath)
-	// 		return
-	// 	}
-
-	// 	// verify the "key" was removed from the (parent) JSON map
-	// 	err = VerifyTrimmed(pResult, key)
-	// }
-
-	return
-}
-
 // ----------------
 // Error tests
 // ----------------
@@ -264,6 +227,7 @@ func TestPatchCdx15(t *testing.T) {
 	// NOTE: patch record: { "op": "add", "path": "/modified", "value": true }
 	// will NOT be written to the output BOM as "modified" is not a CycloneDX key
 	getLogger().Tracef("%s\n", buffer.String())
+	// TODO: verify results
 }
 
 func TestPatchCdx15SliceAdd(t *testing.T) {
@@ -274,15 +238,49 @@ func TestPatchCdx15SliceAdd(t *testing.T) {
 		t.Error(err)
 	}
 	getLogger().Tracef("%s\n", buffer.String())
+	// TODO: verify results
 }
 
 // -------------------------------------
 // RFC6902 Unsupported operation tests
 // -------------------------------------
+func TestPatchRFC6902AppendixA6Patch1(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_6_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_6_PATCH_1, nil)
+	ti.IsInputJSON = true
+	_, _, err := innerTestPatch(t, ti)
+	if !ErrorTypesMatch(err, &UnsupportedError{}) {
+		t.Error(err)
+	}
+}
+
 func TestPatchRFC6902AppendixA7Patch1(t *testing.T) {
 	ti := NewPatchTestInfo(
 		TEST_PATCH_RFC_6902_APPX_A_7_BASE,
 		TEST_PATCH_RFC_6902_APPX_A_7_PATCH_1, nil)
+	ti.IsInputJSON = true
+	_, _, err := innerTestPatch(t, ti)
+	if !ErrorTypesMatch(err, &UnsupportedError{}) {
+		t.Error(err)
+	}
+}
+
+func TestPatchRFC6902AppendixA8Patch1(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_8_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_8_PATCH_1, nil)
+	ti.IsInputJSON = true
+	_, _, err := innerTestPatch(t, ti)
+	if !ErrorTypesMatch(err, &UnsupportedError{}) {
+		t.Error(err)
+	}
+}
+
+func TestPatchRFC6902AppendixA9Patch1(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_9_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_9_PATCH_1, nil)
 	ti.IsInputJSON = true
 	_, _, err := innerTestPatch(t, ti)
 	if !ErrorTypesMatch(err, &UnsupportedError{}) {
@@ -391,6 +389,23 @@ func TestPatchRFC6902AppendixA16Patch1(t *testing.T) {
 	}
 	getLogger().Tracef("%s\n", buffer.String())
 	TEST_RESULT := "{\"foo\":[\"bar\",[\"abc\",\"def\"]]}\n"
+	if buffer.String() != TEST_RESULT {
+		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+	}
+}
+
+func TestPatchRFC6902AppendixA10Patch1(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_10_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_10_PATCH_ADD_NESTED_1, nil)
+	ti.OutputIndent = 0
+	ti.IsInputJSON = true
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
+	TEST_RESULT := "{\"child\":{\"grandchild\":{}},\"foo\":\"bar\"}\n"
 	if buffer.String() != TEST_RESULT {
 		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
 	}
