@@ -263,11 +263,16 @@ func TestPatchRFC6902AppendixA1Patch1(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	//fmt.Printf("json:\n%s", buffer.String())
 	getLogger().Tracef("%s\n", buffer.String())
-	// lineNum, _ := bufferLineContainsValues(buffer, -1, "qux")
-	// if lineNum != 3 {
-	// 	t.Errorf("invalid output. Expected added value: \"qux\" at line: 3")
-	// }
+	lineNum, _ := bufferLineContainsValues(buffer, -1, "qux")
+	if lineNum != 1 {
+		t.Errorf("invalid output. Expected added value: \"qux\" at line: 1")
+	}
+	lineNum, _ = bufferLineContainsValues(buffer, -1, "bar")
+	if lineNum != 2 {
+		t.Errorf("invalid output. Expected added value: \"bar\" at line: 2")
+	}
 }
 
 func TestPatchRFC6902AppendixA2Patch1(t *testing.T) {
