@@ -286,3 +286,37 @@ func TestPatchRFC6902AppendixA2Patch2(t *testing.T) {
 		t.Errorf("invalid output. Expected added value: \"qux\" at line: 4")
 	}
 }
+
+func TestPatchRFC6902AppendixA2Patch3(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_2_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_2_PATCH_3, nil)
+	ti.IsInputJSON = true
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
+	//fmt.Printf("json:\n%s", buffer.String())
+	lineNum, _ := bufferLineContainsValues(buffer, -1, "qux")
+	if lineNum != 4 {
+		t.Errorf("invalid output. Expected added value: \"qux\" at line: 4")
+	}
+}
+
+func TestPatchRFC6902AppendixA2Patch4(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_2_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_2_PATCH_4, nil)
+	ti.IsInputJSON = true
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
+	//fmt.Printf("json:\n%s", buffer.String())
+	lineNum, _ := bufferLineContainsValues(buffer, -1, "qux")
+	if lineNum != 4 {
+		t.Errorf("invalid output. Expected added value: \"qux\" at line: 4")
+	}
+}
