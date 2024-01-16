@@ -42,6 +42,7 @@ const (
 	ERR_TYPE_SBOM_METADATA          = "metadata error"
 	ERR_TYPE_SBOM_METADATA_PROPERTY = "metadata property error"
 	ERR_TYPE_UNEXPECTED_ERROR       = "unexpected error"
+	ERR_TYPE_UNSUPPORTED_OPERATION  = "unsupported operation"
 )
 
 // Validation messages
@@ -112,17 +113,22 @@ func (err *BaseError) AppendMessage(addendum string) {
 	}
 }
 
-type UtilityError struct {
+type UnsupportedError struct {
 	BaseError
+	Operation string
 }
 
-func NewUtilityError(t string, m string, f string, errIn error) *UtilityError {
-	var err = new(UtilityError)
-	err.Type = t
+func NewUnsupportedError(op string, m string) *UnsupportedError {
+	var err = new(UnsupportedError)
+	err.Type = ERR_TYPE_UNSUPPORTED_OPERATION
+	err.Operation = op
 	err.Message = m
-	err.InputFile = f
-	err.InnerError = errIn
 	return err
+}
+
+func (err UnsupportedError) Error() string {
+	formattedMessage := fmt.Sprintf("%s (%s). %s", err.Type, err.Operation, err.Message)
+	return formattedMessage
 }
 
 // ------------------------------------------------

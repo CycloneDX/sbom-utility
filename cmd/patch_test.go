@@ -35,6 +35,7 @@ const (
 	TEST_PATCH_RFC_6902_APPX_A_1_BASE = "test/patch/rfc6902/rfc6902-appendix-a-1-base.json"
 	TEST_PATCH_RFC_6902_APPX_A_2_BASE = "test/patch/rfc6902/rfc6902-appendix-a-2-base.json"
 	TEST_PATCH_RFC_6902_APPX_A_3_BASE = "test/patch/rfc6902/rfc6902-appendix-a-3-base.json"
+	TEST_PATCH_RFC_6902_APPX_A_7_BASE = "test/patch/rfc6902/rfc6902-appendix-a-7-base.json"
 
 	// "base" BOM files for patching
 	TEST_PATCH_BOM_1_5_SLICE_BASE  = "test/patch/cdx-1-5-slice-base.json"
@@ -50,6 +51,9 @@ const (
 	TEST_PATCH_RFC_6902_APPX_A_2_PATCH_3 = "test/patch/rfc6902/rfc6902-appendix-a-2-patch-3.json"
 	TEST_PATCH_RFC_6902_APPX_A_2_PATCH_4 = "test/patch/rfc6902/rfc6902-appendix-a-2-patch-4.json"
 	TEST_PATCH_RFC_6902_APPX_A_3_PATCH_1 = "test/patch/rfc6902/rfc6902-appendix-a-3-patch-1.json"
+
+	// NOTE: Currently unsupported patch operations (i.e., should return consistent error)
+	TEST_PATCH_RFC_6902_APPX_A_7_PATCH_1 = "test/patch/rfc6902/rfc6902-appendix-a-7-patch-1.json"
 
 	// CycloneDX BOM "patch" files
 	TEST_PATCH_BOM_ADD_SLICE_1       = "test/patch/cdx-patch-add-slice-1.json"
@@ -212,6 +216,9 @@ func VerifyPatchedOutputFileResult(t *testing.T, originalTest PatchTestInfo) (er
 	return
 }
 
+// ----------------
+// Error tests
+// ----------------
 func TestPatchAddErrorMissingValue(t *testing.T) {
 	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_MATURE_BASE, TEST_PATCH_ERR_ADD_MISSING_VALUE, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_MATURE_BASE)
@@ -231,6 +238,10 @@ func TestPatchOpErrorPathEmpty(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+// ----------------
+// CycloneDX Tests
+// ----------------
 
 func TestPatchCdx15(t *testing.T) {
 	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLE_BASE, TEST_PATCH_METADATA_PROPERTIES_1, nil)
@@ -253,6 +264,10 @@ func TestPatchCdx15SliceAdd(t *testing.T) {
 	}
 	getLogger().Tracef("%s\n", buffer.String())
 }
+
+// ----------------
+// RFC6902 Tests
+// ----------------
 
 func TestPatchRFC6902AppendixA1Patch1(t *testing.T) {
 	ti := NewPatchTestInfo(
@@ -339,5 +354,19 @@ func TestPatchRFC6902AppendixA2Patch4(t *testing.T) {
 	lineNum, _ := bufferLineContainsValues(buffer, -1, "qux")
 	if lineNum != 4 {
 		t.Errorf("invalid output. Expected added value: \"qux\" at line: 4")
+	}
+}
+
+// -------------------------------------
+// RFC6902 Unsupported operation tests
+// -------------------------------------
+func TestPatchRFC6902AppendixA7Patch1(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_7_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_7_PATCH_1, nil)
+	ti.IsInputJSON = true
+	_, _, err := innerTestPatch(t, ti)
+	if !ErrorTypesMatch(err, &UnsupportedError{}) {
+		t.Error(err)
 	}
 }

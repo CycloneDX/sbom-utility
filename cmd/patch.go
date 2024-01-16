@@ -191,7 +191,7 @@ func Patch(writer io.Writer, persistentFlags utils.PersistentCommandFlags, patch
 		err = document.WriteAsEncodedJSONInt(writer, utils.GlobalFlags.PersistentFlags.GetOutputIndentInt())
 	default:
 		// Default to Text output for anything else (set as flag default)
-		getLogger().Warningf("Trim not supported for `%s` format; defaulting to `%s` format...",
+		getLogger().Warningf("Patch not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_JSON)
 		err = document.WriteAsEncodedJSONInt(writer, utils.GlobalFlags.PersistentFlags.GetOutputIndentInt())
 	}
@@ -250,12 +250,17 @@ func processPatchRecords(bomDocument *schema.BOM, patchDocument *IETF6902Documen
 				return
 			}
 		case IETF_RFC6902_OP_REMOVE:
+			fallthrough
 		case IETF_RFC6902_OP_REPLACE:
+			fallthrough
 		case IETF_RFC6902_OP_MOVE:
+			fallthrough
 		case IETF_RFC6902_OP_COPY:
+			fallthrough
 		case IETF_RFC6902_OP_TEST:
+			return NewUnsupportedError(record.Operation, "IETF RFC 6902 operation not currently supported")
 		default:
-			return fmt.Errorf("invalid IETF RFC 6902 operation: %s", record.Operation)
+			return NewUnsupportedError(record.Operation, "invalid IETF RFC 6902 operation")
 		}
 	}
 
