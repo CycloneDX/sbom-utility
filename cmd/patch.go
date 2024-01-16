@@ -278,6 +278,18 @@ func parseMapKeysFromPath(path string) (keys []string, err error) {
 	return
 }
 
+func parseArrayIndex(indexPath string) (arrayIndex int, err error) {
+
+	// Check for RFC6901 end-of-array character
+	if indexPath == RFC6901_END_OF_ARRAY {
+		arrayIndex = -1
+		return
+	}
+	// otherwise, the path should be convertible to an integer
+	arrayIndex, err = strconv.Atoi(indexPath)
+	return
+}
+
 // The "add" operation performs one of the following functions,
 // depending upon what the target location references:
 //
@@ -343,7 +355,7 @@ func addValue(parentMap map[string]interface{}, keys []string, value interface{}
 
 		var arrayIndex int
 		indexPath := keys[1]
-		arrayIndex, err = parseIndex(indexPath)
+		arrayIndex, err = parseArrayIndex(indexPath)
 		if err != nil {
 			return
 		}
@@ -372,16 +384,4 @@ func insertValueIntoSlice(slice []interface{}, index int, value interface{}) []i
 	slice = append(slice[:index+1], slice[index:]...)
 	slice[index] = value
 	return slice
-}
-
-func parseIndex(indexPath string) (arrayIndex int, err error) {
-
-	// Check for RFC6901 end-of-array character
-	if indexPath == RFC6901_END_OF_ARRAY {
-		arrayIndex = -1
-		return
-	}
-	// otherwise, the path should be convertible to an integer
-	arrayIndex, err = strconv.Atoi(indexPath)
-	return
 }
