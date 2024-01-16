@@ -299,19 +299,15 @@ func TestPatchRFC6902AppendixA1Patch1(t *testing.T) {
 		TEST_PATCH_RFC_6902_APPX_A_1_BASE,
 		TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_OBJ_1, nil)
 	ti.IsInputJSON = true
+	ti.OutputIndent = 0
 	buffer, _, err := innerTestPatch(t, ti)
 	if err != nil {
 		t.Error(err)
 	}
-	//fmt.Printf("json:\n%s", buffer.String())
 	getLogger().Tracef("%s\n", buffer.String())
-	lineNum, _ := bufferLineContainsValues(buffer, -1, "qux")
-	if lineNum != 1 {
-		t.Errorf("invalid output. Expected added value: \"qux\" at line: 1")
-	}
-	lineNum, _ = bufferLineContainsValues(buffer, -1, "bar")
-	if lineNum != 2 {
-		t.Errorf("invalid output. Expected added value: \"bar\" at line: 2")
+	TEST_RESULT := "{\"baz\":\"qux\",\"foo\":\"bar\"}\n"
+	if buffer.String() != TEST_RESULT {
+		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
 	}
 }
 
@@ -320,14 +316,15 @@ func TestPatchRFC6902AppendixA2Patch1(t *testing.T) {
 		TEST_PATCH_RFC_6902_APPX_A_2_BASE,
 		TEST_PATCH_RFC_6902_APPX_A_2_PATCH_ADD_ARRAY_1, nil)
 	ti.IsInputJSON = true
+	ti.OutputIndent = 0
 	buffer, _, err := innerTestPatch(t, ti)
 	if err != nil {
 		t.Error(err)
 	}
 	getLogger().Tracef("%s\n", buffer.String())
-	lineNum, _ := bufferLineContainsValues(buffer, -1, "qux")
-	if lineNum != 3 {
-		t.Errorf("invalid output. Expected added value: \"qux\" at line: 3")
+	TEST_RESULT := "{\"foo\":[\"bar\",\"qux\",\"baz\"]}\n"
+	if buffer.String() != TEST_RESULT {
+		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
 	}
 }
 
@@ -336,15 +333,15 @@ func TestPatchRFC6902AppendixA2Patch2(t *testing.T) {
 		TEST_PATCH_RFC_6902_APPX_A_2_BASE,
 		TEST_PATCH_RFC_6902_APPX_A_2_PATCH_ADD_ARRAY_2, nil)
 	ti.IsInputJSON = true
+	ti.OutputIndent = 0
 	buffer, _, err := innerTestPatch(t, ti)
 	if err != nil {
 		t.Error(err)
 	}
 	getLogger().Tracef("%s\n", buffer.String())
-	//fmt.Printf("json:\n%s", buffer.String())
-	lineNum, _ := bufferLineContainsValues(buffer, -1, "qux")
-	if lineNum != 4 {
-		t.Errorf("invalid output. Expected added value: \"qux\" at line: 4")
+	TEST_RESULT := "{\"foo\":[\"bar\",\"baz\",\"qux\"]}\n"
+	if buffer.String() != TEST_RESULT {
+		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
 	}
 }
 
@@ -353,15 +350,15 @@ func TestPatchRFC6902AppendixA2Patch3(t *testing.T) {
 		TEST_PATCH_RFC_6902_APPX_A_2_BASE,
 		TEST_PATCH_RFC_6902_APPX_A_2_PATCH_ADD_ARRAY_3, nil)
 	ti.IsInputJSON = true
+	ti.OutputIndent = 0
 	buffer, _, err := innerTestPatch(t, ti)
 	if err != nil {
 		t.Error(err)
 	}
 	getLogger().Tracef("%s\n", buffer.String())
-	//fmt.Printf("json:\n%s", buffer.String())
-	lineNum, _ := bufferLineContainsValues(buffer, -1, "qux")
-	if lineNum != 4 {
-		t.Errorf("invalid output. Expected added value: \"qux\" at line: 4")
+	TEST_RESULT := "{\"foo\":[\"bar\",\"baz\",\"qux\"]}\n"
+	if buffer.String() != TEST_RESULT {
+		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
 	}
 }
 
@@ -370,15 +367,15 @@ func TestPatchRFC6902AppendixA2Patch4(t *testing.T) {
 		TEST_PATCH_RFC_6902_APPX_A_2_BASE,
 		TEST_PATCH_RFC_6902_APPX_A_2_PATCH_ADD_ARRAY_4, nil)
 	ti.IsInputJSON = true
+	ti.OutputIndent = 0
 	buffer, _, err := innerTestPatch(t, ti)
 	if err != nil {
 		t.Error(err)
 	}
 	getLogger().Tracef("%s\n", buffer.String())
-	//fmt.Printf("json:\n%s", buffer.String())
-	lineNum, _ := bufferLineContainsValues(buffer, -1, "qux")
-	if lineNum != 4 {
-		t.Errorf("invalid output. Expected added value: \"qux\" at line: 4")
+	TEST_RESULT := "{\"foo\":[\"bar\",\"baz\",\"qux\"]}\n"
+	if buffer.String() != TEST_RESULT {
+		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
 	}
 }
 
@@ -392,8 +389,9 @@ func TestPatchRFC6902AppendixA16Patch1(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	getLogger().Tracef("%s\n", buffer.String())
 	TEST_RESULT := "{\"foo\":[\"bar\",[\"abc\",\"def\"]]}\n"
 	if buffer.String() != TEST_RESULT {
-		t.Errorf("invalid patch result. \nExpected: `%s`, \nActual:   `%s`", TEST_RESULT, buffer.String())
+		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
 	}
 }
