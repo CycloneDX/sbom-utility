@@ -177,7 +177,6 @@ func Patch(writer io.Writer, persistentFlags utils.PersistentCommandFlags, patch
 		return
 	}
 
-	// TODO: write out "patched" BOM
 	// TODO: allow user to change document serial # and/or version
 	// Use the JSON Map to unmarshal to CDX-specific types
 
@@ -197,6 +196,25 @@ func Patch(writer io.Writer, persistentFlags utils.PersistentCommandFlags, patch
 		err = document.WriteAsEncodedJSONInt(writer, utils.GlobalFlags.PersistentFlags.GetOutputIndentInt())
 	}
 
+	return
+}
+
+func innerPatch(document *schema.BOM) (err error) {
+	// validate parameters
+	patchFile := utils.GlobalFlags.PatchFlags.PatchFile
+	if patchFile == "" {
+		err = fmt.Errorf("invalid patch file: %s", patchFile)
+		return
+	}
+
+	patchDocument := NewIETFRFC6902PatchDocument(patchFile)
+	if err = patchDocument.UnmarshalRecords(); err != nil {
+		return
+	}
+
+	if err = processPatchRecords(document, patchDocument); err != nil {
+		return
+	}
 	return
 }
 
@@ -228,13 +246,9 @@ func processPatchRecords(bomDocument *schema.BOM, patchDocument *IETF6902Documen
 			if keys, err = parseMapKeysFromPath(record.Path); err != nil {
 				return
 			}
-			err = addValue(jsonMap, keys, record.Value)
-			if err != nil {
+			if err = addValue(jsonMap, keys, record.Value); err != nil {
 				return
 			}
-			// if err = addValueOld(bomDocument, record.Path, record.Value); err != nil {
-			// 	return
-			// }
 		case IETF_RFC6902_OP_REMOVE:
 		case IETF_RFC6902_OP_REPLACE:
 		case IETF_RFC6902_OP_MOVE:
@@ -335,7 +349,7 @@ func addValue(parentMap map[string]interface{}, keys []string, value interface{}
 }
 
 func insertValueIntoSlice(slice []interface{}, index int, value interface{}) []interface{} {
-	if index == -1 || index > len(slice) {
+	if index == -1 || index >= len(slice) {
 		return append(slice, value)
 	}
 	slice = append(slice[:index+1], slice[index:]...)

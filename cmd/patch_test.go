@@ -26,6 +26,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 )
 
@@ -61,7 +62,8 @@ const (
 
 type PatchTestInfo struct {
 	CommonTestInfo
-	PatchFile string
+	PatchFile   string
+	IsInputJSON bool
 }
 
 func (ti *PatchTestInfo) String() string {
@@ -152,7 +154,20 @@ func innerBufferedTestPatch(t *testing.T, testInfo *PatchTestInfo) (outputBuffer
 		}
 	}
 
-	err = Patch(outputWriter, utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.PatchFlags)
+	// If this is a base JSON patch test
+	if testInfo.IsInputJSON == true {
+		// NOTE: we use the BOM "document" structure, but only use the JSON Map portion
+		document := schema.NewBOM(utils.GlobalFlags.PersistentFlags.InputFile)
+		document.UnmarshalBOMAsJSONMap()
+		if err = innerPatch(document); err != nil {
+			return
+		}
+		outputBuffer, err = utils.EncodeAnyToDefaultIndentedJSONStr(document.JsonMap)
+	} else {
+		// else this is a BOM input test
+		err = Patch(outputWriter, utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.PatchFlags)
+	}
+
 	return
 }
 
@@ -239,14 +254,35 @@ func TestPatchCdx15SliceAdd(t *testing.T) {
 	getLogger().Tracef("%s\n", buffer.String())
 }
 
-// func TestPatchRFC6902AppendixA2(t *testing.T) {
-// 	ti := NewPatchTestInfo(
-// 		TEST_PATCH_RFC_6902_APPX_A_2_BASE,
-// 		TEST_PATCH_RFC_6902_APPX_A_2_PATCH_1, nil)
-// 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_RFC_6902_APPX_A_2_BASE)
-// 	buffer, _, err := innerTestPatch(t, ti)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	fmt.Printf("%s\n", buffer.String())
-// }
+func TestPatchRFC6902AppendixA2Patch1(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_2_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_2_PATCH_1, nil)
+	ti.IsInputJSON = true
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
+	lineNum, _ := bufferLineContainsValues(buffer, -1, "qux")
+	if lineNum != 3 {
+		t.Errorf("invalid output. Expected added value: \"qux\" at line: 3")
+	}
+}
+
+func TestPatchRFC6902AppendixA2Patch2(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_2_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_2_PATCH_2, nil)
+	ti.IsInputJSON = true
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
+	//fmt.Printf("json:\n%s", buffer.String())
+	lineNum, _ := bufferLineContainsValues(buffer, -1, "qux")
+	if lineNum != 4 {
+		t.Errorf("invalid output. Expected added value: \"qux\" at line: 4")
+	}
+}
