@@ -21,11 +21,14 @@ package cmd
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"os"
+	"strings"
 	"testing"
 
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 )
@@ -179,7 +182,7 @@ func innerBufferedTestPatch(t *testing.T, testInfo *PatchTestInfo) (outputBuffer
 		if err = innerPatch(document); err != nil {
 			return
 		}
-		//outputBuffer, err = utils.EncodeAnyToDefaultIndentedJSONStr(document.JsonMap)
+		// store patch records for output verification
 		indentString := utils.GenerateIndentString(int(testInfo.OutputIndent))
 		outputBuffer, err = utils.EncodeAnyToIndentedJSONStr(document.JsonMap, indentString)
 	} else {
@@ -187,6 +190,131 @@ func innerBufferedTestPatch(t *testing.T, testInfo *PatchTestInfo) (outputBuffer
 		err = Patch(outputWriter, utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.PatchFlags)
 	}
 
+	return
+}
+
+func retrieveQueryPathFromPatchRecord(recordPath string) (queryPath string, key string, err error) {
+	var paths []string
+	paths, err = parseMapKeysFromPath(recordPath)
+	if err != nil {
+		return
+	}
+	fmt.Printf("path: %s", paths)
+
+	lenPaths := len(paths)
+	// if record's path is not root, separate it from the last path segment
+	// (which is the map key or slice index)
+	if lenPaths > 1 {
+		queryPath = strings.Join(paths[0:lenPaths-1], ".")
+		key = paths[lenPaths-1]
+	} else {
+		queryPath = paths[0]
+		// NOTE: default root (i.e., "")
+	}
+	return
+}
+
+func VerifyPatchedOutputFileResult(t *testing.T, originalTest PatchTestInfo) (err error) {
+
+	patchDocument := NewIETFRFC6902PatchDocument(originalTest.PatchFile)
+	if err = patchDocument.UnmarshalRecords(); err != nil {
+		return
+	}
+
+	// If no patch records were found after unmarshal
+	if patchDocument.Records == nil {
+		return
+	}
+
+	// Create a new test info. structure copying in data from the original test
+	queryTestInfo := NewCommonTestInfo()
+	queryTestInfo.InputFile = originalTest.OutputFile
+
+	// Load and Query temporary "patched" output BOM file using the "from" path
+	// Default to "root" (i.e,, "") path if none selected.
+	DEFAULT_PATH_DOC_ROOT := ""
+	request, err := common.NewQueryRequestSelectFromWhere(
+		common.QUERY_TOKEN_WILDCARD, DEFAULT_PATH_DOC_ROOT, "")
+	if err != nil {
+		t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
+		return
+	}
+	getLogger().Tracef("request: %s", request.String())
+
+	// Verify each key was removed
+	var pResult interface{}
+	for _, record := range patchDocument.Records {
+
+		var queryPath, key string
+		// var paths []string
+		// paths, err = parseMapKeysFromPath(record.Path)
+		// if err != nil {
+		// 	return
+		// }
+		// fmt.Printf("path: %s", paths)
+		// lenPaths := len(paths)
+		// if lenPaths > 1 {
+		// 	queryPath = strings.Join(paths[0:lenPaths-1], ".")
+
+		// } else {
+		// 	queryPath = paths[0]
+		// }
+		queryPath, key, err = retrieveQueryPathFromPatchRecord(record.Path)
+		fmt.Printf("key: %s\n", key)
+		if err != nil {
+			t.Errorf("%s: %v", "unable to parse patch record path.", err)
+			return
+		}
+		request.SetRawFromPaths(queryPath)
+
+		// use a buffered query on the temp. output file on the (parent) path
+		pResult, _, err = innerQuery(t, queryTestInfo, request)
+		if err != nil {
+			t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
+			return
+		}
+
+		// short-circuit if the "from" path dereferenced to a non-existent key
+		if pResult == nil {
+			t.Errorf("empty (nil) found at from clause: %s", request.String())
+			return
+		}
+
+		// 	// verify the "key" was removed from the (parent) JSON map
+		// 	err = VerifyPatched(pResult, key)
+	}
+
+	return
+}
+
+func VerifyPatched(pResult interface{}, key string, value interface{}) (err error) {
+	// verify the "key" was removed from the (parent) JSON map
+	if pResult != nil {
+		// switch typedValue := pResult.(type) {
+		// case map[string]interface{}:
+		// 	// verify map key was removed
+		// 	if _, ok := typedValue[key]; ok {
+		// 		formattedValue, _ := utils.MarshalAnyToFormattedJsonString(typedValue)
+		// 		err = getLogger().Errorf("trim failed. Key `%s`, found in: `%s`", key, formattedValue)
+		// 		return
+		// 	}
+		// case []interface{}:
+		// 	if len(typedValue) == 0 {
+		// 		err = getLogger().Errorf("empty slice found at from clause.")
+		// 		return
+		// 	}
+		// 	// Verify all elements of slice
+		// 	for _, value := range typedValue {
+		// 		err = VerifyTrimmed(value, key)
+		// 		return err
+		// 	}
+		// default:
+		// 	err = getLogger().Errorf("trim failed. Unexpected JSON type: `%T`", typedValue)
+		// 	return
+		// }
+	} else {
+		getLogger().Trace("nil results")
+	}
 	return
 }
 
@@ -211,34 +339,6 @@ func TestPatchOpErrorPathEmpty(t *testing.T) {
 	if err == nil {
 		t.Error(err)
 	}
-}
-
-// ----------------
-// CycloneDX Tests
-// ----------------
-
-func TestPatchCdx15(t *testing.T) {
-	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLE_BASE, TEST_PATCH_METADATA_PROPERTIES_1, nil)
-	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLE_BASE)
-	buffer, _, err := innerTestPatch(t, ti)
-	if err != nil {
-		t.Error(err)
-	}
-	// NOTE: patch record: { "op": "add", "path": "/modified", "value": true }
-	// will NOT be written to the output BOM as "modified" is not a CycloneDX key
-	getLogger().Tracef("%s\n", buffer.String())
-	// TODO: verify results
-}
-
-func TestPatchCdx15SliceAdd(t *testing.T) {
-	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SLICE_BASE, TEST_PATCH_BOM_ADD_SLICE_1, nil)
-	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SLICE_BASE)
-	buffer, _, err := innerTestPatch(t, ti)
-	if err != nil {
-		t.Error(err)
-	}
-	getLogger().Tracef("%s\n", buffer.String())
-	// TODO: verify results
 }
 
 // -------------------------------------
@@ -409,4 +509,36 @@ func TestPatchRFC6902AppendixA10Patch1(t *testing.T) {
 	if buffer.String() != TEST_RESULT {
 		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
 	}
+}
+
+// ----------------
+// CycloneDX Tests
+// ----------------
+
+func TestPatchCdx15(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLE_BASE, TEST_PATCH_METADATA_PROPERTIES_1, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLE_BASE)
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	// NOTE: patch record: { "op": "add", "path": "/modified", "value": true }
+	// will NOT be written to the output BOM as "modified" is not a CycloneDX key
+	getLogger().Tracef("%s\n", buffer.String())
+	// TODO: verify results
+	err = VerifyPatchedOutputFileResult(t, *ti)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestPatchCdx15SliceAdd(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SLICE_BASE, TEST_PATCH_BOM_ADD_SLICE_1, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SLICE_BASE)
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
+	// TODO: verify results
 }

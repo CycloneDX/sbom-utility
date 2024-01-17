@@ -338,12 +338,16 @@ func addValue(parentMap map[string]interface{}, keys []string, value interface{}
 	case map[string]interface{}:
 		// If the resulting value is indeed another map type, we expect for a Json Map
 		// we preserve that pointer for the next iteration
-		if lengthKeys > 2 { // TODO: > 2 ???
-			//fmt.Printf("lengthKeys=%v\n", lengthKeys)
+		if lengthKeys > 2 {
+			// if the next node is a map AND there is more than one path following it,
+			// it would mean we have not yet reached the final map or slice to add
+			// a value to
 			err = addValue(typedNode, keys[1:], value)
 			return
 		} else {
-			// add value to nextNode's map
+			// if the next node is a map AND only 1 path remains after it,
+			// it would mean that last path is a new key to be added
+			// to the next node's map with the provided value
 			typedNode[keys[0]] = value
 		}
 	case []interface{}:
