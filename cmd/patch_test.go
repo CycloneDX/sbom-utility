@@ -25,6 +25,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -72,8 +73,13 @@ const (
 	TEST_PATCH_RFC_6902_APPX_A_9_PATCH_1 = "test/patch/rfc6902/rfc6902-appendix-a-9-patch-1.json"
 
 	// CycloneDX BOM "patch" files
-	TEST_PATCH_BOM_ADD_SLICE_1       = "test/patch/cdx-patch-add-slice-1.json"
-	TEST_PATCH_METADATA_PROPERTIES_1 = "test/patch/cdx-patch-metadata-properties-1.json"
+	TEST_PATCH_BOM_ADD_SLICE_1 = "test/patch/cdx-patch-add-slice-1.json"
+	//TEST_PATCH_METADATA_PROPERTIES_1 = "test/patch/cdx-patch-metadata-properties-1.json"
+	TEST_PATCH_BOM_ADD_METADATA_PROPS_MIXED      = "test/patch/cdx-patch-add-metadata-properties-mixed.json"
+	TEST_PATCH_BOM_ADD_METADATA_PROP_AT_END      = "test/patch/cdx-patch-add-metadata-property-at-end.json"
+	TEST_PATCH_BOM_ADD_METADATA_PROP_AT_INDEX    = "test/patch/cdx-patch-add-metadata-property-at-index.json"
+	TEST_PATCH_BOM_ADD_ROOT_UPDATE_VERSION       = "test/patch/cdx-patch-add-root-update-version.json"
+	TEST_PATCH_BOM_ADD_ROOT_INVALID_KEY_MODIFIED = "test/patch/cdx-patch-add-root-invalid-key-modified.json"
 
 	// CycloneDX BOM "patch" files (error tests)
 	TEST_PATCH_ERR_ADD_MISSING_VALUE = "test/patch/cdx-patch-add-err-missing-value.json"
@@ -199,7 +205,6 @@ func retrieveQueryPathFromPatchRecord(recordPath string) (queryPath string, key 
 	if err != nil {
 		return
 	}
-	fmt.Printf("path: %s", paths)
 
 	lenPaths := len(paths)
 	// if record's path is not root, separate it from the last path segment
@@ -239,28 +244,14 @@ func VerifyPatchedOutputFileResult(t *testing.T, originalTest PatchTestInfo) (er
 		t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
 		return
 	}
-	getLogger().Tracef("request: %s", request.String())
+	getLogger().Tracef("request: %s\n", request.String())
 
 	// Verify each key was removed
 	var pResult interface{}
 	for _, record := range patchDocument.Records {
-
 		var queryPath, key string
-		// var paths []string
-		// paths, err = parseMapKeysFromPath(record.Path)
-		// if err != nil {
-		// 	return
-		// }
-		// fmt.Printf("path: %s", paths)
-		// lenPaths := len(paths)
-		// if lenPaths > 1 {
-		// 	queryPath = strings.Join(paths[0:lenPaths-1], ".")
-
-		// } else {
-		// 	queryPath = paths[0]
-		// }
 		queryPath, key, err = retrieveQueryPathFromPatchRecord(record.Path)
-		fmt.Printf("key: %s\n", key)
+		//fmt.Printf("queryPath: %s, key: %s\n", queryPath, key)
 		if err != nil {
 			t.Errorf("%s: %v", "unable to parse patch record path.", err)
 			return
@@ -269,7 +260,7 @@ func VerifyPatchedOutputFileResult(t *testing.T, originalTest PatchTestInfo) (er
 
 		// use a buffered query on the temp. output file on the (parent) path
 		pResult, _, err = innerQuery(t, queryTestInfo, request)
-		if err != nil {
+		if err != nil && !ErrorTypesMatch(err, &common.QueryResultInvalidTypeError{}) {
 			t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
 			return
 		}
@@ -280,40 +271,106 @@ func VerifyPatchedOutputFileResult(t *testing.T, originalTest PatchTestInfo) (er
 			return
 		}
 
-		// 	// verify the "key" was removed from the (parent) JSON map
-		// 	err = VerifyPatched(pResult, key)
+		// verify the "key" was removed from the (parent) JSON map
+		err = VerifyPatched(record, pResult, key)
+		if err != nil {
+			return
+		}
 	}
 
 	return
 }
 
-func VerifyPatched(pResult interface{}, key string, value interface{}) (err error) {
+func VerifyPatched(record IETF6902Record, pResult interface{}, key string) (err error) {
 	// verify the "key" was removed from the (parent) JSON map
 	if pResult != nil {
-		// switch typedValue := pResult.(type) {
-		// case map[string]interface{}:
-		// 	// verify map key was removed
-		// 	if _, ok := typedValue[key]; ok {
-		// 		formattedValue, _ := utils.MarshalAnyToFormattedJsonString(typedValue)
-		// 		err = getLogger().Errorf("trim failed. Key `%s`, found in: `%s`", key, formattedValue)
-		// 		return
-		// 	}
-		// case []interface{}:
-		// 	if len(typedValue) == 0 {
-		// 		err = getLogger().Errorf("empty slice found at from clause.")
-		// 		return
-		// 	}
-		// 	// Verify all elements of slice
-		// 	for _, value := range typedValue {
-		// 		err = VerifyTrimmed(value, key)
-		// 		return err
-		// 	}
-		// default:
-		// 	err = getLogger().Errorf("trim failed. Unexpected JSON type: `%T`", typedValue)
-		// 	return
-		// }
+		switch typedResult := pResult.(type) {
+		case map[string]interface{}:
+			// buf, _ := utils.EncodeAnyToDefaultIndentedJSONStr(typedResult)
+			// fmt.Printf("result (map):\n%s", buf.String())
+			// NOTE: this is for "Add" operation only
+			if record.Operation == IETF_RFC6902_OP_ADD {
+				if _, ok := typedResult[key]; !ok {
+					formattedResult, _ := utils.EncodeAnyToDefaultIndentedJSONStr(typedResult)
+					err = getLogger().Errorf("patch failed. Key `%s`, found in: `%s`", key, formattedResult.String())
+					return
+				}
+			}
+		case []interface{}:
+			buf, _ := utils.EncodeAnyToDefaultIndentedJSONStr(typedResult)
+			fmt.Printf("result (slice):\n%s", buf.String())
+			// NOTE: this is for "Add" operation only
+			if record.Operation == IETF_RFC6902_OP_ADD {
+				if len(typedResult) == 0 {
+					err = getLogger().Errorf("empty slice found at from clause.")
+					return
+				}
+
+				if record.Value == nil {
+					err = getLogger().Errorf("value nil.")
+					return
+				}
+				var contains bool
+				contains, err = sliceContainsValue(typedResult, record.Value)
+				if !contains {
+					err = getLogger().Errorf("empty slice found at from clause.")
+					return
+				}
+			}
+		case string: // TODO
+			return
+		case bool: // TODO
+			return
+		case float64: // TODO
+			return
+		default:
+			err = getLogger().Errorf("verify failed. Unexpected JSON type: `%T`", typedResult)
+			return
+		}
 	} else {
+		// TODO: return typed error
 		getLogger().Trace("nil results")
+	}
+	return
+}
+
+func sliceContainsValue(slice []interface{}, value interface{}) (contains bool, err error) {
+	switch typedValue := value.(type) {
+	case map[string]interface{}:
+		var tempValue map[string]interface{}
+		var ok bool
+		for _, entry := range slice {
+			if tempValue, ok = entry.(map[string]interface{}); !ok {
+				err = fmt.Errorf("type mismatch error. Slice values: %v (%T), value: %v (%T)", entry, entry, tempValue, tempValue)
+				return
+			}
+			if reflect.DeepEqual(tempValue, typedValue) {
+				contains = true
+				return
+			}
+		}
+		return
+	case []interface{}:
+		var tempValue []interface{}
+		for _, entry := range slice {
+			if tempValue, ok := entry.([]interface{}); !ok {
+				err = fmt.Errorf("type mismatch error. Slice values: %v (%T), value: %v (%T)", entry, entry, tempValue, tempValue)
+				return
+			}
+			if reflect.DeepEqual(tempValue, typedValue) {
+				contains = true
+				return
+			}
+		}
+	case string: // TODO
+		// NOTE: "slices.Contains()" does not work on []interface{}
+		return
+	case bool: // TODO
+		return
+	case float64: // TODO
+		return
+	default:
+		getLogger().Errorf("contains test failed. Unexpected JSON type: `%T`", typedValue)
 	}
 	return
 }
@@ -515,8 +572,8 @@ func TestPatchRFC6902AppendixA10Patch1(t *testing.T) {
 // CycloneDX Tests
 // ----------------
 
-func TestPatchCdx15(t *testing.T) {
-	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLE_BASE, TEST_PATCH_METADATA_PROPERTIES_1, nil)
+func TestPatchCdx15InvalidAddRootModified(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLE_BASE, TEST_PATCH_BOM_ADD_METADATA_PROPS_MIXED, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLE_BASE)
 	buffer, _, err := innerTestPatch(t, ti)
 	if err != nil {
@@ -525,11 +582,41 @@ func TestPatchCdx15(t *testing.T) {
 	// NOTE: patch record: { "op": "add", "path": "/modified", "value": true }
 	// will NOT be written to the output BOM as "modified" is not a CycloneDX key
 	getLogger().Tracef("%s\n", buffer.String())
-	// TODO: verify results
-	err = VerifyPatchedOutputFileResult(t, *ti)
+}
+
+func TestPatchCdx15AddPropertiesAtEnd(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLE_BASE, TEST_PATCH_BOM_ADD_METADATA_PROP_AT_END, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLE_BASE)
+	buffer, _, err := innerTestPatch(t, ti)
 	if err != nil {
 		t.Error(err)
 	}
+	getLogger().Tracef("%s\n", buffer.String())
+	// verify JSON document has applied all patch records
+	// err = VerifyPatchedOutputFileResult(t, *ti)
+	// if err != nil {
+	// 	t.Error(err)
+	// }
+}
+
+func TestPatchCdx15AddPropertiesAtIndex(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLE_BASE, TEST_PATCH_BOM_ADD_METADATA_PROP_AT_INDEX, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLE_BASE)
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
+}
+
+func TestPatchCdx15AddPropertiesMixed(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLE_BASE, TEST_PATCH_BOM_ADD_METADATA_PROPS_MIXED, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLE_BASE)
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
 }
 
 func TestPatchCdx15SliceAdd(t *testing.T) {

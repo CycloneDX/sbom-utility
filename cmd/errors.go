@@ -64,14 +64,6 @@ const (
 	MSG_LICENSES_NOT_FOUND     = "licenses not found"
 )
 
-// Query error messages
-const (
-	MSG_QUERY_CLAUSE_NOT_FOUND = "required clause not found"
-	MSG_QUERY_INVALID_REQUEST  = "invalid query request"
-	MSG_QUERY_INVALID_RESPONSE = "invalid query response"
-	MSG_QUERY_INVALID_DATATYPE = "invalid data type"
-)
-
 // Query error details
 const (
 	MSG_QUERY_ERROR_FROM_KEY_NOT_FOUND         = "key not found in path"
