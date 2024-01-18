@@ -57,6 +57,8 @@ const (
 const (
 	// RFC 6901 "patch" files
 	TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_OBJ_1      = "test/patch/rfc6902/rfc6902-appendix-a-1-patch-add-obj-1.json"
+	TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_INT        = "test/patch/rfc6902/rfc6902-appendix-a-1-patch-add-integer.json"
+	TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_BOOL       = "test/patch/rfc6902/rfc6902-appendix-a-1-patch-add-bool.json"
 	TEST_PATCH_RFC_6902_APPX_A_2_PATCH_ADD_ARRAY_1    = "test/patch/rfc6902/rfc6902-appendix-a-2-patch-add-array-1.json"
 	TEST_PATCH_RFC_6902_APPX_A_2_PATCH_ADD_ARRAY_2    = "test/patch/rfc6902/rfc6902-appendix-a-2-patch-add-array-2.json"
 	TEST_PATCH_RFC_6902_APPX_A_2_PATCH_ADD_ARRAY_3    = "test/patch/rfc6902/rfc6902-appendix-a-2-patch-add-array-3.json"
@@ -628,4 +630,38 @@ func TestPatchCdx15SliceAdd(t *testing.T) {
 	}
 	getLogger().Tracef("%s\n", buffer.String())
 	// TODO: verify results
+}
+
+func TestPatchRFC6902AppendixA1BaseAddInt(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_1_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_INT, nil)
+	ti.IsInputJSON = true
+	ti.OutputIndent = 0
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
+	TEST_RESULT := "{\"foo\":\"bar\",\"size\":100}\n"
+	if buffer.String() != TEST_RESULT {
+		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+	}
+}
+
+func TestPatchRFC6902AppendixA1BaseAddBool(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_1_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_BOOL, nil)
+	ti.IsInputJSON = true
+	ti.OutputIndent = 0
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
+	TEST_RESULT := "{\"foo\":\"bar\",\"modified\":true}\n"
+	if buffer.String() != TEST_RESULT {
+		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+	}
 }
