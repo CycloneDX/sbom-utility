@@ -1,0 +1,3 @@
+[
+  { "op": "add", "path": "/float", "value": 3.14 }
+]

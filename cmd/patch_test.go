@@ -58,6 +58,7 @@ const (
 	// RFC 6901 "patch" files
 	TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_OBJ_1      = "test/patch/rfc6902/rfc6902-appendix-a-1-patch-add-obj-1.json"
 	TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_INT        = "test/patch/rfc6902/rfc6902-appendix-a-1-patch-add-integer.json"
+	TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_FLOAT      = "test/patch/rfc6902/rfc6902-appendix-a-1-patch-add-float.json"
 	TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_BOOL       = "test/patch/rfc6902/rfc6902-appendix-a-1-patch-add-bool.json"
 	TEST_PATCH_RFC_6902_APPX_A_2_PATCH_ADD_ARRAY_1    = "test/patch/rfc6902/rfc6902-appendix-a-2-patch-add-array-1.json"
 	TEST_PATCH_RFC_6902_APPX_A_2_PATCH_ADD_ARRAY_2    = "test/patch/rfc6902/rfc6902-appendix-a-2-patch-add-array-2.json"
@@ -498,7 +499,26 @@ func TestPatchRFC6902AppendixA1BaseAddInteger(t *testing.T) {
 		t.Error(err)
 	}
 	getLogger().Tracef("%s\n", buffer.String())
-	TEST_RESULT := "{\"foo\":\"bar\",\"size\":100}\n"
+	// Note: Go maps are not committed to preserving order; however, alpha. appears the default
+	TEST_RESULT := "{\"foo\":\"bar\",\"integer\":100}\n"
+	if buffer.String() != TEST_RESULT {
+		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+	}
+}
+
+func TestPatchRFC6902AppendixA1BaseAddFloat(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_1_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_FLOAT, nil)
+	ti.IsInputJSON = true
+	ti.OutputIndent = 0
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
+	// Note: Go maps are not committed to preserving order; however, alpha. appears the default
+	TEST_RESULT := "{\"float\":3.14,\"foo\":\"bar\"}\n"
 	if buffer.String() != TEST_RESULT {
 		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
 	}
@@ -515,7 +535,8 @@ func TestPatchRFC6902AppendixA1BaseAddBool(t *testing.T) {
 		t.Error(err)
 	}
 	getLogger().Tracef("%s\n", buffer.String())
-	TEST_RESULT := "{\"foo\":\"bar\",\"modified\":true}\n"
+	// Note: Go maps are not committed to preserving order; however, alpha. appears the default
+	TEST_RESULT := "{\"boolean\":true,\"foo\":\"bar\"}\n"
 	if buffer.String() != TEST_RESULT {
 		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
 	}
