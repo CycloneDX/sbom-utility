@@ -237,18 +237,35 @@ func processPatchRecords(bomDocument *schema.BOM, patchDocument *IETF6902Documen
 			return fmt.Errorf("invalid IETF RFC 6902 patch operation. \"path\" is empty")
 		}
 
+		var keys []string
+		jsonMap := bomDocument.GetJSONMap()
+
+		if jsonMap == nil {
+			return fmt.Errorf("invalid json document (nil)")
+		}
+
+		if keys, err = parseMapKeysFromPath(record.Path); err != nil {
+			return
+		}
+
+		lengthKeys := len(keys)
+		if lengthKeys == 0 {
+			return fmt.Errorf("invalid document path (nil)")
+		}
+
 		switch record.Operation {
 		case IETF_RFC6902_OP_ADD:
-			var keys []string
-			jsonMap := bomDocument.GetJSONMap()
-			if keys, err = parseMapKeysFromPath(record.Path); err != nil {
-				return
+			if record.Value == nil {
+				// TODO: make this a declared error type that can be tested
+				return fmt.Errorf("invalid IETF RFC 6902 patch operation. \"value\" missing")
 			}
 			if err = addValue(jsonMap, keys, record.Value); err != nil {
 				return
 			}
 		case IETF_RFC6902_OP_REMOVE:
-			fallthrough
+			if err = removeValue(jsonMap, keys, record.Value); err != nil {
+				return
+			}
 		case IETF_RFC6902_OP_REPLACE:
 			fallthrough
 		case IETF_RFC6902_OP_MOVE:
@@ -277,7 +294,6 @@ func parseMapKeysFromPath(path string) (keys []string, err error) {
 }
 
 func parseArrayIndex(indexPath string) (arrayIndex int, err error) {
-
 	// Check for RFC6901 end-of-array character
 	if indexPath == RFC6901_END_OF_ARRAY {
 		arrayIndex = -1
@@ -285,6 +301,71 @@ func parseArrayIndex(indexPath string) (arrayIndex int, err error) {
 	}
 	// otherwise, the path should be convertible to an integer
 	arrayIndex, err = strconv.Atoi(indexPath)
+	return
+}
+
+// The "remove" operation removes the value at the target location.
+//
+// - The target location MUST exist for the operation to be successful.
+// - If removing an element from an array, any elements above the
+// specified index are shifted one position to the left.
+func removeValue(parentMap map[string]interface{}, keys []string, value interface{}) (err error) {
+	var nextNodeKey string   // := keys[0]
+	var nextNode interface{} // := parentMap[nextNodeKey]
+	lengthKeys := len(keys)
+
+	switch lengthKeys {
+	case 0:
+		return fmt.Errorf("invalid map key (nil)")
+	case 1: // special case of adding new key/value to document root
+		nextNode = parentMap
+	default: // adding keys/values along document path
+		nextNodeKey = keys[0]
+		nextNode = parentMap[nextNodeKey]
+	}
+
+	switch typedNode := nextNode.(type) {
+	case map[string]interface{}:
+		// If the resulting value is indeed another map type, we expect for a Json Map
+		// we preserve that pointer for the next iteration
+		if lengthKeys > 2 {
+			// if the next node is a map AND there is more than one path following it,
+			// it would mean we have not yet reached the final map or slice to add
+			// a value to
+			err = removeValue(typedNode, keys[1:], value)
+			return
+		} else {
+			// if the next node is a map AND only 1 path remains after it,
+			// it would mean that last path is a new key to be added
+			// to the next node's map with the provided value
+			delete(typedNode, keys[0])
+		}
+	case []interface{}:
+		if lengthKeys != 2 {
+			err = fmt.Errorf("invalid path. IETF RFC 6901 does not permit paths after array indices")
+			return
+		}
+
+		var arrayIndex int
+		indexPath := keys[1]
+		arrayIndex, err = parseArrayIndex(indexPath)
+		if err != nil {
+			return
+		}
+		newSlice := insertValueIntoSlice(nextNode.([]interface{}), arrayIndex, value)
+		parentMap[nextNodeKey] = newSlice
+	case float64:
+		// NOTE: It is a conscious decision of tbe encoding/json package to
+		// decode all Number values to float64
+		parentMap[nextNodeKey] = value
+	case bool:
+		parentMap[nextNodeKey] = value
+	default:
+		// Optimistically, assign the value and emit a warning of the unexpected JSON type
+		parentMap[nextNodeKey] = value
+		getLogger().Warningf("Invalid document node type: (%T)", nextNode)
+		return
+	}
 	return
 }
 
@@ -303,24 +384,9 @@ func parseArrayIndex(indexPath string) (arrayIndex int, err error) {
 // The operation object MUST contain a "value" member whose content
 // specifies the value to be added.
 func addValue(parentMap map[string]interface{}, keys []string, value interface{}) (err error) {
-
-	// TODO move err to caller
-	if parentMap == nil {
-		return fmt.Errorf("invalid parent document path (nil)")
-	}
-
-	if value == nil {
-		// TODO: make this a declared error type that can be tested
-		return fmt.Errorf("invalid IETF RFC 6902 patch operation. \"value\" missing")
-	}
-
-	lengthKeys := len(keys)
-	if lengthKeys == 0 {
-		return fmt.Errorf("invalid map key (nil)")
-	}
-
 	var nextNodeKey string   // := keys[0]
 	var nextNode interface{} // := parentMap[nextNodeKey]
+	lengthKeys := len(keys)
 
 	switch lengthKeys {
 	case 0:
@@ -374,7 +440,6 @@ func addValue(parentMap map[string]interface{}, keys []string, value interface{}
 		getLogger().Warningf("Invalid document node type: (%T)", nextNode)
 		return
 	}
-
 	return
 }
 

@@ -731,3 +731,20 @@ func TestPatchCdx15SliceAddUpdateVersionInteger(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestPatchRFC6902AppendixA3Patch1Remove(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_3_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_3_PATCH_REMOVE_OBJ_1, nil)
+	ti.IsInputJSON = true
+	ti.OutputIndent = 0
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
+	TEST_RESULT := "{\"foo\":\"bar\"}\n"
+	if buffer.String() != TEST_RESULT {
+		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+	}
+}
