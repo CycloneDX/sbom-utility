@@ -748,3 +748,20 @@ func TestPatchRFC6902AppendixA3Patch1Remove(t *testing.T) {
 		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
 	}
 }
+
+func TestPatchRFC6902AppendixA4Patch1Remove(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_4_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_4_PATCH_REMOVE_ARRAY_1, nil)
+	ti.IsInputJSON = true
+	ti.OutputIndent = 0
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
+	TEST_RESULT := "{\"foo\":[\"bar\",\"baz\"]}\n"
+	if buffer.String() != TEST_RESULT {
+		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+	}
+}

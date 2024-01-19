@@ -2,9 +2,13 @@
 
 # sbom-utility
 
-This utility was designed to be an API platform used initially to **validate CycloneDX** or **SPDX Software Bills-of-Materials (BOMs)** against versioned JSON schemas, as published by their respective communities, as well as customized schema variants provided by companies or organizations that have stricter BOM compliance requirements.
+This utility was designed to be an API platform used initially to validate **CycloneDX** or **SPDX-formatted Bills-of-Materials (BOMs)** against versioned JSON schemas as published by their respective standards communities as well as customized variants designed by companies or organizations that may have stricter BOM compliance requirements.
 
-The utility has now grown to include a rich set of commands, listed below, that can be used for creating filtered BOM-data reports in many formats (e.g., txt, csv, md) using the utility's powerful, SQL-like **query** capability. These commands can  extract data from BOMs that enables verification of information supporting [BOM use cases](#cyclonedx-use-cases) or any custom security and compliance requirements.
+The utility has now grown to include a rich set of commands, listed below, such as **trim**, **patch** (IETF RFC 6902) and **diff** as well as commands used to create filtered reports using the utility's powerful, SQL-like **query** command capability.
+
+In addition, commands exist to easily extract **license**, **vulnerability**, **component**, **service** and other BOM information enabling verification for [BOM use cases](#cyclonedx-use-cases) or custom security and compliance requirements.
+
+*Please note that the utility supports all BOM variants such as **Software** (SBOM), **Hardware** (HBOM), **Manufacturing** (MBOM), **AI/ML** (MLBOM), etc. that adhere to their respective schemas.*
 
 ## Command Overview
 

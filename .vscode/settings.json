@@ -74,6 +74,7 @@
             "losslessly",
             "LSTM",
             "marshallers",
+            "MBOM",
             "MLBOM",
             "multimap",
             "myservices",

@@ -352,7 +352,8 @@ func removeValue(parentMap map[string]interface{}, keys []string, value interfac
 		if err != nil {
 			return
 		}
-		newSlice := insertValueIntoSlice(nextNode.([]interface{}), arrayIndex, value)
+		var newSlice []interface{}
+		newSlice, err = removeValueFromSlice(typedNode, arrayIndex)
 		parentMap[nextNodeKey] = newSlice
 	case float64:
 		// NOTE: It is a conscious decision of tbe encoding/json package to
@@ -450,4 +451,13 @@ func insertValueIntoSlice(slice []interface{}, index int, value interface{}) []i
 	slice = append(slice[:index+1], slice[index:]...)
 	slice[index] = value
 	return slice
+}
+
+func removeValueFromSlice(slice []interface{}, index int) (newSlice []interface{}, err error) {
+	if index < 0 || index >= len(slice) {
+		err = fmt.Errorf("remove array element failed. Index (%v) out of range for array (length: %v). ", index, len(slice))
+		return
+	}
+	// unpack elements from the slice subsets (i.e. using ... notation)
+	return append(slice[:index], slice[index+1:]...), nil
 }
