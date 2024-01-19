@@ -222,6 +222,8 @@ func retrieveQueryPathFromPatchRecord(recordPath string) (queryPath string, key 
 }
 
 func VerifyPatchedOutputFileResult(t *testing.T, originalTest PatchTestInfo) (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
 
 	patchDocument := NewIETFRFC6902PatchDocument(originalTest.PatchFile)
 	if err = patchDocument.UnmarshalRecords(); err != nil {
@@ -262,6 +264,9 @@ func VerifyPatchedOutputFileResult(t *testing.T, originalTest PatchTestInfo) (er
 
 		// use a buffered query on the temp. output file on the (parent) path
 		pResult, _, err = innerQuery(t, queryTestInfo, request)
+
+		// NOTE: Query typically does NOT support non JSON map or slice
+		// we need to allow float64, bool and string for "patch" validation
 		if err != nil && !ErrorTypesMatch(err, &common.QueryResultInvalidTypeError{}) {
 			t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
 			return
@@ -284,12 +289,13 @@ func VerifyPatchedOutputFileResult(t *testing.T, originalTest PatchTestInfo) (er
 }
 
 func VerifyPatched(record IETF6902Record, pResult interface{}, key string) (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
 	// verify the "key" was removed from the (parent) JSON map
 	if pResult != nil {
 		switch typedResult := pResult.(type) {
 		case map[string]interface{}:
-			// buf, _ := utils.EncodeAnyToDefaultIndentedJSONStr(typedResult)
-			// fmt.Printf("result (map):\n%s", buf.String())
 			// NOTE: this is for "Add" operation only
 			if record.Operation == IETF_RFC6902_OP_ADD {
 				if _, ok := typedResult[key]; !ok {
@@ -299,31 +305,35 @@ func VerifyPatched(record IETF6902Record, pResult interface{}, key string) (err 
 				}
 			}
 		case []interface{}:
-			buf, _ := utils.EncodeAnyToDefaultIndentedJSONStr(typedResult)
-			fmt.Printf("result (slice):\n%s", buf.String())
 			// NOTE: this is for "Add" operation only
 			if record.Operation == IETF_RFC6902_OP_ADD {
 				if len(typedResult) == 0 {
-					err = getLogger().Errorf("empty slice found at from clause.")
+					err = getLogger().Errorf("verify failed. Record slice value is empty.")
 					return
 				}
 
 				if record.Value == nil {
-					err = getLogger().Errorf("value nil.")
+					err = getLogger().Errorf("verify failed. Document slice value is nil.")
 					return
 				}
 				var contains bool
 				contains, err = sliceContainsValue(typedResult, record.Value)
 				if !contains {
-					err = getLogger().Errorf("empty slice found at from clause.")
+					err = getLogger().Errorf("verify failed. Document value (%v) does not contain expected value (%v).", typedResult, record.Value)
 					return
 				}
 			}
-		case string: // TODO
+		case bool:
+			if record.Value != typedResult {
+				err = getLogger().Errorf("verify failed. Document value (%v) does not contain expected value (%v).", typedResult, record.Value)
+				return
+			}
 			return
-		case bool: // TODO
-			return
-		case float64: // TODO
+		case float64: // NOTE: encoding/json turns int64 to float64
+			if record.Value != typedResult {
+				err = getLogger().Errorf("verify failed. Document value (%v) does not contain expected value (%v).", typedResult, record.Value)
+				return
+			}
 			return
 		default:
 			err = getLogger().Errorf("verify failed. Unexpected JSON type: `%T`", typedResult)
@@ -337,6 +347,15 @@ func VerifyPatched(record IETF6902Record, pResult interface{}, key string) (err 
 }
 
 func sliceContainsValue(slice []interface{}, value interface{}) (contains bool, err error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	// Debug trace
+	// buffer, _ := utils.EncodeAnyToDefaultIndentedJSONStr(value)
+	// fmt.Printf("sliceContainsValue(): value (%T): %s\n", value, buffer.String())
+	// buffer, _ = utils.EncodeAnyToDefaultIndentedJSONStr(slice)
+	// fmt.Printf("sliceContainsValue(): slice: %s\n", buffer.String())
+
 	switch typedValue := value.(type) {
 	case map[string]interface{}:
 		var tempValue map[string]interface{}
@@ -468,6 +487,40 @@ func TestPatchRFC6902AppendixA1Patch1(t *testing.T) {
 	}
 }
 
+func TestPatchRFC6902AppendixA1BaseAddInteger(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_1_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_INT, nil)
+	ti.IsInputJSON = true
+	ti.OutputIndent = 0
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
+	TEST_RESULT := "{\"foo\":\"bar\",\"size\":100}\n"
+	if buffer.String() != TEST_RESULT {
+		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+	}
+}
+
+func TestPatchRFC6902AppendixA1BaseAddBool(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_1_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_BOOL, nil)
+	ti.IsInputJSON = true
+	ti.OutputIndent = 0
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
+	TEST_RESULT := "{\"foo\":\"bar\",\"modified\":true}\n"
+	if buffer.String() != TEST_RESULT {
+		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+	}
+}
+
 func TestPatchRFC6902AppendixA2Patch1(t *testing.T) {
 	ti := NewPatchTestInfo(
 		TEST_PATCH_RFC_6902_APPX_A_2_BASE,
@@ -536,23 +589,6 @@ func TestPatchRFC6902AppendixA2Patch4(t *testing.T) {
 	}
 }
 
-func TestPatchRFC6902AppendixA16Patch1(t *testing.T) {
-	ti := NewPatchTestInfo(
-		TEST_PATCH_RFC_6902_APPX_A_16_BASE,
-		TEST_PATCH_RFC_6902_APPX_A_16_PATCH_ADD_ARRAY_1, nil)
-	ti.OutputIndent = 0
-	ti.IsInputJSON = true
-	buffer, _, err := innerTestPatch(t, ti)
-	if err != nil {
-		t.Error(err)
-	}
-	getLogger().Tracef("%s\n", buffer.String())
-	TEST_RESULT := "{\"foo\":[\"bar\",[\"abc\",\"def\"]]}\n"
-	if buffer.String() != TEST_RESULT {
-		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
-	}
-}
-
 func TestPatchRFC6902AppendixA10Patch1(t *testing.T) {
 	ti := NewPatchTestInfo(
 		TEST_PATCH_RFC_6902_APPX_A_10_BASE,
@@ -565,6 +601,23 @@ func TestPatchRFC6902AppendixA10Patch1(t *testing.T) {
 	}
 	getLogger().Tracef("%s\n", buffer.String())
 	TEST_RESULT := "{\"child\":{\"grandchild\":{}},\"foo\":\"bar\"}\n"
+	if buffer.String() != TEST_RESULT {
+		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+	}
+}
+
+func TestPatchRFC6902AppendixA16Patch1(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_16_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_16_PATCH_ADD_ARRAY_1, nil)
+	ti.OutputIndent = 0
+	ti.IsInputJSON = true
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
+	TEST_RESULT := "{\"foo\":[\"bar\",[\"abc\",\"def\"]]}\n"
 	if buffer.String() != TEST_RESULT {
 		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
 	}
@@ -595,10 +648,10 @@ func TestPatchCdx15AddPropertiesAtEnd(t *testing.T) {
 	}
 	getLogger().Tracef("%s\n", buffer.String())
 	// verify JSON document has applied all patch records
-	// err = VerifyPatchedOutputFileResult(t, *ti)
-	// if err != nil {
-	// 	t.Error(err)
-	// }
+	err = VerifyPatchedOutputFileResult(t, *ti)
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestPatchCdx15AddPropertiesAtIndex(t *testing.T) {
@@ -609,6 +662,11 @@ func TestPatchCdx15AddPropertiesAtIndex(t *testing.T) {
 		t.Error(err)
 	}
 	getLogger().Tracef("%s\n", buffer.String())
+	// verify JSON document has applied all patch records
+	err = VerifyPatchedOutputFileResult(t, *ti)
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestPatchCdx15AddPropertiesMixed(t *testing.T) {
@@ -619,6 +677,11 @@ func TestPatchCdx15AddPropertiesMixed(t *testing.T) {
 		t.Error(err)
 	}
 	getLogger().Tracef("%s\n", buffer.String())
+	// verify JSON document has applied all patch records
+	err = VerifyPatchedOutputFileResult(t, *ti)
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestPatchCdx15SliceAdd(t *testing.T) {
@@ -632,36 +695,18 @@ func TestPatchCdx15SliceAdd(t *testing.T) {
 	// TODO: verify results
 }
 
-func TestPatchRFC6902AppendixA1BaseAddInt(t *testing.T) {
-	ti := NewPatchTestInfo(
-		TEST_PATCH_RFC_6902_APPX_A_1_BASE,
-		TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_INT, nil)
-	ti.IsInputJSON = true
-	ti.OutputIndent = 0
+// Note: the encoding/json package turns all integers (i.e., int64) to float64
+func TestPatchCdx15SliceAddUpdateVersionInteger(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SLICE_BASE, TEST_PATCH_BOM_ADD_ROOT_UPDATE_VERSION, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SLICE_BASE)
 	buffer, _, err := innerTestPatch(t, ti)
 	if err != nil {
 		t.Error(err)
 	}
 	getLogger().Tracef("%s\n", buffer.String())
-	TEST_RESULT := "{\"foo\":\"bar\",\"size\":100}\n"
-	if buffer.String() != TEST_RESULT {
-		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
-	}
-}
-
-func TestPatchRFC6902AppendixA1BaseAddBool(t *testing.T) {
-	ti := NewPatchTestInfo(
-		TEST_PATCH_RFC_6902_APPX_A_1_BASE,
-		TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_BOOL, nil)
-	ti.IsInputJSON = true
-	ti.OutputIndent = 0
-	buffer, _, err := innerTestPatch(t, ti)
+	// verify JSON document has applied all patch records
+	err = VerifyPatchedOutputFileResult(t, *ti)
 	if err != nil {
 		t.Error(err)
-	}
-	getLogger().Tracef("%s\n", buffer.String())
-	TEST_RESULT := "{\"foo\":\"bar\",\"modified\":true}\n"
-	if buffer.String() != TEST_RESULT {
-		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
 	}
 }

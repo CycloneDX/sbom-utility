@@ -222,8 +222,6 @@ func processPatchRecords(bomDocument *schema.BOM, patchDocument *IETF6902Documen
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	//patchRecords := patchDocument.Records
-
 	for _, record := range patchDocument.Records {
 		getLogger().Tracef("patch: %s\n", record.String())
 
