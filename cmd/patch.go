@@ -259,15 +259,23 @@ func processPatchRecords(bomDocument *schema.BOM, patchDocument *IETF6902Documen
 				// TODO: make this a declared error type that can be tested
 				return fmt.Errorf("invalid IETF RFC 6902 patch operation. \"value\" missing")
 			}
-			if err = addValue(jsonMap, keys, record.Value); err != nil {
+			if err = addOrReplaceValue(jsonMap, keys, record.Value, false); err != nil {
+				return
+			}
+		case IETF_RFC6902_OP_REPLACE:
+			// NOTE: Replace logic is identical to "add" operation except that
+			// the target "key" MUST exist...
+			if record.Value == nil {
+				// TODO: make this a declared error type that can be tested
+				return fmt.Errorf("invalid IETF RFC 6902 patch operation. \"value\" missing")
+			}
+			if err = addOrReplaceValue(jsonMap, keys, record.Value, true); err != nil {
 				return
 			}
 		case IETF_RFC6902_OP_REMOVE:
 			if err = removeValue(jsonMap, keys, record.Value); err != nil {
 				return
 			}
-		case IETF_RFC6902_OP_REPLACE:
-			fallthrough
 		case IETF_RFC6902_OP_MOVE:
 			fallthrough
 		case IETF_RFC6902_OP_COPY:
@@ -384,7 +392,11 @@ func removeValue(parentMap map[string]interface{}, keys []string, value interfac
 //
 // The operation object MUST contain a "value" member whose content
 // specifies the value to be added.
-func addValue(parentMap map[string]interface{}, keys []string, value interface{}) (err error) {
+//
+// The "replace" operation replaces the value at the target location
+// with a new value.  The operation object MUST contain a "value" member
+// whose content specifies the replacement value.
+func addOrReplaceValue(parentMap map[string]interface{}, keys []string, value interface{}, replace bool) (err error) {
 	var nextNodeKey string   // := keys[0]
 	var nextNode interface{} // := parentMap[nextNodeKey]
 	lengthKeys := len(keys)
@@ -407,12 +419,16 @@ func addValue(parentMap map[string]interface{}, keys []string, value interface{}
 			// if the next node is a map AND there is more than one path following it,
 			// it would mean we have not yet reached the final map or slice to add
 			// a value to
-			err = addValue(typedNode, keys[1:], value)
+			err = addOrReplaceValue(typedNode, keys[1:], value, replace)
 			return
 		} else {
 			// if the next node is a map AND only 1 path remains after it,
 			// it would mean that last path is a new key to be added
 			// to the next node's map with the provided value
+			if _, exists := typedNode[keys[0]]; !exists && replace {
+				err = fmt.Errorf("invalid path. Path does not exist to replace value")
+				return
+			}
 			typedNode[keys[0]] = value
 		}
 	case []interface{}:

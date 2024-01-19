@@ -66,6 +66,8 @@ const (
 	TEST_PATCH_RFC_6902_APPX_A_2_PATCH_ADD_ARRAY_4    = "test/patch/rfc6902/rfc6902-appendix-a-2-patch-add-array-4.json"
 	TEST_PATCH_RFC_6902_APPX_A_3_PATCH_REMOVE_OBJ_1   = "test/patch/rfc6902/rfc6902-appendix-a-3-patch-remove-obj-1.json"
 	TEST_PATCH_RFC_6902_APPX_A_4_PATCH_REMOVE_ARRAY_1 = "test/patch/rfc6902/rfc6902-appendix-a-4-patch-remove-array-1.json"
+	TEST_PATCH_RFC_6902_APPX_A_5_PATCH_REPLACE_1      = "test/patch/rfc6902/rfc6902-appendix-a-5-patch-replace-1.json"
+	TEST_PATCH_RFC_6902_APPX_A_5_PATCH_REPLACE_ERR    = "test/patch/rfc6902/rfc6902-appendix-a-5-patch-replace-err.json"
 	TEST_PATCH_RFC_6902_APPX_A_10_PATCH_ADD_NESTED_1  = "test/patch/rfc6902/rfc6902-appendix-a-10-patch-add-nested-1.json"
 	TEST_PATCH_RFC_6902_APPX_A_16_PATCH_ADD_ARRAY_1   = "test/patch/rfc6902/rfc6902-appendix-a-16-patch-add-array-1.json"
 
@@ -761,6 +763,23 @@ func TestPatchRFC6902AppendixA4Patch1Remove(t *testing.T) {
 	}
 	getLogger().Tracef("%s\n", buffer.String())
 	TEST_RESULT := "{\"foo\":[\"bar\",\"baz\"]}\n"
+	if buffer.String() != TEST_RESULT {
+		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+	}
+}
+
+func TestPatchRFC6902AppendixA5Patch1Replace(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_5_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_5_PATCH_REPLACE_1, nil)
+	ti.IsInputJSON = true
+	ti.OutputIndent = 0
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
+	TEST_RESULT := "{\"baz\":\"boo\",\"foo\":\"bar\"}\n"
 	if buffer.String() != TEST_RESULT {
 		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
 	}
