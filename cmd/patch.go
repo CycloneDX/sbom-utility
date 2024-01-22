@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -280,11 +281,27 @@ func processPatchRecords(bomDocument *schema.BOM, patchDocument *IETF6902Documen
 			if err = removeValue(jsonMap, keys, record.Value); err != nil {
 				return
 			}
+		case IETF_RFC6902_OP_TEST:
+			// NOTE: "test" operations do not change the input JSON.  They either
+			// will report (via INFO messages) "success" of a data match or return
+			// a (typed) error that indicates a non-match and terminates all
+			// patch record processing.
+			var equal bool
+			var actualValue interface{}
+			if equal, actualValue, err = testValue(jsonMap, keys, record.Value); err != nil {
+				return
+			}
+			// The RFC6902 spec. requires returning an "error" if the test values does not match
+			// the value found in the document...
+			if !equal {
+				err = NewIETFRFC6902TestError(record.String(), actualValue)
+				return
+			}
+			successMessage := fmt.Sprintf("%s. test record: %s, actual value: %v\n", MSG_IETF_RFC6902_OPERATION_SUCCESS, record.String(), actualValue)
+			getLogger().Info(successMessage)
 		case IETF_RFC6902_OP_MOVE:
 			fallthrough
 		case IETF_RFC6902_OP_COPY:
-			fallthrough
-		case IETF_RFC6902_OP_TEST:
 			return NewUnsupportedError(record.Operation, "IETF RFC 6902 operation not currently supported")
 		default:
 			return NewUnsupportedError(record.Operation, "invalid IETF RFC 6902 operation")
@@ -313,6 +330,141 @@ func parseArrayIndex(indexPath string) (arrayIndex int, err error) {
 	}
 	// otherwise, the path should be convertible to an integer
 	arrayIndex, err = strconv.Atoi(indexPath)
+	return
+}
+
+// The "test" operation tests that a value at the target location is
+// equal to a specified value.
+//   - The operation object MUST contain a "value" member that conveys the
+//     value to be compared to the target location's value.
+//   - The target location MUST be equal to the "value" value for the
+//     operation to be considered successful.
+//
+// Here, "equal" means that the value at the target location and the
+// value conveyed by "value" are of the same JSON type, and that they
+// are considered equal by the following rules for that type:
+//
+//   - strings: are considered equal if they contain the same number of
+//     Unicode characters and their code points are byte-by-byte equal.
+//
+//   - numbers: are considered equal if their values are numerically
+//     equal.
+//
+//   - arrays: are considered equal if they contain the same number of
+//
+//     values, and if each value can be considered equal to the value at
+//     the corresponding position in the other array, using this list of
+//     type-specific rules.
+//
+//   - objects: are considered equal if they contain the same number of
+//     members, and if each member can be considered equal to a member in
+//     the other object, by comparing their keys (as strings) and their
+//     values (using this list of type-specific rules).
+//
+//   - literals (false, true, and null): are considered equal if they are
+//     the same.
+func testValue(parentMap map[string]interface{}, keys []string, value interface{}) (equal bool, actualValue interface{}, err error) {
+	var nextNodeKey string   // := keys[0]
+	var nextNode interface{} // := parentMap[nextNodeKey]
+	lengthKeys := len(keys)
+
+	switch lengthKeys {
+	case 0:
+		err = fmt.Errorf("invalid map key (nil)")
+		return
+	case 1: // special case of adding new key/value to document root
+		nextNode = parentMap
+	default: // adding keys/values along document path
+		nextNodeKey = keys[0]
+		nextNode = parentMap[nextNodeKey]
+	}
+
+	switch typedNode := nextNode.(type) {
+	case map[string]interface{}:
+		// If the resulting value is indeed another map type, we expect for a Json Map
+		// we preserve that pointer for the next iteration
+		if lengthKeys > 2 {
+			// if the next node is a map AND there is more than one path following it,
+			// it would mean we have not yet reached the final map or slice to add
+			// a value to
+			equal, actualValue, err = testValue(typedNode, keys[1:], value)
+			return
+		} else {
+			// if the next node is a map AND only 1 path remains after it,
+			// it would mean that last path is a new key to be added
+			// to the next node's map with the provided value
+			actualValue = typedNode[keys[0]]
+			equal, err = isValueEqual(value, actualValue)
+			if !equal || err != nil {
+				return
+			}
+		}
+	case []interface{}:
+		if lengthKeys != 2 {
+			// TODO: create a formal error type for this
+			err = fmt.Errorf("invalid path. IETF RFC 6901 does not permit paths after array indices")
+			return
+		}
+		var arrayIndex int
+		indexPath := keys[1]
+		arrayIndex, err = parseArrayIndex(indexPath)
+		if err != nil {
+			return
+		}
+		actualValue = typedNode[arrayIndex]
+		equal, err = isValueEqual(value, actualValue)
+		if !equal || err != nil {
+			return
+		}
+	default:
+		// Optimistically, assign the value and emit a warning of the unexpected JSON type
+		getLogger().Warningf("Invalid document node type: (%T)", nextNode)
+		return
+	}
+	return
+}
+
+func isValueEqual(value1 interface{}, value2 interface{}) (equal bool, err error) {
+	// We want to assure type match before actual value comparison
+	switch value1.(type) {
+	case bool:
+		if _, ok := value2.(bool); !ok {
+			err = fmt.Errorf("invalid type comparison. value1: %v (%T), value2: %v (%T)", value1, value1, value2, value2)
+			return
+		}
+		equal = (value1 == value2)
+	case float64:
+		if _, ok := value2.(float64); !ok {
+			err = fmt.Errorf("invalid type comparison. value1: %v (%T), value2: %v (%T)", value1, value1, value2, value2)
+			return
+		}
+		equal = (value1 == value2)
+	case string:
+		if _, ok := value2.(string); !ok {
+			err = fmt.Errorf("invalid type comparison. value1: %v (%T), value2: %v (%T)", value1, value1, value2, value2)
+			return
+		}
+		equal = (value1 == value2)
+		return
+	case []interface{}:
+		if _, ok := value2.([]interface{}); !ok {
+			err = fmt.Errorf("invalid type comparison. value1: %v (%T), value2: %v (%T)", value1, value1, value2, value2)
+			return
+		}
+		equal = reflect.DeepEqual(value1, value2)
+		return
+	case map[string]interface{}:
+		if _, ok := value2.(map[string]interface{}); !ok {
+			err = fmt.Errorf("invalid type comparison. value1: %v (%T), value2: %v (%T)", value1, value1, value2, value2)
+			return
+		}
+		equal = reflect.DeepEqual(value1, value2)
+		return
+	default:
+		err = fmt.Errorf("invalid type comparison. Unexpected type for value: %v (%T)", value1, value1)
+		return
+	}
+
 	return
 }
 

@@ -34,15 +34,16 @@ const (
 
 // General error messages
 const (
-	ERR_TYPE_INVALID_JSON_MAP       = "invalid JSON map"
-	ERR_TYPE_INVALID_SBOM           = "invalid SBOM"
-	ERR_TYPE_SBOM_COMPONENT         = "component error"
-	ERR_TYPE_SBOM_LICENSE           = "license error"
-	ERR_TYPE_SBOM_COMPOSITION       = "composition error"
-	ERR_TYPE_SBOM_METADATA          = "metadata error"
-	ERR_TYPE_SBOM_METADATA_PROPERTY = "metadata property error"
-	ERR_TYPE_UNEXPECTED_ERROR       = "unexpected error"
-	ERR_TYPE_UNSUPPORTED_OPERATION  = "unsupported operation"
+	ERR_TYPE_INVALID_JSON_MAP         = "invalid JSON map"
+	ERR_TYPE_INVALID_SBOM             = "invalid SBOM"
+	ERR_TYPE_SBOM_COMPONENT           = "component error"
+	ERR_TYPE_SBOM_LICENSE             = "license error"
+	ERR_TYPE_SBOM_COMPOSITION         = "composition error"
+	ERR_TYPE_SBOM_METADATA            = "metadata error"
+	ERR_TYPE_SBOM_METADATA_PROPERTY   = "metadata property error"
+	ERR_TYPE_UNEXPECTED_ERROR         = "unexpected error"
+	ERR_TYPE_UNSUPPORTED_OPERATION    = "unsupported operation"
+	ERR_TYPE_IETF_RFC6902_TEST_FAILED = "IETF RFC6902 test operation error."
 )
 
 // Validation messages
@@ -55,6 +56,7 @@ const (
 	MSG_PROPERTY_NOT_FOUND                    = "property not found"
 	MSG_PROPERTY_NOT_UNIQUE                   = "check failed: property not unique"
 	MSG_PROPERTY_REGEX_FAILED                 = "check failed: property regex mismatch"
+	MSG_IETF_RFC6902_OPERATION_SUCCESS        = "IETF RFC6902 test operation success."
 )
 
 // License messages
@@ -105,6 +107,8 @@ func (err *BaseError) AppendMessage(addendum string) {
 	}
 }
 
+// NOTE: use for unsupported features/subfunctions etc.
+// Used primarily for "patch" operation implementations currently
 type UnsupportedError struct {
 	BaseError
 	Operation string
@@ -120,6 +124,28 @@ func NewUnsupportedError(op string, m string) *UnsupportedError {
 
 func (err UnsupportedError) Error() string {
 	formattedMessage := fmt.Sprintf("%s (%s). %s", err.Type, err.Operation, err.Message)
+	return formattedMessage
+}
+
+// IETF RFC6902 "Test" error
+type IETFRFC6902TestError struct {
+	BaseError
+	Operation string
+	Record    string
+	Value     interface{}
+}
+
+func NewIETFRFC6902TestError(record string, value interface{}) *IETFRFC6902TestError {
+	var err = new(IETFRFC6902TestError)
+	err.Type = ERR_TYPE_IETF_RFC6902_TEST_FAILED
+	err.Record = record
+	err.Value = value
+	err.Message = fmt.Sprintf("test record: %s, actual value: %v", err.Record, err.Value)
+	return err
+}
+
+func (err IETFRFC6902TestError) Error() string {
+	formattedMessage := fmt.Sprintf("%s. %s", err.Type, err.Message)
 	return formattedMessage
 }
 

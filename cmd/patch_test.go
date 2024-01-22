@@ -425,16 +425,6 @@ func TestPatchOpErrorPathEmpty(t *testing.T) {
 // -------------------------------------
 // RFC6902 Unsupported operation tests
 // -------------------------------------
-func TestPatchRFC6902AppendixA6Patch1(t *testing.T) {
-	ti := NewPatchTestInfo(
-		TEST_PATCH_RFC_6902_APPX_A_6_BASE,
-		TEST_PATCH_RFC_6902_APPX_A_6_PATCH_1, nil)
-	ti.IsInputJSON = true
-	_, _, err := innerTestPatch(t, ti)
-	if !ErrorTypesMatch(err, &UnsupportedError{}) {
-		t.Error(err)
-	}
-}
 
 func TestPatchRFC6902AppendixA7Patch1(t *testing.T) {
 	ti := NewPatchTestInfo(
@@ -447,27 +437,27 @@ func TestPatchRFC6902AppendixA7Patch1(t *testing.T) {
 	}
 }
 
-func TestPatchRFC6902AppendixA8Patch1(t *testing.T) {
-	ti := NewPatchTestInfo(
-		TEST_PATCH_RFC_6902_APPX_A_8_BASE,
-		TEST_PATCH_RFC_6902_APPX_A_8_PATCH_1, nil)
-	ti.IsInputJSON = true
-	_, _, err := innerTestPatch(t, ti)
-	if !ErrorTypesMatch(err, &UnsupportedError{}) {
-		t.Error(err)
-	}
-}
+// func TestPatchRFC6902AppendixA8Patch1(t *testing.T) {
+// 	ti := NewPatchTestInfo(
+// 		TEST_PATCH_RFC_6902_APPX_A_8_BASE,
+// 		TEST_PATCH_RFC_6902_APPX_A_8_PATCH_1, nil)
+// 	ti.IsInputJSON = true
+// 	_, _, err := innerTestPatch(t, ti)
+// 	if !ErrorTypesMatch(err, &UnsupportedError{}) {
+// 		t.Error(err)
+// 	}
+// }
 
-func TestPatchRFC6902AppendixA9Patch1(t *testing.T) {
-	ti := NewPatchTestInfo(
-		TEST_PATCH_RFC_6902_APPX_A_9_BASE,
-		TEST_PATCH_RFC_6902_APPX_A_9_PATCH_1, nil)
-	ti.IsInputJSON = true
-	_, _, err := innerTestPatch(t, ti)
-	if !ErrorTypesMatch(err, &UnsupportedError{}) {
-		t.Error(err)
-	}
-}
+// func TestPatchRFC6902AppendixA9Patch1(t *testing.T) {
+// 	ti := NewPatchTestInfo(
+// 		TEST_PATCH_RFC_6902_APPX_A_9_BASE,
+// 		TEST_PATCH_RFC_6902_APPX_A_9_PATCH_1, nil)
+// 	ti.IsInputJSON = true
+// 	_, _, err := innerTestPatch(t, ti)
+// 	if !ErrorTypesMatch(err, &UnsupportedError{}) {
+// 		t.Error(err)
+// 	}
+// }
 
 // ----------------
 // RFC6902 Tests
@@ -612,6 +602,85 @@ func TestPatchRFC6902AppendixA2Patch4(t *testing.T) {
 	}
 }
 
+func TestPatchRFC6902AppendixA3Patch1Remove(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_3_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_3_PATCH_REMOVE_OBJ_1, nil)
+	ti.IsInputJSON = true
+	ti.OutputIndent = 0
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
+	TEST_RESULT := "{\"foo\":\"bar\"}\n"
+	if buffer.String() != TEST_RESULT {
+		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+	}
+}
+
+func TestPatchRFC6902AppendixA4Patch1Remove(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_4_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_4_PATCH_REMOVE_ARRAY_1, nil)
+	ti.IsInputJSON = true
+	ti.OutputIndent = 0
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
+	TEST_RESULT := "{\"foo\":[\"bar\",\"baz\"]}\n"
+	if buffer.String() != TEST_RESULT {
+		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+	}
+}
+
+func TestPatchRFC6902AppendixA5Patch1Replace(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_5_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_5_PATCH_REPLACE_1, nil)
+	ti.IsInputJSON = true
+	ti.OutputIndent = 0
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
+	TEST_RESULT := "{\"baz\":\"boo\",\"foo\":\"bar\"}\n"
+	if buffer.String() != TEST_RESULT {
+		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+	}
+}
+
+func TestPatchRFC6902AppendixA5Patch2ReplaceErr(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_5_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_5_PATCH_REPLACE_2_ERR, nil)
+	ti.IsInputJSON = true
+	ti.OutputIndent = 0
+	_, _, err := innerTestPatch(t, ti)
+	if err == nil {
+		t.Errorf("Expected error: %s", ERR_PATCH_REPLACE_PATH_EXISTS)
+		return
+	}
+	if err.Error() != ERR_PATCH_REPLACE_PATH_EXISTS {
+		t.Errorf("Expected error: %s", ERR_PATCH_REPLACE_PATH_EXISTS)
+		return
+	}
+}
+
+func TestPatchRFC6902AppendixA6Patch1(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_6_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_6_PATCH_1, nil)
+	ti.IsInputJSON = true
+	_, _, err := innerTestPatch(t, ti)
+	if !ErrorTypesMatch(err, &UnsupportedError{}) {
+		t.Error(err)
+	}
+}
+
 func TestPatchRFC6902AppendixA10Patch1(t *testing.T) {
 	ti := NewPatchTestInfo(
 		TEST_PATCH_RFC_6902_APPX_A_10_BASE,
@@ -734,70 +803,25 @@ func TestPatchCdx15SliceAddUpdateVersionInteger(t *testing.T) {
 	}
 }
 
-func TestPatchRFC6902AppendixA3Patch1Remove(t *testing.T) {
+func TestPatchRFC6902AppendixA8Patch1Test(t *testing.T) {
 	ti := NewPatchTestInfo(
-		TEST_PATCH_RFC_6902_APPX_A_3_BASE,
-		TEST_PATCH_RFC_6902_APPX_A_3_PATCH_REMOVE_OBJ_1, nil)
+		TEST_PATCH_RFC_6902_APPX_A_8_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_8_PATCH_1, nil)
 	ti.IsInputJSON = true
-	ti.OutputIndent = 0
-	buffer, _, err := innerTestPatch(t, ti)
-	if err != nil {
-		t.Error(err)
-	}
-	getLogger().Tracef("%s\n", buffer.String())
-	TEST_RESULT := "{\"foo\":\"bar\"}\n"
-	if buffer.String() != TEST_RESULT {
-		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
-	}
-}
-
-func TestPatchRFC6902AppendixA4Patch1Remove(t *testing.T) {
-	ti := NewPatchTestInfo(
-		TEST_PATCH_RFC_6902_APPX_A_4_BASE,
-		TEST_PATCH_RFC_6902_APPX_A_4_PATCH_REMOVE_ARRAY_1, nil)
-	ti.IsInputJSON = true
-	ti.OutputIndent = 0
-	buffer, _, err := innerTestPatch(t, ti)
-	if err != nil {
-		t.Error(err)
-	}
-	getLogger().Tracef("%s\n", buffer.String())
-	TEST_RESULT := "{\"foo\":[\"bar\",\"baz\"]}\n"
-	if buffer.String() != TEST_RESULT {
-		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
-	}
-}
-
-func TestPatchRFC6902AppendixA5Patch1Replace(t *testing.T) {
-	ti := NewPatchTestInfo(
-		TEST_PATCH_RFC_6902_APPX_A_5_BASE,
-		TEST_PATCH_RFC_6902_APPX_A_5_PATCH_REPLACE_1, nil)
-	ti.IsInputJSON = true
-	ti.OutputIndent = 0
-	buffer, _, err := innerTestPatch(t, ti)
-	if err != nil {
-		t.Error(err)
-	}
-	getLogger().Tracef("%s\n", buffer.String())
-	TEST_RESULT := "{\"baz\":\"boo\",\"foo\":\"bar\"}\n"
-	if buffer.String() != TEST_RESULT {
-		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
-	}
-}
-
-func TestPatchRFC6902AppendixA5Patch2ReplaceErr(t *testing.T) {
-	ti := NewPatchTestInfo(
-		TEST_PATCH_RFC_6902_APPX_A_5_BASE,
-		TEST_PATCH_RFC_6902_APPX_A_5_PATCH_REPLACE_2_ERR, nil)
-	ti.IsInputJSON = true
-	ti.OutputIndent = 0
 	_, _, err := innerTestPatch(t, ti)
-	if err == nil {
-		t.Errorf("Expected error: %s", ERR_PATCH_REPLACE_PATH_EXISTS)
-		return
+	if err != nil {
+		t.Error(err)
 	}
-	if err.Error() != ERR_PATCH_REPLACE_PATH_EXISTS {
-		t.Errorf("Expected error: %s", ERR_PATCH_REPLACE_PATH_EXISTS)
-		return
+}
+
+func TestPatchRFC6902AppendixA9Patch1TestErr(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_9_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_9_PATCH_1, nil)
+	ti.IsInputJSON = true
+	_, _, err := innerTestPatch(t, ti)
+	getLogger().Tracef("%s\n", err.Error())
+	if err == nil {
+		t.Errorf("expected error for IETF RFC6902 test operation.")
 	}
 }
