@@ -40,6 +40,10 @@ const (
 	MSG_PATCH_FILE = "patch filename"
 )
 
+const (
+	ERR_PATCH_REPLACE_PATH_EXISTS = "invalid path. Path does not exist to replace value"
+)
+
 // The "-" character is used to index the end of the array (see [RFC6901])
 const (
 	RFC6901_END_OF_ARRAY = "-"
@@ -426,7 +430,7 @@ func addOrReplaceValue(parentMap map[string]interface{}, keys []string, value in
 			// it would mean that last path is a new key to be added
 			// to the next node's map with the provided value
 			if _, exists := typedNode[keys[0]]; !exists && replace {
-				err = fmt.Errorf("invalid path. Path does not exist to replace value")
+				err = fmt.Errorf(ERR_PATCH_REPLACE_PATH_EXISTS)
 				return
 			}
 			typedNode[keys[0]] = value
