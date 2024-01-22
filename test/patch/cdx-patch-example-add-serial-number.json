@@ -1,0 +1,3 @@
+[
+    { "op": "add", "path": "/serialNumber", "value": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9" }
+]

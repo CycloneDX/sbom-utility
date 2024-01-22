@@ -1,0 +1,9 @@
+[
+    { "op": "add", "path": "/metadata/supplier", "value": {
+            "name": "Example Co. Distribution Dept.",
+            "url": [
+              "https://example.com/software/"
+            ]
+        }
+    }
+]

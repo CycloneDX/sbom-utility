@@ -49,9 +49,10 @@ const (
 	TEST_PATCH_RFC_6902_APPX_A_16_BASE = "test/patch/rfc6902/rfc6902-appendix-a-16-base.json"
 
 	// "base" BOM files for patching
-	TEST_PATCH_BOM_1_5_SLICE_BASE  = "test/patch/cdx-1-5-slice-base.json"
-	TEST_PATCH_BOM_1_5_SIMPLE_BASE = "test/patch/cdx-1-5-simple-base.json"
-	TEST_PATCH_BOM_1_5_MATURE_BASE = "test/patch/cdx-1-5-mature-base.json"
+	TEST_PATCH_BOM_1_5_SLICE_BASE    = "test/patch/cdx-1-5-slice-base.json"
+	TEST_PATCH_BOM_1_5_SIMPLEST_BASE = "test/patch/cdx-1-5-simplest-base.json"
+	TEST_PATCH_BOM_1_5_SIMPLE_BASE   = "test/patch/cdx-1-5-simple-base.json"
+	TEST_PATCH_BOM_1_5_MATURE_BASE   = "test/patch/cdx-1-5-mature-base.json"
 )
 
 const (
@@ -681,6 +682,29 @@ func TestPatchRFC6902AppendixA6Patch1(t *testing.T) {
 	}
 }
 
+func TestPatchRFC6902AppendixA8Patch1Test(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_8_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_8_PATCH_1, nil)
+	ti.IsInputJSON = true
+	_, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestPatchRFC6902AppendixA9Patch1TestErr(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_9_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_9_PATCH_1, nil)
+	ti.IsInputJSON = true
+	_, _, err := innerTestPatch(t, ti)
+	getLogger().Tracef("%s\n", err.Error())
+	if err == nil {
+		t.Errorf("expected error for IETF RFC6902 test operation.")
+	}
+}
+
 func TestPatchRFC6902AppendixA10Patch1(t *testing.T) {
 	ti := NewPatchTestInfo(
 		TEST_PATCH_RFC_6902_APPX_A_10_BASE,
@@ -800,28 +824,5 @@ func TestPatchCdx15SliceAddUpdateVersionInteger(t *testing.T) {
 	err = VerifyPatchedOutputFileResult(t, *ti)
 	if err != nil {
 		t.Error(err)
-	}
-}
-
-func TestPatchRFC6902AppendixA8Patch1Test(t *testing.T) {
-	ti := NewPatchTestInfo(
-		TEST_PATCH_RFC_6902_APPX_A_8_BASE,
-		TEST_PATCH_RFC_6902_APPX_A_8_PATCH_1, nil)
-	ti.IsInputJSON = true
-	_, _, err := innerTestPatch(t, ti)
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func TestPatchRFC6902AppendixA9Patch1TestErr(t *testing.T) {
-	ti := NewPatchTestInfo(
-		TEST_PATCH_RFC_6902_APPX_A_9_BASE,
-		TEST_PATCH_RFC_6902_APPX_A_9_PATCH_1, nil)
-	ti.IsInputJSON = true
-	_, _, err := innerTestPatch(t, ti)
-	getLogger().Tracef("%s\n", err.Error())
-	if err == nil {
-		t.Errorf("expected error for IETF RFC6902 test operation.")
 	}
 }

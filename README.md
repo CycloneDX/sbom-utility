@@ -1141,37 +1141,139 @@ The patch command operates on a JSON BOM input file (see [`--input-file` flag](#
 
 ##### Patch `--patch-filename` flag
 
+The `--patch-file <filename>` flag is used to provide the relative path to the IETF RFC6902 patch file to applied to the BOM input file.
 
 #### Patch examples
 
 The original BOM used for these examples can be found here:
 
-- TODO
+##### Example: Patch "add" operation:  Add "serialNumber"
 
-##### Example: Patch 1
+This example adds a new top-level key `"serialNumber"` and corresponding value to a CycloneDX JSON BOM file.
 
-TODO
+Original CycloneDX JSON BOM file: [test/patch/cdx-1-5-simplest-base.json](test/patch/cdx-1-5-simplest-base.json):
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2022-10-12T19:07:00Z",
+    "properties": [
+      {
+        "name": "Property 1",
+        "value": "Value 1"
+      },
+      {
+        "name": "Property 2",
+        "value": "Value 2"
+      }
+    ]
+  }
+}
+```
+
+IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-add-serial-number.json](test/patch/cdx-patch-example-add-serial-number.json):
+
+```json
+[
+  { "op": "add", "path": "/serialNumber", "value": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9" }
+]
+```
+
+Invoke the patch command as follows:
 
 ```bash
-TODO
+./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-add-serial-number.json  -q
 ```
 
-Original BOM:
+Patched JSON BOM output file:
 
 ```json
-TODO
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
+    "version": 1,
+    "metadata": {
+        "timestamp": "2022-10-12T19:07:00Z",
+        "properties": [
+            {
+                "name": "Property 1",
+                "value": "Value 1"
+            },
+            {
+                "name": "Property 2",
+                "value": "Value 2"
+            }
+        ]
+    }
+}
 ```
 
-IETF RFC 6902 Patch file:
+##### Example 2: Patch "add" operation:  Update `version` value
+
+This example shows how the patch's "add" operation can be used to update existing values which is the specified behavior of RFC6902.
+
+Original CycloneDX JSON BOM file: [test/patch/cdx-1-5-simplest-base.json](test/patch/cdx-1-5-simplest-base.json):
 
 ```json
-TODO
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2022-10-12T19:07:00Z",
+    "properties": [
+      {
+        "name": "Property 1",
+        "value": "Value 1"
+      },
+      {
+        "name": "Property 2",
+        "value": "Value 2"
+      }
+    ]
+  }
+}
 ```
 
-Output BOM results after patch:
+IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-add-serial-number.json](test/patch/cdx-patch-example-add-serial-number.json):
 
 ```json
-TODO
+[
+  { "op": "add", "path": "/version", "value": 2 }
+]
+```
+
+Invoke the patch command as follows:
+
+```bash
+./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-add-update-version.json  -q
+```
+
+Patched JSON BOM output file:
+
+```json
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "version": 2,
+    "metadata": {
+        "timestamp": "2022-10-12T19:07:00Z",
+        "properties": [
+            {
+                "name": "Property 1",
+                "value": "Value 1"
+            },
+            {
+                "name": "Property 2",
+                "value": "Value 2"
+            }
+        ]
+    }
+}
 ```
 
 ---
