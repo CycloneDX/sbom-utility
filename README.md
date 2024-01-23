@@ -1285,6 +1285,23 @@ Invoke the patch command as follows:
 ```
 
 ```json
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "version": 1,
+    "metadata": {
+        "timestamp": "2022-10-12T19:07:00Z",
+        "supplier": {
+            "name": "Example Co. Distribution Dept.",
+            "url": [
+                "https://example.com/software/"
+            ]
+        },
+        "properties": [
+          ...
+        ]
+    }
+}
 ```
 
 ##### Example 4: Patch "add" `property` objects to `metadata.properties` array

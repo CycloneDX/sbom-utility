@@ -182,10 +182,10 @@ func Patch(writer io.Writer, persistentFlags utils.PersistentCommandFlags, patch
 		return
 	}
 
-	// TODO: allow user to change document serial # and/or version
-	// Use the JSON Map to unmarshal to CDX-specific types
-
 	// After patch records are applied; update the CdxBOM
+	// NOTE: If any JSON keys that are NOT part of the CycloneDX spec.
+	// have been added via a patch "add" operation, they will be removed
+	// during the unmarshal process.
 	err = document.UnmarshalCycloneDXBOM()
 
 	// Output the "patched" version of the Input BOM
