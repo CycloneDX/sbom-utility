@@ -1155,11 +1155,11 @@ The `--patch-file <filename>` flag is used to provide the relative path to the I
 
 The original BOM used for these examples can be found here:
 
-##### Example: Patch "add" operation:  Add "serialNumber"
+##### Example: Patch "add" `serialNumber`
 
 This example adds a new top-level key `"serialNumber"` and corresponding value to a CycloneDX JSON BOM file.
 
-Original CycloneDX JSON BOM file: [test/patch/cdx-1-5-simplest-base.json](test/patch/cdx-1-5-simplest-base.json):
+The original CycloneDX JSON BOM file: [test/patch/cdx-1-5-simplest-base.json](test/patch/cdx-1-5-simplest-base.json) has no serial number:
 
 ```json
 {
@@ -1167,17 +1167,7 @@ Original CycloneDX JSON BOM file: [test/patch/cdx-1-5-simplest-base.json](test/p
   "specVersion": "1.5",
   "version": 1,
   "metadata": {
-    "timestamp": "2022-10-12T19:07:00Z",
-    "properties": [
-      {
-        "name": "Property 1",
-        "value": "Value 1"
-      },
-      {
-        "name": "Property 2",
-        "value": "Value 2"
-      }
-    ]
+      ...
   }
 }
 ```
@@ -1205,22 +1195,12 @@ Patched JSON BOM output file:
     "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
     "version": 1,
     "metadata": {
-        "timestamp": "2022-10-12T19:07:00Z",
-        "properties": [
-            {
-                "name": "Property 1",
-                "value": "Value 1"
-            },
-            {
-                "name": "Property 2",
-                "value": "Value 2"
-            }
-        ]
+        ...
     }
 }
 ```
 
-##### Example 2: Patch "add" operation:  Update `version` value
+##### Example 2: Patch "add" `version` value
 
 This example shows how the patch's "add" operation can be used to update existing values which is the specified behavior of RFC6902.
 
@@ -1232,17 +1212,7 @@ Original CycloneDX JSON BOM file: [test/patch/cdx-1-5-simplest-base.json](test/p
   "specVersion": "1.5",
   "version": 1,
   "metadata": {
-    "timestamp": "2022-10-12T19:07:00Z",
-    "properties": [
-      {
-        "name": "Property 1",
-        "value": "Value 1"
-      },
-      {
-        "name": "Property 2",
-        "value": "Value 2"
-      }
-    ]
+      ...
   }
 }
 ```
@@ -1261,7 +1231,7 @@ Invoke the patch command as follows:
 ./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-add-update-version.json  -q
 ```
 
-Patched JSON BOM output file:
+Patched JSON BOM output file which has changed the `version` value from `1` to `2`:
 
 ```json
 {
@@ -1269,17 +1239,40 @@ Patched JSON BOM output file:
     "specVersion": "1.5",
     "version": 2,
     "metadata": {
-        "timestamp": "2022-10-12T19:07:00Z",
-        "properties": [
-            {
-                "name": "Property 1",
-                "value": "Value 1"
-            },
-            {
-                "name": "Property 2",
-                "value": "Value 2"
-            }
-        ]
+        ...
+    }
+}
+```
+
+##### Example 2a: Patch "replace" `version` value
+
+This example shows how the patch's "replace" operation can be used to change the `version` key's value as an alternative to the "add" operation.
+
+**Note**: *The "update" operation will emit an error if the key (e.g., in this case "version") does not exist.*
+
+Using the same original JSON BOM file, apply the following IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-add-serial-number.json](test/patch/cdx-patch-example-add-serial-number.json):
+
+```json
+[
+  { "op": "replace", "path": "/version", "value": 2 }
+]
+```
+
+Invoke the patch command as follows:
+
+```bash
+./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-replace-version.json  -q
+```
+
+produces the same patched JSON BOM result as the previous "add" `version` operation:
+
+```json
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "version": 2,
+    "metadata": {
+        ...
     }
 }
 ```
