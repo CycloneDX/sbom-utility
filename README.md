@@ -1127,7 +1127,15 @@ Output BOM results with `properties` removed from all `components`:
 
 ### Patch
 
-This command is able to "patch" an input JSON BOM document using an IETF RFC 6902 JSON "patch" file.
+This command is able to "patch" an existing JSON BOM document using an [IETF RFC6902](https://datatracker.ietf.org/doc/html/rfc6902/#section-4.1) "JavaScript Object Notation (JSON) Patch" file.
+
+The current implementation supports the following "patch" operations:
+
+- "add", "update", "remove" and "test"
+
+At this time the "move" or "copy" operations are not supported.
+
+Patches work for both simple (i.e., integer, float, boolean and string) values as well as complex values such as JSON objects, maps and arrays.
 
 #### Patch supported output formats
 
@@ -1137,7 +1145,7 @@ This command is used to output, using the [`--output-file` flag](#output-flag), 
 
 #### Patch flags
 
-The patch command operates on a JSON BOM input file (see [`--input-file` flag](#input-flag)) as well as an IETF RFC 6902-formatted "patch' file and produces a "patched" version of the input JSON BOM as output using the following flags:
+The patch command operates on a JSON BOM input file (see [`--input-file` flag](#input-flag)) as well as an [IETF RFC6902](https://datatracker.ietf.org/doc/html/rfc6902/#section-4.1)-formatted "patch' file and produces a "patched" version of the input JSON BOM as output using the following flags:
 
 ##### Patch `--patch-filename` flag
 
