@@ -1244,37 +1244,96 @@ Patched JSON BOM output file which has changed the `version` value from `1` to `
 }
 ```
 
-##### Example 2a: Patch "replace" `version` value
+##### Example 3: Patch "add" `supplier` object to `metadata` object
 
-This example shows how the patch's "replace" operation can be used to change the `version` key's value as an alternative to the "add" operation.
+This example shows how the patch's "add" operation can be used to add a JSON object to an existing object.
 
-**Note**: *The "update" operation will emit an error if the key (e.g., in this case "version") does not exist.*
+Original CycloneDX JSON BOM file: [test/patch/cdx-1-5-simplest-base.json](test/patch/cdx-1-5-simplest-base.json):
 
-Using the same original JSON BOM file, apply the following IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-add-serial-number.json](test/patch/cdx-patch-example-add-serial-number.json):
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2022-10-12T19:07:00Z",
+    "properties": [
+      ...
+    ]
+  }
+}
+```
+
+Apply the following IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-add-metadata-supplier.json](test/patch/cdx-patch-example-add-metadata-supplier.json):
 
 ```json
 [
-  { "op": "replace", "path": "/version", "value": 2 }
+  { "op": "add", "path": "/metadata/supplier", "value": {
+      "name": "Example Co. Distribution Dept.",
+      "url": [
+        "https://example.com/software/"
+      ]
+    }
+  }
 ]
 ```
 
 Invoke the patch command as follows:
 
 ```bash
-./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-replace-version.json  -q
+./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-add-metadata-supplier.json -q
 ```
 
-produces the same patched JSON BOM result as the previous "add" `version` operation:
+```json
+```
+
+##### Example 4: Patch "add" `property` objects to `metadata.properties` array
+
+This example shows how the patch's "add" operation can be used to add `property` objects to an existing `properties` array.
+
+Apply the following IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-add-metadata-properties.json](test/patch/cdx-patch-example-add-metadata-properties.json):
+
+```json
+[
+  { "op": "add", "path": "/metadata/properties/-", "value": { "name": "foo", "value": "bar" } },
+  { "op": "add", "path": "/metadata/properties/1", "value": { "name": "rush", "value": "yyz" } }
+]
+```
+
+Invoke the patch command as follows:
+
+```bash
+./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-add-metadata-properties.json -q
+```
 
 ```json
 {
     "bomFormat": "CycloneDX",
     "specVersion": "1.5",
-    "version": 2,
+    "version": 1,
     "metadata": {
-        ...
+        "timestamp": "2022-10-12T19:07:00Z",
+        "properties": [
+            {
+                "name": "Property 1",
+                "value": "Value 1"
+            },
+            {
+                "name": "rush",
+                "value": "yyz"
+            },
+            {
+                "name": "Property 2",
+                "value": "Value 2"
+            },
+            {
+                "name": "foo",
+                "value": "bar"
+            }
+        ]
     }
 }
+
 ```
 
 ---

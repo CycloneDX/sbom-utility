@@ -53,24 +53,33 @@ const (
 	TEST_PATCH_BOM_1_5_SIMPLEST_BASE = "test/patch/cdx-1-5-simplest-base.json"
 	TEST_PATCH_BOM_1_5_SIMPLE_BASE   = "test/patch/cdx-1-5-simple-base.json"
 	TEST_PATCH_BOM_1_5_MATURE_BASE   = "test/patch/cdx-1-5-mature-base.json"
+
+	// BOM "patch" files
+	TEST_PATCH_EXAMPLE_ADD_ROOT_SERIAL_NUMBER = "test/patch/cdx-patch-example-add-serial-number.json"
+	TEST_PATCH_EXAMPLE_UPDATE_ROOT_VERSION    = "test/patch/cdx-patch-example-add-update-version.json"
+	TEST_PATCH_EXAMPLE_REPLACE_ROOT_VERSION   = "test/patch/cdx-patch-example-replace-version.json"
+	TEST_PATCH_EXAMPLE_ADD_ROOT_EXT_REF       = "test/patch/cdx-patch-example-add-external-reference.json"
+	TEST_PATCH_EXAMPLE_ADD_METADATA_PROPS     = "test/patch/cdx-patch-example-add-metadata-properties.json"
+	TEST_PATCH_EXAMPLE_ADD_METADATA_SUPPLIER  = "test/patch/cdx-patch-example-add-metadata-supplier.json"
 )
 
 const (
 	// RFC 6901 "patch" files
-	TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_OBJ_1      = "test/patch/rfc6902/rfc6902-appendix-a-1-patch-add-obj-1.json"
-	TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_INT        = "test/patch/rfc6902/rfc6902-appendix-a-1-patch-add-integer.json"
-	TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_FLOAT      = "test/patch/rfc6902/rfc6902-appendix-a-1-patch-add-float.json"
-	TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_BOOL       = "test/patch/rfc6902/rfc6902-appendix-a-1-patch-add-bool.json"
-	TEST_PATCH_RFC_6902_APPX_A_2_PATCH_ADD_ARRAY_1    = "test/patch/rfc6902/rfc6902-appendix-a-2-patch-add-array-1.json"
-	TEST_PATCH_RFC_6902_APPX_A_2_PATCH_ADD_ARRAY_2    = "test/patch/rfc6902/rfc6902-appendix-a-2-patch-add-array-2.json"
-	TEST_PATCH_RFC_6902_APPX_A_2_PATCH_ADD_ARRAY_3    = "test/patch/rfc6902/rfc6902-appendix-a-2-patch-add-array-3.json"
-	TEST_PATCH_RFC_6902_APPX_A_2_PATCH_ADD_ARRAY_4    = "test/patch/rfc6902/rfc6902-appendix-a-2-patch-add-array-4.json"
-	TEST_PATCH_RFC_6902_APPX_A_3_PATCH_REMOVE_OBJ_1   = "test/patch/rfc6902/rfc6902-appendix-a-3-patch-remove-obj-1.json"
-	TEST_PATCH_RFC_6902_APPX_A_4_PATCH_REMOVE_ARRAY_1 = "test/patch/rfc6902/rfc6902-appendix-a-4-patch-remove-array-1.json"
-	TEST_PATCH_RFC_6902_APPX_A_5_PATCH_REPLACE_1      = "test/patch/rfc6902/rfc6902-appendix-a-5-patch-replace-1.json"
-	TEST_PATCH_RFC_6902_APPX_A_5_PATCH_REPLACE_2_ERR  = "test/patch/rfc6902/rfc6902-appendix-a-5-patch-replace-err.json"
-	TEST_PATCH_RFC_6902_APPX_A_10_PATCH_ADD_NESTED_1  = "test/patch/rfc6902/rfc6902-appendix-a-10-patch-add-nested-1.json"
-	TEST_PATCH_RFC_6902_APPX_A_16_PATCH_ADD_ARRAY_1   = "test/patch/rfc6902/rfc6902-appendix-a-16-patch-add-array-1.json"
+	TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_OBJ_1           = "test/patch/rfc6902/rfc6902-appendix-a-1-patch-add-obj-1.json"
+	TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_INT             = "test/patch/rfc6902/rfc6902-appendix-a-1-patch-add-integer.json"
+	TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_FLOAT           = "test/patch/rfc6902/rfc6902-appendix-a-1-patch-add-float.json"
+	TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_BOOL            = "test/patch/rfc6902/rfc6902-appendix-a-1-patch-add-bool.json"
+	TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_ROOT_EMPTY_PATH = "test/patch/rfc6902/rfc6902-appendix-a-1-patch-root-path-only.json"
+	TEST_PATCH_RFC_6902_APPX_A_2_PATCH_ADD_ARRAY_1         = "test/patch/rfc6902/rfc6902-appendix-a-2-patch-add-array-1.json"
+	TEST_PATCH_RFC_6902_APPX_A_2_PATCH_ADD_ARRAY_2         = "test/patch/rfc6902/rfc6902-appendix-a-2-patch-add-array-2.json"
+	TEST_PATCH_RFC_6902_APPX_A_2_PATCH_ADD_ARRAY_3         = "test/patch/rfc6902/rfc6902-appendix-a-2-patch-add-array-3.json"
+	TEST_PATCH_RFC_6902_APPX_A_2_PATCH_ADD_ARRAY_4         = "test/patch/rfc6902/rfc6902-appendix-a-2-patch-add-array-4.json"
+	TEST_PATCH_RFC_6902_APPX_A_3_PATCH_REMOVE_OBJ_1        = "test/patch/rfc6902/rfc6902-appendix-a-3-patch-remove-obj-1.json"
+	TEST_PATCH_RFC_6902_APPX_A_4_PATCH_REMOVE_ARRAY_1      = "test/patch/rfc6902/rfc6902-appendix-a-4-patch-remove-array-1.json"
+	TEST_PATCH_RFC_6902_APPX_A_5_PATCH_REPLACE_1           = "test/patch/rfc6902/rfc6902-appendix-a-5-patch-replace-1.json"
+	TEST_PATCH_RFC_6902_APPX_A_5_PATCH_REPLACE_2_ERR       = "test/patch/rfc6902/rfc6902-appendix-a-5-patch-replace-err.json"
+	TEST_PATCH_RFC_6902_APPX_A_10_PATCH_ADD_NESTED_1       = "test/patch/rfc6902/rfc6902-appendix-a-10-patch-add-nested-1.json"
+	TEST_PATCH_RFC_6902_APPX_A_16_PATCH_ADD_ARRAY_1        = "test/patch/rfc6902/rfc6902-appendix-a-16-patch-add-array-1.json"
 
 	// NOTE: Currently unsupported patch operations (i.e., should return consistent error)
 	TEST_PATCH_RFC_6902_APPX_A_6_PATCH_1 = "test/patch/rfc6902/rfc6902-appendix-a-6-patch-1.json"
@@ -88,8 +97,8 @@ const (
 	TEST_PATCH_BOM_ADD_ROOT_INVALID_KEY_MODIFIED = "test/patch/cdx-patch-add-root-invalid-key-modified.json"
 
 	// CycloneDX BOM "patch" files (error tests)
-	TEST_PATCH_ERR_ADD_MISSING_VALUE = "test/patch/cdx-patch-add-err-missing-value.json"
-	TEST_PATCH_ERR_OP_PATH_EMPTY     = "test/patch/cdx-patch-op-err-empty-path.json"
+	TEST_PATCH_ERR_ADD_MISSING_VALUE = "test/patch/cdx-patch-err-add-missing-value.json"
+	TEST_PATCH_ERR_PATH_EMPTY        = "test/patch/cdx-patch-err-empty-path.json"
 )
 
 type PatchTestInfo struct {
@@ -354,12 +363,6 @@ func sliceContainsValue(slice []interface{}, value interface{}) (contains bool, 
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	// Debug trace
-	// buffer, _ := utils.EncodeAnyToDefaultIndentedJSONStr(value)
-	// fmt.Printf("sliceContainsValue(): value (%T): %s\n", value, buffer.String())
-	// buffer, _ = utils.EncodeAnyToDefaultIndentedJSONStr(slice)
-	// fmt.Printf("sliceContainsValue(): slice: %s\n", buffer.String())
-
 	switch typedValue := value.(type) {
 	case map[string]interface{}:
 		var tempValue map[string]interface{}
@@ -404,8 +407,8 @@ func sliceContainsValue(slice []interface{}, value interface{}) (contains bool, 
 // Error tests
 // ----------------
 func TestPatchAddErrorMissingValue(t *testing.T) {
-	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_MATURE_BASE, TEST_PATCH_ERR_ADD_MISSING_VALUE, nil)
-	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_MATURE_BASE)
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLEST_BASE, TEST_PATCH_ERR_ADD_MISSING_VALUE, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLEST_BASE)
 	_, _, err := innerTestPatch(t, ti)
 	// Expected an error
 	if err == nil {
@@ -414,8 +417,8 @@ func TestPatchAddErrorMissingValue(t *testing.T) {
 }
 
 func TestPatchOpErrorPathEmpty(t *testing.T) {
-	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_MATURE_BASE, TEST_PATCH_ERR_OP_PATH_EMPTY, nil)
-	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_MATURE_BASE)
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLEST_BASE, TEST_PATCH_ERR_PATH_EMPTY, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLEST_BASE)
 	_, _, err := innerTestPatch(t, ti)
 	// Expected an error
 	if err == nil {
@@ -437,28 +440,6 @@ func TestPatchRFC6902AppendixA7Patch1(t *testing.T) {
 		t.Error(err)
 	}
 }
-
-// func TestPatchRFC6902AppendixA8Patch1(t *testing.T) {
-// 	ti := NewPatchTestInfo(
-// 		TEST_PATCH_RFC_6902_APPX_A_8_BASE,
-// 		TEST_PATCH_RFC_6902_APPX_A_8_PATCH_1, nil)
-// 	ti.IsInputJSON = true
-// 	_, _, err := innerTestPatch(t, ti)
-// 	if !ErrorTypesMatch(err, &UnsupportedError{}) {
-// 		t.Error(err)
-// 	}
-// }
-
-// func TestPatchRFC6902AppendixA9Patch1(t *testing.T) {
-// 	ti := NewPatchTestInfo(
-// 		TEST_PATCH_RFC_6902_APPX_A_9_BASE,
-// 		TEST_PATCH_RFC_6902_APPX_A_9_PATCH_1, nil)
-// 	ti.IsInputJSON = true
-// 	_, _, err := innerTestPatch(t, ti)
-// 	if !ErrorTypesMatch(err, &UnsupportedError{}) {
-// 		t.Error(err)
-// 	}
-// }
 
 // ----------------
 // RFC6902 Tests
@@ -532,6 +513,16 @@ func TestPatchRFC6902AppendixA1BaseAddBool(t *testing.T) {
 	TEST_RESULT := "{\"boolean\":true,\"foo\":\"bar\"}\n"
 	if buffer.String() != TEST_RESULT {
 		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+	}
+}
+
+func TestPatchRFC6902AppendixA1RootEmptyPath(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLEST_BASE, TEST_PATCH_RFC_6902_APPX_A_1_PATCH_ADD_ROOT_EMPTY_PATH, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLEST_BASE)
+	_, _, err := innerTestPatch(t, ti)
+	// NOTE: JSON allows empty (i.e., "") as a map key
+	if err != nil {
+		t.Error(err)
 	}
 }
 
@@ -825,4 +816,28 @@ func TestPatchCdx15SliceAddUpdateVersionInteger(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+}
+
+// ----------------
+// README Examples
+// ----------------
+
+func TestPatchCdx15ExampleAddExternalReference(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLEST_BASE, TEST_PATCH_EXAMPLE_ADD_ROOT_EXT_REF, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLEST_BASE)
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
+}
+
+func TestPatchCdx15ExampleAddMetadataSupplier(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLEST_BASE, TEST_PATCH_EXAMPLE_ADD_METADATA_SUPPLIER, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLEST_BASE)
+	buffer, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	getLogger().Tracef("%s\n", buffer.String())
 }

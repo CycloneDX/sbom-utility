@@ -585,7 +585,8 @@ func addOrReplaceValue(parentMap map[string]interface{}, keys []string, value in
 				err = fmt.Errorf(ERR_PATCH_REPLACE_PATH_EXISTS)
 				return
 			}
-			typedNode[keys[0]] = value
+			currentKey := keys[lengthKeys-1]
+			typedNode[currentKey] = value
 		}
 	case []interface{}:
 		if lengthKeys != 2 {
