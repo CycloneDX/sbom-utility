@@ -1162,7 +1162,8 @@ This section contains examples of all supported patch operations (i.e., add, rep
 - ["add" `supplier` object to `metadata`](#patch-example-3-add-supplier-object-to-metadata-object)
 - ["add" `property` objects to `metadata.properties` array](#patch-example-4-add-property-objects-to-metadataproperties-array)
 - ["replace" `version` and `timestamp` values](#patch-example-5-replace-bom-version-and-timestamp)
-- ["remove" `property` from `metadata.properties` array](#patch-example-6-remove-property-from-metadataproperties-array)
+- ["remove" `property` from the `metadata.properties` array](#patch-example-6-remove-property-from-the-metadataproperties-array)
+- ["test" if a `property` exists in the `metadata.properties` array](#patch-example-7-test-property-exists-in-the-metadataproperties-array)
 
 ##### Patch example 1: "add" BOM `serialNumber`
 
@@ -1213,7 +1214,7 @@ Patched JSON BOM output file:
 
 This example shows how the patch's "add" operation can be used to update existing values which is the specified behavior of RFC6902.
 
-Original CycloneDX JSON BOM file: [test/patch/cdx-1-5-simplest-base.json](test/patch/cdx-1-5-simplest-base.json):
+Original CycloneDX JSON BOM file: [test/patch/cdx-1-5-simplest-base.json](test/patch/cdx-1-5-simplest-base.json) with `version` equal to `1`:
 
 ```json
 {
@@ -1293,6 +1294,8 @@ Invoke the patch command as follows:
 ./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-add-metadata-supplier.json -q
 ```
 
+The patched BOM has the `supplier` object added to the `metadata`:
+
 ```json
 {
     "bomFormat": "CycloneDX",
@@ -1307,7 +1310,7 @@ Invoke the patch command as follows:
             ]
         },
         "properties": [
-          ...
+            ...
         ]
     }
 }
@@ -1316,6 +1319,29 @@ Invoke the patch command as follows:
 ##### Patch example 4: "add" `property` objects to `metadata.properties` array
 
 This example shows how the patch's "add" operation can be used to add `property` objects to an existing `properties` array.
+
+Original CycloneDX JSON BOM file: [test/patch/cdx-1-5-simplest-base.json](test/patch/cdx-1-5-simplest-base.json):
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2023-10-12T19:07:00Z",
+    "properties": [
+      {
+        "name": "Property 1",
+        "value": "Value 1"
+      },
+      {
+        "name": "Property 2",
+        "value": "Value 2"
+      }
+    ]
+  }
+}
+```
 
 Apply the following IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-add-metadata-properties.json](test/patch/cdx-patch-example-add-metadata-properties.json):
 
@@ -1365,12 +1391,28 @@ Invoke the patch command as follows:
 
 This example shows how the patch's "replace" operation can be used to update the BOM document's `version` and `timestamp` values.
 
+Original CycloneDX JSON BOM file: [test/patch/cdx-1-5-simplest-base.json](test/patch/cdx-1-5-simplest-base.json):
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2023-10-12T19:07:00Z",
+    "properties": [
+      ...
+    ]
+  }
+}
+```
+
 Apply the following IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-replace-version-timestamp.json](test/patch/cdx-patch-example-replace-version-timestamp.json):
 
 ```json
 [
-    { "op": "replace", "path": "/version", "value": 2 },
-    { "op": "replace", "path": "/metadata/timestamp", "value": "2024-01-24T22:50:18+00:00" }
+  { "op": "replace", "path": "/version", "value": 2 },
+  { "op": "replace", "path": "/metadata/timestamp", "value": "2024-01-24T22:50:18+00:00" }
 ]
 ```
 
@@ -1380,6 +1422,8 @@ Invoke the patch command as follows:
 ./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-replace-version-timestamp.json -q
 ```
 
+The patched, output BOM has both an updated `version` and `timestamp`:
+
 ```json
 {
     "bomFormat": "CycloneDX",
@@ -1388,28 +1432,43 @@ Invoke the patch command as follows:
     "metadata": {
         "timestamp": "2024-01-24T22:50:18+00:00",
         "properties": [
-            {
-                "name": "Property 1",
-                "value": "Value 1"
-            },
-            {
-                "name": "Property 2",
-                "value": "Value 2"
-            }
-        ]
+          ...
     }
 }
 ```
 
-##### Patch example 6: "remove" `property` from `metadata.properties` array
+##### Patch example 6: "remove" `property` from the `metadata.properties` array
 
 This example shows how the patch's "remove" operation can be used to remove a `property` object from the `metadata.properties` array using an index.
+
+Original CycloneDX JSON BOM file: [test/patch/cdx-1-5-simplest-base.json](test/patch/cdx-1-5-simplest-base.json):
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2023-10-12T19:07:00Z",
+    "properties": [
+      {
+        "name": "Property 1",
+        "value": "Value 1"
+      },
+      {
+        "name": "Property 2",
+        "value": "Value 2"
+      }
+    ]
+  }
+}
+```
 
 Apply the following IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-remove-metadata-property.json](test/patch/cdx-patch-example-remove-metadata-property.json):
 
 ```json
 [
-    { "op": "remove", "path": "/metadata/properties/1" }
+  { "op": "remove", "path": "/metadata/properties/1" }
 ]
 ```
 
@@ -1418,6 +1477,8 @@ Invoke the patch command as follows:
 ```bash
 ./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-remove-metadata-property.json -q
 ```
+
+The `property` at index `1` of the `metadata.properties` array has been removed:
 
 ```json
 {
@@ -1432,6 +1493,91 @@ Invoke the patch command as follows:
                 "value": "Value 1"
             }
         ]
+    }
+}
+```
+
+##### Patch example 7: "test" `property` exists in the `metadata.properties` array
+
+This example shows how the patch records's can "test" for values or objects in a BOM.  The utility will confirm "success" (using an `[INFO]` log message); otherwise, the utility will exit and return an error and generate an `[ERROR]` log message.
+
+Original CycloneDX JSON BOM file: [test/patch/cdx-1-5-simplest-base.json](test/patch/cdx-1-5-simplest-base.json):
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2023-10-12T19:07:00Z",
+    "properties": [
+      {
+        "name": "Property 1",
+        "value": "Value 1"
+      },
+      {
+        "name": "Property 2",
+        "value": "Value 2"
+      }
+    ]
+  }
+}
+```
+
+Apply the following IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-test-metadata-property.json](test/patch/cdx-patch-example-test-metadata-property.json):
+
+```json
+[
+  { "op": "test", "path": "/metadata/properties/1", "value":
+    {
+      "name": "Property 2",
+      "value": "Value 2"
+    }
+  }
+]
+```
+
+Invoke the patch command as follows:
+
+```bash
+./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-test-metadata-property.json -q
+```
+
+An informational (i.e., `[INFO]`) message is logged with `success` since the property object was found in the input BOM:
+
+```json
+[INFO] IETF RFC6902 test operation success. test record: {
+    "op": "test",
+    "path": "/metadata/properties/1",
+    "value": {
+        "name": "Property 2",
+        "value": "Value 2"
+    }
+}
+```
+
+If instead, we [tested for a different property](test/patch/cdx-patch-example-test-metadata-property-err.json) object:
+
+```json
+[
+  { "op": "test", "path": "/metadata/properties/1", "value":
+    {
+      "name": "Property 3",
+      "value": "Value 3"
+    }
+  }
+]
+```
+
+an error (i.e., `[ERROR]`) would be returned from the utility:
+
+```json
+[ERROR] IETF RFC6902 test operation error. test record: {
+    "op": "test",
+    "path": "/metadata/properties/1",
+    "value": {
+        "name": "Property 3",
+        "value": "Value 3"
     }
 }
 ```

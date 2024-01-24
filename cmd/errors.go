@@ -43,7 +43,7 @@ const (
 	ERR_TYPE_SBOM_METADATA_PROPERTY   = "metadata property error"
 	ERR_TYPE_UNEXPECTED_ERROR         = "unexpected error"
 	ERR_TYPE_UNSUPPORTED_OPERATION    = "unsupported operation"
-	ERR_TYPE_IETF_RFC6902_TEST_FAILED = "IETF RFC6902 test operation error."
+	ERR_TYPE_IETF_RFC6902_TEST_FAILED = "IETF RFC6902 test operation error"
 )
 
 // Validation messages
@@ -56,7 +56,7 @@ const (
 	MSG_PROPERTY_NOT_FOUND                    = "property not found"
 	MSG_PROPERTY_NOT_UNIQUE                   = "check failed: property not unique"
 	MSG_PROPERTY_REGEX_FAILED                 = "check failed: property regex mismatch"
-	MSG_IETF_RFC6902_OPERATION_SUCCESS        = "IETF RFC6902 test operation success."
+	MSG_IETF_RFC6902_OPERATION_SUCCESS        = "IETF RFC6902 test operation success"
 )
 
 // License messages

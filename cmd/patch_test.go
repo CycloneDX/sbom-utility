@@ -55,14 +55,16 @@ const (
 	TEST_PATCH_BOM_1_5_MATURE_BASE   = "test/patch/cdx-1-5-mature-base.json"
 
 	// BOM "patch" files
-	TEST_PATCH_EXAMPLE_ADD_ROOT_SERIAL_NUMBER    = "test/patch/cdx-patch-example-add-serial-number.json"
-	TEST_PATCH_EXAMPLE_UPDATE_ROOT_VERSION       = "test/patch/cdx-patch-example-add-update-version.json"
-	TEST_PATCH_EXAMPLE_REPLACE_ROOT_VERSION      = "test/patch/cdx-patch-example-replace-version.json"
-	TEST_PATCH_EXAMPLE_ADD_ROOT_EXT_REF          = "test/patch/cdx-patch-example-add-external-reference.json"
-	TEST_PATCH_EXAMPLE_ADD_METADATA_PROPS        = "test/patch/cdx-patch-example-add-metadata-properties.json"
-	TEST_PATCH_EXAMPLE_ADD_METADATA_SUPPLIER     = "test/patch/cdx-patch-example-add-metadata-supplier.json"
-	TEST_PATCH_EXAMPLE_REPLACE_VERSION_TIMESTAMP = "test/patch/cdx-patch-example-replace-version-timestamp.json"
-	TEST_PATCH_EXAMPLE_REMOVE_METADATA_PROPERTY  = "test/patch/cdx-patch-example-remove-metadata-property.json"
+	TEST_PATCH_EXAMPLE_ADD_ROOT_SERIAL_NUMBER     = "test/patch/cdx-patch-example-add-serial-number.json"
+	TEST_PATCH_EXAMPLE_UPDATE_ROOT_VERSION        = "test/patch/cdx-patch-example-add-update-version.json"
+	TEST_PATCH_EXAMPLE_REPLACE_ROOT_VERSION       = "test/patch/cdx-patch-example-replace-version.json"
+	TEST_PATCH_EXAMPLE_ADD_ROOT_EXT_REF           = "test/patch/cdx-patch-example-add-external-reference.json"
+	TEST_PATCH_EXAMPLE_ADD_METADATA_PROPS         = "test/patch/cdx-patch-example-add-metadata-properties.json"
+	TEST_PATCH_EXAMPLE_ADD_METADATA_SUPPLIER      = "test/patch/cdx-patch-example-add-metadata-supplier.json"
+	TEST_PATCH_EXAMPLE_REPLACE_VERSION_TIMESTAMP  = "test/patch/cdx-patch-example-replace-version-timestamp.json"
+	TEST_PATCH_EXAMPLE_REMOVE_METADATA_PROPERTY   = "test/patch/cdx-patch-example-remove-metadata-property.json"
+	TEST_PATCH_EXAMPLE_TEST_METADATA_PROPERTY     = "test/patch/cdx-patch-example-test-metadata-property.json"
+	TEST_PATCH_EXAMPLE_TEST_METADATA_PROPERTY_ERR = "test/patch/cdx-patch-example-test-metadata-property-err.json"
 )
 
 const (
@@ -921,4 +923,26 @@ func TestPatchCdx15Example6RemoveMetadataProperty(t *testing.T) {
 	// if err != nil {
 	// 	t.Error(err)
 	// }
+}
+
+func TestPatchCdx15Example7TestMetadataProperty(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLEST_BASE, TEST_PATCH_EXAMPLE_TEST_METADATA_PROPERTY, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLEST_BASE)
+	_, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	// err = VerifyPatchedOutputFileResult(t, *ti)
+	// if err != nil {
+	// 	t.Error(err)
+	// }
+}
+
+func TestPatchCdx15Example7TestMetadataPropertyErr(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLEST_BASE, TEST_PATCH_EXAMPLE_TEST_METADATA_PROPERTY_ERR, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLEST_BASE)
+	_, _, err := innerTestPatch(t, ti)
+	if err == nil {
+		t.Error(err)
+	}
 }
