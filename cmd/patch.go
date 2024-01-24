@@ -581,11 +581,11 @@ func addOrReplaceValue(parentMap map[string]interface{}, keys []string, value in
 			// if the next node is a map AND only 1 path remains after it,
 			// it would mean that last path is a new key to be added
 			// to the next node's map with the provided value
-			if _, exists := typedNode[keys[0]]; !exists && replace {
+			currentKey := keys[lengthKeys-1]
+			if _, exists := typedNode[currentKey]; !exists && replace {
 				err = fmt.Errorf(ERR_PATCH_REPLACE_PATH_EXISTS)
 				return
 			}
-			currentKey := keys[lengthKeys-1]
 			typedNode[currentKey] = value
 		}
 	case []interface{}:

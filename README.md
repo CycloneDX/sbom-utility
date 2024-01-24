@@ -1159,6 +1159,7 @@ This section contains examples of all supported patch operations (i.e., add, rep
 - ["add" (update) BOM `version`](#patch-example-2-add-update-bom-version)
 - ["add" `supplier` object to `metadata`](#patch-example-3-add-supplier-object-to-metadata-object)
 - ["add" `property` objects to `metadata.properties` array](#patch-example-4-add-property-objects-to-metadataproperties-array)
+- ["replace" `version` and `timestamp` values](#patch-example-5-replace-bom-version-and-timestamp)
 
 ##### Patch example 1: "add" BOM `serialNumber`
 
@@ -1355,7 +1356,46 @@ Invoke the patch command as follows:
         ]
     }
 }
+```
 
+##### Patch example 5: "replace" BOM `version` and `timestamp`
+
+This example shows how the patch's "replace" operation can be used to update the BOM document's `version` and `timestamp` valuea.
+
+Apply the following IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-replace-version-timestamp.json](test/patch/cdx-patch-example-replace-version-timestamp.json):
+
+```json
+[
+    { "op": "replace", "path": "/version", "value": 2 },
+    { "op": "replace", "path": "/metadata/timestamp", "value": "2024-01-24T22:50:18+00:00" }
+]
+```
+
+Invoke the patch command as follows:
+
+```bash
+./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-replace-version-timestamp.json -q
+```
+
+```json
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "version": 2,
+    "metadata": {
+        "timestamp": "2024-01-24T22:50:18+00:00",
+        "properties": [
+            {
+                "name": "Property 1",
+                "value": "Value 1"
+            },
+            {
+                "name": "Property 2",
+                "value": "Value 2"
+            }
+        ]
+    }
+}
 ```
 
 ---
