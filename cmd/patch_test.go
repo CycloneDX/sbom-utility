@@ -336,16 +336,28 @@ func VerifyPatched(record IETF6902Record, pResult interface{}, key string) (err 
 					return
 				}
 			}
-		case bool:
-			if record.Value != typedResult {
-				err = getLogger().Errorf("verify failed. Document value (%v) does not contain expected value (%v).", typedResult, record.Value)
-				return
+		case string:
+			if record.Operation == IETF_RFC6902_OP_ADD {
+				if record.Value != typedResult {
+					err = getLogger().Errorf("verify failed. Document value (%v) does not contain expected value (%v).", typedResult, record.Value)
+					return
+				}
 			}
 			return
 		case float64: // NOTE: encoding/json turns int64 to float64
-			if record.Value != typedResult {
-				err = getLogger().Errorf("verify failed. Document value (%v) does not contain expected value (%v).", typedResult, record.Value)
-				return
+			if record.Operation == IETF_RFC6902_OP_ADD {
+				if record.Value != typedResult {
+					err = getLogger().Errorf("verify failed. Document value (%v) does not contain expected value (%v).", typedResult, record.Value)
+					return
+				}
+			}
+			return
+		case bool:
+			if record.Operation == IETF_RFC6902_OP_ADD {
+				if record.Value != typedResult {
+					err = getLogger().Errorf("verify failed. Document value (%v) does not contain expected value (%v).", typedResult, record.Value)
+					return
+				}
 			}
 			return
 		default:
@@ -379,17 +391,11 @@ func sliceContainsValue(slice []interface{}, value interface{}) (contains bool, 
 		}
 		return
 	case []interface{}:
-		var tempValue []interface{}
-		for _, entry := range slice {
-			if tempValue, ok := entry.([]interface{}); !ok {
-				err = fmt.Errorf("type mismatch error. Slice values: %v (%T), value: %v (%T)", entry, entry, tempValue, tempValue)
-				return
-			}
-			if reflect.DeepEqual(tempValue, typedValue) {
-				contains = true
-				return
-			}
+		if reflect.DeepEqual(slice, typedValue) {
+			contains = true
+			return
 		}
+		return
 	case string: // TODO
 		// NOTE: "slices.Contains()" does not work on []interface{}
 		return
@@ -794,11 +800,10 @@ func TestPatchCdx15AddPropertiesMixed(t *testing.T) {
 func TestPatchCdx15SliceAdd(t *testing.T) {
 	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SLICE_BASE, TEST_PATCH_BOM_ADD_SLICE_1, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SLICE_BASE)
-	buffer, _, err := innerTestPatch(t, ti)
+	_, _, err := innerTestPatch(t, ti)
 	if err != nil {
 		t.Error(err)
 	}
-	getLogger().Tracef("%s\n", buffer.String())
 	// TODO: verify results
 }
 
@@ -806,11 +811,10 @@ func TestPatchCdx15SliceAdd(t *testing.T) {
 func TestPatchCdx15SliceAddUpdateVersionInteger(t *testing.T) {
 	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SLICE_BASE, TEST_PATCH_BOM_ADD_ROOT_UPDATE_VERSION, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SLICE_BASE)
-	buffer, _, err := innerTestPatch(t, ti)
+	_, _, err := innerTestPatch(t, ti)
 	if err != nil {
 		t.Error(err)
 	}
-	getLogger().Tracef("%s\n", buffer.String())
 	// verify JSON document has applied all patch records
 	err = VerifyPatchedOutputFileResult(t, *ti)
 	if err != nil {
@@ -822,22 +826,67 @@ func TestPatchCdx15SliceAddUpdateVersionInteger(t *testing.T) {
 // README Examples
 // ----------------
 
+func TestPatchCdx15Example1AddBOMSerialNumber(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLEST_BASE, TEST_PATCH_EXAMPLE_ADD_ROOT_SERIAL_NUMBER, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLEST_BASE)
+	_, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	err = VerifyPatchedOutputFileResult(t, *ti)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestPatchCdx15Example2AddUpdateBOMVersion(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLEST_BASE, TEST_PATCH_EXAMPLE_UPDATE_ROOT_VERSION, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLEST_BASE)
+	_, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	err = VerifyPatchedOutputFileResult(t, *ti)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestPatchCdx15Example3AddMetadataSupplier(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLEST_BASE, TEST_PATCH_EXAMPLE_ADD_METADATA_SUPPLIER, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLEST_BASE)
+	_, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	err = VerifyPatchedOutputFileResult(t, *ti)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestPatchCdx15Example4AddMetadataProperties(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLEST_BASE, TEST_PATCH_EXAMPLE_ADD_METADATA_PROPS, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLEST_BASE)
+	_, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	err = VerifyPatchedOutputFileResult(t, *ti)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 func TestPatchCdx15ExampleAddExternalReference(t *testing.T) {
 	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLEST_BASE, TEST_PATCH_EXAMPLE_ADD_ROOT_EXT_REF, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLEST_BASE)
-	buffer, _, err := innerTestPatch(t, ti)
+	_, _, err := innerTestPatch(t, ti)
 	if err != nil {
 		t.Error(err)
 	}
-	getLogger().Tracef("%s\n", buffer.String())
-}
-
-func TestPatchCdx15ExampleAddMetadataSupplier(t *testing.T) {
-	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLEST_BASE, TEST_PATCH_EXAMPLE_ADD_METADATA_SUPPLIER, nil)
-	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLEST_BASE)
-	buffer, _, err := innerTestPatch(t, ti)
+	err = VerifyPatchedOutputFileResult(t, *ti)
 	if err != nil {
 		t.Error(err)
 	}
-	getLogger().Tracef("%s\n", buffer.String())
 }
