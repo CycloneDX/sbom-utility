@@ -214,7 +214,8 @@ This flag supplies an integer to any command that encodes JSON output to determi
 ```
 
 output with `indent 2`:
-```
+
+```json
 {
   "name": "juice-shop",
   "version": "11.1.2"
@@ -226,7 +227,8 @@ output with `indent 2`:
 ```
 
 output with `indent 6`:
-```
+
+```json
 {
       "name": "juice-shop",
       "version": "11.1.2"
@@ -525,7 +527,7 @@ allow         Artistic  Artistic-1.0  Artistic License 1.0                true  
 
 ###### Example: policy with `--summary` flag
 
-We can also apply the `--summary` flag to get a reduced set of columns that includes only the `usage-policy` along with the essential SDPX license information (e.g., no annotations or notes).
+We can also apply the `--summary` flag to get a reduced set of columns that includes only the `usage-policy` along with the essential SPDX license information (e.g., no annotations or notes).
 
 ```bash
 ./sbom-utility license policy --summary --quiet
@@ -1160,6 +1162,7 @@ This section contains examples of all supported patch operations (i.e., add, rep
 - ["add" `supplier` object to `metadata`](#patch-example-3-add-supplier-object-to-metadata-object)
 - ["add" `property` objects to `metadata.properties` array](#patch-example-4-add-property-objects-to-metadataproperties-array)
 - ["replace" `version` and `timestamp` values](#patch-example-5-replace-bom-version-and-timestamp)
+- ["remove" `property` from `metadata.properties` array](#patch-example-6-remove-property-from-metadataproperties-array)
 
 ##### Patch example 1: "add" BOM `serialNumber`
 
@@ -1360,7 +1363,7 @@ Invoke the patch command as follows:
 
 ##### Patch example 5: "replace" BOM `version` and `timestamp`
 
-This example shows how the patch's "replace" operation can be used to update the BOM document's `version` and `timestamp` valuea.
+This example shows how the patch's "replace" operation can be used to update the BOM document's `version` and `timestamp` values.
 
 Apply the following IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-replace-version-timestamp.json](test/patch/cdx-patch-example-replace-version-timestamp.json):
 
@@ -1392,6 +1395,41 @@ Invoke the patch command as follows:
             {
                 "name": "Property 2",
                 "value": "Value 2"
+            }
+        ]
+    }
+}
+```
+
+##### Patch example 6: "remove" `property` from `metadata.properties` array
+
+This example shows how the patch's "remove" operation can be used to remove a `property` object from the `metadata.properties` array using an index.
+
+Apply the following IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-remove-metadata-property.json](test/patch/cdx-patch-example-remove-metadata-property.json):
+
+```json
+[
+    { "op": "remove", "path": "/metadata/properties/1" }
+]
+```
+
+Invoke the patch command as follows:
+
+```bash
+./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-remove-metadata-property.json -q
+```
+
+```json
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "version": 1,
+    "metadata": {
+        "timestamp": "2023-10-12T19:07:00Z",
+        "properties": [
+            {
+                "name": "Property 1",
+                "value": "Value 1"
             }
         ]
     }
