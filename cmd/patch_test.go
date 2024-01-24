@@ -78,14 +78,14 @@ const (
 	TEST_PATCH_RFC_6902_APPX_A_4_PATCH_REMOVE_ARRAY_1      = "test/patch/rfc6902/rfc6902-appendix-a-4-patch-remove-array-1.json"
 	TEST_PATCH_RFC_6902_APPX_A_5_PATCH_REPLACE_1           = "test/patch/rfc6902/rfc6902-appendix-a-5-patch-replace-1.json"
 	TEST_PATCH_RFC_6902_APPX_A_5_PATCH_REPLACE_2_ERR       = "test/patch/rfc6902/rfc6902-appendix-a-5-patch-replace-err.json"
+	TEST_PATCH_RFC_6902_APPX_A_8_PATCH_1                   = "test/patch/rfc6902/rfc6902-appendix-a-8-patch-1.json"
+	TEST_PATCH_RFC_6902_APPX_A_9_PATCH_1                   = "test/patch/rfc6902/rfc6902-appendix-a-9-patch-1.json"
 	TEST_PATCH_RFC_6902_APPX_A_10_PATCH_ADD_NESTED_1       = "test/patch/rfc6902/rfc6902-appendix-a-10-patch-add-nested-1.json"
 	TEST_PATCH_RFC_6902_APPX_A_16_PATCH_ADD_ARRAY_1        = "test/patch/rfc6902/rfc6902-appendix-a-16-patch-add-array-1.json"
 
 	// NOTE: Currently unsupported patch operations (i.e., should return consistent error)
 	TEST_PATCH_RFC_6902_APPX_A_6_PATCH_1 = "test/patch/rfc6902/rfc6902-appendix-a-6-patch-1.json"
 	TEST_PATCH_RFC_6902_APPX_A_7_PATCH_1 = "test/patch/rfc6902/rfc6902-appendix-a-7-patch-1.json"
-	TEST_PATCH_RFC_6902_APPX_A_8_PATCH_1 = "test/patch/rfc6902/rfc6902-appendix-a-8-patch-1.json"
-	TEST_PATCH_RFC_6902_APPX_A_9_PATCH_1 = "test/patch/rfc6902/rfc6902-appendix-a-9-patch-1.json"
 
 	// CycloneDX BOM "patch" files
 	TEST_PATCH_BOM_ADD_SLICE_1 = "test/patch/cdx-patch-add-slice-1.json"
@@ -436,12 +436,25 @@ func TestPatchOpErrorPathEmpty(t *testing.T) {
 // RFC6902 Unsupported operation tests
 // -------------------------------------
 
+func TestPatchRFC6902AppendixA6Patch1(t *testing.T) {
+	ti := NewPatchTestInfo(
+		TEST_PATCH_RFC_6902_APPX_A_6_BASE,
+		TEST_PATCH_RFC_6902_APPX_A_6_PATCH_1, nil)
+	ti.IsInputJSON = true
+	_, _, err := innerTestPatch(t, ti)
+	// NOTE: "move" operation not currently supported
+	if !ErrorTypesMatch(err, &UnsupportedError{}) {
+		t.Error(err)
+	}
+}
+
 func TestPatchRFC6902AppendixA7Patch1(t *testing.T) {
 	ti := NewPatchTestInfo(
 		TEST_PATCH_RFC_6902_APPX_A_7_BASE,
 		TEST_PATCH_RFC_6902_APPX_A_7_PATCH_1, nil)
 	ti.IsInputJSON = true
 	_, _, err := innerTestPatch(t, ti)
+	// NOTE: "copy" operation not currently supported
 	if !ErrorTypesMatch(err, &UnsupportedError{}) {
 		t.Error(err)
 	}
@@ -668,17 +681,6 @@ func TestPatchRFC6902AppendixA5Patch2ReplaceErr(t *testing.T) {
 	}
 }
 
-func TestPatchRFC6902AppendixA6Patch1(t *testing.T) {
-	ti := NewPatchTestInfo(
-		TEST_PATCH_RFC_6902_APPX_A_6_BASE,
-		TEST_PATCH_RFC_6902_APPX_A_6_PATCH_1, nil)
-	ti.IsInputJSON = true
-	_, _, err := innerTestPatch(t, ti)
-	if !ErrorTypesMatch(err, &UnsupportedError{}) {
-		t.Error(err)
-	}
-}
-
 func TestPatchRFC6902AppendixA8Patch1Test(t *testing.T) {
 	ti := NewPatchTestInfo(
 		TEST_PATCH_RFC_6902_APPX_A_8_BASE,
@@ -688,6 +690,7 @@ func TestPatchRFC6902AppendixA8Patch1Test(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	// NOTE: The "test" operation should not alter the output
 }
 
 func TestPatchRFC6902AppendixA9Patch1TestErr(t *testing.T) {
@@ -750,6 +753,7 @@ func TestPatchCdx15InvalidAddRootModified(t *testing.T) {
 	// NOTE: patch record: { "op": "add", "path": "/modified", "value": true }
 	// will NOT be written to the output BOM as "modified" is not a CycloneDX key
 	getLogger().Tracef("%s\n", buffer.String())
+	// TODO: verify output BOM does not have a "modified" key
 }
 
 func TestPatchCdx15AddPropertiesAtEnd(t *testing.T) {
