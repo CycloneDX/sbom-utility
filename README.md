@@ -1153,9 +1153,14 @@ The `--patch-file <filename>` flag is used to provide the relative path to the I
 
 #### Patch examples
 
-The original BOM used for these examples can be found here:
+This section contains examples of all supported patch operations (i.e., add, replace, test) including values that are primitives (i.e., `numbers`, `strings`) as well as JSON `objects` and may be indexed JSON `array` elements.
 
-##### Example: Patch "add" `serialNumber`
+- ["add" BOM `serialNumber`](#patch-example-1-add-bom-serialnumber)
+- ["add" (update) BOM `version`](#patch-example-2-add-update-bom-version)
+- ["add" `supplier` object to `metadata`](#patch-example-3-add-supplier-object-to-metadata-object)
+- ["add" `property` objects to `metadata.properties` array](#patch-example-4-add-property-objects-to-metadataproperties-array)
+
+##### Patch example 1: "add" BOM `serialNumber`
 
 This example adds a new top-level key `"serialNumber"` and corresponding value to a CycloneDX JSON BOM file.
 
@@ -1200,7 +1205,7 @@ Patched JSON BOM output file:
 }
 ```
 
-##### Example 2: Patch "add" `version` value
+##### Patch example 2: "add" (update) BOM `version`
 
 This example shows how the patch's "add" operation can be used to update existing values which is the specified behavior of RFC6902.
 
@@ -1244,7 +1249,7 @@ Patched JSON BOM output file which has changed the `version` value from `1` to `
 }
 ```
 
-##### Example 3: Patch "add" `supplier` object to `metadata` object
+##### Patch example 3: "add" `supplier` object to `metadata` object
 
 This example shows how the patch's "add" operation can be used to add a JSON object to an existing object.
 
@@ -1304,7 +1309,7 @@ Invoke the patch command as follows:
 }
 ```
 
-##### Example 4: Patch "add" `property` objects to `metadata.properties` array
+##### Patch example 4: "add" `property` objects to `metadata.properties` array
 
 This example shows how the patch's "add" operation can be used to add `property` objects to an existing `properties` array.
 
