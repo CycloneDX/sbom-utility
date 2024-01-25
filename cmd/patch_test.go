@@ -812,7 +812,11 @@ func TestPatchCdx15SliceAdd(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	// TODO: verify results
+	// verify JSON document has applied all patch records
+	err = VerifyPatchedOutputFileResult(t, *ti)
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 // Note: the encoding/json package turns all integers (i.e., int64) to float64
@@ -906,10 +910,10 @@ func TestPatchCdx15Example5ReplaceMetadataTimestamp(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	// err = VerifyPatchedOutputFileResult(t, *ti)
-	// if err != nil {
-	// 	t.Error(err)
-	// }
+	err = VerifyPatchedOutputFileResult(t, *ti)
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestPatchCdx15Example6RemoveMetadataProperty(t *testing.T) {

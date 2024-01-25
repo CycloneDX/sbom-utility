@@ -96,7 +96,9 @@ func initCommandPatchFlags(command *cobra.Command) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	command.PersistentFlags().StringVar(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_OUTPUT_FORMAT, FORMAT_JSON,
+	// NOTE: Cobra commands that use the same variable with different "default" values (i.e., "txt", "json")
+	// will overwrite each other during initialization... we must use a unique variable for each command/conflict
+	command.PersistentFlags().StringVar(&utils.GlobalFlags.PatchFlags.OutputFormat, FLAG_OUTPUT_FORMAT, FORMAT_JSON,
 		MSG_FLAG_OUTPUT_FORMAT+PATCH_OUTPUT_SUPPORTED_FORMATS)
 	command.Flags().StringVarP(&utils.GlobalFlags.PatchFlags.PatchFile, FLAG_PATCH_FILE, "", "", MSG_PATCH_FILE)
 	err = command.MarkFlagRequired(FLAG_PATCH_FILE)
@@ -110,10 +112,17 @@ func patchCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	getLogger().Enter(args)
 	defer getLogger().Exit()
 
+	// // TODO: remove
+	// buffer, _ := utils.EncodeAnyToDefaultIndentedJSONStr(utils.GlobalFlags.PatchFlags)
+	// fmt.Printf("[B] utils.GlobalFlags.PatchFlags:\n%s", buffer.String())
+
 	// Create output writer
 	outputFilename := utils.GlobalFlags.PersistentFlags.OutputFile
 	outputFile, writer, err := createOutputFile(outputFilename)
 	getLogger().Tracef("outputFile: `%v`; writer: `%v`", outputFilename, writer)
+
+	// Overcome Cobra limitation in variable reuse between diff. commands
+	utils.GlobalFlags.PersistentFlags.OutputFormat = utils.GlobalFlags.PatchFlags.OutputFormat
 
 	// use function closure to assure consistent error output based upon error type
 	defer func() {
