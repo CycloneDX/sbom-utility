@@ -1129,7 +1129,7 @@ Output BOM results with `properties` removed from all `components`:
 
 ### Patch
 
-This command is able to "patch" an existing JSON BOM document using an [IETF RFC6902](https://datatracker.ietf.org/doc/html/rfc6902/#section-4.1) "JavaScript Object Notation (JSON) Patch" file.
+This command is able to "patch" an existing JSON BOM document using an [IETF RFC6902](https://datatracker.ietf.org/doc/html/rfc6902/#section-4.1) *"JavaScript Object Notation (JSON) Patch"* file.
 
 The current implementation supports the following "patch" operations:
 
@@ -1241,7 +1241,7 @@ Invoke the patch command as follows:
 ./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-add-update-version.json  -q
 ```
 
-Patched JSON BOM output file which has changed the `version` value from `1` to `2`:
+The patched, output JSON BOM file which has the changed `version` value of `2`:
 
 ```json
 {
@@ -1352,11 +1352,15 @@ Apply the following IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-
 ]
 ```
 
+Note that the first patch record uses the `-` (dash) to indicate "insert at end" whereas the second patch record has the zero-based array index `1`.
+
 Invoke the patch command as follows:
 
 ```bash
 ./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-add-metadata-properties.json -q
 ```
+
+The patched, output BOM has the two new properties at the specified indices:
 
 ```json
 {
