@@ -34,14 +34,16 @@ const (
 
 // General error messages
 const (
-	ERR_TYPE_INVALID_JSON_MAP       = "invalid JSON map"
-	ERR_TYPE_INVALID_SBOM           = "invalid SBOM"
-	ERR_TYPE_SBOM_COMPONENT         = "component error"
-	ERR_TYPE_SBOM_LICENSE           = "license error"
-	ERR_TYPE_SBOM_COMPOSITION       = "composition error"
-	ERR_TYPE_SBOM_METADATA          = "metadata error"
-	ERR_TYPE_SBOM_METADATA_PROPERTY = "metadata property error"
-	ERR_TYPE_UNEXPECTED_ERROR       = "unexpected error"
+	ERR_TYPE_INVALID_JSON_MAP         = "invalid JSON map"
+	ERR_TYPE_INVALID_SBOM             = "invalid SBOM"
+	ERR_TYPE_SBOM_COMPONENT           = "component error"
+	ERR_TYPE_SBOM_LICENSE             = "license error"
+	ERR_TYPE_SBOM_COMPOSITION         = "composition error"
+	ERR_TYPE_SBOM_METADATA            = "metadata error"
+	ERR_TYPE_SBOM_METADATA_PROPERTY   = "metadata property error"
+	ERR_TYPE_UNEXPECTED_ERROR         = "unexpected error"
+	ERR_TYPE_UNSUPPORTED_OPERATION    = "unsupported operation"
+	ERR_TYPE_IETF_RFC6902_TEST_FAILED = "IETF RFC6902 test operation error"
 )
 
 // Validation messages
@@ -54,6 +56,7 @@ const (
 	MSG_PROPERTY_NOT_FOUND                    = "property not found"
 	MSG_PROPERTY_NOT_UNIQUE                   = "check failed: property not unique"
 	MSG_PROPERTY_REGEX_FAILED                 = "check failed: property regex mismatch"
+	MSG_IETF_RFC6902_OPERATION_SUCCESS        = "IETF RFC6902 test operation success"
 )
 
 // License messages
@@ -61,14 +64,6 @@ const (
 	MSG_LICENSE_INVALID_DATA   = "invalid license data"
 	MSG_LICENSE_INVALID_POLICY = "invalid license policy"
 	MSG_LICENSES_NOT_FOUND     = "licenses not found"
-)
-
-// Query error messages
-const (
-	MSG_QUERY_CLAUSE_NOT_FOUND = "required clause not found"
-	MSG_QUERY_INVALID_REQUEST  = "invalid query request"
-	MSG_QUERY_INVALID_RESPONSE = "invalid query response"
-	MSG_QUERY_INVALID_DATATYPE = "invalid data type"
 )
 
 // Query error details
@@ -112,17 +107,46 @@ func (err *BaseError) AppendMessage(addendum string) {
 	}
 }
 
-type UtilityError struct {
+// NOTE: use for unsupported features/subfunctions etc.
+// Used primarily for "patch" operation implementations currently
+type UnsupportedError struct {
 	BaseError
+	Operation string
 }
 
-func NewUtilityError(t string, m string, f string, errIn error) *UtilityError {
-	var err = new(UtilityError)
-	err.Type = t
+func NewUnsupportedError(op string, m string) *UnsupportedError {
+	var err = new(UnsupportedError)
+	err.Type = ERR_TYPE_UNSUPPORTED_OPERATION
+	err.Operation = op
 	err.Message = m
-	err.InputFile = f
-	err.InnerError = errIn
 	return err
+}
+
+func (err UnsupportedError) Error() string {
+	formattedMessage := fmt.Sprintf("%s (%s). %s", err.Type, err.Operation, err.Message)
+	return formattedMessage
+}
+
+// IETF RFC6902 "Test" error
+type IETFRFC6902TestError struct {
+	BaseError
+	Operation string
+	Record    string
+	Value     interface{}
+}
+
+func NewIETFRFC6902TestError(record string, value interface{}) *IETFRFC6902TestError {
+	var err = new(IETFRFC6902TestError)
+	err.Type = ERR_TYPE_IETF_RFC6902_TEST_FAILED
+	err.Record = record
+	err.Value = value
+	err.Message = fmt.Sprintf("test record: %s, actual value: %v", err.Record, err.Value)
+	return err
+}
+
+func (err IETFRFC6902TestError) Error() string {
+	formattedMessage := fmt.Sprintf("%s. %s", err.Type, err.Message)
+	return formattedMessage
 }
 
 // ------------------------------------------------

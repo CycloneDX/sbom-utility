@@ -1,0 +1,3 @@
+[
+  { "op": "replace", "path": "/bar", "value": "error" }
+]

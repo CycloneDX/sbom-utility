@@ -325,14 +325,8 @@ func TestQueryFailCdx14MetadataComponentInvalidDataType(t *testing.T) {
 	request, _ := common.NewQueryRequestSelectFrom(
 		common.QUERY_TOKEN_WILDCARD,
 		"metadata.component.name")
-	expectedErrorStrings := []string{
-		common.MSG_QUERY_INVALID_FROM_CLAUSE,
-		MSG_QUERY_INVALID_DATATYPE,
-	}
-	// Expect a QueryError
-	_, err := innerQueryError(t, cti, request, &common.QueryError{})
-	// Assure we received an error with the expected key phrases
-	EvaluateErrorAndKeyPhrases(t, err, expectedErrorStrings)
+	// Expect a QueryResultInvalidTypeError
+	innerQueryError(t, cti, request, &common.QueryResultInvalidTypeError{})
 }
 
 func TestQueryFailCdx14MetadataComponentInvalidSelectClause(t *testing.T) {

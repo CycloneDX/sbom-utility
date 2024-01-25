@@ -1,0 +1,3 @@
+[
+  { "op": "test", "path": "/baz", "value": "bar" }
+]

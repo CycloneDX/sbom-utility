@@ -1,0 +1,4 @@
+[
+    { "op": "replace", "path": "/version", "value": 2 },
+    { "op": "replace", "path": "/metadata/timestamp", "value": "2024-01-24T22:50:18+00:00" }
+]

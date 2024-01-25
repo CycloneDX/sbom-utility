@@ -31,14 +31,25 @@ const (
 	MSG_QUERY_INVALID_SELECT_CLAUSE   = "invalid SELECT clause"
 	MSG_QUERY_INVALID_WHERE_CLAUSE    = "invalid WHERE clause"
 	MSG_QUERY_INVALID_ORDER_BY_CLAUSE = "invalid ORDERBY clause"
+	MSG_QUERY_INVALID_REQUEST         = "invalid query request"
+	MSG_QUERY_INVALID_RESPONSE        = "invalid query response"
+	MSG_QUERY_INVALID_DATATYPE        = "invalid result data type"
+)
+
+// Query error formatting
+const (
+	ERR_FORMAT_DETAIL_SEP = ": "
 )
 
 type QueryError struct {
-	//TODO: use BaseError type for its common fields
 	Type    string
 	Message string
 	request *QueryRequest
 	detail  string
+}
+
+type QueryResultInvalidTypeError struct {
+	QueryError
 }
 
 func NewQueryError(qr *QueryRequest, m string, d string) *QueryError {
@@ -50,8 +61,22 @@ func NewQueryError(qr *QueryRequest, m string, d string) *QueryError {
 	return err
 }
 
+func NewQueryResultInvalidTypeError(qr *QueryRequest, value interface{}) (err *QueryResultInvalidTypeError) {
+	err = new(QueryResultInvalidTypeError)
+	err.Type = ERR_TYPE_INVALID_QUERY
+	err.request = qr
+	err.Message = MSG_QUERY_INVALID_DATATYPE
+	err.detail = fmt.Sprintf("value: %v (%T)", value, value)
+	return err
+}
+
 func NewQueryFromClauseError(qr *QueryRequest, detail string) *QueryError {
 	var err = NewQueryError(qr, MSG_QUERY_INVALID_FROM_CLAUSE, detail)
+	return err
+}
+
+func NewQueryFromUnexpectedTypeError(qr *QueryRequest, detail string) *QueryError {
+	var err = NewQueryError(qr, MSG_QUERY_INVALID_FROM_CLAUSE, MSG_QUERY_INVALID_DATATYPE)
 	return err
 }
 
@@ -71,8 +96,7 @@ func (err QueryError) Error() string {
 	var detail string
 	if err.detail != "" {
 		// TODO: use ERR_FORMAT_DETAIL_SEP instead of hardcoded one
-		//detail = fmt.Sprintf("%s%s", ERR_FORMAT_DETAIL_SEP, err.detail)
-		detail = fmt.Sprintf("%s%s", ": ", err.detail)
+		detail = fmt.Sprintf("%s%s", ERR_FORMAT_DETAIL_SEP, err.detail)
 	}
 	formattedMessage := fmt.Sprintf("%s: %s%s", err.Type, err.Message, detail)
 

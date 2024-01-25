@@ -1,0 +1,9 @@
+{
+  "foo": {
+    "bar": "baz",
+    "waldo": "fred"
+  },
+  "qux": {
+    "corge": "grault"
+  }
+}

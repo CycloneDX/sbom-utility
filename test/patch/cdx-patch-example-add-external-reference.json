@@ -1,0 +1,10 @@
+[
+    { "op": "add", "path": "/externalReferences", "value": [
+            {
+            "url": "support@example.com",
+            "comment": "Support for questions about SBOM contents",
+            "type": "support"
+            }
+        ]
+    }
+]

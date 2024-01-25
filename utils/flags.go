@@ -119,7 +119,8 @@ type TrimCommandFlags struct {
 }
 
 type PatchCommandFlags struct {
-	PatchFile string
+	PatchFile    string
+	OutputFormat string // NOTE: needed to overcome Cobra limitation when diff. commands have diff. default values
 }
 
 type CustomValidationFlags struct {

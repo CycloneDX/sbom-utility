@@ -1,0 +1,8 @@
+[
+  { "op": "test", "path": "/metadata/properties/1", "value":
+    {
+      "name": "Property 3",
+      "value": "Value 3"
+    }
+  }
+]

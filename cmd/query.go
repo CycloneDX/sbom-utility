@@ -194,12 +194,12 @@ func Query(writer io.Writer, request *common.QueryRequest, response *common.Quer
 
 	// Validate we have query request/response structs
 	if request == nil {
-		err = fmt.Errorf(MSG_QUERY_INVALID_REQUEST)
+		err = fmt.Errorf(common.MSG_QUERY_INVALID_REQUEST)
 		return
 	}
 
 	if response == nil {
-		err = fmt.Errorf(MSG_QUERY_INVALID_RESPONSE)
+		err = fmt.Errorf(common.MSG_QUERY_INVALID_RESPONSE)
 		return
 	}
 
@@ -234,10 +234,10 @@ func QueryJSONMap(jsonMap map[string]interface{}, request *common.QueryRequest) 
 
 	// SELECT specific fields from the FROM object(s)
 	// logic varies depending on data type of FROM object (i.e., map or slice)
-	switch t := resultJson.(type) {
+	switch typedResult := resultJson.(type) {
 	case map[string]interface{}:
-		// TODO: return this (map) output instead of the one from the "find" stage
-		resultJson, err = selectFieldsFromMap(request, resultJson.(map[string]interface{}))
+		// use this (map) output instead of the one from the "find" stage
+		resultJson, err = selectFieldsFromMap(request, typedResult)
 		if err != nil {
 			getLogger().Debugf("selectFieldsFromMap() failed. QueryRequest: %s", request.String())
 			return
@@ -258,9 +258,10 @@ func QueryJSONMap(jsonMap map[string]interface{}, request *common.QueryRequest) 
 			return
 		}
 	default:
-		// NOTE: this SHOULD never be invoked as the FROM logic should have caught this already
-		err = common.NewQueryFromClauseError(request,
-			fmt.Sprintf("%s: %T", MSG_QUERY_INVALID_DATATYPE, t))
+		// NOTE: this SHOULD never be reached from the "query" command
+		// as the FROM should always reference a map or []interface{}
+		// which is required for JSON output results.
+		err = common.NewQueryResultInvalidTypeError(request, typedResult)
 		return
 	}
 
@@ -293,11 +294,11 @@ func findFromObject(request *common.QueryRequest, jsonMap map[string]interface{}
 			return
 		}
 
-		switch t := pResults.(type) {
+		switch typedResult := pResults.(type) {
 		case map[string]interface{}:
 			// If the resulting value is indeed another map type, we expect for a Json Map
 			// we preserve that pointer for the next iteration
-			tempMap = pResults.(map[string]interface{})
+			tempMap = typedResult //pResults.(map[string]interface{})
 		case []interface{}:
 			// TODO: We only support a slice (i.e., []interface{}) as the last selector
 			// in theory, we could support arrays (perhaps array notation) in the FROM clause
@@ -312,9 +313,10 @@ func findFromObject(request *common.QueryRequest, jsonMap map[string]interface{}
 				return
 			}
 		default:
-			getLogger().Debugf("Invalid datatype of query: key: %s (%t)", key, t)
-			err = common.NewQueryFromClauseError(request,
-				fmt.Sprintf("%s: %T", MSG_QUERY_INVALID_DATATYPE, t))
+			// NOTE: this SHOULD never be reached from the "query" command
+			// as the FROM should always reference a map or []interface{}
+			// which is required for JSON output results.
+			err = common.NewQueryResultInvalidTypeError(request, typedResult)
 			return
 		}
 	}

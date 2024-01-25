@@ -2,9 +2,13 @@
 
 # sbom-utility
 
-This utility was designed to be an API platform used initially to **validate CycloneDX** or **SPDX Software Bills-of-Materials (BOMs)** against versioned JSON schemas, as published by their respective communities, as well as customized schema variants provided by companies or organizations that have stricter BOM compliance requirements.
+This utility was designed to be an API platform used initially to validate **CycloneDX** or **SPDX-formatted Bills-of-Materials (BOMs)** against versioned JSON schemas as published by their respective standards communities as well as customized variants designed by companies or organizations that may have stricter BOM compliance requirements.
 
-The utility has now grown to include a rich set of commands, listed below, that can be used for create filtered reports in many formats (e.g., csv, md) using the utility's powerful, SQL-like **query** capability. These commands can  extract data from BOMs that enables verification of information supporting [BOM use cases](#cyclonedx-use-cases) or any custom security and compliance requirements.
+The utility has now grown to include a rich set of commands, listed below, such as **trim**, **patch** (IETF RFC 6902) and **diff** as well as commands used to create filtered reports using the utility's powerful, SQL-like **query** command capability.
+
+In addition, commands exist to easily extract **license**, **vulnerability**, **component**, **service** and other BOM information enabling verification for [BOM use cases](#cyclonedx-use-cases) or custom security and compliance requirements.
+
+*Please note that the utility supports all BOM variants such as **Software** (SBOM), **Hardware** (HBOM), **Manufacturing** (MBOM), **AI/ML** (MLBOM), etc. that adhere to their respective schemas.*
 
 ## Command Overview
 
@@ -33,7 +37,9 @@ The utility supports the following BOM-related commands:
 
 Feedback and helpful commits appreciated on the following commands which will be moved to non-experimental after two point releases:
 
-- **[diff](#diff)** : Shows the delta between two similar BOM versions in JSON (diff) patch format as defined by [RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902/).
+- **[diff](#diff)** : Shows the delta between two similar BOM versions in JSON (diff) patch format as defined by [IETF RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902/).
+
+- **[patch](#patch)** : Applies a JSON patch file, as defined by [IETF RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902/), to an input JSON BOM file.
 
 ---
 
@@ -208,7 +214,8 @@ This flag supplies an integer to any command that encodes JSON output to determi
 ```
 
 output with `indent 2`:
-```
+
+```json
 {
   "name": "juice-shop",
   "version": "11.1.2"
@@ -220,7 +227,8 @@ output with `indent 2`:
 ```
 
 output with `indent 6`:
-```
+
+```json
 {
       "name": "juice-shop",
       "version": "11.1.2"
@@ -519,7 +527,7 @@ allow         Artistic  Artistic-1.0  Artistic License 1.0                true  
 
 ###### Example: policy with `--summary` flag
 
-We can also apply the `--summary` flag to get a reduced set of columns that includes only the `usage-policy` along with the essential SDPX license information (e.g., no annotations or notes).
+We can also apply the `--summary` flag to get a reduced set of columns that includes only the `usage-policy` along with the essential SPDX license information (e.g., no annotations or notes).
 
 ```bash
 ./sbom-utility license policy --summary --quiet
@@ -1119,6 +1127,467 @@ Output BOM results with `properties` removed from all `components`:
 
 ---
 
+### Patch
+
+This command is able to "patch" an existing JSON BOM document using an [IETF RFC6902](https://datatracker.ietf.org/doc/html/rfc6902/#section-4.1) *"JavaScript Object Notation (JSON) Patch"* file.
+
+The current implementation supports the following "patch" operations:
+
+- "add", "update", "remove" and "test"
+
+At this time the "move" or "copy" operations are not supported.
+
+Patches work for both simple (i.e., integer, float, boolean and string) values as well as complex values such as JSON objects, maps and arrays.
+
+#### Patch supported output formats
+
+This command is used to output, using the [`--output-file` flag](#output-flag), a "patched" BOM in JSON format.
+
+- `json` (default)
+
+#### Patch flags
+
+The patch command operates on a JSON BOM input file (see [`--input-file` flag](#input-flag)) as well as an [IETF RFC6902](https://datatracker.ietf.org/doc/html/rfc6902/#section-4.1)-formatted "patch' file and produces a "patched" version of the input JSON BOM as output using the following flags:
+
+##### Patch `--patch-filename` flag
+
+The `--patch-file <filename>` flag is used to provide the relative path to the IETF RFC6902 patch file to applied to the BOM input file.
+
+#### Patch examples
+
+This section contains examples of all supported patch operations (i.e., add, replace, test) including values that are primitives (i.e., `numbers`, `strings`) as well as JSON `objects` and may be indexed JSON `array` elements.
+
+- ["add" BOM `serialNumber`](#patch-example-1-add-bom-serialnumber)
+- ["add" (update) BOM `version`](#patch-example-2-add-update-bom-version)
+- ["add" `supplier` object to `metadata`](#patch-example-3-add-supplier-object-to-metadata-object)
+- ["add" `property` objects to `metadata.properties` array](#patch-example-4-add-property-objects-to-metadataproperties-array)
+- ["replace" `version` and `timestamp` values](#patch-example-5-replace-bom-version-and-timestamp)
+- ["remove" `property` from the `metadata.properties` array](#patch-example-6-remove-property-from-the-metadataproperties-array)
+- ["test" if a `property` exists in the `metadata.properties` array](#patch-example-7-test-property-exists-in-the-metadataproperties-array)
+
+##### Patch example 1: "add" BOM `serialNumber`
+
+This example adds a new top-level key `"serialNumber"` and corresponding value to a CycloneDX JSON BOM file.
+
+The original CycloneDX JSON BOM file: [test/patch/cdx-1-5-simplest-base.json](test/patch/cdx-1-5-simplest-base.json) has no serial number:
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+      ...
+  }
+}
+```
+
+IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-add-serial-number.json](test/patch/cdx-patch-example-add-serial-number.json):
+
+```json
+[
+  { "op": "add", "path": "/serialNumber", "value": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9" }
+]
+```
+
+Invoke the patch command as follows:
+
+```bash
+./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-add-serial-number.json  -q
+```
+
+Patched JSON BOM output file:
+
+```json
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
+    "version": 1,
+    "metadata": {
+        ...
+    }
+}
+```
+
+##### Patch example 2: "add" (update) BOM `version`
+
+This example shows how the patch's "add" operation can be used to update existing values which is the specified behavior of RFC6902.
+
+Original CycloneDX JSON BOM file: [test/patch/cdx-1-5-simplest-base.json](test/patch/cdx-1-5-simplest-base.json) with `version` equal to `1`:
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+      ...
+  }
+}
+```
+
+IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-add-serial-number.json](test/patch/cdx-patch-example-add-serial-number.json):
+
+```json
+[
+  { "op": "add", "path": "/version", "value": 2 }
+]
+```
+
+Invoke the patch command as follows:
+
+```bash
+./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-add-update-version.json  -q
+```
+
+The patched, output JSON BOM file which has the changed `version` value of `2`:
+
+```json
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "version": 2,
+    "metadata": {
+        ...
+    }
+}
+```
+
+##### Patch example 3: "add" `supplier` object to `metadata` object
+
+This example shows how the patch's "add" operation can be used to add a JSON object to an existing object.
+
+Original CycloneDX JSON BOM file: [test/patch/cdx-1-5-simplest-base.json](test/patch/cdx-1-5-simplest-base.json):
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2023-10-12T19:07:00Z",
+    "properties": [
+      ...
+    ]
+  }
+}
+```
+
+Apply the following IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-add-metadata-supplier.json](test/patch/cdx-patch-example-add-metadata-supplier.json):
+
+```json
+[
+  { "op": "add", "path": "/metadata/supplier", "value": {
+      "name": "Example Co. Distribution Dept.",
+      "url": [
+        "https://example.com/software/"
+      ]
+    }
+  }
+]
+```
+
+Invoke the patch command as follows:
+
+```bash
+./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-add-metadata-supplier.json -q
+```
+
+The patched BOM has the `supplier` object added to the `metadata`:
+
+```json
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "version": 1,
+    "metadata": {
+        "timestamp": "2023-10-12T19:07:00Z",
+        "supplier": {
+            "name": "Example Co. Distribution Dept.",
+            "url": [
+                "https://example.com/software/"
+            ]
+        },
+        "properties": [
+            ...
+        ]
+    }
+}
+```
+
+##### Patch example 4: "add" `property` objects to `metadata.properties` array
+
+This example shows how the patch's "add" operation can be used to add `property` objects to an existing `properties` array.
+
+Original CycloneDX JSON BOM file: [test/patch/cdx-1-5-simplest-base.json](test/patch/cdx-1-5-simplest-base.json):
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2023-10-12T19:07:00Z",
+    "properties": [
+      {
+        "name": "Property 1",
+        "value": "Value 1"
+      },
+      {
+        "name": "Property 2",
+        "value": "Value 2"
+      }
+    ]
+  }
+}
+```
+
+Apply the following IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-add-metadata-properties.json](test/patch/cdx-patch-example-add-metadata-properties.json):
+
+```json
+[
+  { "op": "add", "path": "/metadata/properties/-", "value": { "name": "foo", "value": "bar" } },
+  { "op": "add", "path": "/metadata/properties/1", "value": { "name": "rush", "value": "yyz" } }
+]
+```
+
+Note that the first patch record uses the `-` (dash) to indicate "insert at end" whereas the second patch record has the zero-based array index `1`.
+
+Invoke the patch command as follows:
+
+```bash
+./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-add-metadata-properties.json -q
+```
+
+The patched, output BOM has the two new properties at the specified indices:
+
+```json
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "version": 1,
+    "metadata": {
+        "timestamp": "2023-10-12T19:07:00Z",
+        "properties": [
+            {
+                "name": "Property 1",
+                "value": "Value 1"
+            },
+            {
+                "name": "rush",
+                "value": "yyz"
+            },
+            {
+                "name": "Property 2",
+                "value": "Value 2"
+            },
+            {
+                "name": "foo",
+                "value": "bar"
+            }
+        ]
+    }
+}
+```
+
+##### Patch example 5: "replace" BOM `version` and `timestamp`
+
+This example shows how the patch's "replace" operation can be used to update the BOM document's `version` and `timestamp` values.
+
+Original CycloneDX JSON BOM file: [test/patch/cdx-1-5-simplest-base.json](test/patch/cdx-1-5-simplest-base.json):
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2023-10-12T19:07:00Z",
+    "properties": [
+      ...
+    ]
+  }
+}
+```
+
+Apply the following IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-replace-version-timestamp.json](test/patch/cdx-patch-example-replace-version-timestamp.json):
+
+```json
+[
+  { "op": "replace", "path": "/version", "value": 2 },
+  { "op": "replace", "path": "/metadata/timestamp", "value": "2024-01-24T22:50:18+00:00" }
+]
+```
+
+Invoke the patch command as follows:
+
+```bash
+./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-replace-version-timestamp.json -q
+```
+
+The patched, output BOM has both an updated `version` and `timestamp`:
+
+```json
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "version": 2,
+    "metadata": {
+        "timestamp": "2024-01-24T22:50:18+00:00",
+        "properties": [
+          ...
+    }
+}
+```
+
+##### Patch example 6: "remove" `property` from the `metadata.properties` array
+
+This example shows how the patch's "remove" operation can be used to remove a `property` object from the `metadata.properties` array using an index.
+
+Original CycloneDX JSON BOM file: [test/patch/cdx-1-5-simplest-base.json](test/patch/cdx-1-5-simplest-base.json):
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2023-10-12T19:07:00Z",
+    "properties": [
+      {
+        "name": "Property 1",
+        "value": "Value 1"
+      },
+      {
+        "name": "Property 2",
+        "value": "Value 2"
+      }
+    ]
+  }
+}
+```
+
+Apply the following IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-remove-metadata-property.json](test/patch/cdx-patch-example-remove-metadata-property.json):
+
+```json
+[
+  { "op": "remove", "path": "/metadata/properties/1" }
+]
+```
+
+Invoke the patch command as follows:
+
+```bash
+./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-remove-metadata-property.json -q
+```
+
+The `property` at index `1` of the `metadata.properties` array has been removed:
+
+```json
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "version": 1,
+    "metadata": {
+        "timestamp": "2023-10-12T19:07:00Z",
+        "properties": [
+            {
+                "name": "Property 1",
+                "value": "Value 1"
+            }
+        ]
+    }
+}
+```
+
+##### Patch example 7: "test" `property` exists in the `metadata.properties` array
+
+This example shows how the patch records's can "test" for values or objects in a BOM.  The utility will confirm "success" (using an `[INFO]` log message); otherwise, the utility will exit and return an error and generate an `[ERROR]` log message.
+
+Original CycloneDX JSON BOM file: [test/patch/cdx-1-5-simplest-base.json](test/patch/cdx-1-5-simplest-base.json):
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2023-10-12T19:07:00Z",
+    "properties": [
+      {
+        "name": "Property 1",
+        "value": "Value 1"
+      },
+      {
+        "name": "Property 2",
+        "value": "Value 2"
+      }
+    ]
+  }
+}
+```
+
+Apply the following IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-test-metadata-property.json](test/patch/cdx-patch-example-test-metadata-property.json):
+
+```json
+[
+  { "op": "test", "path": "/metadata/properties/1", "value":
+    {
+      "name": "Property 2",
+      "value": "Value 2"
+    }
+  }
+]
+```
+
+Invoke the patch command as follows:
+
+```bash
+./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-test-metadata-property.json -q
+```
+
+An informational (i.e., `[INFO]`) message is logged with `success` since the property object was found in the input BOM:
+
+```json
+[INFO] IETF RFC6902 test operation success. test record: {
+    "op": "test",
+    "path": "/metadata/properties/1",
+    "value": {
+        "name": "Property 2",
+        "value": "Value 2"
+    }
+}
+```
+
+If instead, we [tested for a different property](test/patch/cdx-patch-example-test-metadata-property-err.json) object:
+
+```json
+[
+  { "op": "test", "path": "/metadata/properties/1", "value":
+    {
+      "name": "Property 3",
+      "value": "Value 3"
+    }
+  }
+]
+```
+
+an error (i.e., `[ERROR]`) would be returned from the utility:
+
+```json
+[ERROR] IETF RFC6902 test operation error. test record: {
+    "op": "test",
+    "path": "/metadata/properties/1",
+    "value": {
+        "name": "Property 3",
+        "value": "Value 3"
+    }
+}
+```
+
+---
+
 ### Validate
 
 This command will parse standardized SBOMs and validate it against its declared format and version (e.g., SPDX 2.2, CycloneDX 1.4). Custom  variants of standard JSON schemas can be used for validation by supplying the `--variant` name as a flag. Explicit JSON schemas can be specified using the `--force` flag.
@@ -1426,8 +1895,8 @@ The `list` subcommand provides a complete view of most top-level, vulnerability 
 ```bash
 id              bom-ref  cwe-ids  cvss-severity                                                source-name  source-url                                       published   updated     created     rejected  analysis-state  analysis-justification  description
 --              -------  -------  -------------                                                -----------  ----------                                       ---------   -------     -------     --------  --------------  ----------------------  -----------
-CVE-2022-42004           502      CVSSv31: 7.5 (high)                                          NVD          https://nvd.nist.gov/vuln/detail/CVE-2022-42004  2022-10-02  2022-10-02  2022-10-02            UNDEFINED       UNDEFINED               In FasterXML jackson-databind before 2.13.4, resource exhaustion can occur because of a lack of a check in BeanDeserializer._deserializeFromArray to prevent use of deeply nested arrays. An application is vulnerable only with certain customized choices for deserialization.
-CVE-2022-42003           502      CVSSv31: 7.5 (high)                                          NVD          https://nvd.nist.gov/vuln/detail/CVE-2022-42003  2022-10-02  2022-10-02  2022-10-02            UNDEFINED       UNDEFINED               In FasterXML jackson-databind before 2.14.0-rc1, resource exhaustion can occur because of a lack of a check in primitive value deserializers to avoid deep wrapper array nesting, when the UNWRAP_SINGLE_VALUE_ARRAYS feature is enabled. Additional fix version in 2.13.4.1 and 2.12.17.1
+CVE-2023-42004           502      CVSSv31: 7.5 (high)                                          NVD          https://nvd.nist.gov/vuln/detail/CVE-2023-42004  2023-10-02  2023-10-02  2023-10-02            UNDEFINED       UNDEFINED               In FasterXML jackson-databind before 2.13.4, resource exhaustion can occur because of a lack of a check in BeanDeserializer._deserializeFromArray to prevent use of deeply nested arrays. An application is vulnerable only with certain customized choices for deserialization.
+CVE-2023-42003           502      CVSSv31: 7.5 (high)                                          NVD          https://nvd.nist.gov/vuln/detail/CVE-2023-42003  2023-10-02  2023-10-02  2023-10-02            UNDEFINED       UNDEFINED               In FasterXML jackson-databind before 2.14.0-rc1, resource exhaustion can occur because of a lack of a check in primitive value deserializers to avoid deep wrapper array nesting, when the UNWRAP_SINGLE_VALUE_ARRAYS feature is enabled. Additional fix version in 2.13.4.1 and 2.12.17.1
 CVE-2020-25649           611      CVSSv31: 7.5 (high), CVSSv31: 8.2 (high), CVSSv31: 0 (none)  NVD          https://nvd.nist.gov/vuln/detail/CVE-2020-25649  2020-12-03  2023-02-02  2020-12-03            not_affected    code_not_reachable      com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.
 ```
 
@@ -1442,8 +1911,8 @@ This example shows the default text output from using the `--summary` flag:
 ```bash
 id              cvss-severity        source-name  published   description
 --              -------------        -----------  ---------   -----------
-CVE-2022-42004  CVSSv31: 7.5 (high)  NVD          2022-10-02  In FasterXML jackson-databind before 2.13.4, resource exhaustion can occur because of a lack of a check in BeanDeserializer._deserializeFromArray to prevent use of deeply nested arrays. An application is vulnerable only with certain customized choices for deserialization.
-CVE-2022-42003  CVSSv31: 7.5 (high)  NVD          2022-10-02  In FasterXML jackson-databind before 2.14.0-rc1, resource exhaustion can occur because of a lack of a check in primitive value deserializers to avoid deep wrapper array nesting, when the UNWRAP_SINGLE_VALUE_ARRAYS feature is enabled. Additional fix version in 2.13.4.1 and 2.12.17.1
+CVE-2023-42004  CVSSv31: 7.5 (high)  NVD          2023-10-02  In FasterXML jackson-databind before 2.13.4, resource exhaustion can occur because of a lack of a check in BeanDeserializer._deserializeFromArray to prevent use of deeply nested arrays. An application is vulnerable only with certain customized choices for deserialization.
+CVE-2023-42003  CVSSv31: 7.5 (high)  NVD          2023-10-02  In FasterXML jackson-databind before 2.14.0-rc1, resource exhaustion can occur because of a lack of a check in primitive value deserializers to avoid deep wrapper array nesting, when the UNWRAP_SINGLE_VALUE_ARRAYS feature is enabled. Additional fix version in 2.13.4.1 and 2.12.17.1
 CVE-2020-25649  CVSSv31: 7.5 (high)  NVD          2020-12-03  com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.
 ```
 
