@@ -22,6 +22,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"strings"
 )
@@ -130,4 +131,22 @@ func WriteAnyAsEncodedJSONInt(writer io.Writer, any interface{}, numSpaces int) 
 		_, err = writer.Write(outputBuffer.Bytes())
 	}
 	return
+}
+
+func PrintlnJSONObject(any interface{}) {
+	buffer, err := EncodeAnyToDefaultIndentedJSONStr(any)
+	if err == nil {
+		fmt.Printf("%s\n", buffer.String())
+		return
+	}
+	fmt.Printf("Print error: %s\n", err.Error())
+}
+
+func PrintlnLabeledJSONObject(any interface{}, label string) {
+	buffer, err := EncodeAnyToDefaultIndentedJSONStr(any)
+	if err == nil {
+		fmt.Printf("%s: %s\n", label, buffer.String())
+		return
+	}
+	fmt.Printf("Print error: %s\n", err.Error())
 }

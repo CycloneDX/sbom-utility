@@ -112,16 +112,13 @@ func patchCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	getLogger().Enter(args)
 	defer getLogger().Exit()
 
-	// // TODO: remove
-	// buffer, _ := utils.EncodeAnyToDefaultIndentedJSONStr(utils.GlobalFlags.PatchFlags)
-	// fmt.Printf("[B] utils.GlobalFlags.PatchFlags:\n%s", buffer.String())
-
 	// Create output writer
 	outputFilename := utils.GlobalFlags.PersistentFlags.OutputFile
 	outputFile, writer, err := createOutputFile(outputFilename)
 	getLogger().Tracef("outputFile: `%v`; writer: `%v`", outputFilename, writer)
 
 	// Overcome Cobra limitation in variable reuse between diff. commands
+	// That is, as soon as ANY command sets a default value, it cannot be changed
 	utils.GlobalFlags.PersistentFlags.OutputFormat = utils.GlobalFlags.PatchFlags.OutputFormat
 
 	// use function closure to assure consistent error output based upon error type
@@ -342,6 +339,21 @@ func parseArrayIndex(indexPath string) (arrayIndex int, err error) {
 	return
 }
 
+// func parseArrayIndexFromPath(path string) (arrayIndex int, err error) {
+// 	var keys []string
+// 	keys, err = parseMapKeysFromPath(path)
+// 	if err != nil {
+// 		return
+// 	}
+
+// 	lengthKeys := len(keys)
+// 	if lengthKeys <= 0 {
+// 		err = fmt.Errorf("invalid path. Path: %s", path)
+// 		return
+// 	}
+// 	return parseArrayIndex(keys[lengthKeys-1])
+// }
+
 // The "test" operation tests that a value at the target location is
 // equal to a specified value.
 //   - The operation object MUST contain a "value" member that conveys the
@@ -526,7 +538,7 @@ func removeValue(parentMap map[string]interface{}, keys []string, value interfac
 			return
 		}
 		var newSlice []interface{}
-		newSlice, err = removeValueFromSlice(typedNode, arrayIndex)
+		newSlice, err = removeValueFromSliceAtIndex(typedNode, arrayIndex)
 		parentMap[nextNodeKey] = newSlice
 	case float64:
 		// NOTE: It is a conscious decision of tbe encoding/json package to
@@ -635,7 +647,7 @@ func insertValueIntoSlice(slice []interface{}, index int, value interface{}) []i
 	return slice
 }
 
-func removeValueFromSlice(slice []interface{}, index int) (newSlice []interface{}, err error) {
+func removeValueFromSliceAtIndex(slice []interface{}, index int) (newSlice []interface{}, err error) {
 	if index < 0 || index >= len(slice) {
 		err = fmt.Errorf("remove array element failed. Index (%v) out of range for array (length: %v). ", index, len(slice))
 		return
