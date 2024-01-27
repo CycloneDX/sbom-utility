@@ -591,7 +591,7 @@ func TestPatchCdx15AddPropertiesAtEnd(t *testing.T) {
 	}
 	getLogger().Tracef("%s\n", buffer.String())
 	// verify JSON document has applied all patch records
-	err = VerifyPatchedOutputFileResult(t, *ti)
+	_, err = VerifyPatchedOutputFileResult(t, *ti)
 	if err != nil {
 		t.Error(err)
 	}
@@ -606,7 +606,7 @@ func TestPatchCdx15AddPropertiesAtIndex(t *testing.T) {
 	}
 	getLogger().Tracef("%s\n", buffer.String())
 	// verify JSON document has applied all patch records
-	err = VerifyPatchedOutputFileResult(t, *ti)
+	_, err = VerifyPatchedOutputFileResult(t, *ti)
 	if err != nil {
 		t.Error(err)
 	}
@@ -621,7 +621,7 @@ func TestPatchCdx15AddPropertiesMixed(t *testing.T) {
 	}
 	getLogger().Tracef("%s\n", buffer.String())
 	// verify JSON document has applied all patch records
-	err = VerifyPatchedOutputFileResult(t, *ti)
+	_, err = VerifyPatchedOutputFileResult(t, *ti)
 	if err != nil {
 		t.Error(err)
 	}
@@ -635,7 +635,7 @@ func TestPatchCdx15SliceAdd(t *testing.T) {
 		t.Error(err)
 	}
 	// verify JSON document has applied all patch records
-	err = VerifyPatchedOutputFileResult(t, *ti)
+	_, err = VerifyPatchedOutputFileResult(t, *ti)
 	if err != nil {
 		t.Error(err)
 	}
@@ -650,7 +650,7 @@ func TestPatchCdx15SliceAddUpdateVersionInteger(t *testing.T) {
 		t.Error(err)
 	}
 	// verify JSON document has applied all patch records
-	err = VerifyPatchedOutputFileResult(t, *ti)
+	_, err = VerifyPatchedOutputFileResult(t, *ti)
 	if err != nil {
 		t.Error(err)
 	}
@@ -667,7 +667,7 @@ func TestPatchCdx15Example1AddBOMSerialNumber(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err = VerifyPatchedOutputFileResult(t, *ti)
+	_, err = VerifyPatchedOutputFileResult(t, *ti)
 	if err != nil {
 		t.Error(err)
 	}
@@ -680,7 +680,7 @@ func TestPatchCdx15Example2AddUpdateBOMVersion(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err = VerifyPatchedOutputFileResult(t, *ti)
+	_, err = VerifyPatchedOutputFileResult(t, *ti)
 	if err != nil {
 		t.Error(err)
 	}
@@ -693,7 +693,7 @@ func TestPatchCdx15Example3AddMetadataSupplier(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err = VerifyPatchedOutputFileResult(t, *ti)
+	_, err = VerifyPatchedOutputFileResult(t, *ti)
 	if err != nil {
 		t.Error(err)
 	}
@@ -706,7 +706,7 @@ func TestPatchCdx15Example4AddMetadataProperties(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err = VerifyPatchedOutputFileResult(t, *ti)
+	_, err = VerifyPatchedOutputFileResult(t, *ti)
 	if err != nil {
 		t.Error(err)
 	}
@@ -719,7 +719,7 @@ func TestPatchCdx15Example4aAddExternalReference(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err = VerifyPatchedOutputFileResult(t, *ti)
+	_, err = VerifyPatchedOutputFileResult(t, *ti)
 	if err != nil {
 		t.Error(err)
 	}
@@ -732,7 +732,7 @@ func TestPatchCdx15Example5ReplaceMetadataTimestamp(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err = VerifyPatchedOutputFileResult(t, *ti)
+	_, err = VerifyPatchedOutputFileResult(t, *ti)
 	if err != nil {
 		t.Error(err)
 	}
@@ -742,14 +742,19 @@ func TestPatchCdx15Example5ReplaceMetadataTimestamp(t *testing.T) {
 func TestPatchCdx15Example6RemoveMetadataProperty(t *testing.T) {
 	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLEST_BASE, TEST_PATCH_EXAMPLE_REMOVE_METADATA_PROPERTY, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLEST_BASE)
+	ti.OutputIndent = 0
 	_, _, err := innerTestPatch(t, ti)
 	if err != nil {
 		t.Error(err)
 	}
-	// err = VerifyPatchedOutputFileResult(t, *ti)
-	// if err != nil {
-	// 	t.Error(err)
-	// }
+	TEST_OUTPUT := "{\"bomFormat\":\"CycloneDX\",\"specVersion\":\"1.5\",\"version\":1,\"metadata\":{\"timestamp\":\"2023-10-12T19:07:00Z\",\"properties\":[{\"name\":\"Property 1\",\"value\":\"Value 1\"}]}}"
+	buffer, err := bufferFile(ti.OutputFile)
+	if err != nil {
+		t.Error(err)
+	}
+	if strings.TrimSpace(buffer.String()) != TEST_OUTPUT {
+		t.Error(err)
+	}
 }
 
 func TestPatchCdx15Example7TestMetadataProperty(t *testing.T) {

@@ -19,8 +19,10 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"reflect"
+	"slices"
 	"testing"
 
 	"github.com/CycloneDX/sbom-utility/common"
@@ -31,7 +33,7 @@ import (
 // test helper functions
 // -------------------------------------------
 
-func VerifyPatchedOutputFileResult(t *testing.T, originalTest PatchTestInfo) (err error) {
+func VerifyPatchedOutputFileResult(t *testing.T, originalTest PatchTestInfo) (outputBuffer bytes.Buffer, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -58,7 +60,6 @@ func VerifyPatchedOutputFileResult(t *testing.T, originalTest PatchTestInfo) (er
 		t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
 		return
 	}
-	getLogger().Tracef("request: %s\n", request.String())
 
 	// Verify each key was removed
 	var pResult interface{}
@@ -73,7 +74,7 @@ func VerifyPatchedOutputFileResult(t *testing.T, originalTest PatchTestInfo) (er
 		request.SetRawFromPaths(queryPath)
 
 		// use a buffered query on the temp. output file on the (parent) path
-		pResult, _, err = innerQuery(t, queryTestInfo, request)
+		pResult, outputBuffer, err = innerQuery(t, queryTestInfo, request)
 
 		// NOTE: Query typically does NOT support non JSON map or slice
 		// we need to allow float64, bool and string for "patch" validation
@@ -209,11 +210,17 @@ func sliceContainsValue(slice []interface{}, value interface{}) (foundValue inte
 			return
 		}
 		return
-	case string: // TODO
+	case string:
+		foundValue = value
+		contains = slices.Contains(slice, value)
 		return
-	case bool: // TODO
+	case bool:
+		foundValue = value
+		contains = slices.Contains(slice, value)
 		return
-	case float64: // TODO
+	case float64:
+		foundValue = value
+		contains = slices.Contains(slice, value)
 		return
 	default:
 		getLogger().Errorf("contains test failed. Unexpected JSON type: `%T`", typedValue)
