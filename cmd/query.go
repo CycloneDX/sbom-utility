@@ -210,6 +210,7 @@ func Query(writer io.Writer, request *common.QueryRequest, response *common.Quer
 	// Use the selected output device (e.g., default stdout or the specified --output-file)
 	// Note: JSON data files MUST ends in a newline as this is a POSIX standard
 	// which is already accounted for by the JSON encoder.
+	// NOTE: the "--format" flag is ignored for query which always outputs in JSON
 	_, err = utils.WriteAnyAsEncodedJSONInt(writer, resultJson,
 		utils.GlobalFlags.PersistentFlags.GetOutputIndentInt())
 

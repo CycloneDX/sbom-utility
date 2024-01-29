@@ -2,17 +2,17 @@
 
 # sbom-utility
 
-This utility was designed to be an API platform used initially to validate **CycloneDX** or **SPDX-formatted Bills-of-Materials (BOMs)** against versioned JSON schemas as published by their respective standards communities as well as customized variants designed by companies or organizations that may have stricter BOM compliance requirements.
+This utility was designed to be an API platform to validate, analyze and edit **Bills-of-Materials (BOMs)**. Primarily, it was created to validate **CycloneDX** or **SPDX-formatted** BOMs against versioned JSON schemas as published by their respective standards communities. The validation support includes customized, BOM-schema variants designed by companies or organizations that may have stricter BOM compliance requirements.
 
-The utility has now grown to include a rich set of commands, listed below, such as **trim**, **patch** (IETF RFC 6902) and **diff** as well as commands used to create filtered reports using the utility's powerful, SQL-like **query** command capability.
+The utility has steadily grown to include a rich set of commands, listed below, such as **trim**, **patch** (IETF RFC 6902) and **diff** as well as commands used to create filtered reports using the utility's powerful, SQL-like **query** command capability.
 
-In addition, commands exist to easily extract **license**, **vulnerability**, **component**, **service** and other BOM information enabling verification for [BOM use cases](#cyclonedx-use-cases) or custom security and compliance requirements.
+Supported report commands can easily extract **license**, **license policy**, **vulnerability**, **component**, **service** and other BOM information enabling verification for most [BOM use cases](#cyclonedx-use-cases) as well as custom security and compliance requirements.
 
 *Please note that the utility supports all BOM variants such as **Software** (SBOM), **Hardware** (HBOM), **Manufacturing** (MBOM), **AI/ML** (MLBOM), etc. that adhere to their respective schemas.*
 
 ## Command Overview
 
-The utility supports the following BOM-related commands:
+The utility supports the following commands:
 
 - **[license](#license)**
   - **[list](#license-list-subcommand)** produce listings or summarized reports of license data contained in a BOM along with license "usage policy" determinations using the policies declared in the `license.json` file.

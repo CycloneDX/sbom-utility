@@ -5,103 +5,22 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "DebugServer",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}",
+            "dlvFlags": ["--check-go-version=false"]
+        },
+        {
             "showGlobalVariables": true,
             "name": "Query: SELECT * FROM metadata.component",
             "type": "go",
             "request": "launch",
             "mode": "debug",
             "program": "main.go", // "program": "${file}",
-            "args": ["query", "-i", "test/cyclonedx/cdx-1-4-mature-example-1.json", "--select", "*", "--from", "metadata.component"]
-        },
-        {
-            "showGlobalVariables": true,
-            "name": "license: list: BAD license exp.",
-            "type": "go",
-            "request": "launch",
-            "mode": "debug",
-            "program": "main.go", // "program": "${file}",
-            "args": ["license", "list", "-i", "test/cyclonedx/cdx-1-2-invalid-license-name-has-expression.json", "--summary"]
-        },
-        {
-            "showGlobalVariables": true,
-            "name": "license policy",
-            "type": "go",
-            "request": "launch",
-            "mode": "debug",
-            "program": "main.go",
-            "args": ["license", "policy", "-t"]
-        },
-        {
-            "showGlobalVariables": true,
-            "name": "license policy --format csv",
-            "type": "go",
-            "request": "launch",
-            "mode": "debug",
-            "program": "main.go",
-            "args": ["license", "policy", "--format", "csv", "-t"]
-        },
-        {
-            "showGlobalVariables": true,
-            "name": "license: list: CDX: test/cyclonedx/cdx-1-3-license-list.json",
-            "type": "go",
-            "request": "launch",
-            "mode": "debug",
-            "program": "main.go", // "program": "${file}",
-            "args": ["license", "list", "-i", "test/cyclonedx/cdx-1-3-license-list.json"]
-        },
-        {
-            "showGlobalVariables": true,
-            "name": "validate: CDX: test/cyclonedx/cdx-1-3-license-list.json",
-            "type": "go",
-            "request": "launch",
-            "mode": "debug",
-            "program": "main.go", // "program": "${file}",
-            "args": ["validate", "-i", "test/cyclonedx/cdx-1-3-license-list.json", "-t"]
-        },
-        {
-            "showGlobalVariables": true,
-            "name": "validate: CDX: juice-shop/bom.json: indent",
-            "type": "go",
-            "request": "launch",
-            "mode": "debug",
-            "program": "main.go", // "program": "${file}",
-            "args": ["validate", "-i", "examples/cyclonedx/juice-shop/bom.json", "-t", "--indent"]
-        },
-        {
-            "showGlobalVariables": true,
-            "name": "validate: CDX: EXAMPLE: juice-shop/bom.json (infer 1.2)",
-            "type": "go",
-            "request": "launch",
-            "mode": "debug",
-            "program": "main.go", // "program": "${file}",
-            "args": ["validate", "-i", "examples/cyclonedx/juice-shop/bom.json", "-t"]
-        },
-        {
-            "showGlobalVariables": true,
-            "name": "validate: SPDX: spdx-min-required.json (infer 2.2)",
-            "type": "go",
-            "request": "launch",
-            "mode": "debug",
-            "program": "main.go", // "program": "${file}",
-            "args": ["validate", "-i", "test/spdx/spdx-min-required.json"]
-        },
-        {
-            "showGlobalVariables": true,
-            "name": "validate: SPDX: spdx-min-required-missing-creationinfo.json (infer)",
-            "type": "go",
-            "request": "launch",
-            "mode": "debug",
-            "program": "main.go", // "program": "${file}",
-            "args": ["validate", "-i", "test/spdx/spdx-min-required-missing-creationinfo.json"]
-        },
-        {
-            "showGlobalVariables": true,
-            "name": "validate: SPDX: EXAMPLE: examples/spdx/example1/example1.json (infer schema)",
-            "type": "go",
-            "request": "launch",
-            "mode": "debug",
-            "program": "main.go", // "program": "${file}",
-            "args": ["validate", "-i", "examples/spdx/example1/example1.json"]
+            "args": ["query", "-i", "test/cyclonedx/cdx-1-4-mature-example-1.json", "--select", "*", "--from", "metadata.component"],
+            "dlvFlags": ["--check-go-version=false"]
         },
     ]
 }

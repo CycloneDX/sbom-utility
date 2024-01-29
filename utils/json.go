@@ -22,6 +22,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"strings"
 )
@@ -40,13 +41,6 @@ func IsJsonSliceType(any interface{}) (isSliceType bool) {
 	_, isSliceType = any.([]interface{})
 	return
 }
-
-// NOTE: currently, an unused function
-// func IsValidJsonMap(test string) bool {
-// 	var js map[string]interface{}
-// 	err := json.Unmarshal([]byte(test), &js)
-// 	return err == nil
-// }
 
 func IsValidJsonRaw(test []byte) bool {
 	var js interface{}
@@ -130,4 +124,22 @@ func WriteAnyAsEncodedJSONInt(writer io.Writer, any interface{}, numSpaces int) 
 		_, err = writer.Write(outputBuffer.Bytes())
 	}
 	return
+}
+
+func PrintlnJSONObject(any interface{}) {
+	buffer, err := EncodeAnyToDefaultIndentedJSONStr(any)
+	if err == nil {
+		fmt.Printf("%s\n", buffer.String())
+		return
+	}
+	fmt.Printf("Print error: %s\n", err.Error())
+}
+
+func PrintlnLabeledJSONObject(any interface{}, label string) {
+	buffer, err := EncodeAnyToDefaultIndentedJSONStr(any)
+	if err == nil {
+		fmt.Printf("%s: %s\n", label, buffer.String())
+		return
+	}
+	fmt.Printf("Print error: %s\n", err.Error())
 }
