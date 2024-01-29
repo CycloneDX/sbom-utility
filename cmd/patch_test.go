@@ -764,10 +764,6 @@ func TestPatchCdx15Example7TestMetadataProperty(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	// err = VerifyPatchedOutputFileResult(t, *ti)
-	// if err != nil {
-	// 	t.Error(err)
-	// }
 }
 
 func TestPatchCdx15Example7TestMetadataPropertyErr(t *testing.T) {
