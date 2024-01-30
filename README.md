@@ -27,7 +27,7 @@ The utility supports the following commands:
 
 - **[trim](#trim)** provide the ability to remove specified JSON information from the input JSON BOM document and produce output BOMs with reduced or targeted sets of information.  A SQL-like set of parameters allows for fine-grained specification of which fields should be trimmed from which document paths.
 
-- **[validate](#validate)** enables validation of SBOMs against their declared format (e.g., SPDX, CycloneDX) and version (e.g., "2.2", "1.4", etc.) using their JSON schemas.
+- **[validate](#validate)** enables validation of SBOMs against their declared format (e.g., SPDX, CycloneDX) and version (e.g., "2.3", "1.5", etc.) using their JSON schemas.
   - Derivative, **"customized" schemas** can be used for verification using the `--variant` flag (e.g., industry or company-specific schemas).
   - You can override an BOM's declared BOM version using the `--force` flag (e.g., verify a BOM against a newer specification version).
 
