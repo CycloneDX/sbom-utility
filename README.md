@@ -2,7 +2,7 @@
 
 # sbom-utility
 
-This utility was designed to be an API platform to validate, analyze and edit **Bills-of-Materials (BOMs)**. Initially, it was created to validate **CycloneDX** or **SPDX-formatted** BOMs against versioned JSON schemas as published by their respective standards communities. Customized validation is also supported by using BOM-schema variants designed by companies or organizations that may have stricter compliance requirements.
+This utility was designed to be an API platform to validate, analyze and edit **Bills-of-Materials (BOMs)**. Initially, it was created to validate **CycloneDX** or **SPDX-formatted** BOMs against versioned JSON schemas (as published by their respective standards communities) or customized schema variants designed by organizations that may have stricter compliance requirements.
 
 The utility now includes a rich set of commands, listed below, such as **trim**, **patch** (IETF RFC 6902) and **diff** as well as commands used to create filtered reports using the utility's powerful, SQL-like **query** command capability.
 
@@ -18,7 +18,7 @@ The utility supports the following commands:
   - **[list](#license-list-subcommand)** produce listings or summarized reports of license data contained in a BOM along with license "usage policy" determinations using the policies declared in the `license.json` file.
   - **[policy](#license-policy-subcommand)** - lists software and data license information and associated license usage policies as defined in the configurable `license.json` file.
 
-- **[query](#query)** produce data listings or custom reports from BOM data using SQL-style query statements (i.e., `--select <data fields> --from <BOM object> --where <field=regex>`).
+- **[query](#query)** retrieves JSON data from BOMs using SQL-style query statements (i.e., `--select <data fields> --from <BOM object> --where <field=regex>`). The JSON data can be used to create custom listings or reports.
 
 - **[resource](#resource)** produce filterable listings or summarized reports of resources, including components and services, from BOM data.
 
