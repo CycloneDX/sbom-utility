@@ -2,9 +2,9 @@
 
 # sbom-utility
 
-This utility was designed to be an API platform to validate, analyze and edit **Bills-of-Materials (BOMs)**. Primarily, it was created to validate **CycloneDX** or **SPDX-formatted** BOMs against versioned JSON schemas as published by their respective standards communities. The validation support includes customized, BOM-schema variants designed by companies or organizations that may have stricter BOM compliance requirements.
+This utility was designed to be an API platform to validate, analyze and edit **Bills-of-Materials (BOMs)**. Initially, it was created to validate **CycloneDX** or **SPDX-formatted** BOMs against versioned JSON schemas (as published by their respective standards communities) or customized schema variants designed by organizations that may have stricter compliance requirements.
 
-The utility has steadily grown to include a rich set of commands, listed below, such as **trim**, **patch** (IETF RFC 6902) and **diff** as well as commands used to create filtered reports using the utility's powerful, SQL-like **query** command capability.
+The utility now includes a rich set of commands, listed below, such as **trim**, **patch** (IETF RFC 6902) and **diff** as well as commands used to create filtered reports, in various formats, using the utility's powerful, SQL-like **query** command capability.
 
 Supported report commands can easily extract **license**, **license policy**, **vulnerability**, **component**, **service** and other BOM information enabling verification for most [BOM use cases](#cyclonedx-use-cases) as well as custom security and compliance requirements.
 
@@ -18,7 +18,7 @@ The utility supports the following commands:
   - **[list](#license-list-subcommand)** produce listings or summarized reports of license data contained in a BOM along with license "usage policy" determinations using the policies declared in the `license.json` file.
   - **[policy](#license-policy-subcommand)** - lists software and data license information and associated license usage policies as defined in the configurable `license.json` file.
 
-- **[query](#query)** produce data listings or custom reports from BOM data using SQL-style query statements (i.e., `--select <data fields> --from <BOM object> --where <field=regex>`).
+- **[query](#query)** retrieves JSON data from BOMs using SQL-style query statements (i.e., `--select <data fields> --from <BOM object> --where <field=regex>`). The JSON data can be used to create custom listings or reports.
 
 - **[resource](#resource)** produce filterable listings or summarized reports of resources, including components and services, from BOM data.
 
@@ -27,7 +27,7 @@ The utility supports the following commands:
 
 - **[trim](#trim)** provide the ability to remove specified JSON information from the input JSON BOM document and produce output BOMs with reduced or targeted sets of information.  A SQL-like set of parameters allows for fine-grained specification of which fields should be trimmed from which document paths.
 
-- **[validate](#validate)** enables validation of SBOMs against their declared format (e.g., SPDX, CycloneDX) and version (e.g., "2.2", "1.4", etc.) using their JSON schemas.
+- **[validate](#validate)** enables validation of SBOMs against their declared format (e.g., SPDX, CycloneDX) and version (e.g., "2.3", "1.5", etc.) using their JSON schemas.
   - Derivative, **"customized" schemas** can be used for verification using the `--variant` flag (e.g., industry or company-specific schemas).
   - You can override an BOM's declared BOM version using the `--force` flag (e.g., verify a BOM against a newer specification version).
 
@@ -35,7 +35,7 @@ The utility supports the following commands:
 
 **Experimental commands**:
 
-Feedback and helpful commits appreciated on the following commands which will be moved to non-experimental after two point releases:
+Feedback and helpful commits appreciated on the following commands which will be promoted after at least two point releases:
 
 - **[diff](#diff)** : Shows the delta between two similar BOM versions in JSON (diff) patch format as defined by [IETF RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902/).
 
@@ -48,20 +48,21 @@ Feedback and helpful commits appreciated on the following commands which will be
 - [Installation](#installation)
 - [Running](#running)
 - [Commands](#commands)
-  - [General information](#general-command-information)
-    - [Exit codes](#exit-codes): (e.g., `0`: none, `1`: application, `2`: validation)
-    - [Persistent flags](#persistent-flags) (e.g., `--format`, `--quiet`, `--where`)
-  - [`license` command](#license)
+  - [Exit codes](#exit-codes): (e.g., `0`: none, `1`: application, `2`: validation)
+  - [Persistent flags](#persistent-flags) (e.g., `--format`, `--quiet`, `--where`, etc.)
+  - [license](#license)
     - [list](#license-list-subcommand) subcommand: lists all license information found in the BOM
     - [policy](#license-policy-subcommand) subcommand: lists configurable license usage policies
-  - [`query` command](#query): extract JSON objects and fields from a BOM using SQL-like queries
-  - [`resource` command](#resource): list resource information by type (e.g., components, services)
-  - [`schema` command](#schema): list supported BOM formats, versions, variants
-  - [`validate` command](#validate): BOM against declared or required schema
-  - [`vulnerability` command](#vulnerability): lists vulnerability summary information included in the BOM or VEX
-  - [`diff` command](#diff): *experimental*: shows the delta between two similar BOM versions
-  - [`trim` command](#diff): *experimental*: remove specified fields from JSON BOM documents and output smaller BOMs that are appropriate sized for different use cases and analysis
-  - [`completion` command](#completion): generates command-line completion scripts for the utility
+  - [query](#query): extract JSON objects and fields from a BOM using SQL-like queries
+  - [resource](#resource): list resource information by type (e.g., components, services)
+  - [schema](#schema): list supported BOM formats, versions, variants
+  - [trim](#trim): remove unnecessary fields and data from a BOM
+  - [validate](#validate): BOM against declared or required schema
+  - [vulnerability](#vulnerability): lists vulnerability summary information included in the BOM or VEX
+  - [completion](#completion): generates command-line completion scripts for the utility
+- [Experimental commands](#experimental-commands)
+  - [diff](#diff): compares differences between two similar BOMs
+  - [patch](#patch): patches BOMs using IETF RFC 6902 records.
 - [Design considerations](#design-considerations)
 - [Development](#development)
   - [Prerequisites](#prerequisites)
@@ -913,6 +914,8 @@ For details see the "[Adding SBOM formats, schema versions and variants](#adding
 
 If you wish to have the new schema *embedded in the executable*, simply add it to the project's `resources` subdirectory following the format and version-based directory structure.
 
+---
+
 ### Trim
 
 This command is able to "trim" one or more JSON keys (fields) from specified JSON BOM documents effectively "pruning" the JSON document.  This functionality helps consumers of large-sized BOMs that need to analyze specific types of data in large BOMs in reducing the BOM data to just what is needed for their use cases or needs.
@@ -1127,9 +1130,458 @@ Output BOM results with `properties` removed from all `components`:
 
 ---
 
+### Validate
+
+This command will parse standardized SBOMs and validate it against its declared format and version (e.g., SPDX 2.2, CycloneDX 1.4). Custom  variants of standard JSON schemas can be used for validation by supplying the `--variant` name as a flag. Explicit JSON schemas can be specified using the `--force` flag.
+
+#### Validate supported schemas
+
+Use the [schema](#schema) command to list supported schemas formats, versions and variants.
+
+Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file. See [adding schemas](#adding-schemas).
+
+#### Validate flags
+
+The following flags can be used to improve performance when formatting error output results:
+
+##### `--error-limit` flag
+
+Use the `--error-limit x` (default: `10`) flag to reduce the formatted error result output to the first `x` errors.  By default, only the first 10 errors are output with an informational messaging indicating `x/y` errors were shown.
+
+##### `--error-value` flag
+
+Use the `--error-value=true|false` (default: `true`) flag to reduce the formatted error result output by not showing the `value` field which shows detailed information about the failing data in the BOM.
+
+##### `--colorize` flag
+
+Use the `--colorize=true|false` (default: `false`) flag to add/remove color formatting to error result `txt` formatted output.  By default, `txt` formatted error output is colorized to help with human readability; for automated use, it can be turned off.
+
+#### Validate Examples
+
+##### Example: Validate using inferred format and schema
+
+Validating the "juice shop" SBOM (CycloneDX 1.2) example provided in this repository.
+
+```bash
+./sbom-utility validate -i examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json
+```
+
+```bash
+[INFO] Loading (embedded) default schema config file: `config.json`...
+[INFO] Loading (embedded) default license policy file: `license.json`...
+[INFO] Attempting to load and unmarshal data from: `examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json`...
+[INFO] Successfully unmarshalled data from: `examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json`
+[INFO] Determining file's BOM format and version...
+[INFO] Determined BOM format, version (variant): `CycloneDX`, `1.2` (latest)
+[INFO] Matching BOM schema (for validation): schema/cyclonedx/1.2/bom-1.2.schema.json
+[INFO] Loading schema `schema/cyclonedx/1.2/bom-1.2.schema.json`...
+[INFO] Schema `schema/cyclonedx/1.2/bom-1.2.schema.json` loaded.
+[INFO] Validating `examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json`...
+[INFO] BOM valid against JSON schema: `true`
+```
+
+You can also verify the [exit code](#exit-codes) from the validate command:
+
+```bash
+echo $?
+```
+
+```bash
+0  // no error (valid)
+```
+
+#### Example: Validate using "custom" schema variants
+
+The validation command will use the declared format and version found within the SBOM JSON file itself to lookup the default (latest) matching schema version (as declared in`config.json`; however, if variants of that same schema (same format and version) are declared, they can be requested via the `--variant` command line flag:
+
+```bash
+./sbom-utility validate -i test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json --variant custom
+```
+
+If you run the sample command above, you would see several "custom" schema errors resulting in an invalid SBOM determination (i.e., `exit status 2`):
+
+```text
+[INFO] Loading (embedded) default schema config file: `config.json`...
+[INFO] Loading (embedded) default license policy file: `license.json`...
+[INFO] Attempting to load and unmarshal data from: `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`...
+[INFO] Successfully unmarshalled data from: `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`
+[INFO] Determining file's BOM format and version...
+[INFO] Determined BOM format, version (variant): `CycloneDX`, `1.4` custom
+[INFO] Matching BOM schema (for validation): schema/test/bom-1.4-custom.schema.json
+[INFO] Loading schema `schema/test/bom-1.4-custom.schema.json`...
+[INFO] Schema `schema/test/bom-1.4-custom.schema.json` loaded.
+[INFO] Validating `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`...
+[INFO] BOM valid against JSON schema: `false`
+[INFO] (3) schema errors detected.
+[INFO] Formatting error results (`txt` format)...
+1. {
+        "type": "contains",
+        "field": "metadata.properties",
+        "context": "(root).metadata.properties",
+        "description": "At least one of the items must match",
+        "value": [
+            {
+                "name": "urn:example.com:disclaimer",
+                "value": "This SBOM is current as of the date it was generated."
+            },
+            {
+                "name": "urn:example.com:classification",
+                "value": "This SBOM is Confidential Information. Do not distribute."
+            }
+        ]
+    }
+2. {
+        "type": "const",
+        "field": "metadata.properties.0.value",
+        "context": "(root).metadata.properties.0.value",
+        "description": "metadata.properties.0.value does not match: \"This SBOM is current as of the date it was generated and is subject to change.\"",
+        "value": "This SBOM is current as of the date it was generated."
+    }
+3. {
+        "type": "number_all_of",
+        "field": "metadata.properties",
+        "context": "(root).metadata.properties",
+        "description": "Must validate all the schemas (allOf)",
+        "value": [
+            {
+                "name": "urn:example.com:disclaimer",
+                "value": "This SBOM is current as of the date it was generated."
+            },
+            {
+                "name": "urn:example.com:classification",
+                "value": "This SBOM is Confidential Information. Do not distribute."
+            }
+        ]
+    }
+[ERROR] invalid SBOM: schema errors found (test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json)
+[INFO] document `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`: valid=[false]
+```
+
+confirming the exit code:
+
+```bash
+echo $?
+```
+
+```bash
+2 // SBOM error
+```
+
+##### Why validation failed
+
+The output shows a first schema error indicating the failing JSON object; in this case,
+
+- the CycloneDX `metadata.properties` field, which is a list of `property` objects.
+- Found that a property with a `name` field with the value  `"urn:example.com:disclaimer"` had an incorrect `value`.
+  - the `value` field SHOULD have had a constant value of `"This SBOM is current as of the date it was generated and is subject to change."` (as was required by the custom schema's regex).
+  - However, it was found to have only a partial match of `"This SBOM is current as of the date it was generated."`.
+
+##### Details of the schema error
+
+Use the `--debug` or `-d` flag to see all schema error details:
+
+```bash
+./sbom-utility validate -i test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json --variant custom -d
+```
+
+The details include the full context of the failing `metadata.properties` object which also includes a `"urn:example.com:classification"` property:
+
+```bash
+3. {
+        "type": "number_all_of",
+        "field": "metadata.properties",
+        "context": "(root).metadata.properties",
+        "description": "Must validate all the schemas (allOf)",
+        "value": [
+            {
+                "name": "urn:example.com:disclaimer",
+                "value": "This SBOM is current as of the date it was generated."
+            },
+            {
+                "name": "urn:example.com:classification",
+                "value": "This SBOM is Confidential Information. Do not distribute."
+            }
+        ]
+    }
+```
+
+#### Example: Validate using "JSON" format
+
+The JSON format will provide an `array` of schema error results that can be post-processed as part of validation toolchain.
+
+```bash
+./sbom-utility validate -i test/validation/cdx-1-4-validate-err-components-unique-items-1.json --format json --quiet
+```
+
+```json
+[
+    {
+        "type": "unique",
+        "field": "components",
+        "context": "(root).components",
+        "description": "array items[1,2] must be unique",
+        "value": {
+            "type": "array",
+            "index": 1,
+            "item": {
+                "bom-ref": "pkg:npm/body-parser@1.19.0",
+                "description": "Node.js body parsing middleware",
+                "hashes": [
+                    {
+                        "alg": "SHA-1",
+                        "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+                    }
+                ],
+                "licenses": [
+                    {
+                        "license": {
+                            "id": "MIT"
+                        }
+                    }
+                ],
+                "name": "body-parser",
+                "purl": "pkg:npm/body-parser@1.19.0",
+                "type": "library",
+                "version": "1.19.0"
+            }
+        }
+    },
+    {
+        "type": "unique",
+        "field": "components",
+        "context": "(root).components",
+        "description": "array items[2,4] must be unique",
+        "value": {
+            "type": "array",
+            "index": 2,
+            "item": {
+                "bom-ref": "pkg:npm/body-parser@1.19.0",
+                "description": "Node.js body parsing middleware",
+                "hashes": [
+                    {
+                        "alg": "SHA-1",
+                        "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+                    }
+                ],
+                "licenses": [
+                    {
+                        "license": {
+                            "id": "MIT"
+                        }
+                    }
+                ],
+                "name": "body-parser",
+                "purl": "pkg:npm/body-parser@1.19.0",
+                "type": "library",
+                "version": "1.19.0"
+            }
+        }
+    }
+]
+```
+
+##### Reducing output size using `error-value=false` flag
+
+In many cases, BOMs may have many errors and having the `value` information details included can be too verbose and lead to large output files to inspect.  In those cases, simply set the `error-value` flag to `false`.
+
+Rerunning the same command with this flag set to false yields a reduced set of information.
+
+```bash
+./sbom-utility validate -i test/validation/cdx-1-4-validate-err-components-unique-items-1.json --format json --error-value=false --quiet
+```
+
+```json
+[
+    {
+        "type": "unique",
+        "field": "components",
+        "context": "(root).components",
+        "description": "array items[1,2] must be unique"
+    },
+    {
+        "type": "unique",
+        "field": "components",
+        "context": "(root).components",
+        "description": "array items[2,4] must be unique"
+    }
+]
+```
+
+---
+
+### Vulnerability
+
+This command will extract basic vulnerability report data from an SBOM that has a "vulnerabilities" list or from a standalone VEX in CycloneDX format. It includes the ability to filter reports data by applying regex to any of the named column data.
+
+#### Vulnerability supported output formats
+
+Use the `--format` flag on the to choose one of the supported output formats:
+
+- txt (default), csv, md
+
+#### Vulnerability result sorting
+
+- `txt`, `csv` and `md` formatted results are sorted by vulnerability `id` (descending) then by `created` date (descending).
+- `json` results are not sorted
+
+#### Vulnerability Examples
+
+##### Example: Vulnerability list
+
+The `list` subcommand provides a complete view of most top-level, vulnerability fields.
+
+```bash
+./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --quiet
+```
+
+```bash
+id              bom-ref  cwe-ids  cvss-severity                                                source-name  source-url                                       published   updated     created     rejected  analysis-state  analysis-justification  description
+--              -------  -------  -------------                                                -----------  ----------                                       ---------   -------     -------     --------  --------------  ----------------------  -----------
+CVE-2023-42004           502      CVSSv31: 7.5 (high)                                          NVD          https://nvd.nist.gov/vuln/detail/CVE-2023-42004  2023-10-02  2023-10-02  2023-10-02            UNDEFINED       UNDEFINED               In FasterXML jackson-databind before 2.13.4, resource exhaustion can occur because of a lack of a check in BeanDeserializer._deserializeFromArray to prevent use of deeply nested arrays. An application is vulnerable only with certain customized choices for deserialization.
+CVE-2023-42003           502      CVSSv31: 7.5 (high)                                          NVD          https://nvd.nist.gov/vuln/detail/CVE-2023-42003  2023-10-02  2023-10-02  2023-10-02            UNDEFINED       UNDEFINED               In FasterXML jackson-databind before 2.14.0-rc1, resource exhaustion can occur because of a lack of a check in primitive value deserializers to avoid deep wrapper array nesting, when the UNWRAP_SINGLE_VALUE_ARRAYS feature is enabled. Additional fix version in 2.13.4.1 and 2.12.17.1
+CVE-2020-25649           611      CVSSv31: 7.5 (high), CVSSv31: 8.2 (high), CVSSv31: 0 (none)  NVD          https://nvd.nist.gov/vuln/detail/CVE-2020-25649  2020-12-03  2023-02-02  2020-12-03            not_affected    code_not_reachable      com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.
+```
+
+###### Example: Vulnerability list summary
+
+This example shows the default text output from using the `--summary` flag:
+
+```bash
+./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --quiet --summary
+```
+
+```bash
+id              cvss-severity        source-name  published   description
+--              -------------        -----------  ---------   -----------
+CVE-2023-42004  CVSSv31: 7.5 (high)  NVD          2023-10-02  In FasterXML jackson-databind before 2.13.4, resource exhaustion can occur because of a lack of a check in BeanDeserializer._deserializeFromArray to prevent use of deeply nested arrays. An application is vulnerable only with certain customized choices for deserialization.
+CVE-2023-42003  CVSSv31: 7.5 (high)  NVD          2023-10-02  In FasterXML jackson-databind before 2.14.0-rc1, resource exhaustion can occur because of a lack of a check in primitive value deserializers to avoid deep wrapper array nesting, when the UNWRAP_SINGLE_VALUE_ARRAYS feature is enabled. Additional fix version in 2.13.4.1 and 2.12.17.1
+CVE-2020-25649  CVSSv31: 7.5 (high)  NVD          2020-12-03  com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.
+```
+
+##### Example: Vulnerability list with `--where` filter with `description` key
+
+```bash
+./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --quiet --where description=XXE
+```
+
+```bash
+id              bom-ref  cwe-ids  cvss-severity                                                source-name  source-url                                       published   updated     created     rejected  analysis-state  analysis-justification  description
+--              -------  -------  -------------                                                -----------  ----------                                       ---------   -------     -------     --------  --------------  ----------------------  -----------
+CVE-2020-25649           611      CVSSv31: 7.5 (high), CVSSv31: 8.2 (high), CVSSv31: 0 (none)  NVD          https://nvd.nist.gov/vuln/detail/CVE-2020-25649  2020-12-03  2023-02-02  2020-12-03            not_affected    code_not_reachable      com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.
+```
+
+##### Example: Vulnerability list with `--where` filter with `analysis-state` key
+
+```bash
+./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --quiet --where analysis-state=not_affected
+```
+
+```bash
+id              bom-ref  cwe-ids  cvss-severity                                                source-name  source-url                                       published   updated     created     rejected  analysis-state  analysis-justification  description
+--              -------  -------  -------------                                                -----------  ----------                                       ---------   -------     -------     --------  --------------  ----------------------  -----------
+CVE-2020-25649           611      CVSSv31: 7.5 (high), CVSSv31: 8.2 (high), CVSSv31: 0 (none)  NVD          https://nvd.nist.gov/vuln/detail/CVE-2020-25649  2020-12-03  2023-02-02  2020-12-03            not_affected    code_not_reachable      com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.
+```
+
+---
+
+#### Completion
+
+This command will generate command-line completion scripts, for the this utility, customized for various supported shells.
+
+The completion command can be invoked as follows:
+
+```bash
+./sbom_utility completion [shell]
+```
+
+where valid values for `shell` are:
+
+- bash
+- fish
+- powershell
+- zsh
+
+---
+
+### Help
+
+The utility supports the `help` command for the root command as well as any supported commands
+
+For example, to list top-level (root command) help which lists the supported "Available Commands":
+
+```bash
+./sbom-utility help
+```
+
+A specific command-level help listing is also available. For example, you can access the help for the `validate` command:
+
+```bash
+./sbom-utility help validate
+```
+
+---
+
+## Experimental Commands
+
+This section contains *experimental* commands that will be promoted once vetted by the community over two or more point releases.
+
+### Diff
+
+This *experimental* command will compare two *similar* BOMs and return the delta (or "diff") in JSON (diff-patch format) or text. This functionality is based upon code ancestral to that used to report file diffs between `git commit`s.
+
+##### Notes
+
+- This command is undergoing analysis and tests which are exposing some underlying issues around "moved" objects in dependent diff-patch packages that may not be fixable and have no alternatives.
+  - *Specifically, the means by which "moved" objects are assigned "similarity" scores appears flawed in the case of JSON.*
+  - *Additionally, some of the underlying code relies upon Go maps which do not preserve key ordering.*
+
+#### Diff supported output formats
+
+Use the `--format` flag on the to choose one of the supported output formats:
+
+- txt (default), json
+
+#### Diff Examples
+
+##### Example: Add, delete and modify
+
+```bash
+./sbom-utility diff -i test/diff/json-array-order-change-with-add-and-delete-base.json -r test/diff/json-array-order-change-with-add-and-delete-delta.json --quiet --format txt --colorize=true
+```
+
+```bash
+ {
+   "licenses": [
+     0: {
+       "license": {
+-        "id": "Apache-1.0"
++        "id": "GPL-2.0"
+       }
+     },
+-+    2=>1: {
+-+      "license": {
+-+        "id": "GPL-3.0-only"
+-+      }
+-+    },
+     2: {
+       "license": {
+         "id": "GPL-3.0-only"
+       }
+     },
+     3: {
+       "license": {
+         "id": "MIT"
+       }
+     }
+   ]
+ }
+```
+
+---
+
 ### Patch
 
-This command is able to "patch" an existing JSON BOM document using an [IETF RFC6902](https://datatracker.ietf.org/doc/html/rfc6902/#section-4.1) *"JavaScript Object Notation (JSON) Patch"* file.
+This *experimental* command is able to "patch" an existing JSON BOM document using an [IETF RFC6902](https://datatracker.ietf.org/doc/html/rfc6902/#section-4.1) *"JavaScript Object Notation (JSON) Patch"* file.
 
 The current implementation supports the following "patch" operations:
 
@@ -1584,451 +2036,6 @@ an error (i.e., `[ERROR]`) would be returned from the utility:
         "value": "Value 3"
     }
 }
-```
-
----
-
-### Validate
-
-This command will parse standardized SBOMs and validate it against its declared format and version (e.g., SPDX 2.2, CycloneDX 1.4). Custom  variants of standard JSON schemas can be used for validation by supplying the `--variant` name as a flag. Explicit JSON schemas can be specified using the `--force` flag.
-
-#### Validate supported schemas
-
-Use the [schema](#schema) command to list supported schemas formats, versions and variants.
-
-Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file. See [adding schemas](#adding-schemas).
-
-#### Validate flags
-
-The following flags can be used to improve performance when formatting error output results:
-
-##### `--error-limit` flag
-
-Use the `--error-limit x` (default: `10`) flag to reduce the formatted error result output to the first `x` errors.  By default, only the first 10 errors are output with an informational messaging indicating `x/y` errors were shown.
-
-##### `--error-value` flag
-
-Use the `--error-value=true|false` (default: `true`) flag to reduce the formatted error result output by not showing the `value` field which shows detailed information about the failing data in the BOM.
-
-##### `--colorize` flag
-
-Use the `--colorize=true|false` (default: `false`) flag to add/remove color formatting to error result `txt` formatted output.  By default, `txt` formatted error output is colorized to help with human readability; for automated use, it can be turned off.
-
-#### Validate Examples
-
-##### Example: Validate using inferred format and schema
-
-Validating the "juice shop" SBOM (CycloneDX 1.2) example provided in this repository.
-
-```bash
-./sbom-utility validate -i examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json
-```
-
-```bash
-[INFO] Loading (embedded) default schema config file: `config.json`...
-[INFO] Loading (embedded) default license policy file: `license.json`...
-[INFO] Attempting to load and unmarshal data from: `examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json`...
-[INFO] Successfully unmarshalled data from: `examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json`
-[INFO] Determining file's BOM format and version...
-[INFO] Determined BOM format, version (variant): `CycloneDX`, `1.2` (latest)
-[INFO] Matching BOM schema (for validation): schema/cyclonedx/1.2/bom-1.2.schema.json
-[INFO] Loading schema `schema/cyclonedx/1.2/bom-1.2.schema.json`...
-[INFO] Schema `schema/cyclonedx/1.2/bom-1.2.schema.json` loaded.
-[INFO] Validating `examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json`...
-[INFO] BOM valid against JSON schema: `true`
-```
-
-You can also verify the [exit code](#exit-codes) from the validate command:
-
-```bash
-echo $?
-```
-
-```bash
-0  // no error (valid)
-```
-
-#### Example: Validate using "custom" schema variants
-
-The validation command will use the declared format and version found within the SBOM JSON file itself to lookup the default (latest) matching schema version (as declared in`config.json`; however, if variants of that same schema (same format and version) are declared, they can be requested via the `--variant` command line flag:
-
-```bash
-./sbom-utility validate -i test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json --variant custom
-```
-
-If you run the sample command above, you would see several "custom" schema errors resulting in an invalid SBOM determination (i.e., `exit status 2`):
-
-```text
-[INFO] Loading (embedded) default schema config file: `config.json`...
-[INFO] Loading (embedded) default license policy file: `license.json`...
-[INFO] Attempting to load and unmarshal data from: `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`...
-[INFO] Successfully unmarshalled data from: `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`
-[INFO] Determining file's BOM format and version...
-[INFO] Determined BOM format, version (variant): `CycloneDX`, `1.4` custom
-[INFO] Matching BOM schema (for validation): schema/test/bom-1.4-custom.schema.json
-[INFO] Loading schema `schema/test/bom-1.4-custom.schema.json`...
-[INFO] Schema `schema/test/bom-1.4-custom.schema.json` loaded.
-[INFO] Validating `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`...
-[INFO] BOM valid against JSON schema: `false`
-[INFO] (3) schema errors detected.
-[INFO] Formatting error results (`txt` format)...
-1. {
-        "type": "contains",
-        "field": "metadata.properties",
-        "context": "(root).metadata.properties",
-        "description": "At least one of the items must match",
-        "value": [
-            {
-                "name": "urn:example.com:disclaimer",
-                "value": "This SBOM is current as of the date it was generated."
-            },
-            {
-                "name": "urn:example.com:classification",
-                "value": "This SBOM is Confidential Information. Do not distribute."
-            }
-        ]
-    }
-2. {
-        "type": "const",
-        "field": "metadata.properties.0.value",
-        "context": "(root).metadata.properties.0.value",
-        "description": "metadata.properties.0.value does not match: \"This SBOM is current as of the date it was generated and is subject to change.\"",
-        "value": "This SBOM is current as of the date it was generated."
-    }
-3. {
-        "type": "number_all_of",
-        "field": "metadata.properties",
-        "context": "(root).metadata.properties",
-        "description": "Must validate all the schemas (allOf)",
-        "value": [
-            {
-                "name": "urn:example.com:disclaimer",
-                "value": "This SBOM is current as of the date it was generated."
-            },
-            {
-                "name": "urn:example.com:classification",
-                "value": "This SBOM is Confidential Information. Do not distribute."
-            }
-        ]
-    }
-[ERROR] invalid SBOM: schema errors found (test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json)
-[INFO] document `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`: valid=[false]
-```
-
-confirming the exit code:
-
-```bash
-echo $?
-```
-
-```bash
-2 // SBOM error
-```
-
-##### Why validation failed
-
-The output shows a first schema error indicating the failing JSON object; in this case,
-
-- the CycloneDX `metadata.properties` field, which is a list of `property` objects.
-- Found that a property with a `name` field with the value  `"urn:example.com:disclaimer"` had an incorrect `value`.
-  - the `value` field SHOULD have had a constant value of `"This SBOM is current as of the date it was generated and is subject to change."` (as was required by the custom schema's regex).
-  - However, it was found to have only a partial match of `"This SBOM is current as of the date it was generated."`.
-
-##### Details of the schema error
-
-Use the `--debug` or `-d` flag to see all schema error details:
-
-```bash
-./sbom-utility validate -i test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json --variant custom -d
-```
-
-The details include the full context of the failing `metadata.properties` object which also includes a `"urn:example.com:classification"` property:
-
-```bash
-3. {
-        "type": "number_all_of",
-        "field": "metadata.properties",
-        "context": "(root).metadata.properties",
-        "description": "Must validate all the schemas (allOf)",
-        "value": [
-            {
-                "name": "urn:example.com:disclaimer",
-                "value": "This SBOM is current as of the date it was generated."
-            },
-            {
-                "name": "urn:example.com:classification",
-                "value": "This SBOM is Confidential Information. Do not distribute."
-            }
-        ]
-    }
-```
-
-#### Example: Validate using "JSON" format
-
-The JSON format will provide an `array` of schema error results that can be post-processed as part of validation toolchain.
-
-```bash
-./sbom-utility validate -i test/validation/cdx-1-4-validate-err-components-unique-items-1.json --format json --quiet
-```
-
-```json
-[
-    {
-        "type": "unique",
-        "field": "components",
-        "context": "(root).components",
-        "description": "array items[1,2] must be unique",
-        "value": {
-            "type": "array",
-            "index": 1,
-            "item": {
-                "bom-ref": "pkg:npm/body-parser@1.19.0",
-                "description": "Node.js body parsing middleware",
-                "hashes": [
-                    {
-                        "alg": "SHA-1",
-                        "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
-                    }
-                ],
-                "licenses": [
-                    {
-                        "license": {
-                            "id": "MIT"
-                        }
-                    }
-                ],
-                "name": "body-parser",
-                "purl": "pkg:npm/body-parser@1.19.0",
-                "type": "library",
-                "version": "1.19.0"
-            }
-        }
-    },
-    {
-        "type": "unique",
-        "field": "components",
-        "context": "(root).components",
-        "description": "array items[2,4] must be unique",
-        "value": {
-            "type": "array",
-            "index": 2,
-            "item": {
-                "bom-ref": "pkg:npm/body-parser@1.19.0",
-                "description": "Node.js body parsing middleware",
-                "hashes": [
-                    {
-                        "alg": "SHA-1",
-                        "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
-                    }
-                ],
-                "licenses": [
-                    {
-                        "license": {
-                            "id": "MIT"
-                        }
-                    }
-                ],
-                "name": "body-parser",
-                "purl": "pkg:npm/body-parser@1.19.0",
-                "type": "library",
-                "version": "1.19.0"
-            }
-        }
-    }
-]
-```
-
-##### Reducing output size using `error-value=false` flag
-
-In many cases, BOMs may have many errors and having the `value` information details included can be too verbose and lead to large output files to inspect.  In those cases, simply set the `error-value` flag to `false`.
-
-Rerunning the same command with this flag set to false yields a reduced set of information.
-
-```bash
-./sbom-utility validate -i test/validation/cdx-1-4-validate-err-components-unique-items-1.json --format json --error-value=false --quiet
-```
-
-```json
-[
-    {
-        "type": "unique",
-        "field": "components",
-        "context": "(root).components",
-        "description": "array items[1,2] must be unique"
-    },
-    {
-        "type": "unique",
-        "field": "components",
-        "context": "(root).components",
-        "description": "array items[2,4] must be unique"
-    }
-]
-```
-
----
-
-### Vulnerability
-
-This command will extract basic vulnerability report data from an SBOM that has a "vulnerabilities" list or from a standalone VEX in CycloneDX format. It includes the ability to filter reports data by applying regex to any of the named column data.
-
-#### Vulnerability supported output formats
-
-Use the `--format` flag on the to choose one of the supported output formats:
-
-- txt (default), csv, md
-
-#### Vulnerability result sorting
-
-- `txt`, `csv` and `md` formatted results are sorted by vulnerability `id` (descending) then by `created` date (descending).
-- `json` results are not sorted
-
-#### Vulnerability Examples
-
-##### Example: Vulnerability list
-
-The `list` subcommand provides a complete view of most top-level, vulnerability fields.
-
-```bash
-./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --quiet
-```
-
-```bash
-id              bom-ref  cwe-ids  cvss-severity                                                source-name  source-url                                       published   updated     created     rejected  analysis-state  analysis-justification  description
---              -------  -------  -------------                                                -----------  ----------                                       ---------   -------     -------     --------  --------------  ----------------------  -----------
-CVE-2023-42004           502      CVSSv31: 7.5 (high)                                          NVD          https://nvd.nist.gov/vuln/detail/CVE-2023-42004  2023-10-02  2023-10-02  2023-10-02            UNDEFINED       UNDEFINED               In FasterXML jackson-databind before 2.13.4, resource exhaustion can occur because of a lack of a check in BeanDeserializer._deserializeFromArray to prevent use of deeply nested arrays. An application is vulnerable only with certain customized choices for deserialization.
-CVE-2023-42003           502      CVSSv31: 7.5 (high)                                          NVD          https://nvd.nist.gov/vuln/detail/CVE-2023-42003  2023-10-02  2023-10-02  2023-10-02            UNDEFINED       UNDEFINED               In FasterXML jackson-databind before 2.14.0-rc1, resource exhaustion can occur because of a lack of a check in primitive value deserializers to avoid deep wrapper array nesting, when the UNWRAP_SINGLE_VALUE_ARRAYS feature is enabled. Additional fix version in 2.13.4.1 and 2.12.17.1
-CVE-2020-25649           611      CVSSv31: 7.5 (high), CVSSv31: 8.2 (high), CVSSv31: 0 (none)  NVD          https://nvd.nist.gov/vuln/detail/CVE-2020-25649  2020-12-03  2023-02-02  2020-12-03            not_affected    code_not_reachable      com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.
-```
-
-###### Example: Vulnerability list summary
-
-This example shows the default text output from using the `--summary` flag:
-
-```bash
-./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --quiet --summary
-```
-
-```bash
-id              cvss-severity        source-name  published   description
---              -------------        -----------  ---------   -----------
-CVE-2023-42004  CVSSv31: 7.5 (high)  NVD          2023-10-02  In FasterXML jackson-databind before 2.13.4, resource exhaustion can occur because of a lack of a check in BeanDeserializer._deserializeFromArray to prevent use of deeply nested arrays. An application is vulnerable only with certain customized choices for deserialization.
-CVE-2023-42003  CVSSv31: 7.5 (high)  NVD          2023-10-02  In FasterXML jackson-databind before 2.14.0-rc1, resource exhaustion can occur because of a lack of a check in primitive value deserializers to avoid deep wrapper array nesting, when the UNWRAP_SINGLE_VALUE_ARRAYS feature is enabled. Additional fix version in 2.13.4.1 and 2.12.17.1
-CVE-2020-25649  CVSSv31: 7.5 (high)  NVD          2020-12-03  com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.
-```
-
-##### Example: Vulnerability list with `--where` filter with `description` key
-
-```bash
-./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --quiet --where description=XXE
-```
-
-```bash
-id              bom-ref  cwe-ids  cvss-severity                                                source-name  source-url                                       published   updated     created     rejected  analysis-state  analysis-justification  description
---              -------  -------  -------------                                                -----------  ----------                                       ---------   -------     -------     --------  --------------  ----------------------  -----------
-CVE-2020-25649           611      CVSSv31: 7.5 (high), CVSSv31: 8.2 (high), CVSSv31: 0 (none)  NVD          https://nvd.nist.gov/vuln/detail/CVE-2020-25649  2020-12-03  2023-02-02  2020-12-03            not_affected    code_not_reachable      com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.
-```
-
-##### Example: Vulnerability list with `--where` filter with `analysis-state` key
-
-```bash
-./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --quiet --where analysis-state=not_affected
-```
-
-```bash
-id              bom-ref  cwe-ids  cvss-severity                                                source-name  source-url                                       published   updated     created     rejected  analysis-state  analysis-justification  description
---              -------  -------  -------------                                                -----------  ----------                                       ---------   -------     -------     --------  --------------  ----------------------  -----------
-CVE-2020-25649           611      CVSSv31: 7.5 (high), CVSSv31: 8.2 (high), CVSSv31: 0 (none)  NVD          https://nvd.nist.gov/vuln/detail/CVE-2020-25649  2020-12-03  2023-02-02  2020-12-03            not_affected    code_not_reachable      com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.  Affected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.
-```
-
----
-
-### Diff
-
-This *experimental* command will compare two *similar* BOMs and return the delta (or "diff") in JSON (diff-patch format) or text. This functionality is based upon code ancestral to that used to report file diffs between `git commit`s.
-
-##### Notes
-
-- This command is undergoing analysis and tests which are exposing some underlying issues around "moved" objects in dependent diff-patch packages that may not be fixable and have no alternatives.
-  - *Specifically, the means by which "moved" objects are assigned "similarity" scores appears flawed in the case of JSON.*
-  - *Additionally, some of the underlying code relies upon Go maps which do not preserve key ordering.*
-
-#### Diff supported output formats
-
-Use the `--format` flag on the to choose one of the supported output formats:
-
-- txt (default), json
-
-#### Diff Examples
-
-##### Example: Add, delete and modify
-
-```bash
-./sbom-utility diff -i test/diff/json-array-order-change-with-add-and-delete-base.json -r test/diff/json-array-order-change-with-add-and-delete-delta.json --quiet --format txt --colorize=true
-```
-
-```bash
- {
-   "licenses": [
-     0: {
-       "license": {
--        "id": "Apache-1.0"
-+        "id": "GPL-2.0"
-       }
-     },
--+    2=>1: {
--+      "license": {
--+        "id": "GPL-3.0-only"
--+      }
--+    },
-     2: {
-       "license": {
-         "id": "GPL-3.0-only"
-       }
-     },
-     3: {
-       "license": {
-         "id": "MIT"
-       }
-     }
-   ]
- }
-```
-
----
-
-#### Completion
-
-This command will generate command-line completion scripts, for the this utility, customized for various supported shells.
-
-The completion command can be invoked as follows:
-
-```bash
-./sbom_utility completion [shell]
-```
-
-where valid values for `shell` are:
-
-- bash
-- fish
-- powershell
-- zsh
-
----
-
-### Help
-
-The utility supports the `help` command for the root command as well as any supported commands
-
-For example, to list top-level (root command) help which lists the supported "Available Commands":
-
-```bash
-./sbom-utility help
-```
-
-A specific command-level help listing is also available. For example, you can access the help for the `validate` command:
-
-```bash
-./sbom-utility help validate
 ```
 
 ---

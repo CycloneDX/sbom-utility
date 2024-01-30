@@ -227,24 +227,3 @@ func sliceContainsValue(slice []interface{}, value interface{}) (foundValue inte
 	}
 	return
 }
-
-// func sliceContainsValueAtIndex(slice []interface{}, value interface{}, index int) (contains bool, err error) {
-// 	getLogger().Enter()
-// 	defer getLogger().Exit()
-
-// 	lenSlice := len(slice)
-// 	if index < 0 {
-// 		err = fmt.Errorf("index out of range. index: %v, slice range: %v", index, lenSlice)
-// 		return
-// 	}
-
-// 	var foundIndex int
-// 	_, foundIndex, contains, err = sliceContainsValue(slice, value)
-
-// 	if index == foundIndex {
-// 		contains = true
-// 		return
-// 	}
-
-// 	return
-// }
