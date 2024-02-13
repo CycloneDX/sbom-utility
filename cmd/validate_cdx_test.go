@@ -26,6 +26,7 @@ const (
 	TEST_CDX_1_3_MIN_REQUIRED = "test/cyclonedx/cdx-1-3-min-required.json"
 	TEST_CDX_1_4_MIN_REQUIRED = "test/cyclonedx/cdx-1-4-min-required.json"
 	TEST_CDX_1_5_MIN_REQUIRED = "test/cyclonedx/cdx-1-5-min-required.json"
+	TEST_CDX_1_6_MIN_REQUIRED = "test/cyclonedx/1.6/cdx-1-6-min-required.json"
 )
 
 // Mature SBOMs used to test various schemas and queries
@@ -59,6 +60,11 @@ func TestValidateCdx14MinRequiredBasic(t *testing.T) {
 
 func TestValidateCdx15MinRequiredBasic(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_5_MIN_REQUIRED)
+	innerTestValidate(t, *vti)
+}
+
+func TestValidateCdx16MinRequiredBasic(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_6_MIN_REQUIRED)
 	innerTestValidate(t, *vti)
 }
 
