@@ -28,7 +28,6 @@ import (
 
 // Custom JSON schema files for testing
 const (
-	SCHEMA_VARIANT_CUSTOM      = "custom"
 	TEST_SCHEMA_CDX_1_3_CUSTOM = "resources/schema/test/bom-1.3-custom.schema.json"
 	TEST_SCHEMA_CDX_1_4_CUSTOM = "resources/schema/test/bom-1.4-custom.schema.json"
 )

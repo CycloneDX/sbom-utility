@@ -339,7 +339,7 @@ type CDXDependency struct {
 
 // v1.2: existed
 // Note: "flow" is of type "dataFlow" which is a constrained `string` type
-// v1.5: removed.  No longer an object; no it is a "string" ( "flow" moved out as "string" into "serviceData" object)
+// v1.5: removed.  No longer an object; now it is a "string" ( "flow" moved out as "string" into "serviceData" object)
 // type CDXDataClassification struct {
 // 	Flow           string `json:"flow,omitempty"`
 // 	Classification string `json:"classification,omitempty"`
