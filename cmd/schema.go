@@ -48,20 +48,20 @@ const (
 )
 
 const (
-	SCHEMA_DATA_KEY_KEY_NAME    = "name"    // summary
-	SCHEMA_DATA_KEY_KEY_FORMAT  = "format"  // summary
-	SCHEMA_DATA_KEY_KEY_VERSION = "version" // summary
-	SCHEMA_DATA_KEY_KEY_VARIANT = "variant" // summary
 	SCHEMA_DATA_KEY_KEY_FILE    = "file"    // summary
+	SCHEMA_DATA_KEY_KEY_FORMAT  = "format"  // summary
+	SCHEMA_DATA_KEY_KEY_NAME    = "name"    // summary
 	SCHEMA_DATA_KEY_KEY_SOURCE  = "url"     // summary
+	SCHEMA_DATA_KEY_KEY_VARIANT = "variant" // summary
+	SCHEMA_DATA_KEY_KEY_VERSION = "version" // summary
 )
 
 // NOTE: columns will be output in order they are listed here:
 var SCHEMA_LIST_ROW_DATA = []ColumnFormatData{
 	{SCHEMA_DATA_KEY_KEY_NAME, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{SCHEMA_DATA_KEY_KEY_VARIANT, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
 	{SCHEMA_DATA_KEY_KEY_FORMAT, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
 	{SCHEMA_DATA_KEY_KEY_VERSION, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
-	{SCHEMA_DATA_KEY_KEY_VARIANT, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
 	{SCHEMA_DATA_KEY_KEY_FILE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
 	{SCHEMA_DATA_KEY_KEY_SOURCE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
 }
@@ -237,7 +237,7 @@ func DisplaySchemasTabbedText(writer io.Writer, filteredSchemas []schema.FormatS
 	w := new(tabwriter.Writer)
 
 	// min-width, tab-width, padding, pad-char, flags
-	w.Init(writer, 8, 2, 2, ' ', 0)
+	w.Init(writer, 2, 2, 2, ' ', 0)
 	defer w.Flush()
 
 	// Emit no schemas found warning into output
@@ -261,9 +261,9 @@ func DisplaySchemasTabbedText(writer io.Writer, filteredSchemas []schema.FormatS
 
 		fmt.Fprintf(w, "%v\t%s\t%s\t%s\t%s\t%s\n",
 			schemaInstance.Name,
+			schema.FormatSchemaVariant(schemaInstance.Variant),
 			schemaInstance.Format,
 			schemaInstance.Version,
-			schema.FormatSchemaVariant(schemaInstance.Variant),
 			schemaInstance.File,
 			schemaInstance.Url,
 		)
@@ -307,9 +307,9 @@ func DisplaySchemasMarkdown(writer io.Writer, filteredSchemas []schema.FormatSch
 
 		line = append(line,
 			schemaInstance.Name,
+			schema.FormatSchemaVariant(schemaInstance.Variant),
 			schemaInstance.Format,
 			schemaInstance.Version,
-			schema.FormatSchemaVariant(schemaInstance.Variant),
 			schemaInstance.File,
 			schemaInstance.Url,
 		)
@@ -356,9 +356,9 @@ func DisplaySchemasCSV(writer io.Writer, filteredSchemas []schema.FormatSchemaIn
 		line = nil
 		line = append(line,
 			schemaInstance.Name,
+			schema.FormatSchemaVariant(schemaInstance.Variant),
 			schemaInstance.Format,
 			schemaInstance.Version,
-			schema.FormatSchemaVariant(schemaInstance.Variant),
 			schemaInstance.File,
 			schemaInstance.Url,
 		)

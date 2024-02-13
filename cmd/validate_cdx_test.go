@@ -65,6 +65,7 @@ func TestValidateCdx15MinRequiredBasic(t *testing.T) {
 
 func TestValidateCdx16MinRequiredBasic(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_6_MIN_REQUIRED)
+	vti.SchemaVariant = SCHEMA_VARIANT_DEVELOPMENT
 	innerTestValidate(t, *vti)
 }
 
