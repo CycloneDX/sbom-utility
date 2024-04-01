@@ -419,7 +419,7 @@ func DisplayLicenseListMarkdown(bom *schema.BOM, writer io.Writer) {
 				// NOTE: we only truncate the content text for Text (console) output
 				// TODO perhaps add flag to allow user to specify truncate length (default 8)
 				// See field "DefaultTruncateLength" in ColumnFormatData struct
-				content = lc.License.Text.TruncateContent(8, true)
+				content = lc.License.Text.GetContentTruncated(8, true)
 
 				// Format line and write to output
 				line = append(line,

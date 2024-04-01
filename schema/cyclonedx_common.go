@@ -69,7 +69,7 @@ type CDXAttachment struct {
 	Content     string `json:"content,omitempty"`
 }
 
-func (attachment *CDXAttachment) TruncateContent(maxLength int, addTruncatedMessage bool) string {
+func (attachment *CDXAttachment) GetContentTruncated(maxLength int, addTruncatedMessage bool) string {
 
 	if length := len(attachment.Content); length > maxLength {
 		if addTruncatedMessage {
