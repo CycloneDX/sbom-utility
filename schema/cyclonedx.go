@@ -210,13 +210,13 @@ type CDXPedigree struct {
 // v1.4: deprecated
 // See: https://www.iso.org/standard/65666.html
 type CDXSwid struct {
-	TagId      string        `json:"tagId,omitempty"`
-	Name       string        `json:"name,omitempty"`
-	Version    string        `json:"version,omitempty"`
-	TagVersion int           `json:"tagVersion,omitempty"`
-	Patch      bool          `json:"patch,omitempty"`
-	Text       CDXAttachment `json:"attachment,omitempty"`
-	Url        string        `json:"url,omitempty"`
+	TagId      string         `json:"tagId,omitempty"`
+	Name       string         `json:"name,omitempty"`
+	Version    string         `json:"version,omitempty"`
+	TagVersion int            `json:"tagVersion,omitempty"`
+	Patch      bool           `json:"patch,omitempty"`
+	Text       *CDXAttachment `json:"attachment,omitempty"`
+	Url        string         `json:"url,omitempty"`
 }
 
 // v1.2: was an anon. type in schema
