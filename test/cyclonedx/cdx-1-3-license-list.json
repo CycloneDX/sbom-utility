@@ -208,14 +208,12 @@
       "licenses": [
         {
           "license": {
-            "name": "BSD",
-            "family": "BSD"
+            "name": "BSD"
           }
         },
         {
           "license": {
-            "name": "AGPL",
-            "family": "AGPL"
+            "name": "AGPL"
           }
         }
       ]
