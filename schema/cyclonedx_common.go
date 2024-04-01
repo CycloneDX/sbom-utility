@@ -18,6 +18,8 @@
 
 package schema
 
+import "fmt"
+
 // v1.4: added
 // v1.5: added Constraints: "minLength": 1
 type CDXRefType string
@@ -65,6 +67,17 @@ type CDXAttachment struct {
 	ContentType string `json:"contentType,omitempty"`
 	Encoding    string `json:"encoding,omitempty"`
 	Content     string `json:"content,omitempty"`
+}
+
+func (attachment *CDXAttachment) GetContentTruncated(maxLength int, addTruncatedMessage bool) string {
+
+	if length := len(attachment.Content); length > maxLength {
+		if addTruncatedMessage {
+			return fmt.Sprintf("%s (truncated from %v) ...", attachment.Content[0:maxLength], length)
+		}
+		return attachment.Content[0:maxLength]
+	}
+	return attachment.Content
 }
 
 // v1.2: existed

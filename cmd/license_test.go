@@ -31,9 +31,10 @@ import (
 
 const (
 	// Test "license list" command
-	TEST_LICENSE_LIST_CDX_1_3            = "test/cyclonedx/cdx-1-3-license-list.json"
-	TEST_LICENSE_LIST_CDX_1_3_NONE_FOUND = "test/cyclonedx/cdx-1-3-license-list-none-found.json"
-	TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND = "test/cyclonedx/cdx-1-4-license-list-none-found.json"
+	TEST_LICENSE_LIST_CDX_1_3                         = "test/cyclonedx/cdx-1-3-license-list.json"
+	TEST_LICENSE_LIST_CDX_1_3_NONE_FOUND              = "test/cyclonedx/cdx-1-3-license-list-none-found.json"
+	TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND              = "test/cyclonedx/cdx-1-4-license-list-none-found.json"
+	TEST_LICENSE_LIST_CDX_1_5_LICENSE_CHOICE_VARIANTS = "test/cyclonedx/cdx-1-5-license-choice-variants.json"
 
 	TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_ID    = "test/cyclonedx/cdx-1-4-license-policy-invalid-spdx-id.json"
 	TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_NAME  = "test/cyclonedx/cdx-1-4-license-policy-invalid-license-name.json"
@@ -63,7 +64,7 @@ func NewLicenseTestInfo(inputFile string, listFormat string, listSummary bool) *
 // license test helper functions
 // -------------------------------------------
 
-func innerTestLicenseListBuffered(t *testing.T, testInfo *LicenseTestInfo, whereFilters []common.WhereFilter) (outputBuffer bytes.Buffer, err error) {
+func innerTestLicenseListBuffered(testInfo *LicenseTestInfo, whereFilters []common.WhereFilter) (outputBuffer bytes.Buffer, err error) {
 	// Declare an output outputBuffer/outputWriter to use used during tests
 	var outputWriter = bufio.NewWriter(&outputBuffer)
 	// MUST ensure all data is written to buffer before further validation
@@ -102,7 +103,7 @@ func innerTestLicenseList(t *testing.T, testInfo *LicenseTestInfo) (outputBuffer
 	}
 
 	// Perform the test with buffered output
-	outputBuffer, err = innerTestLicenseListBuffered(t, testInfo, whereFilters)
+	outputBuffer, err = innerTestLicenseListBuffered(testInfo, whereFilters)
 	if err != nil {
 		getLogger().Tracef("%s", err)
 		return
@@ -159,8 +160,33 @@ func TestLicenseListFormatUnsupportedSPDX2(t *testing.T) {
 }
 
 //---------------------------
-// Raw output tests
+// Test LicenseChoice variants
+// - for all formats
 //---------------------------
+
+func TestLicenseListCdx15VariantsJSON(t *testing.T) {
+	lti := NewLicenseTestInfo(TEST_LICENSE_LIST_CDX_1_5_LICENSE_CHOICE_VARIANTS, FORMAT_JSON, false)
+	innerTestLicenseList(t, lti)
+}
+
+func TestLicenseListCdx15VariantsText(t *testing.T) {
+	lti := NewLicenseTestInfo(TEST_LICENSE_LIST_CDX_1_5_LICENSE_CHOICE_VARIANTS, FORMAT_TEXT, false)
+	innerTestLicenseList(t, lti)
+}
+
+func TestLicenseListCdx15VariantsCSV(t *testing.T) {
+	lti := NewLicenseTestInfo(TEST_LICENSE_LIST_CDX_1_5_LICENSE_CHOICE_VARIANTS, FORMAT_CSV, false)
+	innerTestLicenseList(t, lti)
+}
+
+func TestLicenseListCdx15VariantsMarkdown(t *testing.T) {
+	lti := NewLicenseTestInfo(TEST_LICENSE_LIST_CDX_1_5_LICENSE_CHOICE_VARIANTS, FORMAT_MARKDOWN, false)
+	innerTestLicenseList(t, lti)
+}
+
+// ---------------------------
+// Raw output tests
+// ---------------------------
 
 // Verify "license list" command finds all licenses regardless of where they
 // are declared in schema (e.g., metadata.component, components list, service list, etc.)
@@ -171,6 +197,7 @@ func TestLicenseListCdx13JsonNoneFound(t *testing.T) {
 	lti.ResultExpectedLineCount = 2 // null (valid json) + newline
 	innerTestLicenseList(t, lti)
 }
+
 func TestLicenseListCdx14JsonNoneFound(t *testing.T) {
 	lti := NewLicenseTestInfo(TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND, FORMAT_JSON, false)
 	lti.ResultExpectedLineCount = 2 // null (valid json) + newline

@@ -261,8 +261,26 @@ func ListLicenses(writer io.Writer, policyConfig *schema.LicensePolicyConfig,
 	return
 }
 
+func allocateEmptyLicense(licenseChoice *schema.CDXLicenseChoice) {
+	if licenseChoice != nil {
+		if licenseChoice.License == nil {
+			licenseChoice.License = new(schema.CDXLicense)
+		}
+	}
+}
+
+func allocateEmptyLicenseText(licenseChoice *schema.CDXLicenseChoice) {
+	if licenseChoice != nil {
+		if pLicense := licenseChoice.License; pLicense != nil {
+			if pLicense.Text == nil {
+				pLicense.Text = new(schema.CDXAttachment)
+			}
+		}
+	}
+}
+
 // NOTE: This list is NOT de-duplicated
-// NOTE: if no license are found, the "json.Marshal" method(s) will return a value of "null"
+// NOTE: if no licenses are found, the "json.Marshal" method(s) will return a value of "null"
 // which is valid JSON (and not an empty array)
 // TODO: Support de-duplication (flag) (which MUST be exact using deep comparison)
 func DisplayLicenseListJson(bom *schema.BOM, writer io.Writer) {
@@ -322,6 +340,17 @@ func DisplayLicenseListCSV(bom *schema.BOM, writer io.Writer) (err error) {
 
 				lc := licenseInfo.LicenseChoice
 
+				// Assure we have a valid CDXLicense struct to format
+				if lc.License == nil {
+					allocateEmptyLicense(&lc)
+				}
+
+				// Assure we have at least an empty license text (CDXAttachment) struct to format
+				if lc.License.Text == nil {
+					allocateEmptyLicenseText(&lc)
+				}
+
+				// NOTE: we intentionally do NOT truncate the actual content text for CSV files
 				// Each row will contain every field of a CDX LicenseChoice object
 				currentRow = append(currentRow,
 					lc.License.Id,
@@ -376,12 +405,21 @@ func DisplayLicenseListMarkdown(bom *schema.BOM, writer io.Writer) {
 
 			if licenseInfo.LicenseChoiceTypeValue != schema.LC_TYPE_INVALID {
 				lc := licenseInfo.LicenseChoice
-				content = lc.License.Text.Content
 
-				// Truncate encoded content
-				if content != "" {
-					content = fmt.Sprintf("%s (truncated from %v) ...", content[0:8], len(content))
+				// Assure we have a valid CDXLicense struct to format
+				if lc.License == nil {
+					allocateEmptyLicense(&lc)
 				}
+
+				// Assure we have at least an empty license text (CDXAttachment) struct to format
+				if lc.License.Text == nil {
+					allocateEmptyLicenseText(&lc)
+				}
+
+				// NOTE: we only truncate the content text for Text (console) output
+				// TODO perhaps add flag to allow user to specify truncate length (default 8)
+				// See field "DefaultTruncateLength" in ColumnFormatData struct
+				content = lc.License.Text.GetContentTruncated(8, true)
 
 				// Format line and write to output
 				line = append(line,
