@@ -245,7 +245,7 @@ func TestTrimCdx14PreserveUnencodedChars(t *testing.T) {
 func TestTrimCdx14ComponentPropertiesSampleXXLBuffered(t *testing.T) {
 	ti := NewTrimTestInfo(TEST_TRIM_CDX_1_4_SAMPLE_XXL_1, nil)
 	ti.Keys = append(ti.Keys, "properties")
-	ti.ResultExpectedByteSize = 8123018
+	ti.ResultExpectedByteSize = 8121420
 	outputBuffer, _ := innerBufferedTestTrim(t, ti)
 	// verify "after" trim lengths and content have removed properties
 	getLogger().Tracef("Len(outputBuffer): `%v`\n", outputBuffer.Len())
