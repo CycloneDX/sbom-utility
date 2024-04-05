@@ -115,7 +115,11 @@ func diffCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	}()
 
 	err = Diff(utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.DiffFlags)
-
+	// Note: we turn diff library panics into errors that should change exit status code
+	if err != nil {
+		getLogger().Errorf("diff failed: differences between files perhaps too large.")
+		os.Exit(ERROR_APPLICATION)
+	}
 	return
 }
 
@@ -148,7 +152,7 @@ func Diff(persistentFlags utils.PersistentCommandFlags, flags utils.DiffCommandF
 	bBaseData, errReadBase := os.ReadFile(inputFilename)
 	if errReadBase != nil {
 		getLogger().Debugf("%v", bBaseData[:255])
-		err = getLogger().Errorf("Failed to ReadFile '%s': %s\n", inputFilename, err.Error())
+		err = getLogger().Errorf("Failed to ReadFile '%s': %s", inputFilename, err.Error())
 		return
 	}
 
@@ -157,21 +161,20 @@ func Diff(persistentFlags utils.PersistentCommandFlags, flags utils.DiffCommandF
 	bRevisedData, errReadDelta := os.ReadFile(revisedFilename)
 	if errReadDelta != nil {
 		getLogger().Debugf("%v", bRevisedData[:255])
-		err = getLogger().Errorf("Failed to ReadFile '%s': %s\n", inputFilename, err.Error())
+		err = getLogger().Errorf("Failed to ReadFile '%s': %s", inputFilename, err.Error())
 		return
 	}
 
 	// Compare the base with the revision
-	differ := diff.New()
 	getLogger().Infof("Comparing files: `%s` (base) to `%s` (revised) ...", inputFilename, revisedFilename)
-	d, err := differ.Compare(bBaseData, bRevisedData)
-	if err != nil {
-		err = getLogger().Errorf("Failed to Compare data: %s\n", err.Error())
+	diffResults, errCompare := compareBinaryData(bBaseData, bRevisedData)
+	if errCompare != nil {
+		return errCompare
 	}
 
 	// Output the result
 	var diffString string
-	if d.Modified() {
+	if diffResults.Modified() {
 		getLogger().Infof("Outputting listing (`%s` format)...", format)
 		switch outputFormat {
 		case FORMAT_TEXT:
@@ -179,7 +182,7 @@ func Diff(persistentFlags utils.PersistentCommandFlags, flags utils.DiffCommandF
 			err = json.Unmarshal(bBaseData, &aJson)
 
 			if err != nil {
-				err = getLogger().Errorf("json.Unmarshal() failed '%s': %s\n", inputFilename, err.Error())
+				err = getLogger().Errorf("json.Unmarshal() failed '%s': %s", inputFilename, err.Error())
 				return
 			}
 
@@ -188,10 +191,10 @@ func Diff(persistentFlags utils.PersistentCommandFlags, flags utils.DiffCommandF
 			}
 			config.Coloring = deltaColorize
 			formatter := formatter.NewAsciiFormatter(aJson, config)
-			diffString, err = formatter.Format(d)
+			diffString, err = formatter.Format(diffResults)
 		case FORMAT_JSON:
 			formatter := formatter.NewDeltaFormatter()
-			diffString, err = formatter.Format(d)
+			diffString, err = formatter.Format(diffResults)
 			// Note: JSON data files MUST ends in a newline as this is a POSIX standard
 		default:
 			// Default to Text output for anything else (set as flag default)
@@ -205,5 +208,22 @@ func Diff(persistentFlags utils.PersistentCommandFlags, flags utils.DiffCommandF
 			inputFilename, revisedFilename)
 	}
 
+	return
+}
+
+func compareBinaryData(bBaseData []byte, bRevisedData []byte) (diffResults diff.Diff, err error) {
+	defer func() {
+		if recoveredPanic := recover(); recoveredPanic != nil {
+			fmt.Println("panic occurred:", recoveredPanic)
+			err = getLogger().Errorf("panic occurred: %v", recoveredPanic)
+			return
+		}
+	}()
+
+	differ := diff.New()
+	diffResults, err = differ.Compare(bBaseData, bRevisedData)
+	if err != nil {
+		err = getLogger().Errorf("differ.Compare() failed: %s", err.Error())
+	}
 	return
 }

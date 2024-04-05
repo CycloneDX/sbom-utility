@@ -6,16 +6,8 @@
     "configurations": [
 
         {
-            "name": "DebugServer",
-            "type": "go",
-            "request": "launch",
-            "mode": "debug",
-            "program": "${workspaceFolder}",
-            "dlvFlags": ["--check-go-version=false"]
-        },
-        {
             "showGlobalVariables": true,
-            "name": "Query: SELECT * FROM metadata.component",
+            "name": "Debug: query: SELECT * FROM metadata.component",
             "type": "go",
             "request": "launch",
             "mode": "debug",
@@ -25,12 +17,22 @@
         },
         {
             "showGlobalVariables": true,
-            "name": "Debug: license list --format csv",
+            "name": "Debug: license list",
             "type": "go",
             "request": "launch",
             "mode": "debug",
             "program": "main.go", // "program": "${file}",
-            "args": ["license", "list", "-i", "/Users/Matt_1/Downloads/acdx.json", "--format", "csv"],
+            "args": ["license", "list", "-i", "<filename>", "--format", "json"],
+            "dlvFlags": ["--check-go-version=false"]
+        },
+        {
+            "showGlobalVariables": true,
+            "name": "Debug: diff",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "main.go", // "program": "${file}",
+            "args": ["diff", "-i", "test/cyclonedx/cdx-1-4-mature-example-1.json", "--input-revision", "test/diff/cdx-1-4-mature-example-1-delta.json"],
             "dlvFlags": ["--check-go-version=false"]
         },
     ]
