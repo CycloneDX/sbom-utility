@@ -60,19 +60,21 @@ type CDXBom struct {
 // Sort by:
 // - Required fields: "type", "name"
 func (bom *CDXBom) SortComponents() {
-	components := *(bom.Components)
 
-	// Sort by Format, Version, Variant
-	sort.Slice(components, func(i, j int) bool {
-		value1 := components[i]
-		value2 := components[j]
+	if pComponents := bom.Components; pComponents != nil {
+		components := *pComponents
+		// Sort by Format, Version, Variant
+		sort.Slice(components, func(i, j int) bool {
+			value1 := components[i]
+			value2 := components[j]
 
-		if value1.Type != value2.Type {
-			return value1.Type < value2.Type
-		}
+			if value1.Type != value2.Type {
+				return value1.Type < value2.Type
+			}
 
-		return value1.Name < value2.Name
-	})
+			return value1.Name < value2.Name
+		})
+	}
 }
 
 // v1.2: existed
