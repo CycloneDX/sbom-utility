@@ -18,6 +18,8 @@
 
 package schema
 
+import "sort"
+
 const (
 	KEY_ANNOTATIONS = "annotations"
 	KEY_COMPONENTS  = "components"
@@ -55,6 +57,24 @@ type CDXBom struct {
 	Properties         *[]CDXProperty          `json:"properties,omitempty" cdx:"+1.5"`      // v1.5 added
 }
 
+// Sort by:
+// - Required fields: "type", "name"
+func (bom *CDXBom) SortComponents() {
+	components := *(bom.Components)
+
+	// Sort by Format, Version, Variant
+	sort.Slice(components, func(i, j int) bool {
+		value1 := components[i]
+		value2 := components[j]
+
+		if value1.Type != value2.Type {
+			return value1.Type < value2.Type
+		}
+
+		return value1.Name < value2.Name
+	})
+}
+
 // v1.2: existed
 // v1.3: added "licenses", "properties"
 // v1.5: added "lifecycles"
@@ -75,7 +95,7 @@ type CDXMetadata struct {
 // v1.4: added: "releaseNotes", "signature"
 // v1.4: changed: "version" no longer required
 // v1.4: deprecated: "modified", "cpe", "swid"
-// v1.5: added
+// v1.5: added "modelCard", (component)"data"
 // Note: "bom-ref" is a "refType" which is a constrained `string`
 // TODO: "mime-type" SHOULD become "media-type" which is more modern/inclusive
 // TODO: Remove "service" from "Type" enum. as "service" now exists (deprecate in future versions)
@@ -111,7 +131,7 @@ type CDXComponent struct {
 	Data               *[]CDXComponentData      `json:"data,omitempty"`                      // v1.5: added
 }
 
-// v1.5 added
+// v1.5 added object
 // The general theme or subject matter of the data being specified.
 // TODO: "contents" is plural, but it is not an array
 type CDXComponentData struct {
@@ -126,7 +146,7 @@ type CDXComponentData struct {
 	Governance     *CDXDataGovernance     `json:"governance,omitempty"`
 }
 
-// v1.5 added
+// v1.5 added object
 type CDXContent struct {
 	Attachment *CDXAttachment `json:"attachment,omitempty"`
 	Url        string         `json:"url,omitempty"`
@@ -140,7 +160,7 @@ type CDXDataGovernance struct {
 	Owners     *[]CDXDataGovernanceResponsibleParty `json:"owners,omitempty"`
 }
 
-// v1.5 added
+// v1.5 added structure
 // Constraints: "oneOf": ["organization", "contact"]
 type CDXDataGovernanceResponsibleParty struct {
 	Organization *CDXOrganizationalEntity  `json:"organization,omitempty"`
@@ -229,7 +249,7 @@ type CDXLicenseChoice struct {
 	CDXLicenseExpression
 }
 
-// v1.5: added
+// v1.5: added structure
 // NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXLicenseExpression struct {
 	Expression string      `json:"expression,omitempty"`
@@ -251,7 +271,7 @@ type CDXLicense struct {
 	Properties *[]CDXProperty `json:"properties,omitempty"` // v1.5: added
 }
 
-// v1.5: added
+// v1.5: added object
 type CDXLicensing struct {
 	AltIds        *[]string             `json:"altIds,omitempty"`
 	Licensor      *CDXLicenseLegalParty `json:"licensor,omitempty"`

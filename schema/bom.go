@@ -122,7 +122,6 @@ func (bom *BOM) GetFilename() string {
 }
 
 func (bom *BOM) GetFilenameInterpolated() string {
-
 	if bom.filename == INPUT_TYPE_STDIN {
 		return "stdin"
 	}
@@ -141,14 +140,14 @@ func (bom *BOM) GetCdxMetadata() (pMetadata *CDXMetadata) {
 	if bom := bom.GetCdxBom(); bom != nil {
 		pMetadata = bom.Metadata
 	}
-	return pMetadata
+	return
 }
 
 func (bom *BOM) GetCdxMetadataComponent() (pComponent *CDXComponent) {
 	if metadata := bom.GetCdxMetadata(); metadata != nil {
 		pComponent = metadata.Component
 	}
-	return pComponent
+	return
 }
 
 func (bom *BOM) GetCdxMetadataLicenses() (licenses *[]CDXLicenseChoice) {
