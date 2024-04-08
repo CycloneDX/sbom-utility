@@ -64,6 +64,7 @@ func (bom *CDXBom) Sort() {
 
 	// Sort components
 	// Use required fields: "type", "name"
+	// Use optional identity fields: "purl", "cpe", "swid.TagId"
 	// Sort by the optional field "bom-ref" as this is pseudo-required if
 	// slice elements contain duplicates with both "name" and "type".
 	if pSlice := bom.Components; pSlice != nil {
@@ -79,8 +80,22 @@ func (bom *CDXBom) Sort() {
 			if element1.Name != element2.Name {
 				return element1.Name < element2.Name
 			}
+			if element1.Version != element2.Version {
+				return element1.Version < element2.Version
+			}
 			if element1.BOMRef != nil && element2.BOMRef != nil {
 				return *element1.BOMRef < *element2.BOMRef
+			}
+			if element1.Purl != element2.Purl {
+				return element1.Purl < element2.Purl
+			}
+			if element1.Cpe != element2.Cpe {
+				return element1.Cpe < element2.Cpe
+			}
+			if element1.Swid != nil && element2.Swid != nil {
+				Swid1 := *element1.Swid
+				Swid2 := *element2.Swid
+				return Swid1.TagId < Swid2.TagId
 			}
 			// default: preserve existing order
 			return true

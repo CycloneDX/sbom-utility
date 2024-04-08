@@ -74,12 +74,13 @@ func initCommandTrimFlags(command *cobra.Command) (err error) {
 
 	command.PersistentFlags().StringVar(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_OUTPUT_FORMAT, FORMAT_JSON,
 		MSG_FLAG_OUTPUT_FORMAT+TRIM_OUTPUT_SUPPORTED_FORMATS)
+	command.PersistentFlags().BoolVar(&utils.GlobalFlags.PersistentFlags.Sort, FLAG_TRIM_SORT, false, "")
 	command.Flags().StringVarP(&utils.GlobalFlags.TrimFlags.RawPaths, FLAG_TRIM_FROM_PATHS, "", "", MSG_FLAG_TRIM_FROM_PATHS)
 	command.Flags().StringVarP(&utils.GlobalFlags.TrimFlags.RawKeys, FLAG_TRIM_MAP_KEYS, "", "", MSG_FLAG_TRIM_KEYS)
-	err = command.MarkFlagRequired(FLAG_TRIM_MAP_KEYS)
-	if err != nil {
-		err = getLogger().Errorf("unable to mark flag `%s` as required: %s", FLAG_TRIM_MAP_KEYS, err)
-	}
+	// err = command.MarkFlagRequired(FLAG_TRIM_MAP_KEYS)
+	// if err != nil {
+	// 	err = getLogger().Errorf("unable to mark flag `%s` as required: %s", FLAG_TRIM_MAP_KEYS, err)
+	// }
 	return
 }
 
@@ -160,7 +161,7 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 	}
 
 	// validate parameters
-	if len(trimFlags.Keys) == 0 && utils.GlobalFlags.PersistentFlags.Sort == false {
+	if len(trimFlags.Keys) == 0 && !persistentFlags.Sort {
 		// TODO create named error type in schema package
 		err = getLogger().Errorf("invalid parameter value: missing `keys` value from command")
 		return
@@ -201,7 +202,7 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 	}
 
 	// Sort slices of BOM if "sort" flag set to true
-	if utils.GlobalFlags.PersistentFlags.Sort {
+	if persistentFlags.Sort {
 		// Sort the slices of structures
 		if document.GetCdxBom() != nil {
 			document.GetCdxBom().Sort()
