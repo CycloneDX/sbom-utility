@@ -188,11 +188,14 @@ func Patch(writer io.Writer, persistentFlags utils.PersistentCommandFlags, patch
 		return
 	}
 
-	// After patch records are applied; update the CdxBOM
+	// After patch records are applied to the JSON map;
+	// update the corresponding "CdxBom" using the "unmarshal" wrapper.
 	// NOTE: If any JSON keys that are NOT part of the CycloneDX spec.
 	// have been added via a patch "add" operation, they will be removed
 	// during the unmarshal process.
-	err = document.UnmarshalCycloneDXBOM()
+	if document.CdxBom, err = schema.UnMarshalDocument(document.JsonMap); err != nil {
+		return
+	}
 
 	// Output the "patched" version of the Input BOM
 	format := persistentFlags.OutputFormat

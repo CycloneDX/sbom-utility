@@ -32,6 +32,7 @@ import (
 const (
 	FLAG_TRIM_FROM_PATHS = "from"
 	FLAG_TRIM_MAP_KEYS   = "keys"
+	FLAG_TRIM_SORT       = "sort"
 )
 
 // flag help (translate)
@@ -159,7 +160,7 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 	}
 
 	// validate parameters
-	if len(trimFlags.Keys) == 0 {
+	if len(trimFlags.Keys) == 0 && utils.GlobalFlags.PersistentFlags.Sort == false {
 		// TODO create named error type in schema package
 		err = getLogger().Errorf("invalid parameter value: missing `keys` value from command")
 		return
@@ -197,6 +198,14 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 	// Fully unmarshal the SBOM into named structures
 	if err = document.UnmarshalCycloneDXBOM(); err != nil {
 		return
+	}
+
+	// Sort slices of BOM if "sort" flag set to true
+	if utils.GlobalFlags.PersistentFlags.Sort {
+		// Sort the slices of structures
+		if document.GetCdxBom() != nil {
+			document.GetCdxBom().Sort()
+		}
 	}
 
 	// Output the "trimmed" version of the Input BOM

@@ -1,0 +1,65 @@
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "serialNumber": "urn:uuid:xxxx",
+    "version": 1,
+    "metadata": {
+        "component": {
+            "bom-ref": "acme-app",
+            "name": "Acme Application",
+            "type": "application",
+            "version": "x.y.z"
+        }
+    },
+    "components": [
+        {
+            "bom-ref": "pkg:maven/org.acme/web-framework@1.0.0",
+            "group": "org.acme",
+            "name": "web-framework",
+            "purl": "pkg:maven/org.acme/web-framework@1.0.0",
+            "type": "library",
+            "version": "1.0.0"
+        },
+        {
+            "bom-ref": "pkg:maven/org.acme/persistence@3.1.0",
+            "group": "org.acme",
+            "name": "persistence",
+            "purl": "pkg:maven/org.acme/persistence@3.1.0",
+            "type": "library",
+            "version": "3.1.0"
+        },
+        {
+            "bom-ref": "pkg:maven/org.acme/common-util@3.0.0",
+            "group": "org.acme",
+            "name": "common-util",
+            "purl": "pkg:maven/org.acme/common-util@3.0.0",
+            "type": "library",
+            "version": "3.0.0"
+        }
+    ],
+    "dependencies": [
+        {
+            "dependsOn": [
+                "pkg:maven/org.acme/common-util@3.0.0"
+            ],
+            "ref": "pkg:maven/org.acme/web-framework@1.0.0"
+        },
+        {
+            "dependsOn": [
+                "pkg:maven/org.acme/common-util@3.0.0"
+            ],
+            "ref": "pkg:maven/org.acme/persistence@3.1.0"
+        },
+        {
+            "dependsOn": [
+                "pkg:maven/org.acme/web-framework@1.0.0",
+                "pkg:maven/org.acme/persistence@3.1.0"
+            ],
+            "ref": "acme-app"
+        },
+        {
+            "dependsOn": [],
+            "ref": "pkg:maven/org.acme/common-util@3.0.0"
+        }
+    ]
+}

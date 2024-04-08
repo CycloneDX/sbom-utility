@@ -211,15 +211,6 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 		return valid, bom, schemaErrors, err
 	}
 
-	// Before looking for license data, fully unmarshal the SBOM
-	// into named structures
-	if err = bom.UnmarshalCycloneDXBOM(); err != nil {
-		return
-	}
-	if bom.GetCdxBom() != nil {
-		bom.GetCdxBom().SortComponents()
-	}
-
 	// Create a loader for the BOM (JSON) document
 	var documentLoader gojsonschema.JSONLoader
 	var schemaLoader gojsonschema.JSONLoader

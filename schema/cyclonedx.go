@@ -58,21 +58,124 @@ type CDXBom struct {
 }
 
 // Sort by:
-// - Required fields: "type", "name"
-func (bom *CDXBom) SortComponents() {
+// 1. Required fields if they exist
+// 1. Using optional local identifiers or (combinations of) identifying values
+func (bom *CDXBom) Sort() {
 
-	if pComponents := bom.Components; pComponents != nil {
-		components := *pComponents
-		// Sort by Format, Version, Variant
-		sort.Slice(components, func(i, j int) bool {
-			value1 := components[i]
-			value2 := components[j]
-
-			if value1.Type != value2.Type {
-				return value1.Type < value2.Type
+	// Sort components
+	// Use required fields: "type", "name"
+	// Sort by the optional field "bom-ref" as this is pseudo-required if
+	// slice elements contain duplicates with both "name" and "type".
+	if pSlice := bom.Components; pSlice != nil {
+		slice := *pSlice
+		sort.Slice(slice, func(i, j int) bool {
+			element1 := slice[i]
+			element2 := slice[j]
+			// sort by primary field
+			if element1.Type != element2.Type {
+				return element1.Type < element2.Type
 			}
+			// sort by secondary field
+			if element1.Name != element2.Name {
+				return element1.Name < element2.Name
+			}
+			if element1.BOMRef != nil && element2.BOMRef != nil {
+				return *element1.BOMRef < *element2.BOMRef
+			}
+			// default: preserve existing order
+			return true
+		})
+	}
 
-			return value1.Name < value2.Name
+	// Sort services
+	// Use required fields: "name"
+	if pSlice := bom.Services; pSlice != nil {
+		slice := *pSlice
+		sort.Slice(slice, func(i, j int) bool {
+			element1 := slice[i]
+			element2 := slice[j]
+			return element1.Name < element2.Name
+		})
+	}
+
+	// Sort dependencies
+	// Use required fields: "ref"
+	// TODO sort child slice "dependsOn"
+	if pSlice := bom.Dependencies; pSlice != nil {
+		slice := *pSlice
+		sort.Slice(slice, func(i, j int) bool {
+			element1 := slice[i]
+			element2 := slice[j]
+			// guard against invalid pointers to (required) elements
+			if element1.Ref != nil && element2.Ref != nil {
+				return *element1.Ref < *element2.Ref
+			}
+			// default: preserve existing order
+			return true
+		})
+	}
+
+	// Sort vulnerabilities
+	// The vulnerability object has no required field; sort by fields
+	// that may contain local identifiers or identifying values
+	// Optional sort fields: "id"
+	// TODO source.url, source.name (optional)
+	if pSlice := bom.Vulnerabilities; pSlice != nil {
+		slice := *pSlice
+		sort.Slice(slice, func(i, j int) bool {
+			element1 := slice[i]
+			element2 := slice[j]
+			return element1.Id < element2.Id
+		})
+	}
+
+	// Sort Annotations
+	// Use required fields: "timestamp", "text"
+	// TODO sort "subjects", "annotator"
+	if pSlice := bom.Annotations; pSlice != nil {
+		slice := *pSlice
+		sort.Slice(slice, func(i, j int) bool {
+			element1 := slice[i]
+			element2 := slice[j]
+			// sort by primary field
+			if element1.Timestamp != element2.Timestamp {
+				return element1.Timestamp < element2.Timestamp
+			}
+			// sort by secondary field
+			return element1.Text < element2.Text
+		})
+	}
+
+	// Sort External References
+	// Use required fields: "type", "url"
+	if pSlice := bom.ExternalReferences; pSlice != nil {
+		slice := *pSlice
+		sort.Slice(slice, func(i, j int) bool {
+			element1 := slice[i]
+			element2 := slice[j]
+			// sort by primary field
+			if element1.Type != element2.Type {
+				return element1.Type < element2.Type
+			}
+			// sort by secondary field
+			return element1.Url < element2.Url
+		})
+	}
+
+	// Sort Properties
+	// Use required fields: "timestamp", "text"
+	// TODO sort "subjects", "annotator"
+	if pSlice := bom.Properties; pSlice != nil {
+		slice := *pSlice
+		sort.Slice(slice, func(i, j int) bool {
+			element1 := slice[i]
+			element2 := slice[j]
+			// sort by primary field
+			if element1.Name != element2.Name {
+				return element1.Name < element2.Name
+			}
+			// sort by secondary field
+			return element1.Value < element2.Value
 		})
 	}
 }
@@ -105,13 +208,13 @@ type CDXMetadata struct {
 type CDXComponent struct {
 	Primary            bool                     `json:"-"`              // Proprietary: do NOT marshal/unmarshal
 	Type               string                   `json:"type,omitempty"` // Constraint: enum [see schema]
-	MimeType           string                   `json:"mime-type,omitempty"`
+	Name               string                   `json:"name,omitempty"`
 	BOMRef             *CDXRefType              `json:"bom-ref,omitempty"`
+	MimeType           string                   `json:"mime-type,omitempty"`
 	Supplier           *CDXOrganizationalEntity `json:"supplier,omitempty"`
 	Author             string                   `json:"author,omitempty"`
 	Publisher          string                   `json:"publisher,omitempty"`
 	Group              string                   `json:"group,omitempty"`
-	Name               string                   `json:"name,omitempty"`
 	Version            string                   `json:"version,omitempty"`
 	Description        string                   `json:"description,omitempty"`
 	Scope              string                   `json:"scope,omitempty"` // Constraint: "enum": ["required","optional","excluded"]

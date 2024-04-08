@@ -62,6 +62,7 @@ type PersistentCommandFlags struct {
 	OutputFile   string // TODO: TODO: Note: not used by `validate` command, which emits a warning if supplied
 	OutputFormat string // e.g., "txt", "csv"", "md" (markdown) (normalized to lowercase)
 	OutputIndent uint8
+	Sort         bool
 }
 
 func (persistentFlags PersistentCommandFlags) GetOutputIndentInt() int {

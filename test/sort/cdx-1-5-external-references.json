@@ -1,0 +1,64 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "serialNumber":"urn:uuid:xxxx",
+  "version": 1,
+  "metadata": {
+    "component": {
+        "bom-ref": "acme-app",
+        "name": "Acme Application",
+        "type": "application",
+        "version": "x.y.z"
+    }
+},
+  "externalReferences": [
+    {
+      "comment": "Vendor provided documentation for the product",
+      "type": "documentation",
+      "url": "https://example.org/support/documentation/portal-server/1.0.0"
+    },
+    {
+      "comment": "An external SBOM that describes what this component includes. Integrity verification should be performed to ensure the BOM has not been tampered with.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "708f1f53b41f11f02d12a11b1a38d2905d47b099afc71a0f1124ef8582ec7313"
+        },
+        {
+          "alg": "SHA-384",
+          "content": "d4835048a0f57c74b8fb617d5366ab81376fc92bebe9a93bf24ba7f9da6c9aeeb6179f5d1361f6533211b15f3224cbad"
+        },
+        {
+          "alg": "SHA-512",
+          "content": "74a51ff45e4c11df9ba1f0094282c80489649cb157a75fa337992d2d4592a5a1b8cb4525de8db0ae25233553924d76c36e093ea7fa9df4e5b8b07fd2e074efd6"
+        }
+      ],
+      "type": "bom",
+      "url": "https://example.org/support/sbom/portal-server/1.0.0"
+    },
+    {
+      "comment": "Security advisories from the vendor",
+      "type": "advisories",
+      "url": "https://example.org/security/feed/csaf"
+    },
+    {
+      "comment": "Refers to a specific BOM with the specified serial number. Integrity verification should be performed to ensure the BOM has not been tampered with.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "9048a24d72d3d4a1a0384f8f925566b44f133dd2a0194111a2daeb1cf9f7015b"
+        },
+        {
+          "alg": "SHA-384",
+          "content": "8640424aa9bf337678580c55d23e54b973703c6e586987d85700f24d5de383cd1add590ee5b98d1710a01aff212687f3"
+        },
+        {
+          "alg": "SHA-512",
+          "content": "45c6e3d03ec4207234e926063c484446d8b55f4bfce3f929f44cbc2320565290cc4b71de70c1d983792c6d63504f47f6b94513d09847dbae69c8f7cdd51ce980"
+        }
+      ],
+      "type": "bom",
+      "url": "urn:uuid:bdd819e6-ee8f-42d7-a4d0-166ff44d51e8"
+    }
+  ]
+}
