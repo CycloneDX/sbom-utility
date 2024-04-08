@@ -63,8 +63,9 @@ type CDXBom struct {
 // 1. Using optional local identifiers or
 // 1. Using combinations of identifying field values
 func (bom *CDXBom) Sort() {
-
-	// Sort components
+	// ====================================================================
+	// Sort BOM Components
+	// ====================================================================
 	// Use required fields: "type", "name"
 	// Use optional identity fields: "purl", "cpe", "swid.TagId"
 	// Sort by the optional field "bom-ref" as this is pseudo-required if
@@ -107,7 +108,9 @@ func (bom *CDXBom) Sort() {
 		})
 	}
 
-	// Sort services
+	// ====================================================================
+	// Sort BOM Services
+	// ====================================================================
 	// Use required fields: "name"
 	// Sort by the optional field "bom-ref" as this is pseudo-required if
 	// slice elements contain duplicates with both "name" and "type".
@@ -134,7 +137,9 @@ func (bom *CDXBom) Sort() {
 		})
 	}
 
-	// Sort dependencies
+	// ====================================================================
+	// Sort BOM Dependencies
+	// ====================================================================
 	// Use required fields: "ref"
 	// TODO sort child slice "dependsOn"
 	if pSlice := bom.Dependencies; pSlice != nil {
@@ -151,11 +156,14 @@ func (bom *CDXBom) Sort() {
 		})
 	}
 
-	// Sort vulnerabilities
+	// ====================================================================
+	// Sort BOM Vulnerabilities
+	// ====================================================================
 	// The vulnerability object has no required field; sort by fields
 	// that may contain local identifiers or identifying values
 	// Optional sort fields: "id"
 	// TODO source.url, source.name (optional)
+	// TODO sort "advisories", "cwes" and "ratings.source" and "affects.ref"
 	if pSlice := bom.Vulnerabilities; pSlice != nil {
 		slice := *pSlice
 		sort.Slice(slice, func(i, j int) bool {
@@ -185,7 +193,9 @@ func (bom *CDXBom) Sort() {
 		})
 	}
 
-	// Sort Annotations
+	// ====================================================================
+	// Sort BOM Annotations
+	// ====================================================================
 	// Use required fields: "timestamp", "text"
 	// TODO sort "subjects", "annotator"
 	if pSlice := bom.Annotations; pSlice != nil {
@@ -202,7 +212,9 @@ func (bom *CDXBom) Sort() {
 		})
 	}
 
-	// Sort External References
+	// ====================================================================
+	// Sort BOM External References
+	// ====================================================================
 	// Use required fields: "type", "url"
 	if pSlice := bom.ExternalReferences; pSlice != nil {
 		slice := *pSlice
@@ -218,7 +230,9 @@ func (bom *CDXBom) Sort() {
 		})
 	}
 
-	// Sort Properties
+	// ====================================================================
+	// Sort BOM Properties
+	// ====================================================================
 	// Use required fields: "timestamp", "text"
 	// TODO sort "subjects", "annotator"
 	if pSlice := bom.Properties; pSlice != nil {
