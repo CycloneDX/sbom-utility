@@ -57,9 +57,11 @@ type CDXBom struct {
 	Properties         *[]CDXProperty          `json:"properties,omitempty" cdx:"+1.5"`      // v1.5 added
 }
 
-// Sort by:
+// Sort by rules:
 // 1. Required fields if they exist
-// 1. Using optional local identifiers or (combinations of) identifying values
+// 1. Use pseudo-required field "bom-ref" when available
+// 1. Using optional local identifiers or
+// 1. Using combinations of identifying field values
 func (bom *CDXBom) Sort() {
 
 	// Sort components
@@ -67,35 +69,38 @@ func (bom *CDXBom) Sort() {
 	// Use optional identity fields: "purl", "cpe", "swid.TagId"
 	// Sort by the optional field "bom-ref" as this is pseudo-required if
 	// slice elements contain duplicates with both "name" and "type".
+	// TODO: Sort licenses, hashes, etc.
 	if pSlice := bom.Components; pSlice != nil {
 		slice := *pSlice
 		sort.Slice(slice, func(i, j int) bool {
 			element1 := slice[i]
 			element2 := slice[j]
-			// sort by primary field
+			// sort by required field(s)
 			if element1.Type != element2.Type {
 				return element1.Type < element2.Type
 			}
-			// sort by secondary field
 			if element1.Name != element2.Name {
 				return element1.Name < element2.Name
 			}
-			if element1.Version != element2.Version {
-				return element1.Version < element2.Version
-			}
+			// sort by pseudo-required field "bom-ref"
 			if element1.BOMRef != nil && element2.BOMRef != nil {
 				return *element1.BOMRef < *element2.BOMRef
 			}
-			if element1.Purl != element2.Purl {
-				return element1.Purl < element2.Purl
-			}
+			// Other optional identifiers
 			if element1.Cpe != element2.Cpe {
 				return element1.Cpe < element2.Cpe
+			}
+			if element1.Purl != element2.Purl {
+				return element1.Purl < element2.Purl
 			}
 			if element1.Swid != nil && element2.Swid != nil {
 				Swid1 := *element1.Swid
 				Swid2 := *element2.Swid
 				return Swid1.TagId < Swid2.TagId
+			}
+			// Other "tie breakers"
+			if element1.Version != element2.Version {
+				return element1.Version < element2.Version
 			}
 			// default: preserve existing order
 			return true
@@ -104,12 +109,28 @@ func (bom *CDXBom) Sort() {
 
 	// Sort services
 	// Use required fields: "name"
+	// Sort by the optional field "bom-ref" as this is pseudo-required if
+	// slice elements contain duplicates with both "name" and "type".
+	// TODO: Sort licenses, endpoints, etc.
 	if pSlice := bom.Services; pSlice != nil {
 		slice := *pSlice
 		sort.Slice(slice, func(i, j int) bool {
 			element1 := slice[i]
 			element2 := slice[j]
-			return element1.Name < element2.Name
+			// sort by required field(s)
+			if element1.Name != element2.Name {
+				return element1.Name < element2.Name
+			}
+			// sort by pseudo-required field "bom-ref"
+			if element1.BOMRef != nil && element2.BOMRef != nil {
+				return *element1.BOMRef < *element2.BOMRef
+			}
+			// Other "tie breakers"
+			if element1.Version != element2.Version {
+				return element1.Version < element2.Version
+			}
+			// default: preserve existing order
+			return true
 		})
 	}
 
@@ -140,7 +161,27 @@ func (bom *CDXBom) Sort() {
 		sort.Slice(slice, func(i, j int) bool {
 			element1 := slice[i]
 			element2 := slice[j]
-			return element1.Id < element2.Id
+			// sort by pseudo-required field "bom-ref"
+			if element1.BOMRef != nil && element2.BOMRef != nil {
+				return *element1.BOMRef < *element2.BOMRef
+			}
+			// optional identifiers
+			if element1.Id != element2.Id {
+				return element1.Id < element2.Id
+			}
+			// other optional "tie breakers"
+			if element1.Source != nil && element2.Source != nil {
+				Source1 := *element1.Source
+				Source2 := *element2.Source
+				if Source1.Name != Source2.Name {
+					return Source1.Name < Source2.Name
+				}
+				if Source1.Url != Source2.Url {
+					return Source1.Url < Source2.Url
+				}
+			}
+			// default: preserve existing order
+			return true
 		})
 	}
 
