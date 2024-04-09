@@ -214,7 +214,6 @@ func Diff(persistentFlags utils.PersistentCommandFlags, flags utils.DiffCommandF
 func compareBinaryData(bBaseData []byte, bRevisedData []byte) (diffResults diff.Diff, err error) {
 	defer func() {
 		if recoveredPanic := recover(); recoveredPanic != nil {
-			fmt.Println("panic occurred:", recoveredPanic)
 			err = getLogger().Errorf("panic occurred: %v", recoveredPanic)
 			return
 		}

@@ -77,10 +77,10 @@ func initCommandTrimFlags(command *cobra.Command) (err error) {
 	command.PersistentFlags().BoolVar(&utils.GlobalFlags.PersistentFlags.Sort, FLAG_TRIM_SORT, false, "")
 	command.Flags().StringVarP(&utils.GlobalFlags.TrimFlags.RawPaths, FLAG_TRIM_FROM_PATHS, "", "", MSG_FLAG_TRIM_FROM_PATHS)
 	command.Flags().StringVarP(&utils.GlobalFlags.TrimFlags.RawKeys, FLAG_TRIM_MAP_KEYS, "", "", MSG_FLAG_TRIM_KEYS)
-	// err = command.MarkFlagRequired(FLAG_TRIM_MAP_KEYS)
-	// if err != nil {
-	// 	err = getLogger().Errorf("unable to mark flag `%s` as required: %s", FLAG_TRIM_MAP_KEYS, err)
-	// }
+	err = command.MarkFlagRequired(FLAG_TRIM_MAP_KEYS)
+	if err != nil {
+		err = getLogger().Errorf("unable to mark flag `%s` as required: %s", FLAG_TRIM_MAP_KEYS, err)
+	}
 	return
 }
 
