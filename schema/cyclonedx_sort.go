@@ -35,6 +35,11 @@ import (
 
 // TODO: Compositions, Formula
 func (bom *CDXBom) Sort() {
+	// Sort: BOM Metadata
+	if bom.Metadata != nil {
+		bom.Metadata.Sort()
+	}
+
 	// Sort: Components
 	if bom.Components != nil {
 		sortSliceComponents(bom.Components)
@@ -46,53 +51,28 @@ func (bom *CDXBom) Sort() {
 	}
 
 	// Sort: Dependencies
-	if pSlice := bom.Dependencies; pSlice != nil {
-		slice := *pSlice
-		sort.Slice(slice, func(i, j int) bool {
-			element1 := slice[i]
-			element2 := slice[j]
-			return comparatorDependency(element1, element2)
-		})
+	if bom.Dependencies != nil {
+		sortSliceDependencies(bom.Dependencies)
 	}
 
 	// Sort: Vulnerabilities
-	if pSlice := bom.Vulnerabilities; pSlice != nil {
-		slice := *pSlice
-		sort.Slice(slice, func(i, j int) bool {
-			element1 := slice[i]
-			element2 := slice[j]
-			return comparatorVulnerability(element1, element2)
-		})
+	if bom.Vulnerabilities != nil {
+		sortSliceVulnerabilities(bom.Vulnerabilities)
 	}
 
 	// Sort: Annotations
-	if pSlice := bom.Annotations; pSlice != nil {
-		slice := *pSlice
-		sort.Slice(slice, func(i, j int) bool {
-			element1 := slice[i]
-			element2 := slice[j]
-			return comparatorAnnotation(element1, element2)
-		})
+	if bom.Annotations != nil {
+		sortSliceAnnotations(bom.Annotations)
 	}
 
 	// Sort: ExternalReferences
-	if pSlice := bom.ExternalReferences; pSlice != nil {
-		slice := *pSlice
-		sort.Slice(slice, func(i, j int) bool {
-			element1 := slice[i]
-			element2 := slice[j]
-			return comparatorExternalReference(element1, element2)
-		})
+	if bom.ExternalReferences != nil {
+		sortSliceExternalReferences(bom.ExternalReferences)
 	}
 
 	// Sort: Properties
 	if bom.Properties != nil {
 		sortSliceProperties(bom.Properties)
-	}
-
-	// Sort: Metadata.Licenses
-	if bom.Metadata != nil {
-		bom.Metadata.Sort()
 	}
 }
 
@@ -113,111 +93,56 @@ func (pMetadata *CDXMetadata) Sort() {
 		}
 
 		// Sort: Licenses
-		if pSlice := metadata.Licenses; pSlice != nil {
-			slice := *pSlice
-			sort.Slice(slice, func(i, j int) bool {
-				element1 := slice[i]
-				element2 := slice[j]
-				return comparatorLicense(element1, element2)
-			})
+		if metadata.Licenses != nil {
+			sortSliceLicenseChoices(metadata.Licenses)
 		}
 
 		// Sort: Properties
-		if pSlice := metadata.Properties; pSlice != nil {
-			slice := *pSlice
-			sort.Slice(slice, func(i, j int) bool {
-				element1 := slice[i]
-				element2 := slice[j]
-				return comparatorProperty(element1, element2)
-			})
+		if metadata.Properties != nil {
+			sortSliceProperties(metadata.Properties)
 		}
 	}
 }
 
 func (component *CDXComponent) Sort() {
-
 	// Sort: Components
 	// Note: The following method is recursive
 	if component.Components != nil {
 		sortSliceComponents(component.Components)
 	}
 
+	// Sort: Data
+	if component.Data != nil {
+		sortSliceComponentData(component.Data)
+	}
+
 	// Sort: Hashes
-	if pSlice := component.Hashes; pSlice != nil {
-		slice := *pSlice
-		sort.Slice(slice, func(i, j int) bool {
-			element1 := slice[i]
-			element2 := slice[j]
-			return comparatorHash(element1, element2)
-		})
+	if component.Hashes != nil {
+		sortSliceHashes(component.Hashes)
 	}
 
 	// Sort: Licenses
-	if pSlice := component.Licenses; pSlice != nil {
-		slice := *pSlice
-		sort.Slice(slice, func(i, j int) bool {
-			element1 := slice[i]
-			element2 := slice[j]
-			return comparatorLicense(element1, element2)
-		})
+	if component.Licenses != nil {
+		sortSliceLicenseChoices(component.Licenses)
 	}
 
 	// Sort: ReleaseNotes
-	if pSlice := component.ReleaseNotes; pSlice != nil {
-		slice := *pSlice
-		sort.Slice(slice, func(i, j int) bool {
-			element1 := slice[i]
-			element2 := slice[j]
-			// sort by required fields: "type"
-			if element1.Type != element2.Type {
-				return element1.Type < element2.Type
-			}
-			// sort by using combinations of identifying field values: "title", "timestamp"
-			if element1.Title != element2.Title {
-				return element1.Title < element2.Title
-			}
-			return element1.Timestamp < element2.Timestamp
-		})
+	if component.ReleaseNotes != nil {
+		sortSliceReleaseNotes(component.ReleaseNotes)
 	}
 
-	// Sort: Data
-	if pSlice := component.Data; pSlice != nil {
-		slice := *pSlice
-		sort.Slice(slice, func(i, j int) bool {
-			element1 := slice[i]
-			element2 := slice[j]
-			// sort by required fields: "type"
-			if element1.Type != element2.Type {
-				return element1.Type < element2.Type
-			}
-			// sort using combinations of identifying field values: "name"
-			return element1.Name < element2.Name
-		})
-	}
-
-	// Sort: External References
-	if pSlice := component.ExternalReferences; pSlice != nil {
-		slice := *pSlice
-		sort.Slice(slice, func(i, j int) bool {
-			element1 := slice[i]
-			element2 := slice[j]
-			return comparatorExternalReference(element1, element2)
-		})
+	// Sort: ExternalReferences
+	if component.ExternalReferences != nil {
+		sortSliceExternalReferences(component.ExternalReferences)
 	}
 
 	// Sort: Properties
-	if pSlice := component.Properties; pSlice != nil {
-		slice := *pSlice
-		sort.Slice(slice, func(i, j int) bool {
-			element1 := slice[i]
-			element2 := slice[j]
-			return comparatorProperty(element1, element2)
-		})
+	if component.Properties != nil {
+		sortSliceProperties(component.Properties)
 	}
 }
 
 func (service *CDXService) Sort() {
-
 	// Sort: Services
 	// Note: The following method is recursive
 	if service.Services != nil {
@@ -225,23 +150,23 @@ func (service *CDXService) Sort() {
 	}
 
 	// Sort: Licenses
-	if pSlice := service.Licenses; pSlice != nil {
-		slice := *pSlice
-		sort.Slice(slice, func(i, j int) bool {
-			element1 := slice[i]
-			element2 := slice[j]
-			return comparatorLicense(element1, element2)
-		})
+	if service.Licenses != nil {
+		sortSliceLicenseChoices(service.Licenses)
+	}
+
+	// Sort: ReleaseNotes
+	if service.ReleaseNotes != nil {
+		sortSliceReleaseNotes(service.ReleaseNotes)
 	}
 
 	// Sort: ExternalReferences
-	if pSlice := service.ExternalReferences; pSlice != nil {
-		slice := *pSlice
-		sort.Slice(slice, func(i, j int) bool {
-			element1 := slice[i]
-			element2 := slice[j]
-			return comparatorExternalReference(element1, element2)
-		})
+	if service.ExternalReferences != nil {
+		sortSliceExternalReferences(service.ExternalReferences)
+	}
+
+	// Sort: Properties
+	if service.Properties != nil {
+		sortSliceProperties(service.Properties)
 	}
 }
 
@@ -283,7 +208,94 @@ func sortSliceServices(pSlice *[]CDXService) {
 	}
 }
 
-// Note: recursively sorts slice of CycloneDX Services
+func sortSliceDependencies(pSlice *[]CDXDependency) {
+	if pSlice != nil {
+		slice := *pSlice
+		sort.Slice(slice, func(i, j int) bool {
+			element1 := slice[i]
+			element2 := slice[j]
+			return comparatorDependency(element1, element2)
+		})
+	}
+}
+
+func sortSliceComponentData(pSlice *[]CDXComponentData) {
+	if pSlice != nil {
+		slice := *pSlice
+		sort.Slice(slice, func(i, j int) bool {
+			element1 := slice[i]
+			element2 := slice[j]
+			return comparatorComponentData(element1, element2)
+		})
+	}
+}
+
+func sortSliceAnnotations(pSlice *[]CDXAnnotation) {
+	if pSlice != nil {
+		slice := *pSlice
+		sort.Slice(slice, func(i, j int) bool {
+			element1 := slice[i]
+			element2 := slice[j]
+			return comparatorAnnotation(element1, element2)
+		})
+	}
+}
+
+func sortSliceVulnerabilities(pSlice *[]CDXVulnerability) {
+	if pSlice != nil {
+		slice := *pSlice
+		sort.Slice(slice, func(i, j int) bool {
+			element1 := slice[i]
+			element2 := slice[j]
+			return comparatorVulnerability(element1, element2)
+		})
+	}
+}
+
+func sortSliceLicenseChoices(pSlice *[]CDXLicenseChoice) {
+	if pSlice != nil {
+		slice := *pSlice
+		sort.Slice(slice, func(i, j int) bool {
+			element1 := slice[i]
+			element2 := slice[j]
+			return comparatorLicense(element1, element2)
+		})
+	}
+}
+
+func sortSliceReleaseNotes(pSlice *[]CDXReleaseNotes) {
+	if pSlice != nil {
+		slice := *pSlice
+		sort.Slice(slice, func(i, j int) bool {
+			element1 := slice[i]
+			element2 := slice[j]
+			return comparatorReleaseNotes(element1, element2)
+		})
+	}
+}
+
+func sortSliceHashes(pSlice *[]CDXHash) {
+	if pSlice != nil {
+		slice := *pSlice
+		sort.Slice(slice, func(i, j int) bool {
+			element1 := slice[i]
+			element2 := slice[j]
+			return comparatorHash(element1, element2)
+		})
+	}
+}
+
+func sortSliceExternalReferences(pSlice *[]CDXExternalReference) {
+	if pSlice != nil {
+		slice := *pSlice
+		sort.Slice(slice, func(i, j int) bool {
+			element1 := slice[i]
+			element2 := slice[j]
+			return comparatorExternalReference(element1, element2)
+		})
+	}
+}
+
 func sortSliceProperties(pSlice *[]CDXProperty) {
 	if pSlice != nil {
 		slice := *pSlice
@@ -393,6 +405,15 @@ func comparatorDependency(element1 CDXDependency, element2 CDXDependency) bool {
 	return true
 }
 
+func comparatorComponentData(element1 CDXComponentData, element2 CDXComponentData) bool {
+	// sort by required fields: "type"
+	if element1.Type != element2.Type {
+		return element1.Type < element2.Type
+	}
+	// sort using combinations of identifying field values: "name"
+	return element1.Name < element2.Name
+}
+
 // TODO: use "bom-ref" as pseudo-required (if present)
 // TODO: use "text", "url" as "tie-breakers"
 // Text       *CDXAttachment `json:"text,omitempty"`
@@ -435,6 +456,19 @@ func comparatorAnnotation(element1 CDXAnnotation, element2 CDXAnnotation) bool {
 		return element1.Timestamp < element2.Timestamp
 	}
 	return element1.Text < element2.Text
+}
+
+// NOTE: The name is plural to match the current struct name (and perhaps json schema name)
+func comparatorReleaseNotes(element1 CDXReleaseNotes, element2 CDXReleaseNotes) bool {
+	// sort by required fields: "type"
+	if element1.Type != element2.Type {
+		return element1.Type < element2.Type
+	}
+	// sort by using combinations of identifying field values: "title", "timestamp"
+	if element1.Title != element2.Title {
+		return element1.Title < element2.Title
+	}
+	return element1.Timestamp < element2.Timestamp
 }
 
 func comparatorExternalReference(element1 CDXExternalReference, element2 CDXExternalReference) bool {
