@@ -54,7 +54,7 @@ func NewStatsTestInfoBasic(inputFile string, listFormat string, resultExpectedEr
 // -------------------------------------------
 // resource list test helper functions
 // -------------------------------------------
-func innerBufferedTestStatsList(t *testing.T, testInfo *StatsTestInfo) (outputBuffer bytes.Buffer, err error) {
+func innerBufferedTestStatsList(testInfo *StatsTestInfo) (outputBuffer bytes.Buffer, err error) {
 	// Declare an output outputBuffer/outputWriter to use used during tests
 	var outputWriter = bufio.NewWriter(&outputBuffer)
 	// ensure all data is written to buffer before further validation
@@ -90,7 +90,7 @@ func innerTestStatsList(t *testing.T, testInfo *StatsTestInfo) (outputBuffer byt
 	}
 
 	// invoke resource list command with a byte buffer
-	outputBuffer, err = innerBufferedTestStatsList(t, testInfo)
+	outputBuffer, err = innerBufferedTestStatsList(testInfo)
 
 	return
 }

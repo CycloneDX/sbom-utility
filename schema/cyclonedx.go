@@ -229,25 +229,29 @@ type CDXLicenseChoice struct {
 }
 
 // v1.5: added structure
+// v1.6: added Acknowledgment
 // NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXLicenseExpression struct {
-	Expression string      `json:"expression,omitempty"`
-	BOMRef     *CDXRefType `json:"bom-ref,omitempty"`
+	Expression      string      `json:"expression,omitempty"`
+	BOMRef          *CDXRefType `json:"bom-ref,omitempty"`
+	Acknowledgement string      `json:"acknowledgement,omitempty"` // v1.6: added
 }
 
 // v1.2: was an anon. type
 // v1.3: created
+// v1.6: added Acknowledgment
 // Note: "id" SHOULD be an SPDX license ID
 // Note: "oneOf": ["id", "name"] is required
 // NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXLicense struct {
-	Id         string         `json:"id,omitempty"`
-	Name       string         `json:"name,omitempty"`
-	Text       *CDXAttachment `json:"text,omitempty"`
-	Url        string         `json:"url,omitempty"`
-	BOMRef     *CDXRefType    `json:"bom-ref,omitempty"`    // v1.5: added
-	Licensing  *CDXLicensing  `json:"licensing,omitempty"`  // v1.5: added
-	Properties *[]CDXProperty `json:"properties,omitempty"` // v1.5: added
+	Id              string         `json:"id,omitempty"`
+	Name            string         `json:"name,omitempty"`
+	Text            *CDXAttachment `json:"text,omitempty"`
+	Url             string         `json:"url,omitempty"`
+	BOMRef          *CDXRefType    `json:"bom-ref,omitempty"`         // v1.5: added
+	Licensing       *CDXLicensing  `json:"licensing,omitempty"`       // v1.5: added
+	Properties      *[]CDXProperty `json:"properties,omitempty"`      // v1.5: added
+	Acknowledgement string         `json:"acknowledgement,omitempty"` // v1.6: added
 }
 
 // v1.5: added object

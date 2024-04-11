@@ -31,6 +31,7 @@ import (
 
 const (
 	TEST_CDX_1_5_SORT_COMPONENTS_XXL           = "test/sort/cdx-1-4-components-xxl.json"
+	TEST_CDX_1_5_SORT_LICENSES                 = "test/sort/cdx-1-5-licenses.json"
 	TEST_CDX_1_5_SORT_DEPENDENCIES             = "test/sort/cdx-1-5-dependencies.json"
 	TEST_CDX_1_5_SORT_EXTERNAL_REFERENCES      = "test/sort/cdx-1-5-external-references.json"
 	TEST_CDX_1_5_SORT_VULNERABILITIES          = "test/sort/cdx-1-5-vulnerabilities.json"
@@ -137,6 +138,34 @@ func innerBufferedTestSort(testInfo *SortTestInfo) (outputBuffer bytes.Buffer, e
 func TestSortCdx15ComponentsXXL(t *testing.T) {
 	ti := NewSortTestInfo(TEST_CDX_1_5_SORT_COMPONENTS_XXL, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_SORT_COMPONENTS_XXL)
+	ti.Sort = true // TODO: default true
+	innerTestSort(t, ti)
+}
+
+func TestSortCdx15Dependencies(t *testing.T) {
+	ti := NewSortTestInfo(TEST_CDX_1_5_SORT_DEPENDENCIES, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_SORT_DEPENDENCIES)
+	ti.Sort = true // TODO: default true
+	innerTestSort(t, ti)
+}
+
+func TestSortCdx15ExternalReferences(t *testing.T) {
+	ti := NewSortTestInfo(TEST_CDX_1_5_SORT_EXTERNAL_REFERENCES, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_SORT_EXTERNAL_REFERENCES)
+	ti.Sort = true // TODO: default true
+	innerTestSort(t, ti)
+}
+
+func TestSortCdx15Vulnerabilities(t *testing.T) {
+	ti := NewSortTestInfo(TEST_CDX_1_5_SORT_VULNERABILITIES, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_SORT_VULNERABILITIES)
+	ti.Sort = true // TODO: default true
+	innerTestSort(t, ti)
+}
+
+func TestSortCdx15Licenses(t *testing.T) {
+	ti := NewSortTestInfo(TEST_CDX_1_5_SORT_LICENSES, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_SORT_LICENSES)
 	ti.Sort = true // TODO: default true
 	innerTestSort(t, ti)
 }
