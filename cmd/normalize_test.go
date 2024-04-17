@@ -32,12 +32,13 @@ import (
 
 const (
 	TEST_CDX_1_5_NORMALIZE_COMPONENTS               = "test/normalize/cdx-1-5-components.bom.json"
+	TEST_CDX_1_5_NORMALIZE_SERVICES                 = "test/normalize/cdx-1-5-services.bom.json"
 	TEST_CDX_1_5_NORMALIZE_LICENSES                 = "test/normalize/cdx-1-5-licenses.bom.json"
 	TEST_CDX_1_5_NORMALIZE_DEPENDENCIES             = "test/normalize/cdx-1-5-dependencies.bom.json"
 	TEST_CDX_1_5_NORMALIZE_EXTERNAL_REFERENCES      = "test/normalize/cdx-1-5-external-references.bom.json"
 	TEST_CDX_1_5_NORMALIZE_VULNERABILITIES          = "test/normalize/cdx-1-5-vulnerabilities.bom.json"
 	TEST_CDX_1_5_NORMALIZE_VULNERABILITIES_NATS_BOX = "test/normalize/cdx-1-5-vulnerabilities-container-nats-box.bom.json"
-	TEST_CDX_1_5_NORMALIZE_COMPONENTS_XXL           = "test/normalize/cdx-1-4-components-xxl.bom.json"
+	TEST_CDX_1_4_NORMALIZE_COMPONENTS_XXL           = "test/normalize/cdx-1-4-components-xxl.bom.json"
 	TEST_CDX_1_2_NORMALIZE_COMPONENTS_PROTON        = "test/normalize/cdx-1-2-components-protonmail.bom.json"
 )
 
@@ -160,6 +161,12 @@ func TestNormalizeCdx15Components(t *testing.T) {
 	}
 }
 
+func TestNormalizeCdx15Services(t *testing.T) {
+	ti := NewNormalizeTestInfo(TEST_CDX_1_5_NORMALIZE_SERVICES, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_NORMALIZE_SERVICES)
+	innerTestNormalize(t, ti)
+}
+
 func TestNormalizeCdx15Dependencies(t *testing.T) {
 	ti := NewNormalizeTestInfo(TEST_CDX_1_5_NORMALIZE_DEPENDENCIES, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_NORMALIZE_DEPENDENCIES)
@@ -185,33 +192,20 @@ func TestNormalizeCdx15Licenses(t *testing.T) {
 }
 
 // XXL Sort tests
-func TestNormalizeCdx15ComponentsXXL(t *testing.T) {
-	ti := NewNormalizeTestInfo(TEST_CDX_1_5_NORMALIZE_COMPONENTS_XXL, nil)
-	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_NORMALIZE_COMPONENTS_XXL)
+func TestNormalizeCdx12ComponentsProtonMail(t *testing.T) {
+	ti := NewNormalizeTestInfo(TEST_CDX_1_2_NORMALIZE_COMPONENTS_PROTON, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_2_NORMALIZE_COMPONENTS_PROTON)
 	innerTestNormalize(t, ti)
 }
 
-// func GetOutputFileResult(t *testing.T, originalTest NormalizeTestInfo) (pResult interface{}, err error) {
-// 	// Create a new test info. structure copying in data from the original test
-// 	queryTestInfo := NewCommonTestInfo()
-// 	queryTestInfo.InputFile = originalTest.OutputFile
-// 	// Load and Query temporary "trimmed" output BOM file using the "from" path
-// 	// Default to "root" (i.e,, "") path if none selected.
-// 	fromPath := ""
-// 	if len(originalTest.FromPaths) > 0 {
-// 		fromPath = originalTest.FromPaths[0]
-// 	}
-// 	request, err := common.NewQueryRequestSelectFromWhere(
-// 		common.QUERY_TOKEN_WILDCARD, fromPath, "")
-// 	if err != nil {
-// 		t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
-// 		return
-// 	}
-// 	// use a buffered query on the temp. output file on the (parent) path
-// 	pResult, _, err = innerQuery(t, queryTestInfo, request)
-// 	if err != nil {
-// 		t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
-// 		return
-// 	}
-// 	return
-// }
+func TestNormalizeCdx14ComponentsXXL(t *testing.T) {
+	ti := NewNormalizeTestInfo(TEST_CDX_1_4_NORMALIZE_COMPONENTS_XXL, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_4_NORMALIZE_COMPONENTS_XXL)
+	innerTestNormalize(t, ti)
+}
+
+func TestNormalizeCdx15VulnerabilitiesNatsBox(t *testing.T) {
+	ti := NewNormalizeTestInfo(TEST_CDX_1_5_NORMALIZE_VULNERABILITIES_NATS_BOX, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_NORMALIZE_VULNERABILITIES_NATS_BOX)
+	innerTestNormalize(t, ti)
+}
