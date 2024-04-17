@@ -30,13 +30,14 @@ import (
 )
 
 const (
-	TEST_CDX_1_5_SORT_COMPONENTS_XXL           = "test/sort/cdx-1-4-components-xxl.json"
-	TEST_CDX_1_5_SORT_LICENSES                 = "test/sort/cdx-1-5-licenses.json"
-	TEST_CDX_1_5_SORT_DEPENDENCIES             = "test/sort/cdx-1-5-dependencies.json"
-	TEST_CDX_1_5_SORT_EXTERNAL_REFERENCES      = "test/sort/cdx-1-5-external-references.json"
-	TEST_CDX_1_5_SORT_VULNERABILITIES          = "test/sort/cdx-1-5-vulnerabilities.json"
-	TEST_CDX_1_5_SORT_VULNERABILITIES_NATS_BOX = "test/sort/cdx-1-5-vulnerabilities-container-nats-box.bom.json"
-	TEST_CDX_1_2_SORT_COMPONENTS_PROTON        = "test/sort/cdx-1-2-components-protonmail.bom.json"
+	TEST_CDX_1_5_NORMALIZE_COMPONENTS               = "test/normalize/cdx-1-5-components.bom.json"
+	TEST_CDX_1_5_NORMALIZE_LICENSES                 = "test/normalize/cdx-1-5-licenses.bom.json"
+	TEST_CDX_1_5_NORMALIZE_DEPENDENCIES             = "test/normalize/cdx-1-5-dependencies.bom.json"
+	TEST_CDX_1_5_NORMALIZE_EXTERNAL_REFERENCES      = "test/normalize/cdx-1-5-external-references.bom.json"
+	TEST_CDX_1_5_NORMALIZE_VULNERABILITIES          = "test/normalize/cdx-1-5-vulnerabilities.bom.json"
+	TEST_CDX_1_5_NORMALIZE_VULNERABILITIES_NATS_BOX = "test/normalize/cdx-1-5-vulnerabilities-container-nats-box.bom.json"
+	TEST_CDX_1_5_NORMALIZE_COMPONENTS_XXL           = "test/normalize/cdx-1-4-components-xxl.bom.json"
+	TEST_CDX_1_2_NORMALIZE_COMPONENTS_PROTON        = "test/normalize/cdx-1-2-components-protonmail.bom.json"
 )
 
 type SortTestInfo struct {
@@ -58,7 +59,7 @@ func NewSortTestInfo(inputFile string, resultExpectedError error) *SortTestInfo 
 	return ti
 }
 
-func innerTestSort(t *testing.T, testInfo *SortTestInfo) (outputBuffer bytes.Buffer, basicTestInfo string, err error) {
+func innerTestNormalize(t *testing.T, testInfo *SortTestInfo) (outputBuffer bytes.Buffer, basicTestInfo string, err error) {
 	getLogger().Tracef("TestInfo: %s", testInfo)
 
 	// Mock stdin if requested
@@ -77,7 +78,7 @@ func innerTestSort(t *testing.T, testInfo *SortTestInfo) (outputBuffer bytes.Buf
 	}
 
 	// invoke resource list command with a byte buffer
-	outputBuffer, err = innerBufferedTestSort(testInfo)
+	outputBuffer, err = innerBufferedTestNormalize(testInfo)
 	// if the command resulted in a failure
 	if err != nil {
 		// if tests asks us to report a FAIL to the test framework
@@ -92,14 +93,14 @@ func innerTestSort(t *testing.T, testInfo *SortTestInfo) (outputBuffer bytes.Buf
 	return
 }
 
-func innerBufferedTestSort(testInfo *SortTestInfo) (outputBuffer bytes.Buffer, err error) {
+func innerBufferedTestNormalize(testInfo *SortTestInfo) (outputBuffer bytes.Buffer, err error) {
 
 	// The command looks for the input & output filename in global flags struct
 	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile
 	utils.GlobalFlags.PersistentFlags.OutputFile = testInfo.OutputFile
 	utils.GlobalFlags.PersistentFlags.OutputFormat = testInfo.OutputFormat
 	utils.GlobalFlags.PersistentFlags.OutputIndent = testInfo.OutputIndent
-	utils.GlobalFlags.PersistentFlags.Sort = testInfo.Sort // TODO: default true
+	utils.GlobalFlags.PersistentFlags.OutputNormalize = testInfo.Sort // TODO: default true
 	utils.GlobalFlags.TrimFlags.Keys = testInfo.Keys
 	utils.GlobalFlags.TrimFlags.FromPaths = testInfo.FromPaths
 	var outputWriter io.Writer
@@ -135,37 +136,45 @@ func innerBufferedTestSort(testInfo *SortTestInfo) (outputBuffer bytes.Buffer, e
 	return
 }
 
-func TestSortCdx15ComponentsXXL(t *testing.T) {
-	ti := NewSortTestInfo(TEST_CDX_1_5_SORT_COMPONENTS_XXL, nil)
-	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_SORT_COMPONENTS_XXL)
+func TestNormalizeCdx15Components(t *testing.T) {
+	ti := NewSortTestInfo(TEST_CDX_1_5_NORMALIZE_COMPONENTS, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_NORMALIZE_COMPONENTS)
 	ti.Sort = true // TODO: default true
-	innerTestSort(t, ti)
+	innerTestNormalize(t, ti)
 }
 
-func TestSortCdx15Dependencies(t *testing.T) {
-	ti := NewSortTestInfo(TEST_CDX_1_5_SORT_DEPENDENCIES, nil)
-	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_SORT_DEPENDENCIES)
+func TestNormalizeCdx15Dependencies(t *testing.T) {
+	ti := NewSortTestInfo(TEST_CDX_1_5_NORMALIZE_DEPENDENCIES, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_NORMALIZE_DEPENDENCIES)
 	ti.Sort = true // TODO: default true
-	innerTestSort(t, ti)
+	innerTestNormalize(t, ti)
 }
 
-func TestSortCdx15ExternalReferences(t *testing.T) {
-	ti := NewSortTestInfo(TEST_CDX_1_5_SORT_EXTERNAL_REFERENCES, nil)
-	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_SORT_EXTERNAL_REFERENCES)
+func TestNormalizeCdx15ExternalReferences(t *testing.T) {
+	ti := NewSortTestInfo(TEST_CDX_1_5_NORMALIZE_EXTERNAL_REFERENCES, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_NORMALIZE_EXTERNAL_REFERENCES)
 	ti.Sort = true // TODO: default true
-	innerTestSort(t, ti)
+	innerTestNormalize(t, ti)
 }
 
-func TestSortCdx15Vulnerabilities(t *testing.T) {
-	ti := NewSortTestInfo(TEST_CDX_1_5_SORT_VULNERABILITIES, nil)
-	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_SORT_VULNERABILITIES)
+func TestNormalizeCdx15Vulnerabilities(t *testing.T) {
+	ti := NewSortTestInfo(TEST_CDX_1_5_NORMALIZE_VULNERABILITIES, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_NORMALIZE_VULNERABILITIES)
 	ti.Sort = true // TODO: default true
-	innerTestSort(t, ti)
+	innerTestNormalize(t, ti)
 }
 
-func TestSortCdx15Licenses(t *testing.T) {
-	ti := NewSortTestInfo(TEST_CDX_1_5_SORT_LICENSES, nil)
-	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_SORT_LICENSES)
+func TestNormalizeCdx15Licenses(t *testing.T) {
+	ti := NewSortTestInfo(TEST_CDX_1_5_NORMALIZE_LICENSES, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_NORMALIZE_LICENSES)
 	ti.Sort = true // TODO: default true
-	innerTestSort(t, ti)
+	innerTestNormalize(t, ti)
+}
+
+// XXL Sort tests
+func TestNormalizeCdx15ComponentsXXL(t *testing.T) {
+	ti := NewSortTestInfo(TEST_CDX_1_5_NORMALIZE_COMPONENTS_XXL, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_NORMALIZE_COMPONENTS_XXL)
+	ti.Sort = true // TODO: default true
+	innerTestNormalize(t, ti)
 }

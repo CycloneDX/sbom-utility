@@ -21,8 +21,30 @@ import (
 	"sort"
 )
 
+type Normalizer interface {
+	Normalize()
+}
+
+// **NOTE** this method is a generic means to test for ANY named interface
+func interfaceSupported[T any](i T, itfc interface{}) bool {
+	if itfc != nil {
+		_, ok := itfc.(T)
+		return ok
+	}
+	return false
+}
+
+// This is a wrapper to test specifically for the Normalize interface
+func normalizeSupported(itfc interface{}) bool {
+	return interfaceSupported(Normalizer(nil), itfc)
+}
+
+// named BOM slice types
+type CDXComponentsSlice []CDXComponent
+type CDXServicesSlice []CDXService
+
 // ====================================================================
-// Sort (normalization) by rules:
+// Sort by (normalization) rules:
 // ====================================================================
 // 1. Required fields if they exist
 // 1. Use pseudo-required field "bom-ref" when available
@@ -33,21 +55,57 @@ import (
 // - TODO: track/limit depth of recursion (in "component", "service")
 // ====================================================================
 
+func (slice CDXComponentsSlice) Normalize() {
+	sort.Slice(slice, func(i, j int) bool {
+		element1 := slice[i]
+		element2 := slice[j]
+		return comparatorComponent(element1, element2)
+	})
+
+	// Normalize() each entry in the Components slice
+	// Note: this causes recursion as each Component type
+	// has a Components slice.
+	for _, component := range slice {
+		component.Normalize()
+	}
+}
+
+func (slice CDXServicesSlice) Normalize() {
+	sort.Slice(slice, func(i, j int) bool {
+		element1 := slice[i]
+		element2 := slice[j]
+		return comparatorService(element1, element2)
+	})
+
+	// Normalize() each entry in the Service slice
+	// Note: this causes recursion as each Component type
+	// has a Services slice.
+	for _, component := range slice {
+		component.Normalize()
+	}
+}
+
 // TODO: Compositions, Formula
-func (bom *CDXBom) Sort() {
+func (bom *CDXBom) Normalize() {
 	// Sort: BOM Metadata
 	if bom.Metadata != nil {
-		bom.Metadata.Sort()
+		if normalizeSupported(bom.Metadata) {
+			bom.Metadata.Normalize()
+		}
 	}
 
 	// Sort: Components
 	if bom.Components != nil {
-		sortSliceComponents(bom.Components)
+		var sliceComponents CDXComponentsSlice = *bom.Components
+		sliceComponents.Normalize()
+		// sortSliceComponents(bom.Components)
 	}
 
 	// Sort: Services
 	if bom.Services != nil {
-		sortSliceServices(bom.Services)
+		var sliceServices CDXServicesSlice = *bom.Services
+		sliceServices.Normalize()
+		//sortSliceServices(bom.Services)
 	}
 
 	// Sort: Dependencies
@@ -83,13 +141,13 @@ func (bom *CDXBom) Sort() {
 // Manufacturer *CDXOrganizationalEntity    `json:"manufacture,omitempty"` // NOTE: Typo is in spec.
 // Supplier     *CDXOrganizationalEntity    `json:"supplier,omitempty"`
 // Lifecycles   *[]CDXLifecycle             `json:"lifecycles,omitempty"` // v1.5 added
-func (pMetadata *CDXMetadata) Sort() {
+func (pMetadata *CDXMetadata) Normalize() {
 	if pMetadata != nil {
 		metadata := *pMetadata
 
 		// Sort: Component
 		if metadata.Component != nil {
-			metadata.Component.Sort()
+			metadata.Component.Normalize()
 		}
 
 		// Sort: Licenses
@@ -104,7 +162,7 @@ func (pMetadata *CDXMetadata) Sort() {
 	}
 }
 
-func (component *CDXComponent) Sort() {
+func (component *CDXComponent) Normalize() {
 	// Sort: Components
 	// Note: The following method is recursive
 	if component.Components != nil {
@@ -142,7 +200,7 @@ func (component *CDXComponent) Sort() {
 	}
 }
 
-func (service *CDXService) Sort() {
+func (service *CDXService) Normalize() {
 	// Sort: Services
 	// Note: The following method is recursive
 	if service.Services != nil {
@@ -186,7 +244,7 @@ func sortSliceComponents(pSlice *[]CDXComponent) {
 
 		// !!!RECURSIVELY sort each entry in the Components slice
 		for _, component := range slice {
-			component.Sort()
+			component.Normalize()
 		}
 	}
 }
@@ -203,7 +261,7 @@ func sortSliceServices(pSlice *[]CDXService) {
 
 		// !!!RECURSIVELY sort each entry in the Services slice
 		for _, service := range slice {
-			service.Sort()
+			service.Normalize()
 		}
 	}
 }

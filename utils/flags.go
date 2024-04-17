@@ -55,14 +55,14 @@ type CommandFlags struct {
 
 // NOTE: These flags are shared by both the list and policy subcommands
 type PersistentCommandFlags struct {
-	Quiet        bool // suppresses all non-essential (informational) output from a command. Overrides any other log-level commands.
-	Trace        bool // trace logging
-	Debug        bool // debug logging
-	InputFile    string
-	OutputFile   string // TODO: TODO: Note: not used by `validate` command, which emits a warning if supplied
-	OutputFormat string // e.g., "txt", "csv"", "md" (markdown) (normalized to lowercase)
-	OutputIndent uint8
-	Sort         bool
+	Quiet           bool // suppresses all non-essential (informational) output from a command. Overrides any other log-level commands.
+	Trace           bool // trace logging
+	Debug           bool // debug logging
+	InputFile       string
+	OutputFile      string // TODO: TODO: Note: not used by `validate` command, which emits a warning if supplied
+	OutputFormat    string // e.g., "txt", "csv"", "md" (markdown) (normalized to lowercase)
+	OutputIndent    uint8
+	OutputNormalize bool
 }
 
 func (persistentFlags PersistentCommandFlags) GetOutputIndentInt() int {

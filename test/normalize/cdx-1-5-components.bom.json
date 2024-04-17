@@ -1,0 +1,174 @@
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "serialNumber": "urn:uuid:xxxx",
+    "version": 1,
+    "metadata": {
+        "component": {
+            "type": "application",
+            "name": "Acme"
+        }
+    },
+    "components": [
+        {
+            "type": "operating-system",
+            "name": "busybox",
+            "version": "1.36.0",
+            "description": "BusyBox v1.36.0",
+            "swid": {
+                "tagId": "busybox",
+                "name": "busybox",
+                "version": "1.36.0"
+            }
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:deb/debian/libjq1@1.5+dfsg-2+b1?arch=amd64&upstream=jq%401.5+dfsg-2&distro=debian-10&package-id=c98431b078a20aed",
+            "publisher": "ChangZhuo Chen (陳昌倬) <czchen@debian.org>",
+            "name": "libjq1",
+            "version": "1.5+dfsg-2+b1",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "Apache-2.0"
+                    }
+                },
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                },
+                {
+                    "license": {
+                        "name": "Expat"
+                    }
+                },
+                {
+                    "license": {
+                        "id": "CC-BY-3.0"
+                    }
+                },
+                {
+                    "license": {
+                        "id": "GPL-2.0-or-later"
+                    }
+                },
+                {
+                    "license": {
+                        "id": "GPL-2.0-only"
+                    }
+                }
+            ],
+            "cpe": "cpe:2.3:a:libjq1:libjq1:1.5\\+dfsg-2\\+b1:*:*:*:*:*:*:*",
+            "purl": "pkg:deb/debian/libjq1@1.5+dfsg-2+b1?arch=amd64&upstream=jq%401.5+dfsg-2&distro=debian-10"
+        },
+        {
+            "type": "operating-system",
+            "name": "alpine",
+            "version": "3.11.13",
+            "description": "Alpine Linux v3.11",
+            "swid": {
+                "tagId": "alpine",
+                "name": "alpine",
+                "version": "3.11.13"
+            },
+            "externalReferences": [
+                {
+                    "url": "https://bugs.alpinelinux.org/",
+                    "type": "issue-tracker"
+                },
+                {
+                    "url": "https://alpinelinux.org/",
+                    "type": "website"
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/type-is@1.6.18?package-id=5bdf50fc9a89514f",
+            "name": "type-is",
+            "version": "1.6.18",
+            "description": "Infer the content-type of a request.",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ],
+            "cpe": "cpe:2.3:a:type-is:type-is:1.6.18:*:*:*:*:*:*:*",
+            "purl": "pkg:npm/type-is@1.6.18",
+            "externalReferences": [
+                {
+                    "url": "jshttp/type-is",
+                    "type": "distribution"
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/brace-expansion@1.1.11?package-id=a36ca63616a6d457",
+            "author": "Julian Gruber <mail@juliangruber.com> (http://juliangruber.com)",
+            "name": "brace-expansion",
+            "version": "1.1.11",
+            "description": "Brace expansion as known from sh/bash",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ],
+            "cpe": "cpe:2.3:a:brace-expansion:brace-expansion:1.1.11:*:*:*:*:*:*:*",
+            "purl": "pkg:npm/brace-expansion@1.1.11",
+            "externalReferences": [
+                {
+                    "url": "https://github.com/juliangruber/brace-expansion",
+                    "type": "website"
+                },
+                {
+                    "url": "git://github.com/juliangruber/brace-expansion.git",
+                    "type": "distribution"
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:deb/debian/acl@2.2.53-4?arch=amd64&distro=debian-10&package-id=3fcaa2363534185d",
+            "publisher": "Guillem Jover <guillem@debian.org>",
+            "name": "acl",
+            "version": "2.2.53-4",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "LGPL-2.0-or-later"
+                    }
+                },
+                {
+                    "license": {
+                        "id": "LGPL-2.1-only"
+                    }
+                },
+                {
+                    "license": {
+                        "id": "GPL-2.0-or-later"
+                    }
+                },
+                {
+                    "license": {
+                        "id": "GPL-2.0-only"
+                    }
+                }
+            ],
+            "cpe": "cpe:2.3:a:acl:acl:2.2.53-4:*:*:*:*:*:*:*",
+            "purl": "pkg:deb/debian/acl@2.2.53-4?arch=amd64&distro=debian-10"
+        },
+        {
+            "type": "application",
+            "bom-ref": "bf62711a099cabc1",
+            "name": "busybox",
+            "version": "1.36.0",
+            "cpe": "cpe:2.3:a:busybox:busybox:1.36.0:*:*:*:*:*:*:*"
+        }
+    ]
+}
