@@ -29,6 +29,7 @@ import (
 	"testing"
 
 	"github.com/CycloneDX/sbom-utility/common"
+	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 )
 
@@ -350,4 +351,9 @@ func verifyFileLineCountAndIndentation(t *testing.T, buffer bytes.Buffer, cti *C
 	}
 	getLogger().Tracef("success: output contained expected indent length: %v, at line: %v", cti.ResultExpectedIndentLength, cti.ResultLineContainsValuesAtLineNum)
 	return
+}
+
+func LoadBOMOutputFile(originalTest CommonTestInfo) (bom *schema.BOM, err error) {
+	filename := originalTest.OutputFile
+	return LoadBOMFile(filename)
 }

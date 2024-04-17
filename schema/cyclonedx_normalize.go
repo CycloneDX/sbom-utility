@@ -50,6 +50,8 @@ func normalizeSupported(itfc interface{}) bool {
 // named BOM slice types
 type CDXComponentsSlice []CDXComponent
 type CDXServicesSlice []CDXService
+type CDXDependenciesSlice []CDXDependency
+type CDXLicensesSlice []CDXLicense
 
 // ====================================================================
 // Sort by (normalization) rules:
@@ -91,6 +93,19 @@ func (slice CDXServicesSlice) Normalize() {
 	}
 }
 
+func (slice CDXDependenciesSlice) Normalize() {
+	sort.Slice(slice, func(i, j int) bool {
+		element1 := slice[i]
+		element2 := slice[j]
+		return comparatorDependency(element1, element2)
+	})
+
+	// TODO: Normalize() each entry in the Dependency slice
+	// for _, component := range slice {
+	// 	component.Normalize()
+	// }
+}
+
 // TODO: Compositions, Formula
 func (bom *CDXBom) Normalize() {
 	// Sort: BOM Metadata
@@ -107,13 +122,15 @@ func (bom *CDXBom) Normalize() {
 
 	// Sort: Services
 	if bom.Services != nil {
-		var sliceServices CDXServicesSlice = *bom.Services
-		sliceServices.Normalize()
+		// var sliceServices CDXServicesSlice = *bom.Services
+		// sliceServices.Normalize()
+		CDXServicesSlice(*bom.Services).Normalize()
 	}
 
 	// Sort: Dependencies
 	if bom.Dependencies != nil {
-		sortSliceDependencies(bom.Dependencies)
+		//sortSliceDependencies(bom.Dependencies)
+		CDXDependenciesSlice(*bom.Dependencies).Normalize()
 	}
 
 	// Sort: Vulnerabilities
@@ -169,7 +186,8 @@ func (component *CDXComponent) Normalize() {
 	// Sort: Components
 	// Note: The following method is recursive
 	if component.Components != nil {
-		sortSliceComponents(component.Components)
+		// sortSliceComponents(component.Components)
+		CDXComponentsSlice(*component.Components).Normalize()
 	}
 
 	// Sort: Data
@@ -207,7 +225,8 @@ func (service *CDXService) Normalize() {
 	// Sort: Services
 	// Note: The following method is recursive
 	if service.Services != nil {
-		sortSliceServices(service.Services)
+		//sortSliceServices(service.Services)
+		CDXServicesSlice(*service.Services).Normalize()
 	}
 
 	// Sort: Licenses
@@ -236,49 +255,49 @@ func (service *CDXService) Normalize() {
 // ====================================================================
 
 // Note: recursively sorts slice of CycloneDX Components
-func sortSliceComponents(pSlice *[]CDXComponent) {
-	if pSlice != nil {
-		slice := *pSlice
-		sort.Slice(slice, func(i, j int) bool {
-			element1 := slice[i]
-			element2 := slice[j]
-			return comparatorComponent(element1, element2)
-		})
+// func sortSliceComponents(pSlice *[]CDXComponent) {
+// 	if pSlice != nil {
+// 		slice := *pSlice
+// 		sort.Slice(slice, func(i, j int) bool {
+// 			element1 := slice[i]
+// 			element2 := slice[j]
+// 			return comparatorComponent(element1, element2)
+// 		})
 
-		// !!!RECURSIVELY sort each entry in the Components slice
-		for _, component := range slice {
-			component.Normalize()
-		}
-	}
-}
+// 		// !!!RECURSIVELY sort each entry in the Components slice
+// 		for _, component := range slice {
+// 			component.Normalize()
+// 		}
+// 	}
+// }
 
 // Note: recursively sorts slice of CycloneDX Services
-func sortSliceServices(pSlice *[]CDXService) {
-	if pSlice != nil {
-		slice := *pSlice
-		sort.Slice(slice, func(i, j int) bool {
-			element1 := slice[i]
-			element2 := slice[j]
-			return comparatorService(element1, element2)
-		})
+// func sortSliceServices(pSlice *[]CDXService) {
+// 	if pSlice != nil {
+// 		slice := *pSlice
+// 		sort.Slice(slice, func(i, j int) bool {
+// 			element1 := slice[i]
+// 			element2 := slice[j]
+// 			return comparatorService(element1, element2)
+// 		})
 
-		// !!!RECURSIVELY sort each entry in the Services slice
-		for _, service := range slice {
-			service.Normalize()
-		}
-	}
-}
+// 		// !!!RECURSIVELY sort each entry in the Services slice
+// 		for _, service := range slice {
+// 			service.Normalize()
+// 		}
+// 	}
+// }
 
-func sortSliceDependencies(pSlice *[]CDXDependency) {
-	if pSlice != nil {
-		slice := *pSlice
-		sort.Slice(slice, func(i, j int) bool {
-			element1 := slice[i]
-			element2 := slice[j]
-			return comparatorDependency(element1, element2)
-		})
-	}
-}
+// func sortSliceDependencies(pSlice *[]CDXDependency) {
+// 	if pSlice != nil {
+// 		slice := *pSlice
+// 		sort.Slice(slice, func(i, j int) bool {
+// 			element1 := slice[i]
+// 			element2 := slice[j]
+// 			return comparatorDependency(element1, element2)
+// 		})
+// 	}
+// }
 
 func sortSliceComponentData(pSlice *[]CDXComponentData) {
 	if pSlice != nil {

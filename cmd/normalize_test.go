@@ -26,7 +26,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 )
 
@@ -140,15 +139,10 @@ func innerBufferedTestNormalize(testInfo *NormalizeTestInfo) (outputBuffer bytes
 	return
 }
 
-func LoadBOMOutputFile(originalTest CommonTestInfo) (bom *schema.BOM, err error) {
-	filename := originalTest.OutputFile
-	return LoadBOMFile(filename)
-}
-
 func TestNormalizeCdx15Components(t *testing.T) {
 	ti := NewNormalizeTestInfo(TEST_CDX_1_5_NORMALIZE_COMPONENTS, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_NORMALIZE_COMPONENTS)
-	ti.FromPaths = []string{"components"}
+	// ti.FromPaths = []string{"components"}
 	innerTestNormalize(t, ti)
 	document, err := LoadBOMOutputFile(ti.CommonTestInfo)
 	if err != nil {
