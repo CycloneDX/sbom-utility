@@ -25,6 +25,14 @@ type Normalizer interface {
 	Normalize()
 }
 
+// TODO: Would like to use type reflection against a CDXBom type, walk the type hierarchy,
+// and normalize each element by calling its "Normalizer" interface if it is supported.
+// For example:
+//
+// if normalizeSupported(bom.Metadata) {
+// 	bom.Metadata.Normalize()
+// }
+
 // **NOTE** this method is a generic means to test for ANY named interface
 func interfaceSupported[T any](i T, itfc interface{}) bool {
 	if itfc != nil {
@@ -63,8 +71,7 @@ func (slice CDXComponentsSlice) Normalize() {
 	})
 
 	// Normalize() each entry in the Components slice
-	// Note: this causes recursion as each Component type
-	// has a Components slice.
+	// Note: this causes recursion as each "Component" type has a "Components" slice.
 	for _, component := range slice {
 		component.Normalize()
 	}
@@ -78,8 +85,7 @@ func (slice CDXServicesSlice) Normalize() {
 	})
 
 	// Normalize() each entry in the Service slice
-	// Note: this causes recursion as each Component type
-	// has a Services slice.
+	// Note: this causes recursion as each "Service" type has a "Services" slice.
 	for _, component := range slice {
 		component.Normalize()
 	}
@@ -89,23 +95,20 @@ func (slice CDXServicesSlice) Normalize() {
 func (bom *CDXBom) Normalize() {
 	// Sort: BOM Metadata
 	if bom.Metadata != nil {
-		if normalizeSupported(bom.Metadata) {
-			bom.Metadata.Normalize()
-		}
+		bom.Metadata.Normalize()
 	}
 
 	// Sort: Components
 	if bom.Components != nil {
-		var sliceComponents CDXComponentsSlice = *bom.Components
-		sliceComponents.Normalize()
-		// sortSliceComponents(bom.Components)
+		//var sliceComponents CDXComponentsSlice = *bom.Components
+		//sliceComponents.Normalize()
+		CDXComponentsSlice(*bom.Components).Normalize()
 	}
 
 	// Sort: Services
 	if bom.Services != nil {
 		var sliceServices CDXServicesSlice = *bom.Services
 		sliceServices.Normalize()
-		//sortSliceServices(bom.Services)
 	}
 
 	// Sort: Dependencies

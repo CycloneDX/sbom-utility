@@ -21,13 +21,12 @@ package cmd
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io"
 	"log"
 	"os"
 	"testing"
 
-	"github.com/CycloneDX/sbom-utility/common"
+	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 )
 
@@ -140,14 +139,25 @@ func innerBufferedTestNormalize(testInfo *NormalizeTestInfo) (outputBuffer bytes
 	return
 }
 
+func LoadBOMOutputFile(originalTest CommonTestInfo) (bom *schema.BOM, err error) {
+	filename := originalTest.OutputFile
+	return LoadBOMFile(filename)
+}
+
 func TestNormalizeCdx15Components(t *testing.T) {
 	ti := NewNormalizeTestInfo(TEST_CDX_1_5_NORMALIZE_COMPONENTS, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_NORMALIZE_COMPONENTS)
 	ti.FromPaths = []string{"components"}
 	innerTestNormalize(t, ti)
+	document, err := LoadBOMOutputFile(ti.CommonTestInfo)
+	if err != nil {
+		t.Error(err)
+	}
 
-	pResults, _ := GetOutputFileResult(t, *ti)
-	fmt.Printf("pResults: %+v", pResults)
+	// Before looking for license data, fully unmarshal the SBOM into named structures
+	if err = document.UnmarshalCycloneDXBOM(); err != nil {
+		return
+	}
 }
 
 func TestNormalizeCdx15Dependencies(t *testing.T) {
@@ -181,47 +191,27 @@ func TestNormalizeCdx15ComponentsXXL(t *testing.T) {
 	innerTestNormalize(t, ti)
 }
 
-func GetOutputFileResult(t *testing.T, originalTest NormalizeTestInfo) (pResult interface{}, err error) {
-
-	// Create a new test info. structure copying in data from the original test
-	queryTestInfo := NewCommonTestInfo()
-	queryTestInfo.InputFile = originalTest.OutputFile
-
-	// Load and Query temporary "trimmed" output BOM file using the "from" path
-	// Default to "root" (i.e,, "") path if none selected.
-	fromPath := ""
-	if len(originalTest.FromPaths) > 0 {
-		fromPath = originalTest.FromPaths[0]
-	}
-
-	request, err := common.NewQueryRequestSelectFromWhere(
-		common.QUERY_TOKEN_WILDCARD, fromPath, "")
-	if err != nil {
-		t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
-		return
-	}
-
-	// Verify each key was removed
-	// var pResult interface{}
-	// for _, key := range originalTest.Keys {
-
-	// use a buffered query on the temp. output file on the (parent) path
-	pResult, _, err = innerQuery(t, queryTestInfo, request)
-	if err != nil {
-		t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
-		return
-	}
-	//}
-
-	// 	// short-circuit if the "from" path dereferenced to a non-existent key
-	// 	if pResult == nil {
-	// 		t.Errorf("empty (nil) found at from clause: %s", fromPath)
-	// 		return
-	// 	}
-
-	// 	// verify the "key" was removed from the (parent) JSON map
-	// 	err = VerifyTrimmed(pResult, key)
-	// }
-
-	return
-}
+// func GetOutputFileResult(t *testing.T, originalTest NormalizeTestInfo) (pResult interface{}, err error) {
+// 	// Create a new test info. structure copying in data from the original test
+// 	queryTestInfo := NewCommonTestInfo()
+// 	queryTestInfo.InputFile = originalTest.OutputFile
+// 	// Load and Query temporary "trimmed" output BOM file using the "from" path
+// 	// Default to "root" (i.e,, "") path if none selected.
+// 	fromPath := ""
+// 	if len(originalTest.FromPaths) > 0 {
+// 		fromPath = originalTest.FromPaths[0]
+// 	}
+// 	request, err := common.NewQueryRequestSelectFromWhere(
+// 		common.QUERY_TOKEN_WILDCARD, fromPath, "")
+// 	if err != nil {
+// 		t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
+// 		return
+// 	}
+// 	// use a buffered query on the temp. output file on the (parent) path
+// 	pResult, _, err = innerQuery(t, queryTestInfo, request)
+// 	if err != nil {
+// 		t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
+// 		return
+// 	}
+// 	return
+// }
