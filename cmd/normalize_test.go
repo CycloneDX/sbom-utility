@@ -21,11 +21,13 @@ package cmd
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"os"
 	"testing"
 
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/utils"
 )
 
@@ -40,26 +42,28 @@ const (
 	TEST_CDX_1_2_NORMALIZE_COMPONENTS_PROTON        = "test/normalize/cdx-1-2-components-protonmail.bom.json"
 )
 
-type SortTestInfo struct {
+type NormalizeTestInfo struct {
 	CommonTestInfo
 	Keys      []string
 	FromPaths []string
-	Sort      bool
+	Normalize bool
 }
 
-func (ti *SortTestInfo) String() string {
+func (ti *NormalizeTestInfo) String() string {
 	buffer, _ := utils.EncodeAnyToDefaultIndentedJSONStr(ti)
 	return buffer.String()
 }
 
-func NewSortTestInfo(inputFile string, resultExpectedError error) *SortTestInfo {
-	var ti = new(SortTestInfo)
+func NewNormalizeTestInfo(inputFile string, resultExpectedError error) *NormalizeTestInfo {
+	var ti = new(NormalizeTestInfo)
+	// Set to test normalization by default
+	ti.Normalize = true
 	var pCommon = &ti.CommonTestInfo
 	pCommon.InitBasic(inputFile, FORMAT_JSON, resultExpectedError)
 	return ti
 }
 
-func innerTestNormalize(t *testing.T, testInfo *SortTestInfo) (outputBuffer bytes.Buffer, basicTestInfo string, err error) {
+func innerTestNormalize(t *testing.T, testInfo *NormalizeTestInfo) (outputBuffer bytes.Buffer, basicTestInfo string, err error) {
 	getLogger().Tracef("TestInfo: %s", testInfo)
 
 	// Mock stdin if requested
@@ -93,14 +97,14 @@ func innerTestNormalize(t *testing.T, testInfo *SortTestInfo) (outputBuffer byte
 	return
 }
 
-func innerBufferedTestNormalize(testInfo *SortTestInfo) (outputBuffer bytes.Buffer, err error) {
+func innerBufferedTestNormalize(testInfo *NormalizeTestInfo) (outputBuffer bytes.Buffer, err error) {
 
 	// The command looks for the input & output filename in global flags struct
 	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile
 	utils.GlobalFlags.PersistentFlags.OutputFile = testInfo.OutputFile
 	utils.GlobalFlags.PersistentFlags.OutputFormat = testInfo.OutputFormat
 	utils.GlobalFlags.PersistentFlags.OutputIndent = testInfo.OutputIndent
-	utils.GlobalFlags.PersistentFlags.OutputNormalize = testInfo.Sort // TODO: default true
+	utils.GlobalFlags.PersistentFlags.OutputNormalize = testInfo.Normalize // NOTE: default=true
 	utils.GlobalFlags.TrimFlags.Keys = testInfo.Keys
 	utils.GlobalFlags.TrimFlags.FromPaths = testInfo.FromPaths
 	var outputWriter io.Writer
@@ -137,44 +141,87 @@ func innerBufferedTestNormalize(testInfo *SortTestInfo) (outputBuffer bytes.Buff
 }
 
 func TestNormalizeCdx15Components(t *testing.T) {
-	ti := NewSortTestInfo(TEST_CDX_1_5_NORMALIZE_COMPONENTS, nil)
+	ti := NewNormalizeTestInfo(TEST_CDX_1_5_NORMALIZE_COMPONENTS, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_NORMALIZE_COMPONENTS)
-	ti.Sort = true // TODO: default true
+	ti.FromPaths = []string{"components"}
 	innerTestNormalize(t, ti)
+
+	pResults, _ := GetOutputFileResult(t, *ti)
+	fmt.Printf("pResults: %+v", pResults)
 }
 
 func TestNormalizeCdx15Dependencies(t *testing.T) {
-	ti := NewSortTestInfo(TEST_CDX_1_5_NORMALIZE_DEPENDENCIES, nil)
+	ti := NewNormalizeTestInfo(TEST_CDX_1_5_NORMALIZE_DEPENDENCIES, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_NORMALIZE_DEPENDENCIES)
-	ti.Sort = true // TODO: default true
 	innerTestNormalize(t, ti)
 }
 
 func TestNormalizeCdx15ExternalReferences(t *testing.T) {
-	ti := NewSortTestInfo(TEST_CDX_1_5_NORMALIZE_EXTERNAL_REFERENCES, nil)
+	ti := NewNormalizeTestInfo(TEST_CDX_1_5_NORMALIZE_EXTERNAL_REFERENCES, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_NORMALIZE_EXTERNAL_REFERENCES)
-	ti.Sort = true // TODO: default true
 	innerTestNormalize(t, ti)
 }
 
 func TestNormalizeCdx15Vulnerabilities(t *testing.T) {
-	ti := NewSortTestInfo(TEST_CDX_1_5_NORMALIZE_VULNERABILITIES, nil)
+	ti := NewNormalizeTestInfo(TEST_CDX_1_5_NORMALIZE_VULNERABILITIES, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_NORMALIZE_VULNERABILITIES)
-	ti.Sort = true // TODO: default true
 	innerTestNormalize(t, ti)
 }
 
 func TestNormalizeCdx15Licenses(t *testing.T) {
-	ti := NewSortTestInfo(TEST_CDX_1_5_NORMALIZE_LICENSES, nil)
+	ti := NewNormalizeTestInfo(TEST_CDX_1_5_NORMALIZE_LICENSES, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_NORMALIZE_LICENSES)
-	ti.Sort = true // TODO: default true
 	innerTestNormalize(t, ti)
 }
 
 // XXL Sort tests
 func TestNormalizeCdx15ComponentsXXL(t *testing.T) {
-	ti := NewSortTestInfo(TEST_CDX_1_5_NORMALIZE_COMPONENTS_XXL, nil)
+	ti := NewNormalizeTestInfo(TEST_CDX_1_5_NORMALIZE_COMPONENTS_XXL, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_NORMALIZE_COMPONENTS_XXL)
-	ti.Sort = true // TODO: default true
 	innerTestNormalize(t, ti)
+}
+
+func GetOutputFileResult(t *testing.T, originalTest NormalizeTestInfo) (pResult interface{}, err error) {
+
+	// Create a new test info. structure copying in data from the original test
+	queryTestInfo := NewCommonTestInfo()
+	queryTestInfo.InputFile = originalTest.OutputFile
+
+	// Load and Query temporary "trimmed" output BOM file using the "from" path
+	// Default to "root" (i.e,, "") path if none selected.
+	fromPath := ""
+	if len(originalTest.FromPaths) > 0 {
+		fromPath = originalTest.FromPaths[0]
+	}
+
+	request, err := common.NewQueryRequestSelectFromWhere(
+		common.QUERY_TOKEN_WILDCARD, fromPath, "")
+	if err != nil {
+		t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
+		return
+	}
+
+	// Verify each key was removed
+	// var pResult interface{}
+	// for _, key := range originalTest.Keys {
+
+	// use a buffered query on the temp. output file on the (parent) path
+	pResult, _, err = innerQuery(t, queryTestInfo, request)
+	if err != nil {
+		t.Errorf("%s: %v", ERR_TYPE_UNEXPECTED_ERROR, err)
+		return
+	}
+	//}
+
+	// 	// short-circuit if the "from" path dereferenced to a non-existent key
+	// 	if pResult == nil {
+	// 		t.Errorf("empty (nil) found at from clause: %s", fromPath)
+	// 		return
+	// 	}
+
+	// 	// verify the "key" was removed from the (parent) JSON map
+	// 	err = VerifyTrimmed(pResult, key)
+	// }
+
+	return
 }
