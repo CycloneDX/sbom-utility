@@ -31,6 +31,7 @@ type CDXFormulaSlice []CDXFormula
 type CDXHashesSlice []CDXHash
 type CDXLicenseChoiceSlice []CDXLicenseChoice
 type CDXLicensesSlice []CDXLicense // TODO: used in CDXComponentEvidence
+type CDXOrganizationalContactsSlice []CDXOrganizationalContact
 type CDXPropertiesSlice []CDXProperty
 type CDXRefLinkTypesSlice []CDXRefLinkType
 type CDXReleaseNotesSlice []CDXReleaseNotes
@@ -88,81 +89,67 @@ func (bom *CDXBom) Normalize() {
 	if bom.Metadata != nil {
 		bom.Metadata.Normalize()
 	}
-
 	// Sort: Components
 	if bom.Components != nil {
 		CDXComponentsSlice(*bom.Components).Normalize()
 	}
-
 	// Sort: Services
 	if bom.Services != nil {
 		CDXServicesSlice(*bom.Services).Normalize()
 	}
-
 	// Sort: Dependencies
 	if bom.Dependencies != nil {
 		CDXDependenciesSlice(*bom.Dependencies).Normalize()
 	}
-
 	// Sort: Vulnerabilities
 	if bom.Vulnerabilities != nil {
 		CDXVulnerabilitiesSlice(*bom.Vulnerabilities).Normalize()
 	}
-
-	// TODO: sort Compositions
-
 	// TODO: sort Formulation
 	if bom.Formulation != nil {
 		CDXFormulaSlice(*bom.Formulation).Normalize()
 	}
-
 	// Sort: Annotations
 	if bom.Annotations != nil {
 		CDXAnnotationsSlice(*bom.Annotations).Normalize()
 	}
-
 	// Sort: ExternalReferences
 	if bom.ExternalReferences != nil {
 		CDXExternalReferencesSlice(*bom.ExternalReferences).Normalize()
 	}
-
 	// Sort: Properties
 	if bom.Properties != nil {
 		CDXPropertiesSlice(*bom.Properties).Normalize()
 	}
-
+	// TODO: Sort Compositions
 	// TODO: Sort: Declarations (v1.6)
 	// TODO: Sort: Definitions (v1.6)
 }
 
 // TODO: Sort Metadata object fields that are slices:
-// Tools        interface{}                 `json:"tools,omitempty"`                               // v1.2: added.v1.5: "tools" is now an interface{}
-// Authors      *[]CDXOrganizationalContact `json:"authors,omitempty"`
-// Component    *CDXComponent               `json:"component,omitempty"`
+// Tools        interface{}                 `json:"tools,omitempty"`       // v1.2: added.v1.5: "tools" is now an interface{}
 // Manufacturer *CDXOrganizationalEntity    `json:"manufacture,omitempty"` // NOTE: Typo is in spec.
 // Supplier     *CDXOrganizationalEntity    `json:"supplier,omitempty"`
 // Lifecycles   *[]CDXLifecycle             `json:"lifecycles,omitempty"` // v1.5 added
 func (pMetadata *CDXMetadata) Normalize() {
 	if pMetadata != nil {
 		metadata := *pMetadata
-
 		// Sort: Component
 		if metadata.Component != nil {
 			metadata.Component.Normalize()
 		}
-
 		// Sort: Licenses
 		if metadata.Licenses != nil {
 			CDXLicenseChoiceSlice(*metadata.Licenses).Normalize()
 		}
-
 		// Sort: Properties
 		if metadata.Properties != nil {
 			CDXPropertiesSlice(*metadata.Properties).Normalize()
 		}
-
-		// TODO: Sort: Authors
-
+		// Sort: Authors
+		if metadata.Authors != nil {
+			CDXOrganizationalContactsSlice(*metadata.Authors).Normalize()
+		}
 		// TODO: Sort: Lifecycles
 	}
 }
@@ -173,49 +160,42 @@ func (component *CDXComponent) Normalize() {
 	if component.Components != nil {
 		CDXComponentsSlice(*component.Components).Normalize()
 	}
-
 	// Sort: Licenses
 	if component.Licenses != nil {
-		//sortSliceLicenseChoices(component.Licenses)
 		CDXLicenseChoiceSlice(*component.Licenses).Normalize()
 	}
-
 	// Sort: Hashes
 	if component.Hashes != nil {
 		CDXHashesSlice(*component.Hashes).Normalize()
 	}
-
 	// Sort: Data
 	if component.Data != nil {
 		CDXComponentDataSlice(*component.Data).Normalize()
 	}
-
 	// Sort: ReleaseNotes
 	if component.ReleaseNotes != nil {
 		CDXReleaseNotesSlice(*component.ReleaseNotes).Normalize()
 	}
-
 	// Sort: ExternalReferences
 	if component.ExternalReferences != nil {
 		CDXExternalReferencesSlice(*component.ExternalReferences).Normalize()
 	}
-
 	// Sort: Properties
 	if component.Properties != nil {
 		CDXPropertiesSlice(*component.Properties).Normalize()
 	}
-
-	// TODO: Sort: Authors
-
+	// Sort: Authors (v1.6)
+	if component.Authors != nil {
+		CDXOrganizationalContactsSlice(*component.Authors).Normalize()
+	}
+	// Sort: Tags (i.e., an array of "string") (v1.6)
+	if component.Tags != nil {
+		sort.Strings(*component.Tags)
+	}
 	// TODO: Sort: Evidence
-
 	// TODO: Sort: ModelCard
-
-	// TODO: Sort Pedigree (i.e., its Ancestors, Dependents, etc.)
-
+	// TODO: Sort: Pedigree (i.e., its Ancestors, Dependents, etc.)
 	// TODO: Sort: CryptoProperties (v1.6)
-
-	// TODO: Sort: Tags (v1.6)
 }
 
 func (service *CDXService) Normalize() {
@@ -224,32 +204,46 @@ func (service *CDXService) Normalize() {
 	if service.Services != nil {
 		CDXServicesSlice(*service.Services).Normalize()
 	}
-
 	// Sort: Licenses
 	if service.Licenses != nil {
 		CDXLicenseChoiceSlice(*service.Licenses).Normalize()
 	}
-
 	// Sort: ReleaseNotes
 	if service.ReleaseNotes != nil {
 		CDXReleaseNotesSlice(*service.ReleaseNotes).Normalize()
 	}
-
 	// Sort: ExternalReferences
 	if service.ExternalReferences != nil {
 		CDXExternalReferencesSlice(*service.ExternalReferences).Normalize()
 	}
-
 	// Sort: Properties
 	if service.Properties != nil {
 		CDXPropertiesSlice(*service.Properties).Normalize()
 	}
-
-	// TODO: Sort: Endpoints
-
+	// Sort: Endpoints (i.e., an array of "string")
+	if service.Endpoints != nil {
+		sort.Strings(*service.Endpoints)
+	}
+	// Sort: Tags (i.e., an array of "string") (v1.6)
+	if service.Tags != nil {
+		sort.Strings(*service.Tags)
+	}
 	// TODO: Sort: (Service) Data
+}
 
-	// TODO: Sort: Tags
+func (licenseChoice CDXLicenseChoice) Normalize() {
+	// Sort: License (slices within)
+	if licenseChoice.License != nil {
+		licenseChoice.License.Normalize()
+	}
+}
+
+func (license CDXLicense) Normalize() {
+	// TODO: Sort: Licensing  *CDXLicensing
+	// Sort: Properties
+	if license.Properties != nil {
+		CDXPropertiesSlice(*license.Properties).Normalize()
+	}
 }
 
 func (dependency CDXDependency) Normalize() {
@@ -264,18 +258,15 @@ func (formula *CDXFormula) Normalize() {
 	if formula.Components != nil {
 		CDXComponentsSlice(*formula.Components).Normalize()
 	}
-
 	// Sort: Services
 	// Note: The following method is recursive
 	if formula.Services != nil {
 		CDXServicesSlice(*formula.Services).Normalize()
 	}
-
 	// Sort: Workflows
 	if formula.Workflows != nil {
 		CDXWorkflowsSlice(*formula.Workflows).Normalize()
 	}
-
 	// Sort: Properties
 	if formula.Properties != nil {
 		CDXPropertiesSlice(*formula.Properties).Normalize()
@@ -287,30 +278,19 @@ func (workflow *CDXWorkflow) Normalize() {
 	if workflow.TaskTypes != nil {
 		CDXTaskTypesSlice(*workflow.TaskTypes).Normalize()
 	}
-
 	// Sort: Tasks
 	if workflow.Tasks != nil {
 		CDXTasksSlice(*workflow.Tasks).Normalize()
 	}
-
 	// TODO: Sort: ResourceReferences
-
 	// TODO: Sort: Tasks
-
 	// TODO: Sort: TaskDependencies
-
 	// TODO: Sort: Trigger
-
 	// TODO: Sort: Steps
-
 	// TODO: Sort: Inputs
-
 	// TODO: Sort: Outputs
-
 	// TODO: Sort: Workspaces
-
 	// TODO: Sort: RuntimeTopology
-
 	// Sort: Properties
 	if workflow.Properties != nil {
 		CDXPropertiesSlice(*workflow.Properties).Normalize()
@@ -322,25 +302,15 @@ func (task *CDXTask) Normalize() {
 	if task.TaskTypes != nil {
 		CDXTaskTypesSlice(*task.TaskTypes).Normalize()
 	}
-
 	// TODO: Sort: ResourceReferences
-
 	// TODO: Sort: Tasks
-
 	// TODO: Sort: TaskDependencies
-
 	// TODO: Sort: Trigger
-
 	// TODO: Sort: Steps
-
 	// TODO: Sort: Inputs
-
 	// TODO: Sort: Outputs
-
 	// TODO: Sort: Workspaces
-
 	// TODO: Sort: RuntimeTopology
-
 	// Sort: Properties
 	if task.Properties != nil {
 		CDXPropertiesSlice(*task.Properties).Normalize()
@@ -415,6 +385,19 @@ func (slice CDXLicenseChoiceSlice) Normalize() {
 		element1 := slice[i]
 		element2 := slice[j]
 		return comparatorLicenseChoice(element1, element2)
+	})
+
+	// Sort LicenseChoice elements
+	for _, licenseChoice := range slice {
+		licenseChoice.Normalize()
+	}
+}
+
+func (slice CDXOrganizationalContactsSlice) Normalize() {
+	sort.Slice(slice, func(i, j int) bool {
+		element1 := slice[i]
+		element2 := slice[j]
+		return comparatorOrganizationalContact(element1, element2)
 	})
 }
 
@@ -529,7 +512,7 @@ func comparatorComponent(element1 CDXComponent, element2 CDXComponent) bool {
 	}
 	// sort by pseudo-required field "bom-ref"
 	if element1.BOMRef != nil && element2.BOMRef != nil {
-		return *element1.BOMRef < *element2.BOMRef
+		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
 	}
 	// Other optional identifiers
 	if element1.Cpe != element2.Cpe {
@@ -558,7 +541,7 @@ func comparatorService(element1 CDXService, element2 CDXService) bool {
 	}
 	// sort by pseudo-required field "bom-ref"
 	if element1.BOMRef != nil && element2.BOMRef != nil {
-		return *element1.BOMRef < *element2.BOMRef
+		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
 	}
 	// sort by other "tie breakers"
 	if element1.Version != element2.Version {
@@ -574,7 +557,7 @@ func comparatorService(element1 CDXService, element2 CDXService) bool {
 func comparatorVulnerability(element1 CDXVulnerability, element2 CDXVulnerability) bool {
 	// sort by pseudo-required field "bom-ref"
 	if element1.BOMRef != nil && element2.BOMRef != nil {
-		return *element1.BOMRef < *element2.BOMRef
+		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
 	}
 	// optional identifiers: "id"
 	if element1.Id != element2.Id {
@@ -625,13 +608,7 @@ func comparatorComponentData(element1 CDXComponentData, element2 CDXComponentDat
 	return element1.Name < element2.Name
 }
 
-// TODO: use "bom-ref" as pseudo-required (if present)
 // TODO: use "text", "url" as "tie-breakers"
-// Text       *CDXAttachment `json:"text,omitempty"`
-// Url        string         `json:"url,omitempty"`
-// BOMRef     *CDXRefType    `json:"bom-ref,omitempty"`    // v1.5: added
-// Licensing  *CDXLicensing  `json:"licensing,omitempty"`  // v1.5: added
-// Properties *[]CDXProperty `json:"properties,omitempty"` // v1.5: added
 func comparatorLicenseChoice(element1 CDXLicenseChoice, element2 CDXLicenseChoice) bool {
 	// Option 1: "CDXLicense" object is provided
 	// guard against invalid pointers to (required) elements
@@ -646,10 +623,14 @@ func comparatorLicenseChoice(element1 CDXLicenseChoice, element2 CDXLicenseChoic
 		return license1.Name < license2.Name
 	}
 	// Option 2: "CDXLicenseExpression" is provided
-	// Expression      string      `json:"expression,omitempty"` REQUIRED
-	// Acknowledgement string      `json:"acknowledgement,omitempty"` // v1.6: added
-	// BOMRef          *CDXRefType `json:"bom-ref,omitempty"`
-	return element1.Expression < element2.Expression
+	if element1.Expression != element2.Expression {
+		return element1.Expression < element2.Expression
+	}
+	// "bom-ref" as a "tie-breaker"
+	if element1.BOMRef != nil && element2.BOMRef != nil {
+		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
+	}
+	return true
 }
 
 func comparatorHash(element1 CDXHash, element2 CDXHash) bool {
@@ -658,6 +639,24 @@ func comparatorHash(element1 CDXHash, element2 CDXHash) bool {
 		return element1.Alg < element2.Alg
 	}
 	return element1.Content < element2.Content
+}
+
+func comparatorOrganizationalContact(element1 CDXOrganizationalContact, element2 CDXOrganizationalContact) bool {
+	// sort by pseudo-required field "bom-ref"
+	if element1.BOMRef != nil && element2.BOMRef != nil {
+		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
+	}
+	// sort by optional field(s): "name", "email", "phone"
+	if element1.Name != element2.Name {
+		return element1.Name < element2.Name
+	}
+	if element1.Email != element2.Email {
+		return element1.Email < element2.Email
+	}
+	if element1.Phone != element2.Phone {
+		return element1.Phone < element2.Phone
+	}
+	return true
 }
 
 // TODO sort "subjects", "annotator"

@@ -80,34 +80,36 @@ type CDXMetadata struct {
 // TODO: Remove "service" from "Type" enum. as "service" now exists (deprecate in future versions)
 // NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXComponent struct {
-	Primary            bool                     `json:"-"`              // Proprietary: do NOT marshal/unmarshal
-	Type               string                   `json:"type,omitempty"` // Constraint: enum [see schema]
-	Name               string                   `json:"name,omitempty"`
-	BOMRef             *CDXRefType              `json:"bom-ref,omitempty"`
-	MimeType           string                   `json:"mime-type,omitempty"`
-	Supplier           *CDXOrganizationalEntity `json:"supplier,omitempty"`
-	Author             string                   `json:"author,omitempty"`
-	Publisher          string                   `json:"publisher,omitempty"`
-	Group              string                   `json:"group,omitempty"`
-	Version            string                   `json:"version,omitempty"`
-	Description        string                   `json:"description,omitempty"`
-	Scope              string                   `json:"scope,omitempty"` // Constraint: "enum": ["required","optional","excluded"]
-	Hashes             *[]CDXHash               `json:"hashes,omitempty"`
-	Licenses           *[]CDXLicenseChoice      `json:"licenses,omitempty"`
-	Copyright          string                   `json:"copyright,omitempty"`
-	Cpe                string                   `json:"cpe,omitempty"`                                       // See: https://nvd.nist.gov/products/cpe
-	Purl               string                   `json:"purl,omitempty" scvs:"bom:resource:identifiers:purl"` // See: https://github.com/package-url/purl-spec
-	Swid               *CDXSwid                 `json:"swid,omitempty"`                                      // See: https://www.iso.org/standard/65666.html
-	Pedigree           *CDXPedigree             `json:"pedigree,omitempty"`                                  // anon. type
-	ExternalReferences *[]CDXExternalReference  `json:"externalReferences,omitempty"`
-	Components         *[]CDXComponent          `json:"components,omitempty"`
-	Evidence           *CDXComponentEvidence    `json:"evidence,omitempty"`                  // v1.3: added
-	Properties         *[]CDXProperty           `json:"properties,omitempty"`                // v1.3: added
-	Modified           bool                     `json:"modified,omitempty" cdx:"deprecated"` // v1.4: deprecated
-	ReleaseNotes       *[]CDXReleaseNotes       `json:"releaseNotes,omitempty"`              // v1.4: added
-	Signature          *JSFSignature            `json:"signature,omitempty"`                 // v1.4: added
-	ModelCard          *CDXModelCard            `json:"modelCard,omitempty"`                 // v1.5: added
-	Data               *[]CDXComponentData      `json:"data,omitempty"`                      // v1.5: added
+	Primary            bool                        `json:"-"`              // Proprietary: do NOT marshal/unmarshal
+	Type               string                      `json:"type,omitempty"` // Constraint: enum [see schema]
+	Name               string                      `json:"name,omitempty"`
+	BOMRef             *CDXRefType                 `json:"bom-ref,omitempty"`
+	MimeType           string                      `json:"mime-type,omitempty"`
+	Supplier           *CDXOrganizationalEntity    `json:"supplier,omitempty"`
+	Author             string                      `json:"author,omitempty"`
+	Publisher          string                      `json:"publisher,omitempty"`
+	Group              string                      `json:"group,omitempty"`
+	Version            string                      `json:"version,omitempty"`
+	Description        string                      `json:"description,omitempty"`
+	Scope              string                      `json:"scope,omitempty"` // Constraint: "enum": ["required","optional","excluded"]
+	Hashes             *[]CDXHash                  `json:"hashes,omitempty"`
+	Licenses           *[]CDXLicenseChoice         `json:"licenses,omitempty"`
+	Copyright          string                      `json:"copyright,omitempty"`
+	Cpe                string                      `json:"cpe,omitempty"`                                       // See: https://nvd.nist.gov/products/cpe
+	Purl               string                      `json:"purl,omitempty" scvs:"bom:resource:identifiers:purl"` // See: https://github.com/package-url/purl-spec
+	Swid               *CDXSwid                    `json:"swid,omitempty"`                                      // See: https://www.iso.org/standard/65666.html
+	Pedigree           *CDXPedigree                `json:"pedigree,omitempty"`                                  // anon. type
+	ExternalReferences *[]CDXExternalReference     `json:"externalReferences,omitempty"`
+	Components         *[]CDXComponent             `json:"components,omitempty"`
+	Evidence           *CDXComponentEvidence       `json:"evidence,omitempty"`                  // v1.3: added
+	Properties         *[]CDXProperty              `json:"properties,omitempty"`                // v1.3: added
+	Modified           bool                        `json:"modified,omitempty" cdx:"deprecated"` // v1.4: deprecated
+	ReleaseNotes       *[]CDXReleaseNotes          `json:"releaseNotes,omitempty"`              // v1.4: added
+	Signature          *JSFSignature               `json:"signature,omitempty"`                 // v1.4: added
+	ModelCard          *CDXModelCard               `json:"modelCard,omitempty"`                 // v1.5: added
+	Data               *[]CDXComponentData         `json:"data,omitempty"`                      // v1.5: added
+	Authors            *[]CDXOrganizationalContact `json:"authors,omitempty"`                   // v1.6: added
+	Tags               *[]string                   `json:"tags,omitempty" cdx:"+1.6"`           // v1.6: added
 }
 
 // v1.5 added object
@@ -174,9 +176,10 @@ type CDXService struct {
 	Licenses           *[]CDXLicenseChoice      `json:"licenses,omitempty"`
 	ExternalReferences *[]CDXExternalReference  `json:"externalReferences,omitempty"`
 	Services           *[]CDXService            `json:"services,omitempty"`
-	Properties         *[]CDXProperty           `json:"properties,omitempty"`   // v1.3: added
-	ReleaseNotes       *[]CDXReleaseNotes       `json:"releaseNotes,omitempty"` // v1.4: added
-	Signature          *JSFSignature            `json:"signature,omitempty"`    // v1.4: added
+	Properties         *[]CDXProperty           `json:"properties,omitempty"`      // v1.3: added
+	ReleaseNotes       *[]CDXReleaseNotes       `json:"releaseNotes,omitempty"`    // v1.4: added
+	Signature          *JSFSignature            `json:"signature,omitempty"`       // v1.4: added
+	Tags               *[]string                `json:"tags,omitempty" cdx:"+1.6"` // v1.6: added
 }
 
 // v1.5: added. aggregated related date from v1.2-v1.4 and added additional fields
