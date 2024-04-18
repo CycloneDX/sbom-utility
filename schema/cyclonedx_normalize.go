@@ -231,6 +231,37 @@ func (service *CDXService) Normalize() {
 	// TODO: Sort: (Service) Data
 }
 
+//	type CDXVulnerability struct {
+//		BOMRef         *CDXRefType                  `json:"bom-ref,omitempty"`        // v1.4
+//		Id             string                       `json:"id,omitempty"`             // v1.4
+//		Source         *CDXVulnerabilitySource      `json:"source,omitempty"`         // v1.4
+//		References     *[]CDXVulnerabilityReference `json:"references"`               // v1.4: anon. type
+//		Ratings        *[]CDXRating                 `json:"ratings,omitempty"`        // v1.4
+//		Cwes           *[]int                       `json:"cwes,omitempty"`           // v1.4
+//		Description    string                       `json:"description,omitempty"`    // v1.4
+//		Detail         string                       `json:"detail,omitempty"`         // v1.4
+//		Recommendation string                       `json:"recommendation,omitempty"` // v1.4
+//		Advisories     *[]CDXAdvisory               `json:"advisories,omitempty"`     // v1.4
+//		Created        string                       `json:"created,omitempty"`        // v1.4
+//		Published      string                       `json:"published,omitempty"`      // v1.4
+//		Updated        string                       `json:"updated,omitempty"`        // v1.4
+//		Credits        *CDXCredit                   `json:"credits,omitempty"`        // v1.4: anon. type
+//		Tools          interface{}                  `json:"tools,omitempty"`          // v1.4: added; v1.5: changed to interface{}
+//		Analysis       *CDXAnalysis                 `json:"analysis,omitempty"`       // v1.4: anon. type
+//		Affects        *[]CDXAffect                 `json:"affects,omitempty"`        // v1.4: anon. type
+//		Properties     *[]CDXProperty               `json:"properties,omitempty"`     // v1.4: added
+//		Workaround     string                       `json:"workaround,omitempty"`     // v1.5: added
+//		ProofOfConcept *CDXProofOfConcept           `json:"proofOfConcept,omitempty"` // v1.5: added
+//		Rejected       string                       `json:"rejected,omitempty"`       // v1.5: added
+//	}
+func (vulnerability *CDXVulnerability) Normalize() {
+	// TODO: References, Ratings, Cwes, Advisories, Credits, Tools, Analysis, Affects, ProofOfConcept
+	// Sort: Properties
+	if vulnerability.Properties != nil {
+		CDXPropertiesSlice(*vulnerability.Properties).Normalize()
+	}
+}
+
 func (licenseChoice CDXLicenseChoice) Normalize() {
 	// Sort: License (slices within)
 	if licenseChoice.License != nil {
@@ -243,6 +274,20 @@ func (license CDXLicense) Normalize() {
 	// Sort: Properties
 	if license.Properties != nil {
 		CDXPropertiesSlice(*license.Properties).Normalize()
+	}
+	if license.Licensing != nil {
+		license.Licensing.Normalize()
+	}
+}
+
+func (licensing CDXLicensing) Normalize() {
+	// Sort: AltIds
+	if licensing.AltIds != nil {
+		sort.Strings(*licensing.AltIds)
+	}
+	// Sort: LicenseTypes
+	if licensing.LicenseTypes != nil {
+		sort.Strings(*licensing.LicenseTypes)
 	}
 }
 
@@ -355,6 +400,10 @@ func (slice CDXVulnerabilitiesSlice) Normalize() {
 		element2 := slice[j]
 		return comparatorVulnerability(element1, element2)
 	})
+	// TODO: sort (nested) children of each vulnerability
+	for _, vulnerability := range slice {
+		vulnerability.Normalize()
+	}
 }
 
 func (slice CDXDependenciesSlice) Normalize() {
@@ -656,6 +705,20 @@ func comparatorOrganizationalContact(element1 CDXOrganizationalContact, element2
 	if element1.Phone != element2.Phone {
 		return element1.Phone < element2.Phone
 	}
+	return true
+}
+
+func comparatorOrganizationalEntity(element1 CDXOrganizationalEntity, element2 CDXOrganizationalEntity) bool {
+	// sort by pseudo-required field "bom-ref"
+	if element1.BOMRef != nil && element2.BOMRef != nil {
+		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
+	}
+	// sort by optional field(s): "name"
+	if element1.Name != element2.Name {
+		return element1.Name < element2.Name
+	}
+
+	// TODO: "tie-breakers": Url ([]string), Contact ([]string)
 	return true
 }
 
