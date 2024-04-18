@@ -101,9 +101,20 @@ func (slice CDXDependenciesSlice) Normalize() {
 	})
 
 	// TODO: Normalize() each entry in the Dependency slice
-	// for _, component := range slice {
-	// 	component.Normalize()
-	// }
+	for _, dependency := range slice {
+		dependency.Normalize()
+	}
+}
+
+func (dependency CDXDependency) Normalize() {
+	// Sort the "dependsOn" slice
+	if pDependsOn := dependency.DependsOn; pDependsOn != nil {
+		slice := *pDependsOn
+		// Note: this is a "string" sort effectively
+		sort.Slice(slice, func(i, j int) bool {
+			return slice[i] < slice[j]
+		})
+	}
 }
 
 // TODO: Compositions, Formula
