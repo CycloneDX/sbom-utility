@@ -59,6 +59,7 @@ type CDXPropertiesSlice []CDXProperty
 type CDXReleaseNotesSlice []CDXReleaseNotes
 type CDXServicesSlice []CDXService
 type CDXVulnerabilitiesSlice []CDXVulnerability
+type CDXFormulaSlice []CDXFormula
 
 // ====================================================================
 // Sort by (normalization) rules:
@@ -72,7 +73,6 @@ type CDXVulnerabilitiesSlice []CDXVulnerability
 // - TODO: track/limit depth of recursion (in "component", "service")
 // ====================================================================
 
-// TODO: Compositions, Formula
 func (bom *CDXBom) Normalize() {
 	// Sort: BOM Metadata
 	if bom.Metadata != nil {
@@ -99,6 +99,13 @@ func (bom *CDXBom) Normalize() {
 		CDXVulnerabilitiesSlice(*bom.Vulnerabilities).Normalize()
 	}
 
+	// TODO: sort Compositions
+
+	// TODO: sort Formulation
+	if bom.Formulation != nil {
+		CDXFormulaSlice(*bom.Formulation).Normalize()
+	}
+
 	// Sort: Annotations
 	if bom.Annotations != nil {
 		CDXAnnotationsSlice(*bom.Annotations).Normalize()
@@ -113,6 +120,9 @@ func (bom *CDXBom) Normalize() {
 	if bom.Properties != nil {
 		CDXPropertiesSlice(*bom.Properties).Normalize()
 	}
+
+	// TODO: Sort: Declarations (v1.6)
+	// TODO: Sort: Definitions (v1.6)
 }
 
 // TODO: Sort Metadata object fields that are slices:
@@ -140,6 +150,8 @@ func (pMetadata *CDXMetadata) Normalize() {
 		if metadata.Properties != nil {
 			CDXPropertiesSlice(*metadata.Properties).Normalize()
 		}
+
+		// TODO: Sort: Lifecycles
 	}
 }
 
@@ -180,6 +192,18 @@ func (component *CDXComponent) Normalize() {
 	if component.Properties != nil {
 		CDXPropertiesSlice(*component.Properties).Normalize()
 	}
+
+	// TODO: Sort: Authors
+
+	// TODO: Sort: Evidence
+
+	// TODO: Sort: ModelCard
+
+	// TODO: Sort Pedigree (i.e., its Ancestors, Dependents, etc.)
+
+	// TODO: Sort: CryptoProperties (v1.6)
+
+	// TODO: Sort: Tags (v1.6)
 }
 
 func (service *CDXService) Normalize() {
@@ -208,6 +232,12 @@ func (service *CDXService) Normalize() {
 	if service.Properties != nil {
 		CDXPropertiesSlice(*service.Properties).Normalize()
 	}
+
+	// TODO: Sort: Endpoints
+
+	// TODO: Sort: (Service) Data
+
+	// TODO: Sort: Tags
 }
 
 func (slice CDXComponentsSlice) Normalize() {
@@ -270,6 +300,8 @@ func (dependency CDXDependency) Normalize() {
 	}
 }
 
+// TODO: Sort: the slices within the CDXComponentData (e.g., Contents,
+// SensitiveData, Graphics (collection), Governance, etc. )
 func (slice CDXComponentDataSlice) Normalize() {
 	sort.Slice(slice, func(i, j int) bool {
 		element1 := slice[i]
@@ -326,6 +358,34 @@ func (slice CDXHashesSlice) Normalize() {
 	})
 }
 
+func (slice CDXFormulaSlice) Normalize() {
+	sort.Slice(slice, func(i, j int) bool {
+		element1 := slice[i]
+		element2 := slice[j]
+		return comparatorFormula(element1, element2)
+	})
+
+	// TODO: Sort: workflows (tasks), components, services, properties, etc.
+	// Normalize() each entry in the Dependency slice
+	for _, formula := range slice {
+		formula.Normalize()
+	}
+}
+
+func (formula *CDXFormula) Normalize() {
+	// Sort: Components
+	// Note: The following method is recursive
+	if formula.Components != nil {
+		CDXComponentsSlice(*formula.Components).Normalize()
+	}
+
+	// Sort: Services
+	// Note: The following method is recursive
+	if formula.Services != nil {
+		CDXServicesSlice(*formula.Services).Normalize()
+	}
+}
+
 // ====================================================================
 // Struct comparators
 // ====================================================================
@@ -334,7 +394,6 @@ func (slice CDXHashesSlice) Normalize() {
 // Use optional identity fields: "purl", "cpe", "swid.TagId"
 // Sort by the optional field "bom-ref" as this is pseudo-required if
 // slice elements contain duplicates with both "name" and "type".
-// TODO: Sort licenses, hashes, etc.
 func comparatorComponent(element1 CDXComponent, element2 CDXComponent) bool {
 	// sort by required field(s)
 	if element1.Type != element2.Type {
@@ -367,7 +426,6 @@ func comparatorComponent(element1 CDXComponent, element2 CDXComponent) bool {
 	return true
 }
 
-// TODO: Sort licenses, endpoints, etc.
 func comparatorService(element1 CDXService, element2 CDXService) bool {
 	// sort by required field(s): "name"
 	if element1.Name != element2.Name {
@@ -502,4 +560,22 @@ func comparatorProperty(element1 CDXProperty, element2 CDXProperty) bool {
 		return element1.Name < element2.Name
 	}
 	return element1.Value < element2.Value
+}
+
+func comparatorFormula(element1 CDXFormula, element2 CDXFormula) bool {
+	// sort by pseudo-required field "bom-ref"
+	if element1.BOMRef != nil && element2.BOMRef != nil {
+		return *element1.BOMRef < *element2.BOMRef
+	}
+	// default: preserve existing order
+	return true
+}
+
+func comparatorWorkflow(element1 CDXWorkflow, element2 CDXWorkflow) bool {
+	// sort by required field "bom-ref"
+	if element1.BOMRef != nil && element2.BOMRef != nil {
+		return *element1.BOMRef < *element2.BOMRef
+	}
+	// default: preserve existing order
+	return true
 }
