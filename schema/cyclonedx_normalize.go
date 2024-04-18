@@ -21,6 +21,28 @@ import (
 	"sort"
 )
 
+// named BOM slice types
+type CDXAnnotationsSlice []CDXAnnotation
+type CDXComponentDataSlice []CDXComponentData
+type CDXComponentsSlice []CDXComponent
+type CDXDependenciesSlice []CDXDependency
+type CDXExternalReferencesSlice []CDXExternalReference
+type CDXFormulaSlice []CDXFormula
+type CDXHashesSlice []CDXHash
+type CDXLicenseChoiceSlice []CDXLicenseChoice
+type CDXLicensesSlice []CDXLicense // TODO: used in CDXComponentEvidence
+type CDXPropertiesSlice []CDXProperty
+type CDXRefLinkTypesSlice []CDXRefLinkType
+type CDXReleaseNotesSlice []CDXReleaseNotes
+type CDXServicesSlice []CDXService
+type CDXTasksSlice []CDXTask
+type CDXTaskTypesSlice []CDXTaskType
+type CDXVulnerabilitiesSlice []CDXVulnerability
+type CDXWorkflowsSlice []CDXWorkflow
+
+// ====================================================================
+// Normalizer Interface (and helpers)
+// ====================================================================
 type Normalizer interface {
 	Normalize()
 }
@@ -46,33 +68,21 @@ func normalizeSupported(itfc interface{}) bool {
 	return interfaceSupported(Normalizer(nil), itfc)
 }
 
-// named BOM slice types
-type CDXAnnotationsSlice []CDXAnnotation
-type CDXComponentDataSlice []CDXComponentData
-type CDXComponentsSlice []CDXComponent
-type CDXDependenciesSlice []CDXDependency
-type CDXExternalReferencesSlice []CDXExternalReference
-type CDXHashesSlice []CDXHash
-type CDXLicenseChoiceSlice []CDXLicenseChoice
-type CDXLicensesSlice []CDXLicense // TODO: used in CDXComponentEvidence
-type CDXPropertiesSlice []CDXProperty
-type CDXReleaseNotesSlice []CDXReleaseNotes
-type CDXServicesSlice []CDXService
-type CDXVulnerabilitiesSlice []CDXVulnerability
-type CDXFormulaSlice []CDXFormula
-
 // ====================================================================
-// Sort by (normalization) rules:
+// Normalization (i.e., "sort by") rules:
 // ====================================================================
-// 1. Required fields if they exist
-// 1. Use pseudo-required field "bom-ref" when available
-// 1. Using optional local identifiers or
-// 1. Using combinations of identifying field values (towards 100% normalization)
+// 1. Sort by: Required fields if they exist ("id" values, author order)
+// 1. Sort by: The pseudo-required field "bom-ref" when available (a BOM-unique ID)
+// 1. Sort by: Using optional struct-local, or domain identifiers (e.g., SPDXID) or
+// 1. Sort by: Using combinations of identifying field values (towards 100% normalization)
 // ====================================================================
 // "Punch" list of future items:
 // - TODO: track/limit depth of recursion (in "component", "service")
 // ====================================================================
 
+// ====================================================================
+// Struct Normalizers
+// ====================================================================
 func (bom *CDXBom) Normalize() {
 	// Sort: BOM Metadata
 	if bom.Metadata != nil {
@@ -150,6 +160,8 @@ func (pMetadata *CDXMetadata) Normalize() {
 		if metadata.Properties != nil {
 			CDXPropertiesSlice(*metadata.Properties).Normalize()
 		}
+
+		// TODO: Sort: Authors
 
 		// TODO: Sort: Lifecycles
 	}
@@ -240,6 +252,105 @@ func (service *CDXService) Normalize() {
 	// TODO: Sort: Tags
 }
 
+func (dependency CDXDependency) Normalize() {
+	if dependency.DependsOn != nil {
+		CDXRefLinkTypesSlice(*dependency.DependsOn).Normalize()
+	}
+}
+
+func (formula *CDXFormula) Normalize() {
+	// Sort: Components
+	// Note: The following method is recursive
+	if formula.Components != nil {
+		CDXComponentsSlice(*formula.Components).Normalize()
+	}
+
+	// Sort: Services
+	// Note: The following method is recursive
+	if formula.Services != nil {
+		CDXServicesSlice(*formula.Services).Normalize()
+	}
+
+	// Sort: Workflows
+	if formula.Workflows != nil {
+		CDXWorkflowsSlice(*formula.Workflows).Normalize()
+	}
+
+	// Sort: Properties
+	if formula.Properties != nil {
+		CDXPropertiesSlice(*formula.Properties).Normalize()
+	}
+}
+
+func (workflow *CDXWorkflow) Normalize() {
+	// Sort: TaskTypes
+	if workflow.TaskTypes != nil {
+		CDXTaskTypesSlice(*workflow.TaskTypes).Normalize()
+	}
+
+	// Sort: Tasks
+	if workflow.Tasks != nil {
+		CDXTasksSlice(*workflow.Tasks).Normalize()
+	}
+
+	// TODO: Sort: ResourceReferences
+
+	// TODO: Sort: Tasks
+
+	// TODO: Sort: TaskDependencies
+
+	// TODO: Sort: Trigger
+
+	// TODO: Sort: Steps
+
+	// TODO: Sort: Inputs
+
+	// TODO: Sort: Outputs
+
+	// TODO: Sort: Workspaces
+
+	// TODO: Sort: RuntimeTopology
+
+	// Sort: Properties
+	if workflow.Properties != nil {
+		CDXPropertiesSlice(*workflow.Properties).Normalize()
+	}
+}
+
+func (task *CDXTask) Normalize() {
+	// Sort: TaskTypes
+	if task.TaskTypes != nil {
+		CDXTaskTypesSlice(*task.TaskTypes).Normalize()
+	}
+
+	// TODO: Sort: ResourceReferences
+
+	// TODO: Sort: Tasks
+
+	// TODO: Sort: TaskDependencies
+
+	// TODO: Sort: Trigger
+
+	// TODO: Sort: Steps
+
+	// TODO: Sort: Inputs
+
+	// TODO: Sort: Outputs
+
+	// TODO: Sort: Workspaces
+
+	// TODO: Sort: RuntimeTopology
+
+	// Sort: Properties
+	if task.Properties != nil {
+		CDXPropertiesSlice(*task.Properties).Normalize()
+	}
+}
+
+// ====================================================================
+// Slice Normalizers
+// ====================================================================
+
 func (slice CDXComponentsSlice) Normalize() {
 	sort.Slice(slice, func(i, j int) bool {
 		element1 := slice[i]
@@ -289,17 +400,6 @@ func (slice CDXDependenciesSlice) Normalize() {
 	}
 }
 
-// TODO: sort the slice of "dependsOn"
-func (dependency CDXDependency) Normalize() {
-	if pDependsOn := dependency.DependsOn; pDependsOn != nil {
-		slice := *pDependsOn
-		// Note: this is a "string" sort
-		sort.Slice(slice, func(i, j int) bool {
-			return slice[i] < slice[j]
-		})
-	}
-}
-
 // TODO: Sort: the slices within the CDXComponentData (e.g., Contents,
 // SensitiveData, Graphics (collection), Governance, etc. )
 func (slice CDXComponentDataSlice) Normalize() {
@@ -342,6 +442,14 @@ func (slice CDXPropertiesSlice) Normalize() {
 	})
 }
 
+func (slice CDXRefLinkTypesSlice) Normalize() {
+	sort.Slice(slice, func(i, j int) bool {
+		element1 := slice[i]
+		element2 := slice[j]
+		return comparatorRefLinkType(element1, element2)
+	})
+}
+
 func (slice CDXReleaseNotesSlice) Normalize() {
 	sort.Slice(slice, func(i, j int) bool {
 		element1 := slice[i]
@@ -372,18 +480,35 @@ func (slice CDXFormulaSlice) Normalize() {
 	}
 }
 
-func (formula *CDXFormula) Normalize() {
-	// Sort: Components
-	// Note: The following method is recursive
-	if formula.Components != nil {
-		CDXComponentsSlice(*formula.Components).Normalize()
-	}
+func (slice CDXWorkflowsSlice) Normalize() {
+	sort.Slice(slice, func(i, j int) bool {
+		element1 := slice[i]
+		element2 := slice[j]
+		return comparatorWorkflow(element1, element2)
+	})
 
-	// Sort: Services
-	// Note: The following method is recursive
-	if formula.Services != nil {
-		CDXServicesSlice(*formula.Services).Normalize()
+	for _, workflow := range slice {
+		workflow.Normalize()
 	}
+}
+
+func (slice CDXTasksSlice) Normalize() {
+	sort.Slice(slice, func(i, j int) bool {
+		element1 := slice[i]
+		element2 := slice[j]
+		return comparatorTask(element1, element2)
+	})
+
+	for _, task := range slice {
+		task.Normalize()
+	}
+}
+
+func (slice CDXTaskTypesSlice) Normalize() {
+	sort.Slice(slice, func(i, j int) bool {
+		// Note: CDXTaskType is a named type for "string"
+		return slice[i] < slice[j]
+	})
 }
 
 // ====================================================================
@@ -480,6 +605,17 @@ func comparatorDependency(element1 CDXDependency, element2 CDXDependency) bool {
 	return true
 }
 
+// Note: RefLinkType is of type CDXRefType which is of type "string" (for now)
+func comparatorRefLinkType(element1 CDXRefLinkType, element2 CDXRefLinkType) bool {
+	// Note: casting to actual data type
+	return comparatorRefType(CDXRefType(element1), CDXRefType(element2))
+}
+
+func comparatorRefType(element1 CDXRefType, element2 CDXRefType) bool {
+	// Note: this is a basic "string" comparison
+	return element1 < element2
+}
+
 func comparatorComponentData(element1 CDXComponentData, element2 CDXComponentData) bool {
 	// sort by required fields: "type"
 	if element1.Type != element2.Type {
@@ -562,6 +698,9 @@ func comparatorProperty(element1 CDXProperty, element2 CDXProperty) bool {
 	return element1.Value < element2.Value
 }
 
+// NOTE: sorting structs like this are challenge since there are no required fields
+// within the top-level data schema; yet, there are LOTS of slices to sort within.
+// TODO: make the "bom-ref" field "required" in v2.0
 func comparatorFormula(element1 CDXFormula, element2 CDXFormula) bool {
 	// sort by pseudo-required field "bom-ref"
 	if element1.BOMRef != nil && element2.BOMRef != nil {
@@ -575,6 +714,23 @@ func comparatorWorkflow(element1 CDXWorkflow, element2 CDXWorkflow) bool {
 	// sort by required field "bom-ref"
 	if element1.BOMRef != nil && element2.BOMRef != nil {
 		return *element1.BOMRef < *element2.BOMRef
+	}
+
+	if element1.Uid != element2.Uid {
+		return element1.Uid < element2.Uid
+	}
+	// default: preserve existing order
+	return true
+}
+
+func comparatorTask(element1 CDXTask, element2 CDXTask) bool {
+	// sort by required field "bom-ref"
+	if element1.BOMRef != nil && element2.BOMRef != nil {
+		return *element1.BOMRef < *element2.BOMRef
+	}
+
+	if element1.Uid != element2.Uid {
+		return element1.Uid < element2.Uid
 	}
 	// default: preserve existing order
 	return true
