@@ -25,6 +25,7 @@ import (
 type CDXAnnotationsSlice []CDXAnnotation
 type CDXComponentDataSlice []CDXComponentData
 type CDXComponentsSlice []CDXComponent
+type CDXCompositionSlice []CDXCompositions
 type CDXDependenciesSlice []CDXDependency
 type CDXExternalReferencesSlice []CDXExternalReference
 type CDXFormulaSlice []CDXFormula
@@ -362,6 +363,23 @@ func (task *CDXTask) Normalize() {
 	}
 }
 
+func (composition *CDXCompositions) Normalize() {
+	// Sort: Assemblies
+	if composition.Assemblies != nil {
+		// Note: "Assembly" is really  OneOf: "refLinkType" or "bomLinkElementType"
+		// BOTH of which map to "string" (thankfully for now)
+		sort.Strings(*composition.Assemblies)
+	}
+	// Sort: Dependencies
+	if composition.Dependencies != nil {
+		sort.Strings(*composition.Dependencies)
+	}
+	// Sort: Vulnerabilities
+	if composition.Vulnerabilities != nil {
+		CDXVulnerabilitiesSlice(*composition.Vulnerabilities).Normalize()
+	}
+}
+
 // ====================================================================
 // Slice Normalizers
 // ====================================================================
@@ -541,6 +559,18 @@ func (slice CDXTaskTypesSlice) Normalize() {
 		// Note: CDXTaskType is a named type for "string"
 		return slice[i] < slice[j]
 	})
+}
+
+func (slice CDXCompositionSlice) Normalize() {
+	sort.Slice(slice, func(i, j int) bool {
+		element1 := slice[i]
+		element2 := slice[j]
+		return comparatorComposition(element1, element2)
+	})
+
+	for _, composition := range slice {
+		composition.Normalize()
+	}
 }
 
 // ====================================================================
@@ -766,7 +796,7 @@ func comparatorProperty(element1 CDXProperty, element2 CDXProperty) bool {
 func comparatorFormula(element1 CDXFormula, element2 CDXFormula) bool {
 	// sort by pseudo-required field "bom-ref"
 	if element1.BOMRef != nil && element2.BOMRef != nil {
-		return *element1.BOMRef < *element2.BOMRef
+		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
 	}
 	// default: preserve existing order
 	return true
@@ -775,9 +805,8 @@ func comparatorFormula(element1 CDXFormula, element2 CDXFormula) bool {
 func comparatorWorkflow(element1 CDXWorkflow, element2 CDXWorkflow) bool {
 	// sort by required field "bom-ref"
 	if element1.BOMRef != nil && element2.BOMRef != nil {
-		return *element1.BOMRef < *element2.BOMRef
+		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
 	}
-
 	if element1.Uid != element2.Uid {
 		return element1.Uid < element2.Uid
 	}
@@ -788,12 +817,26 @@ func comparatorWorkflow(element1 CDXWorkflow, element2 CDXWorkflow) bool {
 func comparatorTask(element1 CDXTask, element2 CDXTask) bool {
 	// sort by required field "bom-ref"
 	if element1.BOMRef != nil && element2.BOMRef != nil {
-		return *element1.BOMRef < *element2.BOMRef
+		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
 	}
-
 	if element1.Uid != element2.Uid {
 		return element1.Uid < element2.Uid
 	}
+	// default: preserve existing order
+	return true
+}
+
+func comparatorComposition(element1 CDXCompositions, element2 CDXCompositions) bool {
+	// sort by required field "aggregate"
+	if element1.Aggregate != element2.Aggregate {
+		return element1.Aggregate < element2.Aggregate
+	}
+	// sort by pseudo-required field "bom-ref"
+	if element1.BOMRef != nil && element2.BOMRef != nil {
+		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
+	}
+	// TODO: "tie-breakers": "signature"?
+
 	// default: preserve existing order
 	return true
 }

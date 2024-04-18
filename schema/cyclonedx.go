@@ -371,7 +371,10 @@ type CDXComponentEvidence struct {
 // v1.4: added "signature"
 // v1.5: added "bom-ref", "vulnerabilities"
 // Note: "aggregate" is type `aggregateType` which is a constrained string
-// TODO: Should not be plural; open issue against v2.0 schema
+// TODO: Note: "Assemblies" is really an array of OneOf: "refLinkType" or "bomLinkElementType"
+// which BOTH thankfully mapping to "string"; however, this MAY need to become an "interface{}"
+// similar to "tools" has become.
+// TODO: Should NOT be plural; open issue against v2.0 schema
 // NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXCompositions struct {
 	Aggregate       string              `json:"aggregate,omitempty"`
