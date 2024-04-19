@@ -22,25 +22,26 @@ import (
 )
 
 // named BOM slice types
-type CDXAnnotationsSlice []CDXAnnotation
+type CDXAnnotationSlice []CDXAnnotation
 type CDXComponentDataSlice []CDXComponentData
-type CDXComponentsSlice []CDXComponent
+type CDXComponentSlice []CDXComponent
 type CDXCompositionSlice []CDXCompositions
-type CDXDependenciesSlice []CDXDependency
-type CDXExternalReferencesSlice []CDXExternalReference
+type CDXDependencySlice []CDXDependency
+type CDXExternalReferenceSlice []CDXExternalReference
 type CDXFormulaSlice []CDXFormula
-type CDXHashesSlice []CDXHash
+type CDXHashSlice []CDXHash
 type CDXLicenseChoiceSlice []CDXLicenseChoice
-type CDXLicensesSlice []CDXLicense // TODO: used in CDXComponentEvidence
-type CDXOrganizationalContactsSlice []CDXOrganizationalContact
-type CDXPropertiesSlice []CDXProperty
-type CDXRefLinkTypesSlice []CDXRefLinkType
+type CDXLicenseSlice []CDXLicense // TODO: used in CDXComponentEvidence
+type CDXOrganizationalContactSlice []CDXOrganizationalContact
+type CDXOrganizationalEntitySlice []CDXOrganizationalEntity
+type CDXPropertySlice []CDXProperty
+type CDXRefLinkTypeSlice []CDXRefLinkType
 type CDXReleaseNotesSlice []CDXReleaseNotes
-type CDXServicesSlice []CDXService
-type CDXTasksSlice []CDXTask
-type CDXTaskTypesSlice []CDXTaskType
+type CDXServiceSlice []CDXService
+type CDXTaskSlice []CDXTask
+type CDXTaskTypeSlice []CDXTaskType
 type CDXVersionRangeSlice []CDXVersionRange
-type CDXWorkflowsSlice []CDXWorkflow
+type CDXWorkflowSlice []CDXWorkflow
 
 // ====================================================================
 // Normalizer Interface (and helpers)
@@ -92,15 +93,15 @@ func (bom *CDXBom) Normalize() {
 	}
 	// Sort: Components
 	if bom.Components != nil {
-		CDXComponentsSlice(*bom.Components).Normalize()
+		CDXComponentSlice(*bom.Components).Normalize()
 	}
 	// Sort: Services
 	if bom.Services != nil {
-		CDXServicesSlice(*bom.Services).Normalize()
+		CDXServiceSlice(*bom.Services).Normalize()
 	}
 	// Sort: Dependencies
 	if bom.Dependencies != nil {
-		CDXDependenciesSlice(*bom.Dependencies).Normalize()
+		CDXDependencySlice(*bom.Dependencies).Normalize()
 	}
 	// Sort: Vulnerabilities
 	if bom.Vulnerabilities != nil {
@@ -112,15 +113,15 @@ func (bom *CDXBom) Normalize() {
 	}
 	// Sort: Annotations
 	if bom.Annotations != nil {
-		CDXAnnotationsSlice(*bom.Annotations).Normalize()
+		CDXAnnotationSlice(*bom.Annotations).Normalize()
 	}
 	// Sort: ExternalReferences
 	if bom.ExternalReferences != nil {
-		CDXExternalReferencesSlice(*bom.ExternalReferences).Normalize()
+		CDXExternalReferenceSlice(*bom.ExternalReferences).Normalize()
 	}
 	// Sort: Properties
 	if bom.Properties != nil {
-		CDXPropertiesSlice(*bom.Properties).Normalize()
+		CDXPropertySlice(*bom.Properties).Normalize()
 	}
 	// TODO: Sort Compositions
 	// TODO: Sort: Declarations (v1.6)
@@ -145,11 +146,11 @@ func (pMetadata *CDXMetadata) Normalize() {
 		}
 		// Sort: Properties
 		if metadata.Properties != nil {
-			CDXPropertiesSlice(*metadata.Properties).Normalize()
+			CDXPropertySlice(*metadata.Properties).Normalize()
 		}
 		// Sort: Authors
 		if metadata.Authors != nil {
-			CDXOrganizationalContactsSlice(*metadata.Authors).Normalize()
+			CDXOrganizationalContactSlice(*metadata.Authors).Normalize()
 		}
 		// TODO: Sort: Lifecycles
 	}
@@ -159,7 +160,7 @@ func (component *CDXComponent) Normalize() {
 	// Sort: Components
 	// Note: The following method is recursive
 	if component.Components != nil {
-		CDXComponentsSlice(*component.Components).Normalize()
+		CDXComponentSlice(*component.Components).Normalize()
 	}
 	// Sort: Licenses
 	if component.Licenses != nil {
@@ -167,7 +168,7 @@ func (component *CDXComponent) Normalize() {
 	}
 	// Sort: Hashes
 	if component.Hashes != nil {
-		CDXHashesSlice(*component.Hashes).Normalize()
+		CDXHashSlice(*component.Hashes).Normalize()
 	}
 	// Sort: Data
 	if component.Data != nil {
@@ -179,15 +180,15 @@ func (component *CDXComponent) Normalize() {
 	}
 	// Sort: ExternalReferences
 	if component.ExternalReferences != nil {
-		CDXExternalReferencesSlice(*component.ExternalReferences).Normalize()
+		CDXExternalReferenceSlice(*component.ExternalReferences).Normalize()
 	}
 	// Sort: Properties
 	if component.Properties != nil {
-		CDXPropertiesSlice(*component.Properties).Normalize()
+		CDXPropertySlice(*component.Properties).Normalize()
 	}
 	// Sort: Authors (v1.6)
 	if component.Authors != nil {
-		CDXOrganizationalContactsSlice(*component.Authors).Normalize()
+		CDXOrganizationalContactSlice(*component.Authors).Normalize()
 	}
 	// Sort: Tags (i.e., an array of "string") (v1.6)
 	if component.Tags != nil {
@@ -203,7 +204,7 @@ func (service *CDXService) Normalize() {
 	// Sort: Services
 	// Note: The following method is recursive
 	if service.Services != nil {
-		CDXServicesSlice(*service.Services).Normalize()
+		CDXServiceSlice(*service.Services).Normalize()
 	}
 	// Sort: Licenses
 	if service.Licenses != nil {
@@ -215,11 +216,11 @@ func (service *CDXService) Normalize() {
 	}
 	// Sort: ExternalReferences
 	if service.ExternalReferences != nil {
-		CDXExternalReferencesSlice(*service.ExternalReferences).Normalize()
+		CDXExternalReferenceSlice(*service.ExternalReferences).Normalize()
 	}
 	// Sort: Properties
 	if service.Properties != nil {
-		CDXPropertiesSlice(*service.Properties).Normalize()
+		CDXPropertySlice(*service.Properties).Normalize()
 	}
 	// Sort: Endpoints (i.e., an array of "string")
 	if service.Endpoints != nil {
@@ -243,7 +244,7 @@ func (license CDXLicense) Normalize() {
 	// TODO: Sort: Licensing  *CDXLicensing
 	// Sort: Properties
 	if license.Properties != nil {
-		CDXPropertiesSlice(*license.Properties).Normalize()
+		CDXPropertySlice(*license.Properties).Normalize()
 	}
 	if license.Licensing != nil {
 		license.Licensing.Normalize()
@@ -263,7 +264,7 @@ func (licensing CDXLicensing) Normalize() {
 
 func (dependency CDXDependency) Normalize() {
 	if dependency.DependsOn != nil {
-		CDXRefLinkTypesSlice(*dependency.DependsOn).Normalize()
+		CDXRefLinkTypeSlice(*dependency.DependsOn).Normalize()
 	}
 }
 
@@ -271,31 +272,31 @@ func (formula *CDXFormula) Normalize() {
 	// Sort: Components
 	// Note: The following method is recursive
 	if formula.Components != nil {
-		CDXComponentsSlice(*formula.Components).Normalize()
+		CDXComponentSlice(*formula.Components).Normalize()
 	}
 	// Sort: Services
 	// Note: The following method is recursive
 	if formula.Services != nil {
-		CDXServicesSlice(*formula.Services).Normalize()
+		CDXServiceSlice(*formula.Services).Normalize()
 	}
 	// Sort: Workflows
 	if formula.Workflows != nil {
-		CDXWorkflowsSlice(*formula.Workflows).Normalize()
+		CDXWorkflowSlice(*formula.Workflows).Normalize()
 	}
 	// Sort: Properties
 	if formula.Properties != nil {
-		CDXPropertiesSlice(*formula.Properties).Normalize()
+		CDXPropertySlice(*formula.Properties).Normalize()
 	}
 }
 
 func (workflow *CDXWorkflow) Normalize() {
 	// Sort: TaskTypes
 	if workflow.TaskTypes != nil {
-		CDXTaskTypesSlice(*workflow.TaskTypes).Normalize()
+		CDXTaskTypeSlice(*workflow.TaskTypes).Normalize()
 	}
 	// Sort: Tasks
 	if workflow.Tasks != nil {
-		CDXTasksSlice(*workflow.Tasks).Normalize()
+		CDXTaskSlice(*workflow.Tasks).Normalize()
 	}
 	// TODO: Sort: ResourceReferences
 	// TODO: Sort: Tasks
@@ -308,14 +309,14 @@ func (workflow *CDXWorkflow) Normalize() {
 	// TODO: Sort: RuntimeTopology
 	// Sort: Properties
 	if workflow.Properties != nil {
-		CDXPropertiesSlice(*workflow.Properties).Normalize()
+		CDXPropertySlice(*workflow.Properties).Normalize()
 	}
 }
 
 func (task *CDXTask) Normalize() {
 	// Sort: TaskTypes
 	if task.TaskTypes != nil {
-		CDXTaskTypesSlice(*task.TaskTypes).Normalize()
+		CDXTaskTypeSlice(*task.TaskTypes).Normalize()
 	}
 	// TODO: Sort: ResourceReferences
 	// TODO: Sort: Tasks
@@ -328,7 +329,7 @@ func (task *CDXTask) Normalize() {
 	// TODO: Sort: RuntimeTopology
 	// Sort: Properties
 	if task.Properties != nil {
-		CDXPropertiesSlice(*task.Properties).Normalize()
+		CDXPropertySlice(*task.Properties).Normalize()
 	}
 }
 
@@ -349,11 +350,18 @@ func (composition *CDXCompositions) Normalize() {
 	}
 }
 
+func (entity *CDXOrganizationalEntity) Normalize() {
+	// Sort: Contact(s)
+	if entity.Contact != nil {
+		CDXOrganizationalContactSlice(*entity.Contact).Normalize()
+	}
+}
+
 // ====================================================================
 // Slice Normalizers
 // ====================================================================
 
-func (slice CDXComponentsSlice) Normalize() {
+func (slice CDXComponentSlice) Normalize() {
 	sort.Slice(slice, func(i, j int) bool {
 		element1 := slice[i]
 		element2 := slice[j]
@@ -367,7 +375,7 @@ func (slice CDXComponentsSlice) Normalize() {
 	}
 }
 
-func (slice CDXServicesSlice) Normalize() {
+func (slice CDXServiceSlice) Normalize() {
 	sort.Slice(slice, func(i, j int) bool {
 		element1 := slice[i]
 		element2 := slice[j]
@@ -381,7 +389,7 @@ func (slice CDXServicesSlice) Normalize() {
 	}
 }
 
-func (slice CDXDependenciesSlice) Normalize() {
+func (slice CDXDependencySlice) Normalize() {
 	sort.Slice(slice, func(i, j int) bool {
 		element1 := slice[i]
 		element2 := slice[j]
@@ -417,7 +425,7 @@ func (slice CDXLicenseChoiceSlice) Normalize() {
 	}
 }
 
-func (slice CDXOrganizationalContactsSlice) Normalize() {
+func (slice CDXOrganizationalContactSlice) Normalize() {
 	sort.Slice(slice, func(i, j int) bool {
 		element1 := slice[i]
 		element2 := slice[j]
@@ -425,7 +433,20 @@ func (slice CDXOrganizationalContactsSlice) Normalize() {
 	})
 }
 
-func (slice CDXAnnotationsSlice) Normalize() {
+func (slice CDXOrganizationalEntitySlice) Normalize() {
+	sort.Slice(slice, func(i, j int) bool {
+		element1 := slice[i]
+		element2 := slice[j]
+		return comparatorOrganizationalEntity(element1, element2)
+	})
+
+	// Sort the contents of the CDXOrganizationalEntity (i.e., Contact(s))
+	for _, entity := range slice {
+		entity.Normalize()
+	}
+}
+
+func (slice CDXAnnotationSlice) Normalize() {
 	sort.Slice(slice, func(i, j int) bool {
 		element1 := slice[i]
 		element2 := slice[j]
@@ -433,7 +454,7 @@ func (slice CDXAnnotationsSlice) Normalize() {
 	})
 }
 
-func (slice CDXExternalReferencesSlice) Normalize() {
+func (slice CDXExternalReferenceSlice) Normalize() {
 	sort.Slice(slice, func(i, j int) bool {
 		element1 := slice[i]
 		element2 := slice[j]
@@ -441,7 +462,7 @@ func (slice CDXExternalReferencesSlice) Normalize() {
 	})
 }
 
-func (slice CDXPropertiesSlice) Normalize() {
+func (slice CDXPropertySlice) Normalize() {
 	sort.Slice(slice, func(i, j int) bool {
 		element1 := slice[i]
 		element2 := slice[j]
@@ -449,7 +470,7 @@ func (slice CDXPropertiesSlice) Normalize() {
 	})
 }
 
-func (slice CDXRefLinkTypesSlice) Normalize() {
+func (slice CDXRefLinkTypeSlice) Normalize() {
 	sort.Slice(slice, func(i, j int) bool {
 		element1 := slice[i]
 		element2 := slice[j]
@@ -465,7 +486,7 @@ func (slice CDXReleaseNotesSlice) Normalize() {
 	})
 }
 
-func (slice CDXHashesSlice) Normalize() {
+func (slice CDXHashSlice) Normalize() {
 	sort.Slice(slice, func(i, j int) bool {
 		element1 := slice[i]
 		element2 := slice[j]
@@ -487,7 +508,7 @@ func (slice CDXFormulaSlice) Normalize() {
 	}
 }
 
-func (slice CDXWorkflowsSlice) Normalize() {
+func (slice CDXWorkflowSlice) Normalize() {
 	sort.Slice(slice, func(i, j int) bool {
 		element1 := slice[i]
 		element2 := slice[j]
@@ -499,7 +520,7 @@ func (slice CDXWorkflowsSlice) Normalize() {
 	}
 }
 
-func (slice CDXTasksSlice) Normalize() {
+func (slice CDXTaskSlice) Normalize() {
 	sort.Slice(slice, func(i, j int) bool {
 		element1 := slice[i]
 		element2 := slice[j]
@@ -511,7 +532,7 @@ func (slice CDXTasksSlice) Normalize() {
 	}
 }
 
-func (slice CDXTaskTypesSlice) Normalize() {
+func (slice CDXTaskTypeSlice) Normalize() {
 	sort.Slice(slice, func(i, j int) bool {
 		// Note: CDXTaskType is a named type for "string"
 		return slice[i] < slice[j]
@@ -685,7 +706,6 @@ func comparatorOrganizationalEntity(element1 CDXOrganizationalEntity, element2 C
 	if element1.Name != element2.Name {
 		return element1.Name < element2.Name
 	}
-
 	// TODO: "tie-breakers": Url ([]string), Contact ([]string)
 	return true
 }
