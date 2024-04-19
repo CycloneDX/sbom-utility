@@ -39,7 +39,7 @@ type CDXReleaseNotesSlice []CDXReleaseNotes
 type CDXServicesSlice []CDXService
 type CDXTasksSlice []CDXTask
 type CDXTaskTypesSlice []CDXTaskType
-type CDXVulnerabilitiesSlice []CDXVulnerability
+type CDXVersionRangeSlice []CDXVersionRange
 type CDXWorkflowsSlice []CDXWorkflow
 
 // ====================================================================
@@ -104,7 +104,7 @@ func (bom *CDXBom) Normalize() {
 	}
 	// Sort: Vulnerabilities
 	if bom.Vulnerabilities != nil {
-		CDXVulnerabilitiesSlice(*bom.Vulnerabilities).Normalize()
+		CDXVulnerabilitySlice(*bom.Vulnerabilities).Normalize()
 	}
 	// TODO: sort Formulation
 	if bom.Formulation != nil {
@@ -232,37 +232,6 @@ func (service *CDXService) Normalize() {
 	// TODO: Sort: (Service) Data
 }
 
-//	type CDXVulnerability struct {
-//		BOMRef         *CDXRefType                  `json:"bom-ref,omitempty"`        // v1.4
-//		Id             string                       `json:"id,omitempty"`             // v1.4
-//		Source         *CDXVulnerabilitySource      `json:"source,omitempty"`         // v1.4
-//		References     *[]CDXVulnerabilityReference `json:"references"`               // v1.4: anon. type
-//		Ratings        *[]CDXRating                 `json:"ratings,omitempty"`        // v1.4
-//		Cwes           *[]int                       `json:"cwes,omitempty"`           // v1.4
-//		Description    string                       `json:"description,omitempty"`    // v1.4
-//		Detail         string                       `json:"detail,omitempty"`         // v1.4
-//		Recommendation string                       `json:"recommendation,omitempty"` // v1.4
-//		Advisories     *[]CDXAdvisory               `json:"advisories,omitempty"`     // v1.4
-//		Created        string                       `json:"created,omitempty"`        // v1.4
-//		Published      string                       `json:"published,omitempty"`      // v1.4
-//		Updated        string                       `json:"updated,omitempty"`        // v1.4
-//		Credits        *CDXCredit                   `json:"credits,omitempty"`        // v1.4: anon. type
-//		Tools          interface{}                  `json:"tools,omitempty"`          // v1.4: added; v1.5: changed to interface{}
-//		Analysis       *CDXAnalysis                 `json:"analysis,omitempty"`       // v1.4: anon. type
-//		Affects        *[]CDXAffect                 `json:"affects,omitempty"`        // v1.4: anon. type
-//		Properties     *[]CDXProperty               `json:"properties,omitempty"`     // v1.4: added
-//		Workaround     string                       `json:"workaround,omitempty"`     // v1.5: added
-//		ProofOfConcept *CDXProofOfConcept           `json:"proofOfConcept,omitempty"` // v1.5: added
-//		Rejected       string                       `json:"rejected,omitempty"`       // v1.5: added
-//	}
-func (vulnerability *CDXVulnerability) Normalize() {
-	// TODO: References, Ratings, Cwes, Advisories, Credits, Tools, Analysis, Affects, ProofOfConcept
-	// Sort: Properties
-	if vulnerability.Properties != nil {
-		CDXPropertiesSlice(*vulnerability.Properties).Normalize()
-	}
-}
-
 func (licenseChoice CDXLicenseChoice) Normalize() {
 	// Sort: License (slices within)
 	if licenseChoice.License != nil {
@@ -376,7 +345,7 @@ func (composition *CDXCompositions) Normalize() {
 	}
 	// Sort: Vulnerabilities
 	if composition.Vulnerabilities != nil {
-		CDXVulnerabilitiesSlice(*composition.Vulnerabilities).Normalize()
+		CDXVulnerabilitySlice(*composition.Vulnerabilities).Normalize()
 	}
 }
 
@@ -409,18 +378,6 @@ func (slice CDXServicesSlice) Normalize() {
 	// Note: this causes recursion as each "Service" type has a "Services" slice.
 	for _, component := range slice {
 		component.Normalize()
-	}
-}
-
-func (slice CDXVulnerabilitiesSlice) Normalize() {
-	sort.Slice(slice, func(i, j int) bool {
-		element1 := slice[i]
-		element2 := slice[j]
-		return comparatorVulnerability(element1, element2)
-	})
-	// TODO: sort (nested) children of each vulnerability
-	for _, vulnerability := range slice {
-		vulnerability.Normalize()
 	}
 }
 
@@ -573,6 +530,14 @@ func (slice CDXCompositionSlice) Normalize() {
 	}
 }
 
+func (slice CDXVersionRangeSlice) Normalize() {
+	sort.Slice(slice, func(i, j int) bool {
+		element1 := slice[i]
+		element2 := slice[j]
+		return comparatorVersionRange(element1, element2)
+	})
+}
+
 // ====================================================================
 // Struct comparators
 // ====================================================================
@@ -625,33 +590,6 @@ func comparatorService(element1 CDXService, element2 CDXService) bool {
 	// sort by other "tie breakers"
 	if element1.Version != element2.Version {
 		return element1.Version < element2.Version
-	}
-	// default: preserve existing order
-	return true
-}
-
-// NOTE: there are NO required fields in the vulnerability object's data schema
-// sort by we will sort using fields that may contain local, identifying values
-// TODO sort "advisories", "cwes" and "ratings.source" and "affects.ref"
-func comparatorVulnerability(element1 CDXVulnerability, element2 CDXVulnerability) bool {
-	// sort by pseudo-required field "bom-ref"
-	if element1.BOMRef != nil && element2.BOMRef != nil {
-		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
-	}
-	// optional identifiers: "id"
-	if element1.Id != element2.Id {
-		return element1.Id < element2.Id
-	}
-	// other optional "tie breakers": "Source.Name", "Source.Url"
-	if element1.Source != nil && element2.Source != nil {
-		source1 := *element1.Source
-		source2 := *element2.Source
-		if source1.Name != source2.Name {
-			return source1.Name < source2.Name
-		}
-		if source1.Url != source2.Url {
-			return source1.Url < source2.Url
-		}
 	}
 	// default: preserve existing order
 	return true
@@ -837,6 +775,20 @@ func comparatorComposition(element1 CDXCompositions, element2 CDXCompositions) b
 	}
 	// TODO: "tie-breakers": "signature"?
 
+	// default: preserve existing order
+	return true
+}
+
+func comparatorVersionRange(element1 CDXVersionRange, element2 CDXVersionRange) bool {
+	if element1.Version != element2.Version {
+		return element1.Version < element2.Version
+	}
+	if element1.Range != element2.Range {
+		return element1.Range < element2.Range
+	}
+	if element1.Status != element2.Status {
+		return element1.Status < element2.Status
+	}
 	// default: preserve existing order
 	return true
 }
