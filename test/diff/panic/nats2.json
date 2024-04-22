@@ -17,9 +17,9 @@
         },
         "component": {
             "type": "container",
-            "name": "synadia/nats-box",
-            "bom-ref": "pkg:oci/nats-box@sha256%3Acaf0c9fe15a9a88d001c74fd9d80f7f6fd57474aa243cd63a9a086eda9e202be?arch=amd64&repository_url=index.docker.io%2Fsynadia%2Fnats-box",
-            "purl": "pkg:oci/nats-box@sha256%3Acaf0c9fe15a9a88d001c74fd9d80f7f6fd57474aa243cd63a9a086eda9e202be?arch=amd64&repository_url=index.docker.io%2Fsynadia%2Fnats-box",
+            "name": "natsio/nats-box",
+            "bom-ref": "pkg:oci/nats-box@sha256%3Acaf0c9fe15a9a88d001c74fd9d80f7f6fd57474aa243cd63a9a086eda9e202be?arch=amd64&repository_url=index.docker.io%2Fnatsio%2Fnats-box",
+            "purl": "pkg:oci/nats-box@sha256%3Acaf0c9fe15a9a88d001c74fd9d80f7f6fd57474aa243cd63a9a086eda9e202be?arch=amd64&repository_url=index.docker.io%2Fnatsio%2Fnats-box",
             "properties": [
                 {
                     "name": "aquasecurity:trivy:DiffID",
@@ -55,11 +55,11 @@
                 },
                 {
                     "name": "aquasecurity:trivy:RepoDigest",
-                    "value": "synadia/nats-box@sha256:caf0c9fe15a9a88d001c74fd9d80f7f6fd57474aa243cd63a9a086eda9e202be"
+                    "value": "natsio/nats-box@sha256:caf0c9fe15a9a88d001c74fd9d80f7f6fd57474aa243cd63a9a086eda9e202be"
                 },
                 {
                     "name": "aquasecurity:trivy:RepoTag",
-                    "value": "synadia/nats-box:latest"
+                    "value": "natsio/nats-box:latest"
                 },
                 {
                     "name": "aquasecurity:trivy:SchemaVersion",
@@ -3900,7 +3900,7 @@
             "dependsOn": []
         },
         {
-            "ref": "pkg:oci/nats-box@sha256%3Acaf0c9fe15a9a88d001c74fd9d80f7f6fd57474aa243cd63a9a086eda9e202be?arch=amd64&repository_url=index.docker.io%2Fsynadia%2Fnats-box",
+            "ref": "pkg:oci/nats-box@sha256%3Acaf0c9fe15a9a88d001c74fd9d80f7f6fd57474aa243cd63a9a086eda9e202be?arch=amd64&repository_url=index.docker.io%2Fnatsio%2Fnats-box",
             "dependsOn": [
                 "17d6a00d-ad1c-422f-ab52-07d021d4d62a",
                 "37100b09-d58e-456b-bf66-96cb133c434d",
