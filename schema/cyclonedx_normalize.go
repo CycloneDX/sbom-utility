@@ -477,7 +477,7 @@ func comparatorComponent(element1 CDXComponent, element2 CDXComponent) bool {
 	if element1.Version != element2.Version {
 		return element1.Version < element2.Version
 	}
-	// sort by pseudo-required field "bom-ref"
+	// sort by (sometimes an identifier): "bom-ref"
 	if element1.BOMRef != nil && element2.BOMRef != nil {
 		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
 	}
@@ -494,7 +494,7 @@ func comparatorService(element1 CDXService, element2 CDXService) bool {
 	if element1.Version != element2.Version {
 		return element1.Version < element2.Version
 	}
-	// sort by pseudo-required field "bom-ref"
+	// sort by (sometimes an identifier): "bom-ref"
 	if element1.BOMRef != nil && element2.BOMRef != nil {
 		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
 	}
@@ -550,7 +550,7 @@ func comparatorLicenseChoice(element1 CDXLicenseChoice, element2 CDXLicenseChoic
 	if element1.Expression != element2.Expression {
 		return element1.Expression < element2.Expression
 	}
-	// "bom-ref" as a "tie-breaker"
+	// sort by (sometimes an identifier): "bom-ref"
 	if element1.BOMRef != nil && element2.BOMRef != nil {
 		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
 	}
@@ -576,7 +576,7 @@ func comparatorOrganizationalContact(element1 CDXOrganizationalContact, element2
 	if element1.Phone != element2.Phone {
 		return element1.Phone < element2.Phone
 	}
-	// sort by pseudo-required field "bom-ref"
+	// sort by (sometimes an identifier): "bom-ref"
 	if element1.BOMRef != nil && element2.BOMRef != nil {
 		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
 	}
@@ -589,7 +589,7 @@ func comparatorOrganizationalEntity(element1 CDXOrganizationalEntity, element2 C
 		return element1.Name < element2.Name
 	}
 	// TODO: "tie-breakers": Url ([]string), Contact ([]string)
-	// sort by pseudo-required field "bom-ref"
+	// sort by (sometimes an identifier): "bom-ref"
 	if element1.BOMRef != nil && element2.BOMRef != nil {
 		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
 	}
@@ -639,12 +639,11 @@ func comparatorComposition(element1 CDXCompositions, element2 CDXCompositions) b
 	if element1.Aggregate != element2.Aggregate {
 		return element1.Aggregate < element2.Aggregate
 	}
-	// sort by pseudo-required field "bom-ref"
+	// TODO: "tie-breakers": "signature"?
+	// sort by (sometimes an identifier): "bom-ref"
 	if element1.BOMRef != nil && element2.BOMRef != nil {
 		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
 	}
-	// TODO: "tie-breakers": "signature"?
-
 	// default: preserve existing order
 	return true
 }
