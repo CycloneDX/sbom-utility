@@ -21,11 +21,14 @@ package cmd
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"os"
+	"reflect"
 	"testing"
 
+	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 )
 
@@ -202,4 +205,27 @@ func TestNormalizeCdx15VulnerabilitiesNatsBox(t *testing.T) {
 	ti := NewNormalizeTestInfo(TEST_CDX_1_5_NORMALIZE_VULNERABILITIES_NATS_BOX, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_CDX_1_5_NORMALIZE_VULNERABILITIES_NATS_BOX)
 	innerTestNormalize(t, ti)
+}
+
+func TestNormalizeReflect(t *testing.T) {
+	bom := schema.CDXBom{}
+	datatype := reflect.TypeOf(bom)
+	fmt.Printf("typeField (%v): `%v`\n", datatype.NumField(), datatype)
+	//names := make([]string, typeField.NumField())
+	for i := 0; i < datatype.NumField(); i++ {
+		fmt.Printf("> %s\n", datatype.Field(i).Name)
+		fmt.Printf(">> Type: `%s`\n", datatype.Field(i).Type)
+		tt := datatype.Field(i).Type
+		value := reflect.ValueOf(tt)
+		fmt.Printf(">> Value: `%v`\n", value)
+		switch tt.(type) {
+		case interface{}:
+			fmt.Printf(">> interface{}\n")
+		default:
+			fmt.Printf(">> %v\n", "unknown")
+		}
+	}
+	// o := reflect.New(typeField)
+	// e := o.Elem()
+	// fmt.Printf("elements (%v): %+v\n", e.Field(0), e)
 }

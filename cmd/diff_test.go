@@ -43,6 +43,12 @@ const (
 	TEST_ARRAY_ORDER_2_CHANGES_DELTA = "test/diff/json-array-order-2-changes-delta.json"
 )
 
+// Non-standard test files
+const (
+	TEST_DIFF_PANIC_BASE  = "test/diff/panic/nats1.json"
+	TEST_DIFF_PANIC_DELTA = "test/diff/panic/nats2.json"
+)
+
 // Tests basic validation and expected errors
 func innerDiffError(t *testing.T, baseFilename string, revisedFilename string, format string, expectedError error) (actualError error) {
 	getLogger().Enter()
@@ -54,12 +60,12 @@ func innerDiffError(t *testing.T, baseFilename string, revisedFilename string, f
 	utils.GlobalFlags.DiffFlags.RevisedFile = revisedFilename
 	utils.GlobalFlags.DiffFlags.Colorize = true
 
-	actualError = Diff(utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.DiffFlags)
-
 	getLogger().Tracef("baseFilename: `%s`, revisedFilename=`%s`, actualError=`%T`",
 		utils.GlobalFlags.PersistentFlags.InputFile,
 		utils.GlobalFlags.DiffFlags.RevisedFile,
 		actualError)
+
+	actualError = Diff(utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.DiffFlags)
 
 	// Always compare actual against expected error (even if it is `nil`)
 	if !ErrorTypesMatch(actualError, expectedError) {
@@ -222,4 +228,18 @@ func TestDiffJsonArrayOrderMove1ObjectWithAddAndDeleteFormatText(t *testing.T) {
 // Validate value (range)
 // func Colorize(color string, text string) (colorizedText string) {
 // 	return color + text + Reset
+// }
+
+// NOTE: In order to debug panic handling... here is a test
+// Unfortunately, we cannot run it as part of function test as it "times out"
+// TODO: Create smaller test files that cause panic in Diff command's underlying libs.
+// func TestDiffJsonPanicNATs(t *testing.T) {
+// 	err := innerDiffError(t,
+// 		TEST_DIFF_PANIC_BASE,
+// 		TEST_DIFF_PANIC_DELTA,
+// 		FORMAT_TEXT,
+// 		nil)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
 // }

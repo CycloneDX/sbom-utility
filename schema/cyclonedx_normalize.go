@@ -71,7 +71,7 @@ func normalizeSupported(itfc interface{}) bool {
 // Normalization (i.e., "sort by") rules:
 // ====================================================================
 // 1. Sort by: Required fields if they exist ("id" values, author order)
-// 1. Sort by: The pseudo-required field "bom-ref" when available (a BOM-unique ID)
+// >> WRONG: 1. Sort by: The pseudo-required field "bom-ref" when available (a BOM-unique ID)
 // 1. Sort by: Using optional struct-local, or domain identifiers (e.g., SPDXID) or
 // 1. Sort by: Using combinations of identifying field values (towards 100% normalization)
 // ====================================================================
@@ -461,10 +461,6 @@ func comparatorComponent(element1 CDXComponent, element2 CDXComponent) bool {
 	if element1.Name != element2.Name {
 		return element1.Name < element2.Name
 	}
-	// sort by pseudo-required field "bom-ref"
-	if element1.BOMRef != nil && element2.BOMRef != nil {
-		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
-	}
 	// Other optional identifiers
 	if element1.Cpe != element2.Cpe {
 		return element1.Cpe < element2.Cpe
@@ -481,6 +477,10 @@ func comparatorComponent(element1 CDXComponent, element2 CDXComponent) bool {
 	if element1.Version != element2.Version {
 		return element1.Version < element2.Version
 	}
+	// sort by pseudo-required field "bom-ref"
+	if element1.BOMRef != nil && element2.BOMRef != nil {
+		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
+	}
 	// default: preserve existing order
 	return true
 }
@@ -490,13 +490,13 @@ func comparatorService(element1 CDXService, element2 CDXService) bool {
 	if element1.Name != element2.Name {
 		return element1.Name < element2.Name
 	}
-	// sort by pseudo-required field "bom-ref"
-	if element1.BOMRef != nil && element2.BOMRef != nil {
-		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
-	}
 	// sort by other "tie breakers"
 	if element1.Version != element2.Version {
 		return element1.Version < element2.Version
+	}
+	// sort by pseudo-required field "bom-ref"
+	if element1.BOMRef != nil && element2.BOMRef != nil {
+		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
 	}
 	// default: preserve existing order
 	return true
@@ -566,10 +566,6 @@ func comparatorHash(element1 CDXHash, element2 CDXHash) bool {
 }
 
 func comparatorOrganizationalContact(element1 CDXOrganizationalContact, element2 CDXOrganizationalContact) bool {
-	// sort by pseudo-required field "bom-ref"
-	if element1.BOMRef != nil && element2.BOMRef != nil {
-		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
-	}
 	// sort by optional field(s): "name", "email", "phone"
 	if element1.Name != element2.Name {
 		return element1.Name < element2.Name
@@ -580,19 +576,23 @@ func comparatorOrganizationalContact(element1 CDXOrganizationalContact, element2
 	if element1.Phone != element2.Phone {
 		return element1.Phone < element2.Phone
 	}
-	return true
-}
-
-func comparatorOrganizationalEntity(element1 CDXOrganizationalEntity, element2 CDXOrganizationalEntity) bool {
 	// sort by pseudo-required field "bom-ref"
 	if element1.BOMRef != nil && element2.BOMRef != nil {
 		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
 	}
+	return true
+}
+
+func comparatorOrganizationalEntity(element1 CDXOrganizationalEntity, element2 CDXOrganizationalEntity) bool {
 	// sort by optional field(s): "name"
 	if element1.Name != element2.Name {
 		return element1.Name < element2.Name
 	}
 	// TODO: "tie-breakers": Url ([]string), Contact ([]string)
+	// sort by pseudo-required field "bom-ref"
+	if element1.BOMRef != nil && element2.BOMRef != nil {
+		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
+	}
 	return true
 }
 

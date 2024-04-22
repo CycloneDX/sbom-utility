@@ -151,8 +151,10 @@ func Diff(persistentFlags utils.PersistentCommandFlags, flags utils.DiffCommandF
 	// #nosec G304 (suppress warning)
 	bBaseData, errReadBase := os.ReadFile(inputFilename)
 	if errReadBase != nil {
-		getLogger().Debugf("%v", bBaseData[:255])
-		err = getLogger().Errorf("Failed to ReadFile '%s': %s", inputFilename, err.Error())
+		if len(bBaseData) > 255 {
+			getLogger().Debugf("%v", bBaseData[:255])
+		}
+		err = getLogger().Errorf("Failed to ReadFile '%s': %s", inputFilename, errReadBase.Error())
 		return
 	}
 
@@ -160,8 +162,10 @@ func Diff(persistentFlags utils.PersistentCommandFlags, flags utils.DiffCommandF
 	// #nosec G304 (suppress warning)
 	bRevisedData, errReadDelta := os.ReadFile(revisedFilename)
 	if errReadDelta != nil {
-		getLogger().Debugf("%v", bRevisedData[:255])
-		err = getLogger().Errorf("Failed to ReadFile '%s': %s", inputFilename, err.Error())
+		if len(bRevisedData) > 255 {
+			getLogger().Debugf("%v", bRevisedData[:255])
+		}
+		err = getLogger().Errorf("Failed to ReadFile '%s': %s", revisedFilename, errReadDelta.Error())
 		return
 	}
 
