@@ -205,6 +205,7 @@ func Diff(persistentFlags utils.PersistentCommandFlags, flags utils.DiffCommandF
 			getLogger().Warningf("Diff output format not supported for `%s` format.", format)
 		}
 
+		// Output complete diff in either supported format
 		fmt.Fprintf(output, "%s\n", diffString)
 
 	} else {
