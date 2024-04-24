@@ -205,7 +205,10 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 	if persistentFlags.OutputNormalize {
 		// Sort the slices of structures
 		if document.GetCdxBom() != nil {
-			document.GetCdxBom().Normalize()
+			bom := document.GetCdxBom()
+			if schema.NormalizeSupported(bom) {
+				document.GetCdxBom().Normalize()
+			}
 		}
 	}
 

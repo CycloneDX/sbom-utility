@@ -63,7 +63,7 @@ func interfaceSupported[T any](i T, itfc interface{}) bool {
 }
 
 // This is a wrapper to test specifically for the Normalize interface
-func normalizeSupported(itfc interface{}) bool {
+func NormalizeSupported(itfc interface{}) bool {
 	return interfaceSupported(Normalizer(nil), itfc)
 }
 

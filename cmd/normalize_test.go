@@ -28,7 +28,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 )
 
@@ -138,6 +137,10 @@ func innerBufferedTestNormalize(testInfo *NormalizeTestInfo) (outputBuffer bytes
 		}
 	}
 
+	// NOTE: We use the Trim() command to test the Normalize() functionality for now
+	// TODO: Ideally, we want a top-level command "Normalize()" with other flag options
+	// BUT, also want to allow normalization any time ANY command writes BOM as output
+	// so the Trim() command is a great first impl. towards those goals.
 	err = Trim(outputWriter, utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.TrimFlags)
 	return
 }
@@ -208,23 +211,59 @@ func TestNormalizeCdx15VulnerabilitiesNatsBox(t *testing.T) {
 }
 
 func TestNormalizeReflect(t *testing.T) {
-	bom := schema.CDXBom{}
+	bom, _ := LoadBOMFile(TEST_CDX_1_5_NORMALIZE_COMPONENTS)
+
 	datatype := reflect.TypeOf(bom)
-	fmt.Printf("typeField (%v): `%v`\n", datatype.NumField(), datatype)
-	//names := make([]string, typeField.NumField())
-	for i := 0; i < datatype.NumField(); i++ {
-		fmt.Printf("> %s\n", datatype.Field(i).Name)
-		fmt.Printf(">> Type: `%s`\n", datatype.Field(i).Type)
-		tt := datatype.Field(i).Type
-		value := reflect.ValueOf(tt)
-		fmt.Printf(">> Value: `%v`\n", value)
-		switch tt.(type) {
-		case interface{}:
-			fmt.Printf(">> interface{}\n")
-		default:
-			fmt.Printf(">> %v\n", "unknown")
+	reflectValue := reflect.ValueOf(bom)
+	kind := reflectValue.Kind()
+	fmt.Printf(">> datatype: `%v`, kind: `%v`\n", datatype, kind)
+
+	// If it's an interface, unwrap it.
+	if kind == reflect.Ptr || kind == reflect.Interface { // val.Kind() == reflect.Ptr ||
+		// This gets the actual schema.BOM struct
+		reflectValue = reflectValue.Elem()
+		reflectType := reflectValue.Type()
+		reflectTypeOf := reflect.TypeOf(reflectValue)
+		kind = reflectValue.Kind()
+		datatype := reflect.TypeOf(reflectValue)
+		reflectValueOf := reflect.ValueOf(reflectValue)
+		fmt.Printf(">> type: `%v` (%T), kind: `%v`\n", reflectTypeOf, reflectValueOf, kind)
+
+		valNumFields := reflectValue.NumField()
+		fmt.Printf("valNumFields: `%v`\n", valNumFields)
+		for i := 0; i < valNumFields; i++ {
+			//datatype = reflect.TypeOf(val)
+			field := reflectValue.Field(i)
+			fieldType := field.Type
+			fieldKind := field.Kind()
+			fieldName := reflectType.Field(i).Name
+			isItfc := field.CanInterface()
+
+			fmt.Printf(">> Field: `%v`: datatype: `%v` (%t), fieldType: `%T`, Kind: `%s`\n", fieldName, datatype, isItfc, fieldType, fieldKind)
 		}
+	} else {
+		fmt.Printf("Must be a struct to unwrap fields\n")
+		return
 	}
+
+	// for i := 0; i < valNumFields; i++ {
+	// 	val.Elem()
+	// 	field := datatype.Field(i)
+	// 	fieldType := field.Type
+	// 	fieldName := field.Name
+	// 	//valueOfFieldType := reflect.ValueOf(fieldType)
+	// 	t := reflect.TypeOf(fieldName)
+	// 	o := reflect.New(t)
+	// 	e := o.Elem()
+	// 	fmt.Printf(">> Field(%v): Name; `%s`, Type: `%s`, Elem(): `%v`\n", i, fieldName, fieldType, e)
+
+	// 	switch t := fieldType.(type) {
+	// 	case interface{}:
+	// 		fmt.Printf(">> interface{}\n")
+	// 	default:
+	// 		fmt.Printf(">> %v (%T)\n", "unknown", t)
+	// 	}
+	// }
 	// o := reflect.New(typeField)
 	// e := o.Elem()
 	// fmt.Printf("elements (%v): %+v\n", e.Field(0), e)

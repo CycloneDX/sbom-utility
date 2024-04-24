@@ -30,10 +30,10 @@ type CDXFormula struct {
 
 // v1.5: added
 // NOTE: CDXRefType is a named `string` type as of v1.5
-type CDXWorkflow struct {
-	BOMRef             *CDXRefType                   `json:"bom-ref,omitempty"`            // v1.5
-	Uid                string                        `json:"uid,omitempty"`                // v1.5
-	Name               string                        `json:"name,omitempty"`               // v1.5
+type CDXWorkflow struct { // v1.5
+	Uid                string                        `json:"uid,omitempty"`  // v1.5
+	Name               string                        `json:"name,omitempty"` // v1.5
+	BOMRef             *CDXRefType                   `json:"bom-ref,omitempty"`
 	Description        string                        `json:"description,omitempty"`        // v1.5
 	ResourceReferences *[]CDXResourceReferenceChoice `json:"resourceReferences,omitempty"` // v1.5
 	Tasks              *[]CDXTask                    `json:"tasks,omitempty"`              // v1.5
