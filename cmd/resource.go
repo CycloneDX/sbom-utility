@@ -240,14 +240,14 @@ func loadDocumentResources(document *schema.BOM, resourceType string, whereFilte
 
 	// Add top-level SBOM component
 	if resourceType == schema.RESOURCE_TYPE_DEFAULT || resourceType == schema.RESOURCE_TYPE_COMPONENT {
-		err = document.HashComponentResources(whereFilters)
+		err = document.HashmapComponentResources(whereFilters)
 		if err != nil {
 			return
 		}
 	}
 
 	if resourceType == schema.RESOURCE_TYPE_DEFAULT || resourceType == schema.RESOURCE_TYPE_SERVICE {
-		err = document.HashServiceResources(whereFilters)
+		err = document.HashmapServiceResources(whereFilters)
 		if err != nil {
 			return
 		}

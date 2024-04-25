@@ -210,61 +210,75 @@ func TestNormalizeCdx15VulnerabilitiesNatsBox(t *testing.T) {
 	innerTestNormalize(t, ti)
 }
 
+// EXPERIMENTAL:
+// TODO: see if we can create a function to loop through all nested structures and
+// report one which ones do NOT have support for the Normalizer interface.
+// This could be used to verify always have code to normalize any structure as
+// new ones are added release-to-release
 func TestNormalizeReflect(t *testing.T) {
-	bom, _ := LoadBOMFile(TEST_CDX_1_5_NORMALIZE_COMPONENTS)
-
-	datatype := reflect.TypeOf(bom)
-	reflectValue := reflect.ValueOf(bom)
-	kind := reflectValue.Kind()
-	fmt.Printf(">> datatype: `%v`, kind: `%v`\n", datatype, kind)
-
-	// If it's an interface, unwrap it.
-	if kind == reflect.Ptr || kind == reflect.Interface { // val.Kind() == reflect.Ptr ||
-		// This gets the actual schema.BOM struct
-		reflectValue = reflectValue.Elem()
-		reflectType := reflectValue.Type()
-		reflectTypeOf := reflect.TypeOf(reflectValue)
-		kind = reflectValue.Kind()
-		datatype := reflect.TypeOf(reflectValue)
-		reflectValueOf := reflect.ValueOf(reflectValue)
-		fmt.Printf(">> type: `%v` (%T), kind: `%v`\n", reflectTypeOf, reflectValueOf, kind)
-
-		valNumFields := reflectValue.NumField()
-		fmt.Printf("valNumFields: `%v`\n", valNumFields)
-		for i := 0; i < valNumFields; i++ {
-			//datatype = reflect.TypeOf(val)
-			field := reflectValue.Field(i)
-			fieldType := field.Type
-			fieldKind := field.Kind()
-			fieldName := reflectType.Field(i).Name
-			isItfc := field.CanInterface()
-
-			fmt.Printf(">> Field: `%v`: datatype: `%v` (%t), fieldType: `%T`, Kind: `%s`\n", fieldName, datatype, isItfc, fieldType, fieldKind)
-		}
-	} else {
-		fmt.Printf("Must be a struct to unwrap fields\n")
+	document, err := LoadBOMFile(TEST_CDX_1_5_NORMALIZE_COMPONENTS)
+	if err != nil {
 		return
 	}
 
-	// for i := 0; i < valNumFields; i++ {
-	// 	val.Elem()
-	// 	field := datatype.Field(i)
-	// 	fieldType := field.Type
-	// 	fieldName := field.Name
-	// 	//valueOfFieldType := reflect.ValueOf(fieldType)
-	// 	t := reflect.TypeOf(fieldName)
-	// 	o := reflect.New(t)
-	// 	e := o.Elem()
-	// 	fmt.Printf(">> Field(%v): Name; `%s`, Type: `%s`, Elem(): `%v`\n", i, fieldName, fieldType, e)
+	if err = document.UnmarshalCycloneDXBOM(); err != nil {
+		return
+	}
 
-	// 	switch t := fieldType.(type) {
-	// 	case interface{}:
-	// 		fmt.Printf(">> interface{}\n")
-	// 	default:
-	// 		fmt.Printf(">> %v (%T)\n", "unknown", t)
-	// 	}
-	// }
-	// o := reflect.New(typeField)
-	// e := o.Elem()
-	// fmt.Printf("elements (%v): %+v\n", e.Field(0), e)
+	// Test reflect.New using an existing instance
+	//ptrBom := reflect.New(reflect.TypeOf(*document))
+	//fmt.Printf("New *schema.BOM: %+v\n", ptrBom)
+
+	// Test reflect.New using an existing (empty) instance
+	//bom2Type := reflect.TypeOf(schema.BOM{})
+	//ptrBom2 := reflect.New(bom2Type)
+	//fmt.Printf("New *schema.BOM: %+v\n", ptrBom2)
+
+	// Assure we can
+	ptrCdxBom := document.GetCdxBom()
+	//fmt.Printf("*schema.CDXBom: %+v\n", ptrCdxBom)
+
+	ListFields(ptrCdxBom)
+}
+
+func ListFields(itfc interface{}) {
+	// NOTE: we can immediately use ValueOf() to dereference the interface{}
+	// NOTE: Elem() will panic if reflect.ValueOf(itfc).Kind() != reflect.Ptr || reflect.Interface
+	rvoItfc := reflect.ValueOf(itfc)
+
+	// Deref. if needed to get the ACTUAL type we want to list fields for
+	if rvoItfc.Kind() == reflect.Pointer || rvoItfc.Kind() == reflect.Interface {
+		rvoItfc = reflect.ValueOf(itfc).Elem()
+	}
+
+	// Immediately grab the Type of the dereferenced interface{}
+	rvoType := rvoItfc.Type()
+	fmt.Printf("Interface: Type: `%v`, Kind: `%v`\n", rvoType.String(), rvoType.Kind())
+
+	if rvoType.Kind() == reflect.Struct {
+		// Iterate over all fields of the Struct type (if any)
+		for i := 0; i < rvoType.NumField(); i++ {
+			field := rvoType.Field(i)
+
+			// Indirect returns the fieldValue that v points to.
+			// - If <input> is a nil pointer, Indirect returns a zero Value.
+			// - If <input> is not a pointer, Indirect returns <input> (no dereference using Elem() method).
+			fieldName := field.Name
+			fieldValue := reflect.Indirect(rvoItfc).FieldByName(fieldName)
+			fvKind := fieldValue.Kind()
+			fvValueOf := reflect.ValueOf(fieldValue)
+			// TODO: explore `field.PkgPath`
+			fmt.Printf(">> Field(%v): `%s`, Kind: `%s`, Tags: `%s`, Value: `%v`\n", i, fieldName, fvKind.String(), field.Tag, fvValueOf)
+
+			// TODO: explore use of isItfc := field.CanInterface()
+			if fvKind == reflect.Ptr || fvKind == reflect.Interface {
+				if !fieldValue.IsNil() {
+					// NOTE:  temp.Elem() could be reflect.Struct, reflect.Map, reflect.Slice, etc.
+					ListFields(fieldValue.Interface())
+				}
+			}
+		}
+	} else {
+		fmt.Printf("!!! Unhandled Kind(): `%v`", rvoType.Kind())
+	}
 }

@@ -227,7 +227,7 @@ func TestHashCDXComponentEmpty(t *testing.T) {
 		return
 	}
 
-	_, err = document.HashComponent(*component, nil, false)
+	_, err = document.HashmapComponent(*component, nil, false)
 	if err != nil {
 		t.Error(err)
 		return
@@ -254,7 +254,7 @@ func TestHashCDXComponentNameOnly(t *testing.T) {
 		return
 	}
 
-	_, err = document.HashComponent(*component, nil, false)
+	_, err = document.HashmapComponent(*component, nil, false)
 	if err != nil {
 		t.Error(err)
 		return
@@ -281,7 +281,7 @@ func TestHashCDXComponentFull(t *testing.T) {
 		return
 	}
 
-	_, err = document.HashComponent(*component, nil, false)
+	_, err = document.HashmapComponent(*component, nil, false)
 	if err != nil {
 		t.Error(err)
 		return
@@ -309,7 +309,7 @@ func TestHashCDXComponentsSlice(t *testing.T) {
 	}
 
 	if components != nil {
-		err = document.HashComponents(*components, nil, false)
+		err = document.HashmapComponents(*components, nil, false)
 		if err != nil {
 			t.Error(err)
 			return
@@ -320,7 +320,7 @@ func TestHashCDXComponentsSlice(t *testing.T) {
 func TestHashZeroCDXComponentStruct(t *testing.T) {
 	cdxComponent := new(CDXComponent)
 	document := NewBOM("")
-	hashed, err := document.HashComponent(*cdxComponent, nil, false)
+	hashed, err := document.HashmapComponent(*cdxComponent, nil, false)
 	if err != nil {
 		t.Error(err)
 		return
@@ -355,7 +355,7 @@ func TestHashCDXServicesSlice(t *testing.T) {
 		return
 	}
 
-	err = document.HashServices(*services, nil)
+	err = document.HashmapServices(*services, nil)
 	if err != nil {
 		t.Error(err)
 		return
@@ -365,7 +365,7 @@ func TestHashCDXServicesSlice(t *testing.T) {
 func TestHashZeroCDXServiceStruct(t *testing.T) {
 	cdxService := new(CDXService)
 	document := NewBOM("")
-	hashed, err := document.HashService(*cdxService, nil)
+	hashed, err := document.HashmapService(*cdxService, nil)
 	if err != nil {
 		t.Error(err)
 		return
@@ -397,7 +397,7 @@ func TestHashCDXVulnerabilitiesSlice(t *testing.T) {
 		return
 	}
 
-	err = document.HashVulnerabilities(*vulnerabilities, nil)
+	err = document.HashmapVulnerabilities(*vulnerabilities, nil)
 	if err != nil {
 		t.Error(err)
 		return
@@ -412,7 +412,7 @@ func TestHashCDXVulnerabilitiesSlice(t *testing.T) {
 func TestHashZeroCDXVulnerabilityStruct(t *testing.T) {
 	cdxVulnerability := new(CDXVulnerability)
 	document := NewBOM("")
-	hashed, err := document.HashVulnerability(*cdxVulnerability, nil)
+	hashed, err := document.HashmapVulnerability(*cdxVulnerability, nil)
 	if err != nil {
 		t.Error(err)
 		return
@@ -431,7 +431,7 @@ func TestHashZeroCDXVulnerabilityStruct(t *testing.T) {
 func TestHashZeroCDXLicenseInfoStruct(t *testing.T) {
 	cdxLicenseInfo := new(LicenseInfo)
 	document := NewBOM("")
-	hashed, err := document.HashLicenseInfo(nil, "foo", *cdxLicenseInfo, nil)
+	hashed, err := document.HashmapLicenseInfo(nil, "foo", *cdxLicenseInfo, nil)
 	// HashLicenseInfo(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, key string, licenseInfo schema.LicenseInfo, whereFilters []common.WhereFilter) (hashed bool)
 	if err != nil {
 		t.Error(err)

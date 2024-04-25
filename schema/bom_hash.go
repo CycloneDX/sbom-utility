@@ -35,7 +35,7 @@ import (
 // This hashes all components regardless where in the BOM document structure
 // they are declared.  This includes both the top-level metadata component
 // (i.e., the subject of the BOM) as well as the components array.
-func (bom *BOM) HashComponentResources(whereFilters []common.WhereFilter) (err error) {
+func (bom *BOM) HashmapComponentResources(whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer func() {
 		if panicInfo := recover(); panicInfo != nil {
@@ -47,7 +47,7 @@ func (bom *BOM) HashComponentResources(whereFilters []common.WhereFilter) (err e
 	// Hash the top-level component declared in the BOM metadata
 	pMetadataComponent := bom.GetCdxMetadataComponent()
 	if pMetadataComponent != nil {
-		_, err = bom.HashComponent(*pMetadataComponent, whereFilters, true)
+		_, err = bom.HashmapComponent(*pMetadataComponent, whereFilters, true)
 		if err != nil {
 			return
 		}
@@ -57,7 +57,7 @@ func (bom *BOM) HashComponentResources(whereFilters []common.WhereFilter) (err e
 	pComponents := bom.GetCdxComponents()
 	if pComponents != nil && len(*pComponents) > 0 {
 		//if components := bom.GetCdxComponents(); len(*components) > 0 {
-		if err = bom.HashComponents(*pComponents, whereFilters, false); err != nil {
+		if err = bom.HashmapComponents(*pComponents, whereFilters, false); err != nil {
 			return
 		}
 	}
@@ -65,11 +65,11 @@ func (bom *BOM) HashComponentResources(whereFilters []common.WhereFilter) (err e
 }
 
 // TODO: use pointer for []CDXComponent
-func (bom *BOM) HashComponents(components []CDXComponent, whereFilters []common.WhereFilter, root bool) (err error) {
+func (bom *BOM) HashmapComponents(components []CDXComponent, whereFilters []common.WhereFilter, root bool) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 	for _, cdxComponent := range components {
-		_, err = bom.HashComponent(cdxComponent, whereFilters, root)
+		_, err = bom.HashmapComponent(cdxComponent, whereFilters, root)
 		if err != nil {
 			return
 		}
@@ -80,7 +80,7 @@ func (bom *BOM) HashComponents(components []CDXComponent, whereFilters []common.
 // Hash a CDX Component and recursively those of any "nested" components
 // TODO: we should WARN if version is not a valid semver (e.g., examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json)
 // TODO: Use pointer for CDXComponent
-func (bom *BOM) HashComponent(cdxComponent CDXComponent, whereFilters []common.WhereFilter, root bool) (hashed bool, err error) {
+func (bom *BOM) HashmapComponent(cdxComponent CDXComponent, whereFilters []common.WhereFilter, root bool) (hashed bool, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 	var resourceInfo CDXResourceInfo
@@ -137,7 +137,7 @@ func (bom *BOM) HashComponent(cdxComponent CDXComponent, whereFilters []common.W
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
 	pComponent := cdxComponent.Components
 	if pComponent != nil && len(*pComponent) > 0 {
-		err = bom.HashComponents(*cdxComponent.Components, whereFilters, root)
+		err = bom.HashmapComponents(*cdxComponent.Components, whereFilters, root)
 		if err != nil {
 			return
 		}
@@ -149,13 +149,13 @@ func (bom *BOM) HashComponent(cdxComponent CDXComponent, whereFilters []common.W
 // Services
 // -------------------
 
-func (bom *BOM) HashServiceResources(whereFilters []common.WhereFilter) (err error) {
+func (bom *BOM) HashmapServiceResources(whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
 	pServices := bom.GetCdxServices()
 	if pServices != nil && len(*pServices) > 0 {
-		if err = bom.HashServices(*pServices, whereFilters); err != nil {
+		if err = bom.HashmapServices(*pServices, whereFilters); err != nil {
 			return
 		}
 	}
@@ -163,12 +163,12 @@ func (bom *BOM) HashServiceResources(whereFilters []common.WhereFilter) (err err
 }
 
 // TODO: use pointer for []CDXService
-func (bom *BOM) HashServices(services []CDXService, whereFilters []common.WhereFilter) (err error) {
+func (bom *BOM) HashmapServices(services []CDXService, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
 	for _, cdxService := range services {
-		_, err = bom.HashService(cdxService, whereFilters)
+		_, err = bom.HashmapService(cdxService, whereFilters)
 		if err != nil {
 			return
 		}
@@ -178,7 +178,7 @@ func (bom *BOM) HashServices(services []CDXService, whereFilters []common.WhereF
 
 // Hash a CDX Component and recursively those of any "nested" components
 // TODO: use pointer for CDXService
-func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFilter) (hashed bool, err error) {
+func (bom *BOM) HashmapService(cdxService CDXService, whereFilters []common.WhereFilter) (hashed bool, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 	var resourceInfo CDXResourceInfo
@@ -236,7 +236,7 @@ func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFi
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
 	pServices := cdxService.Services
 	if pServices != nil && len(*pServices) > 0 {
-		err = bom.HashServices(*pServices, whereFilters)
+		err = bom.HashmapServices(*pServices, whereFilters)
 		if err != nil {
 			return
 		}
@@ -248,7 +248,7 @@ func (bom *BOM) HashService(cdxService CDXService, whereFilters []common.WhereFi
 // Licenses
 // -------------------
 
-func (bom *BOM) HashLicenseInfo(policyConfig *LicensePolicyConfig, key string, licenseInfo LicenseInfo, whereFilters []common.WhereFilter) (hashed bool, err error) {
+func (bom *BOM) HashmapLicenseInfo(policyConfig *LicensePolicyConfig, key string, licenseInfo LicenseInfo, whereFilters []common.WhereFilter) (hashed bool, err error) {
 
 	if reflect.DeepEqual(licenseInfo, LicenseInfo{}) {
 		getLogger().Warning("empty license object found")
@@ -292,14 +292,14 @@ func (bom *BOM) HashLicenseInfo(policyConfig *LicensePolicyConfig, key string, l
 // Vulnerabilities
 // -------------------
 
-func (bom *BOM) HashVulnerabilityResources(whereFilters []common.WhereFilter) (err error) {
+func (bom *BOM) HashmapVulnerabilityResources(whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
 	pVulnerabilities := bom.GetCdxVulnerabilities()
 
 	if pVulnerabilities != nil && len(*pVulnerabilities) > 0 {
-		if err = bom.HashVulnerabilities(*pVulnerabilities, whereFilters); err != nil {
+		if err = bom.HashmapVulnerabilities(*pVulnerabilities, whereFilters); err != nil {
 			return
 		}
 	}
@@ -308,12 +308,12 @@ func (bom *BOM) HashVulnerabilityResources(whereFilters []common.WhereFilter) (e
 
 // We need to hash our own informational structure around the CDX data in order
 // to simplify --where queries to command line users
-func (bom *BOM) HashVulnerabilities(vulnerabilities []CDXVulnerability, whereFilters []common.WhereFilter) (err error) {
+func (bom *BOM) HashmapVulnerabilities(vulnerabilities []CDXVulnerability, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
 	for _, cdxVulnerability := range vulnerabilities {
-		_, err = bom.HashVulnerability(cdxVulnerability, whereFilters)
+		_, err = bom.HashmapVulnerability(cdxVulnerability, whereFilters)
 		if err != nil {
 			return
 		}
@@ -323,7 +323,7 @@ func (bom *BOM) HashVulnerabilities(vulnerabilities []CDXVulnerability, whereFil
 
 // Hash a CDX Component and recursively those of any "nested" components
 // TODO we should WARN if version is not a valid semver (e.g., examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json)
-func (bom *BOM) HashVulnerability(cdxVulnerability CDXVulnerability, whereFilters []common.WhereFilter) (hashed bool, err error) {
+func (bom *BOM) HashmapVulnerability(cdxVulnerability CDXVulnerability, whereFilters []common.WhereFilter) (hashed bool, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 	var vulnInfo VulnerabilityInfo

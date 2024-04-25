@@ -325,7 +325,7 @@ func (bom *BOM) UnmarshalCycloneDXBOM() (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	// Unmarshal as a JSON Map if not done already
+	// Unmarshal as a JSON Map, if not done already
 	if bom.JsonMap == nil {
 		if err = bom.UnmarshalBOMAsJSONMap(); err != nil {
 			return
