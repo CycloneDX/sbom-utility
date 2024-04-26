@@ -107,6 +107,10 @@ func (bom *CDXBom) Normalize() {
 	if bom.Dependencies != nil {
 		CDXDependencySlice(*bom.Dependencies).Normalize()
 	}
+	// Sort Compositions
+	if bom.Compositions != nil {
+		CDXCompositionSlice(*bom.Compositions).Normalize()
+	}
 	// Sort: Vulnerabilities
 	if bom.Vulnerabilities != nil {
 		CDXVulnerabilitySlice(*bom.Vulnerabilities).Normalize()
@@ -127,7 +131,6 @@ func (bom *CDXBom) Normalize() {
 	if bom.Properties != nil {
 		CDXPropertySlice(*bom.Properties).Normalize()
 	}
-	// TODO: Sort Compositions
 	// TODO: Sort: Declarations (v1.6)
 	// TODO: Sort: Definitions (v1.6)
 }
