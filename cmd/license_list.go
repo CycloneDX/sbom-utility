@@ -123,7 +123,7 @@ func NewCommandList() *cobra.Command {
 		}
 
 		// Test for required flags (parameters)
-		err = preRunTestForInputFile(cmd, args)
+		err = preRunTestForInputFile(args)
 		return
 	}
 	return (command)

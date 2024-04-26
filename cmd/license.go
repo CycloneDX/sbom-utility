@@ -55,7 +55,7 @@ func NewCommandLicense() *cobra.Command {
 			return getLogger().Errorf("Too many arguments provided: %v", args)
 		}
 		// Make sure subcommand is known
-		if !preRunTestForSubcommand(command, VALID_SUBCOMMANDS_LICENSE, args[0]) {
+		if !preRunTestForSubcommand(VALID_SUBCOMMANDS_LICENSE, args[0]) {
 			return getLogger().Errorf("Subcommand provided is not valid: `%v`", args[0])
 		}
 		return

@@ -83,7 +83,7 @@ func innerTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer bytes.Buf
 	}
 
 	// invoke resource list command with a byte buffer
-	outputBuffer, err = innerBufferedTestTrim(t, testInfo)
+	outputBuffer, err = innerBufferedTestTrim(testInfo)
 	// if the command resulted in a failure
 	if err != nil {
 		// if tests asks us to report a FAIL to the test framework
@@ -98,7 +98,7 @@ func innerTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer bytes.Buf
 	return
 }
 
-func innerBufferedTestTrim(t *testing.T, testInfo *TrimTestInfo) (outputBuffer bytes.Buffer, err error) {
+func innerBufferedTestTrim(testInfo *TrimTestInfo) (outputBuffer bytes.Buffer, err error) {
 
 	// The command looks for the input & output filename in global flags struct
 	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile
@@ -225,7 +225,7 @@ func TestTrimCdx14PreserveUnencodedChars(t *testing.T) {
 	ti := NewTrimTestInfo(TEST_TRIM_CDX_1_4_ENCODED_CHARS, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_TRIM_CDX_1_4_ENCODED_CHARS)
 	ti.Keys = append(ti.Keys, "name")
-	outputBuffer, _ := innerBufferedTestTrim(t, ti)
+	outputBuffer, _ := innerBufferedTestTrim(ti)
 	TEST1 := "<guillem@debian.org>"
 	TEST2 := "<adduser@packages.debian.org>"
 
@@ -247,7 +247,7 @@ func TestTrimCdx14ComponentPropertiesSampleXXLBuffered(t *testing.T) {
 	ti := NewTrimTestInfo(TEST_TRIM_CDX_1_4_SAMPLE_XXL_1, nil)
 	ti.Keys = append(ti.Keys, "properties")
 	ti.ResultExpectedByteSize = 8121420
-	outputBuffer, _ := innerBufferedTestTrim(t, ti)
+	outputBuffer, _ := innerBufferedTestTrim(ti)
 	// verify "after" trim lengths and content have removed properties
 	getLogger().Tracef("Len(outputBuffer): `%v`\n", outputBuffer.Len())
 	if ti.ResultExpectedByteSize > 0 {

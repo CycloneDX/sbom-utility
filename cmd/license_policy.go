@@ -144,7 +144,7 @@ func NewCommandPolicy() *cobra.Command {
 
 		// Make sure (optional) subcommand is known/valid
 		if len(args) == 1 {
-			if !preRunTestForSubcommand(command, VALID_SUBCOMMANDS_POLICY, args[0]) {
+			if !preRunTestForSubcommand(VALID_SUBCOMMANDS_POLICY, args[0]) {
 				return getLogger().Errorf("Subcommand provided is not valid: `%v`", args[0])
 			}
 		}

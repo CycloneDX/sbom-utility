@@ -44,7 +44,7 @@ func NewCommandStats() *cobra.Command {
 	// TODO: command.ValidArgs = VALID_SUBCOMMANDS_S
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		// Test for required flags (parameters)
-		err = preRunTestForInputFile(cmd, args)
+		err = preRunTestForInputFile(args)
 		return
 	}
 	return command

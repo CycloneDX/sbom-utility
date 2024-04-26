@@ -144,7 +144,7 @@ func innerTestPatch(t *testing.T, testInfo *PatchTestInfo) (outputBuffer bytes.B
 	}
 
 	// invoke resource list command with a byte buffer
-	outputBuffer, err = innerBufferedTestPatch(t, testInfo)
+	outputBuffer, err = innerBufferedTestPatch(testInfo)
 	// if the command resulted in a failure
 	if err != nil {
 		// if tests asks us to report a FAIL to the test framework
@@ -159,7 +159,7 @@ func innerTestPatch(t *testing.T, testInfo *PatchTestInfo) (outputBuffer bytes.B
 	return
 }
 
-func innerBufferedTestPatch(t *testing.T, testInfo *PatchTestInfo) (outputBuffer bytes.Buffer, err error) {
+func innerBufferedTestPatch(testInfo *PatchTestInfo) (outputBuffer bytes.Buffer, err error) {
 
 	// The command looks for the input & output filename in global flags struct
 	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile

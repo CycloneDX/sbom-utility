@@ -68,7 +68,7 @@ func innerBufferedTestStatsList(testInfo *StatsTestInfo) (outputBuffer bytes.Buf
 	return
 }
 
-func innerTestStatsList(t *testing.T, testInfo *StatsTestInfo) (outputBuffer bytes.Buffer, basicTestInfo string, err error) {
+func innerTestStatsList(testInfo *StatsTestInfo) (outputBuffer bytes.Buffer, basicTestInfo string, err error) {
 	getLogger().Tracef("TestInfo: %s", testInfo)
 
 	// The command looks for the input filename in global flags struct
@@ -112,7 +112,7 @@ func TestStatsListFormatUnsupportedSPDXMinReq(t *testing.T) {
 	)
 
 	// verify correct error is returned
-	innerTestStatsList(t, ti)
+	innerTestStatsList(ti)
 }
 
 // -------------------------------------------
@@ -126,5 +126,5 @@ func TestStatsCdx14SampleXXL1(t *testing.T) {
 	)
 
 	// verify correct error is returned
-	innerTestStatsList(t, ti)
+	innerTestStatsList(ti)
 }

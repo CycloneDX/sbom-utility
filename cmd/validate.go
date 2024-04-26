@@ -82,7 +82,7 @@ func NewCommandValidate() *cobra.Command {
 	command.Flags().StringVarP(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", "",
 		MSG_VALIDATE_FLAG_ERR_FORMAT+VALIDATE_SUPPORTED_ERROR_FORMATS)
 	command.PreRunE = func(cmd *cobra.Command, args []string) error {
-		return preRunTestForInputFile(cmd, args)
+		return preRunTestForInputFile(args)
 	}
 	initCommandValidateFlags(command)
 	return command

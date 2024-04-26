@@ -62,14 +62,14 @@ func NewCommandDiff() *cobra.Command {
 	command.RunE = diffCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		// Test for required flags (parameters)
-		err = preRunTestForFiles(cmd, args)
+		err = preRunTestForFiles(args)
 
 		return
 	}
 	return command
 }
 
-func preRunTestForFiles(cmd *cobra.Command, args []string) error {
+func preRunTestForFiles(args []string) error {
 	getLogger().Enter()
 	defer getLogger().Exit()
 	getLogger().Tracef("args: %v", args)

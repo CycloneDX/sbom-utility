@@ -73,7 +73,7 @@ func LoadCustomPolicyFile(policyFile string) (customPolicyConfig *schema.License
 	return
 }
 
-func innerTestLicensePolicyListCustomAndBuffered(t *testing.T, testInfo *LicenseTestInfo, whereFilters []common.WhereFilter) (outputBuffer bytes.Buffer, err error) {
+func innerTestLicensePolicyListCustomAndBuffered(testInfo *LicenseTestInfo, whereFilters []common.WhereFilter) (outputBuffer bytes.Buffer, err error) {
 	// Declare an output outputBuffer/outputWriter to use used during tests
 	var outputWriter = bufio.NewWriter(&outputBuffer)
 	// ensure all data is written to buffer before further validation
@@ -117,7 +117,7 @@ func innerTestLicensePolicyList(t *testing.T, testInfo *LicenseTestInfo) (output
 	}
 
 	// Perform the test with buffered output
-	outputBuffer, err = innerTestLicensePolicyListCustomAndBuffered(t, testInfo, whereFilters)
+	outputBuffer, err = innerTestLicensePolicyListCustomAndBuffered(testInfo, whereFilters)
 
 	// Run all common tests against "result" values in the CommonTestInfo struct
 	err = innerRunReportResultTests(t, &testInfo.CommonTestInfo, outputBuffer, err)

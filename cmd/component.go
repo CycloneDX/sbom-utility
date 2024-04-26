@@ -34,70 +34,70 @@ import (
 )
 
 const (
-	SUBCOMMAND_RESOURCE_LIST = "list"
+	SUBCOMMAND_COMPONENT_LIST = "list"
 )
 
-var VALID_SUBCOMMANDS_RESOURCE = []string{SUBCOMMAND_RESOURCE_LIST}
+var VALID_SUBCOMMANDS_COMPONENT = []string{SUBCOMMAND_COMPONENT_LIST}
 
 // filter keys
-// Note: these string values MUST match annotations for the ResourceInfo struct fields
+// Note: these string values MUST match annotations for the ComponentInfo struct fields
 const (
-	RESOURCE_FILTER_KEY_TYPE    = "type"
-	RESOURCE_FILTER_KEY_NAME    = "name"
-	RESOURCE_FILTER_KEY_VERSION = "version"
-	RESOURCE_FILTER_KEY_BOMREF  = "bom-ref"
+	COMPONENT_FILTER_KEY_TYPE    = "type"
+	COMPONENT_FILTER_KEY_NAME    = "name"
+	COMPONENT_FILTER_KEY_VERSION = "version"
+	COMPONENT_FILTER_KEY_BOMREF  = "bom-ref"
 )
 
-var VALID_RESOURCE_FILTER_KEYS = []string{
-	RESOURCE_FILTER_KEY_TYPE,
-	RESOURCE_FILTER_KEY_NAME,
-	RESOURCE_FILTER_KEY_VERSION,
-	RESOURCE_FILTER_KEY_BOMREF,
+var VALID_COMPONENT_FILTER_KEYS = []string{
+	COMPONENT_FILTER_KEY_TYPE,
+	COMPONENT_FILTER_KEY_NAME,
+	COMPONENT_FILTER_KEY_VERSION,
+	COMPONENT_FILTER_KEY_BOMREF,
 }
 
-var RESOURCE_LIST_TITLES = []string{
-	RESOURCE_FILTER_KEY_TYPE,
-	RESOURCE_FILTER_KEY_NAME,
-	RESOURCE_FILTER_KEY_VERSION,
-	RESOURCE_FILTER_KEY_BOMREF,
+var COMPONENT_LIST_TITLES = []string{
+	COMPONENT_FILTER_KEY_TYPE,
+	COMPONENT_FILTER_KEY_NAME,
+	COMPONENT_FILTER_KEY_VERSION,
+	COMPONENT_FILTER_KEY_BOMREF,
 }
 
-var RESOURCE_LIST_ROW_DATA = []ColumnFormatData{
-	{RESOURCE_FILTER_KEY_TYPE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
-	{RESOURCE_FILTER_KEY_NAME, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
-	{RESOURCE_FILTER_KEY_VERSION, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
-	{RESOURCE_FILTER_KEY_BOMREF, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, REPORT_REPLACE_LINE_FEEDS_TRUE},
+var COMPONENT_LIST_ROW_DATA = []ColumnFormatData{
+	{COMPONENT_FILTER_KEY_TYPE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{COMPONENT_FILTER_KEY_NAME, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{COMPONENT_FILTER_KEY_VERSION, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{COMPONENT_FILTER_KEY_BOMREF, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, REPORT_REPLACE_LINE_FEEDS_TRUE},
 }
 
 // Flags. Reuse query flag values where possible
 const (
-	FLAG_RESOURCE_TYPE      = "type"
-	FLAG_RESOURCE_TYPE_HELP = "filter output by resource type (i.e., component | service)"
+	FLAG_COMPONENT_TYPE      = "type"
+	FLAG_COMPONENT_TYPE_HELP = "filter output by component type(s)"
 )
 
 const (
-	MSG_OUTPUT_NO_RESOURCES_FOUND = "[WARN] no matching resources found for query"
+	MSG_OUTPUT_NO_COMPONENTS_FOUND = "[WARN] no matching components found for query"
 )
 
 // Command help formatting
 const (
-	FLAG_RESOURCE_OUTPUT_FORMAT_HELP = "format output using the specified type"
+	FLAG_COMPONENT_OUTPUT_FORMAT_HELP = "format output using the specified type"
 )
 
-var RESOURCE_LIST_OUTPUT_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
+var COMPONENT_LIST_OUTPUT_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{FORMAT_TEXT, FORMAT_CSV, FORMAT_MARKDOWN}, ", ")
 
-func NewCommandResource() *cobra.Command {
+func NewCommandComponent() *cobra.Command {
 	var command = new(cobra.Command)
-	command.Use = CMD_USAGE_RESOURCE_LIST
-	command.Short = "Report on resources (i.e., components, services) found in the BOM input file"
-	command.Long = "Report on resources (i.e., components, services) found in the BOM input file"
+	command.Use = CMD_USAGE_COMPONENT_LIST
+	command.Short = "Report on components found in the BOM input file"
+	command.Long = "Report on components found in the BOM input file"
 	command.Flags().StringVarP(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
-		FLAG_RESOURCE_OUTPUT_FORMAT_HELP+RESOURCE_LIST_OUTPUT_SUPPORTED_FORMATS)
-	command.Flags().StringP(FLAG_RESOURCE_TYPE, "", schema.RESOURCE_TYPE_DEFAULT, FLAG_RESOURCE_TYPE_HELP)
+		FLAG_COMPONENT_OUTPUT_FORMAT_HELP+COMPONENT_LIST_OUTPUT_SUPPORTED_FORMATS)
+	command.Flags().StringP(FLAG_COMPONENT_TYPE, "", "", FLAG_COMPONENT_TYPE_HELP)
 	command.Flags().StringP(FLAG_REPORT_WHERE, "", "", FLAG_REPORT_WHERE_HELP)
-	command.RunE = resourceCmdImpl
-	command.ValidArgs = VALID_SUBCOMMANDS_RESOURCE
+	command.RunE = componentCmdImpl
+	command.ValidArgs = VALID_SUBCOMMANDS_COMPONENT
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		// the command requires at least 1 valid subcommand (argument)
 		if len(args) > 1 {
@@ -106,7 +106,7 @@ func NewCommandResource() *cobra.Command {
 
 		// Make sure (optional) subcommand is known/valid
 		if len(args) == 1 {
-			if !preRunTestForSubcommand(VALID_SUBCOMMANDS_RESOURCE, args[0]) {
+			if !preRunTestForSubcommand(VALID_SUBCOMMANDS_COMPONENT, args[0]) {
 				return getLogger().Errorf("Subcommand provided is not valid: `%v`", args[0])
 			}
 		}
@@ -123,23 +123,26 @@ func NewCommandResource() *cobra.Command {
 	return command
 }
 
-func retrieveResourceType(cmd *cobra.Command) (resourceType string, err error) {
+func retrieveComponentType(cmd *cobra.Command) (componentTypes string, err error) {
 
-	resourceType, err = cmd.Flags().GetString(FLAG_RESOURCE_TYPE)
+	componentTypes, err = cmd.Flags().GetString(FLAG_COMPONENT_TYPE)
 	if err != nil {
 		return
 	}
 
-	// validate resource type is a known keyword
-	if !schema.IsValidResourceType(resourceType) {
-		// invalid
-		err = getLogger().Errorf("invalid resource `%s`: `%s`", FLAG_RESOURCE_TYPE, resourceType)
-	}
+	// TODO: parse "type" flag (comma-separated list of type names)
+	// TODO: validate each one is supported in the CDX Component Type enum.
+	// // validate component type(s) is a known keyword
+	// TODO: support multiple types (slice) and return "invalid" as an error
+	// if !schema.IsValidComponentType(componentTypes) {
+	// 	// invalid
+	// 	err = getLogger().Errorf("invalid type `%s`: `%s`", FLAG_COMPONENT_TYPE, componentType)
+	// }
 
 	return
 }
 
-func resourceCmdImpl(cmd *cobra.Command, args []string) (err error) {
+func componentCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	getLogger().Enter(args)
 	defer getLogger().Exit()
 
@@ -161,20 +164,20 @@ func resourceCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	whereFilters, err := processWhereFlag(cmd)
 
 	// Process flag: --type
-	var resourceType string
-	var resourceFlags utils.ResourceCommandFlags
-	resourceType, err = retrieveResourceType(cmd)
+	var types string
+	var commandFlags utils.ComponentCommandFlags
+	types, err = retrieveComponentType(cmd)
 
 	if err == nil {
-		resourceFlags.ResourceType = resourceType
-		err = ListResources(writer, utils.GlobalFlags.PersistentFlags, resourceFlags, whereFilters)
+		commandFlags.Types = types
+		err = ListComponents(writer, utils.GlobalFlags.PersistentFlags, commandFlags, whereFilters)
 	}
 
 	return
 }
 
 // Assure all errors are logged
-func processResourceListResults(err error) {
+func processComponentListResults(err error) {
 	if err != nil {
 		// No special processing at this time
 		getLogger().Error(err)
@@ -182,14 +185,14 @@ func processResourceListResults(err error) {
 }
 
 // NOTE: resourceType has already been validated
-func ListResources(writer io.Writer, persistentFlags utils.PersistentCommandFlags, resourceFlags utils.ResourceCommandFlags, whereFilters []common.WhereFilter) (err error) {
+func ListComponents(writer io.Writer, persistentFlags utils.PersistentCommandFlags, componentFlags utils.ComponentCommandFlags, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	// use function closure to assure consistent error output based upon error type
 	defer func() {
 		if err != nil {
-			processResourceListResults(err)
+			processComponentListResults(err)
 		}
 	}()
 
@@ -201,9 +204,9 @@ func ListResources(writer io.Writer, persistentFlags utils.PersistentCommandFlag
 		return
 	}
 
-	// Hash all resources (i.e., components, services for now) within input file
+	// Hash all licenses within input file
 	getLogger().Infof("Scanning document for licenses...")
-	err = loadDocumentResources(document, resourceFlags.ResourceType, whereFilters)
+	err = loadDocumentComponents(document, componentFlags.Types, whereFilters)
 
 	if err != nil {
 		return
@@ -213,22 +216,22 @@ func ListResources(writer io.Writer, persistentFlags utils.PersistentCommandFlag
 	getLogger().Infof("Outputting listing (`%s` format)...", format)
 	switch format {
 	case FORMAT_TEXT:
-		DisplayResourceListText(document, writer)
+		DisplayComponentListText(document, writer)
 	case FORMAT_CSV:
-		DisplayResourceListCSV(document, writer)
+		DisplayComponentListCSV(document, writer)
 	case FORMAT_MARKDOWN:
-		DisplayResourceListMarkdown(document, writer)
+		DisplayComponentListMarkdown(document, writer)
 	default:
 		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_TEXT)
-		DisplayResourceListText(document, writer)
+		DisplayComponentListText(document, writer)
 	}
 
 	return
 }
 
-func loadDocumentResources(document *schema.BOM, resourceType string, whereFilters []common.WhereFilter) (err error) {
+func loadDocumentComponents(document *schema.BOM, componentTypes string, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -247,24 +250,15 @@ func loadDocumentResources(document *schema.BOM, resourceType string, whereFilte
 	}
 
 	// Add top-level SBOM component
-	if resourceType == schema.RESOURCE_TYPE_DEFAULT || resourceType == schema.RESOURCE_TYPE_COMPONENT {
-		err = document.HashmapComponentResources(whereFilters)
-		if err != nil {
-			return
-		}
-	}
-
-	if resourceType == schema.RESOURCE_TYPE_DEFAULT || resourceType == schema.RESOURCE_TYPE_SERVICE {
-		err = document.HashmapServiceResources(whereFilters)
-		if err != nil {
-			return
-		}
+	err = document.HashmapComponentResources(whereFilters)
+	if err != nil {
+		return
 	}
 
 	return
 }
 
-func sortResources(entries []multimap.Entry) {
+func sortComponents(entries []multimap.Entry) {
 	// Sort by Type then Name
 	sort.Slice(entries, func(i, j int) bool {
 		resource1 := (entries[i].Value).(schema.CDXResourceInfo)
@@ -278,7 +272,7 @@ func sortResources(entries []multimap.Entry) {
 
 // NOTE: This list is NOT de-duplicated
 // TODO: Add a --no-title flag to skip title output
-func DisplayResourceListText(bom *schema.BOM, writer io.Writer) (err error) {
+func DisplayComponentListText(bom *schema.BOM, writer io.Writer) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -290,7 +284,7 @@ func DisplayResourceListText(bom *schema.BOM, writer io.Writer) (err error) {
 	w.Init(writer, 8, 2, 2, ' ', 0)
 
 	// create title row and underline row from slices of optional and compulsory titles
-	titles, underlines := prepareReportTitleData(RESOURCE_LIST_ROW_DATA, true)
+	titles, underlines := prepareReportTitleData(COMPONENT_LIST_ROW_DATA, true)
 
 	// Add tabs between column titles for the tabWRiter
 	fmt.Fprintf(w, "%s\n", strings.Join(titles, "\t"))
@@ -305,15 +299,15 @@ func DisplayResourceListText(bom *schema.BOM, writer io.Writer) (err error) {
 		return
 	}
 
-	// Sort resources prior to outputting
-	sortResources(entries)
+	// Sort Components prior to outputting
+	sortComponents(entries)
 
 	// Emit row data
 	var line []string
 	for _, entry := range entries {
 		line, err = prepareReportLineData(
 			entry.Value.(schema.CDXResourceInfo),
-			RESOURCE_LIST_ROW_DATA,
+			COMPONENT_LIST_ROW_DATA,
 			true,
 		)
 		// Only emit line if no error
@@ -326,7 +320,7 @@ func DisplayResourceListText(bom *schema.BOM, writer io.Writer) (err error) {
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplayResourceListCSV(bom *schema.BOM, writer io.Writer) (err error) {
+func DisplayComponentListCSV(bom *schema.BOM, writer io.Writer) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -335,7 +329,7 @@ func DisplayResourceListCSV(bom *schema.BOM, writer io.Writer) (err error) {
 	defer w.Flush()
 
 	// Create title row data as []string
-	titles, _ := prepareReportTitleData(RESOURCE_LIST_ROW_DATA, true)
+	titles, _ := prepareReportTitleData(COMPONENT_LIST_ROW_DATA, true)
 
 	if err = w.Write(titles); err != nil {
 		return getLogger().Errorf("error writing to output (%v): %s", titles, err)
@@ -354,14 +348,14 @@ func DisplayResourceListCSV(bom *schema.BOM, writer io.Writer) (err error) {
 		return fmt.Errorf(currentRow[0])
 	}
 
-	// Sort resources prior to outputting
-	sortResources(entries)
+	// Sort Components prior to outputting
+	sortComponents(entries)
 
 	var line []string
 	for _, entry := range entries {
 		line, err = prepareReportLineData(
 			entry.Value.(schema.CDXResourceInfo),
-			RESOURCE_LIST_ROW_DATA,
+			COMPONENT_LIST_ROW_DATA,
 			true,
 		)
 		// Only emit line if no error
@@ -376,40 +370,40 @@ func DisplayResourceListCSV(bom *schema.BOM, writer io.Writer) (err error) {
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplayResourceListMarkdown(bom *schema.BOM, writer io.Writer) (err error) {
+func DisplayComponentListMarkdown(bom *schema.BOM, writer io.Writer) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	// Create title row data as []string
-	titles, _ := prepareReportTitleData(RESOURCE_LIST_ROW_DATA, true)
+	titles, _ := prepareReportTitleData(COMPONENT_LIST_ROW_DATA, true)
 
 	// create title row
 	titleRow := createMarkdownRow(titles)
 	fmt.Fprintf(writer, "%s\n", titleRow)
 
 	// create alignment row
-	alignments := createMarkdownColumnAlignment(RESOURCE_LIST_TITLES)
+	alignments := createMarkdownColumnAlignment(COMPONENT_LIST_TITLES)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(writer, "%s\n", alignmentRow)
 
 	// Display a warning "missing" in the actual output and return (short-circuit)
 	entries := bom.ResourceMap.Entries()
 
-	// Emit no resource found warning into output
+	// Emit no components found warning into output
 	if len(entries) == 0 {
-		fmt.Fprintf(writer, "%s\n", MSG_OUTPUT_NO_RESOURCES_FOUND)
-		return fmt.Errorf(MSG_OUTPUT_NO_RESOURCES_FOUND)
+		fmt.Fprintf(writer, "%s\n", MSG_OUTPUT_NO_COMPONENTS_FOUND)
+		return fmt.Errorf(MSG_OUTPUT_NO_COMPONENTS_FOUND)
 	}
 
-	// Sort resources prior to outputting
-	sortResources(entries)
+	// Sort Components prior to outputting
+	sortComponents(entries)
 
 	var line []string
 	var lineRow string
 	for _, entry := range entries {
 		line, err = prepareReportLineData(
 			entry.Value.(schema.CDXResourceInfo),
-			RESOURCE_LIST_ROW_DATA,
+			COMPONENT_LIST_ROW_DATA,
 			true,
 		)
 		// Only emit line if no error

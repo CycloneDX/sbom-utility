@@ -60,7 +60,7 @@ func NewCommandTrim() *cobra.Command {
 	command.RunE = trimCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		// Test for required flags (parameters)
-		err = preRunTestForInputFile(cmd, args)
+		err = preRunTestForInputFile(args)
 		return
 	}
 	initCommandTrimFlags(command)
