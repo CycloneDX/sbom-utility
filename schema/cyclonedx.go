@@ -83,14 +83,14 @@ type CDXComponent struct {
 	Primary            bool                        `json:"-"`              // Proprietary: do NOT marshal/unmarshal
 	Type               string                      `json:"type,omitempty"` // Constraint: enum [see schema]
 	Name               string                      `json:"name,omitempty"`
+	Version            string                      `json:"version,omitempty"`
+	Description        string                      `json:"description,omitempty"`
+	Group              string                      `json:"group,omitempty"`
 	BOMRef             *CDXRefType                 `json:"bom-ref,omitempty"`
 	MimeType           string                      `json:"mime-type,omitempty"`
 	Supplier           *CDXOrganizationalEntity    `json:"supplier,omitempty"`
 	Author             string                      `json:"author,omitempty"`
 	Publisher          string                      `json:"publisher,omitempty"`
-	Group              string                      `json:"group,omitempty"`
-	Version            string                      `json:"version,omitempty"`
-	Description        string                      `json:"description,omitempty"`
 	Scope              string                      `json:"scope,omitempty"` // Constraint: "enum": ["required","optional","excluded"]
 	Hashes             *[]CDXHash                  `json:"hashes,omitempty"`
 	Licenses           *[]CDXLicenseChoice         `json:"licenses,omitempty"`
@@ -116,9 +116,9 @@ type CDXComponent struct {
 // The general theme or subject matter of the data being specified.
 // TODO: "contents" is plural, but it is not an array
 type CDXComponentData struct {
-	BOMRef         *CDXRefType            `json:"bom-ref,omitempty"`
 	Type           string                 `json:"type,omitempty"` // Constraint: "enum": ["source-code","configuration","dataset","definition","other"]
 	Name           string                 `json:"name,omitempty"`
+	BOMRef         *CDXRefType            `json:"bom-ref,omitempty"`
 	Contents       *CDXContent            `json:"contents,omitempty"`
 	Classification *CDXDataClassification `json:"classification,omitempty"`
 	SensitiveData  []string               `json:"sensitiveData,omitempty"`
@@ -129,8 +129,8 @@ type CDXComponentData struct {
 
 // v1.5 added object
 type CDXContent struct {
-	Attachment *CDXAttachment `json:"attachment,omitempty"`
 	Url        string         `json:"url,omitempty"`
+	Attachment *CDXAttachment `json:"attachment,omitempty"`
 	Properties *[]CDXProperty `json:"properties,omitempty"`
 }
 
@@ -162,12 +162,12 @@ type CDXDataGovernanceResponsibleParty struct {
 // validate a v1.2 SBOM wit the anon. type parses properly
 // NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXService struct {
-	BOMRef             *CDXRefType              `json:"bom-ref,omitempty"`
 	Provider           *CDXOrganizationalEntity `json:"provider,omitempty"`
-	Group              string                   `json:"group,omitempty"`
 	Name               string                   `json:"name,omitempty"`
 	Version            string                   `json:"version,omitempty"`
 	Description        string                   `json:"description,omitempty"`
+	Group              string                   `json:"group,omitempty"`
+	BOMRef             *CDXRefType              `json:"bom-ref,omitempty"`
 	Endpoints          *[]string                `json:"endpoints,omitempty"`
 	Authenticated      bool                     `json:"authenticated,omitempty"`
 	XTrustBoundary     bool                     `json:"x-trust-boundary,omitempty"`
