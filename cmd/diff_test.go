@@ -271,9 +271,9 @@ func TestDiffJsonVulnerabilitiesRemove1(t *testing.T) {
 // Unfortunately, we cannot run it as part of function test as it "times out"
 // TODO: Create smaller test files that cause panic in Diff command's underlying libs.
 // func TestDiffJsonPanicNATs(t *testing.T) {
-//  ti := NewDiffTestInfo(TEST_DIFF_PANIC_BASE, TEST_DIFF_PANIC_DELTA)
-//  ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_PANIC_DELTA)
-//  err := innerDiffError(t, ti)
+// 	ti := NewDiffTestInfo(TEST_DIFF_PANIC_BASE, TEST_DIFF_PANIC_DELTA)
+// 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_PANIC_DELTA)
+// 	err := innerDiffTest(t, ti)
 // 	if err != nil {
 // 		t.Error(err)
 // 	}

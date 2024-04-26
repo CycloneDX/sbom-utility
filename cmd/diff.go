@@ -219,6 +219,7 @@ func Diff(persistentFlags utils.PersistentCommandFlags, flags utils.DiffCommandF
 func compareBinaryData(bBaseData []byte, bRevisedData []byte) (diffResults diff.Diff, err error) {
 	defer func() {
 		if recoveredPanic := recover(); recoveredPanic != nil {
+			getLogger().Infof("ADVICE: Use the Trim command before Diff to remove highly variable data, such as: \"bom-ref\", \"hashes\" and \"properties\".")
 			err = getLogger().Errorf("panic occurred: %v", recoveredPanic)
 			return
 		}
