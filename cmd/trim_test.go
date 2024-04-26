@@ -39,6 +39,7 @@ const (
 	TEST_TRIM_CDX_1_5_SAMPLE_SMALL_COMPS_ONLY = "test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json"
 	TEST_TRIM_CDX_1_4_SAMPLE_VEX              = "test/trim/trim-cdx-1-4-sample-vex.json"
 	TEST_TRIM_CDX_1_5_SAMPLE_MEDIUM_1         = "test/trim/trim-cdx-1-5-sample-medium-1.sbom.json"
+	TEST_TRIM_CDX_1_5_COMPONENTS_NORMALIZE    = "test/trim/trim-cdx-1-5-sample-components-normalize.sbom.json"
 )
 
 type TrimTestInfo struct {
@@ -394,6 +395,26 @@ func TestTrimCdx14SourceFromVulnerabilities(t *testing.T) {
 		t.Error(err)
 	}
 
+	// Assure JSON map does not contain the trimmed key(s)
+	err = VerifyTrimOutputFileResult(t, *ti)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+// ----------------------------------------
+// Trim "properties" and --normalize
+// ----------------------------------------
+
+func TestTrimCdx15ComponentsPropertiesAndNormalize(t *testing.T) {
+	ti := NewTrimTestInfo(TEST_TRIM_CDX_1_5_COMPONENTS_NORMALIZE, nil)
+	ti.Keys = append(ti.Keys, "properties")
+	ti.FromPaths = []string{""}
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_TRIM_CDX_1_5_COMPONENTS_NORMALIZE)
+	_, _, err := innerTestTrim(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
 	// Assure JSON map does not contain the trimmed key(s)
 	err = VerifyTrimOutputFileResult(t, *ti)
 	if err != nil {

@@ -328,9 +328,9 @@ type CDXIdentifiableAction struct {
 // v1.3: added "hashes"
 // v1.4: `Type` field: added value "release-notes" to enum.
 type CDXExternalReference struct {
+	Type    string     `json:"type,omitempty"`
 	Url     string     `json:"url,omitempty"`
 	Comment string     `json:"comment,omitempty"`
-	Type    string     `json:"type,omitempty"`
 	Hashes  *[]CDXHash `json:"hashes,omitempty"` // v1.3: added
 }
 
