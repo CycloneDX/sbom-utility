@@ -54,10 +54,11 @@ const (
 // WARNING!!! The ".Use" field of a Cobra command MUST have the first word be the actual command
 // otherwise, the command will NOT be found by the Cobra framework. This is poor code assumption is NOT documented.
 const (
+	CMD_USAGE_COMPONENT_LIST     = CMD_COMPONENT + " " + SUBCOMMAND_LICENSE_LIST + " --input-file <input_file> [--type type1[,typeN]>] [--where key=regex[,...]] [--format txt|csv|md]"
 	CMD_USAGE_DIFF               = CMD_DIFF + " --input-file <base_file> --input-revision <revised_file> [--format json|txt] [--colorize=true|false]"
 	CMD_USAGE_LICENSE_LIST       = SUBCOMMAND_LICENSE_LIST + " --input-file <input_file> [--summary] [--where key=regex[,...]] [--format json|txt|csv|md]"
 	CMD_USAGE_LICENSE_POLICY     = SUBCOMMAND_LICENSE_POLICY + " [--where key=regex[,...]] [--format txt|csv|md]"
-	CMD_USAGE_QUERY              = CMD_QUERY + " --input-file <input_file> [--select * | field1[,fieldN]] [--from [key1[.keyN]] [--where key=regex[,...]]"
+	CMD_USAGE_QUERY              = CMD_QUERY + " --input-file <input_file> [--select * | field1[,fieldN]] [--from key1[.keyN]] [--where key=regex[,...]]"
 	CMD_USAGE_RESOURCE_LIST      = CMD_RESOURCE + " --input-file <input_file> [--type component|service] [--where key=regex[,...]] [--format txt|csv|md]"
 	CMD_USAGE_SCHEMA_LIST        = CMD_SCHEMA + " [--where key=regex[,...]] [--format txt|csv|md]"
 	CMD_USAGE_VALIDATE           = CMD_VALIDATE + " --input-file <input_file> [--variant <variant_name>] [--format txt|json] [--force schema_file]"
@@ -65,7 +66,6 @@ const (
 	CMD_USAGE_STATS_LIST         = CMD_STATS + " --input-file <input_file> [--type component|service] [--format txt|csv|md]"
 	CMD_USAGE_TRIM               = CMD_TRIM + " --input-file <input_file>  --output-file <output_file> [--normalize]"
 	CMD_USAGE_PATCH              = CMD_PATCH + " --input-file <input_file> --patch-file <patch_file> --output-file <output_file>"
-	CMD_USAGE_COMPONENT_LIST     = CMD_COMPONENT + " --input-file <input_file> [--type <type>] [--where key=regex[,...]] [--format txt|csv|md] [--summary]"
 )
 
 const (
