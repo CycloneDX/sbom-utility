@@ -479,7 +479,7 @@ func comparatorComponent(element1 CDXComponent, element2 CDXComponent) bool {
 	}
 	// sort by (sometimes an identifier): "bom-ref"
 	if element1.BOMRef != nil && element2.BOMRef != nil {
-		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
+		return comparatorBOMRefType(*element1.BOMRef, *element2.BOMRef)
 	}
 	// default: preserve existing order
 	return true
@@ -496,7 +496,7 @@ func comparatorService(element1 CDXService, element2 CDXService) bool {
 	}
 	// sort by (sometimes an identifier): "bom-ref"
 	if element1.BOMRef != nil && element2.BOMRef != nil {
-		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
+		return comparatorBOMRefType(*element1.BOMRef, *element2.BOMRef)
 	}
 	// default: preserve existing order
 	return true
@@ -516,6 +516,11 @@ func comparatorDependency(element1 CDXDependency, element2 CDXDependency) bool {
 func comparatorRefLinkType(element1 CDXRefLinkType, element2 CDXRefLinkType) bool {
 	// Note: casting to actual data type
 	return comparatorRefType(CDXRefType(element1), CDXRefType(element2))
+}
+
+func comparatorBOMRefType(element1 CDXRefType, element2 CDXRefType) bool {
+	// Note: this is a basic "string" comparison
+	return element1 < element2
 }
 
 func comparatorRefType(element1 CDXRefType, element2 CDXRefType) bool {
@@ -552,7 +557,7 @@ func comparatorLicenseChoice(element1 CDXLicenseChoice, element2 CDXLicenseChoic
 	}
 	// sort by (sometimes an identifier): "bom-ref"
 	if element1.BOMRef != nil && element2.BOMRef != nil {
-		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
+		return comparatorBOMRefType(*element1.BOMRef, *element2.BOMRef)
 	}
 	return true
 }
@@ -578,7 +583,7 @@ func comparatorOrganizationalContact(element1 CDXOrganizationalContact, element2
 	}
 	// sort by (sometimes an identifier): "bom-ref"
 	if element1.BOMRef != nil && element2.BOMRef != nil {
-		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
+		return comparatorBOMRefType(*element1.BOMRef, *element2.BOMRef)
 	}
 	return true
 }
@@ -591,7 +596,7 @@ func comparatorOrganizationalEntity(element1 CDXOrganizationalEntity, element2 C
 	// TODO: "tie-breakers": Url ([]string), Contact ([]string)
 	// sort by (sometimes an identifier): "bom-ref"
 	if element1.BOMRef != nil && element2.BOMRef != nil {
-		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
+		return comparatorBOMRefType(*element1.BOMRef, *element2.BOMRef)
 	}
 	return true
 }
@@ -642,7 +647,7 @@ func comparatorComposition(element1 CDXCompositions, element2 CDXCompositions) b
 	// TODO: "tie-breakers": "signature"?
 	// sort by (sometimes an identifier): "bom-ref"
 	if element1.BOMRef != nil && element2.BOMRef != nil {
-		return comparatorRefType(*element1.BOMRef, *element2.BOMRef)
+		return comparatorBOMRefType(*element1.BOMRef, *element2.BOMRef)
 	}
 	// default: preserve existing order
 	return true
