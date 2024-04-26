@@ -945,7 +945,7 @@ A comma-separated list of JSON document paths using the same syntax as the [quer
 
 A flag that normalizes the BOM data after trimming and prior to output.
 
-This flag has custom code that sorts all components, services, licenses, vulnerabilities and *most* other BOM data using custom comparators.
+This flag has custom code that sorts all components, services, licenses, vulnerabilities, properties, external references, hashes and *most* other BOM data using custom comparators.
 
 Each comparator uses `required` fields and other identifying fields to create *"composite keys"* for each unique data structure.
 
