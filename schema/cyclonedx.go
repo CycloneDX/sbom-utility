@@ -59,7 +59,7 @@ type CDXBom struct {
 // v1.5: added "lifecycles"
 type CDXMetadata struct {
 	Timestamp    string                      `json:"timestamp,omitempty" scvs:"bom:core:timestamp"` // urn:owasp:scvs:bom:core:timestamp
-	Tools        interface{}                 `json:"tools,omitempty"`                               // v1.2: added.v1.5: "tools" is now an interface{}
+	Tools        interface{}                 `json:"tools,omitempty"`                               // v1.2: added; v1.5: "tools" is now an interface{}
 	Authors      *[]CDXOrganizationalContact `json:"authors,omitempty"`
 	Component    *CDXComponent               `json:"component,omitempty"`
 	Manufacturer *CDXOrganizationalEntity    `json:"manufacture,omitempty"` // NOTE: Typo is in spec.

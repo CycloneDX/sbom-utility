@@ -173,9 +173,9 @@ func (component *CDXComponent) Normalize() {
 	if component.Tags != nil {
 		sort.Strings(*component.Tags)
 	}
-	// TODO: Sort: Evidence
-	// TODO: Sort: ModelCard
-	// TODO: Sort: Pedigree (i.e., its Ancestors, Dependents, etc.)
+	// TODO: Sort: Evidence, Difficult since it has no top-level required fields, and all arrays
+	// TODO: Sort: ModelCard (v.1.5), Difficult since it has no top-level required fields, and all arrays
+	// TODO: Sort: Pedigree (i.e., its Ancestors, Dependents, etc.), Difficult since it has no top-level required fields, and all arrays
 	// TODO: Sort: CryptoProperties (v1.6)
 }
 
