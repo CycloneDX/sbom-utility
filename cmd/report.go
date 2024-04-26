@@ -202,7 +202,6 @@ func prepareReportTitleData(formatData []ColumnFormatData, summarizedReport bool
 }
 
 func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, summarizedReport bool) (lineData []string, err error) {
-
 	var mapStruct map[string]interface{}
 	var data interface{}
 	var dataFound bool
@@ -212,7 +211,6 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 	mapStruct, err = utils.MarshalStructToJsonMap(structIn)
 
 	for _, columnData := range formatData {
-
 		// reset local vars
 		sliceString = nil
 
@@ -274,7 +272,6 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 		default:
 			err = getLogger().Errorf("Unexpected type for report data: type: `%T`, value: `%v`", data, data)
 		}
-
 	}
 
 	return
