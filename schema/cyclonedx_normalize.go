@@ -19,6 +19,8 @@ package schema
 
 import (
 	"sort"
+
+	"github.com/google/uuid"
 )
 
 // named BOM slice types
@@ -519,8 +521,19 @@ func comparatorRefLinkType(element1 CDXRefLinkType, element2 CDXRefLinkType) boo
 }
 
 func comparatorBOMRefType(element1 CDXRefType, element2 CDXRefType) bool {
+	// NOTE: we do not want to use "bom-def" if it is randomly generated UUID
+	// Even if it is an ID like a Package URL (pURL), other IDs SHOULD
+	// be used for "sort" prior to relying upon it in the "bom-ref" field.
+	if IsValidUUID(element1.String()) || IsValidUUID(element2.String()) {
+		return true
+	}
 	// Note: this is a basic "string" comparison
 	return element1 < element2
+}
+
+func IsValidUUID(u string) bool {
+	_, err := uuid.Parse(u)
+	return err == nil
 }
 
 func comparatorRefType(element1 CDXRefType, element2 CDXRefType) bool {
