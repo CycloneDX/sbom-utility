@@ -29,6 +29,7 @@ import (
 	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
+	"github.com/jwangsadinata/go-multimap"
 	"github.com/spf13/cobra"
 )
 
@@ -59,6 +60,13 @@ var RESOURCE_LIST_TITLES = []string{
 	RESOURCE_FILTER_KEY_NAME,
 	RESOURCE_FILTER_KEY_VERSION,
 	RESOURCE_FILTER_KEY_BOMREF,
+}
+
+var RESOURCE_LIST_ROW_DATA = []ColumnFormatData{
+	{RESOURCE_FILTER_KEY_TYPE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{RESOURCE_FILTER_KEY_NAME, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{RESOURCE_FILTER_KEY_VERSION, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{RESOURCE_FILTER_KEY_BOMREF, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, REPORT_REPLACE_LINE_FEEDS_TRUE},
 }
 
 // Flags. Reuse query flag values where possible
@@ -240,14 +248,14 @@ func loadDocumentResources(document *schema.BOM, resourceType string, whereFilte
 
 	// Add top-level SBOM component
 	if resourceType == schema.RESOURCE_TYPE_DEFAULT || resourceType == schema.RESOURCE_TYPE_COMPONENT {
-		err = document.HashComponentResources(whereFilters)
+		err = document.HashmapComponentResources(whereFilters)
 		if err != nil {
 			return
 		}
 	}
 
 	if resourceType == schema.RESOURCE_TYPE_DEFAULT || resourceType == schema.RESOURCE_TYPE_SERVICE {
-		err = document.HashServiceResources(whereFilters)
+		err = document.HashmapServiceResources(whereFilters)
 		if err != nil {
 			return
 		}
@@ -256,9 +264,21 @@ func loadDocumentResources(document *schema.BOM, resourceType string, whereFilte
 	return
 }
 
+func sortResources(entries []multimap.Entry) {
+	// Sort by Type then Name
+	sort.Slice(entries, func(i, j int) bool {
+		resource1 := (entries[i].Value).(schema.CDXResourceInfo)
+		resource2 := (entries[j].Value).(schema.CDXResourceInfo)
+		if resource1.Type != resource2.Type {
+			return resource1.Type < resource2.Type
+		}
+		return resource1.Name < resource2.Name
+	})
+}
+
 // NOTE: This list is NOT de-duplicated
 // TODO: Add a --no-title flag to skip title output
-func DisplayResourceListText(bom *schema.BOM, writer io.Writer) {
+func DisplayResourceListText(bom *schema.BOM, writer io.Writer) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -269,11 +289,11 @@ func DisplayResourceListText(bom *schema.BOM, writer io.Writer) {
 	// min-width, tab-width, padding, pad-char, flags
 	w.Init(writer, 8, 2, 2, ' ', 0)
 
-	// create underline row from compulsory titles
-	underlines := createTitleTextSeparators(RESOURCE_LIST_TITLES)
+	// create title row and underline row from slices of optional and compulsory titles
+	titles, underlines := prepareReportTitleData(RESOURCE_LIST_ROW_DATA, true)
 
 	// Add tabs between column titles for the tabWRiter
-	fmt.Fprintf(w, "%s\n", strings.Join(RESOURCE_LIST_TITLES, "\t"))
+	fmt.Fprintf(w, "%s\n", strings.Join(titles, "\t"))
 	fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
 	// Display a warning "missing" in the actual output and return (short-circuit)
@@ -285,30 +305,24 @@ func DisplayResourceListText(bom *schema.BOM, writer io.Writer) {
 		return
 	}
 
-	// Sort by Type then Name
-	sort.Slice(entries, func(i, j int) bool {
-		resource1 := (entries[i].Value).(schema.CDXResourceInfo)
-		resource2 := (entries[j].Value).(schema.CDXResourceInfo)
-		if resource1.Type != resource2.Type {
-			return resource1.Type < resource2.Type
-		}
+	// Sort resources prior to outputting
+	sortResources(entries)
 
-		return resource1.Name < resource2.Name
-	})
-
-	var resourceInfo schema.CDXResourceInfo
-
+	// Emit row data
+	var line []string
 	for _, entry := range entries {
-		value := entry.Value
-		resourceInfo = value.(schema.CDXResourceInfo)
-
-		// Format line and write to output
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
-			resourceInfo.Type,
-			resourceInfo.Name,
-			resourceInfo.Version,
-			resourceInfo.BOMRef)
+		line, err = prepareReportLineData(
+			entry.Value.(schema.CDXResourceInfo),
+			RESOURCE_LIST_ROW_DATA,
+			true,
+		)
+		// Only emit line if no error
+		if err != nil {
+			return
+		}
+		fmt.Fprintf(w, "%s\n", strings.Join(line, "\t"))
 	}
+	return
 }
 
 // TODO: Add a --no-title flag to skip title output
@@ -320,8 +334,11 @@ func DisplayResourceListCSV(bom *schema.BOM, writer io.Writer) (err error) {
 	w := csv.NewWriter(writer)
 	defer w.Flush()
 
-	if err = w.Write(RESOURCE_LIST_TITLES); err != nil {
-		return getLogger().Errorf("error writing to output (%v): %s", RESOURCE_LIST_TITLES, err)
+	// Create title row data as []string
+	titles, _ := prepareReportTitleData(RESOURCE_LIST_ROW_DATA, true)
+
+	if err = w.Write(titles); err != nil {
+		return getLogger().Errorf("error writing to output (%v): %s", titles, err)
 	}
 
 	// Display a warning "missing" in the actual output and return (short-circuit)
@@ -337,36 +354,24 @@ func DisplayResourceListCSV(bom *schema.BOM, writer io.Writer) (err error) {
 		return fmt.Errorf(currentRow[0])
 	}
 
-	// Sort by Type
-	sort.Slice(entries, func(i, j int) bool {
-		resource1 := (entries[i].Value).(schema.CDXResourceInfo)
-		resource2 := (entries[j].Value).(schema.CDXResourceInfo)
-		if resource1.Type != resource2.Type {
-			return resource1.Type < resource2.Type
-		}
+	// Sort resources prior to outputting
+	sortResources(entries)
 
-		return resource1.Name < resource2.Name
-	})
-
-	var resourceInfo schema.CDXResourceInfo
 	var line []string
-
 	for _, entry := range entries {
-		value := entry.Value
-		resourceInfo = value.(schema.CDXResourceInfo)
-		line = nil
-		line = append(line,
-			resourceInfo.Type,
-			resourceInfo.Name,
-			resourceInfo.Version,
-			resourceInfo.BOMRef,
+		line, err = prepareReportLineData(
+			entry.Value.(schema.CDXResourceInfo),
+			RESOURCE_LIST_ROW_DATA,
+			true,
 		)
-
+		// Only emit line if no error
+		if err != nil {
+			return
+		}
 		if err = w.Write(line); err != nil {
 			err = getLogger().Errorf("csv.Write: %w", err)
 		}
 	}
-
 	return
 }
 
@@ -375,10 +380,14 @@ func DisplayResourceListMarkdown(bom *schema.BOM, writer io.Writer) (err error) 
 	getLogger().Enter()
 	defer getLogger().Exit()
 
+	// Create title row data as []string
+	titles, _ := prepareReportTitleData(RESOURCE_LIST_ROW_DATA, true)
+
 	// create title row
-	titleRow := createMarkdownRow(RESOURCE_LIST_TITLES)
+	titleRow := createMarkdownRow(titles)
 	fmt.Fprintf(writer, "%s\n", titleRow)
 
+	// create alignment row
 	alignments := createMarkdownColumnAlignment(RESOURCE_LIST_TITLES)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(writer, "%s\n", alignmentRow)
@@ -392,37 +401,24 @@ func DisplayResourceListMarkdown(bom *schema.BOM, writer io.Writer) (err error) 
 		return fmt.Errorf(MSG_OUTPUT_NO_RESOURCES_FOUND)
 	}
 
-	// Sort by Type
-	sort.Slice(entries, func(i, j int) bool {
-		resource1 := (entries[i].Value).(schema.CDXResourceInfo)
-		resource2 := (entries[j].Value).(schema.CDXResourceInfo)
-		if resource1.Type != resource2.Type {
-			return resource1.Type < resource2.Type
-		}
+	// Sort resources prior to outputting
+	sortResources(entries)
 
-		return resource1.Name < resource2.Name
-	})
-
-	var resourceInfo schema.CDXResourceInfo
+	//var resourceInfo schema.CDXResourceInfo
 	var line []string
 	var lineRow string
-
 	for _, entry := range entries {
-		value := entry.Value
-		resourceInfo = value.(schema.CDXResourceInfo)
-		// reset current line
-		line = nil
-
-		line = append(line,
-			resourceInfo.Type,
-			resourceInfo.Name,
-			resourceInfo.Version,
-			resourceInfo.BOMRef,
+		line, err = prepareReportLineData(
+			entry.Value.(schema.CDXResourceInfo),
+			RESOURCE_LIST_ROW_DATA,
+			true,
 		)
-
+		// Only emit line if no error
+		if err != nil {
+			return
+		}
 		lineRow = createMarkdownRow(line)
 		fmt.Fprintf(writer, "%s\n", lineRow)
 	}
-
 	return
 }

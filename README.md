@@ -941,6 +941,14 @@ A comma-separated list of JSON map keys. Similar to the [query command's `--sele
 
 A comma-separated list of JSON document paths using the same syntax as the [query command's `--from` flag](#query---from-flag).
 
+##### Trim `--normalize` flag
+
+A flag that normalizes the BOM data after trimming and prior to output.
+
+This flag has custom code that sorts all components, services, licenses, vulnerabilities, properties, external references, hashes and *most* other BOM data using custom comparators.
+
+Each comparator uses `required` fields and other identifying fields to create *"composite keys"* for each unique data structure.
+
 #### Trim examples
 
 The original BOM used for these examples can be found here:
@@ -1132,6 +1140,180 @@ Output BOM results with `properties` removed from all `components`:
 ```
 
 ---
+
+##### Example: Trim `bom-ref` and normalize output
+
+```bash
+./sbom-utility trim -i test/trim/trim-cdx-1-5-sample-components-normalize.sbom.json --keys="bom-ref" --normalize -q
+```
+
+**Note** If you do not want to remove any keys and simply normalize output, set keys to an empty string: `--keys=""`.
+
+Use the trim command to remove all `bom-ref` fields and normalize output:
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/sample@2.0.0",
+      "purl": "pkg:npm/sample@2.0.0",
+      "name": "sample",
+      "version": "2.0.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "GPL-2.0-or-later"
+          }
+        },
+        {
+          "license": {
+            "id": "LGPL-2.0-or-later"
+          }
+        },
+        {
+          "license": {
+            "id": "GPL-2.0-only"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "moo",
+          "value": "cow"
+        },
+        {
+          "name": "foo",
+          "value": "bar"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/body-parser@1.19.0",
+      "purl": "pkg:npm/body-parser@1.19.0",
+      "name": "body-parser",
+      "version": "1.19.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        },
+        {
+          "alg": "SHA-1",
+          "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        },
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://example.com/website"
+        },
+        {
+          "type": "support",
+          "url": "https://example.com/support"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Trimmed, normalized output:
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "components": [
+    {
+      "type": "library",
+      "name": "body-parser",
+      "version": "1.19.0",
+      "hashes": [
+        {
+          "alg": "SHA-1",
+          "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+        },
+        {
+          "alg": "SHA-256",
+          "content": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        },
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/body-parser@1.19.0",
+      "externalReferences": [
+        {
+          "type": "support",
+          "url": "https://example.com/support"
+        },
+        {
+          "type": "website",
+          "url": "https://example.com/website"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "sample",
+      "version": "2.0.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "GPL-2.0-only"
+          }
+        },
+        {
+          "license": {
+            "id": "GPL-2.0-or-later"
+          }
+        },
+        {
+          "license": {
+            "id": "LGPL-2.0-or-later"
+          }
+        }
+      ],
+      "purl": "pkg:npm/sample@2.0.0",
+      "properties": [
+        {
+          "name": "foo",
+          "value": "bar"
+        },
+        {
+          "name": "moo",
+          "value": "cow"
+        }
+      ]
+    }
+  ]
+}
+```
 
 ### Validate
 

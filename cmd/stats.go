@@ -181,17 +181,17 @@ func loadDocumentStatisticalEntities(document *schema.BOM, statsFlags utils.Stat
 		return
 	}
 
-	err = document.HashComponentResources(nil)
+	err = document.HashmapComponentResources(nil)
 	if err != nil {
 		return
 	}
 
-	err = document.HashServiceResources(nil)
+	err = document.HashmapServiceResources(nil)
 	if err != nil {
 		return
 	}
 
-	err = document.HashVulnerabilityResources(nil)
+	err = document.HashmapVulnerabilityResources(nil)
 	if err != nil {
 		return
 	}

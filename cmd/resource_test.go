@@ -194,18 +194,15 @@ func TestResourceListTextCdx13(t *testing.T) {
 		nil, // no error
 		schema.RESOURCE_TYPE_DEFAULT,
 	)
-
 	innerTestResourceList(t, rti)
 }
 
 func TestResourceListTextCdx14SaaS(t *testing.T) {
-
 	rti := NewResourceTestInfoBasic(
 		TEST_RESOURCE_LIST_CDX_1_4_SAAS_1,
 		FORMAT_TEXT,
 		nil, // no error
 		schema.RESOURCE_TYPE_COMPONENT)
-
 	innerTestResourceList(t, rti)
 }
 

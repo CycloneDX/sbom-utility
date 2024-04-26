@@ -84,21 +84,23 @@ const (
 	FLAG_LOG_OUTPUT_INDENT        = "log-indent"
 	FLAG_FILE_OUTPUT_FORMAT       = "format"
 	FLAG_COLORIZE_OUTPUT          = "colorize"
+	FLAG_OUTPUT_NORMALIZE         = "normalize"
 )
 
 const (
-	MSG_APP_NAME            = "Bill-of-Materials (BOM) utility."
-	MSG_APP_DESCRIPTION     = "This utility serves as centralized command-line interface for various Bill-of-Materials (BOM) helper utilities."
-	MSG_FLAG_TRACE          = "enable trace logging"
-	MSG_FLAG_DEBUG          = "enable debug logging"
-	MSG_FLAG_INPUT          = "input filename (e.g., \"path/sbom.json\")"
-	MSG_FLAG_OUTPUT         = "output filename"
-	MSG_FLAG_OUTPUT_FORMAT  = "format output using the specified type"
-	MSG_FLAG_LOG_QUIET      = "enable quiet logging mode (removes all informational messages from console output); overrides other logging commands"
-	MSG_FLAG_LOG_INDENT     = "enable log indentation of functional callstack"
-	MSG_FLAG_CONFIG_SCHEMA  = "provide custom application schema configuration file (i.e., overrides default `config.json`)"
-	MSG_FLAG_CONFIG_LICENSE = "provide custom application license policy configuration file (i.e., overrides default `license.json`)"
-	MSG_FLAG_OUTPUT_INDENT  = "number of space characters used to indent JSON formatted output"
+	MSG_APP_NAME              = "Bill-of-Materials (BOM) utility."
+	MSG_APP_DESCRIPTION       = "This utility serves as centralized command-line interface for various Bill-of-Materials (BOM) helper utilities."
+	MSG_FLAG_TRACE            = "enable trace logging"
+	MSG_FLAG_DEBUG            = "enable debug logging"
+	MSG_FLAG_INPUT            = "input filename (e.g., \"path/sbom.json\")"
+	MSG_FLAG_OUTPUT           = "output filename"
+	MSG_FLAG_OUTPUT_FORMAT    = "format output using the specified type"
+	MSG_FLAG_LOG_QUIET        = "enable quiet logging mode (removes all informational messages from console output); overrides other logging commands"
+	MSG_FLAG_LOG_INDENT       = "enable log indentation of functional callstack"
+	MSG_FLAG_CONFIG_SCHEMA    = "provide custom application schema configuration file (i.e., overrides default `config.json`)"
+	MSG_FLAG_CONFIG_LICENSE   = "provide custom application license policy configuration file (i.e., overrides default `license.json`)"
+	MSG_FLAG_OUTPUT_INDENT    = "number of space characters used to indent JSON formatted output"
+	MSG_FLAG_OUTPUT_NORMALIZE = "Normalize BOM document"
 )
 
 const (

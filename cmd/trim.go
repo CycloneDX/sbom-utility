@@ -32,6 +32,7 @@ import (
 const (
 	FLAG_TRIM_FROM_PATHS = "from"
 	FLAG_TRIM_MAP_KEYS   = "keys"
+	FLAG_TRIM_NORMALIZE  = "normalize"
 )
 
 // flag help (translate)
@@ -73,6 +74,7 @@ func initCommandTrimFlags(command *cobra.Command) (err error) {
 
 	command.PersistentFlags().StringVar(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_OUTPUT_FORMAT, FORMAT_JSON,
 		MSG_FLAG_OUTPUT_FORMAT+TRIM_OUTPUT_SUPPORTED_FORMATS)
+	command.PersistentFlags().BoolVar(&utils.GlobalFlags.PersistentFlags.OutputNormalize, FLAG_OUTPUT_NORMALIZE, false, MSG_FLAG_OUTPUT_NORMALIZE)
 	command.Flags().StringVarP(&utils.GlobalFlags.TrimFlags.RawPaths, FLAG_TRIM_FROM_PATHS, "", "", MSG_FLAG_TRIM_FROM_PATHS)
 	command.Flags().StringVarP(&utils.GlobalFlags.TrimFlags.RawKeys, FLAG_TRIM_MAP_KEYS, "", "", MSG_FLAG_TRIM_KEYS)
 	err = command.MarkFlagRequired(FLAG_TRIM_MAP_KEYS)
@@ -159,7 +161,7 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 	}
 
 	// validate parameters
-	if len(trimFlags.Keys) == 0 {
+	if len(trimFlags.Keys) == 0 && !persistentFlags.OutputNormalize {
 		// TODO create named error type in schema package
 		err = getLogger().Errorf("invalid parameter value: missing `keys` value from command")
 		return
@@ -197,6 +199,17 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 	// Fully unmarshal the SBOM into named structures
 	if err = document.UnmarshalCycloneDXBOM(); err != nil {
 		return
+	}
+
+	// Sort slices of BOM if "sort" flag set to true
+	if persistentFlags.OutputNormalize {
+		// Sort the slices of structures
+		if document.GetCdxBom() != nil {
+			bom := document.GetCdxBom()
+			if schema.NormalizeSupported(bom) {
+				document.GetCdxBom().Normalize()
+			}
+		}
 	}
 
 	// Output the "trimmed" version of the Input BOM

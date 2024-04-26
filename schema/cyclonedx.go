@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package schema
 
 const (
@@ -75,49 +74,51 @@ type CDXMetadata struct {
 // v1.4: added: "releaseNotes", "signature"
 // v1.4: changed: "version" no longer required
 // v1.4: deprecated: "modified", "cpe", "swid"
-// v1.5: added
+// v1.5: added "modelCard", (component)"data"
 // Note: "bom-ref" is a "refType" which is a constrained `string`
 // TODO: "mime-type" SHOULD become "media-type" which is more modern/inclusive
 // TODO: Remove "service" from "Type" enum. as "service" now exists (deprecate in future versions)
 // NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXComponent struct {
-	Primary            bool                     `json:"-"`              // Proprietary: do NOT marshal/unmarshal
-	Type               string                   `json:"type,omitempty"` // Constraint: enum [see schema]
-	MimeType           string                   `json:"mime-type,omitempty"`
-	BOMRef             *CDXRefType              `json:"bom-ref,omitempty"`
-	Supplier           *CDXOrganizationalEntity `json:"supplier,omitempty"`
-	Author             string                   `json:"author,omitempty"`
-	Publisher          string                   `json:"publisher,omitempty"`
-	Group              string                   `json:"group,omitempty"`
-	Name               string                   `json:"name,omitempty"`
-	Version            string                   `json:"version,omitempty"`
-	Description        string                   `json:"description,omitempty"`
-	Scope              string                   `json:"scope,omitempty"` // Constraint: "enum": ["required","optional","excluded"]
-	Hashes             *[]CDXHash               `json:"hashes,omitempty"`
-	Licenses           *[]CDXLicenseChoice      `json:"licenses,omitempty"`
-	Copyright          string                   `json:"copyright,omitempty"`
-	Cpe                string                   `json:"cpe,omitempty"`                                       // See: https://nvd.nist.gov/products/cpe
-	Purl               string                   `json:"purl,omitempty" scvs:"bom:resource:identifiers:purl"` // See: https://github.com/package-url/purl-spec
-	Swid               *CDXSwid                 `json:"swid,omitempty"`                                      // See: https://www.iso.org/standard/65666.html
-	Pedigree           *CDXPedigree             `json:"pedigree,omitempty"`                                  // anon. type
-	ExternalReferences *[]CDXExternalReference  `json:"externalReferences,omitempty"`
-	Components         *[]CDXComponent          `json:"components,omitempty"`
-	Evidence           *CDXComponentEvidence    `json:"evidence,omitempty"`                  // v1.3: added
-	Properties         *[]CDXProperty           `json:"properties,omitempty"`                // v1.3: added
-	Modified           bool                     `json:"modified,omitempty" cdx:"deprecated"` // v1.4: deprecated
-	ReleaseNotes       *[]CDXReleaseNotes       `json:"releaseNotes,omitempty"`              // v1.4: added
-	Signature          *JSFSignature            `json:"signature,omitempty"`                 // v1.4: added
-	ModelCard          *CDXModelCard            `json:"modelCard,omitempty"`                 // v1.5: added
-	Data               *[]CDXComponentData      `json:"data,omitempty"`                      // v1.5: added
+	Primary            bool                        `json:"-"`              // Proprietary: do NOT marshal/unmarshal
+	Type               string                      `json:"type,omitempty"` // Constraint: enum [see schema]
+	Name               string                      `json:"name,omitempty"`
+	Version            string                      `json:"version,omitempty"`
+	Description        string                      `json:"description,omitempty"`
+	Group              string                      `json:"group,omitempty"`
+	BOMRef             *CDXRefType                 `json:"bom-ref,omitempty"`
+	MimeType           string                      `json:"mime-type,omitempty"`
+	Supplier           *CDXOrganizationalEntity    `json:"supplier,omitempty"`
+	Author             string                      `json:"author,omitempty"`
+	Publisher          string                      `json:"publisher,omitempty"`
+	Scope              string                      `json:"scope,omitempty"` // Constraint: "enum": ["required","optional","excluded"]
+	Hashes             *[]CDXHash                  `json:"hashes,omitempty"`
+	Licenses           *[]CDXLicenseChoice         `json:"licenses,omitempty"`
+	Copyright          string                      `json:"copyright,omitempty"`
+	Cpe                string                      `json:"cpe,omitempty"`                                       // See: https://nvd.nist.gov/products/cpe
+	Purl               string                      `json:"purl,omitempty" scvs:"bom:resource:identifiers:purl"` // See: https://github.com/package-url/purl-spec
+	Swid               *CDXSwid                    `json:"swid,omitempty"`                                      // See: https://www.iso.org/standard/65666.html
+	Pedigree           *CDXPedigree                `json:"pedigree,omitempty"`                                  // anon. type
+	ExternalReferences *[]CDXExternalReference     `json:"externalReferences,omitempty"`
+	Components         *[]CDXComponent             `json:"components,omitempty"`
+	Evidence           *CDXComponentEvidence       `json:"evidence,omitempty"`                  // v1.3: added
+	Properties         *[]CDXProperty              `json:"properties,omitempty"`                // v1.3: added
+	Modified           bool                        `json:"modified,omitempty" cdx:"deprecated"` // v1.4: deprecated
+	ReleaseNotes       *[]CDXReleaseNotes          `json:"releaseNotes,omitempty"`              // v1.4: added
+	Signature          *JSFSignature               `json:"signature,omitempty"`                 // v1.4: added
+	ModelCard          *CDXModelCard               `json:"modelCard,omitempty"`                 // v1.5: added
+	Data               *[]CDXComponentData         `json:"data,omitempty"`                      // v1.5: added
+	Authors            *[]CDXOrganizationalContact `json:"authors,omitempty"`                   // v1.6: added
+	Tags               *[]string                   `json:"tags,omitempty" cdx:"+1.6"`           // v1.6: added
 }
 
-// v1.5 added
+// v1.5 added object
 // The general theme or subject matter of the data being specified.
 // TODO: "contents" is plural, but it is not an array
 type CDXComponentData struct {
-	BOMRef         *CDXRefType            `json:"bom-ref,omitempty"`
 	Type           string                 `json:"type,omitempty"` // Constraint: "enum": ["source-code","configuration","dataset","definition","other"]
 	Name           string                 `json:"name,omitempty"`
+	BOMRef         *CDXRefType            `json:"bom-ref,omitempty"`
 	Contents       *CDXContent            `json:"contents,omitempty"`
 	Classification *CDXDataClassification `json:"classification,omitempty"`
 	SensitiveData  []string               `json:"sensitiveData,omitempty"`
@@ -126,10 +127,10 @@ type CDXComponentData struct {
 	Governance     *CDXDataGovernance     `json:"governance,omitempty"`
 }
 
-// v1.5 added
+// v1.5 added object
 type CDXContent struct {
-	Attachment *CDXAttachment `json:"attachment,omitempty"`
 	Url        string         `json:"url,omitempty"`
+	Attachment *CDXAttachment `json:"attachment,omitempty"`
 	Properties *[]CDXProperty `json:"properties,omitempty"`
 }
 
@@ -140,7 +141,7 @@ type CDXDataGovernance struct {
 	Owners     *[]CDXDataGovernanceResponsibleParty `json:"owners,omitempty"`
 }
 
-// v1.5 added
+// v1.5 added structure
 // Constraints: "oneOf": ["organization", "contact"]
 type CDXDataGovernanceResponsibleParty struct {
 	Organization *CDXOrganizationalEntity  `json:"organization,omitempty"`
@@ -161,12 +162,12 @@ type CDXDataGovernanceResponsibleParty struct {
 // validate a v1.2 SBOM wit the anon. type parses properly
 // NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXService struct {
-	BOMRef             *CDXRefType              `json:"bom-ref,omitempty"`
 	Provider           *CDXOrganizationalEntity `json:"provider,omitempty"`
-	Group              string                   `json:"group,omitempty"`
 	Name               string                   `json:"name,omitempty"`
 	Version            string                   `json:"version,omitempty"`
 	Description        string                   `json:"description,omitempty"`
+	Group              string                   `json:"group,omitempty"`
+	BOMRef             *CDXRefType              `json:"bom-ref,omitempty"`
 	Endpoints          *[]string                `json:"endpoints,omitempty"`
 	Authenticated      bool                     `json:"authenticated,omitempty"`
 	XTrustBoundary     bool                     `json:"x-trust-boundary,omitempty"`
@@ -175,9 +176,10 @@ type CDXService struct {
 	Licenses           *[]CDXLicenseChoice      `json:"licenses,omitempty"`
 	ExternalReferences *[]CDXExternalReference  `json:"externalReferences,omitempty"`
 	Services           *[]CDXService            `json:"services,omitempty"`
-	Properties         *[]CDXProperty           `json:"properties,omitempty"`   // v1.3: added
-	ReleaseNotes       *[]CDXReleaseNotes       `json:"releaseNotes,omitempty"` // v1.4: added
-	Signature          *JSFSignature            `json:"signature,omitempty"`    // v1.4: added
+	Properties         *[]CDXProperty           `json:"properties,omitempty"`      // v1.3: added
+	ReleaseNotes       *[]CDXReleaseNotes       `json:"releaseNotes,omitempty"`    // v1.4: added
+	Signature          *JSFSignature            `json:"signature,omitempty"`       // v1.4: added
+	Tags               *[]string                `json:"tags,omitempty" cdx:"+1.6"` // v1.6: added
 }
 
 // v1.5: added. aggregated related date from v1.2-v1.4 and added additional fields
@@ -229,29 +231,33 @@ type CDXLicenseChoice struct {
 	CDXLicenseExpression
 }
 
-// v1.5: added
+// v1.5: added structure
+// v1.6: added Acknowledgment
 // NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXLicenseExpression struct {
-	Expression string      `json:"expression,omitempty"`
-	BOMRef     *CDXRefType `json:"bom-ref,omitempty"`
+	Expression      string      `json:"expression,omitempty"`
+	BOMRef          *CDXRefType `json:"bom-ref,omitempty"`
+	Acknowledgement string      `json:"acknowledgement,omitempty"` // v1.6: added
 }
 
 // v1.2: was an anon. type
 // v1.3: created
+// v1.6: added Acknowledgment
 // Note: "id" SHOULD be an SPDX license ID
 // Note: "oneOf": ["id", "name"] is required
 // NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXLicense struct {
-	Id         string         `json:"id,omitempty"`
-	Name       string         `json:"name,omitempty"`
-	Text       *CDXAttachment `json:"text,omitempty"`
-	Url        string         `json:"url,omitempty"`
-	BOMRef     *CDXRefType    `json:"bom-ref,omitempty"`    // v1.5: added
-	Licensing  *CDXLicensing  `json:"licensing,omitempty"`  // v1.5: added
-	Properties *[]CDXProperty `json:"properties,omitempty"` // v1.5: added
+	Id              string         `json:"id,omitempty"`
+	Name            string         `json:"name,omitempty"`
+	Text            *CDXAttachment `json:"text,omitempty"`
+	Url             string         `json:"url,omitempty"`
+	BOMRef          *CDXRefType    `json:"bom-ref,omitempty"`         // v1.5: added
+	Licensing       *CDXLicensing  `json:"licensing,omitempty"`       // v1.5: added
+	Properties      *[]CDXProperty `json:"properties,omitempty"`      // v1.5: added
+	Acknowledgement string         `json:"acknowledgement,omitempty"` // v1.6: added
 }
 
-// v1.5: added
+// v1.5: added object
 type CDXLicensing struct {
 	AltIds        *[]string             `json:"altIds,omitempty"`
 	Licensor      *CDXLicenseLegalParty `json:"licensor,omitempty"`
@@ -322,9 +328,9 @@ type CDXIdentifiableAction struct {
 // v1.3: added "hashes"
 // v1.4: `Type` field: added value "release-notes" to enum.
 type CDXExternalReference struct {
+	Type    string     `json:"type,omitempty"`
 	Url     string     `json:"url,omitempty"`
 	Comment string     `json:"comment,omitempty"`
-	Type    string     `json:"type,omitempty"`
 	Hashes  *[]CDXHash `json:"hashes,omitempty"` // v1.3: added
 }
 
@@ -365,7 +371,10 @@ type CDXComponentEvidence struct {
 // v1.4: added "signature"
 // v1.5: added "bom-ref", "vulnerabilities"
 // Note: "aggregate" is type `aggregateType` which is a constrained string
-// TODO: Should not be plural; open issue against v2.0 schema
+// TODO: Note: "Assemblies" is really an array of OneOf: "refLinkType" or "bomLinkElementType"
+// which BOTH thankfully mapping to "string"; however, this MAY need to become an "interface{}"
+// similar to "tools" has become.
+// TODO: Should NOT be plural; open issue against v2.0 schema
 // NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXCompositions struct {
 	Aggregate       string              `json:"aggregate,omitempty"`

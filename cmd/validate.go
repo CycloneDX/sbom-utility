@@ -181,7 +181,7 @@ func validationError(document *schema.BOM, valid bool, err error) {
 	getLogger().Info(message)
 }
 
-func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, validateFlags utils.ValidateCommandFlags) (valid bool, document *schema.BOM, schemaErrors []gojsonschema.ResultError, err error) {
+func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, validateFlags utils.ValidateCommandFlags) (valid bool, bom *schema.BOM, schemaErrors []gojsonschema.ResultError, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -189,26 +189,26 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	defer func() {
 		if err != nil {
 			// normalize the error output to console
-			validationError(document, valid, err)
+			validationError(bom, valid, err)
 		}
 	}()
 
 	// Attempt to load and unmarshal the input file as a Json document
 	// Note: JSON syntax errors return "encoding/json.SyntaxError"
-	document, err = LoadInputBOMFileAndDetectSchema()
+	bom, err = LoadInputBOMFileAndDetectSchema()
 	if err != nil {
-		return INVALID, document, schemaErrors, err
+		return INVALID, bom, schemaErrors, err
 	}
 
 	// if "custom" flag exists, then assure we support the format
-	if validateFlags.CustomValidation && !document.FormatInfo.IsCycloneDx() {
+	if validateFlags.CustomValidation && !bom.FormatInfo.IsCycloneDx() {
 		err = schema.NewUnsupportedFormatError(
 			schema.MSG_FORMAT_UNSUPPORTED_COMMAND,
-			document.GetFilename(),
-			document.FormatInfo.CanonicalName,
+			bom.GetFilename(),
+			bom.FormatInfo.CanonicalName,
 			CMD_VALIDATE,
 			FLAG_VALIDATE_CUSTOM)
-		return valid, document, schemaErrors, err
+		return valid, bom, schemaErrors, err
 	}
 
 	// Create a loader for the BOM (JSON) document
@@ -217,7 +217,7 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	var errRead error
 	var bSchema, bDocument []byte
 
-	if bDocument = document.GetRawBytes(); len(bDocument) > 0 {
+	if bDocument = bom.GetRawBytes(); len(bDocument) > 0 {
 		bufferTemp := new(bytes.Buffer)
 		// Strip off newlines which the json Decoder dislikes at EOF (as well as extra spaces, etc.)
 		if err := json.Compact(bufferTemp, bDocument); err != nil {
@@ -230,10 +230,10 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	}
 
 	if documentLoader == nil {
-		return INVALID, document, schemaErrors, fmt.Errorf("unable to load document: `%s`", document.GetFilename())
+		return INVALID, bom, schemaErrors, fmt.Errorf("unable to load document: `%s`", bom.GetFilename())
 	}
 
-	schemaName := document.SchemaInfo.File
+	schemaName := bom.SchemaInfo.File
 
 	// If caller "forced" a specific schema file (version), load it instead of
 	// any SchemaInfo found in config.json
@@ -248,13 +248,13 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	} else {
 		// Load the matching JSON schema (format, version and variant) from embedded resources
 		// i.e., using the matching schema found in config.json (as SchemaInfo)
-		getLogger().Infof("Loading schema `%s`...", document.SchemaInfo.File)
-		bSchema, errRead = resources.BOMSchemaFiles.ReadFile(document.SchemaInfo.File)
+		getLogger().Infof("Loading schema `%s`...", bom.SchemaInfo.File)
+		bSchema, errRead = resources.BOMSchemaFiles.ReadFile(bom.SchemaInfo.File)
 
 		if errRead != nil {
 			// we force result to INVALID as any errors from the library means
 			// we could NOT actually confirm the input documents validity
-			return INVALID, document, schemaErrors, errRead
+			return INVALID, bom, schemaErrors, errRead
 		}
 
 		schemaLoader = gojsonschema.NewBytesLoader(bSchema)
@@ -263,7 +263,7 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	if schemaLoader == nil {
 		// we force result to INVALID as any errors from the library means
 		// we could NOT actually confirm the input documents validity
-		return INVALID, document, schemaErrors, fmt.Errorf("unable to read schema: `%s`", schemaName)
+		return INVALID, bom, schemaErrors, fmt.Errorf("unable to read schema: `%s`", schemaName)
 	}
 
 	// create a reusable schema object (TODO: validate multiple documents)
@@ -286,13 +286,13 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	}
 
 	if errLoad != nil {
-		return INVALID, document, schemaErrors, fmt.Errorf("unable to load schema: `%s`", schemaName)
+		return INVALID, bom, schemaErrors, fmt.Errorf("unable to load schema: `%s`", schemaName)
 	}
 
 	getLogger().Infof("Schema `%s` loaded.", schemaName)
 
 	// Validate against the schema and save result determination
-	getLogger().Infof("Validating `%s`...", document.GetFilenameInterpolated())
+	getLogger().Infof("Validating `%s`...", bom.GetFilenameInterpolated())
 	result, errValidate := jsonBOMSchema.Validate(documentLoader)
 
 	// ALWAYS set the valid return parameter and provide user an informative message
@@ -303,14 +303,14 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	if errValidate != nil {
 		// we force result to INVALID as any errors from the library means
 		// we could NOT actually confirm the input documents validity
-		return INVALID, document, schemaErrors, errValidate
+		return INVALID, bom, schemaErrors, errValidate
 	}
 
 	// Note: actual schema validation errors appear in the `result` object
 	// Save all schema errors found in the `result` object in an explicit, typed error
 	if schemaErrors = result.Errors(); len(schemaErrors) > 0 {
 		errInvalid := NewInvalidSBOMError(
-			document,
+			bom,
 			MSG_SCHEMA_ERRORS,
 			nil,
 			schemaErrors)
@@ -333,14 +333,14 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 			FormatSchemaErrors(writer, schemaErrors, validateFlags, FORMAT_TEXT)
 		}
 
-		return INVALID, document, schemaErrors, errInvalid
+		return INVALID, bom, schemaErrors, errInvalid
 	}
 
 	// TODO: Perhaps factor in these errors into the JSON output as if they were actual schema errors...
 	// Perform additional validation in document composition/structure
 	// and "custom" required data within specified fields
 	if validateFlags.CustomValidation {
-		valid, err = validateCustom(document, LicensePolicyConfig)
+		valid, err = validateCustom(bom, LicensePolicyConfig)
 	}
 
 	// All validation tests passed; return VALID

@@ -263,7 +263,7 @@ func hashComponentLicense(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 		if cdxComponent.BOMRef != nil {
 			licenseInfo.BOMRef = *cdxComponent.BOMRef
 		}
-		_, err = bom.HashLicenseInfo(policyConfig, LICENSE_NO_ASSERTION, licenseInfo, whereFilters)
+		_, err = bom.HashmapLicenseInfo(policyConfig, LICENSE_NO_ASSERTION, licenseInfo, whereFilters)
 
 		getLogger().Warningf("%s: %s (name:`%s`, version: `%s`, package-url: `%s`)",
 			"No license found for component. bomRef",
@@ -322,7 +322,7 @@ func hashServiceLicense(bom *schema.BOM, policyConfig *schema.LicensePolicyConfi
 		if cdxService.BOMRef != nil {
 			licenseInfo.BOMRef = *cdxService.BOMRef
 		}
-		_, err = bom.HashLicenseInfo(policyConfig, LICENSE_NO_ASSERTION, licenseInfo, whereFilters)
+		_, err = bom.HashmapLicenseInfo(policyConfig, LICENSE_NO_ASSERTION, licenseInfo, whereFilters)
 
 		getLogger().Warningf("%s: %s (name: `%s`, version: `%s`)",
 			"No license found for service. bomRef",
@@ -362,13 +362,13 @@ func hashLicenseInfoByLicenseType(bom *schema.BOM, policyConfig *schema.LicenseP
 
 	if pLicense != nil && pLicense.Id != "" {
 		licenseInfo.LicenseChoiceTypeValue = schema.LC_TYPE_ID
-		_, err = bom.HashLicenseInfo(policyConfig, pLicense.Id, licenseInfo, whereFilters)
+		_, err = bom.HashmapLicenseInfo(policyConfig, pLicense.Id, licenseInfo, whereFilters)
 	} else if pLicense != nil && pLicense.Name != "" {
 		licenseInfo.LicenseChoiceTypeValue = schema.LC_TYPE_NAME
-		_, err = bom.HashLicenseInfo(policyConfig, pLicense.Name, licenseInfo, whereFilters)
+		_, err = bom.HashmapLicenseInfo(policyConfig, pLicense.Name, licenseInfo, whereFilters)
 	} else if licenseChoice.Expression != "" {
 		licenseInfo.LicenseChoiceTypeValue = schema.LC_TYPE_EXPRESSION
-		_, err = bom.HashLicenseInfo(policyConfig, licenseChoice.Expression, licenseInfo, whereFilters)
+		_, err = bom.HashmapLicenseInfo(policyConfig, licenseChoice.Expression, licenseInfo, whereFilters)
 	} else {
 		// Note: This code path only executes if hashing is performed
 		// without schema validation (which would find this as an error)
