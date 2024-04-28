@@ -40,14 +40,14 @@ const (
 )
 
 // Text report helpers
-func createTitleTextSeparators(titles []string) (separatorLine []string) {
-	var underline string
-	for _, title := range titles {
-		underline = strings.Repeat(REPORT_LIST_TITLE_ROW_SEPARATOR, len(title))
-		separatorLine = append(separatorLine, underline)
-	}
-	return
-}
+// func createTitleTextSeparators(titles []string) (separatorLine []string) {
+// 	var underline string
+// 	for _, title := range titles {
+// 		underline = strings.Repeat(REPORT_LIST_TITLE_ROW_SEPARATOR, len(title))
+// 		separatorLine = append(separatorLine, underline)
+// 	}
+// 	return
+// }
 
 // Markdown report helpers
 const (
