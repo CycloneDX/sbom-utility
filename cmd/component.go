@@ -49,7 +49,7 @@ var VALID_SUBCOMMANDS_COMPONENT = []string{SUBCOMMAND_COMPONENT_LIST}
 //		BOMRef             *CDXRefType                 `json:"bom-ref,omitempty"`
 //		MimeType           string                      `json:"mime-type,omitempty"`
 //		Supplier           *CDXOrganizationalEntity    `json:"supplier,omitempty"`
-//		Author             string                      `json:"author,omitempty"`
+//		Author             string                      `json:"author,omitempty"` // v1.6: deprecated.
 //		Publisher          string                      `json:"publisher,omitempty"`
 //		Scope              string                      `json:"scope,omitempty"` // Constraint: "enum": ["required","optional","excluded"]
 //		Hashes             *[]CDXHash                  `json:"hashes,omitempty"`
@@ -72,10 +72,10 @@ var VALID_SUBCOMMANDS_COMPONENT = []string{SUBCOMMAND_COMPONENT_LIST}
 //		Tags               *[]string                   `json:"tags,omitempty" cdx:"+1.6"`           // v1.6: added
 //	}
 var COMPONENT_LIST_ROW_DATA = []ColumnFormatData{
-	{COMPONENT_FILTER_KEY_TYPE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
-	{COMPONENT_FILTER_KEY_NAME, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
-	{COMPONENT_FILTER_KEY_VERSION, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
-	{COMPONENT_FILTER_KEY_BOMREF, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, REPORT_REPLACE_LINE_FEEDS_TRUE},
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_TYPE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_NAME, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_VERSION, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_BOMREF, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, REPORT_REPLACE_LINE_FEEDS_TRUE),
 }
 
 // filter keys

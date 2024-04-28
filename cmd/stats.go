@@ -212,13 +212,6 @@ func DisplayStatsText(bom *schema.BOM, writer io.Writer) {
 	// min-width, tab-width, padding, pad-char, flags
 	w.Init(writer, 8, 2, 2, ' ', 0)
 
-	// create underline row from compulsory titles
-	//underlines := createTitleTextSeparators(RESOURCE_LIST_TITLES)
-
-	// Add tabs between column titles for the tabWRiter
-	// fmt.Fprintf(w, "%s\n", strings.Join(RESOURCE_LIST_TITLES, "\t"))
-	// fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
-
 	// Display a warning "missing" in the actual output and return (short-circuit)
 	entries := bom.ResourceMap.Entries()
 

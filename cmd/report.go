@@ -39,22 +39,13 @@ const (
 	REPORT_LIST_VALUE_NONE          = "none"
 )
 
-// Text report helpers
-// func createTitleTextSeparators(titles []string) (separatorLine []string) {
-// 	var underline string
-// 	for _, title := range titles {
-// 		underline = strings.Repeat(REPORT_LIST_TITLE_ROW_SEPARATOR, len(title))
-// 		separatorLine = append(separatorLine, underline)
-// 	}
-// 	return
-// }
-
 // Markdown report helpers
 const (
 	MD_COLUMN_SEPARATOR = "|"
 	MD_ALIGN_LEFT       = ":--"
 	MD_ALIGN_CENTER     = "-:-"
 	MD_ALIGN_RIGHT      = "--:"
+	MD_ALIGN_DEFAULT    = MD_ALIGN_LEFT
 )
 
 // Helper function in case displayed table columns become too wide
@@ -71,14 +62,15 @@ func truncateString(value string, maxLength int, showDetail bool) string {
 
 func createMarkdownColumnAlignment(titles []string) (alignment []string) {
 	for range titles {
-		alignment = append(alignment, MD_ALIGN_LEFT)
+		alignment = append(alignment, MD_ALIGN_DEFAULT)
 	}
 	return
 }
 
+// TODO: Allow column format data to include MD_ALIGN_xxx values
 func createMarkdownColumnAlignmentRow(columns []ColumnFormatData) (alignment []string) {
 	for range columns {
-		alignment = append(alignment, MD_ALIGN_LEFT)
+		alignment = append(alignment, MD_ALIGN_DEFAULT)
 	}
 	return
 }
@@ -181,17 +173,30 @@ const DEFAULT_COLUMN_TRUNCATE_LENGTH = -1
 //   - provide "empty" value to display in column (e.g., "none" or "UNDEFINED")
 //   - inform how to "summarize" (e.g., show-first-only) data if data type is a slice (e.g., []string)
 //     NOTE: if only a subset of entries are shown on a summary, an indication of (x) entries could be shown as well
+//   - Support Markdown column alignment (e.g., MD_ALIGN_xxx values)
 type ColumnFormatData struct {
 	DataKey               string // Note: data key is the column label (where possible)
 	DefaultTruncateLength int    // truncate data when `--format txt`
 	IsSummaryData         bool   // include in `--summary` reports
 	ReplaceLineFeeds      bool   // replace line feeds with spaces (e.g., for multi-line descriptions)
+	Alignment             string
+}
+
+func NewColumnFormatData(key string, truncateLen int, isSummary bool, replaceLineFeeds bool) (foo *ColumnFormatData) {
+	foo = new(ColumnFormatData)
+	foo.DataKey = key
+	foo.DefaultTruncateLength = truncateLen
+	foo.IsSummaryData = isSummary
+	foo.ReplaceLineFeeds = replaceLineFeeds
+	return
+}
+
+func (data *ColumnFormatData) SetAlignment(alignment string) {
+	data.Alignment = alignment
 }
 
 func prepareReportTitleData(formatData []ColumnFormatData, summarizedReport bool) (titleData []string, separatorData []string) {
-
 	var underline string
-
 	for _, columnData := range formatData {
 
 		// if the report we are preparing is a summarized one (i.e., --summary true)
