@@ -94,12 +94,12 @@ var VALID_COMPONENT_FILTER_KEYS = []string{
 	COMPONENT_FILTER_KEY_BOMREF,
 }
 
-var COMPONENT_LIST_TITLES = []string{
-	COMPONENT_FILTER_KEY_TYPE,
-	COMPONENT_FILTER_KEY_NAME,
-	COMPONENT_FILTER_KEY_VERSION,
-	COMPONENT_FILTER_KEY_BOMREF,
-}
+// var COMPONENT_LIST_TITLES = []string{
+// 	COMPONENT_FILTER_KEY_TYPE,
+// 	COMPONENT_FILTER_KEY_NAME,
+// 	COMPONENT_FILTER_KEY_VERSION,
+// 	COMPONENT_FILTER_KEY_BOMREF,
+// }
 
 // Flags. Reuse query flag values where possible
 const (
@@ -414,7 +414,7 @@ func DisplayComponentListMarkdown(bom *schema.BOM, writer io.Writer) (err error)
 	fmt.Fprintf(writer, "%s\n", titleRow)
 
 	// create alignment row
-	alignments := createMarkdownColumnAlignment(COMPONENT_LIST_TITLES)
+	alignments := createMarkdownColumnAlignmentRow(COMPONENT_LIST_ROW_DATA)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(writer, "%s\n", alignmentRow)
 

@@ -123,18 +123,15 @@ func schemaCmdImpl(cmd *cobra.Command, args []string) (err error) {
 
 	// process filters supplied on the --where command flag
 	whereFilters, err := processWhereFlag(cmd)
-
 	if err != nil {
 		return
 	}
 
 	err = ListSchemas(writer, utils.GlobalFlags.PersistentFlags, whereFilters)
-
 	return
 }
 
 func flattenFormatSchemas(sliceFormatSchemas []schema.FormatSchema) (flattenedFormatSchemas []schema.FormatSchemaInstance) {
-
 	for _, format := range sliceFormatSchemas {
 		for _, schema := range format.Schemas {
 			schema.Format = format.CanonicalName
@@ -155,7 +152,6 @@ func filterFormatSchemas(whereFilters []common.WhereFilter) (filteredFormats []s
 	sliceSchemas := flattenFormatSchemas(sliceFormats)
 
 	for _, schema := range sliceSchemas {
-
 		var match bool = true
 
 		if len(whereFilters) > 0 {
@@ -169,9 +165,7 @@ func filterFormatSchemas(whereFilters []common.WhereFilter) (filteredFormats []s
 			getLogger().Tracef("append: %s\n",
 				schema.Name)
 		}
-
 	}
-
 	return
 }
 
@@ -191,7 +185,6 @@ func sortFormatSchemaInstances(filteredSchemas []schema.FormatSchemaInstance) []
 
 		return schema1.Variant < schema2.Variant
 	})
-
 	return filteredSchemas
 }
 
@@ -282,7 +275,7 @@ func DisplaySchemasMarkdown(writer io.Writer, filteredSchemas []schema.FormatSch
 	// create title row and alignment row from slices of optional and compulsory titles
 	titles, _ := prepareReportTitleData(SCHEMA_LIST_ROW_DATA, false)
 	titleRow := createMarkdownRow(titles)
-	alignments := createMarkdownColumnAlignment(titles)
+	alignments := deprecatedCreateMarkdownColumnAlignment(titles)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(writer, "%s\n", titleRow)
 	fmt.Fprintf(writer, "%s\n", alignmentRow)

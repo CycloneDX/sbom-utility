@@ -363,7 +363,7 @@ func DisplayLicenseListMarkdown(bom *schema.BOM, writer io.Writer) {
 	titleRow := createMarkdownRow(LICENSE_LIST_TITLES_LICENSE_CHOICE)
 	fmt.Fprintf(writer, "%s\n", titleRow)
 
-	alignments := createMarkdownColumnAlignment(LICENSE_LIST_TITLES_LICENSE_CHOICE)
+	alignments := deprecatedCreateMarkdownColumnAlignment(LICENSE_LIST_TITLES_LICENSE_CHOICE)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(writer, "%s\n", alignmentRow)
 

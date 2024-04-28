@@ -60,7 +60,8 @@ func truncateString(value string, maxLength int, showDetail bool) string {
 	return value
 }
 
-func createMarkdownColumnAlignment(titles []string) (alignment []string) {
+// TODO: look to deprecate, only used for LicenseChoice (license list)
+func deprecatedCreateMarkdownColumnAlignment(titles []string) (alignment []string) {
 	for range titles {
 		alignment = append(alignment, MD_ALIGN_DEFAULT)
 	}

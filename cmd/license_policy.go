@@ -394,7 +394,7 @@ func DisplayLicensePoliciesMarkdown(writer io.Writer, filteredPolicyMap *slicemu
 	titleRow := createMarkdownRow(titles)
 	fmt.Fprintf(writer, "%s\n", titleRow)
 
-	alignments := createMarkdownColumnAlignment(titles)
+	alignments := createMarkdownColumnAlignmentRow(LICENSE_POLICY_LIST_ROW_DATA)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(writer, "%s\n", alignmentRow)
 
