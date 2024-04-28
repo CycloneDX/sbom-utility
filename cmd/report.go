@@ -76,6 +76,13 @@ func createMarkdownColumnAlignment(titles []string) (alignment []string) {
 	return
 }
 
+func createMarkdownColumnAlignmentRow(columns []ColumnFormatData) (alignment []string) {
+	for range columns {
+		alignment = append(alignment, MD_ALIGN_LEFT)
+	}
+	return
+}
+
 func createMarkdownRow(data []string) string {
 	return MD_COLUMN_SEPARATOR +
 		strings.Join(data, MD_COLUMN_SEPARATOR) +

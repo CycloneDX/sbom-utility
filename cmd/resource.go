@@ -48,20 +48,6 @@ const (
 	RESOURCE_FILTER_KEY_BOMREF  = "bom-ref"
 )
 
-var VALID_RESOURCE_FILTER_KEYS = []string{
-	RESOURCE_FILTER_KEY_TYPE,
-	RESOURCE_FILTER_KEY_NAME,
-	RESOURCE_FILTER_KEY_VERSION,
-	RESOURCE_FILTER_KEY_BOMREF,
-}
-
-var RESOURCE_LIST_TITLES = []string{
-	RESOURCE_FILTER_KEY_TYPE,
-	RESOURCE_FILTER_KEY_NAME,
-	RESOURCE_FILTER_KEY_VERSION,
-	RESOURCE_FILTER_KEY_BOMREF,
-}
-
 var RESOURCE_LIST_ROW_DATA = []ColumnFormatData{
 	{RESOURCE_FILTER_KEY_TYPE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
 	{RESOURCE_FILTER_KEY_NAME, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
@@ -290,7 +276,7 @@ func DisplayResourceListText(bom *schema.BOM, writer io.Writer) (err error) {
 	w.Init(writer, 8, 2, 2, ' ', 0)
 
 	// create title row and underline row from slices of optional and compulsory titles
-	titles, underlines := prepareReportTitleData(RESOURCE_LIST_ROW_DATA, true)
+	titles, underlines := prepareReportTitleData(RESOURCE_LIST_ROW_DATA, false)
 
 	// Add tabs between column titles for the tabWRiter
 	fmt.Fprintf(w, "%s\n", strings.Join(titles, "\t"))
@@ -335,7 +321,7 @@ func DisplayResourceListCSV(bom *schema.BOM, writer io.Writer) (err error) {
 	defer w.Flush()
 
 	// Create title row data as []string
-	titles, _ := prepareReportTitleData(RESOURCE_LIST_ROW_DATA, true)
+	titles, _ := prepareReportTitleData(RESOURCE_LIST_ROW_DATA, false)
 
 	if err = w.Write(titles); err != nil {
 		return getLogger().Errorf("error writing to output (%v): %s", titles, err)
@@ -381,14 +367,14 @@ func DisplayResourceListMarkdown(bom *schema.BOM, writer io.Writer) (err error) 
 	defer getLogger().Exit()
 
 	// Create title row data as []string
-	titles, _ := prepareReportTitleData(RESOURCE_LIST_ROW_DATA, true)
+	titles, _ := prepareReportTitleData(RESOURCE_LIST_ROW_DATA, false)
 
 	// create title row
 	titleRow := createMarkdownRow(titles)
 	fmt.Fprintf(writer, "%s\n", titleRow)
 
 	// create alignment row
-	alignments := createMarkdownColumnAlignment(RESOURCE_LIST_TITLES)
+	alignments := createMarkdownColumnAlignmentRow(RESOURCE_LIST_ROW_DATA)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(writer, "%s\n", alignmentRow)
 

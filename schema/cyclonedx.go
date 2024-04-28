@@ -69,6 +69,21 @@ type CDXMetadata struct {
 	Lifecycles   *[]CDXLifecycle             `json:"lifecycles,omitempty"` // v1.5 added
 }
 
+// TODO: figure out how to support both current (object)/legacy(array) tools in Metadata.Tools field
+// See: https://stackoverflow.com/questions/47057240/parsing-multiple-json-types-into-the-same-struct
+// type CDXToolLegacy struct {
+// 	Name               string                  `json:"name,omitempty"`
+// 	Version            string                  `json:"version,omitempty"`
+// 	Vendor             string                  `json:"vendor,omitempty"`
+// 	Hashes             *[]CDXHash              `json:"hashes,omitempty"`
+// 	ExternalReferences *[]CDXExternalReference `json:"externalReferences,omitempty"`
+// }
+
+// type CDXTools struct {
+// 	Components *[]CDXComponent `json:"components,omitempty"`
+// 	Services   *[]CDXService   `json:"services,omitempty"`
+// }
+
 // v1.2: existed
 // v1.3: added: "evidence", "properties"
 // v1.4: added: "releaseNotes", "signature"
@@ -89,7 +104,6 @@ type CDXComponent struct {
 	BOMRef             *CDXRefType                 `json:"bom-ref,omitempty"`
 	MimeType           string                      `json:"mime-type,omitempty"`
 	Supplier           *CDXOrganizationalEntity    `json:"supplier,omitempty"`
-	Author             string                      `json:"author,omitempty"`
 	Publisher          string                      `json:"publisher,omitempty"`
 	Scope              string                      `json:"scope,omitempty"` // Constraint: "enum": ["required","optional","excluded"]
 	Hashes             *[]CDXHash                  `json:"hashes,omitempty"`
@@ -110,6 +124,7 @@ type CDXComponent struct {
 	Data               *[]CDXComponentData         `json:"data,omitempty"`                      // v1.5: added
 	Authors            *[]CDXOrganizationalContact `json:"authors,omitempty"`                   // v1.6: added
 	Tags               *[]string                   `json:"tags,omitempty" cdx:"+1.6"`           // v1.6: added
+	Author             string                      `json:"author,omitempty"`                    // v1.6: deprecated
 }
 
 // v1.5 added object

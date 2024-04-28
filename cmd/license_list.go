@@ -71,24 +71,6 @@ var LICENSE_LIST_ROW_DATA = []ColumnFormatData{
 	{LICENSE_FILTER_KEY_BOM_LOCATION, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
 }
 
-var LICENSE_SUMMARY_TITLES = []string{
-	LICENSE_FILTER_KEY_USAGE_POLICY,
-	LICENSE_FILTER_KEY_LICENSE_TYPE,
-	LICENSE_FILTER_KEY_LICENSE,
-	LICENSE_FILTER_KEY_RESOURCE_NAME,
-	LICENSE_FILTER_KEY_BOM_REF,
-	LICENSE_FILTER_KEY_BOM_LOCATION,
-}
-
-var VALID_LICENSE_FILTER_KEYS = []string{
-	LICENSE_FILTER_KEY_USAGE_POLICY,
-	LICENSE_FILTER_KEY_LICENSE_TYPE,
-	LICENSE_FILTER_KEY_LICENSE,
-	LICENSE_FILTER_KEY_RESOURCE_NAME,
-	LICENSE_FILTER_KEY_BOM_REF,
-	LICENSE_FILTER_KEY_BOM_LOCATION,
-}
-
 // Command help formatting
 var LICENSE_LIST_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{FORMAT_JSON, FORMAT_CSV, FORMAT_MARKDOWN}, ", ") +
@@ -443,7 +425,7 @@ func DisplayLicenseListMarkdown(bom *schema.BOM, writer io.Writer) {
 // TODO: Make policy column optional
 // TODO: Add a --no-title flag to skip title output
 // TODO: Support a new --sort <column> flag
-func DisplayLicenseListSummaryText(bom *schema.BOM, writer io.Writer) {
+func DisplayLicenseListSummaryText(bom *schema.BOM, writer io.Writer) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -454,13 +436,11 @@ func DisplayLicenseListSummaryText(bom *schema.BOM, writer io.Writer) {
 	// min-width, tab-width, padding, pad-char, flags
 	w.Init(writer, 8, 2, 2, ' ', 0)
 
-	var licenseInfo schema.LicenseInfo
-
 	// create title row and underline row from slices of optional and compulsory titles
-	underlines := createTitleTextSeparators(LICENSE_SUMMARY_TITLES)
+	titles, underlines := prepareReportTitleData(LICENSE_LIST_ROW_DATA, false)
 
 	// Add tabs between column titles for the tabWRiter
-	fmt.Fprintf(w, "%s\n", strings.Join(LICENSE_SUMMARY_TITLES, "\t"))
+	fmt.Fprintf(w, "%s\n", strings.Join(titles, "\t"))
 	fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
 	// Display a warning missing in the actual output and return (short-circuit)
@@ -472,23 +452,24 @@ func DisplayLicenseListSummaryText(bom *schema.BOM, writer io.Writer) {
 	// Sort license using identifying key (i.e., `id`, `name` or `expression`)
 	sortLicenseKeys(licenseKeys)
 
+	var line []string
 	for _, licenseName := range licenseKeys {
 		arrLicenseInfo, _ := bom.LicenseMap.Get(licenseName)
 
 		for _, iInfo := range arrLicenseInfo {
-			licenseInfo = iInfo.(schema.LicenseInfo)
-
-			// Format line and write to output
-			fmt.Fprintf(w, "%s\t%v\t%s\t%s\t%s\t%s\n",
-				licenseInfo.UsagePolicy,
-				licenseInfo.LicenseChoiceType,
-				licenseName,
-				licenseInfo.ResourceName,
-				licenseInfo.BOMRef,
-				licenseInfo.BOMLocation,
+			line, err = prepareReportLineData(
+				iInfo.(schema.LicenseInfo),
+				LICENSE_LIST_ROW_DATA,
+				true,
 			)
+			// Only emit line if no error
+			if err != nil {
+				return
+			}
+			fmt.Fprintf(w, "%s\n", strings.Join(line, "\t"))
 		}
 	}
+	return
 }
 
 // NOTE: This list is NOT de-duplicated
@@ -503,14 +484,12 @@ func DisplayLicenseListSummaryCSV(bom *schema.BOM, writer io.Writer) (err error)
 	w := csv.NewWriter(writer)
 	defer w.Flush()
 
-	var currentRow []string
-	var licenseInfo schema.LicenseInfo
-
 	// create title row and underline row
 	// TODO: Make policy column optional
-	if errWrite := w.Write(LICENSE_SUMMARY_TITLES); errWrite != nil {
-		err = getLogger().Errorf("error writing to output (%v): %s", LICENSE_SUMMARY_TITLES, errWrite)
-		return
+	titles, _ := prepareReportTitleData(LICENSE_LIST_ROW_DATA, true)
+
+	if err = w.Write(titles); err != nil {
+		return getLogger().Errorf("error writing to output (%v): %s", titles, err)
 	}
 
 	// retrieve all hashed licenses (keys) found in the document and verify we have ones to process
@@ -533,26 +512,19 @@ func DisplayLicenseListSummaryCSV(bom *schema.BOM, writer io.Writer) (err error)
 			os.Exit(ERROR_VALIDATION)
 		}
 
+		var line []string
 		for _, iInfo := range arrLicenseInfo {
-			licenseInfo = iInfo.(schema.LicenseInfo)
-
-			// reset line after each iteration
-			currentRow = nil
-
-			// Note: For CSV files each row should be terminated by a newline
-			// which is automatically done by the CSV writer
-			currentRow = append(currentRow,
-				licenseInfo.Policy.UsagePolicy,
-				licenseInfo.LicenseChoiceType,
-				licenseName.(string),
-				licenseInfo.ResourceName,
-				licenseInfo.BOMRef.String(),
-				licenseInfo.BOMLocation,
+			line, err = prepareReportLineData(
+				iInfo.(schema.LicenseInfo),
+				LICENSE_LIST_ROW_DATA,
+				true,
 			)
-
-			if errWrite := w.Write(currentRow); errWrite != nil {
-				err = getLogger().Errorf("csvWriter.Write(): %w", errWrite)
+			// Only emit line if no error
+			if err != nil {
 				return
+			}
+			if err = w.Write(line); err != nil {
+				err = getLogger().Errorf("csv.Write: %w", err)
 			}
 		}
 	}
@@ -563,17 +535,19 @@ func DisplayLicenseListSummaryCSV(bom *schema.BOM, writer io.Writer) (err error)
 // TODO: Make policy column optional
 // TODO: Add a --no-title flag to skip title output
 // TODO: Support a new --sort <column> flag
-func DisplayLicenseListSummaryMarkdown(bom *schema.BOM, writer io.Writer) {
+func DisplayLicenseListSummaryMarkdown(bom *schema.BOM, writer io.Writer) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	var licenseInfo schema.LicenseInfo
+	// Create title row data as []string
+	titles, _ := prepareReportTitleData(LICENSE_LIST_ROW_DATA, false)
 
 	// create title row
-	titleRow := createMarkdownRow(LICENSE_SUMMARY_TITLES)
+	titleRow := createMarkdownRow(titles)
 	fmt.Fprintf(writer, "%s\n", titleRow)
 
-	alignments := createMarkdownColumnAlignment(LICENSE_SUMMARY_TITLES)
+	// create alignment row
+	alignments := createMarkdownColumnAlignmentRow(LICENSE_LIST_ROW_DATA)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(writer, "%s\n", alignmentRow)
 
@@ -588,28 +562,22 @@ func DisplayLicenseListSummaryMarkdown(bom *schema.BOM, writer io.Writer) {
 
 	var line []string
 	var lineRow string
-
 	for _, licenseName := range licenseKeys {
 		arrLicenseInfo, _ := bom.LicenseMap.Get(licenseName)
 
 		for _, iInfo := range arrLicenseInfo {
-			licenseInfo = iInfo.(schema.LicenseInfo)
-
-			// reset loop variables for new assignments
-			line = nil
-
-			// Format line and write to output
-			line = append(line,
-				licenseInfo.Policy.UsagePolicy,
-				licenseInfo.LicenseChoiceType,
-				licenseName.(string),
-				licenseInfo.ResourceName,
-				licenseInfo.BOMRef.String(),
-				licenseInfo.BOMLocation,
+			line, err = prepareReportLineData(
+				iInfo.(schema.LicenseInfo),
+				LICENSE_LIST_ROW_DATA,
+				true,
 			)
-
+			// Only emit line if no error
+			if err != nil {
+				return
+			}
 			lineRow = createMarkdownRow(line)
 			fmt.Fprintf(writer, "%s\n", lineRow)
 		}
 	}
+	return
 }

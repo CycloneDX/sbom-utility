@@ -39,6 +39,45 @@ const (
 
 var VALID_SUBCOMMANDS_COMPONENT = []string{SUBCOMMAND_COMPONENT_LIST}
 
+//	type CDXComponent struct {
+//		Primary            bool                        `json:"-"`              // Proprietary: do NOT marshal/unmarshal
+//		Type               string                      `json:"type,omitempty"` // Constraint: enum [see schema]
+//		Name               string                      `json:"name,omitempty"`
+//		Version            string                      `json:"version,omitempty"`
+//		Description        string                      `json:"description,omitempty"`
+//		Group              string                      `json:"group,omitempty"`
+//		BOMRef             *CDXRefType                 `json:"bom-ref,omitempty"`
+//		MimeType           string                      `json:"mime-type,omitempty"`
+//		Supplier           *CDXOrganizationalEntity    `json:"supplier,omitempty"`
+//		Author             string                      `json:"author,omitempty"`
+//		Publisher          string                      `json:"publisher,omitempty"`
+//		Scope              string                      `json:"scope,omitempty"` // Constraint: "enum": ["required","optional","excluded"]
+//		Hashes             *[]CDXHash                  `json:"hashes,omitempty"`
+//		Licenses           *[]CDXLicenseChoice         `json:"licenses,omitempty"`
+//		Copyright          string                      `json:"copyright,omitempty"`
+//		Cpe                string                      `json:"cpe,omitempty"`                                       // See: https://nvd.nist.gov/products/cpe
+//		Purl               string                      `json:"purl,omitempty" scvs:"bom:resource:identifiers:purl"` // See: https://github.com/package-url/purl-spec
+//		Swid               *CDXSwid                    `json:"swid,omitempty"`                                      // See: https://www.iso.org/standard/65666.html
+//		Pedigree           *CDXPedigree                `json:"pedigree,omitempty"`                                  // anon. type
+//		ExternalReferences *[]CDXExternalReference     `json:"externalReferences,omitempty"`
+//		Components         *[]CDXComponent             `json:"components,omitempty"`
+//		Evidence           *CDXComponentEvidence       `json:"evidence,omitempty"`                  // v1.3: added
+//		Properties         *[]CDXProperty              `json:"properties,omitempty"`                // v1.3: added
+//		Modified           bool                        `json:"modified,omitempty" cdx:"deprecated"` // v1.4: deprecated
+//		ReleaseNotes       *[]CDXReleaseNotes          `json:"releaseNotes,omitempty"`              // v1.4: added
+//		Signature          *JSFSignature               `json:"signature,omitempty"`                 // v1.4: added
+//		ModelCard          *CDXModelCard               `json:"modelCard,omitempty"`                 // v1.5: added
+//		Data               *[]CDXComponentData         `json:"data,omitempty"`                      // v1.5: added
+//		Authors            *[]CDXOrganizationalContact `json:"authors,omitempty"`                   // v1.6: added
+//		Tags               *[]string                   `json:"tags,omitempty" cdx:"+1.6"`           // v1.6: added
+//	}
+var COMPONENT_LIST_ROW_DATA = []ColumnFormatData{
+	{COMPONENT_FILTER_KEY_TYPE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{COMPONENT_FILTER_KEY_NAME, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{COMPONENT_FILTER_KEY_VERSION, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	{COMPONENT_FILTER_KEY_BOMREF, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, REPORT_REPLACE_LINE_FEEDS_TRUE},
+}
+
 // filter keys
 // Note: these string values MUST match annotations for the ComponentInfo struct fields
 const (
@@ -60,13 +99,6 @@ var COMPONENT_LIST_TITLES = []string{
 	COMPONENT_FILTER_KEY_NAME,
 	COMPONENT_FILTER_KEY_VERSION,
 	COMPONENT_FILTER_KEY_BOMREF,
-}
-
-var COMPONENT_LIST_ROW_DATA = []ColumnFormatData{
-	{COMPONENT_FILTER_KEY_TYPE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
-	{COMPONENT_FILTER_KEY_NAME, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
-	{COMPONENT_FILTER_KEY_VERSION, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
-	{COMPONENT_FILTER_KEY_BOMREF, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, REPORT_REPLACE_LINE_FEEDS_TRUE},
 }
 
 // Flags. Reuse query flag values where possible
