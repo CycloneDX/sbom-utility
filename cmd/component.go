@@ -406,7 +406,7 @@ func DisplayComponentListMarkdown(bom *schema.BOM, writer io.Writer) (err error)
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	// Create title row data as []string,, include all columns that are flagged "summary" data
+	// Create title row data as []string, include all columns that are flagged "summary" data
 	titles, _ := prepareReportTitleData(COMPONENT_LIST_ROW_DATA, true)
 	titleRow := createMarkdownRow(titles)
 	fmt.Fprintf(writer, "%s\n", titleRow)

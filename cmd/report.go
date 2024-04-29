@@ -98,7 +98,6 @@ func processWhereFlag(cmd *cobra.Command) (whereFilters []common.WhereFilter, er
 	}
 
 	whereFilters, err = retrieveWhereFilters(whereValues)
-
 	return
 }
 
@@ -215,7 +214,6 @@ func prepareReportTitleData(formatData []ColumnFormatData, summarizedReport bool
 		underline = strings.Repeat(REPORT_LIST_TITLE_ROW_SEPARATOR, len(columnData.DataKey))
 		separatorData = append(separatorData, underline)
 	}
-
 	return
 }
 

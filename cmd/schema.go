@@ -249,22 +249,23 @@ func DisplaySchemasTabbedText(writer io.Writer, filteredSchemas []schema.FormatS
 	// Sort by Format, Version, Variant
 	filteredSchemas = sortFormatSchemaInstances(filteredSchemas)
 
-	// Emit rows
+	// Emit row data
+	var line []string
 	for _, schemaInstance := range filteredSchemas {
-
-		fmt.Fprintf(w, "%v\t%s\t%s\t%s\t%s\t%s\n",
-			schemaInstance.Name,
-			schema.FormatSchemaVariant(schemaInstance.Variant),
-			schemaInstance.Format,
-			schemaInstance.Version,
-			schemaInstance.File,
-			schemaInstance.Url,
+		// Supply variant name "latest" (the default name), if not otherwise declared in schema definition
+		schemaInstance.Variant = schema.FormatSchemaVariant(schemaInstance.Variant)
+		line, err = prepareReportLineData(
+			schemaInstance,
+			SCHEMA_LIST_ROW_DATA,
+			true,
 		)
+		// Only emit line if no error
+		if err != nil {
+			return
+		}
+		fmt.Fprintf(w, "%s\n", strings.Join(line, "\t"))
 	}
-
-	// Always end on a newline
-	fmt.Fprintln(w, "")
-	return nil
+	return
 }
 
 // TODO: Add a --no-title flag to skip title output
@@ -288,27 +289,23 @@ func DisplaySchemasMarkdown(writer io.Writer, filteredSchemas []schema.FormatSch
 		return fmt.Errorf(MSG_OUTPUT_NO_SCHEMAS_FOUND)
 	}
 
-	var line []string
-	var lineRow string
-
 	// Sort by Format, Version, Variant
 	filteredSchemas = sortFormatSchemaInstances(filteredSchemas)
 
-	// Emit rows
+	var line []string
+	var lineRow string
 	for _, schemaInstance := range filteredSchemas {
-
-		// reset current line
-		line = nil
-
-		line = append(line,
-			schemaInstance.Name,
-			schema.FormatSchemaVariant(schemaInstance.Variant),
-			schemaInstance.Format,
-			schemaInstance.Version,
-			schemaInstance.File,
-			schemaInstance.Url,
+		// Supply variant name "latest" (the default name), if not otherwise declared in schema definition
+		schemaInstance.Variant = schema.FormatSchemaVariant(schemaInstance.Variant)
+		line, err = prepareReportLineData(
+			schemaInstance,
+			SCHEMA_LIST_ROW_DATA,
+			true,
 		)
-
+		// Only emit line if no error
+		if err != nil {
+			return
+		}
 		lineRow = createMarkdownRow(line)
 		fmt.Fprintf(writer, "%s\n", lineRow)
 	}
@@ -340,28 +337,25 @@ func DisplaySchemasCSV(writer io.Writer, filteredSchemas []schema.FormatSchemaIn
 		return fmt.Errorf(currentRow[0])
 	}
 
-	var line []string
-
 	// Sort by Format, Version, Variant
 	filteredSchemas = sortFormatSchemaInstances(filteredSchemas)
 
-	// Emit rows
+	var line []string
 	for _, schemaInstance := range filteredSchemas {
+		// Supply variant name "latest" (the default name), if not otherwise declared in schema definition
+		schemaInstance.Variant = schema.FormatSchemaVariant(schemaInstance.Variant)
+		line, err = prepareReportLineData(
+			schemaInstance,
+			SCHEMA_LIST_ROW_DATA,
+			true)
 
-		line = nil
-		line = append(line,
-			schemaInstance.Name,
-			schema.FormatSchemaVariant(schemaInstance.Variant),
-			schemaInstance.Format,
-			schemaInstance.Version,
-			schemaInstance.File,
-			schemaInstance.Url,
-		)
-
+		// Only emit line if no error
+		if err != nil {
+			return
+		}
 		if err = w.Write(line); err != nil {
-			return getLogger().Errorf("error writing to output (%v): %s", line, err)
+			err = getLogger().Errorf("csv.Write: %w", err)
 		}
 	}
-
 	return
 }
