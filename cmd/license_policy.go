@@ -387,14 +387,13 @@ func DisplayLicensePoliciesMarkdown(writer io.Writer, filteredPolicyMap *slicemu
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	// Create title row data as []string
+	// Create title row data as []string, include columns depending on value of Summary flag.
 	titles, _ := prepareReportTitleData(LICENSE_POLICY_LIST_ROW_DATA, flags.Summary)
-
-	// create title row
 	titleRow := createMarkdownRow(titles)
 	fmt.Fprintf(writer, "%s\n", titleRow)
 
-	alignments := createMarkdownColumnAlignmentRow(LICENSE_POLICY_LIST_ROW_DATA)
+	// create alignment row, include columns depending on value of Summary flag.
+	alignments := createMarkdownColumnAlignmentRow(LICENSE_POLICY_LIST_ROW_DATA, flags.Summary)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(writer, "%s\n", alignmentRow)
 

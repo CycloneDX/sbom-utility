@@ -272,12 +272,14 @@ func DisplaySchemasMarkdown(writer io.Writer, filteredSchemas []schema.FormatSch
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	// create title row and alignment row from slices of optional and compulsory titles
-	titles, _ := prepareReportTitleData(SCHEMA_LIST_ROW_DATA, false)
+	// Create title row data as []string, include all columns that are flagged "summary" data
+	titles, _ := prepareReportTitleData(SCHEMA_LIST_ROW_DATA, true)
 	titleRow := createMarkdownRow(titles)
-	alignments := deprecatedCreateMarkdownColumnAlignment(titles)
-	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(writer, "%s\n", titleRow)
+
+	// create alignment row, include all columns that are flagged "summary" data
+	alignments := createMarkdownColumnAlignmentRow(SCHEMA_LIST_ROW_DATA, true)
+	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(writer, "%s\n", alignmentRow)
 
 	// Emit no schemas found warning into output

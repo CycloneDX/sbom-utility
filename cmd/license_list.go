@@ -539,15 +539,13 @@ func DisplayLicenseListSummaryMarkdown(bom *schema.BOM, writer io.Writer) (err e
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	// Create title row data as []string
-	titles, _ := prepareReportTitleData(LICENSE_LIST_ROW_DATA, false)
-
-	// create title row
+	// Create title row data as []string, include all columns that are flagged "summary" data
+	titles, _ := prepareReportTitleData(LICENSE_LIST_ROW_DATA, true)
 	titleRow := createMarkdownRow(titles)
 	fmt.Fprintf(writer, "%s\n", titleRow)
 
-	// create alignment row
-	alignments := createMarkdownColumnAlignmentRow(LICENSE_LIST_ROW_DATA)
+	// create alignment row, include all columns that are flagged "summary" data
+	alignments := createMarkdownColumnAlignmentRow(LICENSE_LIST_ROW_DATA, true)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(writer, "%s\n", alignmentRow)
 

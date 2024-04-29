@@ -69,8 +69,13 @@ func deprecatedCreateMarkdownColumnAlignment(titles []string) (alignment []strin
 }
 
 // TODO: Allow column format data to include MD_ALIGN_xxx values
-func createMarkdownColumnAlignmentRow(columns []ColumnFormatData) (alignment []string) {
-	for range columns {
+func createMarkdownColumnAlignmentRow(columns []ColumnFormatData, summarizedReport bool) (alignment []string) {
+	for _, column := range columns {
+		// if it is a summary report being created, but the column is not marked summary data
+		if summarizedReport && !column.IsSummaryData {
+			continue // skip to next column
+		}
+		// it is summary colum data, include it in the alignment row formatting
 		alignment = append(alignment, MD_ALIGN_DEFAULT)
 	}
 	return
