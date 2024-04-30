@@ -207,28 +207,28 @@ func TestLicenseListCdx14JsonNoneFound(t *testing.T) {
 func TestLicenseListCdx13CsvNoneFound(t *testing.T) {
 	// Test CDX 1.3 document
 	lti := NewLicenseTestInfo(TEST_LICENSE_LIST_CDX_1_3_NONE_FOUND, FORMAT_CSV, false)
-	lti.ResultExpectedLineCount = 2 // title only + newline
+	lti.ResultExpectedLineCount = 13 // title only + 11 UNDEFINED + newline
 	innerTestLicenseList(t, lti)
 }
 
 func TestLicenseListCdx14CsvNoneFound(t *testing.T) {
 	// Test CDX 1.4 document
 	lti := NewLicenseTestInfo(TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND, FORMAT_CSV, false)
-	lti.ResultExpectedLineCount = 2 // title only + newline
+	lti.ResultExpectedLineCount = 4 // title only + 2 UNDEFINED + newline
 	innerTestLicenseList(t, lti)
 }
 
 func TestLicenseListCdx13MarkdownNoneFound(t *testing.T) {
 	// Test CDX 1.3 document
 	lti := NewLicenseTestInfo(TEST_LICENSE_LIST_CDX_1_3_NONE_FOUND, FORMAT_MARKDOWN, false)
-	lti.ResultExpectedLineCount = 3 // title and separator rows + newline
+	lti.ResultExpectedLineCount = 14 // title only + alignment row + 11 UNDEFINED + newline
 	innerTestLicenseList(t, lti)
 }
 
 func TestLicenseListCdx14MarkdownNoneFound(t *testing.T) {
 	// Test CDX 1.4 document
 	lti := NewLicenseTestInfo(TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND, FORMAT_MARKDOWN, false)
-	lti.ResultExpectedLineCount = 3 // title and separator rows + + newline
+	lti.ResultExpectedLineCount = 5 // title + alignment row + 2 UNDEFINED + newline
 	innerTestLicenseList(t, lti)
 }
 
@@ -277,8 +277,8 @@ func TestLicenseListSummaryCdx13Csv(t *testing.T) {
 	innerTestLicenseList(t, lti)
 }
 
-func TestLicenseListTextSummaryCdx14ContainsUndefined(t *testing.T) {
-	lti := NewLicenseTestInfo(TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND, FORMAT_DEFAULT, true)
+func TestLicenseListTextSummaryCdx14TextContainsUndefined(t *testing.T) {
+	lti := NewLicenseTestInfo(TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND, FORMAT_TEXT, true)
 	lti.ResultExpectedLineCount = 5 // 2 title, 2 with UNDEFINED + newline
 	unknownLCValue := schema.GetLicenseChoiceTypeName(schema.LC_LOC_UNKNOWN)
 	lti.ResultLineContainsValues = []string{schema.POLICY_UNDEFINED, unknownLCValue, LICENSE_NO_ASSERTION, "package-lock.json"}

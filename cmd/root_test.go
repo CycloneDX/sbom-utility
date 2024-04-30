@@ -269,7 +269,7 @@ func bufferLineContainsValues(buffer bytes.Buffer, lineNum int, values ...string
 
 	for curLineNum, line := range lines {
 
-		// if ths is a line we need to test
+		// if this is a line we need to test
 		if lineNum == RESULT_LINE_CONTAINS_ANY || curLineNum == lineNum {
 			// test that all values occur in the current line
 			for iValue, value := range values {
