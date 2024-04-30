@@ -23,6 +23,7 @@ import (
 
 	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/schema"
+	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -79,7 +80,7 @@ func licenseCmdImpl(cmd *cobra.Command, args []string) error {
 // 2. (root).metadata.component.licenses[] + all "nested" components
 // 3. (root).components[](.license[]) (each component + all "nested" components)
 // 4. (root).services[](.license[]) (each service + all "nested" services)
-func loadDocumentLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, whereFilters []common.WhereFilter) (err error) {
+func loadDocumentLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, whereFilters []common.WhereFilter, licenseFlags utils.LicenseCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -104,19 +105,19 @@ func loadDocumentLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 	// 1. Hash all licenses in the SBOM metadata (i.e., (root).metadata.component)
 	// Note: this SHOULD represent a summary of all licenses that apply
 	// to the component being described in the SBOM
-	if err = hashMetadataLicenses(bom, policyConfig, schema.LC_LOC_METADATA, whereFilters); err != nil {
+	if err = hashMetadataLicenses(bom, policyConfig, schema.LC_LOC_METADATA, whereFilters, licenseFlags); err != nil {
 		return
 	}
 
 	// 2. Hash all licenses in (root).metadata.component (+ "nested" components)
-	if err = hashMetadataComponentLicenses(bom, policyConfig, schema.LC_LOC_METADATA_COMPONENT, whereFilters); err != nil {
+	if err = hashMetadataComponentLicenses(bom, policyConfig, schema.LC_LOC_METADATA_COMPONENT, whereFilters, licenseFlags); err != nil {
 		return
 	}
 
 	// 3. Hash all component licenses found in the (root).components[] (+ "nested" components)
 	pComponents := bom.GetCdxComponents()
 	if pComponents != nil && len(*pComponents) > 0 {
-		if err = hashComponentsLicenses(bom, policyConfig, *pComponents, schema.LC_LOC_COMPONENTS, whereFilters); err != nil {
+		if err = hashComponentsLicenses(bom, policyConfig, *pComponents, schema.LC_LOC_COMPONENTS, whereFilters, licenseFlags); err != nil {
 			return
 		}
 	}
@@ -124,7 +125,7 @@ func loadDocumentLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 	// 4. Hash all service licenses found in the (root).services[] (array) (+ "nested" services)
 	pServices := bom.GetCdxServices()
 	if pServices != nil && len(*pServices) > 0 {
-		if err = hashServicesLicenses(bom, policyConfig, *pServices, schema.LC_LOC_SERVICES, whereFilters); err != nil {
+		if err = hashServicesLicenses(bom, policyConfig, *pServices, schema.LC_LOC_SERVICES, whereFilters, licenseFlags); err != nil {
 			return
 		}
 	}
@@ -133,7 +134,7 @@ func loadDocumentLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 }
 
 // Hash the license found in the (root).metadata.licenses[] array
-func hashMetadataLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, location int, whereFilters []common.WhereFilter) (err error) {
+func hashMetadataLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, location int, whereFilters []common.WhereFilter, licenseFlags utils.LicenseCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -162,7 +163,7 @@ func hashMetadataLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 		licenseInfo.BOMLocationValue = location
 		licenseInfo.ResourceName = LICENSE_LIST_NOT_APPLICABLE
 		licenseInfo.BOMRef = LICENSE_LIST_NOT_APPLICABLE
-		err = hashLicenseInfoByLicenseType(bom, policyConfig, licenseInfo, whereFilters)
+		err = hashLicenseInfoByLicenseType(bom, policyConfig, licenseInfo, whereFilters, licenseFlags)
 		if err != nil {
 			return
 		}
@@ -172,7 +173,7 @@ func hashMetadataLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 }
 
 // Hash the license found in the (root).metadata.component object (and any "nested" components)
-func hashMetadataComponentLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, location int, whereFilters []common.WhereFilter) (err error) {
+func hashMetadataComponentLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, location int, whereFilters []common.WhereFilter, licenseFlags utils.LicenseCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -192,19 +193,19 @@ func hashMetadataComponentLicenses(bom *schema.BOM, policyConfig *schema.License
 		return
 	}
 
-	_, err = hashComponentLicense(bom, policyConfig, *component, location, whereFilters)
+	_, err = hashComponentLicense(bom, policyConfig, *component, location, whereFilters, licenseFlags)
 
 	return
 }
 
 // Hash all licenses found in an array of CDX Components
 // TODO use array of pointer to []CDXComponent
-func hashComponentsLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, components []schema.CDXComponent, location int, whereFilters []common.WhereFilter) (err error) {
+func hashComponentsLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, components []schema.CDXComponent, location int, whereFilters []common.WhereFilter, licenseFlags utils.LicenseCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
 	for _, cdxComponent := range components {
-		_, err = hashComponentLicense(bom, policyConfig, cdxComponent, location, whereFilters)
+		_, err = hashComponentLicense(bom, policyConfig, cdxComponent, location, whereFilters, licenseFlags)
 		if err != nil {
 			return
 		}
@@ -214,12 +215,12 @@ func hashComponentsLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyC
 
 // Hash all licenses found in an array of CDX Services
 // TODO use array of pointer to []CDXService
-func hashServicesLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, services []schema.CDXService, location int, whereFilters []common.WhereFilter) (err error) {
+func hashServicesLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, services []schema.CDXService, location int, whereFilters []common.WhereFilter, licenseFlags utils.LicenseCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
 	for _, cdxServices := range services {
-		err = hashServiceLicense(bom, policyConfig, cdxServices, location, whereFilters)
+		err = hashServiceLicense(bom, policyConfig, cdxServices, location, whereFilters, licenseFlags)
 		if err != nil {
 			return
 		}
@@ -228,7 +229,7 @@ func hashServicesLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 }
 
 // Hash a CDX Component's licenses and recursively those of any "nested" components
-func hashComponentLicense(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, cdxComponent schema.CDXComponent, location int, whereFilters []common.WhereFilter) (li *schema.LicenseInfo, err error) {
+func hashComponentLicense(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, cdxComponent schema.CDXComponent, location int, whereFilters []common.WhereFilter, licenseFlags utils.LicenseCommandFlags) (li *schema.LicenseInfo, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 	var licenseInfo schema.LicenseInfo
@@ -246,7 +247,7 @@ func hashComponentLicense(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 			if cdxComponent.BOMRef != nil {
 				licenseInfo.BOMRef = *cdxComponent.BOMRef
 			}
-			err = hashLicenseInfoByLicenseType(bom, policyConfig, licenseInfo, whereFilters)
+			err = hashLicenseInfoByLicenseType(bom, policyConfig, licenseInfo, whereFilters, licenseFlags)
 
 			if err != nil {
 				// Show intent to not check for error returns as there no intent to recover
@@ -263,7 +264,7 @@ func hashComponentLicense(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 		if cdxComponent.BOMRef != nil {
 			licenseInfo.BOMRef = *cdxComponent.BOMRef
 		}
-		_, err = bom.HashmapLicenseInfo(policyConfig, LICENSE_NO_ASSERTION, licenseInfo, whereFilters)
+		_, err = bom.HashmapLicenseInfo(policyConfig, LICENSE_NO_ASSERTION, licenseInfo, whereFilters, licenseFlags)
 
 		getLogger().Warningf("%s: %s (name:`%s`, version: `%s`, package-url: `%s`)",
 			"No license found for component. bomRef",
@@ -278,7 +279,7 @@ func hashComponentLicense(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
 	pComponents := cdxComponent.Components
 	if pComponents != nil && len(*pComponents) > 0 {
-		err = hashComponentsLicenses(bom, policyConfig, *pComponents, location, whereFilters)
+		err = hashComponentsLicenses(bom, policyConfig, *pComponents, location, whereFilters, licenseFlags)
 		if err != nil {
 			return
 		}
@@ -289,7 +290,7 @@ func hashComponentLicense(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 
 // Hash all licenses found in a CDX Service
 // TODO use pointer to CDXService
-func hashServiceLicense(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, cdxService schema.CDXService, location int, whereFilters []common.WhereFilter) (err error) {
+func hashServiceLicense(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, cdxService schema.CDXService, location int, whereFilters []common.WhereFilter, licenseFlags utils.LicenseCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -307,7 +308,7 @@ func hashServiceLicense(bom *schema.BOM, policyConfig *schema.LicensePolicyConfi
 				licenseInfo.BOMRef = *cdxService.BOMRef
 			}
 			licenseInfo.BOMLocationValue = location
-			err = hashLicenseInfoByLicenseType(bom, policyConfig, licenseInfo, whereFilters)
+			err = hashLicenseInfoByLicenseType(bom, policyConfig, licenseInfo, whereFilters, licenseFlags)
 
 			if err != nil {
 				return
@@ -322,7 +323,7 @@ func hashServiceLicense(bom *schema.BOM, policyConfig *schema.LicensePolicyConfi
 		if cdxService.BOMRef != nil {
 			licenseInfo.BOMRef = *cdxService.BOMRef
 		}
-		_, err = bom.HashmapLicenseInfo(policyConfig, LICENSE_NO_ASSERTION, licenseInfo, whereFilters)
+		_, err = bom.HashmapLicenseInfo(policyConfig, LICENSE_NO_ASSERTION, licenseInfo, whereFilters, licenseFlags)
 
 		getLogger().Warningf("%s: %s (name: `%s`, version: `%s`)",
 			"No license found for service. bomRef",
@@ -337,7 +338,7 @@ func hashServiceLicense(bom *schema.BOM, policyConfig *schema.LicensePolicyConfi
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
 	pServices := cdxService.Services
 	if pServices != nil && len(*pServices) > 0 {
-		err = hashServicesLicenses(bom, policyConfig, *pServices, location, whereFilters)
+		err = hashServicesLicenses(bom, policyConfig, *pServices, location, whereFilters, licenseFlags)
 		if err != nil {
 			// Show intent to not check for error returns as there is no recovery
 			_ = getLogger().Errorf("Unable to hash empty license: %v", licenseInfo)
@@ -353,7 +354,7 @@ func hashServiceLicense(bom *schema.BOM, policyConfig *schema.LicensePolicyConfi
 // 2. Where the license was found within the SBOM
 // 3. The entity name (e.g., service or component name) that declared the license
 // 4. The entity local BOM reference (i.e., "bomRef")
-func hashLicenseInfoByLicenseType(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, licenseInfo schema.LicenseInfo, whereFilters []common.WhereFilter) (err error) {
+func hashLicenseInfoByLicenseType(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, licenseInfo schema.LicenseInfo, whereFilters []common.WhereFilter, licenseFlags utils.LicenseCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -362,13 +363,13 @@ func hashLicenseInfoByLicenseType(bom *schema.BOM, policyConfig *schema.LicenseP
 
 	if pLicense != nil && pLicense.Id != "" {
 		licenseInfo.LicenseChoiceTypeValue = schema.LC_TYPE_ID
-		_, err = bom.HashmapLicenseInfo(policyConfig, pLicense.Id, licenseInfo, whereFilters)
+		_, err = bom.HashmapLicenseInfo(policyConfig, pLicense.Id, licenseInfo, whereFilters, licenseFlags)
 	} else if pLicense != nil && pLicense.Name != "" {
 		licenseInfo.LicenseChoiceTypeValue = schema.LC_TYPE_NAME
-		_, err = bom.HashmapLicenseInfo(policyConfig, pLicense.Name, licenseInfo, whereFilters)
+		_, err = bom.HashmapLicenseInfo(policyConfig, pLicense.Name, licenseInfo, whereFilters, licenseFlags)
 	} else if licenseChoice.Expression != "" {
 		licenseInfo.LicenseChoiceTypeValue = schema.LC_TYPE_EXPRESSION
-		_, err = bom.HashmapLicenseInfo(policyConfig, licenseChoice.Expression, licenseInfo, whereFilters)
+		_, err = bom.HashmapLicenseInfo(policyConfig, licenseChoice.Expression, licenseInfo, whereFilters, licenseFlags)
 	} else {
 		// Note: This code path only executes if hashing is performed
 		// without schema validation (which would find this as an error)

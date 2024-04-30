@@ -170,7 +170,9 @@ func wrapTableRowText(maxChars int, joinChar string, columns ...interface{}) (ta
 
 // Report column data values
 const REPORT_SUMMARY_DATA_TRUE = true
+const REPORT_SUMMARY_DATA_FALSE = false
 const REPORT_REPLACE_LINE_FEEDS_TRUE = true
+const REPORT_REPLACE_LINE_FEEDS_FALSE = false
 const DEFAULT_COLUMN_TRUNCATE_LENGTH = -1
 
 // TODO: Support additional flags to:

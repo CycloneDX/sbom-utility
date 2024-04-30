@@ -51,7 +51,6 @@ const (
 	MSG_OUTPUT_NO_LICENSES_ONLY_NOASSERTION = "no valid licenses found in BOM document (only licenses marked NOASSERTION)"
 )
 
-// "Type", "ID/Name/Expression", "Component(s)", "BOM ref.", "Document location"
 // filter keys
 const (
 	LICENSE_FILTER_KEY_USAGE_POLICY  = "usage-policy"
@@ -62,6 +61,17 @@ const (
 	LICENSE_FILTER_KEY_BOM_LOCATION  = "bom-location"
 )
 
+// var LICENSE_LIST_TITLES_LICENSE_CHOICE = []string{"License.Id", "License.Name", "License.Url", "Expression", "License.Text.ContentType", "License.Text.Encoding", "License.Text.Content"}
+const (
+	LICENSE_FILTER_KEY_LICENSE_ID                = "license-id"
+	LICENSE_FILTER_KEY_LICENSE_NAME              = "license-name"
+	LICENSE_FILTER_KEY_LICENSE_EXPRESSION        = "license-expression"
+	LICENSE_FILTER_KEY_LICENSE_URL               = "license-url"
+	LICENSE_FILTER_KEY_LICENSE_TEXT_ENCODING     = "license-text-encoding"
+	LICENSE_FILTER_KEY_LICENSE_TEXT_CONTENT_TYPE = "license-text-content-type"
+	LICENSE_FILTER_KEY_LICENSE_TEXT_CONTENT      = "license-text-content"
+)
+
 var LICENSE_LIST_ROW_DATA = []ColumnFormatData{
 	*NewColumnFormatData(LICENSE_FILTER_KEY_USAGE_POLICY, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
 	*NewColumnFormatData(LICENSE_FILTER_KEY_LICENSE_TYPE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
@@ -69,6 +79,13 @@ var LICENSE_LIST_ROW_DATA = []ColumnFormatData{
 	*NewColumnFormatData(LICENSE_FILTER_KEY_RESOURCE_NAME, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
 	*NewColumnFormatData(LICENSE_FILTER_KEY_BOM_REF, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
 	*NewColumnFormatData(LICENSE_FILTER_KEY_BOM_LOCATION, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
+	*NewColumnFormatData(LICENSE_FILTER_KEY_LICENSE_ID, -1, false, false),
+	*NewColumnFormatData(LICENSE_FILTER_KEY_LICENSE_NAME, -1, false, false),
+	*NewColumnFormatData(LICENSE_FILTER_KEY_LICENSE_EXPRESSION, -1, false, false),
+	*NewColumnFormatData(LICENSE_FILTER_KEY_LICENSE_URL, -1, false, false),
+	*NewColumnFormatData(LICENSE_FILTER_KEY_LICENSE_TEXT_ENCODING, -1, false, false),
+	*NewColumnFormatData(LICENSE_FILTER_KEY_LICENSE_TEXT_CONTENT_TYPE, -1, false, false),
+	*NewColumnFormatData(LICENSE_FILTER_KEY_LICENSE_TEXT_CONTENT, 8, false, false),
 }
 
 // Command help formatting
@@ -173,7 +190,7 @@ func listCmdImpl(cmd *cobra.Command, args []string) (err error) {
 }
 
 func ListLicenses(writer io.Writer, policyConfig *schema.LicensePolicyConfig,
-	persistentFlags utils.PersistentCommandFlags, LicenseFlags utils.LicenseCommandFlags,
+	persistentFlags utils.PersistentCommandFlags, licenseFlags utils.LicenseCommandFlags,
 	whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
@@ -195,7 +212,7 @@ func ListLicenses(writer io.Writer, policyConfig *schema.LicensePolicyConfig,
 
 	// Find an hash all licenses within input BOM file
 	getLogger().Infof("Scanning document for licenses...")
-	err = loadDocumentLicenses(document, policyConfig, whereFilters)
+	err = loadDocumentLicenses(document, policyConfig, whereFilters, licenseFlags)
 
 	if err != nil {
 		return
@@ -204,39 +221,39 @@ func ListLicenses(writer io.Writer, policyConfig *schema.LicensePolicyConfig,
 	format := persistentFlags.OutputFormat
 
 	// if `--summary` report requested
-	if LicenseFlags.Summary {
+	if licenseFlags.Summary {
 		// TODO surface errors returned from "DisplayXXX" functions
 		getLogger().Infof("Outputting summary (`%s` format)...", format)
 		switch format {
 		case FORMAT_TEXT:
-			DisplayLicenseListSummaryText(document, writer)
+			DisplayLicenseListSummaryText(document, writer, licenseFlags)
 		case FORMAT_CSV:
-			err = DisplayLicenseListSummaryCSV(document, writer)
+			err = DisplayLicenseListSummaryCSV(document, writer, licenseFlags)
 		case FORMAT_MARKDOWN:
-			DisplayLicenseListSummaryMarkdown(document, writer)
+			DisplayLicenseListSummaryMarkdown(document, writer, licenseFlags)
 		default:
 			// Default to text output
 			getLogger().Warningf("Summary not supported for `%s` format; defaulting to `%s` format...",
 				format, FORMAT_TEXT)
-			DisplayLicenseListSummaryText(document, writer)
+			DisplayLicenseListSummaryText(document, writer, licenseFlags)
 		}
 	} else {
 		// TODO surface errors returned from "DisplayXXX" functions
 		getLogger().Infof("Outputting listing (`%s` format)...", format)
 		switch format {
 		case FORMAT_JSON:
-			DisplayLicenseListJson(document, writer)
+			DisplayLicenseListJson(document, writer, licenseFlags)
 		case FORMAT_CSV:
-			err = DisplayLicenseListCSV(document, writer)
+			err = DisplayLicenseListCSV(document, writer, licenseFlags)
 		case FORMAT_MARKDOWN:
-			DisplayLicenseListMarkdown(document, writer)
+			DisplayLicenseListMarkdown(document, writer, licenseFlags)
 		case FORMAT_TEXT:
-			DisplayLicenseListSummaryText(document, writer)
+			DisplayLicenseListSummaryText(document, writer, licenseFlags)
 		default:
 			// Default to JSON output for anything else
 			getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
 				format, FORMAT_JSON)
-			DisplayLicenseListJson(document, writer)
+			DisplayLicenseListJson(document, writer, licenseFlags)
 		}
 	}
 
@@ -265,7 +282,7 @@ func allocateEmptyLicenseText(licenseChoice *schema.CDXLicenseChoice) {
 // NOTE: if no licenses are found, the "json.Marshal" method(s) will return a value of "null"
 // which is valid JSON (and not an empty array)
 // TODO: Support de-duplication (flag) (which MUST be exact using deep comparison)
-func DisplayLicenseListJson(bom *schema.BOM, writer io.Writer) {
+func DisplayLicenseListJson(bom *schema.BOM, writer io.Writer, flags utils.LicenseCommandFlags) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -289,19 +306,24 @@ func DisplayLicenseListJson(bom *schema.BOM, writer io.Writer) {
 }
 
 // NOTE: This list is NOT de-duplicated
-func DisplayLicenseListCSV(bom *schema.BOM, writer io.Writer) (err error) {
+func DisplayLicenseListCSV(bom *schema.BOM, writer io.Writer, flags utils.LicenseCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
-
-	var licenseInfo schema.LicenseInfo
-	var currentRow []string
 
 	w := csv.NewWriter(writer)
 	defer w.Flush()
 
 	// Emit title row
-	if err = w.Write(LICENSE_LIST_TITLES_LICENSE_CHOICE); err != nil {
-		return getLogger().Errorf("error writing to output (%v): %s", LICENSE_LIST_TITLES_LICENSE_CHOICE, err)
+	// if err = w.Write(LICENSE_LIST_TITLES_LICENSE_CHOICE); err != nil {
+	// 	return getLogger().Errorf("error writing to output (%v): %s", LICENSE_LIST_TITLES_LICENSE_CHOICE, err)
+	// }
+
+	// create title row and underline row
+	// TODO: Make policy column optional
+	titles, _ := prepareReportTitleData(LICENSE_LIST_ROW_DATA, flags.Summary)
+
+	if err = w.Write(titles); err != nil {
+		return getLogger().Errorf("error writing to output (%v): %s", titles, err)
 	}
 
 	// Emit warning (confirmation) message if no licenses found in document
@@ -310,41 +332,58 @@ func DisplayLicenseListCSV(bom *schema.BOM, writer io.Writer) (err error) {
 	// Emit no license or assertion-only warning into output
 	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
 
+	var licenseInfo schema.LicenseInfo
+	//var currentRow []string
 	for _, licenseName := range licenseKeys {
 		arrLicenseInfo, _ := bom.LicenseMap.Get(licenseName)
 
 		for _, iInfo := range arrLicenseInfo {
 			// reset line after each iteration
-			currentRow = nil
+			//currentRow = nil
 			licenseInfo = iInfo.(schema.LicenseInfo)
 
 			if licenseInfo.LicenseChoiceTypeValue != schema.LC_TYPE_INVALID {
 
-				lc := licenseInfo.LicenseChoice
+				// lc := licenseInfo.LicenseChoice
 
-				// Assure we have a valid CDXLicense struct to format
-				if lc.License == nil {
-					allocateEmptyLicense(&lc)
-				}
+				// // Assure we have a valid CDXLicense struct to format
+				// if lc.License == nil {
+				// 	allocateEmptyLicense(&lc)
+				// }
 
-				// Assure we have at least an empty license text (CDXAttachment) struct to format
-				if lc.License.Text == nil {
-					allocateEmptyLicenseText(&lc)
-				}
+				// // Assure we have at least an empty license text (CDXAttachment) struct to format
+				// if lc.License.Text == nil {
+				// 	allocateEmptyLicenseText(&lc)
+				// }
 
-				// NOTE: we intentionally do NOT truncate the actual content text for CSV files
-				// Each row will contain every field of a CDX LicenseChoice object
-				currentRow = append(currentRow,
-					lc.License.Id,
-					lc.License.Name,
-					lc.License.Url,
-					lc.Expression,
-					lc.License.Text.ContentType,
-					lc.License.Text.Encoding,
-					lc.License.Text.Content)
+				// // NOTE: we intentionally do NOT truncate the actual content text for CSV files
+				// // Each row will contain every field of a CDX LicenseChoice object
+				// currentRow = append(currentRow,
+				// 	lc.License.Id,
+				// 	lc.License.Name,
+				// 	lc.License.Url,
+				// 	lc.Expression,
+				// 	lc.License.Text.ContentType,
+				// 	lc.License.Text.Encoding,
+				// 	lc.License.Text.Content)
 
-				if errWrite := w.Write(currentRow); errWrite != nil {
-					return getLogger().Errorf("error writing to output (%v): %s", currentRow, errWrite)
+				// if errWrite := w.Write(currentRow); errWrite != nil {
+				// 	return getLogger().Errorf("error writing to output (%v): %s", currentRow, errWrite)
+				// }
+				var line []string
+				for _, iInfo := range arrLicenseInfo {
+					line, err = prepareReportLineData(
+						iInfo.(schema.LicenseInfo),
+						LICENSE_LIST_ROW_DATA,
+						flags.Summary,
+					)
+					// Only emit line if no error
+					if err != nil {
+						return
+					}
+					if err = w.Write(line); err != nil {
+						err = getLogger().Errorf("csv.Write: %w", err)
+					}
 				}
 			}
 		}
@@ -353,7 +392,7 @@ func DisplayLicenseListCSV(bom *schema.BOM, writer io.Writer) (err error) {
 }
 
 // NOTE: This list is NOT de-duplicated
-func DisplayLicenseListMarkdown(bom *schema.BOM, writer io.Writer) {
+func DisplayLicenseListMarkdown(bom *schema.BOM, writer io.Writer, flags utils.LicenseCommandFlags) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -425,7 +464,7 @@ func DisplayLicenseListMarkdown(bom *schema.BOM, writer io.Writer) {
 // TODO: Make policy column optional
 // TODO: Add a --no-title flag to skip title output
 // TODO: Support a new --sort <column> flag
-func DisplayLicenseListSummaryText(bom *schema.BOM, writer io.Writer) (err error) {
+func DisplayLicenseListSummaryText(bom *schema.BOM, writer io.Writer, flags utils.LicenseCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -437,7 +476,7 @@ func DisplayLicenseListSummaryText(bom *schema.BOM, writer io.Writer) (err error
 	w.Init(writer, 8, 2, 2, ' ', 0)
 
 	// create title row and underline row from slices of optional and compulsory titles
-	titles, underlines := prepareReportTitleData(LICENSE_LIST_ROW_DATA, false)
+	titles, underlines := prepareReportTitleData(LICENSE_LIST_ROW_DATA, flags.Summary)
 
 	// Add tabs between column titles for the tabWRiter
 	fmt.Fprintf(w, "%s\n", strings.Join(titles, "\t"))
@@ -476,7 +515,7 @@ func DisplayLicenseListSummaryText(bom *schema.BOM, writer io.Writer) (err error
 // TODO: Make policy column optional
 // TODO: Add a --no-title flag to skip title output
 // TODO: Support a new --sort <column> flag
-func DisplayLicenseListSummaryCSV(bom *schema.BOM, writer io.Writer) (err error) {
+func DisplayLicenseListSummaryCSV(bom *schema.BOM, writer io.Writer, flags utils.LicenseCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -486,7 +525,7 @@ func DisplayLicenseListSummaryCSV(bom *schema.BOM, writer io.Writer) (err error)
 
 	// create title row and underline row
 	// TODO: Make policy column optional
-	titles, _ := prepareReportTitleData(LICENSE_LIST_ROW_DATA, true)
+	titles, _ := prepareReportTitleData(LICENSE_LIST_ROW_DATA, flags.Summary)
 
 	if err = w.Write(titles); err != nil {
 		return getLogger().Errorf("error writing to output (%v): %s", titles, err)
@@ -535,17 +574,17 @@ func DisplayLicenseListSummaryCSV(bom *schema.BOM, writer io.Writer) (err error)
 // TODO: Make policy column optional
 // TODO: Add a --no-title flag to skip title output
 // TODO: Support a new --sort <column> flag
-func DisplayLicenseListSummaryMarkdown(bom *schema.BOM, writer io.Writer) (err error) {
+func DisplayLicenseListSummaryMarkdown(bom *schema.BOM, writer io.Writer, flags utils.LicenseCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	// Create title row data as []string, include all columns that are flagged "summary" data
-	titles, _ := prepareReportTitleData(LICENSE_LIST_ROW_DATA, true)
+	titles, _ := prepareReportTitleData(LICENSE_LIST_ROW_DATA, flags.Summary)
 	titleRow := createMarkdownRow(titles)
 	fmt.Fprintf(writer, "%s\n", titleRow)
 
 	// create alignment row, include all columns that are flagged "summary" data
-	alignments := createMarkdownColumnAlignmentRow(LICENSE_LIST_ROW_DATA, true)
+	alignments := createMarkdownColumnAlignmentRow(LICENSE_LIST_ROW_DATA, flags.Summary)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(writer, "%s\n", alignmentRow)
 

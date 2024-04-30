@@ -248,7 +248,7 @@ func (bom *BOM) HashmapService(cdxService CDXService, whereFilters []common.Wher
 // Licenses
 // -------------------
 
-func (bom *BOM) HashmapLicenseInfo(policyConfig *LicensePolicyConfig, key string, licenseInfo LicenseInfo, whereFilters []common.WhereFilter) (hashed bool, err error) {
+func (bom *BOM) HashmapLicenseInfo(policyConfig *LicensePolicyConfig, key string, licenseInfo LicenseInfo, whereFilters []common.WhereFilter, licenseFlags utils.LicenseCommandFlags) (hashed bool, err error) {
 
 	if reflect.DeepEqual(licenseInfo, LicenseInfo{}) {
 		getLogger().Warning("empty license object found")
@@ -269,6 +269,24 @@ func (bom *BOM) HashmapLicenseInfo(policyConfig *LicensePolicyConfig, key string
 	licenseInfo.LicenseChoiceType = GetLicenseChoiceTypeName(licenseInfo.LicenseChoiceTypeValue)
 	licenseInfo.BOMLocation = GetLicenseChoiceLocationName(licenseInfo.BOMLocationValue)
 
+	// If we need to include all license fields, they need to be copied to from
+	// wherever they appear into base LicenseInfo struct (for JSON tag/where filtering)
+	// i.e., "License.Id", "License.Name", "License.Url", "Expression",
+	//       "License.Text.ContentType", "License.Text.Encoding", "License.Text.Content"
+	if !licenseFlags.Summary {
+		if licenseInfo.LicenseChoice.License != nil {
+			if licenseInfo.LicenseChoiceType == LC_VALUE_ID {
+				licenseInfo.LicenseId = licenseInfo.LicenseChoice.License.Id
+			}
+			if licenseInfo.LicenseChoiceType == LC_VALUE_NAME {
+				licenseInfo.LicenseName = licenseInfo.LicenseChoice.License.Name
+			}
+			licenseInfo.LicenseUrl = licenseInfo.LicenseChoice.License.Url
+		} else {
+			getLogger().Tracef("invalid *CDXLicense")
+		}
+	}
+
 	var match bool = true
 	if len(whereFilters) > 0 {
 		mapInfo, _ := utils.MarshalStructToJsonMap(licenseInfo)
@@ -279,7 +297,6 @@ func (bom *BOM) HashmapLicenseInfo(policyConfig *LicensePolicyConfig, key string
 		hashed = true
 		// Hash LicenseInfo by license key (i.e., id|name|expression)
 		bom.LicenseMap.Put(key, licenseInfo)
-
 		getLogger().Tracef("Put: %s (`%s`), `%s`)",
 			licenseInfo.ResourceName,
 			licenseInfo.UsagePolicy,

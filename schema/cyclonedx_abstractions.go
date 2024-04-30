@@ -135,6 +135,13 @@ var mapLicenseLocationNames = map[int]string{
 
 // Note: the "License" property is used as hashmap key
 // NOTE: CDXRefType is a named `string` type as of v1.5
+// lc.License.Id,
+// lc.License.Name,
+// lc.License.Url,
+// lc.Expression,
+// lc.License.Text.ContentType,
+// lc.License.Text.Encoding,
+// lc.License.Text.Content)
 type LicenseInfo struct {
 	UsagePolicy            string           `json:"usage-policy"`
 	LicenseChoiceTypeValue int              `json:"license-type-value"`
@@ -148,6 +155,13 @@ type LicenseInfo struct {
 	Policy                 LicensePolicy    // Do not marshal
 	Component              CDXComponent     // Do not marshal
 	Service                CDXService       // Do not marshal
+	LicenseId              string           `json:"license-id"`
+	LicenseName            string           `json:"license-name"`
+	LicenseExpression      string           `json:"license-expression"`
+	LicenseUrl             string           `json:"license-url"`
+	LicenseTextEncoding    string           `json:"license-text-encoding"`
+	LicenseTextContentType string           `json:"license-text-content-type"`
+	LicenseTextContent     string           `json:"license-text-content"`
 }
 
 func (licenseInfo *LicenseInfo) SetLicenseChoiceTypeValue(value int) {

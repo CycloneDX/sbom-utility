@@ -244,6 +244,16 @@ func TestLicenseListCdx13Json(t *testing.T) {
 	verifyFileLineCountAndIndentation(t, buffer, &lti.CommonTestInfo)
 }
 
+// NOTE: non-summary
+func TestLicenseListCdx13Text(t *testing.T) {
+	lti := NewLicenseTestInfo(TEST_LICENSE_LIST_CDX_1_3, FORMAT_TEXT, false)
+	// lti.ResultExpectedLineCount = 93 // array of LicenseChoice JSON objects + newline
+	// lti.OutputIndent = 6
+	// lti.ResultExpectedIndentLength = int(lti.OutputIndent)
+	// lti.ResultExpectedIndentAtLineNum = 1
+	innerTestLicenseList(t, lti)
+}
+
 //---------------------------
 // Summary flag tests
 //---------------------------
