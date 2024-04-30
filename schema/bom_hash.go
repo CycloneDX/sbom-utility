@@ -294,6 +294,7 @@ func (bom *BOM) HashmapLicenseInfo(policyConfig *LicensePolicyConfig, key string
 	return
 }
 
+// TODO make this a method of *LicenseInfo (object)
 func copyExtendedLicenseChoiceFieldData(pLicenseInfo *LicenseInfo) {
 	if pLicenseInfo == nil {
 		getLogger().Tracef("invalid *LicenseInfo")

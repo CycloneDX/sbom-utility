@@ -293,13 +293,28 @@ func DisplayLicenseListText(bom *schema.BOM, writer io.Writer, flags utils.Licen
 	// Sort license using identifying key (i.e., `id`, `name` or `expression`)
 	sortLicenseKeys(licenseKeys)
 
+	// output the each license entry as a row
 	var line []string
+	var licenseInfo schema.LicenseInfo
+	var content string
+
 	for _, licenseName := range licenseKeys {
 		arrLicenseInfo, _ := bom.LicenseMap.Get(licenseName)
 
 		for _, iInfo := range arrLicenseInfo {
+			licenseInfo = iInfo.(schema.LicenseInfo)
+			lc := licenseInfo.LicenseChoice
+
+			// NOTE: we only truncate the content text for Text (console) output
+			// TODO perhaps add flag to allow user to specify truncate length (default 8)
+			// See field "DefaultTruncateLength" in ColumnFormatData struct
+			if lc.License != nil && lc.License.Text != nil {
+				content = lc.License.Text.GetContentTruncated(8, true)
+				licenseInfo.LicenseTextContent = content
+			}
+
 			line, err = prepareReportLineData(
-				iInfo.(schema.LicenseInfo),
+				licenseInfo,
 				LICENSE_LIST_ROW_DATA,
 				flags.Summary,
 			)
@@ -343,7 +358,9 @@ func DisplayLicenseListCSV(bom *schema.BOM, writer io.Writer, flags utils.Licens
 	sortLicenseKeys(licenseKeys)
 
 	// output the each license entry as a row
+	var line []string
 	var licenseInfo schema.LicenseInfo
+
 	for _, licenseName := range licenseKeys {
 		arrLicenseInfo, _ := bom.LicenseMap.Get(licenseName)
 
@@ -354,7 +371,6 @@ func DisplayLicenseListCSV(bom *schema.BOM, writer io.Writer, flags utils.Licens
 			os.Exit(ERROR_VALIDATION)
 		}
 
-		var line []string
 		for _, iInfo := range arrLicenseInfo {
 			licenseInfo = iInfo.(schema.LicenseInfo)
 			line, err = prepareReportLineData(
@@ -379,8 +395,6 @@ func DisplayLicenseListMarkdown(bom *schema.BOM, writer io.Writer, flags utils.L
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	var licenseInfo schema.LicenseInfo
-
 	titles, _ := prepareReportTitleData(LICENSE_LIST_ROW_DATA, flags.Summary)
 	titleRow := createMarkdownRow(titles)
 	fmt.Fprintf(writer, "%s\n", titleRow)
@@ -396,9 +410,10 @@ func DisplayLicenseListMarkdown(bom *schema.BOM, writer io.Writer, flags utils.L
 	// Emit no license or assertion-only warning into output
 	checkLicenseListEmptyOrNoAssertionOnly(licenseKeys)
 
+	// output the each license entry as a row
 	var line []string
 	var lineRow string
-	var content string
+	var licenseInfo schema.LicenseInfo
 
 	for _, licenseName := range licenseKeys {
 		arrLicenseInfo, _ := bom.LicenseMap.Get(licenseName)
@@ -407,15 +422,6 @@ func DisplayLicenseListMarkdown(bom *schema.BOM, writer io.Writer, flags utils.L
 			// Each row will contain every field of a CDX LicenseChoice object
 			line = nil
 			licenseInfo = iInfo.(schema.LicenseInfo)
-			lc := licenseInfo.LicenseChoice
-
-			// NOTE: we only truncate the content text for Text (console) output
-			// TODO perhaps add flag to allow user to specify truncate length (default 8)
-			// See field "DefaultTruncateLength" in ColumnFormatData struct
-			if lc.License != nil && lc.License.Text != nil {
-				content = lc.License.Text.GetContentTruncated(8, true)
-				licenseInfo.LicenseTextContent = content
-			}
 
 			// Format line and write to output
 			line, err = prepareReportLineData(
