@@ -42,14 +42,14 @@ var VALID_SUBCOMMANDS_RESOURCE = []string{SUBCOMMAND_RESOURCE_LIST}
 // filter keys
 // Note: these string values MUST match annotations for the ResourceInfo struct fields
 const (
-	RESOURCE_FILTER_KEY_TYPE    = "type"
-	RESOURCE_FILTER_KEY_NAME    = "name"
-	RESOURCE_FILTER_KEY_VERSION = "version"
-	RESOURCE_FILTER_KEY_BOMREF  = "bom-ref"
+	RESOURCE_FILTER_KEY_RESOURCE_TYPE = "resource-type"
+	RESOURCE_FILTER_KEY_NAME          = "name"
+	RESOURCE_FILTER_KEY_VERSION       = "version"
+	RESOURCE_FILTER_KEY_BOMREF        = "bom-ref"
 )
 
 var RESOURCE_LIST_ROW_DATA = []ColumnFormatData{
-	*NewColumnFormatData(RESOURCE_FILTER_KEY_TYPE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
+	*NewColumnFormatData(RESOURCE_FILTER_KEY_RESOURCE_TYPE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
 	*NewColumnFormatData(RESOURCE_FILTER_KEY_NAME, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
 	*NewColumnFormatData(RESOURCE_FILTER_KEY_VERSION, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
 	*NewColumnFormatData(RESOURCE_FILTER_KEY_BOMREF, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, REPORT_REPLACE_LINE_FEEDS_TRUE),
@@ -255,8 +255,8 @@ func sortResources(entries []multimap.Entry) {
 	sort.Slice(entries, func(i, j int) bool {
 		resource1 := (entries[i].Value).(schema.CDXResourceInfo)
 		resource2 := (entries[j].Value).(schema.CDXResourceInfo)
-		if resource1.Type != resource2.Type {
-			return resource1.Type < resource2.Type
+		if resource1.ResourceType != resource2.ResourceType {
+			return resource1.ResourceType < resource2.ResourceType
 		}
 		return resource1.Name < resource2.Name
 	})

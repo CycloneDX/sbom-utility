@@ -117,13 +117,13 @@ type CDXComponent struct {
 	Components         *[]CDXComponent             `json:"components,omitempty"`
 	Evidence           *CDXComponentEvidence       `json:"evidence,omitempty"`                  // v1.3: added
 	Properties         *[]CDXProperty              `json:"properties,omitempty"`                // v1.3: added
-	Modified           bool                        `json:"modified,omitempty" cdx:"deprecated"` // v1.4: deprecated
 	ReleaseNotes       *[]CDXReleaseNotes          `json:"releaseNotes,omitempty"`              // v1.4: added
 	Signature          *JSFSignature               `json:"signature,omitempty"`                 // v1.4: added
 	ModelCard          *CDXModelCard               `json:"modelCard,omitempty"`                 // v1.5: added
 	Data               *[]CDXComponentData         `json:"data,omitempty"`                      // v1.5: added
 	Authors            *[]CDXOrganizationalContact `json:"authors,omitempty"`                   // v1.6: added
 	Tags               *[]string                   `json:"tags,omitempty" cdx:"+1.6"`           // v1.6: added
+	Modified           bool                        `json:"modified,omitempty" cdx:"deprecated"` // v1.4: deprecated
 	Author             string                      `json:"author,omitempty"`                    // v1.6: deprecated
 }
 

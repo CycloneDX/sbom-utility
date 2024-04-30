@@ -39,38 +39,6 @@ const (
 
 var VALID_SUBCOMMANDS_COMPONENT = []string{SUBCOMMAND_COMPONENT_LIST}
 
-//	type CDXComponent struct {
-//		Primary            bool                        `json:"-"`              // Proprietary: do NOT marshal/unmarshal
-//		Type               string                      `json:"type,omitempty"` // Constraint: enum [see schema]
-//		Name               string                      `json:"name,omitempty"`
-//		Version            string                      `json:"version,omitempty"`
-//		Description        string                      `json:"description,omitempty"`
-//		Group              string                      `json:"group,omitempty"`
-//		BOMRef             *CDXRefType                 `json:"bom-ref,omitempty"`
-//		MimeType           string                      `json:"mime-type,omitempty"`
-//		Supplier           *CDXOrganizationalEntity    `json:"supplier,omitempty"`
-//		Author             string                      `json:"author,omitempty"` // v1.6: deprecated.
-//		Publisher          string                      `json:"publisher,omitempty"`
-//		Scope              string                      `json:"scope,omitempty"` // Constraint: "enum": ["required","optional","excluded"]
-//		Hashes             *[]CDXHash                  `json:"hashes,omitempty"`
-//		Licenses           *[]CDXLicenseChoice         `json:"licenses,omitempty"`
-//		Copyright          string                      `json:"copyright,omitempty"`
-//		Cpe                string                      `json:"cpe,omitempty"`                                       // See: https://nvd.nist.gov/products/cpe
-//		Purl               string                      `json:"purl,omitempty" scvs:"bom:resource:identifiers:purl"` // See: https://github.com/package-url/purl-spec
-//		Swid               *CDXSwid                    `json:"swid,omitempty"`                                      // See: https://www.iso.org/standard/65666.html
-//		Pedigree           *CDXPedigree                `json:"pedigree,omitempty"`                                  // anon. type
-//		ExternalReferences *[]CDXExternalReference     `json:"externalReferences,omitempty"`
-//		Components         *[]CDXComponent             `json:"components,omitempty"`
-//		Evidence           *CDXComponentEvidence       `json:"evidence,omitempty"`                  // v1.3: added
-//		Properties         *[]CDXProperty              `json:"properties,omitempty"`                // v1.3: added
-//		Modified           bool                        `json:"modified,omitempty" cdx:"deprecated"` // v1.4: deprecated
-//		ReleaseNotes       *[]CDXReleaseNotes          `json:"releaseNotes,omitempty"`              // v1.4: added
-//		Signature          *JSFSignature               `json:"signature,omitempty"`                 // v1.4: added
-//		ModelCard          *CDXModelCard               `json:"modelCard,omitempty"`                 // v1.5: added
-//		Data               *[]CDXComponentData         `json:"data,omitempty"`                      // v1.5: added
-//		Authors            *[]CDXOrganizationalContact `json:"authors,omitempty"`                   // v1.6: added
-//		Tags               *[]string                   `json:"tags,omitempty" cdx:"+1.6"`           // v1.6: added
-//	}
 var COMPONENT_LIST_ROW_DATA = []ColumnFormatData{
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_TYPE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_NAME, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
@@ -93,13 +61,6 @@ var VALID_COMPONENT_FILTER_KEYS = []string{
 	COMPONENT_FILTER_KEY_VERSION,
 	COMPONENT_FILTER_KEY_BOMREF,
 }
-
-// var COMPONENT_LIST_TITLES = []string{
-// 	COMPONENT_FILTER_KEY_TYPE,
-// 	COMPONENT_FILTER_KEY_NAME,
-// 	COMPONENT_FILTER_KEY_VERSION,
-// 	COMPONENT_FILTER_KEY_BOMREF,
-// }
 
 // Flags. Reuse query flag values where possible
 const (
@@ -155,25 +116,6 @@ func NewCommandComponent() *cobra.Command {
 	return command
 }
 
-func retrieveComponentType(cmd *cobra.Command) (componentTypes string, err error) {
-
-	componentTypes, err = cmd.Flags().GetString(FLAG_COMPONENT_TYPE)
-	if err != nil {
-		return
-	}
-
-	// TODO: parse "type" flag (comma-separated list of type names)
-	// TODO: validate each one is supported in the CDX Component Type enum.
-	// // validate component type(s) is a known keyword
-	// TODO: support multiple types (slice) and return "invalid" as an error
-	// if !schema.IsValidComponentType(componentTypes) {
-	// 	// invalid
-	// 	err = getLogger().Errorf("invalid type `%s`: `%s`", FLAG_COMPONENT_TYPE, componentType)
-	// }
-
-	return
-}
-
 func componentCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	getLogger().Enter(args)
 	defer getLogger().Exit()
@@ -195,14 +137,8 @@ func componentCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	// process filters supplied on the --where command flag
 	whereFilters, err := processWhereFlag(cmd)
 
-	// Process flag: --type
-	var types string
-	var commandFlags utils.ComponentCommandFlags
-	types, err = retrieveComponentType(cmd)
-
 	if err == nil {
-		commandFlags.Types = types
-		err = ListComponents(writer, utils.GlobalFlags.PersistentFlags, commandFlags, whereFilters)
+		err = ListComponents(writer, utils.GlobalFlags.PersistentFlags, whereFilters)
 	}
 
 	return
@@ -217,7 +153,7 @@ func processComponentListResults(err error) {
 }
 
 // NOTE: resourceType has already been validated
-func ListComponents(writer io.Writer, persistentFlags utils.PersistentCommandFlags, componentFlags utils.ComponentCommandFlags, whereFilters []common.WhereFilter) (err error) {
+func ListComponents(writer io.Writer, persistentFlags utils.PersistentCommandFlags, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -238,7 +174,7 @@ func ListComponents(writer io.Writer, persistentFlags utils.PersistentCommandFla
 
 	// Hash all licenses within input file
 	getLogger().Infof("Scanning document for licenses...")
-	err = loadDocumentComponents(document, componentFlags.Types, whereFilters)
+	err = loadDocumentComponents(document, whereFilters)
 
 	if err != nil {
 		return
@@ -263,7 +199,7 @@ func ListComponents(writer io.Writer, persistentFlags utils.PersistentCommandFla
 	return
 }
 
-func loadDocumentComponents(document *schema.BOM, componentTypes string, whereFilters []common.WhereFilter) (err error) {
+func loadDocumentComponents(document *schema.BOM, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 
@@ -295,8 +231,8 @@ func sortComponents(entries []multimap.Entry) {
 	sort.Slice(entries, func(i, j int) bool {
 		resource1 := (entries[i].Value).(schema.CDXResourceInfo)
 		resource2 := (entries[j].Value).(schema.CDXResourceInfo)
-		if resource1.Type != resource2.Type {
-			return resource1.Type < resource2.Type
+		if resource1.ResourceType != resource2.ResourceType {
+			return resource1.ResourceType < resource2.ResourceType
 		}
 		return resource1.Name < resource2.Name
 	})

@@ -83,7 +83,8 @@ func (bom *BOM) HashmapComponents(components []CDXComponent, whereFilters []comm
 func (bom *BOM) HashmapComponent(cdxComponent CDXComponent, whereFilters []common.WhereFilter, root bool) (hashed bool, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
-	var resourceInfo CDXResourceInfo
+	//var componentInfo CDXResourceInfo
+	var componentInfo CDXComponentInfo
 
 	if reflect.DeepEqual(cdxComponent, CDXComponent{}) {
 		getLogger().Warning("empty component object found")
@@ -98,40 +99,41 @@ func (bom *BOM) HashmapComponent(cdxComponent CDXComponent, whereFilters []commo
 		getLogger().Warningf("component named `%s` missing `version`", cdxComponent.Name)
 	}
 
-	if cdxComponent.BOMRef != nil && *cdxComponent.BOMRef == "" {
+	//if cdxComponent.BOMRef != nil && *cdxComponent.BOMRef == "" {
+	if cdxComponent.BOMRef == nil || *cdxComponent.BOMRef == "" {
 		getLogger().Warningf("component named `%s` missing `bom-ref`", cdxComponent.Name)
 	}
 
 	// hash any component w/o a license using special key name
-	resourceInfo.IsRoot = root
-	resourceInfo.Type = RESOURCE_TYPE_COMPONENT
-	resourceInfo.Component = cdxComponent
-	resourceInfo.Name = cdxComponent.Name
+	componentInfo.IsRoot = root
+	componentInfo.ResourceType = RESOURCE_TYPE_COMPONENT
+	componentInfo.Component = cdxComponent
+	componentInfo.Name = cdxComponent.Name
 	if cdxComponent.BOMRef != nil {
 		ref := *cdxComponent.BOMRef
-		resourceInfo.BOMRef = ref.String()
+		componentInfo.BOMRef = ref.String()
 	}
-	resourceInfo.Version = cdxComponent.Version
+	componentInfo.Version = cdxComponent.Version
 	if cdxComponent.Supplier != nil {
-		resourceInfo.SupplierProvider = cdxComponent.Supplier
+		componentInfo.SupplierProvider = cdxComponent.Supplier
 	}
-	resourceInfo.Properties = cdxComponent.Properties
+	componentInfo.Properties = cdxComponent.Properties
 
 	var match bool = true
 	if len(whereFilters) > 0 {
-		mapResourceInfo, _ := utils.MarshalStructToJsonMap(resourceInfo)
+		mapResourceInfo, _ := utils.MarshalStructToJsonMap(componentInfo)
 		match, _ = whereFilterMatch(mapResourceInfo, whereFilters)
 	}
 
 	if match {
 		hashed = true
-		bom.ComponentMap.Put(resourceInfo.BOMRef, resourceInfo)
-		bom.ResourceMap.Put(resourceInfo.BOMRef, resourceInfo)
+		bom.ComponentMap.Put(componentInfo.BOMRef, componentInfo)
+		bom.ResourceMap.Put(componentInfo.BOMRef, componentInfo.CDXResourceInfo)
 
-		getLogger().Tracef("Put: %s (`%s`), `%s`)",
-			resourceInfo.Name,
-			resourceInfo.Version,
-			resourceInfo.BOMRef)
+		getLogger().Infof("Put: %s (`%s`), `%s`)",
+			componentInfo.Name,
+			componentInfo.Version,
+			componentInfo.BOMRef)
 	}
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
@@ -196,12 +198,12 @@ func (bom *BOM) HashmapService(cdxService CDXService, whereFilters []common.Wher
 		getLogger().Warningf("service named `%s` missing `version`", cdxService.Name)
 	}
 
-	if cdxService.BOMRef == nil || *cdxService.BOMRef != "" {
+	if cdxService.BOMRef == nil || *cdxService.BOMRef == "" {
 		getLogger().Warningf("service named `%s` missing `bom-ref`", cdxService.Name)
 	}
 
 	// hash any component w/o a license using special key name
-	resourceInfo.Type = RESOURCE_TYPE_SERVICE
+	resourceInfo.ResourceType = RESOURCE_TYPE_SERVICE
 	resourceInfo.Service = cdxService
 	resourceInfo.Name = cdxService.Name
 	if cdxService.BOMRef != nil {
@@ -226,7 +228,7 @@ func (bom *BOM) HashmapService(cdxService CDXService, whereFilters []common.Wher
 		bom.ResourceMap.Put(resourceInfo.BOMRef, resourceInfo)
 
 		getLogger().Tracef("Put: [`%s`] %s (`%s`), `%s`)",
-			resourceInfo.Type,
+			resourceInfo.ResourceType,
 			resourceInfo.Name,
 			resourceInfo.Version,
 			resourceInfo.BOMRef,

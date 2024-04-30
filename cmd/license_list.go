@@ -93,9 +93,6 @@ var LICENSE_LIST_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{FORMAT_JSON, FORMAT_CSV, FORMAT_MARKDOWN}, ", ") +
 	" (default: json)"
 
-// Title row names for formatted lists (reports)
-//var LICENSE_LIST_TITLES_LICENSE_CHOICE = []string{"License.Id", "License.Name", "License.Url", "Expression", "License.Text.ContentType", "License.Text.Encoding", "License.Text.Content"}
-
 // WARNING: Cobra will not recognize a subcommand if its `command.Use` is not a single
 // word string that matches one of the `command.ValidArgs` set on the parent command
 func NewCommandList() *cobra.Command {

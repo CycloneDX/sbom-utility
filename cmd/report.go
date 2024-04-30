@@ -241,10 +241,13 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 		data, dataFound = mapStruct[columnData.DataKey]
 
 		if !dataFound {
-			err = getLogger().Errorf("data not found in structure: key: `%s`", columnData.DataKey)
-			return
+			// TODO: change back?
+			getLogger().Errorf("data not found in structure: key: `%s`", columnData.DataKey)
+			data = ""
+			//return
 		}
 
+		//fmt.Printf("data: `%v` (%T)\n", data, data)
 		switch typedData := data.(type) {
 		case string:
 			// replace line feeds with spaces in description

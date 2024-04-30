@@ -225,8 +225,8 @@ func DisplayStatsText(bom *schema.BOM, writer io.Writer) {
 	sort.Slice(entries, func(i, j int) bool {
 		resource1 := (entries[i].Value).(schema.CDXResourceInfo)
 		resource2 := (entries[j].Value).(schema.CDXResourceInfo)
-		if resource1.Type != resource2.Type {
-			return resource1.Type < resource2.Type
+		if resource1.ResourceType != resource2.ResourceType {
+			return resource1.ResourceType < resource2.ResourceType
 		}
 
 		return resource1.Name < resource2.Name
@@ -240,7 +240,7 @@ func DisplayStatsText(bom *schema.BOM, writer io.Writer) {
 
 		// Format line and write to output
 		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
-			resourceInfo.Type,
+			resourceInfo.ResourceType,
 			resourceInfo.Name,
 			resourceInfo.Version,
 			resourceInfo.BOMRef)
