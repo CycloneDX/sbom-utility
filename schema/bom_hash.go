@@ -231,11 +231,12 @@ func (bom *BOM) HashmapService(cdxService CDXService, whereFilters []common.Wher
 		bom.ServiceMap.Put(serviceInfo.BOMRef, serviceInfo)
 		bom.ResourceMap.Put(serviceInfo.BOMRef, serviceInfo.CDXResourceInfo)
 
-		getLogger().Tracef("Put: [`%s`] %s (`%s`), `%s`)",
+		getLogger().Tracef("Put: [`%s`] %s (`%s`), `%s`, `%s`)",
 			serviceInfo.ResourceType,
 			serviceInfo.Name,
 			serviceInfo.Version,
 			serviceInfo.BOMRef,
+			serviceInfo.Description,
 		)
 	}
 
