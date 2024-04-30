@@ -262,7 +262,13 @@ func sortResources(entries []multimap.Entry) {
 		if resource1.ResourceType != resource2.ResourceType {
 			return resource1.ResourceType < resource2.ResourceType
 		}
-		return resource1.Name < resource2.Name
+		if resource1.Group != resource2.Group {
+			return resource1.Group < resource2.Group
+		}
+		if resource1.Name != resource2.Name {
+			return resource1.Name < resource2.Name
+		}
+		return resource1.Version < resource2.Version
 	})
 }
 
