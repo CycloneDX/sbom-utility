@@ -124,7 +124,6 @@ func innerTestValidate(t *testing.T, vti ValidateTestInfo) (document *schema.BOM
 
 	// TODO: support additional tests on output buffer (e.g., format==valid JSON)
 	isValid, document, schemaErrors, outputBuffer, actualError = innerValidateErrorBuffered(
-		t,
 		utils.GlobalFlags.PersistentFlags,
 		utils.GlobalFlags.ValidateFlags,
 	)
@@ -178,7 +177,7 @@ func innerTestValidate(t *testing.T, vti ValidateTestInfo) (document *schema.BOM
 	return
 }
 
-func innerValidateErrorBuffered(t *testing.T, persistentFlags utils.PersistentCommandFlags, validationFlags utils.ValidateCommandFlags) (isValid bool, document *schema.BOM, schemaErrors []gojsonschema.ResultError, outputBuffer bytes.Buffer, err error) {
+func innerValidateErrorBuffered(persistentFlags utils.PersistentCommandFlags, validationFlags utils.ValidateCommandFlags) (isValid bool, document *schema.BOM, schemaErrors []gojsonschema.ResultError, outputBuffer bytes.Buffer, err error) {
 	// Declare an output outputBuffer/outputWriter to use used during tests
 	var outputWriter = bufio.NewWriter(&outputBuffer)
 	// ensure all data is written to buffer before further validation
@@ -431,7 +430,7 @@ func TestValidateCdx14ErrorResultsFormatIriReferencesJson(t *testing.T) {
 // Test custom config.json (i.e., `--config-schema` flag)
 // -----------------------------------------------------------
 
-func loadCustomSchemaConfig(t *testing.T, filename string) (err error) {
+func loadCustomSchemaConfig(filename string) (err error) {
 	// Do not pass a default file, it should fail if custom policy cannot be loaded
 	err = SupportedFormatConfig.InnerLoadSchemaConfigFile(filename, DEFAULT_SCHEMA_CONFIG)
 	if err != nil {
@@ -440,17 +439,17 @@ func loadCustomSchemaConfig(t *testing.T, filename string) (err error) {
 	return
 }
 
-func restoreEmbeddedDefaultSchemaConfig(t *testing.T) (err error) {
-	return loadCustomSchemaConfig(t, "")
+func restoreEmbeddedDefaultSchemaConfig() (err error) {
+	return loadCustomSchemaConfig("")
 }
 
 func innerValidateCustomSchemaConfig(t *testing.T, filename string, configFile string, variant string, format string, expectedError error) (document *schema.BOM, schemaErrors []gojsonschema.ResultError, actualError error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	loadCustomSchemaConfig(t, configFile)
+	loadCustomSchemaConfig(configFile)
 	// !!!Important!!! MUST restore the embedded `config.json` to be used for all other tests
-	defer restoreEmbeddedDefaultSchemaConfig(t)
+	defer restoreEmbeddedDefaultSchemaConfig()
 
 	vti := NewValidateTestInfo(TEST_CDX_1_4_MIN_REQUIRED, FORMAT_TEXT, variant, nil)
 	document, schemaErrors, actualError = innerTestValidate(t, *vti)

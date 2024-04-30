@@ -44,7 +44,7 @@ func NewCommandStats() *cobra.Command {
 	// TODO: command.ValidArgs = VALID_SUBCOMMANDS_S
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		// Test for required flags (parameters)
-		err = preRunTestForInputFile(cmd, args)
+		err = preRunTestForInputFile(args)
 		return
 	}
 	return command
@@ -212,13 +212,6 @@ func DisplayStatsText(bom *schema.BOM, writer io.Writer) {
 	// min-width, tab-width, padding, pad-char, flags
 	w.Init(writer, 8, 2, 2, ' ', 0)
 
-	// create underline row from compulsory titles
-	underlines := createTitleTextSeparators(RESOURCE_LIST_TITLES)
-
-	// Add tabs between column titles for the tabWRiter
-	fmt.Fprintf(w, "%s\n", strings.Join(RESOURCE_LIST_TITLES, "\t"))
-	fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
-
 	// Display a warning "missing" in the actual output and return (short-circuit)
 	entries := bom.ResourceMap.Entries()
 
@@ -232,8 +225,8 @@ func DisplayStatsText(bom *schema.BOM, writer io.Writer) {
 	sort.Slice(entries, func(i, j int) bool {
 		resource1 := (entries[i].Value).(schema.CDXResourceInfo)
 		resource2 := (entries[j].Value).(schema.CDXResourceInfo)
-		if resource1.Type != resource2.Type {
-			return resource1.Type < resource2.Type
+		if resource1.ResourceType != resource2.ResourceType {
+			return resource1.ResourceType < resource2.ResourceType
 		}
 
 		return resource1.Name < resource2.Name
@@ -247,7 +240,7 @@ func DisplayStatsText(bom *schema.BOM, writer io.Writer) {
 
 		// Format line and write to output
 		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
-			resourceInfo.Type,
+			resourceInfo.ResourceType,
 			resourceInfo.Name,
 			resourceInfo.Version,
 			resourceInfo.BOMRef)

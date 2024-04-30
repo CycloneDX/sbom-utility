@@ -39,22 +39,13 @@ const (
 	REPORT_LIST_VALUE_NONE          = "none"
 )
 
-// Text report helpers
-func createTitleTextSeparators(titles []string) (separatorLine []string) {
-	var underline string
-	for _, title := range titles {
-		underline = strings.Repeat(REPORT_LIST_TITLE_ROW_SEPARATOR, len(title))
-		separatorLine = append(separatorLine, underline)
-	}
-	return
-}
-
 // Markdown report helpers
 const (
 	MD_COLUMN_SEPARATOR = "|"
 	MD_ALIGN_LEFT       = ":--"
 	MD_ALIGN_CENTER     = "-:-"
 	MD_ALIGN_RIGHT      = "--:"
+	MD_ALIGN_DEFAULT    = MD_ALIGN_LEFT
 )
 
 // Helper function in case displayed table columns become too wide
@@ -69,9 +60,15 @@ func truncateString(value string, maxLength int, showDetail bool) string {
 	return value
 }
 
-func createMarkdownColumnAlignment(titles []string) (alignment []string) {
-	for range titles {
-		alignment = append(alignment, MD_ALIGN_LEFT)
+// TODO: Allow column format data to include MD_ALIGN_xxx values
+func createMarkdownColumnAlignmentRow(columns []ColumnFormatData, summarizedReport bool) (alignment []string) {
+	for _, column := range columns {
+		// if it is a summary report being created, but the column is not marked summary data
+		if summarizedReport && !column.IsSummaryData {
+			continue // skip to next column
+		}
+		// it is summary colum data, include it in the alignment row formatting
+		alignment = append(alignment, MD_ALIGN_DEFAULT)
 	}
 	return
 }
@@ -93,7 +90,6 @@ func processWhereFlag(cmd *cobra.Command) (whereFilters []common.WhereFilter, er
 	}
 
 	whereFilters, err = retrieveWhereFilters(whereValues)
-
 	return
 }
 
@@ -166,7 +162,9 @@ func wrapTableRowText(maxChars int, joinChar string, columns ...interface{}) (ta
 
 // Report column data values
 const REPORT_SUMMARY_DATA_TRUE = true
+const REPORT_SUMMARY_DATA_FALSE = false
 const REPORT_REPLACE_LINE_FEEDS_TRUE = true
+const REPORT_REPLACE_LINE_FEEDS_FALSE = false
 const DEFAULT_COLUMN_TRUNCATE_LENGTH = -1
 
 // TODO: Support additional flags to:
@@ -174,17 +172,30 @@ const DEFAULT_COLUMN_TRUNCATE_LENGTH = -1
 //   - provide "empty" value to display in column (e.g., "none" or "UNDEFINED")
 //   - inform how to "summarize" (e.g., show-first-only) data if data type is a slice (e.g., []string)
 //     NOTE: if only a subset of entries are shown on a summary, an indication of (x) entries could be shown as well
+//   - Support Markdown column alignment (e.g., MD_ALIGN_xxx values)
 type ColumnFormatData struct {
 	DataKey               string // Note: data key is the column label (where possible)
 	DefaultTruncateLength int    // truncate data when `--format txt`
 	IsSummaryData         bool   // include in `--summary` reports
 	ReplaceLineFeeds      bool   // replace line feeds with spaces (e.g., for multi-line descriptions)
+	Alignment             string
+}
+
+func NewColumnFormatData(key string, truncateLen int, isSummary bool, replaceLineFeeds bool) (foo *ColumnFormatData) {
+	foo = new(ColumnFormatData)
+	foo.DataKey = key
+	foo.DefaultTruncateLength = truncateLen
+	foo.IsSummaryData = isSummary
+	foo.ReplaceLineFeeds = replaceLineFeeds
+	return
+}
+
+func (data *ColumnFormatData) SetAlignment(alignment string) {
+	data.Alignment = alignment
 }
 
 func prepareReportTitleData(formatData []ColumnFormatData, summarizedReport bool) (titleData []string, separatorData []string) {
-
 	var underline string
-
 	for _, columnData := range formatData {
 
 		// if the report we are preparing is a summarized one (i.e., --summary true)
@@ -197,7 +208,6 @@ func prepareReportTitleData(formatData []ColumnFormatData, summarizedReport bool
 		underline = strings.Repeat(REPORT_LIST_TITLE_ROW_SEPARATOR, len(columnData.DataKey))
 		separatorData = append(separatorData, underline)
 	}
-
 	return
 }
 
@@ -223,10 +233,13 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 		data, dataFound = mapStruct[columnData.DataKey]
 
 		if !dataFound {
-			err = getLogger().Errorf("data not found in structure: key: `%s`", columnData.DataKey)
-			return
+			// TODO: change back?
+			getLogger().Errorf("data not found in structure: key: `%s`", columnData.DataKey)
+			data = ""
+			//return
 		}
 
+		//fmt.Printf("data: `%v` (%T)\n", data, data)
 		switch typedData := data.(type) {
 		case string:
 			// replace line feeds with spaces in description

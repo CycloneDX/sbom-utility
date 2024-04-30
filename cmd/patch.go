@@ -54,7 +54,7 @@ var PATCH_OUTPUT_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
 	strings.Join([]string{FORMAT_JSON}, ", ")
 
 // Command PreRunE helper function to test for patch file
-func preRunTestForPatchFile(cmd *cobra.Command, args []string) error {
+func preRunTestForPatchFile(args []string) error {
 	getLogger().Enter()
 	defer getLogger().Exit()
 	getLogger().Tracef("args: %v", args)
@@ -77,11 +77,11 @@ func NewCommandPatch() *cobra.Command {
 	command.RunE = patchCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) (err error) {
 		// Test for required flags (parameters)
-		err = preRunTestForInputFile(cmd, args)
+		err = preRunTestForInputFile(args)
 		if err != nil {
 			return
 		}
-		err = preRunTestForPatchFile(cmd, args)
+		err = preRunTestForPatchFile(args)
 		if err != nil {
 			return
 		}

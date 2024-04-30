@@ -58,12 +58,12 @@ const (
 
 // NOTE: columns will be output in order they are listed here:
 var SCHEMA_LIST_ROW_DATA = []ColumnFormatData{
-	{SCHEMA_DATA_KEY_KEY_NAME, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
-	{SCHEMA_DATA_KEY_KEY_VARIANT, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
-	{SCHEMA_DATA_KEY_KEY_FORMAT, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
-	{SCHEMA_DATA_KEY_KEY_VERSION, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
-	{SCHEMA_DATA_KEY_KEY_FILE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
-	{SCHEMA_DATA_KEY_KEY_SOURCE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
+	*NewColumnFormatData(SCHEMA_DATA_KEY_KEY_NAME, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
+	*NewColumnFormatData(SCHEMA_DATA_KEY_KEY_VARIANT, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
+	*NewColumnFormatData(SCHEMA_DATA_KEY_KEY_FORMAT, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
+	*NewColumnFormatData(SCHEMA_DATA_KEY_KEY_VERSION, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
+	*NewColumnFormatData(SCHEMA_DATA_KEY_KEY_FILE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
+	*NewColumnFormatData(SCHEMA_DATA_KEY_KEY_SOURCE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
 }
 
 // Command help formatting
@@ -90,7 +90,7 @@ func NewCommandSchema() *cobra.Command {
 
 		// Make sure (optional) subcommand is known/valid
 		if len(args) == 1 {
-			if !preRunTestForSubcommand(command, VALID_SUBCOMMANDS_SCHEMA, args[0]) {
+			if !preRunTestForSubcommand(VALID_SUBCOMMANDS_SCHEMA, args[0]) {
 				return getLogger().Errorf("Subcommand provided is not valid: `%v`", args[0])
 			}
 		}
@@ -123,18 +123,15 @@ func schemaCmdImpl(cmd *cobra.Command, args []string) (err error) {
 
 	// process filters supplied on the --where command flag
 	whereFilters, err := processWhereFlag(cmd)
-
 	if err != nil {
 		return
 	}
 
 	err = ListSchemas(writer, utils.GlobalFlags.PersistentFlags, whereFilters)
-
 	return
 }
 
 func flattenFormatSchemas(sliceFormatSchemas []schema.FormatSchema) (flattenedFormatSchemas []schema.FormatSchemaInstance) {
-
 	for _, format := range sliceFormatSchemas {
 		for _, schema := range format.Schemas {
 			schema.Format = format.CanonicalName
@@ -155,7 +152,6 @@ func filterFormatSchemas(whereFilters []common.WhereFilter) (filteredFormats []s
 	sliceSchemas := flattenFormatSchemas(sliceFormats)
 
 	for _, schema := range sliceSchemas {
-
 		var match bool = true
 
 		if len(whereFilters) > 0 {
@@ -169,9 +165,7 @@ func filterFormatSchemas(whereFilters []common.WhereFilter) (filteredFormats []s
 			getLogger().Tracef("append: %s\n",
 				schema.Name)
 		}
-
 	}
-
 	return
 }
 
@@ -191,7 +185,6 @@ func sortFormatSchemaInstances(filteredSchemas []schema.FormatSchemaInstance) []
 
 		return schema1.Variant < schema2.Variant
 	})
-
 	return filteredSchemas
 }
 
@@ -256,22 +249,23 @@ func DisplaySchemasTabbedText(writer io.Writer, filteredSchemas []schema.FormatS
 	// Sort by Format, Version, Variant
 	filteredSchemas = sortFormatSchemaInstances(filteredSchemas)
 
-	// Emit rows
+	// Emit row data
+	var line []string
 	for _, schemaInstance := range filteredSchemas {
-
-		fmt.Fprintf(w, "%v\t%s\t%s\t%s\t%s\t%s\n",
-			schemaInstance.Name,
-			schema.FormatSchemaVariant(schemaInstance.Variant),
-			schemaInstance.Format,
-			schemaInstance.Version,
-			schemaInstance.File,
-			schemaInstance.Url,
+		// Supply variant name "latest" (the default name), if not otherwise declared in schema definition
+		schemaInstance.Variant = schema.FormatSchemaVariant(schemaInstance.Variant)
+		line, err = prepareReportLineData(
+			schemaInstance,
+			SCHEMA_LIST_ROW_DATA,
+			true,
 		)
+		// Only emit line if no error
+		if err != nil {
+			return
+		}
+		fmt.Fprintf(w, "%s\n", strings.Join(line, "\t"))
 	}
-
-	// Always end on a newline
-	fmt.Fprintln(w, "")
-	return nil
+	return
 }
 
 // TODO: Add a --no-title flag to skip title output
@@ -279,12 +273,14 @@ func DisplaySchemasMarkdown(writer io.Writer, filteredSchemas []schema.FormatSch
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	// create title row and alignment row from slices of optional and compulsory titles
-	titles, _ := prepareReportTitleData(SCHEMA_LIST_ROW_DATA, false)
+	// Create title row data as []string, include all columns that are flagged "summary" data
+	titles, _ := prepareReportTitleData(SCHEMA_LIST_ROW_DATA, true)
 	titleRow := createMarkdownRow(titles)
-	alignments := createMarkdownColumnAlignment(titles)
-	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(writer, "%s\n", titleRow)
+
+	// create alignment row, include all columns that are flagged "summary" data
+	alignments := createMarkdownColumnAlignmentRow(SCHEMA_LIST_ROW_DATA, true)
+	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(writer, "%s\n", alignmentRow)
 
 	// Emit no schemas found warning into output
@@ -293,27 +289,23 @@ func DisplaySchemasMarkdown(writer io.Writer, filteredSchemas []schema.FormatSch
 		return fmt.Errorf(MSG_OUTPUT_NO_SCHEMAS_FOUND)
 	}
 
-	var line []string
-	var lineRow string
-
 	// Sort by Format, Version, Variant
 	filteredSchemas = sortFormatSchemaInstances(filteredSchemas)
 
-	// Emit rows
+	var line []string
+	var lineRow string
 	for _, schemaInstance := range filteredSchemas {
-
-		// reset current line
-		line = nil
-
-		line = append(line,
-			schemaInstance.Name,
-			schema.FormatSchemaVariant(schemaInstance.Variant),
-			schemaInstance.Format,
-			schemaInstance.Version,
-			schemaInstance.File,
-			schemaInstance.Url,
+		// Supply variant name "latest" (the default name), if not otherwise declared in schema definition
+		schemaInstance.Variant = schema.FormatSchemaVariant(schemaInstance.Variant)
+		line, err = prepareReportLineData(
+			schemaInstance,
+			SCHEMA_LIST_ROW_DATA,
+			true,
 		)
-
+		// Only emit line if no error
+		if err != nil {
+			return
+		}
 		lineRow = createMarkdownRow(line)
 		fmt.Fprintf(writer, "%s\n", lineRow)
 	}
@@ -345,28 +337,25 @@ func DisplaySchemasCSV(writer io.Writer, filteredSchemas []schema.FormatSchemaIn
 		return fmt.Errorf(currentRow[0])
 	}
 
-	var line []string
-
 	// Sort by Format, Version, Variant
 	filteredSchemas = sortFormatSchemaInstances(filteredSchemas)
 
-	// Emit rows
+	var line []string
 	for _, schemaInstance := range filteredSchemas {
+		// Supply variant name "latest" (the default name), if not otherwise declared in schema definition
+		schemaInstance.Variant = schema.FormatSchemaVariant(schemaInstance.Variant)
+		line, err = prepareReportLineData(
+			schemaInstance,
+			SCHEMA_LIST_ROW_DATA,
+			true)
 
-		line = nil
-		line = append(line,
-			schemaInstance.Name,
-			schema.FormatSchemaVariant(schemaInstance.Variant),
-			schemaInstance.Format,
-			schemaInstance.Version,
-			schemaInstance.File,
-			schemaInstance.Url,
-		)
-
+		// Only emit line if no error
+		if err != nil {
+			return
+		}
 		if err = w.Write(line); err != nil {
-			return getLogger().Errorf("error writing to output (%v): %s", line, err)
+			err = getLogger().Errorf("csv.Write: %w", err)
 		}
 	}
-
 	return
 }

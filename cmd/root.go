@@ -37,6 +37,7 @@ var SupportedFormatConfig schema.BOMFormatAndSchemaConfig
 
 // top-level commands
 const (
+	CMD_COMPONENT     = "component"
 	CMD_DIFF          = "diff"
 	CMD_LICENSE       = "license"
 	CMD_QUERY         = "query"
@@ -53,16 +54,17 @@ const (
 // WARNING!!! The ".Use" field of a Cobra command MUST have the first word be the actual command
 // otherwise, the command will NOT be found by the Cobra framework. This is poor code assumption is NOT documented.
 const (
+	CMD_USAGE_COMPONENT_LIST     = CMD_COMPONENT + " " + SUBCOMMAND_LICENSE_LIST + " --input-file <input_file> [--type type1[,typeN]>] [--where key=regex[,...]] [--format txt|csv|md]"
 	CMD_USAGE_DIFF               = CMD_DIFF + " --input-file <base_file> --input-revision <revised_file> [--format json|txt] [--colorize=true|false]"
 	CMD_USAGE_LICENSE_LIST       = SUBCOMMAND_LICENSE_LIST + " --input-file <input_file> [--summary] [--where key=regex[,...]] [--format json|txt|csv|md]"
 	CMD_USAGE_LICENSE_POLICY     = SUBCOMMAND_LICENSE_POLICY + " [--where key=regex[,...]] [--format txt|csv|md]"
-	CMD_USAGE_QUERY              = CMD_QUERY + " --input-file <input_file> [--select * | field1[,fieldN]] [--from [key1[.keyN]] [--where key=regex[,...]]"
+	CMD_USAGE_QUERY              = CMD_QUERY + " --input-file <input_file> [--select * | field1[,fieldN]] [--from key1[.keyN]] [--where key=regex[,...]]"
 	CMD_USAGE_RESOURCE_LIST      = CMD_RESOURCE + " --input-file <input_file> [--type component|service] [--where key=regex[,...]] [--format txt|csv|md]"
 	CMD_USAGE_SCHEMA_LIST        = CMD_SCHEMA + " [--where key=regex[,...]] [--format txt|csv|md]"
 	CMD_USAGE_VALIDATE           = CMD_VALIDATE + " --input-file <input_file> [--variant <variant_name>] [--format txt|json] [--force schema_file]"
 	CMD_USAGE_VULNERABILITY_LIST = CMD_VULNERABILITY + " " + SUBCOMMAND_VULNERABILITY_LIST + " --input-file <input_file> [--summary] [--where key=regex[,...]] [--format json|txt|csv|md]"
 	CMD_USAGE_STATS_LIST         = CMD_STATS + " --input-file <input_file> [--type component|service] [--format txt|csv|md]"
-	CMD_USAGE_TRIM               = CMD_TRIM + " --input-file <input_file>  --output-file <output_file>"
+	CMD_USAGE_TRIM               = CMD_TRIM + " --input-file <input_file>  --output-file <output_file> [--normalize]"
 	CMD_USAGE_PATCH              = CMD_PATCH + " --input-file <input_file> --patch-file <patch_file> --output-file <output_file>"
 )
 
@@ -207,6 +209,7 @@ func init() {
 	rootCmd.AddCommand(NewCommandDiff())
 	rootCmd.AddCommand(NewCommandTrim())
 	rootCmd.AddCommand(NewCommandPatch())
+	rootCmd.AddCommand(NewCommandComponent())
 	// TODO: when fully implemented uncomment:
 	//rootCmd.AddCommand(NewCommandStats())
 
@@ -288,7 +291,7 @@ func Execute() {
 }
 
 // Command PreRunE helper function to test for input file
-func preRunTestForInputFile(cmd *cobra.Command, args []string) error {
+func preRunTestForInputFile(args []string) error {
 	getLogger().Enter()
 	defer getLogger().Exit()
 	getLogger().Tracef("args: %v", args)
@@ -307,7 +310,7 @@ func preRunTestForInputFile(cmd *cobra.Command, args []string) error {
 
 // TODO: when the package "golang.org/x/exp/slices" is graduated from "experimental", replace
 // for loop with the "Contains" method.
-func preRunTestForSubcommand(cmd *cobra.Command, validSubcommands []string, subcommand string) bool {
+func preRunTestForSubcommand(validSubcommands []string, subcommand string) bool {
 	getLogger().Enter()
 	defer getLogger().Exit()
 	getLogger().Tracef("subcommands: %v, subcommand: `%v`", validSubcommands, subcommand)

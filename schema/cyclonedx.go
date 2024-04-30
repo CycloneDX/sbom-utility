@@ -59,7 +59,7 @@ type CDXBom struct {
 // v1.5: added "lifecycles"
 type CDXMetadata struct {
 	Timestamp    string                      `json:"timestamp,omitempty" scvs:"bom:core:timestamp"` // urn:owasp:scvs:bom:core:timestamp
-	Tools        interface{}                 `json:"tools,omitempty"`                               // v1.2: added.v1.5: "tools" is now an interface{}
+	Tools        interface{}                 `json:"tools,omitempty"`                               // v1.2: added; v1.5: "tools" is now an interface{}
 	Authors      *[]CDXOrganizationalContact `json:"authors,omitempty"`
 	Component    *CDXComponent               `json:"component,omitempty"`
 	Manufacturer *CDXOrganizationalEntity    `json:"manufacture,omitempty"` // NOTE: Typo is in spec.
@@ -68,6 +68,21 @@ type CDXMetadata struct {
 	Properties   *[]CDXProperty              `json:"properties,omitempty"` // v1.3 added
 	Lifecycles   *[]CDXLifecycle             `json:"lifecycles,omitempty"` // v1.5 added
 }
+
+// TODO: figure out how to support both current (object)/legacy(array) tools in Metadata.Tools field
+// See: https://stackoverflow.com/questions/47057240/parsing-multiple-json-types-into-the-same-struct
+// type CDXToolLegacy struct {
+// 	Name               string                  `json:"name,omitempty"`
+// 	Version            string                  `json:"version,omitempty"`
+// 	Vendor             string                  `json:"vendor,omitempty"`
+// 	Hashes             *[]CDXHash              `json:"hashes,omitempty"`
+// 	ExternalReferences *[]CDXExternalReference `json:"externalReferences,omitempty"`
+// }
+
+// type CDXTools struct {
+// 	Components *[]CDXComponent `json:"components,omitempty"`
+// 	Services   *[]CDXService   `json:"services,omitempty"`
+// }
 
 // v1.2: existed
 // v1.3: added: "evidence", "properties"
@@ -89,7 +104,6 @@ type CDXComponent struct {
 	BOMRef             *CDXRefType                 `json:"bom-ref,omitempty"`
 	MimeType           string                      `json:"mime-type,omitempty"`
 	Supplier           *CDXOrganizationalEntity    `json:"supplier,omitempty"`
-	Author             string                      `json:"author,omitempty"`
 	Publisher          string                      `json:"publisher,omitempty"`
 	Scope              string                      `json:"scope,omitempty"` // Constraint: "enum": ["required","optional","excluded"]
 	Hashes             *[]CDXHash                  `json:"hashes,omitempty"`
@@ -103,13 +117,14 @@ type CDXComponent struct {
 	Components         *[]CDXComponent             `json:"components,omitempty"`
 	Evidence           *CDXComponentEvidence       `json:"evidence,omitempty"`                  // v1.3: added
 	Properties         *[]CDXProperty              `json:"properties,omitempty"`                // v1.3: added
-	Modified           bool                        `json:"modified,omitempty" cdx:"deprecated"` // v1.4: deprecated
 	ReleaseNotes       *[]CDXReleaseNotes          `json:"releaseNotes,omitempty"`              // v1.4: added
 	Signature          *JSFSignature               `json:"signature,omitempty"`                 // v1.4: added
 	ModelCard          *CDXModelCard               `json:"modelCard,omitempty"`                 // v1.5: added
 	Data               *[]CDXComponentData         `json:"data,omitempty"`                      // v1.5: added
 	Authors            *[]CDXOrganizationalContact `json:"authors,omitempty"`                   // v1.6: added
 	Tags               *[]string                   `json:"tags,omitempty" cdx:"+1.6"`           // v1.6: added
+	Modified           bool                        `json:"modified,omitempty" cdx:"deprecated"` // v1.4: deprecated
+	Author             string                      `json:"author,omitempty"`                    // v1.6: deprecated
 }
 
 // v1.5 added object

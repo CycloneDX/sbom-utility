@@ -65,33 +65,20 @@ const (
 )
 
 // TODO use to pre-validate --where clause keys
-// var POLICY_LIST_TITLES = []string{
-// 	POLICY_FILTER_KEY_USAGE_POLICY,
-// 	POLICY_FILTER_KEY_FAMILY,
-// 	POLICY_FILTER_KEY_SPDX_ID,
-// 	POLICY_FILTER_KEY_NAME,
-// 	POLICY_FILTER_KEY_OSI_APPROVED,
-// 	POLICY_FILTER_KEY_FSF_APPROVED,
-// 	POLICY_FILTER_KEY_DEPRECATED,
-// 	POLICY_FILTER_KEY_REFERENCE,
-// 	POLICY_FILTER_KEY_ALIASES,
-// 	POLICY_FILTER_KEY_ANNOTATIONS,
-// 	POLICY_FILTER_KEY_NOTES,
-// }
 
 // Describe the column data and their attributes and constraints used for formatting
 var LICENSE_POLICY_LIST_ROW_DATA = []ColumnFormatData{
-	{POLICY_FILTER_KEY_USAGE_POLICY, 16, REPORT_SUMMARY_DATA_TRUE, false},
-	{POLICY_FILTER_KEY_FAMILY, 20, REPORT_SUMMARY_DATA_TRUE, false},
-	{POLICY_FILTER_KEY_SPDX_ID, 20, REPORT_SUMMARY_DATA_TRUE, false},
-	{POLICY_FILTER_KEY_NAME, 20, REPORT_SUMMARY_DATA_TRUE, false},
-	{POLICY_FILTER_KEY_OSI_APPROVED, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
-	{POLICY_FILTER_KEY_FSF_APPROVED, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
-	{POLICY_FILTER_KEY_DEPRECATED, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
-	{POLICY_FILTER_KEY_REFERENCE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false},
-	{POLICY_FILTER_KEY_ALIASES, 24, false, false},
-	{POLICY_FILTER_KEY_ANNOTATIONS, 24, false, false},
-	{POLICY_FILTER_KEY_NOTES, 24, false, false},
+	*NewColumnFormatData(POLICY_FILTER_KEY_USAGE_POLICY, 16, REPORT_SUMMARY_DATA_TRUE, false),
+	*NewColumnFormatData(POLICY_FILTER_KEY_FAMILY, 20, REPORT_SUMMARY_DATA_TRUE, false),
+	*NewColumnFormatData(POLICY_FILTER_KEY_SPDX_ID, 20, REPORT_SUMMARY_DATA_TRUE, false),
+	*NewColumnFormatData(POLICY_FILTER_KEY_NAME, 20, REPORT_SUMMARY_DATA_TRUE, false),
+	*NewColumnFormatData(POLICY_FILTER_KEY_OSI_APPROVED, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
+	*NewColumnFormatData(POLICY_FILTER_KEY_FSF_APPROVED, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
+	*NewColumnFormatData(POLICY_FILTER_KEY_DEPRECATED, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
+	*NewColumnFormatData(POLICY_FILTER_KEY_REFERENCE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
+	*NewColumnFormatData(POLICY_FILTER_KEY_ALIASES, 24, false, false),
+	*NewColumnFormatData(POLICY_FILTER_KEY_ANNOTATIONS, 24, false, false),
+	*NewColumnFormatData(POLICY_FILTER_KEY_NOTES, 24, false, false),
 }
 
 // TODO: remove if we always map the old field names to new ones
@@ -144,7 +131,7 @@ func NewCommandPolicy() *cobra.Command {
 
 		// Make sure (optional) subcommand is known/valid
 		if len(args) == 1 {
-			if !preRunTestForSubcommand(command, VALID_SUBCOMMANDS_POLICY, args[0]) {
+			if !preRunTestForSubcommand(VALID_SUBCOMMANDS_POLICY, args[0]) {
 				return getLogger().Errorf("Subcommand provided is not valid: `%v`", args[0])
 			}
 		}
@@ -195,6 +182,12 @@ func processLicensePolicyListResults(err error) {
 	if err != nil {
 		getLogger().Error(err)
 	}
+}
+
+func sortLicensePolicies(keyNames []interface{}) {
+	sort.Slice(keyNames, func(i, j int) bool {
+		return keyNames[i].(string) < keyNames[j].(string)
+	})
 }
 
 func ListLicensePolicies(writer io.Writer, policyConfig *schema.LicensePolicyConfig,
@@ -265,9 +258,15 @@ func DisplayLicensePoliciesTabbedText(writer io.Writer, filteredPolicyMap *slice
 
 	// Sort entries for listing by family name keys
 	keyNames := filteredPolicyMap.KeySet()
-	sort.Slice(keyNames, func(i, j int) bool {
-		return keyNames[i].(string) < keyNames[j].(string)
-	})
+
+	// Emit no schemas found warning into output
+	// TODO Use only for Warning messages, do not emit in output table
+	if len(keyNames) == 0 {
+		return fmt.Errorf(MSG_OUTPUT_NO_POLICIES_FOUND)
+	}
+
+	// Sort entries by family name
+	sortLicensePolicies(keyNames)
 
 	// output each license policy entry as a line (by sorted key)
 	var lines [][]string
@@ -278,7 +277,6 @@ func DisplayLicensePoliciesTabbedText(writer io.Writer, filteredPolicyMap *slice
 		getLogger().Tracef("%v (%t)", values, match)
 
 		for _, value := range values {
-
 			// Wrap all column text (i.e. flag `--wrap=true`)
 			if utils.GlobalFlags.LicenseFlags.ListLineWrap {
 				policy := value.(schema.LicensePolicy)
@@ -315,12 +313,15 @@ func DisplayLicensePoliciesTabbedText(writer io.Writer, filteredPolicyMap *slice
 				}
 
 			} else {
-				// TODO surface error data to top-level command
-				line, _ = prepareReportLineData(
+				line, err = prepareReportLineData(
 					value.(schema.LicensePolicy),
 					LICENSE_POLICY_LIST_ROW_DATA,
 					flags.Summary,
 				)
+				// Only emit line if no error
+				if err != nil {
+					return
+				}
 				fmt.Fprintf(w, "%s\n", strings.Join(line, "\t"))
 
 			}
@@ -356,9 +357,7 @@ func DisplayLicensePoliciesCSV(writer io.Writer, filteredPolicyMap *slicemultima
 	}
 
 	// Sort entries by family name
-	sort.Slice(keyNames, func(i, j int) bool {
-		return keyNames[i].(string) < keyNames[j].(string)
-	})
+	sortLicensePolicies(keyNames)
 
 	var line []string
 	for _, key := range keyNames {
@@ -366,13 +365,15 @@ func DisplayLicensePoliciesCSV(writer io.Writer, filteredPolicyMap *slicemultima
 		getLogger().Tracef("%v (%t)", values, match)
 
 		for _, value := range values {
-			// TODO surface error data to top-level command
-			line, _ = prepareReportLineData(
+			line, err = prepareReportLineData(
 				value.(schema.LicensePolicy),
 				LICENSE_POLICY_LIST_ROW_DATA,
 				flags.Summary,
 			)
-
+			// Only emit line if no error
+			if err != nil {
+				return
+			}
 			if err = w.Write(line); err != nil {
 				err = getLogger().Errorf("csv.Write: %w", err)
 			}
@@ -386,14 +387,13 @@ func DisplayLicensePoliciesMarkdown(writer io.Writer, filteredPolicyMap *slicemu
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	// Create title row data as []string
+	// Create title row data as []string, include columns depending on value of Summary flag.
 	titles, _ := prepareReportTitleData(LICENSE_POLICY_LIST_ROW_DATA, flags.Summary)
-
-	// create title row
 	titleRow := createMarkdownRow(titles)
 	fmt.Fprintf(writer, "%s\n", titleRow)
 
-	alignments := createMarkdownColumnAlignment(titles)
+	// create alignment row, include columns depending on value of Summary flag.
+	alignments := createMarkdownColumnAlignmentRow(LICENSE_POLICY_LIST_ROW_DATA, flags.Summary)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(writer, "%s\n", alignmentRow)
 
@@ -409,24 +409,24 @@ func DisplayLicensePoliciesMarkdown(writer io.Writer, filteredPolicyMap *slicemu
 	}
 
 	// Sort entries by family name
-	sort.Slice(keyNames, func(i, j int) bool {
-		return keyNames[i].(string) < keyNames[j].(string)
-	})
+	sortLicensePolicies(keyNames)
 
 	var line []string
 	var lineRow string
-
 	for _, key := range keyNames {
 		values, match := filteredPolicyMap.Get(key)
 		getLogger().Tracef("%v (%t)", values, match)
 
 		for _, value := range values {
-			// TODO surface error data to top-level command
-			line, _ = prepareReportLineData(
+			line, err = prepareReportLineData(
 				value.(schema.LicensePolicy),
 				LICENSE_POLICY_LIST_ROW_DATA,
 				flags.Summary,
 			)
+			// Only emit line if no error
+			if err != nil {
+				return
+			}
 			lineRow = createMarkdownRow(line)
 			fmt.Fprintf(writer, "%s\n", lineRow)
 		}

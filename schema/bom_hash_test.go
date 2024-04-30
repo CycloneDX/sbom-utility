@@ -431,8 +431,8 @@ func TestHashZeroCDXVulnerabilityStruct(t *testing.T) {
 func TestHashZeroCDXLicenseInfoStruct(t *testing.T) {
 	cdxLicenseInfo := new(LicenseInfo)
 	document := NewBOM("")
-	hashed, err := document.HashmapLicenseInfo(nil, "foo", *cdxLicenseInfo, nil)
-	// HashLicenseInfo(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, key string, licenseInfo schema.LicenseInfo, whereFilters []common.WhereFilter) (hashed bool)
+	flags := new(utils.LicenseCommandFlags)
+	hashed, err := document.HashmapLicenseInfo(nil, "foo", *cdxLicenseInfo, nil, *flags)
 	if err != nil {
 		t.Error(err)
 		return

@@ -64,7 +64,6 @@ func (bom *BOM) HashmapComponentResources(whereFilters []common.WhereFilter) (er
 	return
 }
 
-// TODO: use pointer for []CDXComponent
 func (bom *BOM) HashmapComponents(components []CDXComponent, whereFilters []common.WhereFilter, root bool) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
@@ -83,7 +82,8 @@ func (bom *BOM) HashmapComponents(components []CDXComponent, whereFilters []comm
 func (bom *BOM) HashmapComponent(cdxComponent CDXComponent, whereFilters []common.WhereFilter, root bool) (hashed bool, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
-	var resourceInfo CDXResourceInfo
+	//var componentInfo CDXResourceInfo
+	var componentInfo CDXComponentInfo
 
 	if reflect.DeepEqual(cdxComponent, CDXComponent{}) {
 		getLogger().Warning("empty component object found")
@@ -98,40 +98,41 @@ func (bom *BOM) HashmapComponent(cdxComponent CDXComponent, whereFilters []commo
 		getLogger().Warningf("component named `%s` missing `version`", cdxComponent.Name)
 	}
 
-	if cdxComponent.BOMRef != nil && *cdxComponent.BOMRef == "" {
+	//if cdxComponent.BOMRef != nil && *cdxComponent.BOMRef == "" {
+	if cdxComponent.BOMRef == nil || *cdxComponent.BOMRef == "" {
 		getLogger().Warningf("component named `%s` missing `bom-ref`", cdxComponent.Name)
 	}
 
 	// hash any component w/o a license using special key name
-	resourceInfo.IsRoot = root
-	resourceInfo.Type = RESOURCE_TYPE_COMPONENT
-	resourceInfo.Component = cdxComponent
-	resourceInfo.Name = cdxComponent.Name
+	componentInfo.IsRoot = root
+	componentInfo.ResourceType = RESOURCE_TYPE_COMPONENT
+	componentInfo.Component = cdxComponent
+	componentInfo.Name = cdxComponent.Name
 	if cdxComponent.BOMRef != nil {
 		ref := *cdxComponent.BOMRef
-		resourceInfo.BOMRef = ref.String()
+		componentInfo.BOMRef = ref.String()
 	}
-	resourceInfo.Version = cdxComponent.Version
+	componentInfo.Version = cdxComponent.Version
 	if cdxComponent.Supplier != nil {
-		resourceInfo.SupplierProvider = cdxComponent.Supplier
+		componentInfo.SupplierProvider = cdxComponent.Supplier
 	}
-	resourceInfo.Properties = cdxComponent.Properties
+	componentInfo.Properties = cdxComponent.Properties
 
 	var match bool = true
 	if len(whereFilters) > 0 {
-		mapResourceInfo, _ := utils.MarshalStructToJsonMap(resourceInfo)
+		mapResourceInfo, _ := utils.MarshalStructToJsonMap(componentInfo)
 		match, _ = whereFilterMatch(mapResourceInfo, whereFilters)
 	}
 
 	if match {
 		hashed = true
-		bom.ComponentMap.Put(resourceInfo.BOMRef, resourceInfo)
-		bom.ResourceMap.Put(resourceInfo.BOMRef, resourceInfo)
+		bom.ComponentMap.Put(componentInfo.BOMRef, componentInfo)
+		bom.ResourceMap.Put(componentInfo.BOMRef, componentInfo.CDXResourceInfo)
 
-		getLogger().Tracef("Put: %s (`%s`), `%s`)",
-			resourceInfo.Name,
-			resourceInfo.Version,
-			resourceInfo.BOMRef)
+		getLogger().Infof("Put: %s (`%s`), `%s`)",
+			componentInfo.Name,
+			componentInfo.Version,
+			componentInfo.BOMRef)
 	}
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
@@ -181,7 +182,7 @@ func (bom *BOM) HashmapServices(services []CDXService, whereFilters []common.Whe
 func (bom *BOM) HashmapService(cdxService CDXService, whereFilters []common.WhereFilter) (hashed bool, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
-	var resourceInfo CDXResourceInfo
+	var serviceInfo CDXServiceInfo
 
 	if reflect.DeepEqual(cdxService, CDXService{}) {
 		getLogger().Warning("empty service object found")
@@ -196,40 +197,40 @@ func (bom *BOM) HashmapService(cdxService CDXService, whereFilters []common.Wher
 		getLogger().Warningf("service named `%s` missing `version`", cdxService.Name)
 	}
 
-	if cdxService.BOMRef == nil || *cdxService.BOMRef != "" {
+	if cdxService.BOMRef == nil || *cdxService.BOMRef == "" {
 		getLogger().Warningf("service named `%s` missing `bom-ref`", cdxService.Name)
 	}
 
 	// hash any component w/o a license using special key name
-	resourceInfo.Type = RESOURCE_TYPE_SERVICE
-	resourceInfo.Service = cdxService
-	resourceInfo.Name = cdxService.Name
+	serviceInfo.ResourceType = RESOURCE_TYPE_SERVICE
+	serviceInfo.Service = cdxService
+	serviceInfo.Name = cdxService.Name
 	if cdxService.BOMRef != nil {
-		resourceInfo.BOMRef = cdxService.BOMRef.String()
+		serviceInfo.BOMRef = cdxService.BOMRef.String()
 	}
-	resourceInfo.Version = cdxService.Version
+	serviceInfo.Version = cdxService.Version
 	if cdxService.Provider != nil {
-		resourceInfo.SupplierProvider = cdxService.Provider
+		serviceInfo.SupplierProvider = cdxService.Provider
 	}
-	resourceInfo.Properties = cdxService.Properties
+	serviceInfo.Properties = cdxService.Properties
 
 	var match bool = true
 	if len(whereFilters) > 0 {
-		mapResourceInfo, _ := utils.MarshalStructToJsonMap(resourceInfo)
+		mapResourceInfo, _ := utils.MarshalStructToJsonMap(serviceInfo)
 		match, _ = whereFilterMatch(mapResourceInfo, whereFilters)
 	}
 
 	if match {
 		// TODO: AppendLicenseInfo(LICENSE_NONE, resourceInfo)
 		hashed = true
-		bom.ServiceMap.Put(resourceInfo.BOMRef, resourceInfo)
-		bom.ResourceMap.Put(resourceInfo.BOMRef, resourceInfo)
+		bom.ServiceMap.Put(serviceInfo.BOMRef, serviceInfo)
+		bom.ResourceMap.Put(serviceInfo.BOMRef, serviceInfo.CDXResourceInfo)
 
 		getLogger().Tracef("Put: [`%s`] %s (`%s`), `%s`)",
-			resourceInfo.Type,
-			resourceInfo.Name,
-			resourceInfo.Version,
-			resourceInfo.BOMRef,
+			serviceInfo.ResourceType,
+			serviceInfo.Name,
+			serviceInfo.Version,
+			serviceInfo.BOMRef,
 		)
 	}
 
@@ -248,8 +249,7 @@ func (bom *BOM) HashmapService(cdxService CDXService, whereFilters []common.Wher
 // Licenses
 // -------------------
 
-func (bom *BOM) HashmapLicenseInfo(policyConfig *LicensePolicyConfig, key string, licenseInfo LicenseInfo, whereFilters []common.WhereFilter) (hashed bool, err error) {
-
+func (bom *BOM) HashmapLicenseInfo(policyConfig *LicensePolicyConfig, key string, licenseInfo LicenseInfo, whereFilters []common.WhereFilter, licenseFlags utils.LicenseCommandFlags) (hashed bool, err error) {
 	if reflect.DeepEqual(licenseInfo, LicenseInfo{}) {
 		getLogger().Warning("empty license object found")
 		return
@@ -269,6 +269,14 @@ func (bom *BOM) HashmapLicenseInfo(policyConfig *LicensePolicyConfig, key string
 	licenseInfo.LicenseChoiceType = GetLicenseChoiceTypeName(licenseInfo.LicenseChoiceTypeValue)
 	licenseInfo.BOMLocation = GetLicenseChoiceLocationName(licenseInfo.BOMLocationValue)
 
+	// If we need to include all license fields, they need to be copied to from
+	// wherever they appear into base LicenseInfo struct (for JSON tag/where filtering)
+	// i.e., "License.Id", "License.Name", "License.Url", "Expression",
+	//       "License.Text.ContentType", "License.Text.Encoding", "License.Text.Content"
+	if !licenseFlags.Summary {
+		copyExtendedLicenseChoiceFieldData(&licenseInfo)
+	}
+
 	var match bool = true
 	if len(whereFilters) > 0 {
 		mapInfo, _ := utils.MarshalStructToJsonMap(licenseInfo)
@@ -279,13 +287,41 @@ func (bom *BOM) HashmapLicenseInfo(policyConfig *LicensePolicyConfig, key string
 		hashed = true
 		// Hash LicenseInfo by license key (i.e., id|name|expression)
 		bom.LicenseMap.Put(key, licenseInfo)
-
 		getLogger().Tracef("Put: %s (`%s`), `%s`)",
 			licenseInfo.ResourceName,
 			licenseInfo.UsagePolicy,
 			licenseInfo.BOMRef)
 	}
 	return
+}
+
+// TODO make this a method of *LicenseInfo (object)
+func copyExtendedLicenseChoiceFieldData(pLicenseInfo *LicenseInfo) {
+	if pLicenseInfo == nil {
+		getLogger().Tracef("invalid *LicenseInfo")
+		return
+	}
+
+	var lcType = pLicenseInfo.LicenseChoiceType
+	if lcType == LC_VALUE_ID || lcType == LC_VALUE_NAME {
+		if pLicenseInfo.LicenseChoice.License == nil {
+			getLogger().Tracef("invalid *CDXLicense")
+			return
+		}
+		pLicenseInfo.LicenseId = pLicenseInfo.LicenseChoice.License.Id
+		pLicenseInfo.LicenseName = pLicenseInfo.LicenseChoice.License.Name
+		pLicenseInfo.LicenseUrl = pLicenseInfo.LicenseChoice.License.Url
+
+		if pLicenseInfo.LicenseChoice.License.Text != nil {
+			// NOTE: always copy full context text; downstream display functions
+			// can truncate later
+			pLicenseInfo.LicenseTextContent = pLicenseInfo.LicenseChoice.License.Text.Content
+			pLicenseInfo.LicenseTextContentType = pLicenseInfo.LicenseChoice.License.Text.ContentType
+			pLicenseInfo.LicenseTextEncoding = pLicenseInfo.LicenseChoice.License.Text.Encoding
+		}
+	} else if lcType == LC_VALUE_EXPRESSION {
+		pLicenseInfo.LicenseExpression = pLicenseInfo.LicenseChoice.Expression
+	}
 }
 
 // -------------------

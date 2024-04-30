@@ -227,7 +227,8 @@ func validateLicenseData(document *schema.BOM, policyConfig *schema.LicensePolic
 	// Now we need to validate that the input file contains licenses
 	// the license "hash" function does this validation checking for us...
 	// TODO support []WhereFilter
-	err = loadDocumentLicenses(document, policyConfig, nil)
+	// NOTE: licenseFlags will be all defaults (should not matter for simple true/false validation)
+	err = loadDocumentLicenses(document, policyConfig, nil, utils.GlobalFlags.LicenseFlags)
 
 	if err != nil {
 		return

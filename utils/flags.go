@@ -99,6 +99,10 @@ type ResourceCommandFlags struct {
 	ResourceType string
 }
 
+type ComponentCommandFlags struct {
+	Types string
+}
+
 func NewResourceCommandFlags(resourceType string) ResourceCommandFlags {
 	return ResourceCommandFlags{
 		ResourceType: resourceType,

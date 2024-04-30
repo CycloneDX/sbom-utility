@@ -62,7 +62,7 @@ func NewCommandQuery() *cobra.Command {
 	command.Long = "SQL-like query (i.e. SELECT x,y FROM a.b.c WHERE x=<regex>) of JSON objects and specified fields from SBOM (JSON) document."
 	command.RunE = queryCmdImpl
 	command.PreRunE = func(cmd *cobra.Command, args []string) error {
-		return preRunTestForInputFile(cmd, args)
+		return preRunTestForInputFile(args)
 	}
 	initCommandQuery(command)
 	return command

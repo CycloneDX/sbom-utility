@@ -61,7 +61,7 @@ func innerQuery(t *testing.T, cti *CommonTestInfo, queryRequest *common.QueryReq
 
 	// allocate response/result object and invoke query
 	var queryResponse = new(common.QueryResponse)
-	resultJson, outputBuffer, err = innerBufferedTestQuery(t, cti, queryRequest, queryResponse)
+	resultJson, outputBuffer, err = innerBufferedTestQuery(cti, queryRequest, queryResponse)
 
 	// if the command resulted in a failure
 	if err != nil {
@@ -83,7 +83,7 @@ func innerQuery(t *testing.T, cti *CommonTestInfo, queryRequest *common.QueryReq
 	return
 }
 
-func innerBufferedTestQuery(t *testing.T, testInfo *CommonTestInfo, queryRequest *common.QueryRequest, queryResponse *common.QueryResponse) (resultJson interface{}, outputBuffer bytes.Buffer, err error) {
+func innerBufferedTestQuery(testInfo *CommonTestInfo, queryRequest *common.QueryRequest, queryResponse *common.QueryResponse) (resultJson interface{}, outputBuffer bytes.Buffer, err error) {
 
 	// The command looks for the input & output filename in global flags struct
 	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile

@@ -51,14 +51,47 @@ func IsValidResourceType(value string) bool {
 // the CDX types CDXComponent and CDXService.
 type CDXResourceInfo struct {
 	IsRoot           bool
-	Type             string `json:"type"`
-	BOMRef           string `json:"bom-ref"`
+	ResourceType     string `json:"resource-type"`
+	Group            string `json:"group"`
 	Name             string `json:"name"`
 	Version          string `json:"version"`
+	Description      string `json:"description"`
+	BOMRef           string `json:"bom-ref"`
 	SupplierProvider *CDXOrganizationalEntity
 	Properties       *[]CDXProperty
 	Component        CDXComponent
 	Service          CDXService
+}
+
+// -------------------
+// Components
+// -------------------
+// TODO: Supplier (*CDXOrganizationalEntity), Authors (*[]CDXOrganizationalContact)
+// TODO: HasHashes, HasLicenses, HasPedigree, HasEvidence, HasComponents, HasReleaseNotes
+// TODO: HasModelCard, HasData, HasTags, HasSignature (*JSFSignature)
+// TODO: OmniborId (new), Swhid (new)
+type CDXComponentInfo struct {
+	Type      string   `json:"type"`
+	Publisher string   `json:"publisher,omitempty"`
+	Scope     string   `json:"scope,omitempty"`
+	Copyright string   `json:"copyright,omitempty"`
+	Cpe       string   `json:"cpe,omitempty"`                                       // See: https://nvd.nist.gov/products/cpe
+	Purl      string   `json:"purl,omitempty" scvs:"bom:resource:identifiers:purl"` // See: https://github.com/package-url/purl-spec
+	Swid      *CDXSwid `json:"swid,omitempty"`
+	CDXResourceInfo
+}
+
+// -------------------
+// Services
+// -------------------
+// TODO: HasServices, HasEndpoints
+// TODO: HasLicenses, HasReleaseNotes, HasData, HasTags, HasSignature (*JSFSignature)
+// TODO: HasProperties, HasExternalRefs
+type CDXServiceInfo struct {
+	CDXResourceInfo
+	Authenticated  bool   `json:"authenticated,omitempty"`
+	XTrustBoundary bool   `json:"x-trust-boundary,omitempty"`
+	TrustZone      string `json:"trustZone,omitempty"`
 }
 
 // -------------------
@@ -148,6 +181,17 @@ type LicenseInfo struct {
 	Policy                 LicensePolicy    // Do not marshal
 	Component              CDXComponent     // Do not marshal
 	Service                CDXService       // Do not marshal
+	ExtendedLicenseInfo
+}
+
+type ExtendedLicenseInfo struct {
+	LicenseId              string `json:"license-id"`
+	LicenseName            string `json:"license-name"`
+	LicenseExpression      string `json:"license-expression"`
+	LicenseUrl             string `json:"license-url"`
+	LicenseTextEncoding    string `json:"license-text-encoding"`
+	LicenseTextContentType string `json:"license-text-content-type"`
+	LicenseTextContent     string `json:"license-text-content"`
 }
 
 func (licenseInfo *LicenseInfo) SetLicenseChoiceTypeValue(value int) {

@@ -31,7 +31,7 @@ import (
 // resource list test helper functions
 // -------------------------------------------
 
-func innerBufferedTestSchemaList(t *testing.T, pTestInfo *CommonTestInfo, whereFilters []common.WhereFilter) (outputBuffer bytes.Buffer, err error) {
+func innerBufferedTestSchemaList(pTestInfo *CommonTestInfo, whereFilters []common.WhereFilter) (outputBuffer bytes.Buffer, err error) {
 	// Declare an output outputBuffer/outputWriter to use used during tests
 	var outputWriter = bufio.NewWriter(&outputBuffer)
 	// ensure all data is written to buffer before further validation
@@ -53,7 +53,7 @@ func innerTestSchemaList(t *testing.T, pTestInfo *CommonTestInfo) (outputBuffer 
 	}
 
 	// invoke resource list command with a byte buffer
-	outputBuffer, err = innerBufferedTestSchemaList(t, pTestInfo, whereFilters)
+	outputBuffer, err = innerBufferedTestSchemaList(pTestInfo, whereFilters)
 
 	// Run all common tests against "result" values in the CommonTestInfo struct
 	err = innerRunReportResultTests(t, pTestInfo, outputBuffer, err)
