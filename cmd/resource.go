@@ -46,6 +46,8 @@ const (
 	RESOURCE_FILTER_KEY_NAME          = "name"
 	RESOURCE_FILTER_KEY_VERSION       = "version"
 	RESOURCE_FILTER_KEY_BOMREF        = "bom-ref"
+	RESOURCE_FILTER_KEY_GROUP         = "group"
+	RESOURCE_FILTER_KEY_DESCRIPTION   = "description"
 )
 
 var RESOURCE_LIST_ROW_DATA = []ColumnFormatData{

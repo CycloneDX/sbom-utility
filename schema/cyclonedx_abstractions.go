@@ -66,7 +66,6 @@ type CDXResourceInfo struct {
 // -------------------
 // Components
 // -------------------
-
 // TODO: Supplier (*CDXOrganizationalEntity), Authors (*[]CDXOrganizationalContact)
 // TODO: HasHashes, HasLicenses, HasPedigree, HasEvidence, HasComponents, HasReleaseNotes
 // TODO: HasModelCard, HasData, HasTags, HasSignature (*JSFSignature)
@@ -80,6 +79,19 @@ type CDXComponentInfo struct {
 	Purl      string   `json:"purl,omitempty" scvs:"bom:resource:identifiers:purl"` // See: https://github.com/package-url/purl-spec
 	Swid      *CDXSwid `json:"swid,omitempty"`
 	CDXResourceInfo
+}
+
+// -------------------
+// Services
+// -------------------
+// TODO: HasServices, HasEndpoints
+// TODO: HasLicenses, HasReleaseNotes, HasData, HasTags, HasSignature (*JSFSignature)
+// TODO: HasProperties, HasExternalRefs
+type CDXServiceInfo struct {
+	CDXResourceInfo
+	Authenticated  bool   `json:"authenticated,omitempty"`
+	XTrustBoundary bool   `json:"x-trust-boundary,omitempty"`
+	TrustZone      string `json:"trustZone,omitempty"`
 }
 
 // -------------------

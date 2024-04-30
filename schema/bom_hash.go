@@ -64,7 +64,6 @@ func (bom *BOM) HashmapComponentResources(whereFilters []common.WhereFilter) (er
 	return
 }
 
-// TODO: use pointer for []CDXComponent
 func (bom *BOM) HashmapComponents(components []CDXComponent, whereFilters []common.WhereFilter, root bool) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
@@ -183,7 +182,7 @@ func (bom *BOM) HashmapServices(services []CDXService, whereFilters []common.Whe
 func (bom *BOM) HashmapService(cdxService CDXService, whereFilters []common.WhereFilter) (hashed bool, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
-	var resourceInfo CDXResourceInfo
+	var serviceInfo CDXServiceInfo
 
 	if reflect.DeepEqual(cdxService, CDXService{}) {
 		getLogger().Warning("empty service object found")
@@ -203,35 +202,35 @@ func (bom *BOM) HashmapService(cdxService CDXService, whereFilters []common.Wher
 	}
 
 	// hash any component w/o a license using special key name
-	resourceInfo.ResourceType = RESOURCE_TYPE_SERVICE
-	resourceInfo.Service = cdxService
-	resourceInfo.Name = cdxService.Name
+	serviceInfo.ResourceType = RESOURCE_TYPE_SERVICE
+	serviceInfo.Service = cdxService
+	serviceInfo.Name = cdxService.Name
 	if cdxService.BOMRef != nil {
-		resourceInfo.BOMRef = cdxService.BOMRef.String()
+		serviceInfo.BOMRef = cdxService.BOMRef.String()
 	}
-	resourceInfo.Version = cdxService.Version
+	serviceInfo.Version = cdxService.Version
 	if cdxService.Provider != nil {
-		resourceInfo.SupplierProvider = cdxService.Provider
+		serviceInfo.SupplierProvider = cdxService.Provider
 	}
-	resourceInfo.Properties = cdxService.Properties
+	serviceInfo.Properties = cdxService.Properties
 
 	var match bool = true
 	if len(whereFilters) > 0 {
-		mapResourceInfo, _ := utils.MarshalStructToJsonMap(resourceInfo)
+		mapResourceInfo, _ := utils.MarshalStructToJsonMap(serviceInfo)
 		match, _ = whereFilterMatch(mapResourceInfo, whereFilters)
 	}
 
 	if match {
 		// TODO: AppendLicenseInfo(LICENSE_NONE, resourceInfo)
 		hashed = true
-		bom.ServiceMap.Put(resourceInfo.BOMRef, resourceInfo)
-		bom.ResourceMap.Put(resourceInfo.BOMRef, resourceInfo)
+		bom.ServiceMap.Put(serviceInfo.BOMRef, serviceInfo)
+		bom.ResourceMap.Put(serviceInfo.BOMRef, serviceInfo.CDXResourceInfo)
 
 		getLogger().Tracef("Put: [`%s`] %s (`%s`), `%s`)",
-			resourceInfo.ResourceType,
-			resourceInfo.Name,
-			resourceInfo.Version,
-			resourceInfo.BOMRef,
+			serviceInfo.ResourceType,
+			serviceInfo.Name,
+			serviceInfo.Version,
+			serviceInfo.BOMRef,
 		)
 	}
 

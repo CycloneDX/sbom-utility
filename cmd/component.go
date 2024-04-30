@@ -48,6 +48,13 @@ var COMPONENT_LIST_ROW_DATA = []ColumnFormatData{
 
 // filter keys
 // Note: these string values MUST match annotations for the ComponentInfo struct fields
+// Type      string   `json:"type"`
+// Publisher string   `json:"publisher,omitempty"`
+// Scope     string   `json:"scope,omitempty"`
+// Copyright string   `json:"copyright,omitempty"`
+// Cpe       string   `json:"cpe,omitempty"`                                       // See: https://nvd.nist.gov/products/cpe
+// Purl      string   `json:"purl,omitempty" scvs:"bom:resource:identifiers:purl"` // See: https://github.com/package-url/purl-spec
+// Swid      *CDXSwid `json:"swid,omitempty"`
 const (
 	COMPONENT_FILTER_KEY_TYPE    = "type"
 	COMPONENT_FILTER_KEY_NAME    = "name"
