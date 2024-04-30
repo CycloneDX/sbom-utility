@@ -202,7 +202,7 @@ type CDXService struct {
 // TODO: "source" is a "oneOf" type (both currently resolve to string), but needs to be its own anonymous type
 // TODO: "destination" is a "oneOf" type (both currently resolve to string), but needs to be its own anonymous type
 type CDXServiceData struct {
-	Flow           string                 `json:"externalReferences,omitempty"`
+	Flow           string                 `json:"flow,omitempty"`
 	Classification *CDXDataClassification `json:"classification,omitempty"`
 	Name           string                 `json:"name,omitempty"`        // v1.5: added
 	Description    string                 `json:"description,omitempty"` // v1.5: added
