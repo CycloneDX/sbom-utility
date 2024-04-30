@@ -226,7 +226,7 @@ func ListLicenses(writer io.Writer, policyConfig *schema.LicensePolicyConfig,
 		// Default to JSON output for anything else
 		getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_JSON)
-		DisplayLicenseListJson(document, writer, licenseFlags)
+		err = DisplayLicenseListJson(document, writer, licenseFlags)
 	}
 	return
 }
@@ -298,6 +298,7 @@ func DisplayLicenseListText(bom *schema.BOM, writer io.Writer, flags utils.Licen
 	for _, licenseName := range licenseKeys {
 		arrLicenseInfo, _ := bom.LicenseMap.Get(licenseName)
 
+		// Format each LicenseInfo as a line and write to output
 		for _, iInfo := range arrLicenseInfo {
 			licenseInfo = iInfo.(schema.LicenseInfo)
 			lc := licenseInfo.LicenseChoice
@@ -368,6 +369,7 @@ func DisplayLicenseListCSV(bom *schema.BOM, writer io.Writer, flags utils.Licens
 			os.Exit(ERROR_VALIDATION)
 		}
 
+		// Format each LicenseInfo as a line and write to output
 		for _, iInfo := range arrLicenseInfo {
 			licenseInfo = iInfo.(schema.LicenseInfo)
 			line, err = prepareReportLineData(
@@ -415,12 +417,9 @@ func DisplayLicenseListMarkdown(bom *schema.BOM, writer io.Writer, flags utils.L
 	for _, licenseName := range licenseKeys {
 		arrLicenseInfo, _ := bom.LicenseMap.Get(licenseName)
 
+		// Format each LicenseInfo as a line and write to output
 		for _, iInfo := range arrLicenseInfo {
-			// Each row will contain every field of a CDX LicenseChoice object
-			line = nil
 			licenseInfo = iInfo.(schema.LicenseInfo)
-
-			// Format line and write to output
 			line, err = prepareReportLineData(
 				licenseInfo,
 				LICENSE_LIST_ROW_DATA,

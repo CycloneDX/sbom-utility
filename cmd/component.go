@@ -184,18 +184,17 @@ func ListComponents(writer io.Writer, persistentFlags utils.PersistentCommandFla
 	getLogger().Infof("Outputting listing (`%s` format)...", format)
 	switch format {
 	case FORMAT_TEXT:
-		DisplayComponentListText(document, writer)
+		err = DisplayComponentListText(document, writer)
 	case FORMAT_CSV:
-		DisplayComponentListCSV(document, writer)
+		err = DisplayComponentListCSV(document, writer)
 	case FORMAT_MARKDOWN:
-		DisplayComponentListMarkdown(document, writer)
+		err = DisplayComponentListMarkdown(document, writer)
 	default:
 		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_TEXT)
-		DisplayComponentListText(document, writer)
+		err = DisplayComponentListText(document, writer)
 	}
-
 	return
 }
 
