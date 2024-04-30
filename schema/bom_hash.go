@@ -112,6 +112,8 @@ func (bom *BOM) HashmapComponent(cdxComponent CDXComponent, whereFilters []commo
 		ref := *cdxComponent.BOMRef
 		componentInfo.BOMRef = ref.String()
 	}
+	componentInfo.Group = cdxComponent.Group
+	componentInfo.Description = cdxComponent.Description
 	componentInfo.Version = cdxComponent.Version
 	if cdxComponent.Supplier != nil {
 		componentInfo.SupplierProvider = cdxComponent.Supplier
@@ -208,6 +210,8 @@ func (bom *BOM) HashmapService(cdxService CDXService, whereFilters []common.Wher
 	if cdxService.BOMRef != nil {
 		serviceInfo.BOMRef = cdxService.BOMRef.String()
 	}
+	serviceInfo.Group = cdxService.Group
+	serviceInfo.Description = cdxService.Description
 	serviceInfo.Version = cdxService.Version
 	if cdxService.Provider != nil {
 		serviceInfo.SupplierProvider = cdxService.Provider
