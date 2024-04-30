@@ -249,7 +249,6 @@ func (bom *BOM) HashmapService(cdxService CDXService, whereFilters []common.Wher
 // -------------------
 
 func (bom *BOM) HashmapLicenseInfo(policyConfig *LicensePolicyConfig, key string, licenseInfo LicenseInfo, whereFilters []common.WhereFilter, licenseFlags utils.LicenseCommandFlags) (hashed bool, err error) {
-
 	if reflect.DeepEqual(licenseInfo, LicenseInfo{}) {
 		getLogger().Warning("empty license object found")
 		return
@@ -274,17 +273,7 @@ func (bom *BOM) HashmapLicenseInfo(policyConfig *LicensePolicyConfig, key string
 	// i.e., "License.Id", "License.Name", "License.Url", "Expression",
 	//       "License.Text.ContentType", "License.Text.Encoding", "License.Text.Content"
 	if !licenseFlags.Summary {
-		if licenseInfo.LicenseChoice.License != nil {
-			if licenseInfo.LicenseChoiceType == LC_VALUE_ID {
-				licenseInfo.LicenseId = licenseInfo.LicenseChoice.License.Id
-			}
-			if licenseInfo.LicenseChoiceType == LC_VALUE_NAME {
-				licenseInfo.LicenseName = licenseInfo.LicenseChoice.License.Name
-			}
-			licenseInfo.LicenseUrl = licenseInfo.LicenseChoice.License.Url
-		} else {
-			getLogger().Tracef("invalid *CDXLicense")
-		}
+		copyExtendedLicenseChoiceFieldData(&licenseInfo)
 	}
 
 	var match bool = true
@@ -303,6 +292,34 @@ func (bom *BOM) HashmapLicenseInfo(policyConfig *LicensePolicyConfig, key string
 			licenseInfo.BOMRef)
 	}
 	return
+}
+
+func copyExtendedLicenseChoiceFieldData(pLicenseInfo *LicenseInfo) {
+	if pLicenseInfo == nil {
+		getLogger().Tracef("invalid *LicenseInfo")
+		return
+	}
+
+	var lcType = pLicenseInfo.LicenseChoiceType
+	if lcType == LC_VALUE_ID || lcType == LC_VALUE_NAME {
+		if pLicenseInfo.LicenseChoice.License == nil {
+			getLogger().Tracef("invalid *CDXLicense")
+			return
+		}
+		pLicenseInfo.LicenseId = pLicenseInfo.LicenseChoice.License.Id
+		pLicenseInfo.LicenseName = pLicenseInfo.LicenseChoice.License.Name
+		pLicenseInfo.LicenseUrl = pLicenseInfo.LicenseChoice.License.Url
+
+		if pLicenseInfo.LicenseChoice.License.Text != nil {
+			// NOTE: always copy full context text; downstream display functions
+			// can truncate later
+			pLicenseInfo.LicenseTextContent = pLicenseInfo.LicenseChoice.License.Text.Content
+			pLicenseInfo.LicenseTextContentType = pLicenseInfo.LicenseChoice.License.Text.ContentType
+			pLicenseInfo.LicenseTextEncoding = pLicenseInfo.LicenseChoice.License.Text.Encoding
+		}
+	} else if lcType == LC_VALUE_EXPRESSION {
+		pLicenseInfo.LicenseExpression = pLicenseInfo.LicenseChoice.Expression
+	}
 }
 
 // -------------------

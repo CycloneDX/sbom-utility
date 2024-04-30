@@ -433,7 +433,6 @@ func TestHashZeroCDXLicenseInfoStruct(t *testing.T) {
 	document := NewBOM("")
 	flags := new(utils.LicenseCommandFlags)
 	hashed, err := document.HashmapLicenseInfo(nil, "foo", *cdxLicenseInfo, nil, *flags)
-	// HashLicenseInfo(bom *schema.BOM, policyConfig *schema.LicensePolicyConfig, key string, licenseInfo schema.LicenseInfo, whereFilters []common.WhereFilter) (hashed bool)
 	if err != nil {
 		t.Error(err)
 		return
