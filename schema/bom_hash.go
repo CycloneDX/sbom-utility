@@ -119,6 +119,7 @@ func (bom *BOM) HashmapComponent(cdxComponent CDXComponent, whereFilters []commo
 		componentInfo.SupplierProvider = cdxComponent.Supplier
 	}
 	componentInfo.Properties = cdxComponent.Properties
+	componentInfo.Type = cdxComponent.Type
 
 	var match bool = true
 	if len(whereFilters) > 0 {
@@ -131,7 +132,7 @@ func (bom *BOM) HashmapComponent(cdxComponent CDXComponent, whereFilters []commo
 		bom.ComponentMap.Put(componentInfo.BOMRef, componentInfo)
 		bom.ResourceMap.Put(componentInfo.BOMRef, componentInfo.CDXResourceInfo)
 
-		getLogger().Infof("Put: %s (`%s`), `%s`)",
+		getLogger().Tracef("Put: %s (`%s`), `%s`)",
 			componentInfo.Name,
 			componentInfo.Version,
 			componentInfo.BOMRef)

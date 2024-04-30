@@ -72,12 +72,12 @@ type CDXResourceInfo struct {
 // TODO: OmniborId (new), Swhid (new)
 type CDXComponentInfo struct {
 	Type      string   `json:"type"`
-	Publisher string   `json:"publisher,omitempty"`
-	Scope     string   `json:"scope,omitempty"`
-	Copyright string   `json:"copyright,omitempty"`
-	Cpe       string   `json:"cpe,omitempty"`                                       // See: https://nvd.nist.gov/products/cpe
-	Purl      string   `json:"purl,omitempty" scvs:"bom:resource:identifiers:purl"` // See: https://github.com/package-url/purl-spec
-	Swid      *CDXSwid `json:"swid,omitempty"`
+	Publisher string   `json:"publisher"`
+	Scope     string   `json:"scope"`
+	Copyright string   `json:"copyright"`
+	Cpe       string   `json:"cpe"`  // See: https://nvd.nist.gov/products/cpe
+	Purl      string   `json:"purl"` // See: https://github.com/package-url/purl-spec
+	Swid      *CDXSwid `json:"swid"`
 	CDXResourceInfo
 }
 

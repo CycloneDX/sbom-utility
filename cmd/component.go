@@ -235,8 +235,8 @@ func loadDocumentComponents(document *schema.BOM, whereFilters []common.WhereFil
 func sortComponents(entries []multimap.Entry) {
 	// Sort by Type then Name
 	sort.Slice(entries, func(i, j int) bool {
-		resource1 := (entries[i].Value).(schema.CDXResourceInfo)
-		resource2 := (entries[j].Value).(schema.CDXResourceInfo)
+		resource1 := (entries[i].Value).(schema.CDXComponentInfo)
+		resource2 := (entries[j].Value).(schema.CDXComponentInfo)
 		if resource1.ResourceType != resource2.ResourceType {
 			return resource1.ResourceType < resource2.ResourceType
 		}
@@ -265,7 +265,7 @@ func DisplayComponentListText(bom *schema.BOM, writer io.Writer) (err error) {
 	fmt.Fprintf(w, "%s\n", strings.Join(underlines, "\t"))
 
 	// Display a warning "missing" in the actual output and return (short-circuit)
-	entries := bom.ResourceMap.Entries()
+	entries := bom.ComponentMap.Entries()
 
 	// Emit no license warning into output
 	if len(entries) == 0 {
@@ -280,7 +280,7 @@ func DisplayComponentListText(bom *schema.BOM, writer io.Writer) (err error) {
 	var line []string
 	for _, entry := range entries {
 		line, err = prepareReportLineData(
-			entry.Value.(schema.CDXResourceInfo),
+			entry.Value.(schema.CDXComponentInfo),
 			COMPONENT_LIST_ROW_DATA,
 			true,
 		)
