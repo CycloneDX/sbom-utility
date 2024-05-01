@@ -57,6 +57,8 @@ const (
 	COMPONENT_FILTER_KEY_BOMREF        = "bom-ref"
 	COMPONENT_FILTER_KEY_SUPPLIER_NAME = "supplier-name"
 	COMPONENT_FILTER_KEY_SUPPLIER_URL  = "supplier-url"
+	COMPONENT_FILTER_KEY_NUM_LICENSES  = "number-licenses"
+	COMPONENT_FILTER_KEY_COPYRIGHT     = "copyright"
 )
 
 var VALID_COMPONENT_FILTER_KEYS = []string{
@@ -66,6 +68,8 @@ var VALID_COMPONENT_FILTER_KEYS = []string{
 	COMPONENT_FILTER_KEY_DESCRIPTION,
 	COMPONENT_FILTER_KEY_VERSION,
 	COMPONENT_FILTER_KEY_BOMREF,
+	COMPONENT_FILTER_KEY_NUM_LICENSES,
+	COMPONENT_FILTER_KEY_COPYRIGHT,
 }
 
 var COMPONENT_LIST_ROW_DATA = []ColumnFormatData{
@@ -77,6 +81,8 @@ var COMPONENT_LIST_ROW_DATA = []ColumnFormatData{
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_SUPPLIER_NAME, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_SUPPLIER_URL, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_BOMREF, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_NUM_LICENSES, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_COPYRIGHT, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
 }
 
 // Flags. Reuse query flag values where possible
@@ -248,6 +254,9 @@ func sortComponents(entries []multimap.Entry) {
 	sort.Slice(entries, func(i, j int) bool {
 		resource1 := (entries[i].Value).(*schema.CDXComponentInfo)
 		resource2 := (entries[j].Value).(*schema.CDXComponentInfo)
+		if resource1.Group != resource2.Group {
+			return resource1.Group < resource2.Group
+		}
 		if resource1.Type != resource2.Type {
 			return resource1.Type < resource2.Type
 		}

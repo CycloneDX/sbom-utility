@@ -149,11 +149,14 @@ func wrapTableRowText(maxChars int, joinChar string, columns ...interface{}) (ta
 			rowData[iCol] = strconv.FormatBool(data)
 		case int:
 			rowData[iCol] = strconv.Itoa(data)
+		case float64:
+			// NOTE: JSON Unmarshal() always decodes JSON Numbers as "float64" type
+			rowData[iCol] = strconv.FormatFloat(data, 'f', -1, 64)
 		case nil:
 			//getLogger().Tracef("nil value for column: `%v`", columnData.DataKey)
 			rowData[iCol] = REPORT_LIST_VALUE_NONE
 		default:
-			err = getLogger().Errorf("Unexpected type for report data: type: `%T`, value: `%v`", data, data)
+			err = getLogger().Errorf("Unexpected type for report data: column: %s, type: `%T`, value: `%v`", rowData[iCol], data, data)
 		}
 	}
 
@@ -252,6 +255,9 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 			lineData = append(lineData, strconv.FormatBool(typedData))
 		case int:
 			lineData = append(lineData, strconv.Itoa(typedData))
+		case float64:
+			// NOTE: JSON Unmarshal() always decodes JSON Numbers as "float64" type
+			lineData = append(lineData, strconv.FormatFloat(typedData, 'f', -1, 64))
 		case []interface{}:
 			// convert to []string
 			for _, value := range typedData {
@@ -281,7 +287,7 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 			//getLogger().Tracef("nil value for column: `%v`", columnData.DataKey)
 			lineData = append(lineData, REPORT_LIST_VALUE_NONE)
 		default:
-			err = getLogger().Errorf("Unexpected type for report data: type: `%T`, value: `%v`", data, data)
+			err = getLogger().Errorf("Unexpected type for report data: column: %s, type: `%T`, value: `%v`", columnData.DataKey, data, data)
 		}
 	}
 

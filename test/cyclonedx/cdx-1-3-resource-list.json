@@ -65,6 +65,7 @@
       "name": "Library A",
       "version": "1.0.0",
       "description": "Library A description",
+      "copyright": "Copyright 2024 Apache Software Foundation",
       "licenses": [
         {
           "license": {
@@ -148,6 +149,7 @@
       "name": "Library E",
       "version": "1.0.0",
       "description": "Library E description.",
+      "copyright": "© E. Enterprises",
       "licenses": [
         {
           "license": {

@@ -50,7 +50,6 @@ func (ti *ResourceTestInfo) String() string {
 
 func NewResourceTestInfo(inputFile string, outputFormat string, listSummary bool, whereClause string,
 	resultExpectedLineCount int, resourceType string) *ResourceTestInfo {
-
 	var ti = new(ResourceTestInfo)
 	var pCommon = &ti.CommonTestInfo
 	// initialize common fields
@@ -65,6 +64,8 @@ func NewResourceTestInfoBasic(inputFile string, listFormat string, resultExpecte
 	var ti = new(ResourceTestInfo)
 	var pCommon = &ti.CommonTestInfo
 	pCommon.InitBasic(inputFile, listFormat, resultExpectedError)
+	// Initialize resource-unique fields
+	ti.ResourceType = resourceType
 	return ti
 }
 

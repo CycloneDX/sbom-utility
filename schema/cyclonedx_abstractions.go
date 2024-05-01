@@ -50,23 +50,25 @@ func IsValidResourceType(value string) bool {
 // Please note that the JSON annotations MUST match those declared by
 // the CDX types CDXComponent and CDXService.
 type CDXResourceInfo struct {
-	IsRoot       bool
-	ResourceType string `json:"resource-type"`
-	Group        string `json:"group"`
-	Name         string `json:"name"`
-	Version      string `json:"version"`
-	Description  string `json:"description"`
-	BOMRef       string `json:"bom-ref"`
-	Properties   *[]CDXProperty
-	Component    CDXComponent
-	Service      CDXService
-	HasLicense   bool
+	IsRoot         bool
+	ResourceType   string `json:"resource-type"`
+	Group          string `json:"group"`
+	Name           string `json:"name"`
+	Version        string `json:"version"`
+	Description    string `json:"description"`
+	BOMRef         string `json:"bom-ref"`
+	NumberLicenses int    `json:"number-licenses"`
+	NumberHashes   int    `json:"number-hashes"`
+	Properties     *[]CDXProperty
+	Component      CDXComponent
+	Service        CDXService
+	HasLicense     bool
 }
 
 // -------------------
 // Components
 // -------------------
-// TODO: Supplier (*CDXOrganizationalEntity), Authors (*[]CDXOrganizationalContact)
+// TODO: Authors (*[]CDXOrganizationalContact)
 // TODO: HasHashes, HasLicenses, HasPedigree, HasEvidence, HasComponents, HasReleaseNotes
 // TODO: HasModelCard, HasData, HasTags, HasSignature (*JSFSignature)
 // TODO: OmniborId (new), Swhid (new)
@@ -77,8 +79,8 @@ type CDXComponentInfo struct {
 	Publisher    string   `json:"publisher"`
 	Scope        string   `json:"scope"`
 	Copyright    string   `json:"copyright"`
-	Cpe          string   `json:"cpe"`  // See: https://nvd.nist.gov/products/cpe
-	Purl         string   `json:"purl"` // See: https://github.com/package-url/purl-spec
+	Cpe          string   `json:"cpe"`
+	Purl         string   `json:"purl"`
 	Swid         *CDXSwid `json:"swid"`
 	CDXResourceInfo
 }
@@ -109,13 +111,20 @@ func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXCompo
 		}
 	}
 	componentInfo.Properties = cdxComponent.Properties
-	componentInfo.Type = cdxComponent.Type
 
 	// Mark the component has having no licenses declared (at all)
 	// TODO: Need to further mark ones that have licenses array, yet no valid (e.g., empty) license
-	if cdxComponent.Licenses == nil {
-		componentInfo.HasLicense = false
+	if cdxComponent.Licenses != nil {
+		numLicenses := len(*cdxComponent.Licenses)
+		if numLicenses > 0 {
+			componentInfo.HasLicense = true
+			componentInfo.NumberLicenses = numLicenses
+		}
 	}
+
+	// Component-specific fields/properties
+	componentInfo.Type = cdxComponent.Type
+	componentInfo.Copyright = cdxComponent.Copyright
 }
 
 // -------------------
@@ -159,8 +168,12 @@ func (serviceInfo *CDXServiceInfo) MapCDXServiceData(cdxService CDXService) {
 	serviceInfo.Properties = cdxService.Properties
 	// Mark the service has having no licenses declared (at all)
 	// TODO: Need to further mark ones that have licenses array, yet no valid (e.g., empty) license
-	if cdxService.Licenses == nil {
-		serviceInfo.HasLicense = false
+	if cdxService.Licenses != nil {
+		numLicenses := len(*cdxService.Licenses)
+		if numLicenses > 0 {
+			serviceInfo.HasLicense = true
+			serviceInfo.NumberLicenses = numLicenses
+		}
 	}
 }
 
