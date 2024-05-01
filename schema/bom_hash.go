@@ -230,14 +230,7 @@ func (bom *BOM) HashmapService(cdxService CDXService, whereFilters []common.Wher
 		hashed = true
 		bom.ServiceMap.Put(serviceInfo.BOMRef, serviceInfo)
 		bom.ResourceMap.Put(serviceInfo.BOMRef, serviceInfo.CDXResourceInfo)
-
-		getLogger().Tracef("Put: [`%s`] %s (`%s`), `%s`, `%s`)",
-			serviceInfo.ResourceType,
-			serviceInfo.Name,
-			serviceInfo.Version,
-			serviceInfo.BOMRef,
-			serviceInfo.Description,
-		)
+		getLogger().Tracef("Hashmap Put() serviceInfo: %+v", serviceInfo)
 	}
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
@@ -293,10 +286,7 @@ func (bom *BOM) HashmapLicenseInfo(policyConfig *LicensePolicyConfig, key string
 		hashed = true
 		// Hash LicenseInfo by license key (i.e., id|name|expression)
 		bom.LicenseMap.Put(key, licenseInfo)
-		getLogger().Tracef("Put: %s (`%s`), `%s`)",
-			licenseInfo.ResourceName,
-			licenseInfo.UsagePolicy,
-			licenseInfo.BOMRef)
+		getLogger().Tracef("Hashmap Put() licenseInfo: %+v", licenseInfo)
 	}
 	return
 }
@@ -304,14 +294,14 @@ func (bom *BOM) HashmapLicenseInfo(policyConfig *LicensePolicyConfig, key string
 // TODO make this a method of *LicenseInfo (object)
 func copyExtendedLicenseChoiceFieldData(pLicenseInfo *LicenseInfo) {
 	if pLicenseInfo == nil {
-		getLogger().Tracef("invalid *LicenseInfo")
+		getLogger().Tracef("invalid *LicenseInfo: nil")
 		return
 	}
 
 	var lcType = pLicenseInfo.LicenseChoiceType
 	if lcType == LC_VALUE_ID || lcType == LC_VALUE_NAME {
 		if pLicenseInfo.LicenseChoice.License == nil {
-			getLogger().Tracef("invalid *CDXLicense")
+			getLogger().Tracef("invalid *CDXLicense: nil")
 			return
 		}
 		pLicenseInfo.LicenseId = pLicenseInfo.LicenseChoice.License.Id
@@ -489,9 +479,7 @@ func (bom *BOM) HashmapVulnerability(cdxVulnerability CDXVulnerability, whereFil
 	if match {
 		hashed = true
 		bom.VulnerabilityMap.Put(vulnInfo.Id, vulnInfo)
-		getLogger().Tracef("Put: %s (`%s`), `%s`)",
-			vulnInfo.Id, vulnInfo.Description, vulnInfo.BOMRef)
+		getLogger().Tracef("Hashmap Put() vulnInfo: %+v", vulnInfo)
 	}
-
 	return
 }
