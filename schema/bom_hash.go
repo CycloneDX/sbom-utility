@@ -131,11 +131,7 @@ func (bom *BOM) HashmapComponent(cdxComponent CDXComponent, whereFilters []commo
 		hashed = true
 		bom.ComponentMap.Put(componentInfo.BOMRef, componentInfo)
 		bom.ResourceMap.Put(componentInfo.BOMRef, componentInfo.CDXResourceInfo)
-
-		getLogger().Tracef("Put: %s (`%s`), `%s`)",
-			componentInfo.Name,
-			componentInfo.Version,
-			componentInfo.BOMRef)
+		getLogger().Tracef("Hashmap Put() componentInfo: %+v", componentInfo)
 	}
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
