@@ -256,7 +256,7 @@ func TestResourceListTextCdx13WhereClauseAndResultsBomRefContains(t *testing.T) 
 		EXPECTED_OUTPUT_LINE_COUNT,
 		schema.RESOURCE_TYPE_COMPONENT)
 	rti.ResultLineContainsValues = TEST_OUTPUT_CONTAINS
-	rti.ResultLineContainsValuesAtLineNum = 10
+	rti.ResultLineContainsValuesAtLineNum = 11
 	innerTestResourceList(t, rti)
 }
 
