@@ -161,11 +161,9 @@ func wrapTableRowText(maxChars int, joinChar string, columns ...interface{}) (ta
 }
 
 // Report column data values
-const REPORT_SUMMARY_DATA_TRUE = true
-const REPORT_SUMMARY_DATA_FALSE = false
+const REPORT_SUMMARY_DATA = true
 const REPORT_REPLACE_LINE_FEEDS_TRUE = true
-const REPORT_REPLACE_LINE_FEEDS_FALSE = false
-const DEFAULT_COLUMN_TRUNCATE_LENGTH = -1
+const REPORT_DO_NOT_TRUNCATE = -1
 
 // TODO: Support additional flags to:
 //   - show number of chars shown vs. available when truncated (e.g., (x/y))

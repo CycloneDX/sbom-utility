@@ -50,18 +50,17 @@ func IsValidResourceType(value string) bool {
 // Please note that the JSON annotations MUST match those declared by
 // the CDX types CDXComponent and CDXService.
 type CDXResourceInfo struct {
-	IsRoot           bool
-	ResourceType     string `json:"resource-type"`
-	Group            string `json:"group"`
-	Name             string `json:"name"`
-	Version          string `json:"version"`
-	Description      string `json:"description"`
-	BOMRef           string `json:"bom-ref"`
-	SupplierProvider *CDXOrganizationalEntity
-	Properties       *[]CDXProperty
-	Component        CDXComponent
-	Service          CDXService
-	HasLicense       bool
+	IsRoot       bool
+	ResourceType string `json:"resource-type"`
+	Group        string `json:"group"`
+	Name         string `json:"name"`
+	Version      string `json:"version"`
+	Description  string `json:"description"`
+	BOMRef       string `json:"bom-ref"`
+	Properties   *[]CDXProperty
+	Component    CDXComponent
+	Service      CDXService
+	HasLicense   bool
 }
 
 // -------------------
@@ -72,13 +71,15 @@ type CDXResourceInfo struct {
 // TODO: HasModelCard, HasData, HasTags, HasSignature (*JSFSignature)
 // TODO: OmniborId (new), Swhid (new)
 type CDXComponentInfo struct {
-	Type      string   `json:"type"`
-	Publisher string   `json:"publisher"`
-	Scope     string   `json:"scope"`
-	Copyright string   `json:"copyright"`
-	Cpe       string   `json:"cpe"`  // See: https://nvd.nist.gov/products/cpe
-	Purl      string   `json:"purl"` // See: https://github.com/package-url/purl-spec
-	Swid      *CDXSwid `json:"swid"`
+	Type         string   `json:"type"`
+	SupplierName string   `json:"supplier-name"`
+	SupplierUrl  string   `json:"supplier-url"`
+	Publisher    string   `json:"publisher"`
+	Scope        string   `json:"scope"`
+	Copyright    string   `json:"copyright"`
+	Cpe          string   `json:"cpe"`  // See: https://nvd.nist.gov/products/cpe
+	Purl         string   `json:"purl"` // See: https://github.com/package-url/purl-spec
+	Swid         *CDXSwid `json:"swid"`
 	CDXResourceInfo
 }
 
@@ -101,7 +102,11 @@ func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXCompo
 	componentInfo.Description = cdxComponent.Description
 	componentInfo.Version = cdxComponent.Version
 	if cdxComponent.Supplier != nil {
-		componentInfo.SupplierProvider = cdxComponent.Supplier
+		componentInfo.SupplierName = cdxComponent.Supplier.Name
+		// NOTE: if multiple URLs exist, we only display the first
+		if len(cdxComponent.Supplier.Url) > 0 {
+			componentInfo.SupplierUrl = cdxComponent.Supplier.Url[0]
+		}
 	}
 	componentInfo.Properties = cdxComponent.Properties
 	componentInfo.Type = cdxComponent.Type
@@ -121,6 +126,8 @@ func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXCompo
 // TODO: HasProperties, HasExternalRefs
 type CDXServiceInfo struct {
 	CDXResourceInfo
+	ProviderName   string `json:"provider-name"`
+	ProviderUrl    string `json:"provider-url"`
 	Authenticated  bool   `json:"authenticated,omitempty"`
 	XTrustBoundary bool   `json:"x-trust-boundary,omitempty"`
 	TrustZone      string `json:"trustZone,omitempty"`
@@ -143,7 +150,11 @@ func (serviceInfo *CDXServiceInfo) MapCDXServiceData(cdxService CDXService) {
 	serviceInfo.Description = cdxService.Description
 	serviceInfo.Version = cdxService.Version
 	if cdxService.Provider != nil {
-		serviceInfo.SupplierProvider = cdxService.Provider
+		serviceInfo.ProviderName = cdxService.Provider.Name
+		// NOTE: if multiple URLs exist, we only display the first
+		if len(cdxService.Provider.Url) > 0 {
+			serviceInfo.ProviderUrl = cdxService.Provider.Url[0]
+		}
 	}
 	serviceInfo.Properties = cdxService.Properties
 	// Mark the service has having no licenses declared (at all)

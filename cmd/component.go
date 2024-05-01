@@ -39,13 +39,6 @@ const (
 
 var VALID_SUBCOMMANDS_COMPONENT = []string{SUBCOMMAND_COMPONENT_LIST}
 
-var COMPONENT_LIST_ROW_DATA = []ColumnFormatData{
-	*NewColumnFormatData(COMPONENT_FILTER_KEY_TYPE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
-	*NewColumnFormatData(COMPONENT_FILTER_KEY_NAME, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
-	*NewColumnFormatData(COMPONENT_FILTER_KEY_VERSION, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
-	*NewColumnFormatData(COMPONENT_FILTER_KEY_BOMREF, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, REPORT_REPLACE_LINE_FEEDS_TRUE),
-}
-
 // filter keys
 // Note: these string values MUST match annotations for the ComponentInfo struct fields
 // Type      string   `json:"type"`
@@ -56,17 +49,34 @@ var COMPONENT_LIST_ROW_DATA = []ColumnFormatData{
 // Purl      string   `json:"purl,omitempty" scvs:"bom:resource:identifiers:purl"` // See: https://github.com/package-url/purl-spec
 // Swid      *CDXSwid `json:"swid,omitempty"`
 const (
-	COMPONENT_FILTER_KEY_TYPE    = "type"
-	COMPONENT_FILTER_KEY_NAME    = "name"
-	COMPONENT_FILTER_KEY_VERSION = "version"
-	COMPONENT_FILTER_KEY_BOMREF  = "bom-ref"
+	COMPONENT_FILTER_KEY_GROUP         = "group"
+	COMPONENT_FILTER_KEY_TYPE          = "type"
+	COMPONENT_FILTER_KEY_NAME          = "name"
+	COMPONENT_FILTER_KEY_DESCRIPTION   = "description"
+	COMPONENT_FILTER_KEY_VERSION       = "version"
+	COMPONENT_FILTER_KEY_BOMREF        = "bom-ref"
+	COMPONENT_FILTER_KEY_SUPPLIER_NAME = "supplier-name"
+	COMPONENT_FILTER_KEY_SUPPLIER_URL  = "supplier-url"
 )
 
 var VALID_COMPONENT_FILTER_KEYS = []string{
+	COMPONENT_FILTER_KEY_GROUP,
 	COMPONENT_FILTER_KEY_TYPE,
 	COMPONENT_FILTER_KEY_NAME,
+	COMPONENT_FILTER_KEY_DESCRIPTION,
 	COMPONENT_FILTER_KEY_VERSION,
 	COMPONENT_FILTER_KEY_BOMREF,
+}
+
+var COMPONENT_LIST_ROW_DATA = []ColumnFormatData{
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_GROUP, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_TYPE, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_NAME, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_VERSION, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_DESCRIPTION, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, REPORT_REPLACE_LINE_FEEDS_TRUE),
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_SUPPLIER_NAME, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_SUPPLIER_URL, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_BOMREF, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
 }
 
 // Flags. Reuse query flag values where possible
@@ -237,8 +247,8 @@ func sortComponents(entries []multimap.Entry) {
 	sort.Slice(entries, func(i, j int) bool {
 		resource1 := (entries[i].Value).(schema.CDXComponentInfo)
 		resource2 := (entries[j].Value).(schema.CDXComponentInfo)
-		if resource1.ResourceType != resource2.ResourceType {
-			return resource1.ResourceType < resource2.ResourceType
+		if resource1.Type != resource2.Type {
+			return resource1.Type < resource2.Type
 		}
 		return resource1.Name < resource2.Name
 	})
@@ -328,7 +338,7 @@ func DisplayComponentListCSV(bom *schema.BOM, writer io.Writer) (err error) {
 	var line []string
 	for _, entry := range entries {
 		line, err = prepareReportLineData(
-			entry.Value.(schema.CDXResourceInfo),
+			entry.Value.(schema.CDXComponentInfo),
 			COMPONENT_LIST_ROW_DATA,
 			true,
 		)
@@ -374,7 +384,7 @@ func DisplayComponentListMarkdown(bom *schema.BOM, writer io.Writer) (err error)
 	var lineRow string
 	for _, entry := range entries {
 		line, err = prepareReportLineData(
-			entry.Value.(schema.CDXResourceInfo),
+			entry.Value.(schema.CDXComponentInfo),
 			COMPONENT_LIST_ROW_DATA,
 			true,
 		)
