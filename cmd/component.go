@@ -242,11 +242,12 @@ func loadDocumentComponents(document *schema.BOM, whereFilters []common.WhereFil
 	return
 }
 
+// NOTE: component hashmap values are pointers to CDXComponentInfo structs
 func sortComponents(entries []multimap.Entry) {
 	// Sort by Type then Name
 	sort.Slice(entries, func(i, j int) bool {
-		resource1 := (entries[i].Value).(schema.CDXComponentInfo)
-		resource2 := (entries[j].Value).(schema.CDXComponentInfo)
+		resource1 := (entries[i].Value).(*schema.CDXComponentInfo)
+		resource2 := (entries[j].Value).(*schema.CDXComponentInfo)
 		if resource1.Type != resource2.Type {
 			return resource1.Type < resource2.Type
 		}
@@ -288,9 +289,12 @@ func DisplayComponentListText(bom *schema.BOM, writer io.Writer) (err error) {
 
 	// Emit row data
 	var line []string
+	var pComponentInfo *schema.CDXComponentInfo
 	for _, entry := range entries {
+		// NOTE: component hashmap values are pointers to CDXComponentInfo structs
+		pComponentInfo = entry.Value.(*schema.CDXComponentInfo)
 		line, err = prepareReportLineData(
-			entry.Value.(schema.CDXComponentInfo),
+			*pComponentInfo,
 			COMPONENT_LIST_ROW_DATA,
 			true,
 		)
@@ -320,7 +324,7 @@ func DisplayComponentListCSV(bom *schema.BOM, writer io.Writer) (err error) {
 	}
 
 	// Display a warning "missing" in the actual output and return (short-circuit)
-	entries := bom.ResourceMap.Entries()
+	entries := bom.ComponentMap.Entries()
 
 	// Emit no resource found warning into output
 	if len(entries) == 0 {
@@ -336,9 +340,12 @@ func DisplayComponentListCSV(bom *schema.BOM, writer io.Writer) (err error) {
 	sortComponents(entries)
 
 	var line []string
+	var pComponentInfo *schema.CDXComponentInfo
 	for _, entry := range entries {
+		// NOTE: component hashmap values are pointers to CDXComponentInfo structs
+		pComponentInfo = entry.Value.(*schema.CDXComponentInfo)
 		line, err = prepareReportLineData(
-			entry.Value.(schema.CDXComponentInfo),
+			*pComponentInfo,
 			COMPONENT_LIST_ROW_DATA,
 			true,
 		)
@@ -369,7 +376,7 @@ func DisplayComponentListMarkdown(bom *schema.BOM, writer io.Writer) (err error)
 	fmt.Fprintf(writer, "%s\n", alignmentRow)
 
 	// Display a warning "missing" in the actual output and return (short-circuit)
-	entries := bom.ResourceMap.Entries()
+	entries := bom.ComponentMap.Entries()
 
 	// Emit no components found warning into output
 	if len(entries) == 0 {
@@ -382,9 +389,12 @@ func DisplayComponentListMarkdown(bom *schema.BOM, writer io.Writer) (err error)
 
 	var line []string
 	var lineRow string
+	var pComponentInfo *schema.CDXComponentInfo
 	for _, entry := range entries {
+		// NOTE: component hashmap values are pointers to CDXComponentInfo structs
+		pComponentInfo = entry.Value.(*schema.CDXComponentInfo)
 		line, err = prepareReportLineData(
-			entry.Value.(schema.CDXComponentInfo),
+			*pComponentInfo,
 			COMPONENT_LIST_ROW_DATA,
 			true,
 		)

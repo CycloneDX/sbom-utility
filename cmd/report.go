@@ -172,17 +172,17 @@ const REPORT_DO_NOT_TRUNCATE = -1
 //     NOTE: if only a subset of entries are shown on a summary, an indication of (x) entries could be shown as well
 //   - Support Markdown column alignment (e.g., MD_ALIGN_xxx values)
 type ColumnFormatData struct {
-	DataKey               string // Note: data key is the column label (where possible)
-	DefaultTruncateLength int    // truncate data when `--format txt`
-	IsSummaryData         bool   // include in `--summary` reports
-	ReplaceLineFeeds      bool   // replace line feeds with spaces (e.g., for multi-line descriptions)
-	Alignment             string
+	DataKey          string // Note: data key is the column label (where possible)
+	TruncateLength   int    // truncate character data to this length (default=-1 means don't truncate)
+	IsSummaryData    bool   // include in `--summary` reports
+	ReplaceLineFeeds bool   // replace line feeds with spaces (e.g., for multi-line descriptions)
+	Alignment        string // Align column data where possible (i.e., This is primarily for markdown format)
 }
 
 func NewColumnFormatData(key string, truncateLen int, isSummary bool, replaceLineFeeds bool) (foo *ColumnFormatData) {
 	foo = new(ColumnFormatData)
 	foo.DataKey = key
-	foo.DefaultTruncateLength = truncateLen
+	foo.TruncateLength = truncateLen
 	foo.IsSummaryData = isSummary
 	foo.ReplaceLineFeeds = replaceLineFeeds
 	return
