@@ -82,8 +82,6 @@ func (bom *BOM) HashmapComponents(components []CDXComponent, whereFilters []comm
 func (bom *BOM) HashmapComponent(cdxComponent CDXComponent, whereFilters []common.WhereFilter, isRoot bool) (hashed bool, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
-	//var componentInfo CDXResourceInfo
-	var componentInfo CDXComponentInfo
 
 	if reflect.DeepEqual(cdxComponent, CDXComponent{}) {
 		getLogger().Warning("empty component object found")
@@ -98,29 +96,13 @@ func (bom *BOM) HashmapComponent(cdxComponent CDXComponent, whereFilters []commo
 		getLogger().Warningf("component named `%s` missing `version`", cdxComponent.Name)
 	}
 
-	//if cdxComponent.BOMRef != nil && *cdxComponent.BOMRef == "" {
 	if cdxComponent.BOMRef == nil || *cdxComponent.BOMRef == "" {
 		getLogger().Warningf("component named `%s` missing `bom-ref`", cdxComponent.Name)
 	}
 
-	// // hash any component w/o a license using special key name
-	// componentInfo.IsRoot = root
-	// componentInfo.ResourceType = RESOURCE_TYPE_COMPONENT
-	// componentInfo.Component = cdxComponent
-	// componentInfo.Name = cdxComponent.Name
-	// if cdxComponent.BOMRef != nil {
-	// 	ref := *cdxComponent.BOMRef
-	// 	componentInfo.BOMRef = ref.String()
-	// }
-	// componentInfo.Group = cdxComponent.Group
-	// componentInfo.Description = cdxComponent.Description
-	// componentInfo.Version = cdxComponent.Version
-	// if cdxComponent.Supplier != nil {
-	// 	componentInfo.SupplierProvider = cdxComponent.Supplier
-	// }
-	// componentInfo.Properties = cdxComponent.Properties
-	// componentInfo.Type = cdxComponent.Type
-	componentInfo.MapCDXComponentData(cdxComponent, isRoot)
+	// Map CDX data struct to our internal structure used for reporting/stats gathering
+	var componentInfo *CDXComponentInfo = NewComponentInfo(cdxComponent)
+	componentInfo.IsRoot = isRoot // mark BOM root component based upon location
 
 	var match bool = true
 	if len(whereFilters) > 0 {
@@ -182,7 +164,6 @@ func (bom *BOM) HashmapServices(services []CDXService, whereFilters []common.Whe
 func (bom *BOM) HashmapService(cdxService CDXService, whereFilters []common.WhereFilter) (hashed bool, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
-	var serviceInfo CDXServiceInfo
 
 	if reflect.DeepEqual(cdxService, CDXService{}) {
 		getLogger().Warning("empty service object found")
@@ -201,20 +182,8 @@ func (bom *BOM) HashmapService(cdxService CDXService, whereFilters []common.Wher
 		getLogger().Warningf("service named `%s` missing `bom-ref`", cdxService.Name)
 	}
 
-	// hash any component w/o a license using special key name
-	serviceInfo.ResourceType = RESOURCE_TYPE_SERVICE
-	serviceInfo.Service = cdxService
-	serviceInfo.Name = cdxService.Name
-	if cdxService.BOMRef != nil {
-		serviceInfo.BOMRef = cdxService.BOMRef.String()
-	}
-	serviceInfo.Group = cdxService.Group
-	serviceInfo.Description = cdxService.Description
-	serviceInfo.Version = cdxService.Version
-	if cdxService.Provider != nil {
-		serviceInfo.SupplierProvider = cdxService.Provider
-	}
-	serviceInfo.Properties = cdxService.Properties
+	// Map CDX data struct to our internal structure used for reporting/stats gathering
+	var serviceInfo *CDXServiceInfo = NewServiceInfo(cdxService)
 
 	var match bool = true
 	if len(whereFilters) > 0 {

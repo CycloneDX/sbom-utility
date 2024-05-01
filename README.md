@@ -1333,11 +1333,7 @@ component              Library A  1.0.0    Library A description  pkg:lib/librar
 
 ### Schema
 
-You can verify which formats, schemas, versions and variants are available for validation by using the `schema` command:
-
-```bash
-./sbom-utility schema list
-```
+You can verify which formats, schemas, versions and variants are available for validation by using the `schema` command.
 
 - **Note**: The `schema` command will default to the `list` subcommand if omitted.
 
@@ -1354,6 +1350,10 @@ This command supports the `--format` flag with any of the following values:
 #### Schema examples
 
 ##### Example: schema list
+
+```bash
+./sbom-utility schema list -q
+```
 
 ```bash
 name            variant      format     version   file                                             url
