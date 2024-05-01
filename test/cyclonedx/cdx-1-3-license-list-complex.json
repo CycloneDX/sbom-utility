@@ -36,7 +36,7 @@
     {
       "bom-ref": "service:example.com/myservices/foo",
       "name": "Foo",
-      "decription": "Foo service",
+      "description": "Foo service",
       "endpoints": [
           "https://example.com/myservice/foo"
       ],
@@ -51,7 +51,7 @@
     {
       "bom-ref": "service:example.com/myservices/bar",
       "name": "Bar",
-      "decription": "Bar service",
+      "description": "Bar service",
       "endpoints": [
           "https://example.com/myservice/bar"
       ]

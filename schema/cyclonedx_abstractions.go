@@ -61,6 +61,7 @@ type CDXResourceInfo struct {
 	Properties       *[]CDXProperty
 	Component        CDXComponent
 	Service          CDXService
+	HasLicense       bool
 }
 
 // -------------------
@@ -72,13 +73,44 @@ type CDXResourceInfo struct {
 // TODO: OmniborId (new), Swhid (new)
 type CDXComponentInfo struct {
 	Type      string   `json:"type"`
-	Publisher string   `json:"publisher,omitempty"`
-	Scope     string   `json:"scope,omitempty"`
-	Copyright string   `json:"copyright,omitempty"`
-	Cpe       string   `json:"cpe,omitempty"`                                       // See: https://nvd.nist.gov/products/cpe
-	Purl      string   `json:"purl,omitempty" scvs:"bom:resource:identifiers:purl"` // See: https://github.com/package-url/purl-spec
-	Swid      *CDXSwid `json:"swid,omitempty"`
+	Publisher string   `json:"publisher"`
+	Scope     string   `json:"scope"`
+	Copyright string   `json:"copyright"`
+	Cpe       string   `json:"cpe"`  // See: https://nvd.nist.gov/products/cpe
+	Purl      string   `json:"purl"` // See: https://github.com/package-url/purl-spec
+	Swid      *CDXSwid `json:"swid"`
 	CDXResourceInfo
+}
+
+func NewComponentInfo(cdxComponent CDXComponent) (componentInfo *CDXComponentInfo) {
+	componentInfo = new(CDXComponentInfo)
+	componentInfo.MapCDXComponentData(cdxComponent)
+	return
+}
+
+// TODO: flag any component w/o a license
+func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXComponent) {
+	componentInfo.ResourceType = RESOURCE_TYPE_COMPONENT
+	componentInfo.Component = cdxComponent
+	componentInfo.Name = cdxComponent.Name
+	if cdxComponent.BOMRef != nil {
+		ref := *cdxComponent.BOMRef
+		componentInfo.BOMRef = ref.String()
+	}
+	componentInfo.Group = cdxComponent.Group
+	componentInfo.Description = cdxComponent.Description
+	componentInfo.Version = cdxComponent.Version
+	if cdxComponent.Supplier != nil {
+		componentInfo.SupplierProvider = cdxComponent.Supplier
+	}
+	componentInfo.Properties = cdxComponent.Properties
+	componentInfo.Type = cdxComponent.Type
+
+	// Mark the component has having no licenses declared (at all)
+	// TODO: Need to further mark ones that have licenses array, yet no valid (e.g., empty) license
+	if cdxComponent.Licenses == nil {
+		componentInfo.HasLicense = false
+	}
 }
 
 // -------------------
@@ -92,6 +124,33 @@ type CDXServiceInfo struct {
 	Authenticated  bool   `json:"authenticated,omitempty"`
 	XTrustBoundary bool   `json:"x-trust-boundary,omitempty"`
 	TrustZone      string `json:"trustZone,omitempty"`
+}
+
+func NewServiceInfo(cdxService CDXService) (serviceInfo *CDXServiceInfo) {
+	serviceInfo = new(CDXServiceInfo)
+	serviceInfo.MapCDXServiceData(cdxService)
+	return
+}
+
+func (serviceInfo *CDXServiceInfo) MapCDXServiceData(cdxService CDXService) {
+	serviceInfo.ResourceType = RESOURCE_TYPE_SERVICE
+	serviceInfo.Service = cdxService
+	serviceInfo.Name = cdxService.Name
+	if cdxService.BOMRef != nil {
+		serviceInfo.BOMRef = cdxService.BOMRef.String()
+	}
+	serviceInfo.Group = cdxService.Group
+	serviceInfo.Description = cdxService.Description
+	serviceInfo.Version = cdxService.Version
+	if cdxService.Provider != nil {
+		serviceInfo.SupplierProvider = cdxService.Provider
+	}
+	serviceInfo.Properties = cdxService.Properties
+	// Mark the service has having no licenses declared (at all)
+	// TODO: Need to further mark ones that have licenses array, yet no valid (e.g., empty) license
+	if cdxService.Licenses == nil {
+		serviceInfo.HasLicense = false
+	}
 }
 
 // -------------------
@@ -192,6 +251,39 @@ type ExtendedLicenseInfo struct {
 	LicenseTextEncoding    string `json:"license-text-encoding"`
 	LicenseTextContentType string `json:"license-text-content-type"`
 	LicenseTextContent     string `json:"license-text-content"`
+}
+
+func NewLicenseInfoFromComponent(cdxComponent CDXComponent, licenseChoice CDXLicenseChoice, location int) (licenseInfo *LicenseInfo) {
+	licenseInfo = new(LicenseInfo)
+	licenseInfo.BOMLocationValue = location
+	licenseInfo.MapCDXLicenseFromComponent(cdxComponent, licenseChoice)
+	return
+}
+
+// TODO: flag any component or service w/o a license
+func (licenseInfo *LicenseInfo) MapCDXLicenseFromComponent(cdxComponent CDXComponent, cdxLicenseChoice CDXLicenseChoice) {
+	licenseInfo.Component = cdxComponent
+	licenseInfo.ResourceName = cdxComponent.Name
+	licenseInfo.LicenseChoice = cdxLicenseChoice
+	if cdxComponent.BOMRef != nil {
+		licenseInfo.BOMRef = *cdxComponent.BOMRef
+	}
+}
+
+func NewLicenseInfoFromService(cdxService CDXService, licenseChoice CDXLicenseChoice, location int) (licenseInfo *LicenseInfo) {
+	licenseInfo = new(LicenseInfo)
+	licenseInfo.BOMLocationValue = location
+	licenseInfo.MapCDXLicenseFromService(cdxService, licenseChoice)
+	return
+}
+
+func (licenseInfo *LicenseInfo) MapCDXLicenseFromService(cdxService CDXService, cdxLicenseChoice CDXLicenseChoice) {
+	licenseInfo.Service = cdxService
+	licenseInfo.LicenseChoice = cdxLicenseChoice
+	licenseInfo.ResourceName = cdxService.Name
+	if cdxService.BOMRef != nil {
+		licenseInfo.BOMRef = *cdxService.BOMRef
+	}
 }
 
 func (licenseInfo *LicenseInfo) SetLicenseChoiceTypeValue(value int) {

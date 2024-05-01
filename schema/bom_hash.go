@@ -79,11 +79,9 @@ func (bom *BOM) HashmapComponents(components []CDXComponent, whereFilters []comm
 // Hash a CDX Component and recursively those of any "nested" components
 // TODO: we should WARN if version is not a valid semver (e.g., examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json)
 // TODO: Use pointer for CDXComponent
-func (bom *BOM) HashmapComponent(cdxComponent CDXComponent, whereFilters []common.WhereFilter, root bool) (hashed bool, err error) {
+func (bom *BOM) HashmapComponent(cdxComponent CDXComponent, whereFilters []common.WhereFilter, isRoot bool) (hashed bool, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
-	//var componentInfo CDXResourceInfo
-	var componentInfo CDXComponentInfo
 
 	if reflect.DeepEqual(cdxComponent, CDXComponent{}) {
 		getLogger().Warning("empty component object found")
@@ -98,25 +96,13 @@ func (bom *BOM) HashmapComponent(cdxComponent CDXComponent, whereFilters []commo
 		getLogger().Warningf("component named `%s` missing `version`", cdxComponent.Name)
 	}
 
-	//if cdxComponent.BOMRef != nil && *cdxComponent.BOMRef == "" {
 	if cdxComponent.BOMRef == nil || *cdxComponent.BOMRef == "" {
 		getLogger().Warningf("component named `%s` missing `bom-ref`", cdxComponent.Name)
 	}
 
-	// hash any component w/o a license using special key name
-	componentInfo.IsRoot = root
-	componentInfo.ResourceType = RESOURCE_TYPE_COMPONENT
-	componentInfo.Component = cdxComponent
-	componentInfo.Name = cdxComponent.Name
-	if cdxComponent.BOMRef != nil {
-		ref := *cdxComponent.BOMRef
-		componentInfo.BOMRef = ref.String()
-	}
-	componentInfo.Version = cdxComponent.Version
-	if cdxComponent.Supplier != nil {
-		componentInfo.SupplierProvider = cdxComponent.Supplier
-	}
-	componentInfo.Properties = cdxComponent.Properties
+	// Map CDX data struct to our internal structure used for reporting/stats gathering
+	var componentInfo *CDXComponentInfo = NewComponentInfo(cdxComponent)
+	componentInfo.IsRoot = isRoot // mark BOM root component based upon location
 
 	var match bool = true
 	if len(whereFilters) > 0 {
@@ -128,17 +114,13 @@ func (bom *BOM) HashmapComponent(cdxComponent CDXComponent, whereFilters []commo
 		hashed = true
 		bom.ComponentMap.Put(componentInfo.BOMRef, componentInfo)
 		bom.ResourceMap.Put(componentInfo.BOMRef, componentInfo.CDXResourceInfo)
-
-		getLogger().Infof("Put: %s (`%s`), `%s`)",
-			componentInfo.Name,
-			componentInfo.Version,
-			componentInfo.BOMRef)
+		getLogger().Tracef("Hashmap Put() componentInfo: %+v", componentInfo)
 	}
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
 	pComponent := cdxComponent.Components
 	if pComponent != nil && len(*pComponent) > 0 {
-		err = bom.HashmapComponents(*cdxComponent.Components, whereFilters, root)
+		err = bom.HashmapComponents(*cdxComponent.Components, whereFilters, isRoot)
 		if err != nil {
 			return
 		}
@@ -182,7 +164,6 @@ func (bom *BOM) HashmapServices(services []CDXService, whereFilters []common.Whe
 func (bom *BOM) HashmapService(cdxService CDXService, whereFilters []common.WhereFilter) (hashed bool, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
-	var serviceInfo CDXServiceInfo
 
 	if reflect.DeepEqual(cdxService, CDXService{}) {
 		getLogger().Warning("empty service object found")
@@ -201,18 +182,8 @@ func (bom *BOM) HashmapService(cdxService CDXService, whereFilters []common.Wher
 		getLogger().Warningf("service named `%s` missing `bom-ref`", cdxService.Name)
 	}
 
-	// hash any component w/o a license using special key name
-	serviceInfo.ResourceType = RESOURCE_TYPE_SERVICE
-	serviceInfo.Service = cdxService
-	serviceInfo.Name = cdxService.Name
-	if cdxService.BOMRef != nil {
-		serviceInfo.BOMRef = cdxService.BOMRef.String()
-	}
-	serviceInfo.Version = cdxService.Version
-	if cdxService.Provider != nil {
-		serviceInfo.SupplierProvider = cdxService.Provider
-	}
-	serviceInfo.Properties = cdxService.Properties
+	// Map CDX data struct to our internal structure used for reporting/stats gathering
+	var serviceInfo *CDXServiceInfo = NewServiceInfo(cdxService)
 
 	var match bool = true
 	if len(whereFilters) > 0 {
@@ -225,13 +196,7 @@ func (bom *BOM) HashmapService(cdxService CDXService, whereFilters []common.Wher
 		hashed = true
 		bom.ServiceMap.Put(serviceInfo.BOMRef, serviceInfo)
 		bom.ResourceMap.Put(serviceInfo.BOMRef, serviceInfo.CDXResourceInfo)
-
-		getLogger().Tracef("Put: [`%s`] %s (`%s`), `%s`)",
-			serviceInfo.ResourceType,
-			serviceInfo.Name,
-			serviceInfo.Version,
-			serviceInfo.BOMRef,
-		)
+		getLogger().Tracef("Hashmap Put() serviceInfo: %+v", serviceInfo)
 	}
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
@@ -287,10 +252,7 @@ func (bom *BOM) HashmapLicenseInfo(policyConfig *LicensePolicyConfig, key string
 		hashed = true
 		// Hash LicenseInfo by license key (i.e., id|name|expression)
 		bom.LicenseMap.Put(key, licenseInfo)
-		getLogger().Tracef("Put: %s (`%s`), `%s`)",
-			licenseInfo.ResourceName,
-			licenseInfo.UsagePolicy,
-			licenseInfo.BOMRef)
+		getLogger().Tracef("Hashmap Put() licenseInfo: %+v", licenseInfo)
 	}
 	return
 }
@@ -298,14 +260,14 @@ func (bom *BOM) HashmapLicenseInfo(policyConfig *LicensePolicyConfig, key string
 // TODO make this a method of *LicenseInfo (object)
 func copyExtendedLicenseChoiceFieldData(pLicenseInfo *LicenseInfo) {
 	if pLicenseInfo == nil {
-		getLogger().Tracef("invalid *LicenseInfo")
+		getLogger().Tracef("invalid *LicenseInfo: nil")
 		return
 	}
 
 	var lcType = pLicenseInfo.LicenseChoiceType
 	if lcType == LC_VALUE_ID || lcType == LC_VALUE_NAME {
 		if pLicenseInfo.LicenseChoice.License == nil {
-			getLogger().Tracef("invalid *CDXLicense")
+			getLogger().Tracef("invalid *CDXLicense: nil")
 			return
 		}
 		pLicenseInfo.LicenseId = pLicenseInfo.LicenseChoice.License.Id
@@ -483,9 +445,7 @@ func (bom *BOM) HashmapVulnerability(cdxVulnerability CDXVulnerability, whereFil
 	if match {
 		hashed = true
 		bom.VulnerabilityMap.Put(vulnInfo.Id, vulnInfo)
-		getLogger().Tracef("Put: %s (`%s`), `%s`)",
-			vulnInfo.Id, vulnInfo.Description, vulnInfo.BOMRef)
+		getLogger().Tracef("Hashmap Put() vulnInfo: %+v", vulnInfo)
 	}
-
 	return
 }

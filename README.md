@@ -1276,21 +1276,22 @@ Currently, all `resource list` command results are sorted by resource `type` the
 ```
 
 ```bash
-type       name               version  bom-ref
-----       ----               -------  -------
-component  ACME Application   2.0.0    pkg:app/sample@1.0.0
-component  Library A          1.0.0    pkg:lib/libraryA@1.0.0
-component  Library B          1.0.0    pkg:lib/libraryB@1.0.0
-component  Library C          1.0.0    pkg:lib/libraryC@1.0.0
-component  Library D          1.0.0    pkg:lib/libraryD@1.0.0
-component  Library E          1.0.0    pkg:lib/libraryE@1.0.0
-component  Library F          1.0.0    pkg:lib/libraryF@1.0.0
-component  Library G          1.0.0    pkg:lib/libraryG@1.0.0
-component  Library H          1.0.0    pkg:lib/libraryH@1.0.0
-component  Library J          1.0.0    pkg:lib/libraryJ@1.0.0
-component  Library NoLicense  1.0.0    pkg:lib/libraryNoLicense@1.0.0
-service    Bar                         service:example.com/myservices/bar
-service    Foo                         service:example.com/myservices/foo
+resource-type  group   name               version  description                       bom-ref
+-------------  -----   ----               -------  -----------                       -------
+component              ACME Application   2.0.0    ACME sample application           pkg:app/sample@1.0.0
+component              Library A          1.0.0    Library A description             pkg:lib/libraryA@1.0.0
+component              Library C          1.0.0    Library C description.            pkg:lib/libraryC@1.0.0
+component              Library F          1.0.0    Library F description.            pkg:lib/libraryF@1.0.0
+component              Library G          1.0.0    Library G description.            pkg:lib/libraryG@1.0.0
+component              Library H          1.0.0    Library H description.            pkg:lib/libraryH@1.0.0
+component              Library NoLicense  1.0.0    Library "NoLicense" description.  pkg:lib/libraryNoLicense@1.0.0
+component      blue    Library B          1.0.0    Library B description.            pkg:lib/libraryB@1.0.0
+component      blue    Library E          1.0.0    Library E description.            pkg:lib/libraryE@1.0.0
+component      green   Library D          1.0.0    Library D description.            pkg:lib/libraryD@1.0.0
+component      green   Library J          1.0.0    Library J description.            pkg:lib/libraryJ@1.0.0
+service                Bar                         Bar service                       service:example.com/myservices/bar
+service                Foo                         Foo service                       service:example.com/myservices/foo
+
 ```
 
 ##### Example: resource list using `--type service`
@@ -1302,10 +1303,16 @@ This example uses the `type` flag to specific `service`.  The other valid type i
 ```
 
 ```bash
-type     name    version  bom-ref
-----     ----    -------  -------
-service  Bar              service:example.com/myservices/bar
-service  Foo              service:example.com/myservices/foo
+resource-type  group   name    version  description  bom-ref
+-------------  -----   ----    -------  -----------  -------
+service                Bar              Bar service  service:example.com/myservices/bar
+service                Foo              Foo service  service:example.com/myservices/foo
+```
+
+**Note** The results would be equivalent to using the `--where` filter:
+
+```bash
+./sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --where "resource-type=service" --quiet
 ```
 
 ##### Example: list with `name` regex match
@@ -1317,20 +1324,16 @@ This example uses the `where` filter on the `name` field. In this case we supply
 ```
 
 ```bash
-type       name       version  bom-ref
-----       ----       -------  -------
-component  Library A  1.0.0    pkg:lib/libraryA@1.0.0
+resource-type  group   name       version  description            bom-ref
+-------------  -----   ----       -------  -----------            -------
+component              Library A  1.0.0    Library A description  pkg:lib/libraryA@1.0.0
 ```
 
 ---
 
 ### Schema
 
-You can verify which formats, schemas, versions and variants are available for validation by using the `schema` command:
-
-```bash
-./sbom-utility schema list
-```
+You can verify which formats, schemas, versions and variants are available for validation by using the `schema` command.
 
 - **Note**: The `schema` command will default to the `list` subcommand if omitted.
 
@@ -1347,6 +1350,10 @@ This command supports the `--format` flag with any of the following values:
 #### Schema examples
 
 ##### Example: schema list
+
+```bash
+./sbom-utility schema list -q
+```
 
 ```bash
 name            variant      format     version   file                                             url

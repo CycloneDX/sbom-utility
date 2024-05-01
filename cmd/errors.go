@@ -46,24 +46,31 @@ const (
 	ERR_TYPE_IETF_RFC6902_TEST_FAILED = "IETF RFC6902 test operation error"
 )
 
-// Validation messages
+// Custom Validation messages
+// TODO: Need to define a profile that supports these validation checks/messages
 const (
-	MSG_FORMAT_TYPE                           = "format: `%s`"
-	MSG_SCHEMA_ERRORS                         = "schema errors found"
+	MSG_PROPERTY_NOT_UNIQUE                   = "check failed: property not unique"
 	MSG_INVALID_METADATA_PROPERTIES           = "field `metadata.properties` is missing or invalid"
 	MSG_INVALID_METADATA_COMPONENT_COMPONENTS = "field `metadata.component.components` array should be empty"
 	MSG_INVALID_METADATA_COMPONENT            = "field `metadata.component` is missing or invalid"
-	MSG_PROPERTY_NOT_FOUND                    = "property not found"
-	MSG_PROPERTY_NOT_UNIQUE                   = "check failed: property not unique"
-	MSG_PROPERTY_REGEX_FAILED                 = "check failed: property regex mismatch"
-	MSG_IETF_RFC6902_OPERATION_SUCCESS        = "IETF RFC6902 test operation success"
+)
+
+// Validation messages
+const (
+	MSG_FORMAT_TYPE                    = "format: `%s`"
+	MSG_SCHEMA_ERRORS                  = "schema errors found"
+	MSG_PROPERTY_NOT_FOUND             = "property not found"
+	MSG_PROPERTY_REGEX_FAILED          = "check failed: property regex mismatch"
+	MSG_IETF_RFC6902_OPERATION_SUCCESS = "IETF RFC6902 test operation success"
 )
 
 // License messages
 const (
 	MSG_LICENSE_INVALID_DATA   = "invalid license data"
 	MSG_LICENSE_INVALID_POLICY = "invalid license policy"
+	MSG_LICENSE_NOT_FOUND      = "license not found"
 	MSG_LICENSES_NOT_FOUND     = "licenses not found"
+	MSG_LICENSE_HASH_ERROR     = "hash of license failed"
 )
 
 // Query error details

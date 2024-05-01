@@ -129,8 +129,22 @@ func loadDocumentLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 			return
 		}
 	}
-
 	return
+}
+
+// Note: An actual error SHOULD ONLY be returned by the custom validation code.
+func warnNoLicenseFound(bom *schema.BOM, location int) {
+	message := fmt.Sprintf("%s (%s)",
+		MSG_LICENSES_NOT_FOUND, // "licenses not found"
+		schema.GetLicenseChoiceLocationName(location))
+	sbomError := NewInvalidSBOMError(bom, message, nil, nil)
+	getLogger().Warning(sbomError)
+}
+
+func warnInvalidResourceLicense(resourceType string, bomRef string, name string, version string) {
+	getLogger().Warningf("%s. resourceType: `%s`: bomRef: `%s`, name:`%s`, version: `%s`",
+		MSG_LICENSE_NOT_FOUND,
+		resourceType, bomRef, name, version)
 }
 
 // Hash the license found in the (root).metadata.licenses[] array
@@ -139,18 +153,9 @@ func hashMetadataLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 	defer getLogger().Exit(err)
 
 	pLicenses := bom.GetCdxMetadataLicenses()
+	// Issue a warning that the SBOM does not declare at least one, top-level component license.
 	if pLicenses == nil {
-		sbomError := NewInvalidSBOMError(
-			bom,
-			fmt.Sprintf("%s (%s)",
-				MSG_LICENSES_NOT_FOUND,
-				schema.GetLicenseChoiceLocationName(location)),
-			nil, nil)
-		// Issue a warning as an SBOM without at least one, top-level license
-		// (in the metadata license summary) SHOULD be noted.
-		// Note: An actual error SHOULD ONLY be returned by
-		// the custom validation code.
-		getLogger().Warning(sbomError)
+		warnNoLicenseFound(bom, location)
 		return
 	}
 
@@ -168,7 +173,6 @@ func hashMetadataLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 			return
 		}
 	}
-
 	return
 }
 
@@ -179,22 +183,10 @@ func hashMetadataComponentLicenses(bom *schema.BOM, policyConfig *schema.License
 
 	component := bom.GetCdxMetadataComponent()
 	if component == nil {
-		sbomError := NewInvalidSBOMError(
-			bom,
-			fmt.Sprintf("%s (%s)",
-				MSG_LICENSES_NOT_FOUND,
-				schema.GetLicenseChoiceLocationName(location)),
-			nil, nil)
-		// Issue a warning as an SBOM without at least one
-		// top-level component license declared SHOULD be noted.
-		// Note: An actual error SHOULD ONLY be returned by
-		// the custom validation code.
-		getLogger().Warning(sbomError)
+		warnNoLicenseFound(bom, location)
 		return
 	}
-
 	_, err = hashComponentLicense(bom, policyConfig, *component, location, whereFilters, licenseFlags)
-
 	return
 }
 
@@ -240,38 +232,23 @@ func hashComponentLicense(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 			getLogger().Debugf("licenseChoice: %s", getLogger().FormatStruct(licenseChoice))
 			getLogger().Tracef("hashing license for component=`%s`", cdxComponent.Name)
 
-			licenseInfo.LicenseChoice = licenseChoice
-			licenseInfo.Component = cdxComponent
-			licenseInfo.BOMLocationValue = location
-			licenseInfo.ResourceName = cdxComponent.Name
-			if cdxComponent.BOMRef != nil {
-				licenseInfo.BOMRef = *cdxComponent.BOMRef
-			}
+			licenseInfo = *schema.NewLicenseInfoFromComponent(cdxComponent, licenseChoice, location)
 			err = hashLicenseInfoByLicenseType(bom, policyConfig, licenseInfo, whereFilters, licenseFlags)
 
 			if err != nil {
 				// Show intent to not check for error returns as there no intent to recover
-				_ = getLogger().Errorf("Unable to hash empty license: %v", licenseInfo)
+				_ = getLogger().Errorf("%s. license: %+v", MSG_LICENSE_HASH_ERROR, licenseInfo)
 				return
 			}
 		}
 	} else {
 		// Account for component with no license with an "UNDEFINED" entry
-		// hash any component w/o a license using special key name
-		licenseInfo.Component = cdxComponent
-		licenseInfo.BOMLocationValue = location
-		licenseInfo.ResourceName = cdxComponent.Name
-		if cdxComponent.BOMRef != nil {
-			licenseInfo.BOMRef = *cdxComponent.BOMRef
-		}
+		licenseInfo = *schema.NewLicenseInfoFromComponent(cdxComponent, schema.CDXLicenseChoice{}, location)
 		_, err = bom.HashmapLicenseInfo(policyConfig, LICENSE_NO_ASSERTION, licenseInfo, whereFilters, licenseFlags)
 
-		getLogger().Warningf("%s: %s (name:`%s`, version: `%s`, package-url: `%s`)",
-			"No license found for component. bomRef",
-			licenseInfo.BOMRef,
-			licenseInfo.ResourceName,
-			cdxComponent.Version,
-			cdxComponent.Purl)
+		// Issue a warning that the component had no license; use "safe" BOMRef string value
+		// TODO: flag component for stats. purposes
+		warnInvalidResourceLicense(schema.RESOURCE_TYPE_COMPONENT, licenseInfo.BOMRef.String(), cdxComponent.Name, cdxComponent.Version)
 		// No actual licenses to process
 		return
 	}
@@ -284,7 +261,6 @@ func hashComponentLicense(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 			return
 		}
 	}
-
 	return
 }
 
@@ -301,35 +277,23 @@ func hashServiceLicense(bom *schema.BOM, policyConfig *schema.LicensePolicyConfi
 		for _, licenseChoice := range *pLicenses {
 			getLogger().Debugf("licenseChoice: %s", getLogger().FormatStruct(licenseChoice))
 			getLogger().Tracef("Hashing license for service=`%s`", cdxService.Name)
-			licenseInfo.LicenseChoice = licenseChoice
-			licenseInfo.Service = cdxService
-			licenseInfo.ResourceName = cdxService.Name
-			if cdxService.BOMRef != nil {
-				licenseInfo.BOMRef = *cdxService.BOMRef
-			}
-			licenseInfo.BOMLocationValue = location
+			licenseInfo = *schema.NewLicenseInfoFromService(cdxService, licenseChoice, location)
 			err = hashLicenseInfoByLicenseType(bom, policyConfig, licenseInfo, whereFilters, licenseFlags)
-
 			if err != nil {
+				// Show intent to not check for error returns as there no intent to recover
+				_ = getLogger().Errorf("%s. license: %+v", MSG_LICENSE_HASH_ERROR, licenseInfo)
 				return
 			}
 		}
 	} else {
 		// Account for service with no license with an "UNDEFINED" entry
 		// hash any service w/o a license using special key name
-		licenseInfo.Service = cdxService
-		licenseInfo.BOMLocationValue = location
-		licenseInfo.ResourceName = cdxService.Name
-		if cdxService.BOMRef != nil {
-			licenseInfo.BOMRef = *cdxService.BOMRef
-		}
+		licenseInfo = *schema.NewLicenseInfoFromService(cdxService, schema.CDXLicenseChoice{}, location)
 		_, err = bom.HashmapLicenseInfo(policyConfig, LICENSE_NO_ASSERTION, licenseInfo, whereFilters, licenseFlags)
 
-		getLogger().Warningf("%s: %s (name: `%s`, version: `%s`)",
-			"No license found for service. bomRef",
-			cdxService.BOMRef,
-			cdxService.Name,
-			cdxService.Version)
+		// Issue a warning that the service had no license; use "safe" BOMRef string value
+		// TODO: flag service for stats. purposes
+		warnInvalidResourceLicense(schema.RESOURCE_TYPE_SERVICE, licenseInfo.BOMRef.String(), cdxService.Name, cdxService.Version)
 
 		// No actual licenses to process
 		return
@@ -340,8 +304,8 @@ func hashServiceLicense(bom *schema.BOM, policyConfig *schema.LicensePolicyConfi
 	if pServices != nil && len(*pServices) > 0 {
 		err = hashServicesLicenses(bom, policyConfig, *pServices, location, whereFilters, licenseFlags)
 		if err != nil {
-			// Show intent to not check for error returns as there is no recovery
-			_ = getLogger().Errorf("Unable to hash empty license: %v", licenseInfo)
+			// Show intent to not check for error returns as there no intent to recover
+			_ = getLogger().Errorf("%s. license: %+v", MSG_LICENSE_HASH_ERROR, licenseInfo)
 			return
 		}
 	}

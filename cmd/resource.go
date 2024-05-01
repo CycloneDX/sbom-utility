@@ -52,8 +52,10 @@ const (
 
 var RESOURCE_LIST_ROW_DATA = []ColumnFormatData{
 	*NewColumnFormatData(RESOURCE_FILTER_KEY_RESOURCE_TYPE, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
+	*NewColumnFormatData(RESOURCE_FILTER_KEY_GROUP, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, REPORT_REPLACE_LINE_FEEDS_TRUE),
 	*NewColumnFormatData(RESOURCE_FILTER_KEY_NAME, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
 	*NewColumnFormatData(RESOURCE_FILTER_KEY_VERSION, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, false),
+	*NewColumnFormatData(RESOURCE_FILTER_KEY_DESCRIPTION, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, REPORT_REPLACE_LINE_FEEDS_TRUE),
 	*NewColumnFormatData(RESOURCE_FILTER_KEY_BOMREF, DEFAULT_COLUMN_TRUNCATE_LENGTH, REPORT_SUMMARY_DATA_TRUE, REPORT_REPLACE_LINE_FEEDS_TRUE),
 }
 
@@ -260,7 +262,13 @@ func sortResources(entries []multimap.Entry) {
 		if resource1.ResourceType != resource2.ResourceType {
 			return resource1.ResourceType < resource2.ResourceType
 		}
-		return resource1.Name < resource2.Name
+		if resource1.Group != resource2.Group {
+			return resource1.Group < resource2.Group
+		}
+		if resource1.Name != resource2.Name {
+			return resource1.Name < resource2.Name
+		}
+		return resource1.Version < resource2.Version
 	})
 }
 

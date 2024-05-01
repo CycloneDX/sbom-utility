@@ -177,7 +177,6 @@ type CDXDataGovernanceResponsibleParty struct {
 // validate a v1.2 SBOM wit the anon. type parses properly
 // NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXService struct {
-	Provider           *CDXOrganizationalEntity `json:"provider,omitempty"`
 	Name               string                   `json:"name,omitempty"`
 	Version            string                   `json:"version,omitempty"`
 	Description        string                   `json:"description,omitempty"`
@@ -187,6 +186,7 @@ type CDXService struct {
 	Authenticated      bool                     `json:"authenticated,omitempty"`
 	XTrustBoundary     bool                     `json:"x-trust-boundary,omitempty"`
 	TrustZone          string                   `json:"trustZone,omitempty"`
+	Provider           *CDXOrganizationalEntity `json:"provider,omitempty"`
 	Data               *[]CDXServiceData        `json:"data,omitempty"`
 	Licenses           *[]CDXLicenseChoice      `json:"licenses,omitempty"`
 	ExternalReferences *[]CDXExternalReference  `json:"externalReferences,omitempty"`
@@ -202,7 +202,7 @@ type CDXService struct {
 // TODO: "source" is a "oneOf" type (both currently resolve to string), but needs to be its own anonymous type
 // TODO: "destination" is a "oneOf" type (both currently resolve to string), but needs to be its own anonymous type
 type CDXServiceData struct {
-	Flow           string                 `json:"externalReferences,omitempty"`
+	Flow           string                 `json:"flow,omitempty"`
 	Classification *CDXDataClassification `json:"classification,omitempty"`
 	Name           string                 `json:"name,omitempty"`        // v1.5: added
 	Description    string                 `json:"description,omitempty"` // v1.5: added
