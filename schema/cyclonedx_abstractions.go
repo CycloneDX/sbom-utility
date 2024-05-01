@@ -81,6 +81,26 @@ type CDXComponentInfo struct {
 	CDXResourceInfo
 }
 
+func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXComponent, isRoot bool) {
+	// hash any component w/o a license using special key name
+	componentInfo.IsRoot = isRoot
+	componentInfo.ResourceType = RESOURCE_TYPE_COMPONENT
+	componentInfo.Component = cdxComponent
+	componentInfo.Name = cdxComponent.Name
+	if cdxComponent.BOMRef != nil {
+		ref := *cdxComponent.BOMRef
+		componentInfo.BOMRef = ref.String()
+	}
+	componentInfo.Group = cdxComponent.Group
+	componentInfo.Description = cdxComponent.Description
+	componentInfo.Version = cdxComponent.Version
+	if cdxComponent.Supplier != nil {
+		componentInfo.SupplierProvider = cdxComponent.Supplier
+	}
+	componentInfo.Properties = cdxComponent.Properties
+	componentInfo.Type = cdxComponent.Type
+}
+
 // -------------------
 // Services
 // -------------------

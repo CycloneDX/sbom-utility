@@ -79,7 +79,7 @@ func (bom *BOM) HashmapComponents(components []CDXComponent, whereFilters []comm
 // Hash a CDX Component and recursively those of any "nested" components
 // TODO: we should WARN if version is not a valid semver (e.g., examples/cyclonedx/BOM/laravel-7.12.0/bom.1.3.json)
 // TODO: Use pointer for CDXComponent
-func (bom *BOM) HashmapComponent(cdxComponent CDXComponent, whereFilters []common.WhereFilter, root bool) (hashed bool, err error) {
+func (bom *BOM) HashmapComponent(cdxComponent CDXComponent, whereFilters []common.WhereFilter, isRoot bool) (hashed bool, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit(err)
 	//var componentInfo CDXResourceInfo
@@ -103,23 +103,24 @@ func (bom *BOM) HashmapComponent(cdxComponent CDXComponent, whereFilters []commo
 		getLogger().Warningf("component named `%s` missing `bom-ref`", cdxComponent.Name)
 	}
 
-	// hash any component w/o a license using special key name
-	componentInfo.IsRoot = root
-	componentInfo.ResourceType = RESOURCE_TYPE_COMPONENT
-	componentInfo.Component = cdxComponent
-	componentInfo.Name = cdxComponent.Name
-	if cdxComponent.BOMRef != nil {
-		ref := *cdxComponent.BOMRef
-		componentInfo.BOMRef = ref.String()
-	}
-	componentInfo.Group = cdxComponent.Group
-	componentInfo.Description = cdxComponent.Description
-	componentInfo.Version = cdxComponent.Version
-	if cdxComponent.Supplier != nil {
-		componentInfo.SupplierProvider = cdxComponent.Supplier
-	}
-	componentInfo.Properties = cdxComponent.Properties
-	componentInfo.Type = cdxComponent.Type
+	// // hash any component w/o a license using special key name
+	// componentInfo.IsRoot = root
+	// componentInfo.ResourceType = RESOURCE_TYPE_COMPONENT
+	// componentInfo.Component = cdxComponent
+	// componentInfo.Name = cdxComponent.Name
+	// if cdxComponent.BOMRef != nil {
+	// 	ref := *cdxComponent.BOMRef
+	// 	componentInfo.BOMRef = ref.String()
+	// }
+	// componentInfo.Group = cdxComponent.Group
+	// componentInfo.Description = cdxComponent.Description
+	// componentInfo.Version = cdxComponent.Version
+	// if cdxComponent.Supplier != nil {
+	// 	componentInfo.SupplierProvider = cdxComponent.Supplier
+	// }
+	// componentInfo.Properties = cdxComponent.Properties
+	// componentInfo.Type = cdxComponent.Type
+	componentInfo.MapCDXComponentData(cdxComponent, isRoot)
 
 	var match bool = true
 	if len(whereFilters) > 0 {
@@ -137,7 +138,7 @@ func (bom *BOM) HashmapComponent(cdxComponent CDXComponent, whereFilters []commo
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
 	pComponent := cdxComponent.Components
 	if pComponent != nil && len(*pComponent) > 0 {
-		err = bom.HashmapComponents(*cdxComponent.Components, whereFilters, root)
+		err = bom.HashmapComponents(*cdxComponent.Components, whereFilters, isRoot)
 		if err != nil {
 			return
 		}
