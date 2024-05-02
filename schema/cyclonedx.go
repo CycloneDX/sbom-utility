@@ -226,23 +226,23 @@ type CDXPedigree struct {
 
 // TODO: create "isEmpty()" method to use in "component list" command
 // This method, currently, does NOT go "deep" enough into the structs used as slices...
-func (pedigree *CDXPedigree) isEmpty() bool {
-	if pedigree == nil {
-		return true
-	}
-	if (pedigree.Notes != "") ||
-		(pedigree.Ancestors != nil && len(*pedigree.Ancestors) > 0) ||
-		(pedigree.Descendants != nil && len(*pedigree.Descendants) > 0) ||
-		(pedigree.Variants != nil && len(*pedigree.Variants) > 0) ||
-		(pedigree.Commits != nil && len(*pedigree.Commits) > 0) ||
-		(pedigree.Patches != nil && len(*pedigree.Patches) > 0) {
-		return false
-	}
-	// TODO: we verified, at least to a shallow depth, that an attempt was made to provide
-	// provenance data; however, data structs in could still be "empty"
-	// a full, deep empty check impl. is needed
-	return true
-}
+// func (pedigree *CDXPedigree) isEmpty() bool {
+// 	if pedigree == nil {
+// 		return true
+// 	}
+// 	if (pedigree.Notes != "") ||
+// 		(pedigree.Ancestors != nil && len(*pedigree.Ancestors) > 0) ||
+// 		(pedigree.Descendants != nil && len(*pedigree.Descendants) > 0) ||
+// 		(pedigree.Variants != nil && len(*pedigree.Variants) > 0) ||
+// 		(pedigree.Commits != nil && len(*pedigree.Commits) > 0) ||
+// 		(pedigree.Patches != nil && len(*pedigree.Patches) > 0) {
+// 		return false
+// 	}
+// 	// TODO: we verified, at least to a shallow depth, that an attempt was made to provide
+// 	// provenance data; however, data structs in could still be "empty"
+// 	// a full, deep empty check impl. is needed
+// 	return true
+// }
 
 // v1.2: existed
 // v1.4: deprecated
