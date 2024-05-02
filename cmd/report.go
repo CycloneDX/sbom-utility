@@ -236,7 +236,7 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 		if !dataFound {
 			// TODO: change back?
 			getLogger().Errorf("data not found in structure: key: `%s`", columnData.DataKey)
-			data = ""
+			data = "<error: not found>"
 			//return
 		}
 

@@ -176,7 +176,7 @@ func TestComponentListCdx15MatureCsv(t *testing.T) {
 	innerTestComponentList(t, ti)
 }
 
-func TestComponentListCdx16CryptoBOM(t *testing.T) {
+func TestComponentListCdx16CryptoBOMCsv(t *testing.T) {
 	ti := NewComponentTestInfoBasic(TEST_COMPONENT_LIST_CDX_1_6_CBOM, FORMAT_CSV, nil)
 	ti.ResultExpectedLineCount = 6 // title + 4 data + EOF LF
 	ti.ResultLineContainsValuesAtLineNum = 2
@@ -184,7 +184,7 @@ func TestComponentListCdx16CryptoBOM(t *testing.T) {
 	innerTestComponentList(t, ti)
 }
 
-func TestComponentListCdx16MachineLearningBOM(t *testing.T) {
+func TestComponentListCdx16MachineLearningBOMCsv(t *testing.T) {
 	ti := NewComponentTestInfoBasic(TEST_COMPONENT_LIST_CDX_1_6_MLBOM, FORMAT_CSV, nil)
 	ti.ResultExpectedLineCount = 3 // title + 1 data + EOF LF
 	ti.ResultLineContainsValuesAtLineNum = 1
