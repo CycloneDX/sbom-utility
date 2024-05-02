@@ -222,7 +222,7 @@ func TestDiffJsonArrayOrderMove1ObjectWithAddAndDeleteFormatText(t *testing.T) {
 // =====================================================
 
 func TestDiffCdx14MatureDelta1Text(t *testing.T) {
-	ti := NewDiffTestInfo(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_1_DELTA)
+	ti := NewDiffTestInfo(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE, TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_1_DELTA)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_1_DELTA)
 	err := innerDiffTest(t, ti)
 	if err != nil {
@@ -231,7 +231,7 @@ func TestDiffCdx14MatureDelta1Text(t *testing.T) {
 }
 
 func TestDiffCdx14MatureDelta1Json(t *testing.T) {
-	ti := NewDiffTestInfo(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_1_DELTA)
+	ti := NewDiffTestInfo(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE, TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_1_DELTA)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_1_DELTA)
 	ti.OutputFormat = FORMAT_JSON
 	err := innerDiffTest(t, ti)
@@ -241,7 +241,7 @@ func TestDiffCdx14MatureDelta1Json(t *testing.T) {
 }
 
 func TestDiffCdx14MatureDelta2(t *testing.T) {
-	ti := NewDiffTestInfo(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE, TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_2_DELTA)
+	ti := NewDiffTestInfo(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE, TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_2_DELTA)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_2_DELTA)
 	err := innerDiffTest(t, ti)
 	if err != nil {

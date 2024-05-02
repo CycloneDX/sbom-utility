@@ -102,16 +102,16 @@
                     "file": "schema/cyclonedx/1.5/bom-1.5.schema.json",
                     "development": "https://github.com/CycloneDX/specification/blob/master/schema/bom-1.5.schema.json",
                     "url": "https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.5.schema.json",
-                    "default": true
+                    "default": false
                 },
                 {
                     "version": "1.6",
-                    "variant": "development",
+                    "variant": "",
                     "name": "CycloneDX v1.6",
                     "file": "schema/cyclonedx/1.6/bom-1.6.schema.json",
-                    "development": "https://github.com/CycloneDX/specification/blob/1.6-dev/schema/bom-1.6.schema.json",
-                    "url": "https://raw.githubusercontent.com/CycloneDX/specification/1.6-dev/schema/bom-1.6.schema.json",
-                    "default": false
+                    "development": "https://github.com/CycloneDX/specification/blob/master/schema/bom-1.6.schema.json",
+                    "url": "https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.6.schema.json",
+                    "default": true
                 },
                 {
                     "version": "1.3",

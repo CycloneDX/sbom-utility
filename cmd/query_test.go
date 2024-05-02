@@ -182,7 +182,7 @@ func TestQueryFailInvalidInputFileLoad(t *testing.T) {
 // ----------------------------------------
 
 func TestQueryCdx14BomFormatSpecVersion(t *testing.T) {
-	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
 	request, _ := common.NewQueryRequestSelectFrom(
 		"bomFormat,specVersion",
 		"")
@@ -191,7 +191,7 @@ func TestQueryCdx14BomFormatSpecVersion(t *testing.T) {
 }
 
 func TestQueryCdx14MetadataTimestampField(t *testing.T) {
-	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
 	request, _ := common.NewQueryRequestSelectFrom(
 		"timestamp",
 		"metadata")
@@ -200,7 +200,7 @@ func TestQueryCdx14MetadataTimestampField(t *testing.T) {
 }
 
 func TestQueryCdx14MetadataComponentAll(t *testing.T) {
-	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
 	request, _ := common.NewQueryRequestSelectWildcardFrom(
 		"metadata.component")
 	results, _ := innerQueryError(t, cti, request, nil)
@@ -213,7 +213,7 @@ func TestQueryCdx14MetadataComponentAll(t *testing.T) {
 }
 
 func TestQueryCdx14MetadataComponentNameDescriptionVersion(t *testing.T) {
-	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
 	request, _ := common.NewQueryRequestSelectFrom(
 		"name,description,version",
 		"metadata.component")
@@ -222,7 +222,7 @@ func TestQueryCdx14MetadataComponentNameDescriptionVersion(t *testing.T) {
 }
 
 func TestQueryCdx14MetadataSupplier(t *testing.T) {
-	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
 	request, _ := common.NewQueryRequestSelectFrom(
 		common.QUERY_TOKEN_WILDCARD,
 		"metadata.supplier")
@@ -233,7 +233,7 @@ func TestQueryCdx14MetadataSupplier(t *testing.T) {
 }
 
 func TestQueryCdx14MetadataManufacturer(t *testing.T) {
-	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
 	request, _ := common.NewQueryRequestSelectFrom(
 		common.QUERY_TOKEN_WILDCARD,
 		"metadata.manufacture")
@@ -244,7 +244,7 @@ func TestQueryCdx14MetadataManufacturer(t *testing.T) {
 }
 
 func TestQueryCdx14MetadataComponentLicenses(t *testing.T) {
-	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
 	request, _ := common.NewQueryRequestSelectFrom(
 		"licenses",
 		"metadata.component")
@@ -253,7 +253,7 @@ func TestQueryCdx14MetadataComponentLicenses(t *testing.T) {
 }
 
 func TestQueryCdx14MetadataComponentSupplier(t *testing.T) {
-	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
 	request, _ := common.NewQueryRequestSelectFrom(
 		"supplier",
 		"metadata.component")
@@ -262,7 +262,7 @@ func TestQueryCdx14MetadataComponentSupplier(t *testing.T) {
 }
 
 func TestQueryCdx14MetadataComponentPublisher(t *testing.T) {
-	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
 	request, _ := common.NewQueryRequestSelectFrom(
 		"publisher",
 		"metadata.component")
@@ -271,7 +271,7 @@ func TestQueryCdx14MetadataComponentPublisher(t *testing.T) {
 }
 
 func TestQueryCdx14MetadataAllWithWildcard(t *testing.T) {
-	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
 	request, _ := common.NewQueryRequestSelectWildcardFrom(
 		"metadata.component")
 	results, _ := innerQueryError(t, cti, request, nil)
@@ -282,7 +282,7 @@ func TestQueryCdx14MetadataAllWithWildcard(t *testing.T) {
 
 // NOTE: properties is an []interface
 func TestQueryCdx14MetadataComponentProperties(t *testing.T) {
-	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
 	request, _ := common.NewQueryRequestSelectFrom(
 		"properties",
 		"metadata.component")
@@ -304,7 +304,7 @@ func TestQueryFailSpdx22Metadata(t *testing.T) {
 }
 
 func TestQueryFailCdx14MetadataComponentInvalidKey(t *testing.T) {
-	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
 	request, _ := common.NewQueryRequestSelectFrom(
 		common.QUERY_TOKEN_WILDCARD,
 		"metadata.component.foo")
@@ -321,7 +321,7 @@ func TestQueryFailCdx14MetadataComponentInvalidKey(t *testing.T) {
 }
 
 func TestQueryFailCdx14MetadataComponentInvalidDataType(t *testing.T) {
-	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
 	request, _ := common.NewQueryRequestSelectFrom(
 		common.QUERY_TOKEN_WILDCARD,
 		"metadata.component.name")
@@ -330,7 +330,7 @@ func TestQueryFailCdx14MetadataComponentInvalidDataType(t *testing.T) {
 }
 
 func TestQueryFailCdx14MetadataComponentInvalidSelectClause(t *testing.T) {
-	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
 	request, _ := common.NewQueryRequestSelectFrom(
 		"name,*",
 		"metadata.component")
@@ -345,7 +345,7 @@ func TestQueryFailCdx14MetadataComponentInvalidSelectClause(t *testing.T) {
 }
 
 func TestQueryFailCdx14InvalidFromClauseWithArray(t *testing.T) {
-	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
 	request, _ := common.NewQueryRequestSelectFrom(
 		common.QUERY_TOKEN_WILDCARD,
 		"metadata.properties.name")
@@ -412,7 +412,7 @@ func TestQueryCdx14InvalidWhereClauseEmptyRegex(t *testing.T) {
 }
 
 func TestQueryCdx14RequiredDataLegalDisclaimer(t *testing.T) {
-	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
 	request, errNew := common.NewQueryRequestSelectFromWhere(
 		common.QUERY_TOKEN_WILDCARD,
 		"metadata.properties",
@@ -439,7 +439,7 @@ func TestQueryCdx14RequiredDataLegalDisclaimer(t *testing.T) {
 }
 
 func TestQueryCdx14InvalidWhereClauseOnFromSingleton(t *testing.T) {
-	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
 	request, _ := common.NewQueryRequestSelectFromWhere(
 		common.QUERY_TOKEN_WILDCARD,
 		"metadata.component",
@@ -452,7 +452,7 @@ func TestQueryCdx14InvalidWhereClauseOnFromSingleton(t *testing.T) {
 }
 
 func TestQueryCdx14MetadataToolsSlice(t *testing.T) {
-	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
 	request, _ := common.NewQueryRequestSelectFromWhere(
 		common.QUERY_TOKEN_WILDCARD,
 		"metadata.tools",
@@ -476,7 +476,7 @@ func TestQueryCdx14MetadataToolsSlice(t *testing.T) {
 }
 
 func TestQueryCdx14MetadataToolsSliceWhereName(t *testing.T) {
-	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
 	cti.ResultExpectedLineCount = 24
 	request, _ := common.NewQueryRequestSelectFromWhere(
 		common.QUERY_TOKEN_WILDCARD,
@@ -503,7 +503,7 @@ func TestQueryCdx14MetadataToolsSliceWhereName(t *testing.T) {
 }
 
 func TestQueryCdx14MetadataComponentIndent(t *testing.T) {
-	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
 	cti.ResultExpectedLineCount = 6
 	cti.ResultExpectedIndentLength = DEFAULT_OUTPUT_INDENT_LENGTH
 	cti.ResultExpectedIndentAtLineNum = 1
@@ -519,8 +519,8 @@ func TestQueryCdx14MetadataComponentIndent(t *testing.T) {
 }
 
 func TestQueryCdx14MetadataComponentIndentedFileWrite(t *testing.T) {
-	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
-	cti.OutputFile = cti.CreateTemporaryTestOutputFilename(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	cti := NewCommonTestInfoBasic(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
+	cti.OutputFile = cti.CreateTemporaryTestOutputFilename(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
 	cti.OutputIndent = 3
 	cti.ResultExpectedLineCount = 6
 	cti.ResultExpectedIndentLength = int(cti.OutputIndent)

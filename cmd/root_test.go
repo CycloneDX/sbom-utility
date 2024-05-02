@@ -276,6 +276,7 @@ func bufferLineContainsValues(buffer bytes.Buffer, lineNum int, values ...string
 				if !strings.Contains(line, value) {
 					// if we failed to match all values on the specified line return failure
 					if curLineNum == lineNum {
+						getLogger().Infof("Actual contents of line %v: `%s`", curLineNum, line)
 						return curLineNum, false
 					}
 					// else, keep checking next line

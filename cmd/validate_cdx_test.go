@@ -29,17 +29,21 @@ const (
 	TEST_CDX_1_6_MIN_REQUIRED = "test/cyclonedx/1.6/cdx-1-6-min-required.json"
 )
 
-// Tests for BOM subtypes
+// Tests for MLBOM subtypes
 const (
 	TEST_CDX_1_6_MACHINE_LEARNING_BOM = "test/cyclonedx/1.6/cdx-1-6-valid-mlbom-environmental-considerations.json"
-	TEST_CDX_1_6_CRYPTO_BOM           = "test/cyclonedx/1.6/cdx-1-6-valid-cbom-full-1.6.json"
+)
+
+// Tests for CBOM subtypes
+const (
+	TEST_CDX_1_6_CRYPTO_BOM = "test/cyclonedx/1.6/cdx-1-6-valid-cbom-full-1.6.json"
 )
 
 // Mature SBOMs used to test various schemas and queries
 const (
-	TEST_CDX_1_3_MATURITY_EXAMPLE_1_BASE = "test/cyclonedx/cdx-1-3-mature-example-1.json"
-	TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE = "test/cyclonedx/cdx-1-4-mature-example-1.json"
-	TEST_CDX_1_5_MATURITY_EXAMPLE_1_BASE = "test/cyclonedx/cdx-1-5-mature-example-1.json"
+	TEST_CDX_1_3_MATURE_EXAMPLE_1_BASE = "test/cyclonedx/cdx-1-3-mature-example-1.json"
+	TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE = "test/cyclonedx/cdx-1-4-mature-example-1.json"
+	TEST_CDX_1_5_MATURE_EXAMPLE_1_BASE = "test/cyclonedx/cdx-1-5-mature-example-1.json"
 )
 
 const (
@@ -71,35 +75,32 @@ func TestValidateCdx15MinRequiredBasic(t *testing.T) {
 
 func TestValidateCdx16MinRequiredBasic(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_6_MIN_REQUIRED)
-	vti.SchemaVariant = SCHEMA_VARIANT_DEVELOPMENT
 	innerTestValidate(t, *vti)
 }
 
 func TestValidateCdx13Mature(t *testing.T) {
-	vti := NewValidateTestInfoMinimum(TEST_CDX_1_3_MATURITY_EXAMPLE_1_BASE)
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_3_MATURE_EXAMPLE_1_BASE)
 	innerTestValidate(t, *vti)
 }
 
 func TestValidateCdx14MMature(t *testing.T) {
-	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE)
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE)
 	innerTestValidate(t, *vti)
 }
 
 func TestValidateCdx15Mature(t *testing.T) {
-	vti := NewValidateTestInfoMinimum(TEST_CDX_1_5_MATURITY_EXAMPLE_1_BASE)
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_5_MATURE_EXAMPLE_1_BASE)
 	innerTestValidate(t, *vti)
 }
 
 // Test BOM variants (e.g., MLBOM, CBOM, etc.)
 func TestValidateCdx16MachineLearningBOM(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_6_MACHINE_LEARNING_BOM)
-	vti.SchemaVariant = SCHEMA_VARIANT_DEVELOPMENT
 	innerTestValidate(t, *vti)
 }
 
 func TestValidateCdx16CryptographicBOM(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_6_CRYPTO_BOM)
-	vti.SchemaVariant = SCHEMA_VARIANT_DEVELOPMENT
 	innerTestValidate(t, *vti)
 }
 

@@ -62,6 +62,7 @@ type CDXResourceInfo struct {
 	Properties     *[]CDXProperty
 	Component      CDXComponent
 	Service        CDXService
+	HasHash        bool
 	HasLicense     bool
 }
 
@@ -119,6 +120,14 @@ func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXCompo
 		if numLicenses > 0 {
 			componentInfo.HasLicense = true
 			componentInfo.NumberLicenses = numLicenses
+		}
+	}
+
+	if cdxComponent.Hashes != nil {
+		numHashes := len(*cdxComponent.Hashes)
+		if numHashes > 0 {
+			componentInfo.HasHash = true
+			componentInfo.NumberHashes = numHashes
 		}
 	}
 
