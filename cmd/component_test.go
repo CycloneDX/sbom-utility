@@ -191,3 +191,15 @@ func TestComponentListCdx16MachineLearningBOM(t *testing.T) {
 	ti.ResultLineContainsValues = []string{"Llama-2-7b"}
 	innerTestComponentList(t, ti)
 }
+
+// ./sbom-utility component list -i test/cyclonedx/cdx-1-3-resource-list.json --where "number-licenses=0"  --quiet --format=txt
+//
+//	library  Library NoLicense  1.0.0  Library "NoLicense" description.  pkg:lib/libraryNoLicense@1.0.0  0   0
+func TestComponentListCdx13WhereNumLicensesCsv(t *testing.T) {
+	ti := NewComponentTestInfoBasic(TEST_RESOURCE_LIST_CDX_1_3, FORMAT_CSV, nil)
+	ti.WhereClause = "number-licenses=0"
+	ti.ResultExpectedLineCount = 3 // title + 1 data + EOF LF
+	ti.ResultLineContainsValuesAtLineNum = 1
+	ti.ResultLineContainsValues = []string{"NoLicense"}
+	innerTestComponentList(t, ti)
+}
