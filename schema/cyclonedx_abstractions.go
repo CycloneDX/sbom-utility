@@ -86,7 +86,16 @@ type CDXComponentInfo struct {
 	NumberHashes     int    `json:"number-hashes"`
 	HasHash          bool   `json:"has-hash"`
 	HasPedigree      bool   `json:"has-pedigree"`
-	//Scope            string `json:"scope"`
+	HasEvidence      bool   `json:"has-evidence"`
+	MimeType         string `json:"mime-type"`
+	Scope            string `json:"scope"`
+	// TODO:
+	// HasComponents    bool   `json:"has-components"`    // *[]CDXComponent
+	// HasReleaseNotes  bool   `json:"has-release-notes"` // *[]CDXReleaseNotes
+	// HasModelCard     bool   `json:"has-model-card"`    // *CDXModelCard
+	// HasData          bool   `json:"has-data"`          // *[]CDXComponentData
+	// HasTags          bool   `json:"has-tags"`          // *[]string
+	// HasSignature     bool   `json:"has-signature"`     // *JSFSignature
 }
 
 func NewComponentInfo(cdxComponent CDXComponent) (componentInfo *CDXComponentInfo) {
@@ -117,7 +126,11 @@ func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXCompo
 		}
 	}
 
-	componentInfo.Publisher = cdxComponent.Publisher
+	//---------------------
+	// Component-specific
+	//---------------------
+	componentInfo.Scope = cdxComponent.Scope
+	componentInfo.MimeType = cdxComponent.MimeType
 
 	// Manufacturer field added v1.6
 	if cdxComponent.Manufacturer != nil {
@@ -154,9 +167,6 @@ func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXCompo
 	if cdxComponent.Swid != nil {
 		componentInfo.SwidTagId = cdxComponent.Swid.TagId
 	}
-	// if cdxComponent.Pedigree != nil && *cdxComponent.Pedigree != (CDXPedigree{}) {
-	// 	componentInfo.HasPedigree = true
-	// }
 	if cdxComponent.Pedigree != nil && !cdxComponent.Pedigree.isEmpty() {
 		componentInfo.HasPedigree = true
 	}

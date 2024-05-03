@@ -213,3 +213,13 @@ func TestComponentListCdx16ValidComponentIds(t *testing.T) {
 	ti := NewComponentTestInfoBasic(TEST_CDX_SPEC_1_6_VALID_COMPONENT_IDS, FORMAT_CSV, nil)
 	innerTestComponentList(t, ti)
 }
+
+func TestComponentListCdx16ValidComponentSwid(t *testing.T) {
+	ti := NewComponentTestInfoBasic(TEST_CDX_SPEC_1_6_VALID_SWID, FORMAT_CSV, nil)
+	innerTestComponentList(t, ti)
+}
+
+func TestComponentListCdx16ValidComponentTypes(t *testing.T) {
+	ti := NewComponentTestInfoBasic(TEST_CDX_SPEC_1_6_VALID_COMPONENT_TYPES, FORMAT_CSV, nil)
+	innerTestComponentList(t, ti)
+}
