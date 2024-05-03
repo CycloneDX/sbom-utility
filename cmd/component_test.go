@@ -205,6 +205,6 @@ func TestComponentListCdx13WhereNumLicensesCsv(t *testing.T) {
 }
 
 func TestComponentListCdx16ValidBom(t *testing.T) {
-	ti := NewComponentTestInfoBasic(TEST_SPECIFICATION_CDX_1_6_VALID_BOM, FORMAT_CSV, nil)
+	ti := NewComponentTestInfoBasic(TEST_CDX_SPEC_1_6_VALID_BOM, FORMAT_CSV, nil)
 	innerTestComponentList(t, ti)
 }
