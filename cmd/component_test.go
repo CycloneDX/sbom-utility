@@ -42,6 +42,10 @@ const (
 	TEST_COMPONENT_LIST_CDX_1_6_MLBOM = TEST_CDX_1_6_MACHINE_LEARNING_BOM
 )
 
+const (
+	TEST_SPECIFICATION_CDX_1_6_VALID_BOM = "test/cyclonedx/1.6/specification/valid-bom-1.6.json"
+)
+
 type ComponentTestInfo struct {
 	CommonTestInfo
 }
@@ -201,5 +205,10 @@ func TestComponentListCdx13WhereNumLicensesCsv(t *testing.T) {
 	ti.ResultExpectedLineCount = 3 // title + 1 data + EOF LF
 	ti.ResultLineContainsValuesAtLineNum = 1
 	ti.ResultLineContainsValues = []string{"NoLicense"}
+	innerTestComponentList(t, ti)
+}
+
+func TestComponentListCdx16ValidBom(t *testing.T) {
+	ti := NewComponentTestInfoBasic(TEST_SPECIFICATION_CDX_1_6_VALID_BOM, FORMAT_CSV, nil)
 	innerTestComponentList(t, ti)
 }

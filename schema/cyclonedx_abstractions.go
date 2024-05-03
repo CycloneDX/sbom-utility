@@ -154,7 +154,10 @@ func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXCompo
 	if cdxComponent.Swid != nil {
 		componentInfo.SwidTagId = cdxComponent.Swid.TagId
 	}
-	if cdxComponent.Pedigree != nil && *cdxComponent.Pedigree != (CDXPedigree{}) {
+	// if cdxComponent.Pedigree != nil && *cdxComponent.Pedigree != (CDXPedigree{}) {
+	// 	componentInfo.HasPedigree = true
+	// }
+	if cdxComponent.Pedigree != nil && !cdxComponent.Pedigree.isEmpty() {
 		componentInfo.HasPedigree = true
 	}
 }
