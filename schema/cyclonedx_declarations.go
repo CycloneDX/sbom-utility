@@ -19,13 +19,13 @@ package schema
 
 // v1.6: added "declarations"
 type CDXDeclaration struct {
-	Assessors    *[]CDXAssessor             `json:"assessors,omitempty" cdx:"+1.6"`    // v1.6 added
-	Attestations *[]CDXAttestation          `json:"attestations,omitempty" cdx:"+1.6"` // v1.6 added
-	Claims       *[]CDXClaim                `json:"claims,omitempty" cdx:"+1.6"`       // v1.6 added
-	Evidence     *[]CDXEvidence             `json:"evidence,omitempty" cdx:"+1.6"`     // v1.6 added
-	Targets      *[]CDXOrganizationalEntity `json:"targets,omitempty" cdx:"+1.6"`      // v1.6 added
-	Affirmation  *CDXAffirmation            `json:"affirmation,omitempty" cdx:"+1.6"`  // v1.6 added
-	Signature    *JSFSignature              `json:"signature,omitempty" cdx:"+1.6"`    // v1.6 added
+	Assessors    *[]CDXAssessor    `json:"assessors,omitempty" cdx:"+1.6"`    // v1.6 added
+	Attestations *[]CDXAttestation `json:"attestations,omitempty" cdx:"+1.6"` // v1.6 added
+	Claims       *[]CDXClaim       `json:"claims,omitempty" cdx:"+1.6"`       // v1.6 added
+	Evidence     *[]CDXEvidence    `json:"evidence,omitempty" cdx:"+1.6"`     // v1.6 added
+	Targets      *CDXTargets       `json:"targets,omitempty" cdx:"+1.6"`      // v1.6 added
+	Affirmation  *CDXAffirmation   `json:"affirmation,omitempty" cdx:"+1.6"`  // v1.6 added
+	Signature    *JSFSignature     `json:"signature,omitempty" cdx:"+1.6"`    // v1.6 added
 }
 
 // v1.6: added
@@ -85,7 +85,7 @@ type CDXEvidence struct {
 	BOMRef       *CDXRefType               `json:"bom-ref,omitempty" cdx:"+1.6"`      // v1.6 added
 	PropertyName string                    `json:"propertyName,omitempty" cdx:"+1.6"` // v1.6 added
 	Description  string                    `json:"description,omitempty" cdx:"+1.6"`  // v1.6 added
-	Data         *[]CDXData                `json:"data,omitempty" cdx:"+1.6"`         // v1.6 added
+	Data         *[]CDXEvidenceData        `json:"data,omitempty" cdx:"+1.6"`         // v1.6 added
 	Created      string                    `json:"created,omitempty" cdx:"+1.6"`      // v1.6 added
 	Expires      string                    `json:"expires,omitempty" cdx:"+1.6"`      // v1.6 added
 	Author       *CDXOrganizationalContact `json:"author,omitempty" cdx:"+1.6"`       // v1.6 added
@@ -98,7 +98,7 @@ type CDXEvidence struct {
 // used in CDXComponentData, but does NOT have a "properties" field.
 // we will reuse it here as it does NOT impact JSON encoding/decoding
 // NOTE: The "Classification" field is actually an "enum" type in the JSON schema
-type CDXData struct {
+type CDXEvidenceData struct {
 	Name           string         `json:"name,omitempty" cdx:"+1.6"`           // v1.6 added
 	Contents       *CDXContent    `json:"contents,omitempty" cdx:"+1.6"`       // v1.6 added
 	Classification string         `json:"classification,omitempty" cdx:"+1.6"` // v1.6 added
@@ -114,17 +114,25 @@ type CDXGovernance struct {
 }
 
 // v1.6: added
+// NOTE: Type name matches plural reference from the spec.
+type CDXTargets struct {
+	Organizations *[]CDXOrganizationalEntity `json:"organizations,omitempty" cdx:"+1.6"` // v1.6 added
+	Components    *[]CDXComponent            `json:"components,omitempty" cdx:"+1.6"`    // v1.6 added
+	Services      *[]CDXService              `json:"services,omitempty" cdx:"+1.6"`      // v1.6 added
+}
+
+// v1.6: added
 type CDXAffirmation struct {
 	Statement   string          `json:"statement,omitempty" cdx:"+1.6"`   // v1.6 added
 	Signatories *[]CDXSignatory `json:"signatories,omitempty" cdx:"+1.6"` // v1.6 added
+	Signature   *JSFSignature   `json:"signature,omitempty" cdx:"+1.6"`   // v1.6 added
 }
 
 // v1.6: added
 type CDXSignatory struct {
-	Name string `json:"name,omitempty" cdx:"+1.6"` // v1.6 added
-	Role string `json:"role,omitempty" cdx:"+1.6"` // v1.6 added
-	// TODO:
-	Signature          interface{}              `json:"signature,omitempty" cdx:"+1.6"`          // v1.6 added
+	Name               string                   `json:"name,omitempty" cdx:"+1.6"`               // v1.6 added
+	Role               string                   `json:"role,omitempty" cdx:"+1.6"`               // v1.6 added
+	Signature          *JSFSignature            `json:"signature,omitempty" cdx:"+1.6"`          // v1.6 added
 	Organization       *CDXOrganizationalEntity `json:"organization,omitempty" cdx:"+1.6"`       // v1.6 added
 	ExternalReferences *[]CDXExternalReference  `json:"externalReferences,omitempty" cdx:"+1.6"` // v1.6 added
 }
