@@ -25,11 +25,11 @@ package schema
 // v1.5: added
 // NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXModelCard struct {
-	BOMRef               CDXRefType              `json:"bom-ref,omitempty"`              // v1.5
-	ModelParameters      CDXModelParameters      `json:"modelParameters,omitempty"`      // v1.5
-	QuantitativeAnalysis CDXQuantitativeAnalysis `json:"quantitativeAnalysis,omitempty"` // v1.5
-	Considerations       CDXConsiderations       `json:"considerations,omitempty"`       // v1.5
-	Properties           []CDXProperty           `json:"properties,omitempty"`           // v1.5
+	BOMRef               *CDXRefType              `json:"bom-ref,omitempty"`              // v1.5
+	ModelParameters      *CDXModelParameters      `json:"modelParameters,omitempty"`      // v1.5
+	QuantitativeAnalysis *CDXQuantitativeAnalysis `json:"quantitativeAnalysis,omitempty"` // v1.5
+	Considerations       *CDXConsiderations       `json:"considerations,omitempty"`       // v1.5
+	Properties           *[]CDXProperty           `json:"properties,omitempty"`           // v1.5
 }
 
 // ========================================
@@ -38,13 +38,13 @@ type CDXModelCard struct {
 
 // v1.5: added
 type CDXModelParameters struct {
-	Approach           CDXApproach                  `json:"approach,omitempty"`           // v1.5
-	Task               string                       `json:"task,omitempty"`               // v1.5
-	ArchitectureFamily string                       `json:"architectureFamily,omitempty"` // v1.5
-	ModelArchitecture  string                       `json:"modelArchitecture,omitempty"`  // v1.5
-	Datasets           []CDXDataset                 `json:"datasets,omitempty"`           // v1.5
-	Inputs             []CDXInputOutputMLParameters `json:"inputs,omitempty"`             // v1.5
-	Outputs            []CDXInputOutputMLParameters `json:"outputs,omitempty"`            // v1.5
+	Approach           *CDXApproach                  `json:"approach,omitempty"`           // v1.5
+	Task               string                        `json:"task,omitempty"`               // v1.5
+	ArchitectureFamily string                        `json:"architectureFamily,omitempty"` // v1.5
+	ModelArchitecture  string                        `json:"modelArchitecture,omitempty"`  // v1.5
+	Datasets           *[]CDXDataset                 `json:"datasets,omitempty"`           // v1.5
+	Inputs             *[]CDXInputOutputMLParameters `json:"inputs,omitempty"`             // v1.5
+	Outputs            *[]CDXInputOutputMLParameters `json:"outputs,omitempty"`            // v1.5
 }
 
 // v1.5: added
@@ -59,7 +59,7 @@ type CDXApproach struct {
 // TODO: actually, "Ref" should be its own anonymous type with "anyOf": ["#/definitions/refLinkType", "#/definitions/bomLinkElementType"]
 type CDXDataset struct {
 	CDXComponentData
-	Ref CDXRefLinkType `json:"ref,omitempty"` // v1.5
+	Ref *CDXRefLinkType `json:"ref,omitempty"` // v1.5
 }
 
 // v1.5: added
@@ -75,16 +75,16 @@ type CDXInputOutputMLParameters struct {
 
 // v1.5: added (anonymous type)
 type CDXQuantitativeAnalysis struct {
-	PerformanceMetrics []CDXPerformanceMetric `json:"performanceMetrics,omitempty"` // v1.5
-	Graphics           CDXGraphicsCollection  `json:"graphics,omitempty"`           // v1.5
+	PerformanceMetrics *[]CDXPerformanceMetric `json:"performanceMetrics,omitempty"` // v1.5
+	Graphics           *CDXGraphicsCollection  `json:"graphics,omitempty"`           // v1.5
 }
 
 // v1.5: added
 type CDXPerformanceMetric struct {
-	Type               string                `json:"type,omitempty"`               // v1.5
-	Value              string                `json:"value,omitempty"`              // v1.5
-	Slice              string                `json:"slice,omitempty"`              // v1.5
-	ConfidenceInterval CDXConfidenceInterval `json:"confidenceInterval,omitempty"` // v1.5
+	Type               string                 `json:"type,omitempty"`               // v1.5
+	Value              string                 `json:"value,omitempty"`              // v1.5
+	Slice              string                 `json:"slice,omitempty"`              // v1.5
+	ConfidenceInterval *CDXConfidenceInterval `json:"confidenceInterval,omitempty"` // v1.5
 }
 
 // v1.5: added
@@ -95,14 +95,14 @@ type CDXConfidenceInterval struct {
 
 // v1.5: added
 type CDXGraphicsCollection struct {
-	Description string       `json:"description,omitempty"` // v1.5
-	Collection  []CDXGraphic `json:"collection,omitempty"`  // v1.5
+	Description string        `json:"description,omitempty"` // v1.5
+	Collection  *[]CDXGraphic `json:"collection,omitempty"`  // v1.5
 }
 
 // v1.5: added
 type CDXGraphic struct {
-	Name  string        `json:"name,omitempty"`  // v1.5
-	Image CDXAttachment `json:"image,omitempty"` // v1.5
+	Name  string         `json:"name,omitempty"`  // v1.5
+	Image *CDXAttachment `json:"image,omitempty"` // v1.5
 }
 
 // ========================================
@@ -113,12 +113,12 @@ type CDXGraphic struct {
 // Considerations that should be taken into account regarding the model's construction,
 // training, and application
 type CDXConsiderations struct {
-	Users                 []string                `json:"users,omitempty"`                 // v1.5
-	UseCases              []string                `json:"useCases,omitempty"`              // v1.5
-	TechnicalLimitations  []string                `json:"technicalLimitations,omitempty"`  // v1.5
-	PerformanceTradeoffs  []string                `json:"performanceTradeoffs,omitempty"`  // v1.5
-	EthicalConsiderations []CDXRisk               `json:"ethicalConsiderations,omitempty"` // v1.5
-	FairnessAssessments   []CDXFairnessAssessment `json:"fairnessAssessments,omitempty"`   // v1.5
+	Users                 *[]string                `json:"users,omitempty"`                 // v1.5
+	UseCases              *[]string                `json:"useCases,omitempty"`              // v1.5
+	TechnicalLimitations  *[]string                `json:"technicalLimitations,omitempty"`  // v1.5
+	PerformanceTradeoffs  *[]string                `json:"performanceTradeoffs,omitempty"`  // v1.5
+	EthicalConsiderations *[]CDXRisk               `json:"ethicalConsiderations,omitempty"` // v1.5
+	FairnessAssessments   *[]CDXFairnessAssessment `json:"fairnessAssessments,omitempty"`   // v1.5
 }
 
 // v1.5: added

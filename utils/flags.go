@@ -38,16 +38,17 @@ type CommandFlags struct {
 	PersistentFlags PersistentCommandFlags
 
 	// Command-specific flags
+	ComponentFlags          ComponentCommandFlags
 	CustomValidationOptions CustomValidationFlags
 	DiffFlags               DiffCommandFlags
 	LicenseFlags            LicenseCommandFlags
+	PatchFlags              PatchCommandFlags
 	ResourceFlags           ResourceCommandFlags
 	SchemaFlags             SchemaCommandFlags
-	ValidateFlags           ValidateCommandFlags
-	VulnerabilityFlags      VulnerabilityCommandFlags
 	StatsFlags              StatsCommandFlags
 	TrimFlags               TrimCommandFlags
-	PatchFlags              PatchCommandFlags
+	ValidateFlags           ValidateCommandFlags
+	VulnerabilityFlags      VulnerabilityCommandFlags
 
 	// Misc flags
 	LogOutputIndentCallstack bool // Log indent
@@ -100,7 +101,8 @@ type ResourceCommandFlags struct {
 }
 
 type ComponentCommandFlags struct {
-	Types string
+	Summary bool
+	Types   []string
 }
 
 func NewResourceCommandFlags(resourceType string) ResourceCommandFlags {

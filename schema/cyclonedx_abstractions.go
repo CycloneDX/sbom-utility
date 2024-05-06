@@ -18,7 +18,9 @@
 
 package schema
 
-import "golang.org/x/exp/slices"
+import (
+	"golang.org/x/exp/slices"
+)
 
 // -------------------
 // Resources
@@ -89,13 +91,12 @@ type CDXComponentInfo struct {
 	HasEvidence      bool   `json:"has-evidence"`
 	MimeType         string `json:"mime-type"`
 	Scope            string `json:"scope"`
-	// TODO:
-	// HasComponents    bool   `json:"has-components"`    // *[]CDXComponent
-	// HasReleaseNotes  bool   `json:"has-release-notes"` // *[]CDXReleaseNotes
-	// HasModelCard     bool   `json:"has-model-card"`    // *CDXModelCard
-	// HasData          bool   `json:"has-data"`          // *[]CDXComponentData
-	// HasTags          bool   `json:"has-tags"`          // *[]string
-	// HasSignature     bool   `json:"has-signature"`     // *JSFSignature
+	HasComponents    bool   `json:"has-components"`
+	HasReleaseNotes  bool   `json:"has-release-notes"`
+	HasModelCard     bool   `json:"has-model-card"`
+	HasData          bool   `json:"has-data"`
+	HasTags          bool   `json:"has-tags"`
+	HasSignature     bool   `json:"has-signature"`
 }
 
 func NewComponentInfo(cdxComponent CDXComponent) (componentInfo *CDXComponentInfo) {
@@ -129,15 +130,23 @@ func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXCompo
 	//---------------------
 	// Component-specific
 	//---------------------
+	componentInfo.Type = cdxComponent.Type
 	componentInfo.Scope = cdxComponent.Scope
 	componentInfo.MimeType = cdxComponent.MimeType
+	componentInfo.Copyright = cdxComponent.Copyright
+	componentInfo.Purl = cdxComponent.Purl
+	componentInfo.Cpe = cdxComponent.Cpe
 
-	// Manufacturer field added v1.6
-	if cdxComponent.Manufacturer != nil {
-		componentInfo.ManufacturerName = cdxComponent.Manufacturer.Name
-		// NOTE: if multiple URLs exist, we only display the first
-		if len(cdxComponent.Manufacturer.Url) > 0 {
-			componentInfo.ManufacturerUrl = cdxComponent.Manufacturer.Url[0]
+	// Surface SWID Tag ID field only
+	if cdxComponent.Swid != nil {
+		componentInfo.SwidTagId = cdxComponent.Swid.TagId
+	}
+
+	if cdxComponent.Hashes != nil {
+		numHashes := len(*cdxComponent.Hashes)
+		if numHashes > 0 {
+			componentInfo.HasHash = true
+			componentInfo.NumberHashes = numHashes
 		}
 	}
 
@@ -151,24 +160,34 @@ func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXCompo
 		}
 	}
 
-	if cdxComponent.Hashes != nil {
-		numHashes := len(*cdxComponent.Hashes)
-		if numHashes > 0 {
-			componentInfo.HasHash = true
-			componentInfo.NumberHashes = numHashes
+	// Manufacturer field added v1.6
+	if cdxComponent.Manufacturer != nil {
+		componentInfo.ManufacturerName = cdxComponent.Manufacturer.Name
+		// NOTE: if multiple URLs exist, we only display the first
+		if len(cdxComponent.Manufacturer.Url) > 0 {
+			componentInfo.ManufacturerUrl = cdxComponent.Manufacturer.Url[0]
 		}
-	}
-
-	// Component-specific fields/properties
-	componentInfo.Type = cdxComponent.Type
-	componentInfo.Copyright = cdxComponent.Copyright
-	componentInfo.Purl = cdxComponent.Purl
-	componentInfo.Cpe = cdxComponent.Cpe
-	if cdxComponent.Swid != nil {
-		componentInfo.SwidTagId = cdxComponent.Swid.TagId
 	}
 	if cdxComponent.Pedigree != nil && !cdxComponent.Pedigree.isEmpty() {
 		componentInfo.HasPedigree = true
+	}
+	if cdxComponent.Components != nil && len(*cdxComponent.Components) > 0 {
+		componentInfo.HasComponents = true
+	}
+	if cdxComponent.ReleaseNotes != nil && len(*cdxComponent.ReleaseNotes) > 0 {
+		componentInfo.HasReleaseNotes = true
+	}
+	if cdxComponent.ModelCard != nil && *cdxComponent.ModelCard != (CDXModelCard{}) {
+		componentInfo.HasModelCard = true
+	}
+	if cdxComponent.Data != nil && len(*cdxComponent.Data) > 0 {
+		componentInfo.HasData = true
+	}
+	if cdxComponent.Tags != nil && len(*cdxComponent.Tags) > 0 {
+		componentInfo.HasTags = true
+	}
+	if cdxComponent.Signature != nil && *cdxComponent.Signature != (JSFSignature{}) {
+		componentInfo.HasSignature = true
 	}
 }
 

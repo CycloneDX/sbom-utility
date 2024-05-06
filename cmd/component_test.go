@@ -42,6 +42,8 @@ const (
 	TEST_COMPONENT_LIST_CDX_1_6_MLBOM = TEST_CDX_1_6_MACHINE_LEARNING_BOM
 )
 
+var COMPONENT_TEST_DEFAULT_FLAGS utils.ComponentCommandFlags
+
 type ComponentTestInfo struct {
 	CommonTestInfo
 }
@@ -72,7 +74,7 @@ func NewComponentTestInfoBasic(inputFile string, listFormat string, resultExpect
 // -------------------------------------------
 // resource list test helper functions
 // -------------------------------------------
-func innerBufferedTestComponentList(testInfo *ComponentTestInfo, whereFilters []common.WhereFilter) (outputBuffer bytes.Buffer, err error) {
+func innerBufferedTestComponentList(testInfo *ComponentTestInfo, whereFilters []common.WhereFilter, flags utils.ComponentCommandFlags) (outputBuffer bytes.Buffer, err error) {
 	// Declare an output outputBuffer/outputWriter to use used during tests
 	var outputWriter = bufio.NewWriter(&outputBuffer)
 	// ensure all data is written to buffer before further validation
@@ -81,11 +83,11 @@ func innerBufferedTestComponentList(testInfo *ComponentTestInfo, whereFilters []
 	var persistentFlags utils.PersistentCommandFlags
 	persistentFlags.OutputFormat = testInfo.OutputFormat
 
-	err = ListComponents(outputWriter, persistentFlags, whereFilters)
+	err = ListComponents(outputWriter, persistentFlags, flags, whereFilters)
 	return
 }
 
-func innerTestComponentList(t *testing.T, testInfo *ComponentTestInfo) (outputBuffer bytes.Buffer, basicTestInfo string, err error) {
+func innerTestComponentList(t *testing.T, testInfo *ComponentTestInfo, flags utils.ComponentCommandFlags) (outputBuffer bytes.Buffer, basicTestInfo string, err error) {
 	getLogger().Tracef("TestInfo: %s", testInfo)
 
 	// Parse out --where filters and exit out if error detected
@@ -113,7 +115,7 @@ func innerTestComponentList(t *testing.T, testInfo *ComponentTestInfo) (outputBu
 	}
 
 	// invoke resource list command with a byte buffer
-	outputBuffer, err = innerBufferedTestComponentList(testInfo, whereFilters)
+	outputBuffer, err = innerBufferedTestComponentList(testInfo, whereFilters, flags)
 
 	// Run all common tests against "result" values in the CommonTestInfo struct
 	err = innerRunReportResultTests(t, &testInfo.CommonTestInfo, outputBuffer, err)
@@ -131,7 +133,7 @@ func TestComponentListFormatUnsupportedSPDXMinReq(t *testing.T) {
 		&fs.PathError{},
 	)
 	// verify correct error is returned
-	innerTestComponentList(t, ti)
+	innerTestComponentList(t, ti, COMPONENT_TEST_DEFAULT_FLAGS)
 }
 
 // -------------------------------------------
@@ -143,7 +145,7 @@ func TestComponentListCdx13Text(t *testing.T) {
 	ti.ResultExpectedLineCount = 14 // title + separator + 11 data + EOF LF
 	ti.ResultLineContainsValuesAtLineNum = 6
 	ti.ResultLineContainsValues = []string{"Library G"}
-	innerTestComponentList(t, ti)
+	innerTestComponentList(t, ti, COMPONENT_TEST_DEFAULT_FLAGS)
 }
 
 func TestComponentListCdx13Csv(t *testing.T) {
@@ -151,7 +153,7 @@ func TestComponentListCdx13Csv(t *testing.T) {
 	ti.ResultExpectedLineCount = 13 // title + 11 data + EOF LF
 	ti.ResultLineContainsValuesAtLineNum = 5
 	ti.ResultLineContainsValues = []string{"Library G"}
-	innerTestComponentList(t, ti)
+	innerTestComponentList(t, ti, COMPONENT_TEST_DEFAULT_FLAGS)
 }
 
 func TestComponentListCdx13Markdown(t *testing.T) {
@@ -159,7 +161,7 @@ func TestComponentListCdx13Markdown(t *testing.T) {
 	ti.ResultExpectedLineCount = 14 // title + separator + 11 data + EOF LF
 	ti.ResultLineContainsValuesAtLineNum = 6
 	ti.ResultLineContainsValues = []string{"Library G"}
-	innerTestComponentList(t, ti)
+	innerTestComponentList(t, ti, COMPONENT_TEST_DEFAULT_FLAGS)
 }
 
 // -------------------------------------------
@@ -173,7 +175,7 @@ func TestComponentListCdx15MatureCsv(t *testing.T) {
 	ti.ResultExpectedLineCount = 5 // title + 3 data + EOF LF
 	ti.ResultLineContainsValuesAtLineNum = 3
 	ti.ResultLineContainsValues = []string{"sample"}
-	innerTestComponentList(t, ti)
+	innerTestComponentList(t, ti, COMPONENT_TEST_DEFAULT_FLAGS)
 }
 
 func TestComponentListCdx16CryptoBOMCsv(t *testing.T) {
@@ -181,7 +183,7 @@ func TestComponentListCdx16CryptoBOMCsv(t *testing.T) {
 	ti.ResultExpectedLineCount = 6 // title + 4 data + EOF LF
 	ti.ResultLineContainsValuesAtLineNum = 2
 	ti.ResultLineContainsValues = []string{"asset-2"}
-	innerTestComponentList(t, ti)
+	innerTestComponentList(t, ti, COMPONENT_TEST_DEFAULT_FLAGS)
 }
 
 func TestComponentListCdx16MachineLearningBOMCsv(t *testing.T) {
@@ -189,7 +191,7 @@ func TestComponentListCdx16MachineLearningBOMCsv(t *testing.T) {
 	ti.ResultExpectedLineCount = 3 // title + 1 data + EOF LF
 	ti.ResultLineContainsValuesAtLineNum = 1
 	ti.ResultLineContainsValues = []string{"Llama-2-7b"}
-	innerTestComponentList(t, ti)
+	innerTestComponentList(t, ti, COMPONENT_TEST_DEFAULT_FLAGS)
 }
 
 // ./sbom-utility component list -i test/cyclonedx/cdx-1-3-resource-list.json --where "number-licenses=0"  --quiet --format=txt
@@ -201,25 +203,25 @@ func TestComponentListCdx13WhereNumLicensesCsv(t *testing.T) {
 	ti.ResultExpectedLineCount = 3 // title + 1 data + EOF LF
 	ti.ResultLineContainsValuesAtLineNum = 1
 	ti.ResultLineContainsValues = []string{"NoLicense"}
-	innerTestComponentList(t, ti)
+	innerTestComponentList(t, ti, COMPONENT_TEST_DEFAULT_FLAGS)
 }
 
 func TestComponentListCdx16ValidBom(t *testing.T) {
 	ti := NewComponentTestInfoBasic(TEST_CDX_SPEC_1_6_VALID_BOM, FORMAT_CSV, nil)
-	innerTestComponentList(t, ti)
+	innerTestComponentList(t, ti, COMPONENT_TEST_DEFAULT_FLAGS)
 }
 
 func TestComponentListCdx16ValidComponentIds(t *testing.T) {
 	ti := NewComponentTestInfoBasic(TEST_CDX_SPEC_1_6_VALID_COMPONENT_IDS, FORMAT_CSV, nil)
-	innerTestComponentList(t, ti)
+	innerTestComponentList(t, ti, COMPONENT_TEST_DEFAULT_FLAGS)
 }
 
 func TestComponentListCdx16ValidComponentSwid(t *testing.T) {
 	ti := NewComponentTestInfoBasic(TEST_CDX_SPEC_1_6_VALID_SWID, FORMAT_CSV, nil)
-	innerTestComponentList(t, ti)
+	innerTestComponentList(t, ti, COMPONENT_TEST_DEFAULT_FLAGS)
 }
 
 func TestComponentListCdx16ValidComponentTypes(t *testing.T) {
 	ti := NewComponentTestInfoBasic(TEST_CDX_SPEC_1_6_VALID_COMPONENT_TYPES, FORMAT_CSV, nil)
-	innerTestComponentList(t, ti)
+	innerTestComponentList(t, ti, COMPONENT_TEST_DEFAULT_FLAGS)
 }

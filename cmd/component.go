@@ -41,13 +41,7 @@ var VALID_SUBCOMMANDS_COMPONENT = []string{SUBCOMMAND_COMPONENT_LIST}
 
 // filter keys
 // Note: these string values MUST match annotations for the ComponentInfo struct fields
-// Type      string   `json:"type"`
-// Publisher string   `json:"publisher,omitempty"`
 // Scope     string   `json:"scope,omitempty"`
-// Copyright string   `json:"copyright,omitempty"`
-// Cpe       string   `json:"cpe,omitempty"`                                       // See: https://nvd.nist.gov/products/cpe
-// Purl      string   `json:"purl,omitempty" scvs:"bom:resource:identifiers:purl"` // See: https://github.com/package-url/purl-spec
-// Swid      *CDXSwid `json:"swid,omitempty"`
 const (
 	COMPONENT_FILTER_KEY_BOMREF            = "bom-ref"
 	COMPONENT_FILTER_KEY_GROUP             = "group"
@@ -68,6 +62,14 @@ const (
 	COMPONENT_FILTER_KEY_NUM_HASHES        = "number-hashes"
 	COMPONENT_FILTER_KEY_HAS_PEDIGREE      = "has-pedigree"
 	COMPONENT_FILTER_KEY_HAS_EVIDENCE      = "has-evidence"
+	COMPONENT_FILTER_KEY_MIME_TYPE         = "mime-type"
+	COMPONENT_FILTER_KEY_HAS_SCOPE         = "scope"
+	COMPONENT_FILTER_KEY_HAS_COMPONENTS    = "has-components"
+	COMPONENT_FILTER_KEY_HAS_RELEASE_NOTES = "has-release-notes"
+	COMPONENT_FILTER_KEY_HAS_MODEL_CARD    = "has-model-card"
+	COMPONENT_FILTER_KEY_HAS_DATA          = "has-data"
+	COMPONENT_FILTER_KEY_HAS_TAGS          = "has-tags"
+	COMPONENT_FILTER_KEY_HAS_SIGNATURE     = "has-signature"
 )
 
 var VALID_COMPONENT_FILTER_KEYS = []string{
@@ -90,6 +92,14 @@ var VALID_COMPONENT_FILTER_KEYS = []string{
 	COMPONENT_FILTER_KEY_NUM_HASHES,
 	COMPONENT_FILTER_KEY_HAS_PEDIGREE,
 	COMPONENT_FILTER_KEY_HAS_EVIDENCE,
+	COMPONENT_FILTER_KEY_MIME_TYPE,
+	COMPONENT_FILTER_KEY_HAS_SCOPE,
+	COMPONENT_FILTER_KEY_HAS_COMPONENTS,
+	COMPONENT_FILTER_KEY_HAS_RELEASE_NOTES,
+	COMPONENT_FILTER_KEY_HAS_MODEL_CARD,
+	COMPONENT_FILTER_KEY_HAS_DATA,
+	COMPONENT_FILTER_KEY_HAS_TAGS,
+	COMPONENT_FILTER_KEY_HAS_SIGNATURE,
 }
 
 var COMPONENT_LIST_ROW_DATA = []ColumnFormatData{
@@ -108,16 +118,26 @@ var COMPONENT_LIST_ROW_DATA = []ColumnFormatData{
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_PURL, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_SWID, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_CPE, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_MIME_TYPE, REPORT_DO_NOT_TRUNCATE, false, false),
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_HAS_SCOPE, REPORT_DO_NOT_TRUNCATE, false, false),
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_NUM_HASHES, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_NUM_LICENSES, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
-	*NewColumnFormatData(COMPONENT_FILTER_KEY_HAS_PEDIGREE, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
-	*NewColumnFormatData(COMPONENT_FILTER_KEY_HAS_EVIDENCE, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_HAS_PEDIGREE, REPORT_DO_NOT_TRUNCATE, false, false),
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_HAS_EVIDENCE, REPORT_DO_NOT_TRUNCATE, false, false),
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_HAS_COMPONENTS, REPORT_DO_NOT_TRUNCATE, false, false),
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_HAS_RELEASE_NOTES, REPORT_DO_NOT_TRUNCATE, false, false),
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_HAS_MODEL_CARD, REPORT_DO_NOT_TRUNCATE, false, false),
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_HAS_DATA, REPORT_DO_NOT_TRUNCATE, false, false),
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_HAS_TAGS, REPORT_DO_NOT_TRUNCATE, false, false),
+	*NewColumnFormatData(COMPONENT_FILTER_KEY_HAS_SIGNATURE, REPORT_DO_NOT_TRUNCATE, false, false),
 }
 
 // Flags. Reuse query flag values where possible
 const (
-	FLAG_COMPONENT_TYPE      = "type"
-	FLAG_COMPONENT_TYPE_HELP = "filter output by component type(s)"
+	FLAG_COMPONENT_SUMMARY = "summary"
+	FLAG_COMPONENT_TYPE    = "type"
+	// FLAG_COMPONENT_TYPE_HELP    = "filter output by component type(s)"
+	FLAG_COMPONENT_SUMMARY_HELP = "summarize component information when listing in supported formats"
 )
 
 const (
@@ -139,7 +159,11 @@ func NewCommandComponent() *cobra.Command {
 	command.Long = "Report on components found in the BOM input file"
 	command.Flags().StringVarP(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
 		FLAG_COMPONENT_OUTPUT_FORMAT_HELP+COMPONENT_LIST_OUTPUT_SUPPORTED_FORMATS)
-	command.Flags().StringP(FLAG_COMPONENT_TYPE, "", "", FLAG_COMPONENT_TYPE_HELP)
+	//command.Flags().StringP(FLAG_COMPONENT_TYPE, "", "", FLAG_COMPONENT_TYPE_HELP)
+	command.Flags().BoolVarP(
+		&utils.GlobalFlags.ComponentFlags.Summary,
+		FLAG_COMPONENT_SUMMARY, "", false,
+		FLAG_COMPONENT_SUMMARY_HELP)
 	command.Flags().StringP(FLAG_REPORT_WHERE, "", "", FLAG_REPORT_WHERE_HELP)
 	command.RunE = componentCmdImpl
 	command.ValidArgs = VALID_SUBCOMMANDS_COMPONENT
@@ -190,7 +214,7 @@ func componentCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	whereFilters, err := processWhereFlag(cmd)
 
 	if err == nil {
-		err = ListComponents(writer, utils.GlobalFlags.PersistentFlags, whereFilters)
+		err = ListComponents(writer, utils.GlobalFlags.PersistentFlags, utils.GlobalFlags.ComponentFlags, whereFilters)
 	}
 
 	return
@@ -205,7 +229,7 @@ func processComponentListResults(err error) {
 }
 
 // NOTE: resourceType has already been validated
-func ListComponents(writer io.Writer, persistentFlags utils.PersistentCommandFlags, whereFilters []common.WhereFilter) (err error) {
+func ListComponents(writer io.Writer, persistentFlags utils.PersistentCommandFlags, flags utils.ComponentCommandFlags, whereFilters []common.WhereFilter) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -236,16 +260,16 @@ func ListComponents(writer io.Writer, persistentFlags utils.PersistentCommandFla
 	getLogger().Infof("Outputting listing (`%s` format)...", format)
 	switch format {
 	case FORMAT_TEXT:
-		err = DisplayComponentListText(document, writer)
+		err = DisplayComponentListText(document, writer, flags)
 	case FORMAT_CSV:
-		err = DisplayComponentListCSV(document, writer)
+		err = DisplayComponentListCSV(document, writer, flags)
 	case FORMAT_MARKDOWN:
-		err = DisplayComponentListMarkdown(document, writer)
+		err = DisplayComponentListMarkdown(document, writer, flags)
 	default:
 		// Default to Text output for anything else (set as flag default)
 		getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
 			format, FORMAT_TEXT)
-		err = DisplayComponentListText(document, writer)
+		err = DisplayComponentListText(document, writer, flags)
 	}
 	return
 }
@@ -295,7 +319,7 @@ func sortComponents(entries []multimap.Entry) {
 
 // NOTE: This list is NOT de-duplicated
 // TODO: Add a --no-title flag to skip title output
-func DisplayComponentListText(bom *schema.BOM, writer io.Writer) (err error) {
+func DisplayComponentListText(bom *schema.BOM, writer io.Writer, flags utils.ComponentCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -307,7 +331,7 @@ func DisplayComponentListText(bom *schema.BOM, writer io.Writer) (err error) {
 	w.Init(writer, 8, 2, 2, ' ', 0)
 
 	// create title row and underline row from slices of optional and compulsory titles
-	titles, underlines := prepareReportTitleData(COMPONENT_LIST_ROW_DATA, true)
+	titles, underlines := prepareReportTitleData(COMPONENT_LIST_ROW_DATA, flags.Summary)
 
 	// Add tabs between column titles for the tabWRiter
 	fmt.Fprintf(w, "%s\n", strings.Join(titles, "\t"))
@@ -334,7 +358,7 @@ func DisplayComponentListText(bom *schema.BOM, writer io.Writer) (err error) {
 		line, err = prepareReportLineData(
 			*pComponentInfo,
 			COMPONENT_LIST_ROW_DATA,
-			true,
+			flags.Summary,
 		)
 		// Only emit line if no error
 		if err != nil {
@@ -346,7 +370,7 @@ func DisplayComponentListText(bom *schema.BOM, writer io.Writer) (err error) {
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplayComponentListCSV(bom *schema.BOM, writer io.Writer) (err error) {
+func DisplayComponentListCSV(bom *schema.BOM, writer io.Writer, flags utils.ComponentCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
@@ -355,7 +379,7 @@ func DisplayComponentListCSV(bom *schema.BOM, writer io.Writer) (err error) {
 	defer w.Flush()
 
 	// Create title row data as []string
-	titles, _ := prepareReportTitleData(COMPONENT_LIST_ROW_DATA, true)
+	titles, _ := prepareReportTitleData(COMPONENT_LIST_ROW_DATA, flags.Summary)
 
 	if err = w.Write(titles); err != nil {
 		return getLogger().Errorf("error writing to output (%v): %s", titles, err)
@@ -385,7 +409,7 @@ func DisplayComponentListCSV(bom *schema.BOM, writer io.Writer) (err error) {
 		line, err = prepareReportLineData(
 			*pComponentInfo,
 			COMPONENT_LIST_ROW_DATA,
-			true,
+			flags.Summary,
 		)
 		// Only emit line if no error
 		if err != nil {
@@ -399,17 +423,17 @@ func DisplayComponentListCSV(bom *schema.BOM, writer io.Writer) (err error) {
 }
 
 // TODO: Add a --no-title flag to skip title output
-func DisplayComponentListMarkdown(bom *schema.BOM, writer io.Writer) (err error) {
+func DisplayComponentListMarkdown(bom *schema.BOM, writer io.Writer, flags utils.ComponentCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	// Create title row data as []string, include all columns that are flagged "summary" data
-	titles, _ := prepareReportTitleData(COMPONENT_LIST_ROW_DATA, true)
+	titles, _ := prepareReportTitleData(COMPONENT_LIST_ROW_DATA, flags.Summary)
 	titleRow := createMarkdownRow(titles)
 	fmt.Fprintf(writer, "%s\n", titleRow)
 
 	// create alignment row, include all columns that are flagged "summary" data
-	alignments := createMarkdownColumnAlignmentRow(COMPONENT_LIST_ROW_DATA, true)
+	alignments := createMarkdownColumnAlignmentRow(COMPONENT_LIST_ROW_DATA, flags.Summary)
 	alignmentRow := createMarkdownRow(alignments)
 	fmt.Fprintf(writer, "%s\n", alignmentRow)
 
@@ -434,7 +458,7 @@ func DisplayComponentListMarkdown(bom *schema.BOM, writer io.Writer) (err error)
 		line, err = prepareReportLineData(
 			*pComponentInfo,
 			COMPONENT_LIST_ROW_DATA,
-			true,
+			flags.Summary,
 		)
 		// Only emit line if no error
 		if err != nil {

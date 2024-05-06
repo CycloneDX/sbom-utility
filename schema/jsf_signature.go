@@ -23,11 +23,11 @@ package schema
 // Note: struct will contain "oneOf": []"Signers", "Chain", "Signature"]
 type JSFSignature struct {
 	// "Unique top level property for Multiple Signatures."
-	Signers []JSFSigner `json:"signers,omitempty"`
+	Signers *[]JSFSigner `json:"signers,omitempty"`
 	// "Unique top level property for Signature Chains."
-	Chain []JSFSigner `json:"chain,omitempty"`
+	Chain *[]JSFSigner `json:"chain,omitempty"`
 	// "Unique top level property for simple signatures."
-	Signature JSFSigner `json:"signature,omitempty"`
+	Signature *JSFSigner `json:"signature,omitempty"`
 }
 
 // Algorithm: "Signature algorithm. The currently recognized JWA [RFC7518] and RFC8037
@@ -41,12 +41,12 @@ type JSFSignature struct {
 // Excludes: "Optional. Array holding the names of one or more application level properties that must be excluded from the signature process. Note that the \"excludes\" property itself, must also be excluded from the signature process. Since both the \"excludes\" property and the associated data it points to are unsigned, a conforming JSF implementation must provide options for specifying which properties to accept."
 // Value: "The signature data. Note that the binary representation must follow the JWA [RFC7518] specifications."
 type JSFSigner struct {
-	Algorithm       string       `json:"algorithm,omitempty"`
-	KeyId           string       `json:"keyId,omitempty"`
-	PublicKey       JSFPublicKey `json:"publicKey,omitempty"`
-	CertificatePath []string     `json:"certificatePath,omitempty"`
-	Excludes        []string     `json:"excludes,omitempty"`
-	Value           string       `json:"value,omitempty"`
+	Algorithm       string        `json:"algorithm,omitempty"`
+	KeyId           string        `json:"keyId,omitempty"`
+	PublicKey       *JSFPublicKey `json:"publicKey,omitempty"`
+	CertificatePath *[]string     `json:"certificatePath,omitempty"`
+	Excludes        *[]string     `json:"excludes,omitempty"`
+	Value           string        `json:"value,omitempty"`
 }
 
 // constraint: "enum": ["EC","OKP","RSA"]
@@ -63,11 +63,10 @@ type JSFKeyType string
 // else if kty == "RSA"
 //   - required: n, e
 type JSFPublicKey struct {
-	Kty JSFKeyType `json:"kty,omitempty"` // Key Type
-	Crv string     `json:"crv,omitempty"` // EC/OKP curve name
-	X   string     `json:"x,omitempty"`   // X coordinate
-	Y   string     `json:"y,omitempty"`   // Y coordinate
-	N   string     `json:"n,omitempty"`   // RSA modulus
-	E   string     `json:"e,omitempty"`   // RSA exponent
-
+	Kty *JSFKeyType `json:"kty,omitempty"` // Key Type
+	Crv string      `json:"crv,omitempty"` // EC/OKP curve name
+	X   string      `json:"x,omitempty"`   // X coordinate
+	Y   string      `json:"y,omitempty"`   // Y coordinate
+	N   string      `json:"n,omitempty"`   // RSA modulus
+	E   string      `json:"e,omitempty"`   // RSA exponent
 }
