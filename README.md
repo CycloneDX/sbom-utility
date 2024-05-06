@@ -4,7 +4,7 @@
 
 This utility was designed to be an API platform to validate, analyze and edit **Bills-of-Materials (BOMs)**. Initially, it was created to validate **CycloneDX** or **SPDX-formatted** BOMs against versioned JSON schemas (as published by their respective standards communities) or customized schema variants designed by organizations that may have stricter compliance requirements.
 
-Supported report commands can easily extract **component**, **service**, software **license**, **license policy**, **vulnerability** and other BOM information enabling verification for most [BOM use cases](#cyclonedx-use-cases) as well as custom security and compliance requirements. These commands can be used to create filtered reports, in various formats, using the utility's powerful, SQL-like **query** command capability to only include information *where* (i.e., using the `--where` flag) data values match specified patterns.
+Supported report commands can easily extract **component**, **service**, component **license**, **license policy**, **vulnerability** and other BOM information. These reports are designed to enable verification for most [BOM use cases](#cyclonedx-use-cases) as well as custom security and compliance requirements. Specifically, these commands can be used to create customized, filtered reports, in various formats *(e.g., CSV, markdown, JSON)*, using the utility's powerful, SQL-like **query** command capability to only include information *where* (i.e., using the `--where` flag) data values match specified patterns.
 
 The utility now includes a rich set of commands, listed below, such as **trim**, **patch** (IETF RFC 6902) and **diff**.
 
