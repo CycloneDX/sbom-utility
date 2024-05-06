@@ -7,7 +7,7 @@
     {
       "type": "cryptographic-asset",
       "bom-ref": "asset-1",
-      "name": "Name here",
+      "name": "asset-1",
       "cryptoProperties": {
         "assetType": "algorithm",
         "algorithmProperties": {
@@ -29,7 +29,7 @@
     {
       "type": "cryptographic-asset",
       "bom-ref": "asset-2",
-      "name": "Name here",
+      "name": "asset-2",
       "cryptoProperties": {
         "assetType": "certificate",
         "certificateProperties": {
@@ -48,7 +48,7 @@
     {
       "type": "cryptographic-asset",
       "bom-ref": "asset-3",
-      "name": "Name here",
+      "name": "asset-3",
       "cryptoProperties": {
         "assetType": "protocol",
         "protocolProperties": {
@@ -72,7 +72,7 @@
     {
       "type": "cryptographic-asset",
       "bom-ref": "asset-4",
-      "name": "Name here",
+      "name": "asset-4",
       "cryptoProperties": {
         "assetType": "related-crypto-material",
         "relatedCryptoMaterialProperties": {

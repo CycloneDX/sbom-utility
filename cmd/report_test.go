@@ -48,6 +48,11 @@ func innerRunReportResultTests(t *testing.T, testInfo *CommonTestInfo, outputBuf
 		return
 	}
 
+	// TEST: Line Count (total)
+	if testInfo.ResultExpectedLineCount != TI_RESULT_DEFAULT_LINE_COUNT {
+		verifyFileLineCountAndIndentation(t, outputBuffer, testInfo)
+	}
+
 	// TEST: Line contains a set of string values
 	// TODO: support any number of row/values in test info. structure
 	if len(testInfo.ResultLineContainsValues) > 0 {
@@ -58,11 +63,6 @@ func innerRunReportResultTests(t *testing.T, testInfo *CommonTestInfo, outputBuf
 			return
 		}
 		getLogger().Tracef("output contains expected values: `%v` at line: %v\n", testInfo.ResultLineContainsValues, matchFoundLine)
-	}
-
-	// TEST: Line Count
-	if testInfo.ResultExpectedLineCount != TI_RESULT_DEFAULT_LINE_COUNT {
-		verifyFileLineCountAndIndentation(t, outputBuffer, testInfo)
 	}
 
 	// TEST: valid JSON if format JSON

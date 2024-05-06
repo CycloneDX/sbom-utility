@@ -149,11 +149,14 @@ func wrapTableRowText(maxChars int, joinChar string, columns ...interface{}) (ta
 			rowData[iCol] = strconv.FormatBool(data)
 		case int:
 			rowData[iCol] = strconv.Itoa(data)
+		case float64:
+			// NOTE: JSON Unmarshal() always decodes JSON Numbers as "float64" type
+			rowData[iCol] = strconv.FormatFloat(data, 'f', -1, 64)
 		case nil:
 			//getLogger().Tracef("nil value for column: `%v`", columnData.DataKey)
 			rowData[iCol] = REPORT_LIST_VALUE_NONE
 		default:
-			err = getLogger().Errorf("Unexpected type for report data: type: `%T`, value: `%v`", data, data)
+			err = getLogger().Errorf("Unexpected type for report data: column: %s, type: `%T`, value: `%v`", rowData[iCol], data, data)
 		}
 	}
 
@@ -161,11 +164,9 @@ func wrapTableRowText(maxChars int, joinChar string, columns ...interface{}) (ta
 }
 
 // Report column data values
-const REPORT_SUMMARY_DATA_TRUE = true
-const REPORT_SUMMARY_DATA_FALSE = false
+const REPORT_SUMMARY_DATA = true
 const REPORT_REPLACE_LINE_FEEDS_TRUE = true
-const REPORT_REPLACE_LINE_FEEDS_FALSE = false
-const DEFAULT_COLUMN_TRUNCATE_LENGTH = -1
+const REPORT_DO_NOT_TRUNCATE = -1
 
 // TODO: Support additional flags to:
 //   - show number of chars shown vs. available when truncated (e.g., (x/y))
@@ -174,17 +175,17 @@ const DEFAULT_COLUMN_TRUNCATE_LENGTH = -1
 //     NOTE: if only a subset of entries are shown on a summary, an indication of (x) entries could be shown as well
 //   - Support Markdown column alignment (e.g., MD_ALIGN_xxx values)
 type ColumnFormatData struct {
-	DataKey               string // Note: data key is the column label (where possible)
-	DefaultTruncateLength int    // truncate data when `--format txt`
-	IsSummaryData         bool   // include in `--summary` reports
-	ReplaceLineFeeds      bool   // replace line feeds with spaces (e.g., for multi-line descriptions)
-	Alignment             string
+	DataKey          string // Note: data key is the column label (where possible)
+	TruncateLength   int    // truncate character data to this length (default=-1 means don't truncate)
+	IsSummaryData    bool   // include in `--summary` reports
+	ReplaceLineFeeds bool   // replace line feeds with spaces (e.g., for multi-line descriptions)
+	Alignment        string // Align column data where possible (i.e., This is primarily for markdown format)
 }
 
 func NewColumnFormatData(key string, truncateLen int, isSummary bool, replaceLineFeeds bool) (foo *ColumnFormatData) {
 	foo = new(ColumnFormatData)
 	foo.DataKey = key
-	foo.DefaultTruncateLength = truncateLen
+	foo.TruncateLength = truncateLen
 	foo.IsSummaryData = isSummary
 	foo.ReplaceLineFeeds = replaceLineFeeds
 	return
@@ -235,7 +236,7 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 		if !dataFound {
 			// TODO: change back?
 			getLogger().Errorf("data not found in structure: key: `%s`", columnData.DataKey)
-			data = ""
+			data = "<error: not found>"
 			//return
 		}
 
@@ -254,6 +255,9 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 			lineData = append(lineData, strconv.FormatBool(typedData))
 		case int:
 			lineData = append(lineData, strconv.Itoa(typedData))
+		case float64:
+			// NOTE: JSON Unmarshal() always decodes JSON Numbers as "float64" type
+			lineData = append(lineData, strconv.FormatFloat(typedData, 'f', -1, 64))
 		case []interface{}:
 			// convert to []string
 			for _, value := range typedData {
@@ -283,7 +287,7 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 			//getLogger().Tracef("nil value for column: `%v`", columnData.DataKey)
 			lineData = append(lineData, REPORT_LIST_VALUE_NONE)
 		default:
-			err = getLogger().Errorf("Unexpected type for report data: type: `%T`, value: `%v`", data, data)
+			err = getLogger().Errorf("Unexpected type for report data: column: %s, type: `%T`, value: `%v`", columnData.DataKey, data, data)
 		}
 	}
 

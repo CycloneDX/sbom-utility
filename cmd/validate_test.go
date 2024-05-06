@@ -346,7 +346,7 @@ func TestValidateSyntaxErrorCdx13Test2(t *testing.T) {
 // Force validation against a "custom" schema with compatible format (CDX) and version (1.3)
 func TestValidateForceCustomSchemaCdx13(t *testing.T) {
 	innerValidateForcedSchema(t,
-		TEST_CDX_1_3_MATURITY_EXAMPLE_1_BASE,
+		TEST_CDX_1_3_MATURE_EXAMPLE_1_BASE,
 		TEST_SCHEMA_CDX_1_3_CUSTOM,
 		FORMAT_TEXT,
 		nil)
@@ -355,7 +355,7 @@ func TestValidateForceCustomSchemaCdx13(t *testing.T) {
 // Force validation against a "custom" schema with compatible format (CDX) and version (1.4)
 func TestValidateForceCustomSchemaCdx14(t *testing.T) {
 	innerValidateForcedSchema(t,
-		TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE,
+		TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE,
 		TEST_SCHEMA_CDX_1_4_CUSTOM,
 		FORMAT_TEXT,
 		nil)
@@ -364,7 +364,7 @@ func TestValidateForceCustomSchemaCdx14(t *testing.T) {
 // Force validation using schema with compatible format, but older version than the SBOM version
 func TestValidateForceCustomSchemaCdxSchemaOlder(t *testing.T) {
 	innerValidateForcedSchema(t,
-		TEST_CDX_1_4_MATURITY_EXAMPLE_1_BASE,
+		TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE,
 		TEST_SCHEMA_CDX_1_3_CUSTOM,
 		FORMAT_TEXT,
 		nil)

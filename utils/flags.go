@@ -38,16 +38,17 @@ type CommandFlags struct {
 	PersistentFlags PersistentCommandFlags
 
 	// Command-specific flags
+	ComponentFlags          ComponentCommandFlags
 	CustomValidationOptions CustomValidationFlags
 	DiffFlags               DiffCommandFlags
 	LicenseFlags            LicenseCommandFlags
+	PatchFlags              PatchCommandFlags
 	ResourceFlags           ResourceCommandFlags
 	SchemaFlags             SchemaCommandFlags
-	ValidateFlags           ValidateCommandFlags
-	VulnerabilityFlags      VulnerabilityCommandFlags
 	StatsFlags              StatsCommandFlags
 	TrimFlags               TrimCommandFlags
-	PatchFlags              PatchCommandFlags
+	ValidateFlags           ValidateCommandFlags
+	VulnerabilityFlags      VulnerabilityCommandFlags
 
 	// Misc flags
 	LogOutputIndentCallstack bool // Log indent
@@ -69,17 +70,21 @@ func (persistentFlags PersistentCommandFlags) GetOutputIndentInt() int {
 	return int(persistentFlags.OutputIndent)
 }
 
-type LicenseCommandFlags struct {
+// Common flags for all "list" (report) commands (e.g., license list, vulnerability list, etc.)
+type ReportCommandFlags struct {
 	Summary      bool
-	ListLineWrap bool
+	ListLineWrap bool // NOTE: SHOULD ONLY be used for "text" output; currently only used by "license policy" command.
+}
+
+type LicenseCommandFlags struct {
+	ReportCommandFlags
 }
 
 type ValidateCommandFlags struct {
 	SchemaVariant        string
 	ForcedJsonSchemaFile string
-	// Uses custom validation flags if "true"; defaults to config. "custom.json"
-	CustomValidation bool
-	// error result processing
+	CustomValidation     bool // Uses custom validation flags if "true"; defaults to config. "custom.json"
+	// validation error result (output) processing
 	MaxNumErrors              int
 	MaxErrorDescriptionLength int
 	ColorizeErrorOutput       bool
@@ -87,7 +92,7 @@ type ValidateCommandFlags struct {
 }
 
 type VulnerabilityCommandFlags struct {
-	Summary bool
+	ReportCommandFlags
 }
 
 type DiffCommandFlags struct {
@@ -96,11 +101,13 @@ type DiffCommandFlags struct {
 }
 
 type ResourceCommandFlags struct {
-	ResourceType string
+	ReportCommandFlags // NOTE: currently unused; as # columns grows, please implement
+	ResourceType       string
 }
 
 type ComponentCommandFlags struct {
-	Types string
+	ReportCommandFlags
+	Types []string
 }
 
 func NewResourceCommandFlags(resourceType string) ResourceCommandFlags {
@@ -110,8 +117,10 @@ func NewResourceCommandFlags(resourceType string) ResourceCommandFlags {
 }
 
 type SchemaCommandFlags struct {
+	ReportCommandFlags // NOTE: currently unused; as # columns grows, please implement
 }
 
+// TODO: unused/unimplemented
 type StatsCommandFlags struct {
 }
 

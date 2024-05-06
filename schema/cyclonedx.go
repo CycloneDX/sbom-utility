@@ -115,16 +115,17 @@ type CDXComponent struct {
 	Pedigree           *CDXPedigree                `json:"pedigree,omitempty"`                                  // anon. type
 	ExternalReferences *[]CDXExternalReference     `json:"externalReferences,omitempty"`
 	Components         *[]CDXComponent             `json:"components,omitempty"`
-	Evidence           *CDXComponentEvidence       `json:"evidence,omitempty"`                  // v1.3: added
-	Properties         *[]CDXProperty              `json:"properties,omitempty"`                // v1.3: added
-	ReleaseNotes       *[]CDXReleaseNotes          `json:"releaseNotes,omitempty"`              // v1.4: added
-	Signature          *JSFSignature               `json:"signature,omitempty"`                 // v1.4: added
-	ModelCard          *CDXModelCard               `json:"modelCard,omitempty"`                 // v1.5: added
-	Data               *[]CDXComponentData         `json:"data,omitempty"`                      // v1.5: added
-	Authors            *[]CDXOrganizationalContact `json:"authors,omitempty"`                   // v1.6: added
-	Tags               *[]string                   `json:"tags,omitempty" cdx:"+1.6"`           // v1.6: added
-	Modified           bool                        `json:"modified,omitempty" cdx:"deprecated"` // v1.4: deprecated
-	Author             string                      `json:"author,omitempty"`                    // v1.6: deprecated
+	Evidence           *CDXComponentEvidence       `json:"evidence,omitempty" cdx:"added:1.3"`      // v1.3: added
+	Properties         *[]CDXProperty              `json:"properties,omitempty" cdx:"added:1.3"`    // v1.3: added
+	ReleaseNotes       *[]CDXReleaseNotes          `json:"releaseNotes,omitempty" cdx:"added:1.4"`  // v1.4: added
+	Signature          *JSFSignature               `json:"signature,omitempty" cdx:"added:1.4"`     // v1.4: added
+	Modified           bool                        `json:"modified,omitempty" cdx:"deprecated:1.4"` // v1.4: deprecated
+	ModelCard          *CDXModelCard               `json:"modelCard,omitempty" cdx:"added:1.5"`     // v1.5: added
+	Data               *[]CDXComponentData         `json:"data,omitempty" cdx:"added:1.5"`          // v1.5: added
+	Authors            *[]CDXOrganizationalContact `json:"authors,omitempty" cdx:"added:1.6"`       // v1.6: added
+	Tags               *[]string                   `json:"tags,omitempty" cdx:"added:1.6"`          // v1.6: added
+	Manufacturer       *CDXOrganizationalEntity    `json:"manufacturer,omitempty" cdx:"added:1.6"`  // v1.6: added
+	Author             string                      `json:"author,omitempty" cdx:"deprecated:1.6"`   // v1.6: deprecated
 }
 
 // v1.5 added object
@@ -221,6 +222,26 @@ type CDXPedigree struct {
 	Commits     *[]CDXCommit    `json:"commits,omitempty"`
 	Patches     *[]CDXPatch     `json:"patches,omitempty"`
 	Notes       string          `json:"notes,omitempty"`
+}
+
+// TODO: create "isEmpty()" method to use in "component list" command
+// This method, currently, does NOT go "deep" enough into the structs used as slices...
+func (pedigree *CDXPedigree) isEmpty() bool {
+	if *pedigree == (CDXPedigree{}) {
+		return true
+	}
+	if (pedigree.Notes != "") ||
+		(pedigree.Ancestors != nil && len(*pedigree.Ancestors) > 0) ||
+		(pedigree.Descendants != nil && len(*pedigree.Descendants) > 0) ||
+		(pedigree.Variants != nil && len(*pedigree.Variants) > 0) ||
+		(pedigree.Commits != nil && len(*pedigree.Commits) > 0) ||
+		(pedigree.Patches != nil && len(*pedigree.Patches) > 0) {
+		return false
+	}
+	// TODO: we verified, at least to a shallow depth, that an attempt was made to provide
+	// provenance data; however, data structs in could still be "empty"
+	// a full, deep empty check impl. is needed
+	return true
 }
 
 // v1.2: existed

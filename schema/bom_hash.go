@@ -56,7 +56,6 @@ func (bom *BOM) HashmapComponentResources(whereFilters []common.WhereFilter) (er
 	// Hash all components found in the (root).components[] (+ "nested" components)
 	pComponents := bom.GetCdxComponents()
 	if pComponents != nil && len(*pComponents) > 0 {
-		//if components := bom.GetCdxComponents(); len(*components) > 0 {
 		if err = bom.HashmapComponents(*pComponents, whereFilters, false); err != nil {
 			return
 		}
@@ -236,8 +235,6 @@ func (bom *BOM) HashmapLicenseInfo(policyConfig *LicensePolicyConfig, key string
 
 	// If we need to include all license fields, they need to be copied to from
 	// wherever they appear into base LicenseInfo struct (for JSON tag/where filtering)
-	// i.e., "License.Id", "License.Name", "License.Url", "Expression",
-	//       "License.Text.ContentType", "License.Text.Encoding", "License.Text.Content"
 	if !licenseFlags.Summary {
 		copyExtendedLicenseChoiceFieldData(&licenseInfo)
 	}
@@ -380,7 +377,7 @@ func (bom *BOM) HashmapVulnerability(cdxVulnerability CDXVulnerability, whereFil
 		vulnInfo.SourceUrl = source.Url
 	}
 
-	// TODO: replace empty Analysis values with "UNDEFINED"
+	// replace empty Analysis values with "UNDEFINED"
 	if cdxVulnerability.Analysis != nil {
 		vulnInfo.AnalysisState = cdxVulnerability.Analysis.State
 		if vulnInfo.AnalysisState == "" {
@@ -403,7 +400,7 @@ func (bom *BOM) HashmapVulnerability(cdxVulnerability CDXVulnerability, whereFil
 	}
 
 	// Convert []int to []string for --where filter
-	// TODO see if we can eliminate this conversion and handle while preparing report data
+	// TODO: see if we can eliminate this conversion and handle while preparing report data
 	// as this SHOULD appear there as []interface{}
 	if cdxVulnerability.Cwes != nil && len(*cdxVulnerability.Cwes) > 0 {
 		// strip off slice/array brackets

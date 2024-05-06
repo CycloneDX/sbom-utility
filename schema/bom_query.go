@@ -63,6 +63,11 @@ func whereFilterMatch(mapObject map[string]interface{}, whereFilters []common.Wh
 			value = strconv.FormatBool(data)
 		case int:
 			value = strconv.Itoa(data)
+		case float64:
+			// NOTE: JSON Unmarshal() always decodes JSON Numbers as "float64" type
+			value = strconv.FormatFloat(data, 'f', -1, 64)
+		default:
+			getLogger().Errorf("unhandled datatype. key=%s, value=`%v`, type=`%T`", key, data, data)
 		}
 
 		err = enc.Encode(value)
