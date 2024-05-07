@@ -37,6 +37,7 @@ type CDXStandard struct {
 	Signature          *JSFSignature           `json:"signature,omitempty" cdx:"+1.6"`          // v1.6 added
 }
 
+// v1.6: added
 type CDXRequirement struct {
 	BOMRef             *CDXRefType             `json:"bom-ref,omitempty" cdx:"+1.6"`            // v1.6 added
 	Identifier         string                  `json:"identifier,omitempty" cdx:"+1.6"`         // v1.6 added
@@ -49,6 +50,7 @@ type CDXRequirement struct {
 	ExternalReferences *[]CDXExternalReference `json:"externalReferences,omitempty" cdx:"+1.6"` // v1.6 added
 }
 
+// v1.6: added
 type CDXLevel struct {
 	BOMRef       *CDXRefType       `json:"bom-ref,omitempty" cdx:"+1.6"`      // v1.6 added
 	Identifier   string            `json:"identifier,omitempty" cdx:"+1.6"`   // v1.6 added
