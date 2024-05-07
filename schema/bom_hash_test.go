@@ -308,12 +308,11 @@ func TestHashCDXComponentsSlice(t *testing.T) {
 		return
 	}
 
-	if components != nil {
-		err = document.HashmapComponents(*components, nil, false)
-		if err != nil {
-			t.Error(err)
-			return
-		}
+	// Now that we believe we have actual components, hash them
+	err = document.HashmapComponents(*components, nil, false)
+	if err != nil {
+		t.Error(err)
+		return
 	}
 }
 
