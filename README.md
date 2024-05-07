@@ -2244,7 +2244,7 @@ This *experimental* command will compare two *similar* BOMs and return the delta
 
 ##### Recommendations
 
-- *Even with BOMs that **SHOULD** be similar, it is recommended to use the **[trim](#trim)** to remove data that changes within a BOM from one generation to another *or* is often proprietary such as: **bom-ref**, **hashes**, **timestamp**(s), **properties**, etc.*.
+- *Even with BOMs that **SHOULD** be similar, it is recommended to use the **[trim](#trim)** command to remove data that changes within a BOM from one generation to another *or* is often proprietary such as: **bom-ref**, **hashes**, **timestamp**(s), **properties**, etc.*.
 - *In addition, it is recommended that you also `--normalize` trimmed output data to better guarantee ordering of fields and array data.*
 
 ##### Notes
