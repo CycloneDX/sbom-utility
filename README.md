@@ -4,9 +4,9 @@
 
 # sbom-utility
 
-This utility was designed to be an API platform to validate, analyze and edit **Bills-of-Materials (BOMs)**. Initially, it was created to **validate** either **CycloneDX** or **SPDX**-formatted BOMs against official, versioned JSON schemas as published by their respective standards communities *or* custom variants.
+This utility was designed to be an API platform to validate, analyze and edit **Bills-of-Materials (BOMs)**. Initially, it was created to **validate** either **CycloneDX** or **SPDX**-formatted BOMs against official, versioned JSON schemas as published by their respective standards communities.
 
-- *Organizations may also design and supply **"custom schema"** variants to the validate command which are perhaps designed to assure additional data-compliance requirements are met.*
+- *Organizations may also design and supply **"custom JSON schema"** variants to the validate command which are perhaps designed to assure additional data-compliance requirements are met.*
 
 In addition, the utility features "report" commands that can easily extract, filter, list and summarize **component**, **service**, **license**, **resource**, **vulnerability** and other BOM information using the utility's powerful, SQL-like query command. The **query** command allows **select**-ion of specific data **from** anywhere in the BOM document **where** data values match specified (regex) patterns.
 
