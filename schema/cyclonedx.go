@@ -36,6 +36,7 @@ var EMPTY_CDXLicense = CDXLicense{}
 // v1.3: added "compositions"
 // v1.4: added "vulnerabilities", "signature"
 // v1.5: added "annotations", "formulation", "properties"
+// v1.6: added "declarations", "definitions"
 type CDXBom struct {
 	BOMFormat          string                  `json:"bomFormat,omitempty"`
 	SpecVersion        string                  `json:"specVersion,omitempty"`
@@ -52,6 +53,8 @@ type CDXBom struct {
 	Annotations        *[]CDXAnnotation        `json:"annotations,omitempty" cdx:"+1.5"`     // v1.5 added
 	Formulation        *[]CDXFormula           `json:"formulation,omitempty" cdx:"+1.5"`     // v1.5 added
 	Properties         *[]CDXProperty          `json:"properties,omitempty" cdx:"+1.5"`      // v1.5 added
+	Declarations       *[]CDXDeclaration       `json:"declarations,omitempty" cdx:"+1.6"`    // v1.6 added
+	Definitions        *[]CDXDefinition        `json:"definitions,omitempty" cdx:"+1.6"`     // v1.6 added
 }
 
 // v1.2: existed
