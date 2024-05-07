@@ -329,9 +329,65 @@ All `list` subcommands support the `--where`  flag. It can be used to filter out
 
 Multiple key-value (i.e., column-title=regex) pairs can be provided on the same `--where` filter flag using commas.
 
-Syntax: `[--where key=regex[,...]]`
+**Syntax**: `[--where key=regex[,...]]`
 
 See each command's section for contextual examples of the `--where` flag filter usage.
+
+---
+
+## Component
+
+Primarily, this command is used to generate lists of components that are included in a CycloneDX SBOM.
+
+### Component `list` command
+
+This command is used to extract, filter and list CycloneDX BOM `Component` data.
+
+#### Component list supported formats
+
+This command supports the `--format` flag with any of the following values:
+
+- `txt` (default), `csv`, `md`
+
+#### Component list flags
+
+##### Component list `--summary` flag
+
+Use the `--summary` flag on the `component list` command to produce a summary report with reduced column information.
+
+#### Component list examples
+
+##### Example: `component list`
+
+This example shows the component list with all column information display. Since CycloneDX component data can be very extensive, many columns simply indicate the component `has` more data available which can be extracted using the `query` command if needed.
+
+```bash
+./sbom-utility component list -i test/cyclonedx/1.6/specification/valid-bom-1.6.json -q
+```
+
+```text
+bom-ref                       group        type         name              version  description  copyright  supplier-name  supplier-url         manufacturer-name  manufacturer-url     publisher  purl                          swid-tag-id                                         cpe     mime-type  scope     number-hashes  number-licenses  has-pedigree  has-evidence  has-components  has-release-notes  has-model-card  has-data  has-tags  has-signature
+-------                       -----        ----         ----              -------  -----------  ---------  -------------  ------------         -----------------  ----------------     ---------  ----                          -----------                                         ---     ---------  -----     -------------  ---------------  ------------  ------------  --------------  -----------------  --------------  --------  --------  -------------
+                                           application  Acme Application  9.1.1                                                                                                                                                 swidgen-242eb18a-503e-ca37-393b-cf156ef09691_9.1.1                               0              0                false         false         false           false              false           false     false     false
+pkg:npm/acme/component@1.0.0  com.acme     library      tomcat-catalina   9.0.14                                                                                                                  pkg:npm/acme/component@1.0.0                                                                                   4              1                true          false         false           false              false           false     false     false
+                              org.example  library      mylibrary         1.0.0                            Example, Inc.  https://example.com  Example-2, Inc.    https://example.org                                                                                                                  required  0              0                true          false         false           false              false           false     false     false
+```
+
+##### Example: `component list` summary in markdown format
+
+The same BOM component information as in the previous example; however, with output produced in markdown table format and using the summary flag to reduce the number of columns.
+
+```bash
+./sbom-utility component list -i test/cyclonedx/1.6/specification/valid-bom-1.6.json --summary --format=md -q
+```
+
+```markdown
+|bom-ref|group|type|name|version|description|copyright|supplier-name|supplier-url|manufacturer-name|manufacturer-url|publisher|purl|swid-tag-id|cpe|number-hashes|number-licenses|
+|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|
+|||application|Acme Application|9.1.1|||||||||swidgen-242eb18a-503e-ca37-393b-cf156ef09691_9.1.1||0|0|
+|pkg:npm/acme/component@1.0.0|com.acme|library|tomcat-catalina|9.0.14||||||||pkg:npm/acme/component@1.0.0|||4|1|
+||org.example|library|mylibrary|1.0.0|||Example, Inc.|https://example.com|Example-2, Inc.|https://example.org|||||0|0|
+```
 
 ---
 
