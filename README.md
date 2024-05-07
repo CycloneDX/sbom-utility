@@ -1,39 +1,47 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License](https://img.shields.io/badge/CycloneDX-v1.2,1.3,1.4,1.5,1.6-darkcyan.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License](https://img.shields.io/badge/SPDX-v2.1,2.2,2.3-purple.svg)](https://opensource.org/licenses/Apache-2.0)
 
 # sbom-utility
 
-This utility was designed to be an API platform to validate, analyze and edit **Bills-of-Materials (BOMs)**. Initially, it was created to validate **CycloneDX** or **SPDX-formatted** BOMs against versioned JSON schemas (as published by their respective standards communities) or customized schema variants designed by organizations that may have stricter compliance requirements.
+This utility was designed to be an API platform to validate, analyze and edit **Bills-of-Materials (BOMs)**. Initially, it was created to **validate** either **CycloneDX** or **SPDX**-formatted BOMs against official, versioned JSON schemas as published by their respective standards communities.
 
-Supported report commands can easily extract **component**, **service**, component **license**, **license policy**, **vulnerability** and other BOM information. These reports are designed to enable verification for most [BOM use cases](#cyclonedx-use-cases) as well as custom security and compliance requirements. Specifically, these commands can be used to create customized, filtered reports, in various formats *(e.g., CSV, markdown, JSON)*, using the utility's powerful, SQL-like **query** command capability to only include information *where* (i.e., using the `--where` flag) data values match specified patterns.
+- *Organizations may also design and supply **"custom JSON schema"** variants to the validate command which are perhaps designed to assure additional data-compliance requirements are met.*
 
-The utility now includes a rich set of commands, listed below, such as **trim**, **patch** (IETF RFC 6902) and **diff**.
+In addition, the utility features "report" commands that can easily extract, filter, list and summarize **component**, **service**, **license**, **resource**, **vulnerability** and other BOM information using the utility's powerful, SQL-like query command. The **query** command allows **select**-ion of specific data **from** anywhere in the BOM document **where** data values match specified (regex) patterns.
 
-*Please note that the utility supports all BOM variants such as **Software** (SBOM), **Hardware** (HBOM), **Manufacturing** (MBOM), **AI/ML** (MLBOM), etc. that adhere to their respective schemas.*
+- *Report output can be produced in several formats (e.g., text, CSV, MD (markdown) and JSON) to accommodate further processing.*
+
+The utility also offers commands that support analysis and editing of BOM document data including **trim**, **patch** (IETF RFC 6902) and **diff**.
+
+> **Note**: *The utility supports all CycloneDX BOM variants, such as **Software** (SBOM), **Hardware** (HBOM), **Manufacturing** (MBOM), **AI/ML** (MLBOM), **Cryptographic** (CBOM), etc., that adhere to their respective schemas.*
 
 ## Command Overview
 
-The utility supports the following commands:
+The following commands, which operate against input BOMs and named resources within them, are offered by the utility:
+
+- **[component](#component) list** produces filterable listings of hardware or software components declared in the BOM.
 
 - **[license](#license)**
-  - **[list](#license-list-subcommand)** produce listings or summarized reports of license data contained in a BOM along with license "usage policy" determinations using the policies declared in the `license.json` file.
+  - **[`list`](#license-list-subcommand)** produces filtered listings  of license data contained in a BOM along with license "usage policy" determinations using the policies declared in the `license.json` file.
   - **[policy](#license-policy-subcommand)** - lists software and data license information and associated license usage policies as defined in the configurable `license.json` file.
 
 - **[patch](#patch)** : Applies a JSON patch file, as defined by [IETF RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902/), to an input JSON BOM file.
 
 - **[query](#query)** retrieves JSON data from BOMs using SQL-style query statements (i.e., `--select <data fields> --from <BOM object> --where <field=regex>`). The JSON data can be used to create custom listings or reports.
 
-- **[resource](#resource)** produce filterable listings or summarized reports of resources, including components and services, from BOM data.
+- **[resource](#resource) list** produces filterable listings of resources (i.e., components and services) declared in the BOM.
 
 - **[schema](#schema)** lists the "built-in" set of schema formats, versions and variants supported by the `validation` command.
   - Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file (see the `schema` command's [adding schemas](#adding-schemas) section).
 
 - **[trim](#trim)** provide the ability to remove specified JSON information from the input JSON BOM document and produce output BOMs with reduced or targeted sets of information.  A SQL-like set of parameters allows for fine-grained specification of which fields should be trimmed from which document paths.
 
-- **[validate](#validate)** enables validation of SBOMs against their declared format (e.g., SPDX, CycloneDX) and version (e.g., "2.3", "1.5", etc.) using their JSON schemas.
+- **[validate](#validate)** enables validation of SBOMs against their declared format (e.g., SPDX, CycloneDX) and version (e.g., "2.3", "1.6", etc.) using their JSON schemas.
   - Derivative, **"customized" schemas** can be used for verification using the `--variant` flag (e.g., industry or company-specific schemas).
   - You can override an BOM's declared BOM version using the `--force` flag (e.g., verify a BOM against a newer specification version).
 
-- **[vulnerability](#vulnerability)** produce filterable listings or summarized reports of vulnerabilities from BOM data (i.e., CycloneDX Vulnerability Exploitability eXchange (**VEX**)) data or independently stored CycloneDX Vulnerability Disclosure Report (**VDR**) data.
+- **[vulnerability](#vulnerability) list** produces filterable listings of vulnerabilities declared in the BOM (i.e., CycloneDX Vulnerability Exploitability eXchange (**VEX**)) data or independently stored CycloneDX Vulnerability Disclosure Report (**VDR**) data.
 
 **Experimental commands**:
 
@@ -50,6 +58,8 @@ Feedback and helpful commits appreciated on the following commands which will be
 - [Commands](#commands)
   - [Exit codes](#exit-codes): (e.g., `0`: none, `1`: application, `2`: validation)
   - [Persistent flags](#persistent-flags) (e.g., `--format`, `--quiet`, `--where`, etc.)
+  - [component](#component)
+    - [list](#component-list-subcommand) subcommand: lists all component information found in the BOM
   - [license](#license)
     - [list](#license-list-subcommand) subcommand: lists all license information found in the BOM
     - [policy](#license-policy-subcommand) subcommand: lists configurable license usage policies
@@ -319,9 +329,65 @@ All `list` subcommands support the `--where`  flag. It can be used to filter out
 
 Multiple key-value (i.e., column-title=regex) pairs can be provided on the same `--where` filter flag using commas.
 
-Syntax: `[--where key=regex[,...]]`
+**Syntax**: `[--where key=regex[,...]]`
 
 See each command's section for contextual examples of the `--where` flag filter usage.
+
+---
+
+## Component
+
+Primarily, this command is used to generate lists of components that are included in a CycloneDX SBOM.
+
+### Component `list` command
+
+This command is used to extract, filter and list CycloneDX BOM `Component` data.
+
+#### Component list supported formats
+
+This command supports the `--format` flag with any of the following values:
+
+- `txt` (default), `csv`, `md`
+
+#### Component list flags
+
+##### Component list `--summary` flag
+
+Use the `--summary` flag on the `component list` command to produce a summary report with reduced column information.
+
+#### Component list examples
+
+##### Example: `component list`
+
+This example shows the component list with all column information display. Since CycloneDX component data can be very extensive, many columns simply indicate the component `has` more data available which can be extracted using the `query` command if needed.
+
+```bash
+./sbom-utility component list -i test/cyclonedx/1.6/specification/valid-bom-1.6.json -q
+```
+
+```text
+bom-ref                       group        type         name              version  description  copyright  supplier-name  supplier-url         manufacturer-name  manufacturer-url     publisher  purl                          swid-tag-id                                         cpe     mime-type  scope     number-hashes  number-licenses  has-pedigree  has-evidence  has-components  has-release-notes  has-model-card  has-data  has-tags  has-signature
+-------                       -----        ----         ----              -------  -----------  ---------  -------------  ------------         -----------------  ----------------     ---------  ----                          -----------                                         ---     ---------  -----     -------------  ---------------  ------------  ------------  --------------  -----------------  --------------  --------  --------  -------------
+                                           application  Acme Application  9.1.1                                                                                                                                                 swidgen-242eb18a-503e-ca37-393b-cf156ef09691_9.1.1                               0              0                false         false         false           false              false           false     false     false
+pkg:npm/acme/component@1.0.0  com.acme     library      tomcat-catalina   9.0.14                                                                                                                  pkg:npm/acme/component@1.0.0                                                                                   4              1                true          false         false           false              false           false     false     false
+                              org.example  library      mylibrary         1.0.0                            Example, Inc.  https://example.com  Example-2, Inc.    https://example.org                                                                                                                  required  0              0                true          false         false           false              false           false     false     false
+```
+
+##### Example: `component list` summary in markdown format
+
+The same BOM component information as in the previous example; however, with output produced in markdown table format and using the summary flag to reduce the number of columns.
+
+```bash
+./sbom-utility component list -i test/cyclonedx/1.6/specification/valid-bom-1.6.json --summary --format=md -q
+```
+
+```markdown
+|bom-ref|group|type|name|version|description|copyright|supplier-name|supplier-url|manufacturer-name|manufacturer-url|publisher|purl|swid-tag-id|cpe|number-hashes|number-licenses|
+|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|
+|||application|Acme Application|9.1.1|||||||||swidgen-242eb18a-503e-ca37-393b-cf156ef09691_9.1.1||0|0|
+|pkg:npm/acme/component@1.0.0|com.acme|library|tomcat-catalina|9.0.14||||||||pkg:npm/acme/component@1.0.0|||4|1|
+||org.example|library|mylibrary|1.0.0|||Example, Inc.|https://example.com|Example-2, Inc.|https://example.org|||||0|0|
+```
 
 ---
 
