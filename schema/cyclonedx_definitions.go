@@ -19,5 +19,40 @@ package schema
 
 // v1.6: added
 type CDXDefinition struct {
-	//TODO
+	Standards *[]CDXStandard `json:"standards,omitempty" cdx:"+1.6"` // v1.6 added
+}
+
+// v1.6: added
+// NOTE: The "Owner" field SHOULD be a CDXOrganizationalEntity OR CDXOrganizationalContact
+// We have structures that already support this concept!!!
+type CDXStandard struct {
+	BOMRef             *CDXRefType             `json:"bom-ref,omitempty" cdx:"+1.6"`            // v1.6 added
+	Name               string                  `json:"name,omitempty" cdx:"+1.6"`               // v1.6 added
+	Version            string                  `json:"version,omitempty" cdx:"+1.6"`            // v1.6 added
+	Description        string                  `json:"description,omitempty" cdx:"+1.6"`        // v1.6 added
+	Owner              string                  `json:"owner,omitempty" cdx:"+1.6"`              // v1.6 added
+	Requirements       *[]CDXRequirement       `json:"requirements,omitempty" cdx:"+1.6"`       // v1.6 added
+	Levels             *[]CDXLevel             `json:"levels,omitempty" cdx:"+1.6"`             // v1.6 added
+	ExternalReferences *[]CDXExternalReference `json:"externalReferences,omitempty" cdx:"+1.6"` // v1.6 added
+	Signature          *JSFSignature           `json:"signature,omitempty" cdx:"+1.6"`          // v1.6 added
+}
+
+type CDXRequirement struct {
+	BOMRef             *CDXRefType             `json:"bom-ref,omitempty" cdx:"+1.6"`            // v1.6 added
+	Identifier         string                  `json:"identifier,omitempty" cdx:"+1.6"`         // v1.6 added
+	Title              string                  `json:"title,omitempty" cdx:"+1.6"`              // v1.6 added
+	Text               string                  `json:"text,omitempty" cdx:"+1.6"`               // v1.6 added
+	Descriptions       *[]string               `json:"descriptions,omitempty" cdx:"+1.6"`       // v1.6 added
+	OpenCre            *[]string               `json:"openCre,omitempty" cdx:"+1.6"`            // v1.6 added
+	Parent             *CDXRefLinkType         `json:"parent,omitempty" cdx:"+1.6"`             // v1.6 added
+	Properties         *[]CDXProperty          `json:"properties,omitempty" cdx:"+1.6"`         // v1.6 added
+	ExternalReferences *[]CDXExternalReference `json:"externalReferences,omitempty" cdx:"+1.6"` // v1.6 added
+}
+
+type CDXLevel struct {
+	BOMRef       *CDXRefType       `json:"bom-ref,omitempty" cdx:"+1.6"`      // v1.6 added
+	Identifier   string            `json:"identifier,omitempty" cdx:"+1.6"`   // v1.6 added
+	Title        string            `json:"title,omitempty" cdx:"+1.6"`        // v1.6 added
+	Description  string            `json:"description,omitempty" cdx:"+1.6"`  // v1.6 added
+	Requirements *[]CDXRefLinkType `json:"requirements,omitempty" cdx:"+1.6"` // v1.6 added
 }
