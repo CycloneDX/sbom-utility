@@ -58,21 +58,6 @@ Feedback and helpful commits appreciated on the following commands which will be
 - [Commands](#commands)
   - [Exit codes](#exit-codes): (e.g., `0`: none, `1`: application, `2`: validation)
   - [Persistent flags](#persistent-flags) (e.g., `--format`, `--quiet`, `--where`, etc.)
-  - [component](#component)
-    - [list](#component-list-subcommand) subcommand: lists all component information found in the BOM
-  - [license](#license)
-    - [list](#license-list-subcommand) subcommand: lists all license information found in the BOM
-    - [policy](#license-policy-subcommand) subcommand: lists configurable license usage policies
-  - [patch](#patch): patches BOMs using IETF RFC 6902 records.
-  - [query](#query): extract JSON objects and fields from a BOM using SQL-like queries
-  - [resource](#resource): list resource information by type (e.g., components, services)
-  - [schema](#schema): list supported BOM formats, versions, variants
-  - [trim](#trim): remove unnecessary fields and data from a BOM
-  - [validate](#validate): BOM against declared or required schema
-  - [vulnerability](#vulnerability): lists vulnerability summary information included in the BOM or VEX
-  - [completion](#completion): generates command-line completion scripts for the utility
-- [Experimental commands](#experimental-commands)
-  - [diff](#diff): compares differences between two similar BOMs
 - [Design considerations](#design-considerations)
 - [Development](#development)
   - [Prerequisites](#prerequisites)
@@ -129,16 +114,25 @@ This section provides detailed descriptions of all commands, their flags and exa
 
 For convenience, links to each command's section are here:
 
+- [component](#component): list all, top-level component information.
 - [license](#license)
-  - [list](#license-list-subcommand) subcommand
-  - [policy](#license-policy-subcommand) subcommand
-- [query](#query)
-- [resource](#resource)
-- [schema](#schema)
-- [vulnerability](#vulnerability)
-- [validate](#validate)
+  - [list](#license-list-subcommand) subcommand: lists all license information found in the BOM
+  - [policy](#license-policy-subcommand) subcommand: lists configurable license usage policies
+- [patch](#patch): patches BOMs using IETF RFC 6902 records.
+- [query](#query): extract JSON objects and fields from a BOM using SQL-like queries
+- [resource](#resource): list resource information by type (e.g., components, services)
+- [schema](#schema): list supported BOM formats, versions, variants
+- [trim](#trim): remove unnecessary fields and data from a BOM
+- [validate](#validate): BOM against declared or required schema
+- [vulnerability](#vulnerability): lists vulnerability summary information included in the BOM or VEX
 - [completion](#completion)
 - [help](#help)
+
+### Experimental commands
+
+These commands need more community testing and feedback.
+
+- [diff](#diff): compares differences between two similar BOMs.
 
 #### Exit codes
 
@@ -2246,7 +2240,12 @@ This section contains *experimental* commands that will be promoted once vetted 
 
 ### Diff
 
-This *experimental* command will compare two *similar* BOMs and return the delta (or "diff") in JSON (diff-patch format) or text. This functionality is based upon code ancestral to that used to report file diffs between `git commit`s.
+This *experimental* command will compare two *similar* BOMs and return the delta (or "diff") in JSON (diff-patch format) or text. This functionality is "JSON aware" and based upon code ancestral to that used to report file diffs between `git commit`s.
+
+##### Recommendations
+
+- *Even with BOMs that **SHOULD** be similar, it is recommended to use the **[trim](#trim)** to remove data that changes within a BOM from one generation to another *or* is often proprietary such as: **bom-ref**, **hashes**, **timestamp**(s), **properties**, etc.*.
+- *In addition, it is recommended that you also `--normalize` trimmed output data to better guarantee ordering of fields and array data.*
 
 ##### Notes
 
