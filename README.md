@@ -93,7 +93,7 @@ and under the `resources/config` directory:
 
 For convenience, the default `config.json` and optional `license.json` configuration files have been embedded in the executable and used.  *You can provide your own versions of these files on the command line using the `--config-schema` or `--config-license` flags respectively.*
 
-When providing configuration files using command line flags, the executable attempts to load them from the same path where the executable is run from. If you choose to keep them in a different directory, you will have to supply their location relative to the executable along with the filename.
+- **Note**: *When providing configuration files using command line flags, the executable attempts to load them from the same path where the executable is run from. If you choose to keep them in a different directory, you will have to supply their location relative to the executable along with the filename.*
 
 ##### MacOS - Granting executable permission
 
