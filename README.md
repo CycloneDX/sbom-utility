@@ -109,19 +109,19 @@ This section provides detailed descriptions of all commands, their flags and exa
 
 For convenience, links to each command's section are here:
 
-- [component](#component): list all, top-level component information.
-- [license](#license)
-  - [list](#license-list-subcommand) subcommand: lists all license information found in the BOM
-  - [policy](#license-policy-subcommand) subcommand: lists configurable license usage policies
+- [validate](#validate): validates BOM data against declared or required JSON schema.
+- [trim](#trim): removes uninteresting or necessary fields and data from a BOM.
 - [patch](#patch): patches BOMs using IETF RFC 6902 records.
-- [query](#query): extract JSON objects and fields from a BOM using SQL-like queries
-- [resource](#resource): list resource information by type (e.g., components, services)
-- [schema](#schema): list supported BOM formats, versions, variants
-- [trim](#trim): remove unnecessary fields and data from a BOM
-- [validate](#validate): BOM against declared or required schema
-- [vulnerability](#vulnerability): lists vulnerability summary information included in the BOM or VEX
-- [completion](#completion)
-- [help](#help)
+- [query](#query): extracts JSON objects and fields from a BOM using SQL-like queries.
+- [component list](#component): lists all, top-level component information.
+- [license](#license)
+  - [list](#license-list-subcommand) subcommand: lists all license information found in the BOM.
+  - [policy](#license-policy-subcommand) subcommand: lists configurable license usage policies.
+- [resource list](#resource): lists resource information by type (e.g., components, services).
+- [schema list](#schema): lists supported JSON schemas by BOM formats, versions and variants.
+- [vulnerability list](#vulnerability): lists vulnerability summary information included in a BOM or standalone VDR BOM.
+- [completion](#completion): generates command-line completion scripts for the this utility.
+- [help](#help): displays help and usage information for the utility or current command/subcommand.
 
 ### Experimental commands
 
