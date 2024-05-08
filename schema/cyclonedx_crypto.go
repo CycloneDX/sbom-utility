@@ -19,7 +19,7 @@ package schema
 
 // v1.6: added
 // NOTE: This is an enum. (e.g., "algorithm", "certificate", "protocol", etc.)
-type CDXAssetType struct {
+type CDXCryptoProperties struct {
 	AssetType                       string                              `json:"assetType,omitempty" cdx:"+1.6"`                       // v1.6 added
 	AlgorithmProperties             *CDXAlgorithmProperties             `json:"algorithmProperties,omitempty" cdx:"+1.6"`             // v1.6 added
 	CertificateProperties           *CDXCertificateProperties           `json:"certificateProperties,omitempty" cdx:"+1.6"`           // v1.6 added

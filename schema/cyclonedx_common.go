@@ -103,12 +103,14 @@ type CDXNote struct {
 
 // v1.2: existed
 // v1.5: added "bom-ref"
+// v1.6: added "address"
 // NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXOrganizationalEntity struct {
 	Name    string                      `json:"name,omitempty"`
 	Url     []string                    `json:"url,omitempty"`
 	Contact *[]CDXOrganizationalContact `json:"contact,omitempty"`
 	BOMRef  *CDXRefType                 `json:"bom-ref,omitempty"` // v1.5 added
+	Address *CDXPostalAddress           `json:"address,omitempty"` // v1.6 added
 }
 
 // v1.2: existed
