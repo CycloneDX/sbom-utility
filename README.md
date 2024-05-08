@@ -176,7 +176,7 @@ All `list` subcommands support the `--format` flag with the following values:
 
 - `txt`: text (tabbed tables)
 - `csv`: Comma Separated Value (CSV), e.g., for spreadsheets
-- `md`: Markdown, e.g., for GitHub
+- `md`: Markdown (GitHub-compliant tables)
 
 Some commands, which can output lists of JSON objects, also support JSON format using the `json` value.
 
