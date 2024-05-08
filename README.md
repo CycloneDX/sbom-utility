@@ -210,7 +210,7 @@ This flag supplies an integer to any command that encodes JSON output to determi
 #### Example: indent flag on the query command
 
 ```bash
-./sbom-utility query --select name,version --from metadata.component -i examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json --indent 2 --quiet
+./sbom-utility query --select name,version --from metadata.component -i examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json --indent 2 -q
 ```
 
 output with `indent 2`:
@@ -223,7 +223,7 @@ output with `indent 2`:
 ```
 
 ```bash
-./sbom-utility query --select name,version --from metadata.component -i examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json --indent 6 --quiet
+./sbom-utility query --select name,version --from metadata.component -i examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json --indent 6 -q
 ```
 
 output with `indent 6`:
@@ -307,10 +307,10 @@ CycloneDX v1.4                CycloneDX  1.4       (latest)     schema/cyclonedx
 CycloneDX v1.3                CycloneDX  1.3       (latest)     schema/cyclonedx/1.3/bom-1.3.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3.schema.json
 CycloneDX v1.2                CycloneDX  1.2       (latest)     schema/cyclonedx/1.2/bom-1.2.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.2.schema.json
 SPDX v2.3.1 (development)     SPDX       SPDX-2.3  development  schema/spdx/2.3.1/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3.1/schemas/spdx-schema.json
-SPDX v2.3                     SPDX       SPDX-2.3  (latest)     schema/spdx/2.3/spdx-schema.json                 https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3/schemas/spdx-schema.json
-SPDX v2.2.2                   SPDX       SPDX-2.2  (latest)     schema/spdx/2.2.2/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.2/schemas/spdx-schema.json
-SPDX v2.2.1                   SPDX       SPDX-2.2  2.2.1        schema/spdx/2.2.1/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json
+...
 ```
+
+- **Note**: *The short-form `-q` (quiet) flag is equivalent to `--quiet`.*
 
 #### Where flag (output filtering)
 
@@ -362,20 +362,20 @@ pkg:npm/acme/component@1.0.0  com.acme     library      tomcat-catalina   9.0.14
                               org.example  library      mylibrary         1.0.0                            Example, Inc.  https://example.com  Example-2, Inc.    https://example.org                                                                                                                  required  0              0                true          false         false           false              false           false     false     false
 ```
 
-##### Example: `component list` summary in markdown format
+##### Example: `component list` summary only
 
-The same BOM component information as in the previous example; however, with output produced in markdown table format and using the summary flag to reduce the number of columns.
+The same BOM component information as in the previous example; however, using the summary flag to reduce the number of columns data.
 
 ```bash
-./sbom-utility component list -i test/cyclonedx/1.6/specification/valid-bom-1.6.json --summary --format=md -q
+./sbom-utility component list -i test/cyclonedx/1.6/specification/valid-bom-1.6.json --summary -q
 ```
 
-```markdown
-|bom-ref|group|type|name|version|description|copyright|supplier-name|supplier-url|manufacturer-name|manufacturer-url|publisher|purl|swid-tag-id|cpe|number-hashes|number-licenses|
-|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|
-|||application|Acme Application|9.1.1|||||||||swidgen-242eb18a-503e-ca37-393b-cf156ef09691_9.1.1||0|0|
-|pkg:npm/acme/component@1.0.0|com.acme|library|tomcat-catalina|9.0.14||||||||pkg:npm/acme/component@1.0.0|||4|1|
-||org.example|library|mylibrary|1.0.0|||Example, Inc.|https://example.com|Example-2, Inc.|https://example.org|||||0|0|
+```text
+bom-ref                       group        type         name              version  description  copyright  supplier-name  supplier-url         manufacturer-name  manufacturer-url     publisher  purl                          swid-tag-id                                         cpe     number-hashes  number-licenses
+-------                       -----        ----         ----              -------  -----------  ---------  -------------  ------------         -----------------  ----------------     ---------  ----                          -----------                                         ---     -------------  ---------------
+                                           application  Acme Application  9.1.1                                                                                                                                                 swidgen-242eb18a-503e-ca37-393b-cf156ef09691_9.1.1          0              0
+pkg:npm/acme/component@1.0.0  com.acme     library      tomcat-catalina   9.0.14                                                                                                                  pkg:npm/acme/component@1.0.0                                                              4              1
+                              org.example  library      mylibrary         1.0.0                            Example, Inc.  https://example.com  Example-2, Inc.    https://example.org                                                                                                       0              0
 ```
 
 ---
