@@ -296,7 +296,7 @@ All commands support the `--quiet` flag. By default, the utility outputs informa
 This example shows the `--quiet` flag being used on the `schema` command to turn off or "quiet" any informational output so that only the result table is displayed.
 
 ```bash
-./sbom-utility schema --quiet
+./sbom-utility schema list --quiet
 ```
 
 ```bash
@@ -309,8 +309,6 @@ CycloneDX v1.2                CycloneDX  1.2       (latest)     schema/cyclonedx
 SPDX v2.3.1 (development)     SPDX       SPDX-2.3  development  schema/spdx/2.3.1/spdx-schema.json               https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3.1/schemas/spdx-schema.json
 ...
 ```
-
-- **Note**: *The short-form `-q` (quiet) flag is equivalent to `--quiet`.*
 
 #### Where flag (output filtering)
 
@@ -421,7 +419,7 @@ Use the `--summary` flag on the `license list` command to produce a summary repo
 This example shows a few entries of the JSON output that exhibit the three types of license data described above:
 
 ```bash
-./sbom-utility license list -i examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json --format json --quiet
+./sbom-utility license list -i examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json --format json -q
 ```
 
 ```json
@@ -465,7 +463,7 @@ This example shows a few entries of the JSON output that exhibit the three types
 This example shows the default text output from using the summary flag:
 
 ```bash
-./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --quiet
+./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary -q
 ```
 
 ```bash
@@ -503,7 +501,7 @@ The list command results can be filtered using the `--where` flag using the colu
 The following example shows filtering of component licenses using the `license-type` column where the license was described as a `name` value:
 
 ```bash
-./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --where license-type=name --quiet
+./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --where license-type=name -q
 ```
 
 ```bash
@@ -520,7 +518,7 @@ needs-review  name          UFL       ACME Application  pkg:app/sample@1.0.0    
 In another example, the list is filtered by the `usage-policy` where the value is `needs-review`:
 
 ```bash
-./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --where usage-policy=needs-review --quiet
+./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --where usage-policy=needs-review -q
 ```
 
 ```bash
@@ -565,7 +563,7 @@ Use the `--wrap` flag to toggle the wrapping of text within columns of the licen
 ##### Example: license policy
 
 ```bash
-./sbom-utility license policy --quiet
+./sbom-utility license policy -q
 ```
 
 ```bash
@@ -586,7 +584,7 @@ allow         Artistic  Artistic-1.0  Artistic License 1.0                true  
 We can also apply the `--summary` flag to get a reduced set of columns that includes only the `usage-policy` along with the essential SPDX license information (e.g., no annotations or notes).
 
 ```bash
-./sbom-utility license policy --summary --quiet
+./sbom-utility license policy --summary -q
 ```
 
 ```bash
@@ -622,7 +620,7 @@ allow         Apache  Apache-2.0  Apache License 2.0  true    true    false     
 ###### Example: policy with `--wrap` flag
 
 ```bash
-./sbom-utility license policy --quiet --wrap=true
+./sbom-utility license policy --wrap=true -q
 ```
 
 ```bash
@@ -716,7 +714,7 @@ IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-add-serial-number.js
 Invoke the patch command as follows:
 
 ```bash
-./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-add-serial-number.json  -q
+./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-add-serial-number.json -q
 ```
 
 Patched JSON BOM output file:
@@ -761,7 +759,7 @@ IETF RFC6902 JSON Patch file: [test/patch/cdx-patch-example-add-serial-number.js
 Invoke the patch command as follows:
 
 ```bash
-./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-add-update-version.json  -q
+./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-add-update-version.json -q
 ```
 
 The patched, output JSON BOM file which has the changed `version` value of `2`:
@@ -1156,7 +1154,7 @@ In this example, only the `--from` clause is needed to select an object.  The `-
 is equivalent to using the wildcard character (which may need to be enclosed in single or double quotes depending on your shell):
 
 ```bash
-./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --select '*' --from metadata.component --quiet
+./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --select '*' --from metadata.component -q
 ```
 
 ```json
@@ -1191,7 +1189,7 @@ is equivalent to using the wildcard character (which may need to be enclosed in 
 In this example, the `--from` clause references the top-level `metadata.supplier` object.
 
 ```bash
-./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from metadata.supplier --quiet
+./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from metadata.supplier -q
 ```
 
 ```json
@@ -1213,7 +1211,7 @@ In this example, the `--from` clause references the top-level `metadata.supplier
 In this example, the `--from` clause references the singleton JSON object `component` found under the top-level `metadata` object. It then reduces the resultant JSON object to only return the `name` and `value` fields and their values as requested on the `--select` clause.
 
 ```bash
-./sbom-utility query --select name,version --from metadata.component -i examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json --quiet
+./sbom-utility query --select name,version --from metadata.component -i examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json -q
 ```
 
 ```json
@@ -1228,7 +1226,7 @@ In this example, the `--from` clause references the singleton JSON object `compo
 In this example, the `--from` filter will return the entire JSON components array.
 
 ```bash
-./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from components --quiet
+./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from components -q
 ```
 
 ```json
@@ -1278,7 +1276,7 @@ In this example, the `--from` filter will return the entire JSON components arra
 In this example, the `--where` filter will be applied to a set of `properties` results to only include entries that match the specified regex.
 
 ```bash
-./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from metadata.properties --where name=urn:example.com:classification --quiet
+./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from metadata.properties --where name=urn:example.com:classification -q
 ```
 
 ```json
@@ -1293,7 +1291,7 @@ In this example, the `--where` filter will be applied to a set of `properties` r
 additionally, you can apply a `--select` clause to simply obtain the matching entry's `value`:
 
 ```bash
-./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --select value --from metadata.properties --where name=urn:example.com:classification --quiet
+./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --select value --from metadata.properties --where name=urn:example.com:classification -q
 ```
 
 ```json
@@ -1327,7 +1325,7 @@ Currently, all `resource list` command results are sorted by resource `type` the
 #### Example: resource list
 
 ```bash
-./sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --quiet
+./sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json -q
 ```
 
 ```bash
@@ -1354,7 +1352,7 @@ service                Foo                         Foo service                  
 This example uses the `type` flag to specific `service`.  The other valid type is `component`.  Future versions of CycloneDX schema will include more resource types such as "ml" (machine learning) or "tool".
 
 ```bash
-./sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --type service --quiet
+./sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --type service -q
 ```
 
 ```bash
@@ -1367,7 +1365,7 @@ service                Foo              Foo service  service:example.com/myservi
 **Note** The results would be equivalent to using the `--where` filter:
 
 ```bash
-./sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --where "resource-type=service" --quiet
+./sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --where "resource-type=service" -q
 ```
 
 ##### Example: list with `name` regex match
@@ -1375,7 +1373,7 @@ service                Foo              Foo service  service:example.com/myservi
 This example uses the `where` filter on the `name` field. In this case we supply an exact "startswith" regex. for the `name` filter.
 
 ```bash
-./sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --where "name=Library A" --quiet
+./sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --where "name=Library A" -q
 ```
 
 ```bash
@@ -1571,7 +1569,7 @@ Output BOM results without `properties`:
 ##### Example: Trim `name` and `description` from entire JSON BOM
 
 ```bash
-./sbom-utility trim -i test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json --keys=name,description --quiet
+./sbom-utility trim -i test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json --keys=name,description -q
 ```
 
 Output BOM results without `name` or `description`:
@@ -1618,7 +1616,7 @@ Output BOM results without `name` or `description`:
 ##### Example: Trim `properties` from only `components` path
 
 ```bash
-./sbom-utility trim -i test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json --keys=properties --from components --quiet
+./sbom-utility trim -i test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json --keys=properties --from components -q
 ```
 
 Output BOM results with `properties` removed from all `components`:
@@ -2023,7 +2021,7 @@ The details include the full context of the failing `metadata.properties` object
 The JSON format will provide an `array` of schema error results that can be post-processed as part of validation toolchain.
 
 ```bash
-./sbom-utility validate -i test/validation/cdx-1-4-validate-err-components-unique-items-1.json --format json --quiet
+./sbom-utility validate -i test/validation/cdx-1-4-validate-err-components-unique-items-1.json --format json -q
 ```
 
 ```json
@@ -2100,7 +2098,7 @@ In many cases, BOMs may have many errors and having the `value` information deta
 Rerunning the same command with this flag set to false yields a reduced set of information.
 
 ```bash
-./sbom-utility validate -i test/validation/cdx-1-4-validate-err-components-unique-items-1.json --format json --error-value=false --quiet
+./sbom-utility validate -i test/validation/cdx-1-4-validate-err-components-unique-items-1.json --format json --error-value=false -q
 ```
 
 ```json
@@ -2144,7 +2142,7 @@ Use the `--format` flag on the to choose one of the supported output formats:
 The `list` subcommand provides a complete view of most top-level, vulnerability fields.
 
 ```bash
-./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --quiet
+./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json -q
 ```
 
 ```bash
@@ -2160,7 +2158,7 @@ CVE-2020-25649           611      CVSSv31: 7.5 (high), CVSSv31: 8.2 (high), CVSS
 This example shows the default text output from using the `--summary` flag:
 
 ```bash
-./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --quiet --summary
+./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --summary -q
 ```
 
 ```bash
@@ -2174,7 +2172,7 @@ CVE-2020-25649  CVSSv31: 7.5 (high)  NVD          2020-12-03  com.fasterxml.jack
 ##### Example: Vulnerability list with `--where` filter with `description` key
 
 ```bash
-./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --quiet --where description=XXE
+./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --where description=XXE -q
 ```
 
 ```bash
@@ -2186,7 +2184,7 @@ CVE-2020-25649           611      CVSSv31: 7.5 (high), CVSSv31: 8.2 (high), CVSS
 ##### Example: Vulnerability list with `--where` filter with `analysis-state` key
 
 ```bash
-./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --quiet --where analysis-state=not_affected
+./sbom-utility vulnerability list -i test/vex/cdx-1-3-example1-bom-vex.json --where analysis-state=not_affected -q
 ```
 
 ```bash
@@ -2264,7 +2262,7 @@ Use the `--format` flag on the to choose one of the supported output formats:
 ##### Example: Add, delete and modify
 
 ```bash
-./sbom-utility diff -i test/diff/json-array-order-change-with-add-and-delete-base.json -r test/diff/json-array-order-change-with-add-and-delete-delta.json --quiet --format txt --colorize=true
+./sbom-utility diff -i test/diff/json-array-order-change-with-add-and-delete-base.json -r test/diff/json-array-order-change-with-add-and-delete-delta.json --format txt --colorize=true -q
 ```
 
 ```bash
@@ -2576,15 +2574,15 @@ Simply append the flags `--args --trace` or `--args --debug` to your `go test` c
 go test github.com/CycloneDX/sbom-utility/cmd -v --args --trace
 ```
 
+**Note**: You should always use the `--args` flag of `go test` as this will assure non-conflict with `go test` built-in flags which is the case with the `--trace` flag.
+
 #### Eliminating extraneous test output
 
 Several tests will still output error and warning messages as designed.  If these messages are distracting, you can turn them off using the `--quiet` flag.
 
 ```bash
-go test github.com/CycloneDX/sbom-utility/cmd -v --args --quiet
+go test github.com/CycloneDX/sbom-utility/cmd -v --quiet
 ```
-
-**Note**: Always use the `--args` flag of `go test` as this will assure non-conflict with built-in flags.
 
 ---
 
