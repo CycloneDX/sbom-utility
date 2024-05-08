@@ -75,14 +75,17 @@ Download and decompress the correct archive file (i.e., `.tar` for Unix/Linux sy
 
 - [https://github.com/CycloneDX/sbom-utility/releases](https://github.com/CycloneDX/sbom-utility/releases)
 
-The archive will contain the following files:
+The source archive will contain the following files under the root directory:
 
 - `sbom-utility` - binary executable. This is all most need for non-customized configurations.
-- `config.json` *(optional)* - copy of the default schema configuration file for optional customization (to be passed on the command line)
-- `license.json` *(optional)* - copy of the default license policy configuration file for optional customization (to be passed on the command line)
-- `custom.json` *(experimental)* - custom validation configuration file
 - `LICENSE` - the software license for the utility (i.e. Apache 2)
 - `sbom-utility-<version>.sbom.json` - a simple Software Bill-of-Materials (SBOM) for the utility
+- `custom.json` *(experimental)* - custom validation configuration file
+
+The archive will contain the following files under the `resources/config` directory:
+
+- `config.json` *(optional)* - copy of the default schema configuration file for optional customization (to be passed on the command line)
+- `license.json` *(optional)* - copy of the default license policy configuration file for optional customization (to be passed on the command line)
 
 ---
 
