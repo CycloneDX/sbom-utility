@@ -47,14 +47,14 @@ type CDXBom struct {
 	Services           *[]CDXService           `json:"services,omitempty"`
 	ExternalReferences *[]CDXExternalReference `json:"externalReferences,omitempty"`
 	Dependencies       *[]CDXDependency        `json:"dependencies,omitempty"`
-	Compositions       *[]CDXCompositions      `json:"compositions,omitempty" cdx:"+1.3"`    // v1.3 added
-	Vulnerabilities    *[]CDXVulnerability     `json:"vulnerabilities,omitempty" cdx:"+1.4"` // v1.4 added
-	Signature          *JSFSignature           `json:"signature,omitempty" cdx:"+1.4"`       // v1.4 added
-	Annotations        *[]CDXAnnotation        `json:"annotations,omitempty" cdx:"+1.5"`     // v1.5 added
-	Formulation        *[]CDXFormula           `json:"formulation,omitempty" cdx:"+1.5"`     // v1.5 added
-	Properties         *[]CDXProperty          `json:"properties,omitempty" cdx:"+1.5"`      // v1.5 added
-	Declarations       *[]CDXDeclaration       `json:"declarations,omitempty" cdx:"+1.6"`    // v1.6 added
-	Definitions        *[]CDXDefinition        `json:"definitions,omitempty" cdx:"+1.6"`     // v1.6 added
+	Compositions       *[]CDXCompositions      `json:"compositions,omitempty" cdx:"added:1.3"`    // v1.3 added
+	Vulnerabilities    *[]CDXVulnerability     `json:"vulnerabilities,omitempty" cdx:"added:1.4"` // v1.4 added
+	Signature          *JSFSignature           `json:"signature,omitempty" cdx:"added:1.4"`       // v1.4 added
+	Annotations        *[]CDXAnnotation        `json:"annotations,omitempty" cdx:"added:1.5"`     // v1.5 added
+	Formulation        *[]CDXFormula           `json:"formulation,omitempty" cdx:"added:1.5"`     // v1.5 added
+	Properties         *[]CDXProperty          `json:"properties,omitempty" cdx:"added:1.5"`      // v1.5 added
+	Declarations       *[]CDXDeclaration       `json:"declarations,omitempty" cdx:"added:1.6"`    // v1.6 added
+	Definitions        *[]CDXDefinition        `json:"definitions,omitempty" cdx:"added:1.6"`     // v1.6 added
 }
 
 // v1.2: existed
@@ -67,11 +67,11 @@ type CDXMetadata struct {
 	Authors      *[]CDXOrganizationalContact `json:"authors,omitempty"`
 	Component    *CDXComponent               `json:"component,omitempty"`
 	Supplier     *CDXOrganizationalEntity    `json:"supplier,omitempty"`
-	Licenses     *[]CDXLicenseChoice         `json:"licenses,omitempty" cdx:"+1.3"`               // v1.3 added
-	Properties   *[]CDXProperty              `json:"properties,omitempty" cdx:"+1.3"`             // v1.3 added
-	Lifecycles   *[]CDXLifecycle             `json:"lifecycles,omitempty" cdx:"+1.5"`             // v1.5 added
+	Licenses     *[]CDXLicenseChoice         `json:"licenses,omitempty" cdx:"added:1.3"`          // v1.3 added
+	Properties   *[]CDXProperty              `json:"properties,omitempty" cdx:"added:1.3"`        // v1.3 added
+	Lifecycles   *[]CDXLifecycle             `json:"lifecycles,omitempty" cdx:"added:1.5"`        // v1.5 added
 	Manufacturer *CDXOrganizationalEntity    `json:"manufacturer,omitempty" cdx:"deprecated:1.6"` // v1.6: added
-	Manufacture  *CDXOrganizationalEntity    `json:"manufacture,omitempty" cdx:"+1.6"`            // v1.6: deprecated (typo. error)
+	Manufacture  *CDXOrganizationalEntity    `json:"manufacture,omitempty" cdx:"added:1.6"`       // v1.6: deprecated (typo. error)
 }
 
 // TODO: figure out how to support both current (object)/legacy(array) tools in Metadata.Tools field
@@ -281,11 +281,11 @@ type CDXLicenseChoice struct {
 type CDXLicenseExpression struct {
 	Expression      string      `json:"expression,omitempty"`
 	BOMRef          *CDXRefType `json:"bom-ref,omitempty"`
-	Acknowledgement string      `json:"acknowledgement,omitempty"` // v1.6: added
+	Acknowledgement string      `json:"acknowledgement,omitempty" cdx:"added:1.6"` // v1.6: added
 }
 
 // v1.2: was an anon. type
-// v1.3: created
+// v1.3: created as a named type
 // v1.6: added Acknowledgment
 // Note: "id" SHOULD be an SPDX license ID
 // Note: "oneOf": ["id", "name"] is required
@@ -296,22 +296,22 @@ type CDXLicense struct {
 	Name            string         `json:"name,omitempty"`
 	Text            *CDXAttachment `json:"text,omitempty"`
 	Url             string         `json:"url,omitempty"`
-	BOMRef          *CDXRefType    `json:"bom-ref,omitempty"`         // v1.5: added
-	Licensing       *CDXLicensing  `json:"licensing,omitempty"`       // v1.5: added
-	Properties      *[]CDXProperty `json:"properties,omitempty"`      // v1.5: added
-	Acknowledgement string         `json:"acknowledgement,omitempty"` // v1.6: added
+	BOMRef          *CDXRefType    `json:"bom-ref,omitempty" cdx:"added:1.5"`         // v1.5: added
+	Licensing       *CDXLicensing  `json:"licensing,omitempty" cdx:"added:1.5"`       // v1.5: added
+	Properties      *[]CDXProperty `json:"properties,omitempty" cdx:"added:1.5"`      // v1.5: added
+	Acknowledgement string         `json:"acknowledgement,omitempty" cdx:"added:1.6"` // v1.6: added
 }
 
 // v1.5: added object
 type CDXLicensing struct {
-	AltIds        *[]string             `json:"altIds,omitempty"`
-	Licensor      *CDXLicenseLegalParty `json:"licensor,omitempty"`
-	Licensee      *CDXLicenseLegalParty `json:"licensee,omitempty"`
-	Purchaser     *CDXLicenseLegalParty `json:"purchaser,omitempty"`
-	PurchaseOrder string                `json:"purchaseOrder,omitempty"`
-	LicenseTypes  *[]string             `json:"licenseTypes,omitempty"` // Constraint: enum[see schema]
-	LastRenewal   string                `json:"lastRenewal,omitempty"`
-	Expiration    string                `json:"expiration,omitempty"`
+	AltIds        *[]string             `json:"altIds,omitempty" cdx:"added:1.5"`        // v1.5: added
+	Licensor      *CDXLicenseLegalParty `json:"licensor,omitempty" cdx:"added:1.5"`      // v1.5: added
+	Licensee      *CDXLicenseLegalParty `json:"licensee,omitempty" cdx:"added:1.5"`      // v1.5: added
+	Purchaser     *CDXLicenseLegalParty `json:"purchaser,omitempty" cdx:"added:1.5"`     // v1.5: added
+	PurchaseOrder string                `json:"purchaseOrder,omitempty" cdx:"added:1.5"` // v1.5: added
+	LicenseTypes  *[]string             `json:"licenseTypes,omitempty" cdx:"added:1.5"`  // v1.5: added
+	LastRenewal   string                `json:"lastRenewal,omitempty" cdx:"added:1.5"`   // v1.5: added
+	Expiration    string                `json:"expiration,omitempty" cdx:"added:1.5"`    // v1.5: added
 }
 
 // v1.2: existed
@@ -407,10 +407,56 @@ type CDXCopyright struct {
 }
 
 // v1.3: created "componentEvidence" defn.
+// Note: "Identity" was changed from a singleton in v1.5, to an array of in v1.6
 type CDXComponentEvidence struct {
-	Licenses  *[]CDXLicense   `json:"licenses,omitempty"`
-	Copyright *[]CDXCopyright `json:"copyright,omitempty"`
+	Licenses    *[]CDXLicense    `json:"licenses,omitempty" cdx:"added:1.3"`
+	Copyright   *[]CDXCopyright  `json:"copyright,omitempty" cdx:"added:1.3"`
+	Identity    interface{}      `json:"identity,omitempty" cdx:"added:1.5,changed:1.6"`
+	Occurrences *[]CDXOccurrence `json:"occurrences,omitempty" cdx:"added:1.5"`
+	Callstack   *CDXCallstack    `json:"callstack,omitempty" cdx:"added:1.5"`
 }
+
+// v1.5: added
+type CDXOccurrence struct {
+	BOMRef   *CDXRefType `json:"bom-ref,omitempty" cdx:"added:1.5"`
+	Location string      `json:"location,omitempty" cdx:"added:1.5"`
+}
+
+// v1.5: added
+type CDXCallstack struct {
+	Frames *[]CDXFrames `json:"frames,omitempty" cdx:"added:1.5"`
+}
+
+// v1.5: added
+// Note: "parameters" SHOULD use "formulation" definitions that better define a parameter
+type CDXFrames struct {
+	Package      string    `json:"package,omitempty" cdx:"added:1.5"`
+	Module       string    `json:"module,omitempty" cdx:"added:1.5"`
+	Function     string    `json:"function,omitempty" cdx:"added:1.5"`
+	Parameters   *[]string `json:"parameters,omitempty" cdx:"added:1.5"`
+	Line         int       `json:"line,omitempty" cdx:"added:1.5"`
+	Column       int       `json:"column,omitempty" cdx:"added:1.5"`
+	FullFilename string    `json:"fullFilename,omitempty" cdx:"added:1.5"`
+}
+
+// v1.5: added
+// TODO: figure out how to support both the v1.5 "Identity" type (a singleton
+// of an anonymous type) vs. the v1.6 "identity" which is an array of named type
+// (i.e., componentIdentityEvidence).
+// Note: Tools is either (OneOf) CDXRefType <or> CDXBomLinkElementType, which are both strings for now...
+// type CDXComponentIdentityEvidence struct {
+// 	Field      string       `json:"field,omitempty" cdx:"added:1.5"`
+// 	Confidence float64      `json:"confidence,omitempty" cdx:"added:1.5"`
+// 	Methods    *[]CDXMethod `json:"methods,omitempty" cdx:"added:1.5"`
+// 	Tools      *[]string    `json:"tools,omitempty" cdx:"added:1.5"`
+// }
+
+// // v1.5: added
+// type CDXMethod struct {
+// 	Technique  string  `json:"technique,omitempty" cdx:"added:1.5"`
+// 	Confidence float64 `json:"confidence,omitempty" cdx:"added:1.5"`
+// 	Value      string  `json:"value,omitempty" cdx:"added:1.5"`
+// }
 
 // v1.3: created "compositions" defn.
 // v1.4: added "signature"
