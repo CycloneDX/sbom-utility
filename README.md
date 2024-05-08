@@ -10,7 +10,7 @@ This utility was designed to be an API platform to validate, analyze and edit **
 
 In addition, the utility features "report" commands that can easily extract, filter, list and summarize **component**, **service**, **license**, **resource**, **vulnerability** and other BOM information using the utility's powerful, SQL-like query command. The **query** command allows **select**-ion of specific data **from** anywhere in the BOM document **where** data values match specified (regex) patterns.
 
-- *Report output can be produced in several formats (e.g., text, CSV, MD (markdown) and JSON) to accommodate further processing.*
+- *Report output can be produced in several formats (e.g., `txt`, `csv`, `md` (markdown) and `json`) to accommodate further processing.*
 
 The utility also offers commands that support analysis and editing of BOM document data including **trim**, **patch** (IETF RFC 6902) and **diff**.
 
@@ -18,36 +18,28 @@ The utility also offers commands that support analysis and editing of BOM docume
 
 ## Command Overview
 
-The following commands, which operate against input BOMs and named resources within them, are offered by the utility:
+The following commands, which operate against input BOMs and named resources within them, are offered by the utility.  They are presented by category
 
-- **[component](#component) list** produces filterable listings of hardware or software components declared in the BOM.
-
-- **[license](#license)**
-  - **[`list`](#license-list-subcommand)** produces filtered listings  of license data contained in a BOM along with license "usage policy" determinations using the policies declared in the `license.json` file.
-  - **[policy](#license-policy-subcommand)** - lists software and data license information and associated license usage policies as defined in the configurable `license.json` file.
-
-- **[patch](#patch)** : Applies a JSON patch file, as defined by [IETF RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902/), to an input JSON BOM file.
-
-- **[query](#query)** retrieves JSON data from BOMs using SQL-style query statements (i.e., `--select <data fields> --from <BOM object> --where <field=regex>`). The JSON data can be used to create custom listings or reports.
-
-- **[resource](#resource) list** produces filterable listings of resources (i.e., components and services) declared in the BOM.
-
-- **[schema](#schema)** lists the "built-in" set of schema formats, versions and variants supported by the `validation` command.
-  - Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file (see the `schema` command's [adding schemas](#adding-schemas) section).
-
-- **[trim](#trim)** provide the ability to remove specified JSON information from the input JSON BOM document and produce output BOMs with reduced or targeted sets of information.  A SQL-like set of parameters allows for fine-grained specification of which fields should be trimmed from which document paths.
-
-- **[validate](#validate)** enables validation of SBOMs against their declared format (e.g., SPDX, CycloneDX) and version (e.g., "2.3", "1.6", etc.) using their JSON schemas.
-  - Derivative, **"customized" schemas** can be used for verification using the `--variant` flag (e.g., industry or company-specific schemas).
-  - You can override an BOM's declared BOM version using the `--force` flag (e.g., verify a BOM against a newer specification version).
-
-- **[vulnerability](#vulnerability) list** produces filterable listings of vulnerabilities declared in the BOM (i.e., CycloneDX Vulnerability Exploitability eXchange (**VEX**)) data or independently stored CycloneDX Vulnerability Disclosure Report (**VDR**) data.
+| Command *[subcommand]* | Description |
+| :-- | :-- |
+| **[validate](#validate)**  |enables validation of SBOMs against their declared format (e.g., SPDX, CycloneDX) and version (e.g., "2.3", "1.6", etc.) using their JSON schemas.|
+| **[patch](#patch)** | Applies a JSON patch file, as defined by [IETF RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902/), to an input JSON BOM file. |
+| **[trim](#trim)** | provides the ability to remove specified JSON information from the input JSON BOM document and produce output BOMs with reduced or targeted sets of information.</br></br>*A "SQL-like" set of parameters allows for fine-grained specification of which fields should be trimmed from which document paths.* |
+| **[query](#query)** | retrieves JSON data from BOMs using SQL-style query statements (i.e., `--select <data fields> --from <BOM object> --where <field=regex>`). The JSON data can be used to create custom listings or reports. |
+| **[component](#component)** **[`list`](#component-list-command)** | produces filterable listings of hardware or software components declared in the BOM. |
+| **[license](#license)** **[`list`](#license-list-subcommand)** | produces filterable listings of license data declared in the BOM along with the associated component or service. Includes *"usage policy"* determinations as declared in the `license.json` configuration file. |
+| **[license](#license)** **[`policy`](#license-policy-subcommand)** | lists software and data license information and associated license usage policies as defined in the configurable `license.json` file. |
+| **[resource `list`](#resource)** | produces filterable listings of resources (i.e., components and services) declared in the BOM. |
+| **[schema `list`](#schema)** | produces filterable listings of schema formats, versions and variants supported by the `validation` command.</br></br> **Note**: Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file (see the `schema` command's [adding schemas](#adding-schemas) section). |
+| **[vulnerability `list`](#vulnerability)** | produces filterable listings of vulnerabilities declared in the BOM (i.e., CycloneDX Vulnerability Exploitability eXchange (**VEX**)) data or independently stored CycloneDX Vulnerability Disclosure Report (**VDR**) data stored in the BOM format. |
 
 **Experimental commands**:
 
 Feedback and helpful commits appreciated on the following commands which will be promoted after at least two point releases:
 
-- **[diff](#diff)** : Shows the delta between two similar BOM versions in JSON (diff) patch format as defined by [IETF RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902/).
+| Command | Description |
+| :-- | :-- |
+| **[diff](#diff)** | Shows the delta between two similar BOM versions in JSON (diff) patch format as defined by [IETF RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902/). |
 
 ---
 
@@ -1847,11 +1839,16 @@ Trimmed, normalized output:
 
 This command will parse standardized SBOMs and validate it against its declared format and version (e.g., SPDX 2.2, CycloneDX 1.4). Custom  variants of standard JSON schemas can be used for validation by supplying the `--variant` name as a flag. Explicit JSON schemas can be specified using the `--force` flag.
 
-#### Validate supported schemas
+#### Validating using supported schemas
 
 Use the [schema](#schema) command to list supported schemas formats, versions and variants.
 
+#### Validating using "custom" schemas
+
 Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file. See [adding schemas](#adding-schemas).
+
+- **"Customized" schema** variants, perhaps derived from standard BOM schemas, can be used for validation using the `--variant` flag (e.g., industry or company-specific schemas).
+- **Overriding default schema** - You can override an BOM's declared BOM version using the `--force` flag (e.g., verify a BOM against a newer specification version).
 
 #### Validate flags
 
