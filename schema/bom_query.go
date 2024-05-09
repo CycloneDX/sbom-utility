@@ -59,6 +59,8 @@ func whereFilterMatch(mapObject map[string]interface{}, whereFilters []common.Wh
 
 		// Handle non-string data types in the map by converting them to string
 		switch data := value.(type) {
+		case string:
+			value = data
 		case bool:
 			value = strconv.FormatBool(data)
 		case int:
