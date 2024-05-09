@@ -20,7 +20,7 @@ The utility also offers commands that support analysis and editing of BOM docume
 
 The following commands, which operate against input BOMs and their data, are offered by the utility:
 
-| Command *[subcommand]* | Description |
+| Command <font size="-1">*[`subcommand`]*</font> | Description |
 | :-- | :-- |
 | **[validate](#validate)**  | Enables validation of SBOMs against their declared format (e.g., SPDX, CycloneDX) and version (e.g., "2.3", "1.6", etc.) using their JSON schemas.|
 | **[patch](#patch)** | Applies a JSON patch file, as defined by [IETF RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902/), to an input JSON BOM file. |
@@ -54,10 +54,10 @@ Feedback and helpful commits appreciated on the following commands which will be
 - [Contributing](#contributing)
 - [Development](#development)
 - [Testing](#testing)
-  - [Go test files](#go-test-files)
-  - [Running tests](#running-tests)
 - [Releasing](#releasing)
-- [References](#references): [CycloneDX](#cyclonedx), [SPDX](#spdx)
+- [BOM References](#bom-references)
+  - [CycloneDX](#cyclonedx)
+  - [SPDX](#spdx)
 
 ---
 
@@ -2516,9 +2516,18 @@ An example `schema` object for the canonical SPDX v2.3 (default, no variant) sch
 
 ## Testing
 
-### Go test files
+Testing implementation and invocation, with examples, is described in this section including:
 
-The built-in `go test` command is used to execute all functional tests that appear in `*._test.go` files.  By default, `go test` executes tests within the same directory where its respective `*._test.go` file is located and sets that as the working directory. For example, tests in the `validate_test.go` file are executed from the `cmd` subdirectory. This is a problem as the actual test SBOM JSON test files are located relative the project root, one level higher, and would not be found.  In order to correct for that, the test working directory is automatically changed for all tests within the `TestMain` routine found in `root_test.go`.
+- [Authoring Go test files](#authoring-go-test-files)
+- [Running tests](#running-tests)
+
+### Authoring Go test files
+
+The built-in `go test` command will execute all functional tests that appear in files named with the pattern: `<filename>_test.go`. These files are executed from within the same directory (package) where its respective `<filename>.go` source code file is located and sets that same as the "working directory".
+
+*For example,* tests in the `validate_test.go` file are executed from the `cmd` subdirectory.
+
+This is normally a problem as the actual test SBOM JSON test files are located relative the project root, one level higher, and would not be found by the "working directory".  In order to correct for that, the test working directory is automatically changed for all tests within the `TestMain` routine found in `root_test.go`.
 
 ### Running tests
 
@@ -2642,7 +2651,18 @@ $ go build ${LDFLAGS} -o ${BINARY}
 
 ---
 
-## References
+## BOM References
+
+### Software-Bill-of-Materials (SBOM)
+
+- [NTIA - SBOM Minimum Requirements](https://www.ntia.doc.gov/blog/2021/ntia-releases-minimum-elements-software-bill-materials)
+- [CISA - Software Bill of Materials (SBOM)](https://www.cisa.gov/sbom)
+- [FOSSA - Software Bill Of Materials: Formats, Use Cases, and Tools](https://fossa.com/blog/software-bill-of-materials-formats-use-cases-tools/)
+
+#### Guides
+
+- [FOSSA](https://fossa.com/)
+  - *["A Practical Guide to CycloneDX"](https://fossa.com/cyclonedx)*
 
 ### CycloneDX
 
@@ -2676,14 +2696,3 @@ $ go build ${LDFLAGS} -o ${BINARY}
 - Tools
   - [SPDX Online Tool](https://tools.spdx.org/app/)
     - **Note** Used the [convert](https://tools.spdx.org/app/convert/) tool to convert SPDX examples from `.tv` format to `.json`; however, conversion of [`example6-bin.spdx`](https://github.com/spdx/spdx-examples/blob/master/example6/spdx/example6-bin.spdx) resulted in an error.
-
-### Software-Bill-of-Materials (SBOM)
-
-- [NTIA - SBOM Minimum Requirements](https://www.ntia.doc.gov/blog/2021/ntia-releases-minimum-elements-software-bill-materials)
-- [CISA - Software Bill of Materials (SBOM)](https://www.cisa.gov/sbom)
-- [FOSSA - Software Bill Of Materials: Formats, Use Cases, and Tools](https://fossa.com/blog/software-bill-of-materials-formats-use-cases-tools/)
-
-#### Guides
-
-- [FOSSA](https://fossa.com/)
-  - *["A Practical Guide to CycloneDX"](https://fossa.com/cyclonedx)*
