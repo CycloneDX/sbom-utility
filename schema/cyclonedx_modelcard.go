@@ -24,6 +24,9 @@ package schema
 
 // v1.5: added
 // NOTE: CDXRefType is a named `string` type as of v1.5
+// TODO: v1.7: How to represent an AI App. (e.g., a Chatbot) using a model
+// with components like embeddings (vector DB), re-rankers, etc.
+// also consider distinguishing model capabilities: e.g., generative/classification; types (multi-model, LLM, LM, etc.)
 type CDXModelCard struct {
 	BOMRef               *CDXRefType              `json:"bom-ref,omitempty" cdx:"+1.5"`              // v1.5
 	ModelParameters      *CDXModelParameters      `json:"modelParameters,omitempty" cdx:"+1.5"`      // v1.5

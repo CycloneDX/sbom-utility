@@ -63,6 +63,16 @@ func (link CDXBomLink) String() string {
 }
 
 // v1.2: existed
+// v1.3: added "hashes"
+// v1.4: `Type` field: added value "release-notes" to enum.
+type CDXExternalReference struct {
+	Type    string     `json:"type,omitempty"`
+	Url     string     `json:"url,omitempty"`
+	Comment string     `json:"comment,omitempty"`
+	Hashes  *[]CDXHash `json:"hashes,omitempty"` // v1.3: added
+}
+
+// v1.2: existed
 type CDXAttachment struct {
 	ContentType string `json:"contentType,omitempty"`
 	Encoding    string `json:"encoding,omitempty"`
@@ -70,7 +80,6 @@ type CDXAttachment struct {
 }
 
 func (attachment *CDXAttachment) GetContentTruncated(maxLength int, addTruncatedMessage bool) string {
-
 	if length := len(attachment.Content); length > maxLength {
 		if addTruncatedMessage {
 			return fmt.Sprintf("%s (truncated from %v) ...", attachment.Content[0:maxLength], length)
@@ -86,19 +95,6 @@ func (attachment *CDXAttachment) GetContentTruncated(maxLength int, addTruncated
 type CDXHash struct {
 	Alg     string `json:"alg,omitempty"`
 	Content string `json:"content,omitempty"`
-}
-
-// v1.5 new type for "metadata"
-type CDXNameDescription struct {
-	Name        string `json:"name,omitempty"`
-	Description string `json:"description,omitempty"`
-}
-
-// v1.4: created "note" defn.
-// Note: "locale" is of type "localeType" which is a constrained `string`
-type CDXNote struct {
-	Locale string         `json:"locale,omitempty"`
-	Text   *CDXAttachment `json:"attachment,omitempty"`
 }
 
 // v1.2: existed
@@ -129,11 +125,11 @@ type CDXProperty struct {
 	Value string `json:"value,omitempty"`
 }
 
-// v1.5: created for reuse in "licensing" schema for "licensee" and "licensor"
-// TODO: reuse on "annotator" as well?
-type CDXLicenseLegalParty struct {
-	Organization *CDXOrganizationalEntity  `json:"organization,omitempty"`
-	Individual   *CDXOrganizationalContact `json:"individual,omitempty"`
+// v1.4: created "note" defn.
+// Note: "locale" is of type "localeType" which is a constrained `string`
+type CDXNote struct {
+	Locale string         `json:"locale,omitempty"`
+	Text   *CDXAttachment `json:"attachment,omitempty"`
 }
 
 // v1.2: existed
@@ -142,6 +138,8 @@ type CDXLicenseLegalParty struct {
 // - v1.5 Note: The v1.4 structure/fields is now called the "Creation Tools (legacy)" structure
 // - v1.5: In order to support the new object "Creation Tools", we need to combine these fields
 // into with the legacy structure fields
+// TODO: figure out how to support both current (object)/legacy(array) tools in Metadata.Tools field
+// See: https://stackoverflow.com/questions/47057240/parsing-multiple-json-types-into-the-same-struct
 type CDXLegacyCreationTool struct {
 	Vendor             string                  `json:"vendor,omitempty" cdx:"deprecated"`       // v1.5: deprecated
 	Name               string                  `json:"name,omitempty" cdx:"deprecated"`         // v1.5: deprecated
@@ -154,4 +152,11 @@ type CDXLegacyCreationTool struct {
 type CDXCreationTools struct {
 	Components *[]CDXComponent `json:"components,omitempty" cdx:"+1.5"` // v1.5: added (new type)
 	Services   *[]CDXService   `json:"services,omitempty" cdx:"+1.5"`   // v1.5: added (new type)
+}
+
+// v1.5: created for reuse in "licensing" schema for "licensee" and "licensor"
+// TODO: reuse on "annotator" as well?
+type CDXLicenseLegalParty struct {
+	Organization *CDXOrganizationalEntity  `json:"organization,omitempty"`
+	Individual   *CDXOrganizationalContact `json:"individual,omitempty"`
 }
