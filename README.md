@@ -2321,7 +2321,7 @@ The following development-oriented topics are included in this section:
 - [Running from source](#running-from-source)
 - [Debugging](#debugging)
   - [Using VSCode](#vscode)
-- [Adding SBOM formats, schema versions and variants](#adding-sbom-formats-schema-versions-and-variants)
+- [Adding new SBOM formats, schema versions and variants](#adding-new-sbom-formats-schema-versions-and-variants)
 
 ### Prerequisites
 
@@ -2397,7 +2397,7 @@ or add it globally to the `settings.json` file:
 
 **Note**: *The `showGlobalVariables` setting was only recently disabled as the default in VSCode as a stop-gap measure due to performance (loading) problems under Windows.*
 
-### Supporting new SBOM formats and schema versions
+### Adding new SBOM formats, schema versions and variants
 
 The utility uses the [`config.json`](./config.json) file (either the default, embedded version or the equivalent provided on the command line using `--config-schema` flag) to lookup supported formats and their associated versioned JSON schema files.  To add another SBOM format simply add another entry to the `format` array in the document:
 
