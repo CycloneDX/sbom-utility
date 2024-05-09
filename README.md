@@ -25,6 +25,7 @@ The following commands, which operate against input BOMs and their data, are off
 | **[validate](#validate)**  | Enables validation of SBOMs against their declared format (e.g., SPDX, CycloneDX) and version (e.g., "2.3", "1.6", etc.) using their JSON schemas.|
 | **[patch](#patch)** | Applies a JSON patch file, as defined by [IETF RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902/), to an input JSON BOM file. |
 | **[trim](#trim)** | Removes specified JSON information from the input JSON BOM document and produce output BOMs with reduced or targeted sets of information.</br></br>*A "SQL-like" set of parameters allows for fine-grained specification of which fields should be trimmed from which document paths.* |
+| **[diff](#diff)** | **Experimental**[<sup>1</sup>](#experimental-commands):  Displays the delta between two similar BOM versions in JSON (diff) patch format as defined by [IETF RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902/). *Please read "recommendations"  before running.* |
 | **[query](#query)** | Retrieves JSON data from BOMs using SQL-style query statements (i.e., `--select <data fields> --from <BOM object> --where <field=regex>`). The JSON data can be used to create custom listings or reports. |
 | **[component](#component)** **[`list`](#component-list-command)** | Produces filterable listings of hardware or software components declared in the BOM. |
 | **[license](#license)** **[`list`](#license-list-subcommand)** | Produces filterable listings of license data declared in the BOM along with the associated component or service. Includes *"usage policy"* determinations as declared in the `license.json` configuration file. |
@@ -33,13 +34,8 @@ The following commands, which operate against input BOMs and their data, are off
 | **[schema `list`](#schema)** | Produces filterable listings of schema formats, versions and variants supported by the `validation` command.</br></br> **Note**: Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file (see the `schema` command's [adding schemas](#adding-schemas) section). |
 | **[vulnerability `list`](#vulnerability)** | produces filterable listings of vulnerabilities declared in the BOM (i.e., CycloneDX Vulnerability Exploitability eXchange (**VEX**)) data or independently stored CycloneDX Vulnerability Disclosure Report (**VDR**) data stored in the BOM format. |
 
-**Experimental commands**:
-
-Feedback and helpful commits appreciated on the following commands which will be promoted after at least two point releases:
-
-| Command | Description |
-| :-- | :-- |
-| **[diff](#diff)** | Shows the delta between two similar BOM versions in JSON (diff) patch format as defined by [IETF RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902/). |
+> **Experimental commands**:
+*Testing, feedback and helpful suggestions and code commits are appreciated on experimental commands.*
 
 ---
 
