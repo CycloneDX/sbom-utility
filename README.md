@@ -46,8 +46,8 @@ The following commands, which operate against input BOMs and their data, are off
 - [Installation](#installation)
 - [Running](#running)
 - [Commands](#commands)
-- [Design considerations](#design-considerations)
 - [Contributing](#contributing)
+- [Design considerations](#design-considerations)
 - [Development](#development)
 - [Testing](#testing)
 - [Releasing](#releasing)
@@ -2284,6 +2284,33 @@ Use the `--format` flag on the to choose one of the supported output formats:
 
 ---
 
+## Contributing
+
+Contributions are welcome under the Apache 2.0 license.  Help is wanted in the following areas:
+
+- [TODO list](#todo-list)
+- [Priority features](#priority-features)
+
+#### TODO list
+
+The entirety of the code contains the tag "**TODO**" with comments of things that are features or improvements conceived while authoring the base functionality.  Most of these do not have active issues opened form them.
+
+Feel free to "grep" for the "TODO" tag, open an issue and/or submit a draft PR.
+
+#### Priority features
+
+An ad-hoc list of featured "TODOs" geared at making the tool more accessible, extensible and useful especially around "core" commands such as validation.
+
+- **Merge command** Support merge of two (both validated) SBOMs with de-duplication and configurable. Please note that some method of normalization prior to merge will be necessary.
+- **Remote Schema loading** Support using SBOM schema files that are remotely hosted  (network accessible) from known, trusted source locations (e.g., releases of SPDX, CycloneDX specification schemas). Note that the config file has an existing `url` field per entry that can be used for this purpose.
+- **--orderby** Support ordering of query result sets by comparison of values from a specified field key.
+- **license.json** Document license policy configuration JSON schema structure and how to add entries relative to a CycloneDX `LicenseChoice` object for entries with SPDX IDs and those without.
+- **license.json** Add entries for all SPDX licenses listed in v3.21.
+  - See issue: https://github.com/CycloneDX/sbom-utility/issues/12
+- **Go libraries** Replace `go-prettyjson`, `go-multimap` libraries with alternatives that produce maintained releases.
+
+---
+
 ## Design considerations
 
 ### Memory safety
@@ -2440,33 +2467,6 @@ An example `schema` object for the canonical SPDX v2.3 (default, no variant) sch
   - **Note** If the schema exists under the `resources` directory, it will automatically be embedded in in the executable binary when built using `go build` which includes using the project's `Makefile`.
 - Assure **only one** `schema` object entry for a given format and version has the value `latest` set to `true`.  This latest schema will be used when the SBOM being validated does not have a clear version declared **or** used with the `--force latest` flag.
 - If you have a customized or "variant" version of a schema (with the same format and version values) you wish to use for validation (e.g., a `corporate`or `staging` version with added requirements or for testing an unreleased version), you can create an entry that has the same `version` as another entry, but also declare its `variant` name *(non-empty value)*.  This value can be supplied on the commend line with the `--variant <variant name>` flag to force the validator to use it instead of the default *(empty variant value)*.
-
----
-
-## Contributing
-
-Contributions are welcome under the Apache 2.0 license.  Help is wanted in the following areas:
-
-- [TODO list](#todo-list)
-- [Priority features](#priority-features)
-
-#### TODO list
-
-The entirety of the code contains the tag "**TODO**" with comments of things that are features or improvements conceived while authoring the base functionality.  Most of these do not have active issues opened form them.
-
-Feel free to "grep" for the "TODO" tag, open an issue and/or submit a draft PR.
-
-#### Priority features
-
-An ad-hoc list of featured "TODOs" geared at making the tool more accessible, extensible and useful especially around "core" commands such as validation.
-
-- **Merge command** Support merge of two (both validated) SBOMs with de-duplication and configurable. Please note that some method of normalization prior to merge will be necessary.
-- **Remote Schema loading** Support using SBOM schema files that are remotely hosted  (network accessible) from known, trusted source locations (e.g., releases of SPDX, CycloneDX specification schemas). Note that the config file has an existing `url` field per entry that can be used for this purpose.
-- **--orderby** Support ordering of query result sets by comparison of values from a specified field key.
-- **license.json** Document license policy configuration JSON schema structure and how to add entries relative to a CycloneDX `LicenseChoice` object for entries with SPDX IDs and those without.
-- **license.json** Add entries for all SPDX licenses listed in v3.21.
-  - See issue: https://github.com/CycloneDX/sbom-utility/issues/12
-- **Go libraries** Replace `go-prettyjson`, `go-multimap` libraries with alternatives that produce maintained releases.
 
 ---
 
