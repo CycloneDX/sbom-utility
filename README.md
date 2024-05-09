@@ -6,7 +6,7 @@
 
 > *This utility supports all CycloneDX BOM variants, such as Software (**SBOM**), Hardware (**HBOM**), Manufacturing (**MBOM**), Machine Learning and AI (**MLBOM**), Cryptographic (**CBOM**), etc.*
 
-This utility was designed to be an API platform to validate, analyze and edit **Bills-of-Materials (BOMs)**. Initially, it was created to **validate** either **CycloneDX** or **SPDX**-formatted BOMs against official, versioned JSON schemas as published by their respective standards communities.
+**`sbom-utility`** was designed to be an API platform to validate, analyze and edit **Bills-of-Materials (BOMs)**. Initially, it was created to **validate** either CycloneDX *or* SPDX-formatted BOMs against official, versioned JSON schemas as published by their respective standards communities.
 
 - *Organizations may also design and supply **"custom JSON schema"** variants to the validate command which are perhaps designed to assure additional data-compliance requirements are met.*
 
