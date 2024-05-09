@@ -43,21 +43,18 @@ Feedback and helpful commits appreciated on the following commands which will be
 
 ---
 
-## Index
+### Project Index
 
 - [Installation](#installation)
 - [Running](#running)
 - [Commands](#commands)
-  - [Exit codes](#exit-codes): (e.g., `0`: none, `1`: application, `2`: validation)
-  - [Persistent flags](#persistent-flags) (e.g., `--format`, `--quiet`, `--where`, etc.)
 - [Design considerations](#design-considerations)
 - [Contributing](#contributing)
 - [Development](#development)
 - [Testing](#testing)
 - [Releasing](#releasing)
 - [BOM References](#bom-references)
-  - [CycloneDX](#cyclonedx)
-  - [SPDX](#spdx)
+  - [CycloneDX](#cyclonedx), [SPDX](#spdx)
 
 ---
 
@@ -101,6 +98,8 @@ This section provides detailed descriptions of all commands, their flags and exa
 
 For convenience, links to each command's section are here:
 
+- [Exit codes](#exit-codes): *e.g., `0`: none, `1`: application, `2`: validation*
+- [Persistent flags](#persistent-flags) *e.g., `--format`, `--quiet`, `--where`, etc.*
 - [validate](#validate): validates BOM data against declared or required JSON schema.
 - [trim](#trim): removes uninteresting or necessary fields and data from a BOM.
 - [patch](#patch): patches BOMs using IETF RFC 6902 records.
