@@ -14,23 +14,23 @@ In addition, the utility features "report" commands that can easily extract, fil
 
 The utility also offers commands that support analysis and editing of BOM document data including **trim**, **patch** (IETF RFC 6902) and **diff**.
 
-> **Note**: *The utility supports all CycloneDX BOM variants, such as **Software** (SBOM), **Hardware** (HBOM), **Manufacturing** (MBOM), **AI/ML** (MLBOM), **Cryptographic** (CBOM), etc., that adhere to their respective schemas.*
+> **Note**: *The utility supports all CycloneDX BOM variants, such as Software (**SBOM**), Hardware (**HBOM**), Manufacturing (**MBOM**), Machine Learning and AI (**MLBOM**), Cryptographic (**CBOM**), etc., that adhere to their respective schemas.*
 
 ## Command Overview
 
-The following commands, which operate against input BOMs and named resources within them, are offered by the utility.  They are presented by category
+The following commands, which operate against input BOMs and their data, are offered by the utility:
 
 | Command *[subcommand]* | Description |
 | :-- | :-- |
-| **[validate](#validate)**  |enables validation of SBOMs against their declared format (e.g., SPDX, CycloneDX) and version (e.g., "2.3", "1.6", etc.) using their JSON schemas.|
+| **[validate](#validate)**  | Enables validation of SBOMs against their declared format (e.g., SPDX, CycloneDX) and version (e.g., "2.3", "1.6", etc.) using their JSON schemas.|
 | **[patch](#patch)** | Applies a JSON patch file, as defined by [IETF RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902/), to an input JSON BOM file. |
-| **[trim](#trim)** | provides the ability to remove specified JSON information from the input JSON BOM document and produce output BOMs with reduced or targeted sets of information.</br></br>*A "SQL-like" set of parameters allows for fine-grained specification of which fields should be trimmed from which document paths.* |
-| **[query](#query)** | retrieves JSON data from BOMs using SQL-style query statements (i.e., `--select <data fields> --from <BOM object> --where <field=regex>`). The JSON data can be used to create custom listings or reports. |
-| **[component](#component)** **[`list`](#component-list-command)** | produces filterable listings of hardware or software components declared in the BOM. |
-| **[license](#license)** **[`list`](#license-list-subcommand)** | produces filterable listings of license data declared in the BOM along with the associated component or service. Includes *"usage policy"* determinations as declared in the `license.json` configuration file. |
-| **[license](#license)** **[`policy`](#license-policy-subcommand)** | lists software and data license information and associated license usage policies as defined in the configurable `license.json` file. |
-| **[resource `list`](#resource)** | produces filterable listings of resources (i.e., components and services) declared in the BOM. |
-| **[schema `list`](#schema)** | produces filterable listings of schema formats, versions and variants supported by the `validation` command.</br></br> **Note**: Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file (see the `schema` command's [adding schemas](#adding-schemas) section). |
+| **[trim](#trim)** | Removes specified JSON information from the input JSON BOM document and produce output BOMs with reduced or targeted sets of information.</br></br>*A "SQL-like" set of parameters allows for fine-grained specification of which fields should be trimmed from which document paths.* |
+| **[query](#query)** | Retrieves JSON data from BOMs using SQL-style query statements (i.e., `--select <data fields> --from <BOM object> --where <field=regex>`). The JSON data can be used to create custom listings or reports. |
+| **[component](#component)** **[`list`](#component-list-command)** | Produces filterable listings of hardware or software components declared in the BOM. |
+| **[license](#license)** **[`list`](#license-list-subcommand)** | Produces filterable listings of license data declared in the BOM along with the associated component or service. Includes *"usage policy"* determinations as declared in the `license.json` configuration file. |
+| **[license](#license)** **[`policy`](#license-policy-subcommand)** | Produces filterable listings of software and data license information and associated license usage policies as defined a `license.json` configuration file. |
+| **[resource `list`](#resource)** | Produces filterable listings of resources (i.e., components and services) declared in the BOM. |
+| **[schema `list`](#schema)** | Produces filterable listings of schema formats, versions and variants supported by the `validation` command.</br></br> **Note**: Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file (see the `schema` command's [adding schemas](#adding-schemas) section). |
 | **[vulnerability `list`](#vulnerability)** | produces filterable listings of vulnerabilities declared in the BOM (i.e., CycloneDX Vulnerability Exploitability eXchange (**VEX**)) data or independently stored CycloneDX Vulnerability Disclosure Report (**VDR**) data stored in the BOM format. |
 
 **Experimental commands**:
@@ -51,16 +51,8 @@ Feedback and helpful commits appreciated on the following commands which will be
   - [Exit codes](#exit-codes): (e.g., `0`: none, `1`: application, `2`: validation)
   - [Persistent flags](#persistent-flags) (e.g., `--format`, `--quiet`, `--where`, etc.)
 - [Design considerations](#design-considerations)
-- [Development](#development)
-  - [Prerequisites](#prerequisites)
-  - [Building](#building)
-  - [Running from source](#running-from-source)
-  - [Debugging](#debugging)
-    - [VSCode](#vscode)
-  - [Adding SBOM formats, schema versions and variants](#adding-sbom-formats-schema-versions-and-variants)
 - [Contributing](#contributing)
-  - [TODO list](#todo-list)
-  - [Priority features](#priority-features)
+- [Development](#development)
 - [Testing](#testing)
   - [Go test files](#go-test-files)
   - [Running tests](#running-tests)
@@ -2325,6 +2317,15 @@ In the future, we envision support for additional kinds of BOMs (e.g., Hardware 
 
 ### Development
 
+The following development-oriented topics are included in this section:
+
+- [Prerequisites](#prerequisites)
+- [Building](#building)
+- [Running from source](#running-from-source)
+- [Debugging](#debugging)
+  - [Using VSCode](#vscode)
+- [Adding SBOM formats, schema versions and variants](#adding-sbom-formats-schema-versions-and-variants)
+
 #### Prerequisites
 
 - Go v1.20.1 or higher: see [https://go.dev/doc/install](https://go.dev/doc/install)
@@ -2442,7 +2443,10 @@ The fields `canonicalName`, `propertyKeyFormat`, `propertyKeyVersion`, and `prop
 
 ### Contributing
 
-Contributions are welcome under the Apache 2.0 license.
+Contributions are welcome under the Apache 2.0 license.  Help is wanted in the following areas:
+
+- [TODO list](#todo-list)
+- [Priority features](#priority-features)
 
 #### TODO list
 
