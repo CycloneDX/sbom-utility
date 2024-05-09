@@ -2101,7 +2101,7 @@ Entries for new or "custom" schemas can be added to the `config.json` file by ad
 
 These new schema entries will tell the schema loader where to find the JSON schema file locally, relative to the utility's executable.
 
-For details see the "[Adding SBOM formats, schema versions and variants](#adding-sbom-formats-schema-versions-and-variants)" section.
+For details see the "[Adding new SBOM formats, schema versions and variants](#adding-new-sbom-formats-schema-versions-and-variants)" section.
 
 #### Embedding schemas
 
