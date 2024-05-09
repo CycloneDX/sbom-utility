@@ -8,7 +8,7 @@ This utility was designed to be an API platform to validate, analyze and edit **
 
 - *Organizations may also design and supply **"custom JSON schema"** variants to the validate command which are perhaps designed to assure additional data-compliance requirements are met.*
 
-In addition, the utility features "report" commands that can easily extract, filter, list and summarize **component**, **service**, **license**, **resource**, **vulnerability** and other BOM information using the utility's powerful, SQL-like query command. The **query** command allows **select**-ion of specific data **from** anywhere in the BOM document **where** data values match specified (regex) patterns.
+In addition, the utility features "report" commands that can easily *extract*, *filter*, *list* and *summarize* **component**, **service**, **license**, **resource**, **vulnerability** and other BOM information using the utility's powerful, SQL-like query command. The **query** command allows **select**-ion of specific data **from** anywhere in the BOM document **where** data values match specified (regex) patterns.
 
 - *Report output can be produced in several formats (e.g., `txt`, `csv`, `md` (markdown) and `json`) to accommodate further processing.*
 
@@ -90,31 +90,31 @@ On MacOS, the utility is not a registered Apple application and may warn you tha
 
 ## Commands
 
-This section provides detailed descriptions of all commands, their flags and examples. First we will cover how all commands generate consistent [exit codes](#exit-codes) and describe some of the  [persistent flags](#persistent-flags) supported by most commands.
+This section provides detailed descriptions of all commands, supported flags and output formats along with usage examples.
 
-For convenience, links to each command's section are here:
+All commands generate consistent [exit codes](#exit-codes) as well as share some [persistent flags](#persistent-flags) which are described here:
 
-- [Exit codes](#exit-codes): *e.g., `0`: none, `1`: application, `2`: validation*
-- [Persistent flags](#persistent-flags) *e.g., `--format`, `--quiet`, `--where`, etc.*
-- [validate](#validate): validates BOM data against declared or required JSON schema.
-- [trim](#trim): removes uninteresting or necessary fields and data from a BOM.
-- [patch](#patch): patches BOMs using IETF RFC 6902 records.
-- [query](#query): extracts JSON objects and fields from a BOM using SQL-like queries.
-- [component list](#component): lists all, top-level component information.
+- [Exit codes](#exit-codes): Including: *`0`: no error, `1`: application error, `2`: validation error, etc.*
+- [Persistent flags](#persistent-flags) Including: *`--input`, `--output`, `--format`, `--quiet`, `--where`, etc.*
+
+Convenient links to each command:
+
+- [validate](#validate): Validates BOM data against declared or required JSON schema.
+- [trim](#trim): Removes uninteresting or necessary fields and data from a BOM.
+- [patch](#patch): Patches BOMs using IETF RFC 6902 records.
+- [diff](#diff): *(Experimental)*: Displays the differences between two similar BOMs. *Please read recommendations before executing.*
+- [query](#query): Extracts JSON objects and fields from a BOM using SQL-like queries.
+- [component list](#component): Lists all component information found in a BOM.
 - [license](#license)
-  - [list](#license-list-subcommand) subcommand: lists all license information found in the BOM.
-  - [policy](#license-policy-subcommand) subcommand: lists configurable license usage policies.
-- [resource list](#resource): lists resource information by type (e.g., components, services).
-- [schema list](#schema): lists supported JSON schemas by BOM formats, versions and variants.
-- [vulnerability list](#vulnerability): lists vulnerability summary information included in a BOM or standalone VDR BOM.
-- [completion](#completion): generates command-line completion scripts for the this utility.
-- [help](#help): displays help and usage information for the utility or current command/subcommand.
+  - [list](#license-list-subcommand): Lists all license information found in a BOM.
+  - [policy](#license-policy-subcommand): Lists configurable license usage policies found in the `license.json` file.
+- [resource list](#resource): Lists all resource information by type (e.g., components, services).
+- [schema list](#schema): Lists supported JSON schemas by BOM format, version and variant.
+- [vulnerability list](#vulnerability): Lists vulnerability (i.e., `VEX`) information included in a BOM or standalone `VDR` BOM.
+- [completion](#completion): Generates command-line completion scripts for the this utility.
+- [help](#help): Displays help and usage information for the utility or currently specified command.
 
-### Experimental commands
-
-These commands need more community testing and feedback.
-
-- [diff](#diff): compares differences between two similar BOMs.
+---
 
 #### Exit codes
 
@@ -145,6 +145,8 @@ which returns `0` (zero) or "no error":
 ```bash
 0
 ```
+
+---
 
 ### Persistent flags
 
@@ -190,11 +192,11 @@ This example uses the `--format` flag on the `schema` command to output in markd
 |SPDX v2.2.1|SPDX|SPDX-2.2|2.2.1|schema/spdx/2.2.1/spdx-schema.json|https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json|
 ```
 
-### Indent flag
+#### Indent flag
 
 This flag supplies an integer to any command that encodes JSON output to determine how many spaces to indent nested JSON elements.  If not specified, the default indent is `4` (spaces).
 
-#### Example: indent flag on the query command
+##### Example: indent flag on the query command
 
 ```bash
 ./sbom-utility query --select name,version --from metadata.component -i examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json --indent 2 -q
@@ -309,329 +311,685 @@ See each command's section for contextual examples of the `--where` flag filter 
 
 ---
 
-## Component
+### Validate
 
-Primarily, this command is used to generate lists of components that are included in a CycloneDX SBOM.
+This command will parse standardized SBOMs and validate it against its declared format and version (e.g., SPDX 2.2, CycloneDX 1.4). Custom  variants of standard JSON schemas can be used for validation by supplying the `--variant` name as a flag. Explicit JSON schemas can be specified using the `--force` flag.
 
-### Component `list` command
+#### Validating using supported schemas
 
-This command is used to extract, filter and list CycloneDX BOM `Component` data.
+Use the [schema](#schema) command to list supported schemas formats, versions and variants.
 
-#### Component list supported formats
+#### Validating using "custom" schemas
 
-This command supports the `--format` flag with any of the following values:
+Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file. See [adding schemas](#adding-schemas).
 
-- `txt` (default), `csv`, `md`
+- **"Customized" schema** variants, perhaps derived from standard BOM schemas, can be used for validation using the `--variant` flag (e.g., industry or company-specific schemas).
+- **Overriding default schema** - You can override an BOM's declared BOM version using the `--force` flag (e.g., verify a BOM against a newer specification version).
 
-#### Component list flags
+#### Validate flags
 
-##### Component list `--summary` flag
+The following flags can be used to improve performance when formatting error output results:
 
-Use the `--summary` flag on the `component list` command to produce a summary report with reduced column information.
+##### `--error-limit` flag
 
-#### Component list examples
+Use the `--error-limit x` (default: `10`) flag to reduce the formatted error result output to the first `x` errors.  By default, only the first 10 errors are output with an informational messaging indicating `x/y` errors were shown.
 
-##### Example: `component list`
+##### `--error-value` flag
 
-This example shows the component list with all column information display. Since CycloneDX component data can be very extensive, many columns simply indicate the component `has` more data available which can be extracted using the `query` command if needed.
+Use the `--error-value=true|false` (default: `true`) flag to reduce the formatted error result output by not showing the `value` field which shows detailed information about the failing data in the BOM.
+
+##### `--colorize` flag
+
+Use the `--colorize=true|false` (default: `false`) flag to add/remove color formatting to error result `txt` formatted output.  By default, `txt` formatted error output is colorized to help with human readability; for automated use, it can be turned off.
+
+#### Validate Examples
+
+##### Example: Validate using inferred format and schema
+
+Validating the "juice shop" SBOM (CycloneDX 1.2) example provided in this repository.
 
 ```bash
-./sbom-utility component list -i test/cyclonedx/1.6/specification/valid-bom-1.6.json -q
+./sbom-utility validate -i examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json
 ```
+
+```bash
+[INFO] Loading (embedded) default schema config file: `config.json`...
+[INFO] Loading (embedded) default license policy file: `license.json`...
+[INFO] Attempting to load and unmarshal data from: `examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json`...
+[INFO] Successfully unmarshalled data from: `examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json`
+[INFO] Determining file's BOM format and version...
+[INFO] Determined BOM format, version (variant): `CycloneDX`, `1.2` (latest)
+[INFO] Matching BOM schema (for validation): schema/cyclonedx/1.2/bom-1.2.schema.json
+[INFO] Loading schema `schema/cyclonedx/1.2/bom-1.2.schema.json`...
+[INFO] Schema `schema/cyclonedx/1.2/bom-1.2.schema.json` loaded.
+[INFO] Validating `examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json`...
+[INFO] BOM valid against JSON schema: `true`
+```
+
+You can also verify the [exit code](#exit-codes) from the validate command:
+
+```bash
+echo $?
+```
+
+```bash
+0  // no error (valid)
+```
+
+#### Example: Validate using "custom" schema variants
+
+The validation command will use the declared format and version found within the SBOM JSON file itself to lookup the default (latest) matching schema version (as declared in`config.json`; however, if variants of that same schema (same format and version) are declared, they can be requested via the `--variant` command line flag:
+
+```bash
+./sbom-utility validate -i test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json --variant custom
+```
+
+If you run the sample command above, you would see several "custom" schema errors resulting in an invalid SBOM determination (i.e., `exit status 2`):
 
 ```text
-bom-ref                       group        type         name              version  description  copyright  supplier-name  supplier-url         manufacturer-name  manufacturer-url     publisher  purl                          swid-tag-id                                         cpe     mime-type  scope     number-hashes  number-licenses  has-pedigree  has-evidence  has-components  has-release-notes  has-model-card  has-data  has-tags  has-signature
--------                       -----        ----         ----              -------  -----------  ---------  -------------  ------------         -----------------  ----------------     ---------  ----                          -----------                                         ---     ---------  -----     -------------  ---------------  ------------  ------------  --------------  -----------------  --------------  --------  --------  -------------
-                                           application  Acme Application  9.1.1                                                                                                                                                 swidgen-242eb18a-503e-ca37-393b-cf156ef09691_9.1.1                               0              0                false         false         false           false              false           false     false     false
-pkg:npm/acme/component@1.0.0  com.acme     library      tomcat-catalina   9.0.14                                                                                                                  pkg:npm/acme/component@1.0.0                                                                                   4              1                true          false         false           false              false           false     false     false
-                              org.example  library      mylibrary         1.0.0                            Example, Inc.  https://example.com  Example-2, Inc.    https://example.org                                                                                                                  required  0              0                true          false         false           false              false           false     false     false
+[INFO] Loading (embedded) default schema config file: `config.json`...
+[INFO] Loading (embedded) default license policy file: `license.json`...
+[INFO] Attempting to load and unmarshal data from: `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`...
+[INFO] Successfully unmarshalled data from: `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`
+[INFO] Determining file's BOM format and version...
+[INFO] Determined BOM format, version (variant): `CycloneDX`, `1.4` custom
+[INFO] Matching BOM schema (for validation): schema/test/bom-1.4-custom.schema.json
+[INFO] Loading schema `schema/test/bom-1.4-custom.schema.json`...
+[INFO] Schema `schema/test/bom-1.4-custom.schema.json` loaded.
+[INFO] Validating `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`...
+[INFO] BOM valid against JSON schema: `false`
+[INFO] (3) schema errors detected.
+[INFO] Formatting error results (`txt` format)...
+1. {
+        "type": "contains",
+        "field": "metadata.properties",
+        "context": "(root).metadata.properties",
+        "description": "At least one of the items must match",
+        "value": [
+            {
+                "name": "urn:example.com:disclaimer",
+                "value": "This SBOM is current as of the date it was generated."
+            },
+            {
+                "name": "urn:example.com:classification",
+                "value": "This SBOM is Confidential Information. Do not distribute."
+            }
+        ]
+    }
+2. {
+        "type": "const",
+        "field": "metadata.properties.0.value",
+        "context": "(root).metadata.properties.0.value",
+        "description": "metadata.properties.0.value does not match: \"This SBOM is current as of the date it was generated and is subject to change.\"",
+        "value": "This SBOM is current as of the date it was generated."
+    }
+3. {
+        "type": "number_all_of",
+        "field": "metadata.properties",
+        "context": "(root).metadata.properties",
+        "description": "Must validate all the schemas (allOf)",
+        "value": [
+            {
+                "name": "urn:example.com:disclaimer",
+                "value": "This SBOM is current as of the date it was generated."
+            },
+            {
+                "name": "urn:example.com:classification",
+                "value": "This SBOM is Confidential Information. Do not distribute."
+            }
+        ]
+    }
+[ERROR] invalid SBOM: schema errors found (test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json)
+[INFO] document `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`: valid=[false]
 ```
 
-##### Example: `component list` summary only
-
-The same BOM component information as in the previous example; however, using the summary flag to reduce the number of columns data.
+confirming the exit code:
 
 ```bash
-./sbom-utility component list -i test/cyclonedx/1.6/specification/valid-bom-1.6.json --summary -q
+echo $?
 ```
-
-```text
-bom-ref                       group        type         name              version  description  copyright  supplier-name  supplier-url         manufacturer-name  manufacturer-url     publisher  purl                          swid-tag-id                                         cpe     number-hashes  number-licenses
--------                       -----        ----         ----              -------  -----------  ---------  -------------  ------------         -----------------  ----------------     ---------  ----                          -----------                                         ---     -------------  ---------------
-                                           application  Acme Application  9.1.1                                                                                                                                                 swidgen-242eb18a-503e-ca37-393b-cf156ef09691_9.1.1          0              0
-pkg:npm/acme/component@1.0.0  com.acme     library      tomcat-catalina   9.0.14                                                                                                                  pkg:npm/acme/component@1.0.0                                                              4              1
-                              org.example  library      mylibrary         1.0.0                            Example, Inc.  https://example.com  Example-2, Inc.    https://example.org                                                                                                       0              0
-```
-
----
-
-### License
-
-This command is used to aggregate and summarize software, hardware and data license information included in the SBOM. It also displays license usage policies for resources based upon concluded by SPDX license identifier, license family or logical license expressions as defined in he current policy file (i.e., `license.json`).
-
-The `license` command supports the following subcommands:
-
-- [list](#license-list-subcommand) - list or create a summarized report of licenses found in input SBOM.
-  - [list with --summary flag](#license-list---summary-flag) - As full license information can be very large, a summary view is often most useful.
-- [policy](#license-policy-subcommand) - list user configured license policies by SPDX license ID, family name and other filters.
-
----
-
-### License `list` subcommand
-
-The `list` subcommand produces JSON output which contains an array of CycloneDX `LicenseChoice` data objects found in the BOM input file without component association.  `LicenseChoice` data, in general, may provide license information using registered SPDX IDs, license expressions (of SPDX IDs) or license names (not necessarily registered by SPDX).  License data may also include base64-encoded license or legal text that was used to determine a license's SPDX ID or name.
-
-#### License list supported formats
-
-This command supports the `--format` flag with any of the following values:
-
-- `json` (default), `csv`, `md`
-  - using the `--summary` flag: `txt` (default), `csv`, `md`
-
-#### License list result sorting
-
-- Results are not sorted for base `license list` subcommand.
-  - using the  `--summary` flag: results are sorted (ascending) by license key which can be one of license `id` (SPDX ID), `name` or `expression`.
-
-#### License list flags
-
-##### License list `--summary` flag
-
-Use the `--summary` flag on the `license list` command to produce a summary report in `txt` (default) format as well as policy determination based upon the `license.json` declarations.
-
-#### License list examples
-
-##### Example: license list JSON
-
-This example shows a few entries of the JSON output that exhibit the three types of license data described above:
 
 ```bash
-./sbom-utility license list -i examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json --format json -q
+2 // SBOM error
+```
+
+##### Why validation failed
+
+The output shows a first schema error indicating the failing JSON object; in this case,
+
+- the CycloneDX `metadata.properties` field, which is a list of `property` objects.
+- Found that a property with a `name` field with the value  `"urn:example.com:disclaimer"` had an incorrect `value`.
+  - the `value` field SHOULD have had a constant value of `"This SBOM is current as of the date it was generated and is subject to change."` (as was required by the custom schema's regex).
+  - However, it was found to have only a partial match of `"This SBOM is current as of the date it was generated."`.
+
+##### Details of the schema error
+
+Use the `--debug` or `-d` flag to see all schema error details:
+
+```bash
+./sbom-utility validate -i test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json --variant custom -d
+```
+
+The details include the full context of the failing `metadata.properties` object which also includes a `"urn:example.com:classification"` property:
+
+```bash
+3. {
+        "type": "number_all_of",
+        "field": "metadata.properties",
+        "context": "(root).metadata.properties",
+        "description": "Must validate all the schemas (allOf)",
+        "value": [
+            {
+                "name": "urn:example.com:disclaimer",
+                "value": "This SBOM is current as of the date it was generated."
+            },
+            {
+                "name": "urn:example.com:classification",
+                "value": "This SBOM is Confidential Information. Do not distribute."
+            }
+        ]
+    }
+```
+
+#### Example: Validate using "JSON" format
+
+The JSON format will provide an `array` of schema error results that can be post-processed as part of validation toolchain.
+
+```bash
+./sbom-utility validate -i test/validation/cdx-1-4-validate-err-components-unique-items-1.json --format json -q
 ```
 
 ```json
 [
     {
-        "license": {
-            "$comment": "by license `id",
-            "id": "MIT",
-            "name": "",
-            "url": ""
+        "type": "unique",
+        "field": "components",
+        "context": "(root).components",
+        "description": "array items[1,2] must be unique",
+        "value": {
+            "type": "array",
+            "index": 1,
+            "item": {
+                "bom-ref": "pkg:npm/body-parser@1.19.0",
+                "description": "Node.js body parsing middleware",
+                "hashes": [
+                    {
+                        "alg": "SHA-1",
+                        "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+                    }
+                ],
+                "licenses": [
+                    {
+                        "license": {
+                            "id": "MIT"
+                        }
+                    }
+                ],
+                "name": "body-parser",
+                "purl": "pkg:npm/body-parser@1.19.0",
+                "type": "library",
+                "version": "1.19.0"
+            }
         }
     },
     {
-        "license": {
-            "$comment": "by license `expression",
-            "id": "",
-            "name": "",
-            "url": ""
-        },
-        "expression": "Apache-2.0 AND (MIT OR GPL-2.0-only)"
-    },
-    {
-        "license": {
-            "$comment": "by license `name` with full license encoding",
-            "id": "",
-            "name": "Apache 2",
-            "text": {
-                "contentType": "text/plain",
-                "encoding": "base64",
-                "content": "CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIEFwYWNoZSBMaWNlbnNlCiAgICAgICAgICAgICAgICAgICAgICAgICAgIFZlcnNpb24 ..."
-            },
-            "url": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+        "type": "unique",
+        "field": "components",
+        "context": "(root).components",
+        "description": "array items[2,4] must be unique",
+        "value": {
+            "type": "array",
+            "index": 2,
+            "item": {
+                "bom-ref": "pkg:npm/body-parser@1.19.0",
+                "description": "Node.js body parsing middleware",
+                "hashes": [
+                    {
+                        "alg": "SHA-1",
+                        "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+                    }
+                ],
+                "licenses": [
+                    {
+                        "license": {
+                            "id": "MIT"
+                        }
+                    }
+                ],
+                "name": "body-parser",
+                "purl": "pkg:npm/body-parser@1.19.0",
+                "type": "library",
+                "version": "1.19.0"
+            }
         }
-    },
-    ...
+    }
 ]
 ```
 
-###### Example: license list `--summary`
+##### Reducing output size using `error-value=false` flag
 
-This example shows the default text output from using the summary flag:
+In many cases, BOMs may have many errors and having the `value` information details included can be too verbose and lead to large output files to inspect.  In those cases, simply set the `error-value` flag to `false`.
+
+Rerunning the same command with this flag set to false yields a reduced set of information.
 
 ```bash
-./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary -q
+./sbom-utility validate -i test/validation/cdx-1-4-validate-err-components-unique-items-1.json --format json --error-value=false -q
 ```
 
-```bash
-usage-policy  license-type  license                               resource-name      bom-ref                             bom-location
-------------  ------------  -------                               -------------      -------                             ------------
-needs-review  id            ADSL                                  Foo                service:example.com/myservices/foo  services
-needs-review  name          AGPL                                  Library J          pkg:lib/libraryJ@1.0.0              components
-allow         name          Apache                                Library B          pkg:lib/libraryB@1.0.0              components
-allow         id            Apache-1.0                            Library E          pkg:lib/libraryE@1.0.0              components
-allow         id            Apache-2.0                            N/A                N/A                                 metadata.licenses
-allow         id            Apache-2.0                            Library A          pkg:lib/libraryA@1.0.0              components
-allow         id            Apache-2.0                            Library F          pkg:lib/libraryF@1.0.0              components
-allow         expression    Apache-2.0 AND (MIT OR BSD-2-Clause)  Library B          pkg:lib/libraryB@1.0.0              components
-allow         name          BSD                                   Library J          pkg:lib/libraryJ@1.0.0              components
-deny          name          CC-BY-NC                              Library G          pkg:lib/libraryG@1.0.0              components
-needs-review  name          GPL                                   Library H          pkg:lib/libraryH@1.0.0              components
-needs-review  id            GPL-2.0-only                          Library C          pkg:lib/libraryC@1.0.0              components
-needs-review  id            GPL-3.0-only                          Library D          pkg:lib/libraryD@1.0.0              components
-allow         id            MIT                                   ACME Application   pkg:app/sample@1.0.0                metadata.component
-allow         id            MIT                                   Library A          pkg:lib/libraryA@1.0.0              components
-UNDEFINED     invalid       NOASSERTION                           Library NoLicense  pkg:lib/libraryNoLicense@1.0.0      components
-UNDEFINED     invalid       NOASSERTION                           Bar                service:example.com/myservices/bar  services
-needs-review  name          UFL                                   ACME Application   pkg:app/sample@1.0.0                metadata.component
-```
-
-- **Notes**
-  - **Usage policy** column values are derived from the `license.json` policy configuration file.
-    - A `usage policy` value of `UNDEFINED` indicates that `license.json` provided no entry that matched the declared license (`id` or `name`) in the SBOM.
-  - **License expressions** (e.g., `(MIT or GPL-2.0)`) with one term resolving to `UNDEFINED` and the the other term having a concrete policy will resolve to the "optimistic" policy for `OR` expressions and the "pessimistic" policy for `AND` expressions.  In addition, a warning of this resolution is emitted.
-
-###### Example: license list summary with `--where` filter
-
-The list command results can be filtered using the `--where` flag using the column names in the report. These include `usage-policy`, `license-type`, `license`, `resource-name`, `bom-ref` and `bom-location`.
-
-The following example shows filtering of component licenses using the `license-type` column where the license was described as a `name` value:
-
-```bash
-./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --where license-type=name -q
-```
-
-```bash
-usage-policy  license-type  license   resource-name     bom-ref                 bom-location
-------------  ------------  -------   -------------     -------                 ------------
-needs-review  name          AGPL      Library J         pkg:lib/libraryJ@1.0.0  components
-allow         name          Apache    Library B         pkg:lib/libraryB@1.0.0  components
-allow         name          BSD       Library J         pkg:lib/libraryJ@1.0.0  components
-deny          name          CC-BY-NC  Library G         pkg:lib/libraryG@1.0.0  components
-needs-review  name          GPL       Library H         pkg:lib/libraryH@1.0.0  components
-needs-review  name          UFL       ACME Application  pkg:app/sample@1.0.0    metadata.component
-```
-
-In another example, the list is filtered by the `usage-policy` where the value is `needs-review`:
-
-```bash
-./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --where usage-policy=needs-review -q
-```
-
-```bash
-usage-policy  license-type  license       resource-name     bom-ref                             bom-location
-------------  ------------  -------       -------------     -------                             ------------
-needs-review  id            ADSL          Foo               service:example.com/myservices/foo  services
-needs-review  name          AGPL          Library J         pkg:lib/libraryJ@1.0.0              components
-needs-review  name          GPL           Library H         pkg:lib/libraryH@1.0.0              components
-needs-review  id            GPL-2.0-only  Library C         pkg:lib/libraryC@1.0.0              components
-needs-review  id            GPL-3.0-only  Library D         pkg:lib/libraryD@1.0.0              components
-needs-review  name          UFL           ACME Application  pkg:app/sample@1.0.0                metadata.component
+```json
+[
+    {
+        "type": "unique",
+        "field": "components",
+        "context": "(root).components",
+        "description": "array items[1,2] must be unique"
+    },
+    {
+        "type": "unique",
+        "field": "components",
+        "context": "(root).components",
+        "description": "array items[2,4] must be unique"
+    }
+]
 ```
 
 ---
 
-### License `policy` subcommand
+### Trim
 
-To view a report listing the contents of the current policy file (i.e., [`license.json`](https://github.com/CycloneDX/sbom-utility/blob/main/license.json)) which contains an encoding of known software and data licenses by SPDX ID and license family along with a configurable usage policy (i.e., `"allow"`, `"deny"` or `"needs-review"`).
+This command is able to "trim" one or more JSON keys (fields) from specified JSON BOM documents effectively "pruning" the JSON document.  This functionality helps consumers of large-sized BOMs that need to analyze specific types of data in large BOMs in reducing the BOM data to just what is needed for their use cases or needs.
 
-#### License policy supported formats
+#### Trim supported output formats
 
-This command supports the `--format` flag with any of the following values:
+This command is used to output, using the [`--output-file` flag](#output-flag), a "trimmed" BOM in JSON format.
 
-- `txt` (default), `csv`, `md`
+- `json` (default)
 
-#### License policy result sorting
+#### Trim flags
 
-- Results are sorted by license policy `family`.
+Trim operates on a JSON BOM input file (see [`--input-file` flag](#input-flag)) and produces a trimmed JSON BOM output file using the following flags:
 
-#### License policy flags
+##### Trim `--keys` flag
 
-##### list `--summary` flag
+A comma-separated list of JSON map keys. Similar to the [query command's `--select` flag](#query---select-flag) syntax.
 
-Use the `--summary` flag on the `license policy list` command to produce a summary report with a reduced set of column data (i.e., it includes only the following columns:  `usage-policy`, `family`, `id`, `name`, `oci` (approved) `fsf` (approved), `deprecated`, and SPDX `reference` URL).
+##### Trim `--from` flag
 
-##### list `--wrap` flag
+A comma-separated list of JSON document paths using the same syntax as the [query command's `--from` flag](#query---from-flag).
 
-Use the `--wrap` flag to toggle the wrapping of text within columns of the license policy report (`txt` format only) output using the values `true` or `false`. The default value is `false`.
+##### Trim `--normalize` flag
 
-#### License policy examples
+A flag that normalizes the BOM data after trimming and prior to output.
 
-##### Example: license policy
+This flag has custom code that sorts all components, services, licenses, vulnerabilities, properties, external references, hashes and *most* other BOM data using custom comparators.
 
-```bash
-./sbom-utility license policy -q
-```
+Each comparator uses `required` fields and other identifying fields to create *"composite keys"* for each unique data structure.
 
-```bash
-usage-policy  family    id            name                                osi    fsf    deprecated  reference                                    aliases                      annotations                  notes
-------------  ------    --            ----                                ---    ---    ----------  ---------                                    -------                      -----------                  -----
-allow         0BSD      0BSD          BSD Zero Clause License             true   false  false       https://spdx.org/licenses/0BSD.html          Free Public License 1.0.0    APPROVED                     none
-needs-review  ADSL      ADSL          Amazon Digital Services License     false  false  false       https://spdx.org/licenses/ADSL.html          none                         NEEDS-APPROVAL               none
-allow         AFL       AFL-3.0       Academic Free License v3.0          true   true   false       https://spdx.org/licenses/AFL-3.0.html       none                         APPROVED                     none
-needs-review  AGPL      AGPL-1.0      Affero General Public License v1.0  false  false  true        https://spdx.org/licenses/AGPL-1.0.html      none                         NEEDS-APPROVAL,AGPL-WARNING  none
-allow         Adobe     Adobe-2006    Adobe Systems Incorporated CLA      false  false  false       https://spdx.org/licenses/Adobe-2006.html    none                         APPROVED                     none
-allow         Apache    Apache-2.0    Apache License 2.0                  true   true   false       https://spdx.org/licenses/Apache-2.0.html    Apache License, Version 2.0  APPROVED                     none
-allow         Artistic  Artistic-1.0  Artistic License 1.0                true   false  false       https://spdx.org/licenses/Artistic-1.0.html  none                         APPROVED                     none
-...
-```
+#### Trim examples
 
-###### Example: policy with `--summary` flag
+The original BOM used for these examples can be found here:
 
-We can also apply the `--summary` flag to get a reduced set of columns that includes only the `usage-policy` along with the essential SPDX license information (e.g., no annotations or notes).
+- [test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json](test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json)
+
+##### Example: Trim `properties` from entire JSON BOM
+
+Validating the "juice shop" SBOM (CycloneDX 1.2) example provided in this repository.
 
 ```bash
-./sbom-utility license policy --summary -q
+./sbom-utility trim -i ./sbom-utility trim -i test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json --keys=properties
 ```
+
+Original BOM with `properties`:
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/sample@2.0.0",
+      "purl": "pkg:npm/sample@2.0.0",
+      "name": "sample",
+      "version": "2.0.0",
+      "description": "Node.js Sampler package",
+      "properties": [
+        {
+          "name": "foo",
+          "value": "bar"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/body-parser@1.19.0",
+      "purl": "pkg:npm/body-parser@1.19.0",
+      "name": "body-parser",
+      "version": "1.19.0",
+      "description": "Node.js body parsing middleware",
+      "hashes": [
+        {
+          "alg": "SHA-1",
+          "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+        }
+      ]
+    }
+  ],
+  "properties": [
+    {
+      "name": "abc",
+      "value": "123"
+    }
+  ]
+}
+```
+
+Output BOM results without `properties`:
+
+```json
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
+    "version": 1,
+    "components": [
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/sample@2.0.0",
+            "name": "sample",
+            "version": "2.0.0",
+            "description": "Node.js Sampler package",
+            "purl": "pkg:npm/sample@2.0.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/body-parser@1.19.0",
+            "name": "body-parser",
+            "version": "1.19.0",
+            "description": "Node.js body parsing middleware",
+            "hashes": [
+                {
+                    "alg": "SHA-1",
+                    "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+                }
+            ],
+            "purl": "pkg:npm/body-parser@1.19.0"
+        }
+    ]
+}
+```
+
+##### Example: Trim `name` and `description` from entire JSON BOM
 
 ```bash
-usage-policy  family    id            name                                osi     fsf     deprecated  reference
-------------  ------    --            ----                                ---     ---     ----------  ---------
-allow         0BSD      0BSD          BSD Zero Clause License             true    false   false       https://spdx.org/licenses/0BSD.html
-needs-review  ADSL      ADSL          Amazon Digital Services License     false   false   false       https://spdx.org/licenses/ADSL.html
-allow         AFL       AFL-3.0       Academic Free License v3.0          true    true    false       https://spdx.org/licenses/AFL-3.0.html
-needs-review  AGPL      AGPL-1.0      Affero General Public License v1.0  false   false   true        https://spdx.org/licenses/AGPL-1.0.html
-allow         Adobe     Adobe-2006    Adobe Systems Incorporated CLA      false   false   false       https://spdx.org/licenses/Adobe-2006.html
-allow         Apache    Apache-2.0    Apache License 2.0                  true    true    false       https://spdx.org/licenses/Apache-2.0.html
-allow         Artistic  Artistic-1.0  Artistic License 1.0                true    true    false       https://spdx.org/licenses/Artistic-2.0.html
-...
+./sbom-utility trim -i test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json --keys=name,description -q
 ```
 
-###### Example: policy with `--where` filter
+Output BOM results without `name` or `description`:
 
-The following example shows filtering of  license policies using the `id` column:
+```json
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
+    "version": 1,
+    "components": [
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/sample@2.0.0",
+            "version": "2.0.0",
+            "purl": "pkg:npm/sample@2.0.0",
+            "properties": [
+                {
+                    "value": "bar"
+                }
+            ]
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/body-parser@1.19.0",
+            "version": "1.19.0",
+            "hashes": [
+                {
+                    "alg": "SHA-1",
+                    "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+                }
+            ],
+            "purl": "pkg:npm/body-parser@1.19.0"
+        }
+    ],
+    "properties": [
+        {
+            "value": "123"
+        }
+    ]
+}
+```
+
+##### Example: Trim `properties` from only `components` path
 
 ```bash
-./sbom-utility license policy --where id=Apache
+./sbom-utility trim -i test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json --keys=properties --from components -q
 ```
+
+Output BOM results with `properties` removed from all `components`:
+
+```json
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
+    "version": 1,
+    "components": [
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/sample@2.0.0",
+            "name": "sample",
+            "version": "2.0.0",
+            "description": "Node.js Sampler package",
+            "purl": "pkg:npm/sample@2.0.0"
+        },
+        {
+            "type": "library",
+            "bom-ref": "pkg:npm/body-parser@1.19.0",
+            "name": "body-parser",
+            "version": "1.19.0",
+            "description": "Node.js body parsing middleware",
+            "hashes": [
+                {
+                    "alg": "SHA-1",
+                    "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+                }
+            ],
+            "purl": "pkg:npm/body-parser@1.19.0"
+        }
+    ],
+    "properties": [
+        {
+            "name": "abc",
+            "value": "123"
+        }
+    ]
+}
+```
+
+---
+
+##### Example: Trim `bom-ref` and normalize output
 
 ```bash
-usage-policy  family  id          name                osi     fsf     deprecated  reference                                  aliases         annotations  notes
-------------  ------  --          ----                ---     ---     ----------  ---------                                  -------         -----------  -----
-allow         Apache  Apache-1.0  Apache v1.0         false   true    false       https://spdx.org/licenses/Apache-1.0.html  none            APPROVED     none
-allow         Apache  Apache-1.1  Apache v1.1         true    true    false       https://spdx.org/licenses/Apache-1.1.html  none            APPROVED     Superseded by Apache-2.0
-allow         Apache  Apache-2.0  Apache License 2.0  true    true    false       https://spdx.org/licenses/Apache-2.0.html  Apache License  APPROVED     none
-
+./sbom-utility trim -i test/trim/trim-cdx-1-5-sample-components-normalize.sbom.json --keys="bom-ref" --normalize -q
 ```
 
-###### Example: policy with `--wrap` flag
+**Note** If you do not want to remove any keys and simply normalize output, set keys to an empty string: `--keys=""`.
 
-```bash
-./sbom-utility license policy --wrap=true -q
+Use the trim command to remove all `bom-ref` fields and normalize output:
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/sample@2.0.0",
+      "purl": "pkg:npm/sample@2.0.0",
+      "name": "sample",
+      "version": "2.0.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "GPL-2.0-or-later"
+          }
+        },
+        {
+          "license": {
+            "id": "LGPL-2.0-or-later"
+          }
+        },
+        {
+          "license": {
+            "id": "GPL-2.0-only"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "moo",
+          "value": "cow"
+        },
+        {
+          "name": "foo",
+          "value": "bar"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/body-parser@1.19.0",
+      "purl": "pkg:npm/body-parser@1.19.0",
+      "name": "body-parser",
+      "version": "1.19.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        },
+        {
+          "alg": "SHA-1",
+          "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        },
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://example.com/website"
+        },
+        {
+          "type": "support",
+          "url": "https://example.com/support"
+        }
+      ]
+    }
+  ]
+}
 ```
 
-```bash
-usage-policy  family    id             name                          osi     fsf     deprecated  reference                                     aliases                           annotations             notes
-------------  ------    --             ----                          ---     ---     ----------  ---------                                     -------                           -----------             -----
-allow         0BSD      0BSD           BSD Zero Clause Lice (20/23)  true    false   false       https://spdx.org/licenses/0BSD.html           Free Public License 1.0. (24/25)  APPROVED                none
-needs-review  ADSL      ADSL           Amazon Digital Servi (20/31)  false   false   false       https://spdx.org/licenses/ADSL.html                                             NEEDS-APPROVAL          none
-allow         AFL       AFL-3.0        Academic Free Licens (20/26)  true    true    false       https://spdx.org/licenses/AFL-3.0.ht (36/38)                                    APPROVED                none
-needs-review  AGPL      AGPL-1.0       Affero General Publi (20/34)  false   false   true        https://spdx.org/licenses/AGPL-1.0.h (36/39)                                    NEEDS-APPROVAL          none
-                                                                                                                                                                                 AGPL-WARNING
-needs-review  APSL      APSL-2.0       Apple Public Source  (20/31)  true    true    false       https://spdx.org/licenses/APSL-2.0.h (36/39)                                    NEEDS-APPROVAL          none
-allow         Adobe     Adobe-2006     Adobe Systems Incorp (20/56)  false   false   false       https://spdx.org/licenses/Adobe-2006 (36/41)                                    APPROVED                none
-allow         Apache    Apache-2.0     Apache License 2.0            true    true    false       https://spdx.org/licenses/Apache-2.0 (36/41)  Apache License, Version  (24/27)  APPROVED                none
-allow         Artistic  Artistic-2.0   Artistic License 2.0          true    true    false       https://spdx.org/licenses/Artistic-2 (36/43)                                    APPROVED                none
-...
+Trimmed, normalized output:
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "components": [
+    {
+      "type": "library",
+      "name": "body-parser",
+      "version": "1.19.0",
+      "hashes": [
+        {
+          "alg": "SHA-1",
+          "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
+        },
+        {
+          "alg": "SHA-256",
+          "content": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        },
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/body-parser@1.19.0",
+      "externalReferences": [
+        {
+          "type": "support",
+          "url": "https://example.com/support"
+        },
+        {
+          "type": "website",
+          "url": "https://example.com/website"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "sample",
+      "version": "2.0.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "GPL-2.0-only"
+          }
+        },
+        {
+          "license": {
+            "id": "GPL-2.0-or-later"
+          }
+        },
+        {
+          "license": {
+            "id": "LGPL-2.0-or-later"
+          }
+        }
+      ],
+      "purl": "pkg:npm/sample@2.0.0",
+      "properties": [
+        {
+          "name": "foo",
+          "value": "bar"
+        },
+        {
+          "name": "moo",
+          "value": "cow"
+        }
+      ]
+    }
+  ]
+}
 ```
-
-#### License policy notes
-
-- Currently, the default `license.json` file, used to derive the `usage-policy` data, does not contain entries for the entire set of SPDX 3.2 license templates.
-  - An issue [12](https://github.com/CycloneDX/sbom-utility/issues/12) is open to add parity.
-- Annotations (tags) and notes can be defined within the `license.json` file and one or more assigned each license entry.
-<!-- - Column data is, by default, truncated in `txt` format views only. In these cases, the number of characters shown out of the total available will be displayed at the point of truncation (e.g., seeing `(24/26)` in a column would indicate 24 out of 26 characters were displayed). -->
-- For backwards compatibility, the `--where` filter supports the key `spdx-id` as an alias for `id`.
 
 ---
 
@@ -1291,9 +1649,331 @@ additionally, you can apply a `--select` clause to simply obtain the matching en
 
 ---
 
+### Component
+
+Primarily, this command is used to extract, filter and list CycloneDX BOM component data using `component list`.
+
+#### Component list supported formats
+
+This command supports the `--format` flag with any of the following values:
+
+- `txt` (default), `csv`, `md`
+
+#### Component list flags
+
+##### Component list `--summary` flag
+
+Use the `--summary` flag on the `component list` command to produce a summary report with reduced column information.
+
+#### Component list examples
+
+##### Example: `component list`
+
+This example shows the component list with all column information display. Since CycloneDX component data can be very extensive, many columns simply indicate the component `has` more data available which can be extracted using the `query` command if needed.
+
+```bash
+./sbom-utility component list -i test/cyclonedx/1.6/specification/valid-bom-1.6.json -q
+```
+
+```text
+bom-ref                       group        type         name              version  description  copyright  supplier-name  supplier-url         manufacturer-name  manufacturer-url     publisher  purl                          swid-tag-id                                         cpe     mime-type  scope     number-hashes  number-licenses  has-pedigree  has-evidence  has-components  has-release-notes  has-model-card  has-data  has-tags  has-signature
+-------                       -----        ----         ----              -------  -----------  ---------  -------------  ------------         -----------------  ----------------     ---------  ----                          -----------                                         ---     ---------  -----     -------------  ---------------  ------------  ------------  --------------  -----------------  --------------  --------  --------  -------------
+                                           application  Acme Application  9.1.1                                                                                                                                                 swidgen-242eb18a-503e-ca37-393b-cf156ef09691_9.1.1                               0              0                false         false         false           false              false           false     false     false
+pkg:npm/acme/component@1.0.0  com.acme     library      tomcat-catalina   9.0.14                                                                                                                  pkg:npm/acme/component@1.0.0                                                                                   4              1                true          false         false           false              false           false     false     false
+                              org.example  library      mylibrary         1.0.0                            Example, Inc.  https://example.com  Example-2, Inc.    https://example.org                                                                                                                  required  0              0                true          false         false           false              false           false     false     false
+```
+
+##### Example: `component list` summary only
+
+The same BOM component information as in the previous example; however, using the summary flag to reduce the number of columns data.
+
+```bash
+./sbom-utility component list -i test/cyclonedx/1.6/specification/valid-bom-1.6.json --summary -q
+```
+
+```text
+bom-ref                       group        type         name              version  description  copyright  supplier-name  supplier-url         manufacturer-name  manufacturer-url     publisher  purl                          swid-tag-id                                         cpe     number-hashes  number-licenses
+-------                       -----        ----         ----              -------  -----------  ---------  -------------  ------------         -----------------  ----------------     ---------  ----                          -----------                                         ---     -------------  ---------------
+                                           application  Acme Application  9.1.1                                                                                                                                                 swidgen-242eb18a-503e-ca37-393b-cf156ef09691_9.1.1          0              0
+pkg:npm/acme/component@1.0.0  com.acme     library      tomcat-catalina   9.0.14                                                                                                                  pkg:npm/acme/component@1.0.0                                                              4              1
+                              org.example  library      mylibrary         1.0.0                            Example, Inc.  https://example.com  Example-2, Inc.    https://example.org                                                                                                       0              0
+```
+
+---
+
+### License
+
+This command is used to aggregate and summarize software, hardware and data license information included in the SBOM. It also displays license usage policies for resources based upon concluded by SPDX license identifier, license family or logical license expressions as defined in he current policy file (i.e., `license.json`).
+
+The `license` command supports the following subcommands:
+
+- [list](#license-list-subcommand) - list or create a summarized report of licenses found in input SBOM.
+  - [list with --summary flag](#license-list---summary-flag) - As full license information can be very large, a summary view is often most useful.
+- [policy](#license-policy-subcommand) - list user configured license policies by SPDX license ID, family name and other filters.
+
+---
+
+### License `list` subcommand
+
+The `list` subcommand produces JSON output which contains an array of CycloneDX `LicenseChoice` data objects found in the BOM input file without component association.  `LicenseChoice` data, in general, may provide license information using registered SPDX IDs, license expressions (of SPDX IDs) or license names (not necessarily registered by SPDX).  License data may also include base64-encoded license or legal text that was used to determine a license's SPDX ID or name.
+
+#### License list supported formats
+
+This command supports the `--format` flag with any of the following values:
+
+- `json` (default), `csv`, `md`
+  - using the `--summary` flag: `txt` (default), `csv`, `md`
+
+#### License list result sorting
+
+- Results are not sorted for base `license list` subcommand.
+  - using the  `--summary` flag: results are sorted (ascending) by license key which can be one of license `id` (SPDX ID), `name` or `expression`.
+
+#### License list flags
+
+##### License list `--summary` flag
+
+Use the `--summary` flag on the `license list` command to produce a summary report in `txt` (default) format as well as policy determination based upon the `license.json` declarations.
+
+#### License list examples
+
+##### Example: license list JSON
+
+This example shows a few entries of the JSON output that exhibit the three types of license data described above:
+
+```bash
+./sbom-utility license list -i examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json --format json -q
+```
+
+```json
+[
+    {
+        "license": {
+            "$comment": "by license `id",
+            "id": "MIT",
+            "name": "",
+            "url": ""
+        }
+    },
+    {
+        "license": {
+            "$comment": "by license `expression",
+            "id": "",
+            "name": "",
+            "url": ""
+        },
+        "expression": "Apache-2.0 AND (MIT OR GPL-2.0-only)"
+    },
+    {
+        "license": {
+            "$comment": "by license `name` with full license encoding",
+            "id": "",
+            "name": "Apache 2",
+            "text": {
+                "contentType": "text/plain",
+                "encoding": "base64",
+                "content": "CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIEFwYWNoZSBMaWNlbnNlCiAgICAgICAgICAgICAgICAgICAgICAgICAgIFZlcnNpb24 ..."
+            },
+            "url": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+        }
+    },
+    ...
+]
+```
+
+###### Example: license list `--summary`
+
+This example shows the default text output from using the summary flag:
+
+```bash
+./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary -q
+```
+
+```bash
+usage-policy  license-type  license                               resource-name      bom-ref                             bom-location
+------------  ------------  -------                               -------------      -------                             ------------
+needs-review  id            ADSL                                  Foo                service:example.com/myservices/foo  services
+needs-review  name          AGPL                                  Library J          pkg:lib/libraryJ@1.0.0              components
+allow         name          Apache                                Library B          pkg:lib/libraryB@1.0.0              components
+allow         id            Apache-1.0                            Library E          pkg:lib/libraryE@1.0.0              components
+allow         id            Apache-2.0                            N/A                N/A                                 metadata.licenses
+allow         id            Apache-2.0                            Library A          pkg:lib/libraryA@1.0.0              components
+allow         id            Apache-2.0                            Library F          pkg:lib/libraryF@1.0.0              components
+allow         expression    Apache-2.0 AND (MIT OR BSD-2-Clause)  Library B          pkg:lib/libraryB@1.0.0              components
+allow         name          BSD                                   Library J          pkg:lib/libraryJ@1.0.0              components
+deny          name          CC-BY-NC                              Library G          pkg:lib/libraryG@1.0.0              components
+needs-review  name          GPL                                   Library H          pkg:lib/libraryH@1.0.0              components
+needs-review  id            GPL-2.0-only                          Library C          pkg:lib/libraryC@1.0.0              components
+needs-review  id            GPL-3.0-only                          Library D          pkg:lib/libraryD@1.0.0              components
+allow         id            MIT                                   ACME Application   pkg:app/sample@1.0.0                metadata.component
+allow         id            MIT                                   Library A          pkg:lib/libraryA@1.0.0              components
+UNDEFINED     invalid       NOASSERTION                           Library NoLicense  pkg:lib/libraryNoLicense@1.0.0      components
+UNDEFINED     invalid       NOASSERTION                           Bar                service:example.com/myservices/bar  services
+needs-review  name          UFL                                   ACME Application   pkg:app/sample@1.0.0                metadata.component
+```
+
+- **Notes**
+  - **Usage policy** column values are derived from the `license.json` policy configuration file.
+    - A `usage policy` value of `UNDEFINED` indicates that `license.json` provided no entry that matched the declared license (`id` or `name`) in the SBOM.
+  - **License expressions** (e.g., `(MIT or GPL-2.0)`) with one term resolving to `UNDEFINED` and the the other term having a concrete policy will resolve to the "optimistic" policy for `OR` expressions and the "pessimistic" policy for `AND` expressions.  In addition, a warning of this resolution is emitted.
+
+###### Example: license list summary with `--where` filter
+
+The list command results can be filtered using the `--where` flag using the column names in the report. These include `usage-policy`, `license-type`, `license`, `resource-name`, `bom-ref` and `bom-location`.
+
+The following example shows filtering of component licenses using the `license-type` column where the license was described as a `name` value:
+
+```bash
+./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --where license-type=name -q
+```
+
+```bash
+usage-policy  license-type  license   resource-name     bom-ref                 bom-location
+------------  ------------  -------   -------------     -------                 ------------
+needs-review  name          AGPL      Library J         pkg:lib/libraryJ@1.0.0  components
+allow         name          Apache    Library B         pkg:lib/libraryB@1.0.0  components
+allow         name          BSD       Library J         pkg:lib/libraryJ@1.0.0  components
+deny          name          CC-BY-NC  Library G         pkg:lib/libraryG@1.0.0  components
+needs-review  name          GPL       Library H         pkg:lib/libraryH@1.0.0  components
+needs-review  name          UFL       ACME Application  pkg:app/sample@1.0.0    metadata.component
+```
+
+In another example, the list is filtered by the `usage-policy` where the value is `needs-review`:
+
+```bash
+./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --where usage-policy=needs-review -q
+```
+
+```bash
+usage-policy  license-type  license       resource-name     bom-ref                             bom-location
+------------  ------------  -------       -------------     -------                             ------------
+needs-review  id            ADSL          Foo               service:example.com/myservices/foo  services
+needs-review  name          AGPL          Library J         pkg:lib/libraryJ@1.0.0              components
+needs-review  name          GPL           Library H         pkg:lib/libraryH@1.0.0              components
+needs-review  id            GPL-2.0-only  Library C         pkg:lib/libraryC@1.0.0              components
+needs-review  id            GPL-3.0-only  Library D         pkg:lib/libraryD@1.0.0              components
+needs-review  name          UFL           ACME Application  pkg:app/sample@1.0.0                metadata.component
+```
+
+---
+
+### License `policy` subcommand
+
+To view a report listing the contents of the current policy file (i.e., [`license.json`](https://github.com/CycloneDX/sbom-utility/blob/main/license.json)) which contains an encoding of known software and data licenses by SPDX ID and license family along with a configurable usage policy (i.e., `"allow"`, `"deny"` or `"needs-review"`).
+
+#### License policy supported formats
+
+This command supports the `--format` flag with any of the following values:
+
+- `txt` (default), `csv`, `md`
+
+#### License policy result sorting
+
+- Results are sorted by license policy `family`.
+
+#### License policy flags
+
+##### list `--summary` flag
+
+Use the `--summary` flag on the `license policy list` command to produce a summary report with a reduced set of column data (i.e., it includes only the following columns:  `usage-policy`, `family`, `id`, `name`, `oci` (approved) `fsf` (approved), `deprecated`, and SPDX `reference` URL).
+
+##### list `--wrap` flag
+
+Use the `--wrap` flag to toggle the wrapping of text within columns of the license policy report (`txt` format only) output using the values `true` or `false`. The default value is `false`.
+
+#### License policy examples
+
+##### Example: license policy
+
+```bash
+./sbom-utility license policy -q
+```
+
+```bash
+usage-policy  family    id            name                                osi    fsf    deprecated  reference                                    aliases                      annotations                  notes
+------------  ------    --            ----                                ---    ---    ----------  ---------                                    -------                      -----------                  -----
+allow         0BSD      0BSD          BSD Zero Clause License             true   false  false       https://spdx.org/licenses/0BSD.html          Free Public License 1.0.0    APPROVED                     none
+needs-review  ADSL      ADSL          Amazon Digital Services License     false  false  false       https://spdx.org/licenses/ADSL.html          none                         NEEDS-APPROVAL               none
+allow         AFL       AFL-3.0       Academic Free License v3.0          true   true   false       https://spdx.org/licenses/AFL-3.0.html       none                         APPROVED                     none
+needs-review  AGPL      AGPL-1.0      Affero General Public License v1.0  false  false  true        https://spdx.org/licenses/AGPL-1.0.html      none                         NEEDS-APPROVAL,AGPL-WARNING  none
+allow         Adobe     Adobe-2006    Adobe Systems Incorporated CLA      false  false  false       https://spdx.org/licenses/Adobe-2006.html    none                         APPROVED                     none
+allow         Apache    Apache-2.0    Apache License 2.0                  true   true   false       https://spdx.org/licenses/Apache-2.0.html    Apache License, Version 2.0  APPROVED                     none
+allow         Artistic  Artistic-1.0  Artistic License 1.0                true   false  false       https://spdx.org/licenses/Artistic-1.0.html  none                         APPROVED                     none
+...
+```
+
+###### Example: policy with `--summary` flag
+
+We can also apply the `--summary` flag to get a reduced set of columns that includes only the `usage-policy` along with the essential SPDX license information (e.g., no annotations or notes).
+
+```bash
+./sbom-utility license policy --summary -q
+```
+
+```bash
+usage-policy  family    id            name                                osi     fsf     deprecated  reference
+------------  ------    --            ----                                ---     ---     ----------  ---------
+allow         0BSD      0BSD          BSD Zero Clause License             true    false   false       https://spdx.org/licenses/0BSD.html
+needs-review  ADSL      ADSL          Amazon Digital Services License     false   false   false       https://spdx.org/licenses/ADSL.html
+allow         AFL       AFL-3.0       Academic Free License v3.0          true    true    false       https://spdx.org/licenses/AFL-3.0.html
+needs-review  AGPL      AGPL-1.0      Affero General Public License v1.0  false   false   true        https://spdx.org/licenses/AGPL-1.0.html
+allow         Adobe     Adobe-2006    Adobe Systems Incorporated CLA      false   false   false       https://spdx.org/licenses/Adobe-2006.html
+allow         Apache    Apache-2.0    Apache License 2.0                  true    true    false       https://spdx.org/licenses/Apache-2.0.html
+allow         Artistic  Artistic-1.0  Artistic License 1.0                true    true    false       https://spdx.org/licenses/Artistic-2.0.html
+...
+```
+
+###### Example: policy with `--where` filter
+
+The following example shows filtering of  license policies using the `id` column:
+
+```bash
+./sbom-utility license policy --where id=Apache
+```
+
+```bash
+usage-policy  family  id          name                osi     fsf     deprecated  reference                                  aliases         annotations  notes
+------------  ------  --          ----                ---     ---     ----------  ---------                                  -------         -----------  -----
+allow         Apache  Apache-1.0  Apache v1.0         false   true    false       https://spdx.org/licenses/Apache-1.0.html  none            APPROVED     none
+allow         Apache  Apache-1.1  Apache v1.1         true    true    false       https://spdx.org/licenses/Apache-1.1.html  none            APPROVED     Superseded by Apache-2.0
+allow         Apache  Apache-2.0  Apache License 2.0  true    true    false       https://spdx.org/licenses/Apache-2.0.html  Apache License  APPROVED     none
+
+```
+
+###### Example: policy with `--wrap` flag
+
+```bash
+./sbom-utility license policy --wrap=true -q
+```
+
+```bash
+usage-policy  family    id             name                          osi     fsf     deprecated  reference                                     aliases                           annotations             notes
+------------  ------    --             ----                          ---     ---     ----------  ---------                                     -------                           -----------             -----
+allow         0BSD      0BSD           BSD Zero Clause Lice (20/23)  true    false   false       https://spdx.org/licenses/0BSD.html           Free Public License 1.0. (24/25)  APPROVED                none
+needs-review  ADSL      ADSL           Amazon Digital Servi (20/31)  false   false   false       https://spdx.org/licenses/ADSL.html                                             NEEDS-APPROVAL          none
+allow         AFL       AFL-3.0        Academic Free Licens (20/26)  true    true    false       https://spdx.org/licenses/AFL-3.0.ht (36/38)                                    APPROVED                none
+needs-review  AGPL      AGPL-1.0       Affero General Publi (20/34)  false   false   true        https://spdx.org/licenses/AGPL-1.0.h (36/39)                                    NEEDS-APPROVAL          none
+                                                                                                                                                                                 AGPL-WARNING
+needs-review  APSL      APSL-2.0       Apple Public Source  (20/31)  true    true    false       https://spdx.org/licenses/APSL-2.0.h (36/39)                                    NEEDS-APPROVAL          none
+allow         Adobe     Adobe-2006     Adobe Systems Incorp (20/56)  false   false   false       https://spdx.org/licenses/Adobe-2006 (36/41)                                    APPROVED                none
+allow         Apache    Apache-2.0     Apache License 2.0            true    true    false       https://spdx.org/licenses/Apache-2.0 (36/41)  Apache License, Version  (24/27)  APPROVED                none
+allow         Artistic  Artistic-2.0   Artistic License 2.0          true    true    false       https://spdx.org/licenses/Artistic-2 (36/43)                                    APPROVED                none
+...
+```
+
+#### License policy notes
+
+- Currently, the default `license.json` file, used to derive the `usage-policy` data, does not contain entries for the entire set of SPDX 3.2 license templates.
+  - An issue [12](https://github.com/CycloneDX/sbom-utility/issues/12) is open to add parity.
+- Annotations (tags) and notes can be defined within the `license.json` file and one or more assigned each license entry.
+<!-- - Column data is, by default, truncated in `txt` format views only. In these cases, the number of characters shown out of the total available will be displayed at the point of truncation (e.g., seeing `(24/26)` in a column would indicate 24 out of 26 characters were displayed). -->
+- For backwards compatibility, the `--where` filter supports the key `spdx-id` as an alias for `id`.
+
+---
+
 ### Resource
 
-The `resource` command is geared toward inspecting various resources types and their information from SBOMs against future maturity models being developed as part of the [OWASP Software Component Verification Standard (SCVS)](https://owasp.org/www-project-software-component-verification-standard/).  In the SCVS model, a "resource" is  the parent classification for software (components), services, Machine Learning (ML) models, data, hardware, tools and more.
+The `resource` command is geared toward inspecting various resources types and their information from SBOMs against future maturity models being developed as part of the [OWASP Software Component Verification Standard (SCVS)](https://owasp.org/www-project-software-component-verification-standard/).  In the SCVS model, a "resource" is the parent classification for software (components), services, Machine Learning (ML) models, data, hardware, tools and more.
 
 Primarily, the command is used to generate lists of resources, by type, that are included in a CycloneDX SBOM by invoking `resource list`.
 
@@ -1427,686 +2107,6 @@ If you wish to have the new schema *embedded in the executable*, simply add it t
 
 ---
 
-### Trim
-
-This command is able to "trim" one or more JSON keys (fields) from specified JSON BOM documents effectively "pruning" the JSON document.  This functionality helps consumers of large-sized BOMs that need to analyze specific types of data in large BOMs in reducing the BOM data to just what is needed for their use cases or needs.
-
-#### Trim supported output formats
-
-This command is used to output, using the [`--output-file` flag](#output-flag), a "trimmed" BOM in JSON format.
-
-- `json` (default)
-
-#### Trim flags
-
-Trim operates on a JSON BOM input file (see [`--input-file` flag](#input-flag)) and produces a trimmed JSON BOM output file using the following flags:
-
-##### Trim `--keys` flag
-
-A comma-separated list of JSON map keys. Similar to the [query command's `--select` flag](#query---select-flag) syntax.
-
-##### Trim `--from` flag
-
-A comma-separated list of JSON document paths using the same syntax as the [query command's `--from` flag](#query---from-flag).
-
-##### Trim `--normalize` flag
-
-A flag that normalizes the BOM data after trimming and prior to output.
-
-This flag has custom code that sorts all components, services, licenses, vulnerabilities, properties, external references, hashes and *most* other BOM data using custom comparators.
-
-Each comparator uses `required` fields and other identifying fields to create *"composite keys"* for each unique data structure.
-
-#### Trim examples
-
-The original BOM used for these examples can be found here:
-
-- [test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json](test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json)
-
-##### Example: Trim `properties` from entire JSON BOM
-
-Validating the "juice shop" SBOM (CycloneDX 1.2) example provided in this repository.
-
-```bash
-./sbom-utility trim -i ./sbom-utility trim -i test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json --keys=properties
-```
-
-Original BOM with `properties`:
-
-```json
-{
-  "bomFormat": "CycloneDX",
-  "specVersion": "1.5",
-  "version": 1,
-  "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
-  "components": [
-    {
-      "type": "library",
-      "bom-ref": "pkg:npm/sample@2.0.0",
-      "purl": "pkg:npm/sample@2.0.0",
-      "name": "sample",
-      "version": "2.0.0",
-      "description": "Node.js Sampler package",
-      "properties": [
-        {
-          "name": "foo",
-          "value": "bar"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "bom-ref": "pkg:npm/body-parser@1.19.0",
-      "purl": "pkg:npm/body-parser@1.19.0",
-      "name": "body-parser",
-      "version": "1.19.0",
-      "description": "Node.js body parsing middleware",
-      "hashes": [
-        {
-          "alg": "SHA-1",
-          "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
-        }
-      ]
-    }
-  ],
-  "properties": [
-    {
-      "name": "abc",
-      "value": "123"
-    }
-  ]
-}
-```
-
-Output BOM results without `properties`:
-
-```json
-{
-    "bomFormat": "CycloneDX",
-    "specVersion": "1.5",
-    "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
-    "version": 1,
-    "components": [
-        {
-            "type": "library",
-            "bom-ref": "pkg:npm/sample@2.0.0",
-            "name": "sample",
-            "version": "2.0.0",
-            "description": "Node.js Sampler package",
-            "purl": "pkg:npm/sample@2.0.0"
-        },
-        {
-            "type": "library",
-            "bom-ref": "pkg:npm/body-parser@1.19.0",
-            "name": "body-parser",
-            "version": "1.19.0",
-            "description": "Node.js body parsing middleware",
-            "hashes": [
-                {
-                    "alg": "SHA-1",
-                    "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
-                }
-            ],
-            "purl": "pkg:npm/body-parser@1.19.0"
-        }
-    ]
-}
-```
-
-##### Example: Trim `name` and `description` from entire JSON BOM
-
-```bash
-./sbom-utility trim -i test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json --keys=name,description -q
-```
-
-Output BOM results without `name` or `description`:
-
-```json
-{
-    "bomFormat": "CycloneDX",
-    "specVersion": "1.5",
-    "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
-    "version": 1,
-    "components": [
-        {
-            "type": "library",
-            "bom-ref": "pkg:npm/sample@2.0.0",
-            "version": "2.0.0",
-            "purl": "pkg:npm/sample@2.0.0",
-            "properties": [
-                {
-                    "value": "bar"
-                }
-            ]
-        },
-        {
-            "type": "library",
-            "bom-ref": "pkg:npm/body-parser@1.19.0",
-            "version": "1.19.0",
-            "hashes": [
-                {
-                    "alg": "SHA-1",
-                    "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
-                }
-            ],
-            "purl": "pkg:npm/body-parser@1.19.0"
-        }
-    ],
-    "properties": [
-        {
-            "value": "123"
-        }
-    ]
-}
-```
-
-##### Example: Trim `properties` from only `components` path
-
-```bash
-./sbom-utility trim -i test/trim/trim-cdx-1-5-sample-small-components-only.sbom.json --keys=properties --from components -q
-```
-
-Output BOM results with `properties` removed from all `components`:
-
-```json
-{
-    "bomFormat": "CycloneDX",
-    "specVersion": "1.5",
-    "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7f9",
-    "version": 1,
-    "components": [
-        {
-            "type": "library",
-            "bom-ref": "pkg:npm/sample@2.0.0",
-            "name": "sample",
-            "version": "2.0.0",
-            "description": "Node.js Sampler package",
-            "purl": "pkg:npm/sample@2.0.0"
-        },
-        {
-            "type": "library",
-            "bom-ref": "pkg:npm/body-parser@1.19.0",
-            "name": "body-parser",
-            "version": "1.19.0",
-            "description": "Node.js body parsing middleware",
-            "hashes": [
-                {
-                    "alg": "SHA-1",
-                    "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
-                }
-            ],
-            "purl": "pkg:npm/body-parser@1.19.0"
-        }
-    ],
-    "properties": [
-        {
-            "name": "abc",
-            "value": "123"
-        }
-    ]
-}
-```
-
----
-
-##### Example: Trim `bom-ref` and normalize output
-
-```bash
-./sbom-utility trim -i test/trim/trim-cdx-1-5-sample-components-normalize.sbom.json --keys="bom-ref" --normalize -q
-```
-
-**Note** If you do not want to remove any keys and simply normalize output, set keys to an empty string: `--keys=""`.
-
-Use the trim command to remove all `bom-ref` fields and normalize output:
-
-```json
-{
-  "bomFormat": "CycloneDX",
-  "specVersion": "1.5",
-  "components": [
-    {
-      "type": "library",
-      "bom-ref": "pkg:npm/sample@2.0.0",
-      "purl": "pkg:npm/sample@2.0.0",
-      "name": "sample",
-      "version": "2.0.0",
-      "licenses": [
-        {
-          "license": {
-            "id": "GPL-2.0-or-later"
-          }
-        },
-        {
-          "license": {
-            "id": "LGPL-2.0-or-later"
-          }
-        },
-        {
-          "license": {
-            "id": "GPL-2.0-only"
-          }
-        }
-      ],
-      "properties": [
-        {
-          "name": "moo",
-          "value": "cow"
-        },
-        {
-          "name": "foo",
-          "value": "bar"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "bom-ref": "pkg:npm/body-parser@1.19.0",
-      "purl": "pkg:npm/body-parser@1.19.0",
-      "name": "body-parser",
-      "version": "1.19.0",
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
-        },
-        {
-          "alg": "SHA-1",
-          "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "id": "MIT"
-          }
-        },
-        {
-          "license": {
-            "id": "Apache-2.0"
-          }
-        }
-      ],
-      "externalReferences": [
-        {
-          "type": "website",
-          "url": "https://example.com/website"
-        },
-        {
-          "type": "support",
-          "url": "https://example.com/support"
-        }
-      ]
-    }
-  ]
-}
-```
-
-Trimmed, normalized output:
-
-```json
-{
-  "bomFormat": "CycloneDX",
-  "specVersion": "1.5",
-  "components": [
-    {
-      "type": "library",
-      "name": "body-parser",
-      "version": "1.19.0",
-      "hashes": [
-        {
-          "alg": "SHA-1",
-          "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
-        },
-        {
-          "alg": "SHA-256",
-          "content": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "id": "Apache-2.0"
-          }
-        },
-        {
-          "license": {
-            "id": "MIT"
-          }
-        }
-      ],
-      "purl": "pkg:npm/body-parser@1.19.0",
-      "externalReferences": [
-        {
-          "type": "support",
-          "url": "https://example.com/support"
-        },
-        {
-          "type": "website",
-          "url": "https://example.com/website"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "sample",
-      "version": "2.0.0",
-      "licenses": [
-        {
-          "license": {
-            "id": "GPL-2.0-only"
-          }
-        },
-        {
-          "license": {
-            "id": "GPL-2.0-or-later"
-          }
-        },
-        {
-          "license": {
-            "id": "LGPL-2.0-or-later"
-          }
-        }
-      ],
-      "purl": "pkg:npm/sample@2.0.0",
-      "properties": [
-        {
-          "name": "foo",
-          "value": "bar"
-        },
-        {
-          "name": "moo",
-          "value": "cow"
-        }
-      ]
-    }
-  ]
-}
-```
-
-### Validate
-
-This command will parse standardized SBOMs and validate it against its declared format and version (e.g., SPDX 2.2, CycloneDX 1.4). Custom  variants of standard JSON schemas can be used for validation by supplying the `--variant` name as a flag. Explicit JSON schemas can be specified using the `--force` flag.
-
-#### Validating using supported schemas
-
-Use the [schema](#schema) command to list supported schemas formats, versions and variants.
-
-#### Validating using "custom" schemas
-
-Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file. See [adding schemas](#adding-schemas).
-
-- **"Customized" schema** variants, perhaps derived from standard BOM schemas, can be used for validation using the `--variant` flag (e.g., industry or company-specific schemas).
-- **Overriding default schema** - You can override an BOM's declared BOM version using the `--force` flag (e.g., verify a BOM against a newer specification version).
-
-#### Validate flags
-
-The following flags can be used to improve performance when formatting error output results:
-
-##### `--error-limit` flag
-
-Use the `--error-limit x` (default: `10`) flag to reduce the formatted error result output to the first `x` errors.  By default, only the first 10 errors are output with an informational messaging indicating `x/y` errors were shown.
-
-##### `--error-value` flag
-
-Use the `--error-value=true|false` (default: `true`) flag to reduce the formatted error result output by not showing the `value` field which shows detailed information about the failing data in the BOM.
-
-##### `--colorize` flag
-
-Use the `--colorize=true|false` (default: `false`) flag to add/remove color formatting to error result `txt` formatted output.  By default, `txt` formatted error output is colorized to help with human readability; for automated use, it can be turned off.
-
-#### Validate Examples
-
-##### Example: Validate using inferred format and schema
-
-Validating the "juice shop" SBOM (CycloneDX 1.2) example provided in this repository.
-
-```bash
-./sbom-utility validate -i examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json
-```
-
-```bash
-[INFO] Loading (embedded) default schema config file: `config.json`...
-[INFO] Loading (embedded) default license policy file: `license.json`...
-[INFO] Attempting to load and unmarshal data from: `examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json`...
-[INFO] Successfully unmarshalled data from: `examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json`
-[INFO] Determining file's BOM format and version...
-[INFO] Determined BOM format, version (variant): `CycloneDX`, `1.2` (latest)
-[INFO] Matching BOM schema (for validation): schema/cyclonedx/1.2/bom-1.2.schema.json
-[INFO] Loading schema `schema/cyclonedx/1.2/bom-1.2.schema.json`...
-[INFO] Schema `schema/cyclonedx/1.2/bom-1.2.schema.json` loaded.
-[INFO] Validating `examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json`...
-[INFO] BOM valid against JSON schema: `true`
-```
-
-You can also verify the [exit code](#exit-codes) from the validate command:
-
-```bash
-echo $?
-```
-
-```bash
-0  // no error (valid)
-```
-
-#### Example: Validate using "custom" schema variants
-
-The validation command will use the declared format and version found within the SBOM JSON file itself to lookup the default (latest) matching schema version (as declared in`config.json`; however, if variants of that same schema (same format and version) are declared, they can be requested via the `--variant` command line flag:
-
-```bash
-./sbom-utility validate -i test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json --variant custom
-```
-
-If you run the sample command above, you would see several "custom" schema errors resulting in an invalid SBOM determination (i.e., `exit status 2`):
-
-```text
-[INFO] Loading (embedded) default schema config file: `config.json`...
-[INFO] Loading (embedded) default license policy file: `license.json`...
-[INFO] Attempting to load and unmarshal data from: `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`...
-[INFO] Successfully unmarshalled data from: `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`
-[INFO] Determining file's BOM format and version...
-[INFO] Determined BOM format, version (variant): `CycloneDX`, `1.4` custom
-[INFO] Matching BOM schema (for validation): schema/test/bom-1.4-custom.schema.json
-[INFO] Loading schema `schema/test/bom-1.4-custom.schema.json`...
-[INFO] Schema `schema/test/bom-1.4-custom.schema.json` loaded.
-[INFO] Validating `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`...
-[INFO] BOM valid against JSON schema: `false`
-[INFO] (3) schema errors detected.
-[INFO] Formatting error results (`txt` format)...
-1. {
-        "type": "contains",
-        "field": "metadata.properties",
-        "context": "(root).metadata.properties",
-        "description": "At least one of the items must match",
-        "value": [
-            {
-                "name": "urn:example.com:disclaimer",
-                "value": "This SBOM is current as of the date it was generated."
-            },
-            {
-                "name": "urn:example.com:classification",
-                "value": "This SBOM is Confidential Information. Do not distribute."
-            }
-        ]
-    }
-2. {
-        "type": "const",
-        "field": "metadata.properties.0.value",
-        "context": "(root).metadata.properties.0.value",
-        "description": "metadata.properties.0.value does not match: \"This SBOM is current as of the date it was generated and is subject to change.\"",
-        "value": "This SBOM is current as of the date it was generated."
-    }
-3. {
-        "type": "number_all_of",
-        "field": "metadata.properties",
-        "context": "(root).metadata.properties",
-        "description": "Must validate all the schemas (allOf)",
-        "value": [
-            {
-                "name": "urn:example.com:disclaimer",
-                "value": "This SBOM is current as of the date it was generated."
-            },
-            {
-                "name": "urn:example.com:classification",
-                "value": "This SBOM is Confidential Information. Do not distribute."
-            }
-        ]
-    }
-[ERROR] invalid SBOM: schema errors found (test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json)
-[INFO] document `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`: valid=[false]
-```
-
-confirming the exit code:
-
-```bash
-echo $?
-```
-
-```bash
-2 // SBOM error
-```
-
-##### Why validation failed
-
-The output shows a first schema error indicating the failing JSON object; in this case,
-
-- the CycloneDX `metadata.properties` field, which is a list of `property` objects.
-- Found that a property with a `name` field with the value  `"urn:example.com:disclaimer"` had an incorrect `value`.
-  - the `value` field SHOULD have had a constant value of `"This SBOM is current as of the date it was generated and is subject to change."` (as was required by the custom schema's regex).
-  - However, it was found to have only a partial match of `"This SBOM is current as of the date it was generated."`.
-
-##### Details of the schema error
-
-Use the `--debug` or `-d` flag to see all schema error details:
-
-```bash
-./sbom-utility validate -i test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json --variant custom -d
-```
-
-The details include the full context of the failing `metadata.properties` object which also includes a `"urn:example.com:classification"` property:
-
-```bash
-3. {
-        "type": "number_all_of",
-        "field": "metadata.properties",
-        "context": "(root).metadata.properties",
-        "description": "Must validate all the schemas (allOf)",
-        "value": [
-            {
-                "name": "urn:example.com:disclaimer",
-                "value": "This SBOM is current as of the date it was generated."
-            },
-            {
-                "name": "urn:example.com:classification",
-                "value": "This SBOM is Confidential Information. Do not distribute."
-            }
-        ]
-    }
-```
-
-#### Example: Validate using "JSON" format
-
-The JSON format will provide an `array` of schema error results that can be post-processed as part of validation toolchain.
-
-```bash
-./sbom-utility validate -i test/validation/cdx-1-4-validate-err-components-unique-items-1.json --format json -q
-```
-
-```json
-[
-    {
-        "type": "unique",
-        "field": "components",
-        "context": "(root).components",
-        "description": "array items[1,2] must be unique",
-        "value": {
-            "type": "array",
-            "index": 1,
-            "item": {
-                "bom-ref": "pkg:npm/body-parser@1.19.0",
-                "description": "Node.js body parsing middleware",
-                "hashes": [
-                    {
-                        "alg": "SHA-1",
-                        "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
-                    }
-                ],
-                "licenses": [
-                    {
-                        "license": {
-                            "id": "MIT"
-                        }
-                    }
-                ],
-                "name": "body-parser",
-                "purl": "pkg:npm/body-parser@1.19.0",
-                "type": "library",
-                "version": "1.19.0"
-            }
-        }
-    },
-    {
-        "type": "unique",
-        "field": "components",
-        "context": "(root).components",
-        "description": "array items[2,4] must be unique",
-        "value": {
-            "type": "array",
-            "index": 2,
-            "item": {
-                "bom-ref": "pkg:npm/body-parser@1.19.0",
-                "description": "Node.js body parsing middleware",
-                "hashes": [
-                    {
-                        "alg": "SHA-1",
-                        "content": "96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
-                    }
-                ],
-                "licenses": [
-                    {
-                        "license": {
-                            "id": "MIT"
-                        }
-                    }
-                ],
-                "name": "body-parser",
-                "purl": "pkg:npm/body-parser@1.19.0",
-                "type": "library",
-                "version": "1.19.0"
-            }
-        }
-    }
-]
-```
-
-##### Reducing output size using `error-value=false` flag
-
-In many cases, BOMs may have many errors and having the `value` information details included can be too verbose and lead to large output files to inspect.  In those cases, simply set the `error-value` flag to `false`.
-
-Rerunning the same command with this flag set to false yields a reduced set of information.
-
-```bash
-./sbom-utility validate -i test/validation/cdx-1-4-validate-err-components-unique-items-1.json --format json --error-value=false -q
-```
-
-```json
-[
-    {
-        "type": "unique",
-        "field": "components",
-        "context": "(root).components",
-        "description": "array items[1,2] must be unique"
-    },
-    {
-        "type": "unique",
-        "field": "components",
-        "context": "(root).components",
-        "description": "array items[2,4] must be unique"
-    }
-]
-```
-
----
-
 ### Vulnerability
 
 This command will extract basic vulnerability report data from an SBOM that has a "vulnerabilities" list or from a standalone VEX in CycloneDX format. It includes the ability to filter reports data by applying regex to any of the named column data.
@@ -2182,7 +2182,7 @@ CVE-2020-25649           611      CVSSv31: 7.5 (high), CVSSv31: 8.2 (high), CVSS
 
 ---
 
-#### Completion
+### Completion
 
 This command will generate command-line completion scripts, for the this utility, customized for various supported shells.
 
