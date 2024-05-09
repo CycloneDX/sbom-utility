@@ -315,7 +315,7 @@ See each command's section for contextual examples of the `--where` flag filter 
 
 ### Validate
 
-This command will parse standardized SBOMs and validate it against its declared format and version (e.g., SPDX 2.2, CycloneDX 1.4). Custom  variants of standard JSON schemas can be used for validation by supplying the `--variant` name as a flag. Explicit JSON schemas can be specified using the `--force` flag.
+This command will parse standardized SBOMs and validate it against its declared format and version (e.g., SPDX 2.3, CycloneDX 1.6). Custom  variants of standard JSON schemas can be used for validation by supplying the `--variant` name as a flag. Explicit JSON schemas can be specified using the `--force` flag.
 
 #### Validating using supported schemas
 
@@ -1558,8 +1558,10 @@ In this example, the `--from` clause references the top-level `metadata.supplier
 In this example, the `--from` clause references the singleton JSON object `component` found under the top-level `metadata` object. It then reduces the resultant JSON object to only return the `name` and `value` fields and their values as requested on the `--select` clause.
 
 ```bash
-./sbom-utility query --select name,version --from metadata.component -i examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json -q
+./sbom-utility query --select name,version --from metadata.component -i examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json --indent 2 -q
 ```
+
+The result, which also uses the `--indent 2` flag:
 
 ```json
 {
@@ -1930,7 +1932,7 @@ allow         Artistic  Artistic-1.0  Artistic License 1.0                true  
 The following example shows filtering of  license policies using the `id` column:
 
 ```bash
-./sbom-utility license policy --where id=Apache
+./sbom-utility license policy --where id=Apache -q
 ```
 
 ```bash
@@ -2573,8 +2575,13 @@ For local development, you may choose to make a release on your machine using th
 make release
 ```
 
+After all builds are done, the binaries and config. files can be verified to be in the target `release` directory:
+
 ```bash
 ls release
+```
+
+```bash
 total 131680
 drwxr-xr-x   8 User1  staff       256 Jan 27 14:43 .
 drwxr-xr-x  27 User1  staff       864 Jan 27 14:43 ..
