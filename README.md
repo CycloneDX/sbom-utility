@@ -16,7 +16,9 @@ In addition, the utility features "report" commands that can easily *extract*, *
 
 > **Note**: *This utility supports all CycloneDX BOM variants, such as Software (**SBOM**), Hardware (**HBOM**), Manufacturing (**MBOM**), Machine Learning and AI (**MLBOM**), Cryptographic (**CBOM**), etc.*
 
-## Command Overview
+---
+
+### Command Overview
 
 The following commands, which operate against input BOMs and their data, are offered by the utility:
 
@@ -116,7 +118,7 @@ Convenient links to each command:
 
 ---
 
-#### Exit codes
+### Exit codes
 
 All commands return a numeric exit code (i.e., a POSIX exit code) for use in automated processing where `0` indicates success and a non-zero value indicates failure of some kind designated by the number.
 
@@ -2282,35 +2284,35 @@ Use the `--format` flag on the to choose one of the supported output formats:
 
 ---
 
-### Design considerations
+## Design considerations
 
-#### Memory safety
+### Memory safety
 
 The utility itself is written in `Go` to advantage the language's built-in typing enforcement and memory safe features and its ability to be compiled for a wide range of target platforms and architectures.
 
-#### Consistent output
+### Consistent output
 
 The utility also is designed to produce output formats (e.g., JSON) and handle exit codes consistently to make it immediately useful standalone or as part of automated Continuous Integration (CI) tool chains for downstream use or inspection.
 
-#### Security and integrity focus
+### Security and integrity focus
 
 Further commands and reports are planned that prioritize use cases that enable greater insight and analysis of the legal, security and compliance data captured in the SBOM such as component **provenance** and **signage** (e.g., verifying resource identities by hashes or fingerprints).
 
 In addition, inclusion of **Continuous Integration and Delivery (CI/CD)** or "build integrity" information around the BOM component is anticipated as part of the CycloneDX Formulation work which will require features for workflow insights.
 
-#### Functional priorities
+### Functional priorities
 
 The utility additionally prioritizes commands that help provide insight into contents of the BOM to search for and report on missing (i.e., completeness) or specific data requirements (e.g., organization or customer-specific requirements).
 
 In general, the goal of these prioritized commands is to support data verification for many of the primary BOM use cases as identified by the CycloneDX community (see https://cyclonedx.org/use-cases/).  Functional development has focused on those use cases that verify inventory (resource identity), legal compliance (e.g., license), and security analysis (e.g., vulnerability) which are foundational to any SBOM.
 
-#### Support all BOM formats
+### Support all BOM formats
 
 In the future, we envision support for additional kinds of BOMs (e.g., Hardware (HBOM), Machine Learning (MLBOM), etc.) with each again having different data requirements and levels of maturity which will increase the need for domain-specific validation.  Specifically, this utility intends to support the work of the [OWASP Software Component Verification Standard (SCVS)](https://owasp.org/www-project-software-component-verification-standard/) which is defining a BOM Maturity Model (BMM).
 
 ---
 
-### Development
+## Development
 
 The following development-oriented topics are included in this section:
 
@@ -2321,12 +2323,12 @@ The following development-oriented topics are included in this section:
   - [Using VSCode](#vscode)
 - [Adding SBOM formats, schema versions and variants](#adding-sbom-formats-schema-versions-and-variants)
 
-#### Prerequisites
+### Prerequisites
 
 - Go v1.20.1 or higher: see [https://go.dev/doc/install](https://go.dev/doc/install)
 - `git` client: see [https://git-scm.com/downloads](https://git-scm.com/downloads)
 
-#### Building
+### Building
 
 To build an executable of the utility compatible with your local computer's architecture use the `build` target in the project's `Makefile`:
 
@@ -2351,7 +2353,7 @@ Welcome to the sbom-utility! Version `latest` (sbom-utility) (darwin/arm64)
 
 If you wish to build binaries for all supported combinations of `GOOS` and `GOARCH` values, use the `release` target (i.e., `make release`) which will produce named binaries of the form `sbom-utility-${GOOS}-${GOARCH}` under the `release` directory (e.g., `sbom-utility-darwin-amd64`).
 
-#### Running from source
+### Running from source
 
 Developers can run using the current source code in their local branch using `go run main.go`. For example:
 
@@ -2359,9 +2361,9 @@ Developers can run using the current source code in their local branch using `go
 go run main.go validate -i test/cyclonedx/cdx-1-4-mature-example-1.json
 ```
 
-#### Debugging
+### Debugging
 
-##### VSCode
+#### VSCode
 
 This project was developed using VSCode and can be seamlessly loaded as a project.
 
@@ -2395,77 +2397,9 @@ or add it globally to the `settings.json` file:
 
 **Note**: *The `showGlobalVariables` setting was only recently disabled as the default in VSCode as a stop-gap measure due to performance (loading) problems under Windows.*
 
-#### Adding SBOM formats, schema versions and variants
-
-The utility uses the [`config.json`](./config.json) file (either the default, embedded version or the equivalent provided on the command line using `--config-schema` flag) to lookup supported formats and their associated versioned JSON schema files.  To add another SBOM format simply add another entry to the `format` array in the root of the document:
-
-```json
-{
-            "canonicalName": "SPDX",
-            "propertyKeyFormat": "SPDXID",
-            "propertyKeyVersion": "spdxVersion",
-            "propertyValueFormat": "SPDXRef-DOCUMENT",
-            "schemas": [
-                {
-                   ...
-                }
-            ]
-   ...
-}
-```
-
-The value for `propertyKeyFormat` should be the exact name of key field that would appear in the JSON SBOM itself which can be used to confirm it is indeed a format match.  In addition, the corresponding value to match for that key should be declared in the `propertyValueFormat` value.
-
-The fields `canonicalName`, `propertyKeyFormat`, `propertyKeyVersion`, and `propertyValueFormat` are required. The `format` object **MUST** have at least one valid `schema` object. The `schema` object appears as follows:
-
-```json
-{
-     "version": "SPDX-2.2",
-     "file": "file://schema/spdx/2.2.1/spdx-schema.json",
-     "url": "https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json",
-     "strict": false,
-     "latest": true,
-     "variant": ""
-},
-```
-
-- Add a copy of the JSON schema file locally in the project under the structure `resources/schema/<format>/<version>/<schema filename>`.
-  - **Note** If the schema exists under the `resources` directory, it will automatically be embedded in in the executable binary when built using `go build` which includes using the project's `Makefile`.
-- Assure **only one** `schema` object entry for a given format and version has the value `latest` set to `true`.  This latest schema will be used when the SBOM being validated does not have a clear version declared **or** used with the `--force latest` flag.
-- If you have a customized or "variant" version of a schema (with the same format and version values) you wish to use for validation (e.g., a `corporate`or `staging` version with added requirements or for testing an unreleased version), you can create an entry that has the same `version` as another entry, but also declare its `variant` name *(non-empty value)*.  This value can be supplied on the commend line with the `--variant <variant name>` flag to force the validator to use it instead of the default *(empty variant value)*.
-
----
-
-### Contributing
-
-Contributions are welcome under the Apache 2.0 license.  Help is wanted in the following areas:
-
-- [TODO list](#todo-list)
-- [Priority features](#priority-features)
-
-#### TODO list
-
-The entirety of the code contains the tag "**TODO**" with comments of things that are features or improvements conceived while authoring the base functionality.  Most of these do not have active issues opened form them.
-
-Feel free to "grep" for the "TODO" tag, open an issue and/or submit a draft PR.
-
-#### Priority features
-
-An ad-hoc list of featured "TODOs" geared at making the tool more accessible, extensible and useful especially around "core" commands such as validation.
-
-- **Merge command** Support merge of two (both validated) SBOMs with de-duplication and configurable. Please note that some method of normalization prior to merge will be necessary.
-- **Remote Schema loading** Support using SBOM schema files that are remotely hosted  (network accessible) from known, trusted source locations (e.g., releases of SPDX, CycloneDX specification schemas). Note that the config file has an existing `url` field per entry that can be used for this purpose.
-- **--orderby** Support ordering of query result sets by comparison of values from a specified field key.
-- **license.json** Document license policy configuration JSON schema structure and how to add entries relative to a CycloneDX `LicenseChoice` object for entries with SPDX IDs and those without.
-- **license.json** Add entries for all SPDX licenses listed in v3.21.
-  - See issue: https://github.com/CycloneDX/sbom-utility/issues/12
-- **Go libraries** Replace `go-prettyjson`, `go-multimap` libraries with alternatives that produce maintained releases.
-
----
-
 ### Supporting new SBOM formats and schema versions
 
-The utility uses the [`config.json`](./config.json) file to lookup supported BOM formats and their associated versioned schemas.  To add another SBOM format simply add another entry to the `format` array in the root of the document:
+The utility uses the [`config.json`](./config.json) file (either the default, embedded version or the equivalent provided on the command line using `--config-schema` flag) to lookup supported formats and their associated versioned JSON schema files.  To add another SBOM format simply add another entry to the `format` array in the document:
 
 ```json
 {
@@ -2506,6 +2440,33 @@ An example `schema` object for the canonical SPDX v2.3 (default, no variant) sch
   - **Note** If the schema exists under the `resources` directory, it will automatically be embedded in in the executable binary when built using `go build` which includes using the project's `Makefile`.
 - Assure **only one** `schema` object entry for a given format and version has the value `latest` set to `true`.  This latest schema will be used when the SBOM being validated does not have a clear version declared **or** used with the `--force latest` flag.
 - If you have a customized or "variant" version of a schema (with the same format and version values) you wish to use for validation (e.g., a `corporate`or `staging` version with added requirements or for testing an unreleased version), you can create an entry that has the same `version` as another entry, but also declare its `variant` name *(non-empty value)*.  This value can be supplied on the commend line with the `--variant <variant name>` flag to force the validator to use it instead of the default *(empty variant value)*.
+
+---
+
+## Contributing
+
+Contributions are welcome under the Apache 2.0 license.  Help is wanted in the following areas:
+
+- [TODO list](#todo-list)
+- [Priority features](#priority-features)
+
+#### TODO list
+
+The entirety of the code contains the tag "**TODO**" with comments of things that are features or improvements conceived while authoring the base functionality.  Most of these do not have active issues opened form them.
+
+Feel free to "grep" for the "TODO" tag, open an issue and/or submit a draft PR.
+
+#### Priority features
+
+An ad-hoc list of featured "TODOs" geared at making the tool more accessible, extensible and useful especially around "core" commands such as validation.
+
+- **Merge command** Support merge of two (both validated) SBOMs with de-duplication and configurable. Please note that some method of normalization prior to merge will be necessary.
+- **Remote Schema loading** Support using SBOM schema files that are remotely hosted  (network accessible) from known, trusted source locations (e.g., releases of SPDX, CycloneDX specification schemas). Note that the config file has an existing `url` field per entry that can be used for this purpose.
+- **--orderby** Support ordering of query result sets by comparison of values from a specified field key.
+- **license.json** Document license policy configuration JSON schema structure and how to add entries relative to a CycloneDX `LicenseChoice` object for entries with SPDX IDs and those without.
+- **license.json** Add entries for all SPDX licenses listed in v3.21.
+  - See issue: https://github.com/CycloneDX/sbom-utility/issues/12
+- **Go libraries** Replace `go-prettyjson`, `go-multimap` libraries with alternatives that produce maintained releases.
 
 ---
 
@@ -2574,7 +2535,7 @@ run an individual test within the `cmd` package:
 go test github.com/CycloneDX/sbom-utility/cmd -v -run TestValidateCdx14MinRequiredBasic
 ```
 
-##### Debugging `go test`
+#### Debugging `go test`
 
 Simply append the flags `--args --trace` or `--args --debug` to your `go test` command to enable trace or debug output for your designated test(s):
 
@@ -2594,9 +2555,9 @@ go test github.com/CycloneDX/sbom-utility/cmd -v --quiet
 
 ---
 
-#### Releasing
+## Releasing
 
-##### GitHub
+### GitHub
 
 In order to initiate the release workflow, simply go to the release page of the repository:
 
@@ -2604,7 +2565,7 @@ In order to initiate the release workflow, simply go to the release page of the 
 
 and click on the `Draft a new release` button.  Follow the instructions to create a new version tag, provide an appropriate release title and description and `publish` the release.  The GitHub release workflow will be triggered automatically.
 
-##### Local
+### Local
 
 For local development, you may choose to make a release on your machine using the `Makefile` directive `release`:
 
@@ -2631,7 +2592,7 @@ drwxr-xr-x  27 User1  staff       864 Jan 27 14:43 ..
 
 - *Please also note that the common `*.json` configuration files are also copied to the `release` directory.*
 
-##### Versioning
+### Versioning
 
 to produce a release version you can set the following flags and invoke `go build` directly:
 
