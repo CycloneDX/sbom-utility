@@ -67,12 +67,12 @@ The source archive will contain the following files under the root directory:
 - `sbom-utility` - binary executable. This is all most need for non-customized configurations.
 - `LICENSE` - the software license for the utility (i.e. Apache 2)
 - `sbom-utility-<version>.sbom.json` - a simple Software Bill-of-Materials (SBOM) for the utility
-- `custom.json` *(experimental)* - custom validation configuration file
 
-and under the `resources/config` directory:
+as well as sample configuration files:
 
 - `config.json` *(optional)* - copy of the default schema configuration file for optional customization (to be passed on the command line)
 - `license.json` *(optional)* - copy of the default license policy configuration file for optional customization (to be passed on the command line)
+- `custom.json` *(experimental, unused)* - custom validation configuration file
 
 ---
 
