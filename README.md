@@ -2,6 +2,8 @@
 [![License](https://img.shields.io/badge/CycloneDX-v1.2,1.3,1.4,1.5,1.6-darkcyan.svg)](https://opensource.org/licenses/Apache-2.0)
 [![License](https://img.shields.io/badge/SPDX-v2.1,2.2,2.3-purple.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Go Report Card](https://goreportcard.com/badge/github.com/CycloneDX/sbom-utility)](https://goreportcard.com/badge/github.com/CycloneDX/sbom-utility)
+<!--![CodeQL](https://github.com/CycloneDX/sbom-utility/actions/workflows/codeql.yml/badge.svg)-->
+![golangci-lint](https://github.com/CycloneDX/sbom-utility/actions/workflows/golangci-lint.yml/badge.svg)
 
 # sbom-utility
 
