@@ -1,12 +1,13 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![License](https://img.shields.io/badge/CycloneDX-v1.2,1.3,1.4,1.5,1.6-darkcyan.svg)](https://opensource.org/licenses/Apache-2.0)
 [![License](https://img.shields.io/badge/SPDX-v2.1,2.2,2.3-purple.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Go Report Card](https://goreportcard.com/badge/github.com/CycloneDX/sbom-utility)](https://goreportcard.com/badge/github.com/CycloneDX/sbom-utility)
 
 # sbom-utility
 
 The **`sbom-utility`** was designed to be an API platform to validate, analyze and edit **Bills-of-Materials (BOMs)**. Initially, it was created to **validate** either CycloneDX *or* SPDX-formatted BOMs against official, versioned JSON schemas as published by their respective standards communities.
 
-- *Organizations may also design and supply **"custom JSON schema"** variants to the validate command which are perhaps designed to assure additional data-compliance requirements are met.*
+- *Organizations may also design and supply **"custom JSON schema"** variants to the validate command which are perhaps designed to enforce additional data-compliance requirements.*
 
 The utility also offers commands that support analysis and editing of BOM document data including **trim**, **patch** (IETF RFC 6902) and **diff** *(experimental)*.
 
