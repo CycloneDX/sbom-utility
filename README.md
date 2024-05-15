@@ -2003,22 +2003,21 @@ Currently, all `resource list` command results are sorted by resource `type` the
 ```
 
 ```bash
-resource-type  group   name               version  description                       bom-ref
--------------  -----   ----               -------  -----------                       -------
-component              ACME Application   2.0.0    ACME sample application           pkg:app/sample@1.0.0
-component              Library A          1.0.0    Library A description             pkg:lib/libraryA@1.0.0
-component              Library C          1.0.0    Library C description.            pkg:lib/libraryC@1.0.0
-component              Library F          1.0.0    Library F description.            pkg:lib/libraryF@1.0.0
-component              Library G          1.0.0    Library G description.            pkg:lib/libraryG@1.0.0
-component              Library H          1.0.0    Library H description.            pkg:lib/libraryH@1.0.0
-component              Library NoLicense  1.0.0    Library "NoLicense" description.  pkg:lib/libraryNoLicense@1.0.0
-component      blue    Library B          1.0.0    Library B description.            pkg:lib/libraryB@1.0.0
-component      blue    Library E          1.0.0    Library E description.            pkg:lib/libraryE@1.0.0
-component      green   Library D          1.0.0    Library D description.            pkg:lib/libraryD@1.0.0
-component      green   Library J          1.0.0    Library J description.            pkg:lib/libraryJ@1.0.0
-service                Bar                         Bar service                       service:example.com/myservices/bar
-service                Foo                         Foo service                       service:example.com/myservices/foo
-
+bom-ref                             resource-type  group   name               version  description
+-------                             -------------  -----   ----               -------  -----------
+pkg:app/sample@1.0.0                component              ACME Application   2.0.0    ACME sample application
+pkg:lib/libraryA@1.0.0              component              Library A          1.0.0    Library A description
+pkg:lib/libraryC@1.0.0              component              Library C          1.0.0    Library C description.
+pkg:lib/libraryF@1.0.0              component              Library F          1.0.0    Library F description.
+pkg:lib/libraryG@1.0.0              component              Library G          1.0.0    Library G description.
+pkg:lib/libraryH@1.0.0              component              Library H          1.0.0    Library H description.
+pkg:lib/libraryNoLicense@1.0.0      component              Library NoLicense  1.0.0    Library "NoLicense" description.
+pkg:lib/libraryB@1.0.0              component      blue    Library B          1.0.0    Library B description.
+pkg:lib/libraryE@1.0.0              component      blue    Library E          1.0.0    Library E description.
+pkg:lib/libraryD@1.0.0              component      green   Library D          1.0.0    Library D description.
+pkg:lib/libraryJ@1.0.0              component      green   Library J          1.0.0    Library J description.
+service:example.com/myservices/bar  service                Bar                         Bar service
+service:example.com/myservices/foo  service                Foo                         Foo service
 ```
 
 ##### Example: resource list using `--type service`
@@ -2085,7 +2084,7 @@ This command supports the `--format` flag with any of the following values:
 ```bash
 name            variant      format     version   file                                             url
 ----            -------      ------     -------   ----                                             ---
-CycloneDX v1.6  development  CycloneDX  1.6       schema/cyclonedx/1.6/bom-1.6.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/1.6-dev/schema/bom-1.6.schema.json
+CycloneDX v1.6  (latest)     CycloneDX  1.6       schema/cyclonedx/1.6/bom-1.6.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.6.schema.json
 CycloneDX v1.5  (latest)     CycloneDX  1.5       schema/cyclonedx/1.5/bom-1.5.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.5.schema.json
 CycloneDX v1.4  (latest)     CycloneDX  1.4       schema/cyclonedx/1.4/bom-1.4.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json
 CycloneDX v1.4  custom       CycloneDX  1.4       schema/test/bom-1.4-custom.schema.json
