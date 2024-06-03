@@ -32,7 +32,6 @@ import (
 const (
 	FLAG_TRIM_FROM_PATHS = "from"
 	FLAG_TRIM_MAP_KEYS   = "keys"
-	FLAG_TRIM_NORMALIZE  = "normalize"
 )
 
 // flag help (translate)

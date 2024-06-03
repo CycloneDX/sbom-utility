@@ -197,6 +197,17 @@ func Patch(writer io.Writer, persistentFlags utils.PersistentCommandFlags, patch
 		return
 	}
 
+	// Sort slices of BOM if "sort" flag set to true
+	if persistentFlags.OutputNormalize {
+		// Sort the slices of structures
+		if document.GetCdxBom() != nil {
+			bom := document.GetCdxBom()
+			if schema.NormalizeSupported(bom) {
+				document.GetCdxBom().Normalize()
+			}
+		}
+	}
+
 	// Output the "patched" version of the Input BOM
 	format := persistentFlags.OutputFormat
 	getLogger().Infof("Writing patched BOM (`%s` format)...", format)

@@ -37,7 +37,7 @@ The following commands, which operate against input BOMs and their data, are off
 | **[license](#license)** **[`policy`](#license-policy-subcommand)** | Produces filterable listings of software and data license information and associated license usage policies as defined a `license.json` configuration file. |
 | **[resource `list`](#resource)** | Produces filterable listings of resources (i.e., components and services) declared in the BOM. |
 | **[schema `list`](#schema)** | Produces filterable listings of schema formats, versions and variants supported by the `validation` command.</br></br> **Note**: Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file (see the `schema` command's [adding schemas](#adding-schemas) section). |
-| **[vulnerability `list`](#vulnerability)** | produces filterable listings of vulnerabilities declared in the BOM (i.e., CycloneDX Vulnerability Exploitability eXchange (**VEX**)) data or independently stored CycloneDX Vulnerability Disclosure Report (**VDR**) data stored in the BOM format. |
+| **[vulnerability `list`](#vulnerability)** | Produces filterable listings of vulnerabilities declared in the BOM (i.e., CycloneDX Vulnerability Exploitability eXchange (**VEX**)) data or independently stored CycloneDX Vulnerability Disclosure Report (**VDR**) data stored in the BOM format. |
 
 > **Experimental commands**:
 *Testing, feedback and helpful suggestions and code commits are appreciated on experimental commands.*
