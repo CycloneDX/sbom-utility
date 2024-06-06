@@ -1273,13 +1273,13 @@ The patched, output BOM has the two new properties at the specified indices:
 
 ##### Patch example 4a: `--normalize` properties after patching
 
-This variant of the previous example also normalizes the output BOM arrays; in this case, normalizing the existing and added properties.
+This variant of the previous example also normalizes the output BOM arrays; in this case, normalizing the existing and added properties of the `metadata.properties` array.
 
 ```bash
 ./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-add-metadata-properties.json --normalize -q
 ```
 
-The patched and **normalized** properties appear as follows:
+The patched and **normalized** `metadata.properties` appear as follows:
 
 ```shell
 {
@@ -1309,8 +1309,6 @@ The patched and **normalized** properties appear as follows:
     }
 }
 ```
-
-```json
 
 ##### Patch example 5: "replace" BOM `version` and `timestamp`
 
