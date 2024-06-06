@@ -83,10 +83,10 @@ const (
 	FLAG_QUIET_MODE               = "quiet"
 	FLAG_QUIET_MODE_SHORT         = "q"
 	FLAG_OUTPUT_INDENT            = "indent"
+	FLAG_OUTPUT_NORMALIZE         = "normalize"
 	FLAG_LOG_OUTPUT_INDENT        = "log-indent"
 	FLAG_FILE_OUTPUT_FORMAT       = "format"
 	FLAG_COLORIZE_OUTPUT          = "colorize"
-	FLAG_OUTPUT_NORMALIZE         = "normalize"
 )
 
 const (

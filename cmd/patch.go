@@ -101,6 +101,7 @@ func initCommandPatchFlags(command *cobra.Command) (err error) {
 	command.PersistentFlags().StringVar(&utils.GlobalFlags.PatchFlags.OutputFormat, FLAG_OUTPUT_FORMAT, FORMAT_JSON,
 		MSG_FLAG_OUTPUT_FORMAT+PATCH_OUTPUT_SUPPORTED_FORMATS)
 	command.Flags().StringVarP(&utils.GlobalFlags.PatchFlags.PatchFile, FLAG_PATCH_FILE, "", "", MSG_PATCH_FILE)
+	command.PersistentFlags().BoolVar(&utils.GlobalFlags.PersistentFlags.OutputNormalize, FLAG_OUTPUT_NORMALIZE, false, MSG_FLAG_OUTPUT_NORMALIZE)
 	err = command.MarkFlagRequired(FLAG_PATCH_FILE)
 	if err != nil {
 		err = getLogger().Errorf("unable to mark flag `%s` as required: %s", FLAG_PATCH_FILE, err)
@@ -195,6 +196,17 @@ func Patch(writer io.Writer, persistentFlags utils.PersistentCommandFlags, patch
 	// during the unmarshal process.
 	if document.CdxBom, err = schema.UnMarshalDocument(document.JsonMap); err != nil {
 		return
+	}
+
+	// Sort slices of BOM if "sort" flag set to true
+	if persistentFlags.OutputNormalize {
+		// Sort the slices of structures
+		if document.GetCdxBom() != nil {
+			bom := document.GetCdxBom()
+			if schema.NormalizeSupported(bom) {
+				document.GetCdxBom().Normalize()
+			}
+		}
 	}
 
 	// Output the "patched" version of the Input BOM
