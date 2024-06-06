@@ -626,7 +626,7 @@ A comma-separated list of JSON document paths using the same syntax as the [quer
 
 A flag that normalizes the BOM data after trimming and prior to output.
 
-This flag has custom code that sorts all components, services, licenses, vulnerabilities, properties, external references, hashes and *most* other BOM data using custom comparators.
+This flag invokes custom code that sorts all components, services, licenses, vulnerabilities, properties, external references, hashes and *most* other BOM data using custom comparators.
 
 Each comparator uses `required` fields and other identifying fields to create *"composite keys"* for each unique data structure.
 
@@ -1024,17 +1024,26 @@ The patch command operates on a JSON BOM input file (see [`--input-file` flag](#
 
 The `--patch-file <filename>` flag is used to provide the relative path to the IETF RFC6902 patch file to applied to the BOM input file.
 
+##### Patch `--normalize` flag
+
+A flag that normalizes the BOM data after patching and prior to output.
+
+This flag invokes custom code that sorts all components, services, licenses, vulnerabilities, properties, external references, hashes and *most* other BOM data using custom comparators.
+
+Each comparator uses `required` fields and other identifying fields to create *"composite keys"* for each unique data structure.
+
 #### Patch examples
 
 This section contains examples of all supported patch operations (i.e., add, replace, test) including values that are primitives (i.e., `numbers`, `strings`) as well as JSON `objects` and may be indexed JSON `array` elements.
 
-- ["add" BOM `serialNumber`](#patch-example-1-add-bom-serialnumber)
-- ["add" (update) BOM `version`](#patch-example-2-add-update-bom-version)
-- ["add" `supplier` object to `metadata`](#patch-example-3-add-supplier-object-to-metadata-object)
-- ["add" `property` objects to `metadata.properties` array](#patch-example-4-add-property-objects-to-metadataproperties-array)
-- ["replace" `version` and `timestamp` values](#patch-example-5-replace-bom-version-and-timestamp)
-- ["remove" `property` from the `metadata.properties` array](#patch-example-6-remove-property-from-the-metadataproperties-array)
-- ["test" if a `property` exists in the `metadata.properties` array](#patch-example-7-test-property-exists-in-the-metadataproperties-array)
+- [Example 1: "add" BOM `serialNumber`](#patch-example-1-add-bom-serialnumber)
+- [Example 2: "add" (update) BOM `version`](#patch-example-2-add-update-bom-version)
+- [Example 3: "add" `supplier` object to `metadata`](#patch-example-3-add-supplier-object-to-metadata-object)
+- [Example 4:"add" `property` objects to `metadata.properties` array](#patch-example-4-add-property-objects-to-metadataproperties-array)
+  - [Example 4a: Normalize `metadata.properties` after patching](#patch-example-4a---normalize-properties-after-patching)
+- [Example 5: "replace" `version` and `timestamp` values](#patch-example-5-replace-bom-version-and-timestamp)
+- [Example 6: "remove" `property` from the `metadata.properties` array](#patch-example-6-remove-property-from-the-metadataproperties-array)
+- [Example 7: "test" if a `property` exists in the `metadata.properties` array](#patch-example-7-test-property-exists-in-the-metadataproperties-array)
 
 ##### Patch example 1: "add" BOM `serialNumber`
 
@@ -1261,6 +1270,47 @@ The patched, output BOM has the two new properties at the specified indices:
     }
 }
 ```
+
+##### Patch example 4a: `--normalize` properties after patching
+
+This variant of the previous example also normalizes the output BOM arrays; in this case, normalizing the existing and added properties.
+
+```bash
+./sbom-utility patch --input-file test/patch/cdx-1-5-simplest-base.json --patch-file test/patch/cdx-patch-example-add-metadata-properties.json --normalize -q
+```
+
+The patched and **normalized** properties appear as follows:
+
+```shell
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "version": 1,
+    "metadata": {
+        "timestamp": "2023-10-12T19:07:00Z",
+        "properties": [
+            {
+                "name": "Property 1",
+                "value": "Value 1"
+            },
+            {
+                "name": "Property 2",
+                "value": "Value 2"
+            },
+            {
+                "name": "foo",
+                "value": "bar"
+            },
+            {
+                "name": "rush",
+                "value": "yyz"
+            }
+        ]
+    }
+}
+```
+
+```json
 
 ##### Patch example 5: "replace" BOM `version` and `timestamp`
 
