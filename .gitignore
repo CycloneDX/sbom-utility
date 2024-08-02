@@ -1,3 +1,6 @@
+# Filesystem
+.DS_Store
+
 # make target file types
 sbom-utility*
 /release
