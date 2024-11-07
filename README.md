@@ -1669,7 +1669,7 @@ In this example, the `--from` filter will return the entire JSON components arra
 ]
 ```
 
-**Note**: The command for this example only used the `--from` flag and did not need to supply `--select '*'` as this us the default.
+**Note**: The command for this example only used the `--from` flag and did not need to supply `--select '*'` as this is the default.
 
 ##### Example: Filter result entries with a specified value
 

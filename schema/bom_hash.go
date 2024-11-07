@@ -421,7 +421,7 @@ func (bom *BOM) HashmapVulnerability(cdxVulnerability CDXVulnerability, whereFil
 			// defer to same source as the top-level vuln. declares
 			fSeverity := fmt.Sprintf("%s: %v (%s)", rating.Method, rating.Score, rating.Severity)
 			// give listing priority to ratings that matches top-level vuln. reporting source
-			if rating.Source.Name == cdxVulnerability.Source.Name {
+			if rating.Source != nil && rating.Source.Name == cdxVulnerability.Source.Name {
 				// prepend to slice
 				vulnInfo.CvssSeverity = append([]string{fSeverity}, vulnInfo.CvssSeverity...)
 				continue
