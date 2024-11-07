@@ -18,7 +18,6 @@
 
 package cmd
 
-// "github.com/iancoleman/orderedmap"
 import (
 	"bytes"
 	"encoding/json"
@@ -31,7 +30,7 @@ import (
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/spf13/cobra"
-	"github.com/xeipuuv/gojsonschema"
+	"github.com/xeipuuv/gojsonschema" // TODO: switch to: https://github.com/santhosh-tekuri/jsonschema
 )
 
 const (
@@ -377,3 +376,23 @@ func validateCustom(document *schema.BOM, policyConfig *schema.LicensePolicyConf
 
 	return VALID, nil
 }
+
+// func isJSONSchema(filePath string) (isSchema bool, err error) {
+// 	isSchema = false
+// 	file, err := os.Open(filePath)
+// 	if err != nil {
+// 		return
+// 	}
+// 	defer file.Close()
+// 	// decode
+// 	decoder := json.NewDecoder(file)
+// 	var jsonData map[string]interface{}
+// 	err = decoder.Decode(&jsonData)
+// 	if err != nil {
+// 		return
+// 	}
+// 	// if schema tag present then likely a schema file (for now)
+// 	_, hasSchema := jsonData["$schema"]
+// 	isSchema = hasSchema
+// 	return
+// }
