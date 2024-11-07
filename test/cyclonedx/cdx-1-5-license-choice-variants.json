@@ -5,6 +5,7 @@
   "components": [
     {
       "name": "Variant 1: id field only",
+      "type": "library",
       "licenses": [
         {
           "license": {
@@ -15,16 +16,18 @@
     },
     {
       "name": "Variant 2: name field only",
+      "type": "library",      
       "licenses": [
         {
           "license": {
-            "id": "MIT"
+            "name": "MIT"
           }
         }
       ]
     },
     {
       "name": "Variant 3: expression only",
+      "type": "library", 
       "licenses": [
         {
           "expression": "MIT OR Apache-2.0"
@@ -33,6 +36,7 @@
     },
     {
       "name": "Variant 4: id and text (attachment)",
+      "type": "library",       
       "licenses": [
         {
           "license": {
@@ -49,6 +53,7 @@
     },
     {
       "name": "Variant 5: id and properties",
+      "type": "library", 
       "licenses": [
         {
           "license": {
