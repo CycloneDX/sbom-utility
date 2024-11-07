@@ -50,6 +50,7 @@
             "gojsondiff",
             "gojsonschema",
             "gomod",
+            "govet",
             "GTPL",
             "hasher",
             "hashstructure",

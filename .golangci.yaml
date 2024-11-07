@@ -5,6 +5,9 @@ run:
 # https://golangci-lint.run/usage/false-positives/
 # https://staticcheck.io/docs/
 linters-settings:
+  govet:
+    disable:
+      - printf
   staticcheck:
     checks:
       - all

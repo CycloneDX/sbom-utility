@@ -21,6 +21,7 @@ package cmd
 import (
 	"bytes"
 	"encoding/gob"
+	"errors"
 	"fmt"
 	"io"
 	"strconv"
@@ -188,18 +189,18 @@ func Query(writer io.Writer, request *common.QueryRequest, response *common.Quer
 
 	// Assure we have a map to dereference
 	if document.GetJSONMap() == nil {
-		err = fmt.Errorf(ERR_TYPE_INVALID_JSON_MAP)
+		err = errors.New(ERR_TYPE_INVALID_JSON_MAP)
 		return
 	}
 
 	// Validate we have query request/response structs
 	if request == nil {
-		err = fmt.Errorf(common.MSG_QUERY_INVALID_REQUEST)
+		err = errors.New(common.MSG_QUERY_INVALID_REQUEST)
 		return
 	}
 
 	if response == nil {
-		err = fmt.Errorf(common.MSG_QUERY_INVALID_RESPONSE)
+		err = errors.New(common.MSG_QUERY_INVALID_RESPONSE)
 		return
 	}
 

@@ -20,6 +20,7 @@ package cmd
 
 import (
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"io"
 	"sort"
@@ -395,7 +396,7 @@ func DisplayComponentListCSV(bom *schema.BOM, writer io.Writer, flags utils.Comp
 			// unable to emit an error message into output stream
 			return getLogger().Errorf("error writing to output (%v): %s", currentRow, err)
 		}
-		return fmt.Errorf(currentRow[0])
+		return errors.New(MSG_OUTPUT_NO_RESOURCES_FOUND)
 	}
 
 	// Sort Components prior to outputting
@@ -443,7 +444,7 @@ func DisplayComponentListMarkdown(bom *schema.BOM, writer io.Writer, flags utils
 	// Emit no components found warning into output
 	if len(entries) == 0 {
 		fmt.Fprintf(writer, "%s\n", MSG_OUTPUT_NO_COMPONENTS_FOUND)
-		return fmt.Errorf(MSG_OUTPUT_NO_COMPONENTS_FOUND)
+		return errors.New(MSG_OUTPUT_NO_COMPONENTS_FOUND)
 	}
 
 	// Sort Components prior to outputting

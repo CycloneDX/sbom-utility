@@ -20,6 +20,7 @@ package cmd
 
 import (
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"io"
 	"sort"
@@ -262,7 +263,7 @@ func DisplayLicensePoliciesTabbedText(writer io.Writer, filteredPolicyMap *slice
 	// Emit no schemas found warning into output
 	// TODO Use only for Warning messages, do not emit in output table
 	if len(keyNames) == 0 {
-		return fmt.Errorf(MSG_OUTPUT_NO_POLICIES_FOUND)
+		return errors.New(MSG_OUTPUT_NO_POLICIES_FOUND)
 	}
 
 	// Sort entries by family name
@@ -353,7 +354,7 @@ func DisplayLicensePoliciesCSV(writer io.Writer, filteredPolicyMap *slicemultima
 	// TODO Use only for Warning messages, do not emit in output table
 	if len(keyNames) == 0 {
 		fmt.Fprintf(writer, "%s\n", MSG_OUTPUT_NO_POLICIES_FOUND)
-		return fmt.Errorf(MSG_OUTPUT_NO_POLICIES_FOUND)
+		return errors.New(MSG_OUTPUT_NO_POLICIES_FOUND)
 	}
 
 	// Sort entries by family name
@@ -405,7 +406,7 @@ func DisplayLicensePoliciesMarkdown(writer io.Writer, filteredPolicyMap *slicemu
 	// TODO Use only for Warning messages, do not emit in output table
 	if len(keyNames) == 0 {
 		fmt.Fprintf(writer, "%s\n", MSG_OUTPUT_NO_POLICIES_FOUND)
-		return fmt.Errorf(MSG_OUTPUT_NO_POLICIES_FOUND)
+		return errors.New(MSG_OUTPUT_NO_POLICIES_FOUND)
 	}
 
 	// Sort entries by family name
