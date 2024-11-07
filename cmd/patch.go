@@ -19,6 +19,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -260,14 +261,14 @@ func processPatchRecords(bomDocument *schema.BOM, patchDocument *IETF6902Documen
 		// which does not make sense...
 		if record.Path == "" {
 			// TODO: make this a declared error type that can be tested
-			return fmt.Errorf("invalid IETF RFC 6902 patch operation. \"path\" is empty")
+			return errors.New("invalid IETF RFC 6902 patch operation. \"path\" is empty")
 		}
 
 		var keys []string
 		jsonMap := bomDocument.GetJSONMap()
 
 		if jsonMap == nil {
-			return fmt.Errorf("invalid json document (nil)")
+			return errors.New("invalid json document (nil)")
 		}
 
 		if keys, err = parseMapKeysFromPath(record.Path); err != nil {
@@ -276,14 +277,14 @@ func processPatchRecords(bomDocument *schema.BOM, patchDocument *IETF6902Documen
 
 		lengthKeys := len(keys)
 		if lengthKeys == 0 {
-			return fmt.Errorf("invalid document path (nil)")
+			return errors.New("invalid document path (nil)")
 		}
 
 		switch record.Operation {
 		case IETF_RFC6902_OP_ADD:
 			if record.Value == nil {
 				// TODO: make this a declared error type that can be tested
-				return fmt.Errorf("invalid IETF RFC 6902 patch operation. \"value\" missing")
+				return errors.New("invalid IETF RFC 6902 patch operation. \"value\" missing")
 			}
 			if err = addOrReplaceValue(jsonMap, keys, record.Value, false); err != nil {
 				return
@@ -293,7 +294,7 @@ func processPatchRecords(bomDocument *schema.BOM, patchDocument *IETF6902Documen
 			// the target "key" MUST exist...
 			if record.Value == nil {
 				// TODO: make this a declared error type that can be tested
-				return fmt.Errorf("invalid IETF RFC 6902 patch operation. \"value\" missing")
+				return errors.New("invalid IETF RFC 6902 patch operation. \"value\" missing")
 			}
 			if err = addOrReplaceValue(jsonMap, keys, record.Value, true); err != nil {
 				return
@@ -335,7 +336,7 @@ func processPatchRecords(bomDocument *schema.BOM, patchDocument *IETF6902Documen
 func parseMapKeysFromPath(path string) (keys []string, err error) {
 	// first char SHOULD be a forward slash, if not error
 	if path == "" || path[0] != '/' {
-		err = fmt.Errorf("invalid path. Path must begin with forward slash")
+		err = errors.New("invalid path. Path must begin with forward slash")
 		return
 	}
 	// parse out paths ignoring leading forward slash character
@@ -406,7 +407,7 @@ func testValue(parentMap map[string]interface{}, keys []string, value interface{
 
 	switch lengthKeys {
 	case 0:
-		err = fmt.Errorf("invalid map key (nil)")
+		err = errors.New("invalid map key (nil)")
 		return
 	case 1: // special case of adding new key/value to document root
 		nextNode = parentMap
@@ -438,7 +439,7 @@ func testValue(parentMap map[string]interface{}, keys []string, value interface{
 	case []interface{}:
 		if lengthKeys != 2 {
 			// TODO: create a formal error type for this
-			err = fmt.Errorf("invalid path. IETF RFC 6901 does not permit paths after array indices")
+			err = errors.New("invalid path. IETF RFC 6901 does not permit paths after array indices")
 			return
 		}
 		var arrayIndex int
@@ -516,7 +517,7 @@ func removeValue(parentMap map[string]interface{}, keys []string, value interfac
 
 	switch lengthKeys {
 	case 0:
-		return fmt.Errorf("invalid map key (nil)")
+		return errors.New("invalid map key (nil)")
 	case 1: // special case of adding new key/value to document root
 		nextNode = parentMap
 	default: // adding keys/values along document path
@@ -542,7 +543,7 @@ func removeValue(parentMap map[string]interface{}, keys []string, value interfac
 		}
 	case []interface{}:
 		if lengthKeys != 2 {
-			err = fmt.Errorf("invalid path. IETF RFC 6901 does not permit paths after array indices")
+			err = errors.New("invalid path. IETF RFC 6901 does not permit paths after array indices")
 			return
 		}
 
@@ -595,7 +596,7 @@ func addOrReplaceValue(parentMap map[string]interface{}, keys []string, value in
 
 	switch lengthKeys {
 	case 0:
-		return fmt.Errorf("invalid map key (nil)")
+		return errors.New("invalid map key (nil)")
 	case 1: // special case of adding new key/value to document root
 		nextNode = parentMap
 	default: // adding keys/values along document path
@@ -619,14 +620,14 @@ func addOrReplaceValue(parentMap map[string]interface{}, keys []string, value in
 			// to the next node's map with the provided value
 			currentKey := keys[lengthKeys-1]
 			if _, exists := typedNode[currentKey]; !exists && replace {
-				err = fmt.Errorf(ERR_PATCH_REPLACE_PATH_EXISTS)
+				err = errors.New(ERR_PATCH_REPLACE_PATH_EXISTS)
 				return
 			}
 			typedNode[currentKey] = value
 		}
 	case []interface{}:
 		if lengthKeys != 2 {
-			err = fmt.Errorf("invalid path. IETF RFC 6901 does not permit paths after array indices")
+			err = errors.New("invalid path. IETF RFC 6901 does not permit paths after array indices")
 			return
 		}
 
