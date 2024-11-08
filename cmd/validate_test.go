@@ -128,20 +128,20 @@ func innerTestValidate(t *testing.T, vti ValidateTestInfo) (document *schema.BOM
 		utils.GlobalFlags.ValidateFlags,
 	)
 
-	getLogger().Tracef("document: `%s`, isValid=`%t`, actualError=`%T`", document.GetFilename(), isValid, actualError)
+	getLogger().Tracef("document: '%s', isValid=`%t`, actualError=`%T`", document.GetFilename(), isValid, actualError)
 
 	// Always compare actual against expected error (even if it is `nil`)
 	expectedError := vti.ResultExpectedError
 
 	if !ErrorTypesMatch(actualError, expectedError) {
 		if len(schemaErrors) > 0 {
-			getLogger().Debugf("schemaErrors=`%s`", schemaErrors)
+			getLogger().Debugf("schemaErrors='%s'", schemaErrors)
 		}
 
 		switch t := actualError.(type) {
 		default:
-			fmt.Printf("unhandled error type: `%v`\n", t)
-			fmt.Printf(">> value: `%v`\n", t)
+			fmt.Printf("unhandled error type: '%v'\n", t)
+			fmt.Printf(">> value: '%v'\n", t)
 			getLogger().Error(actualError)
 		}
 		t.Errorf("expected error type: `%T`, actual type: `%T`", expectedError, actualError)
@@ -168,7 +168,7 @@ func innerTestValidate(t *testing.T, vti ValidateTestInfo) (document *schema.BOM
 			}
 
 		} else if !utils.IsValidJsonRaw(outputBuffer.Bytes()) {
-			err := getLogger().Errorf("output did not contain valid format data; expected: `%s`", FORMAT_JSON)
+			err := getLogger().Errorf("output did not contain valid format data; expected: '%s'", FORMAT_JSON)
 			t.Error(err.Error())
 			t.Logf("%s", outputBuffer.String())
 			return
@@ -185,7 +185,7 @@ func innerValidateErrorBuffered(persistentFlags utils.PersistentCommandFlags, va
 
 	// Invoke the actual command (API)
 	isValid, document, schemaErrors, err = Validate(outputWriter, persistentFlags, utils.GlobalFlags.ValidateFlags)
-	getLogger().Tracef("document: `%s`, isValid=`%t`, err=`%T`", document.GetFilename(), isValid, err)
+	getLogger().Tracef("document: '%s', isValid=`%t`, err=`%T`", document.GetFilename(), isValid, err)
 
 	return
 }
@@ -254,13 +254,13 @@ func innerTestSchemaErrorAndErrorResults(t *testing.T,
 
 	vti := NewValidateTestInfo(filename, FORMAT_TEXT, variant, &InvalidSBOMError{})
 	document, results, _ := innerTestValidate(t, *vti)
-	getLogger().Debugf("filename: `%s`, results:\n%v", document.GetFilename(), results)
+	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
 
 	// See ResultType struct fields (and values) in the `gojsonschema` package
 	exists := schemaErrorExists(results, schemaErrorType, schemaErrorField, schemaErrorValue)
 
 	if !exists {
-		t.Errorf("expected schema error: Type=`%s`, Field=`%s`, Value=`%s`",
+		t.Errorf("expected schema error: Type='%s', Field='%s', Value='%s'",
 			schemaErrorType,
 			schemaErrorField,
 			schemaErrorValue)
@@ -287,18 +287,18 @@ func schemaErrorExists(schemaErrors []gojsonschema.ResultError,
 			// we have matched on the type (key) field, continue to match other fields
 			if expectedField != "" &&
 				actualField != expectedField {
-				getLogger().Tracef("expected Field: `%s`; actual Field: `%s`", expectedField, actualField)
+				getLogger().Tracef("expected Field: '%s'; actual Field: '%s'", expectedField, actualField)
 				return false
 			}
 
 			if expectedValue != "" &&
 				actualValue != expectedValue {
-				getLogger().Tracef("expected Value: `%s`; actual Value: `%s`", actualValue, expectedValue)
+				getLogger().Tracef("expected Value: '%s'; actual Value: '%s'", actualValue, expectedValue)
 				return false
 			}
 			return true
 		} else {
-			getLogger().Debugf("Skipping result[%d]: expected Type: `%s`; actual Type: `%s`", i, expectedType, actualType)
+			getLogger().Debugf("Skipping result[%d]: expected Type: '%s'; actual Type: '%s'", i, expectedType, actualType)
 		}
 	}
 	return false
@@ -401,11 +401,11 @@ func TestValidateCdx14ErrorResultsUniqueComponentsJson(t *testing.T) {
 	_, schemaErrors, _ := innerTestValidate(t, *vti)
 
 	if len(schemaErrors) != EXPECTED_ERROR_NUM {
-		t.Errorf("invalid schema error count: expected `%v`; actual: `%v`)", EXPECTED_ERROR_NUM, len(schemaErrors))
+		t.Errorf("invalid schema error count: expected '%v'; actual: '%v')", EXPECTED_ERROR_NUM, len(schemaErrors))
 	}
 
 	if schemaErrors[0].Context().String() != EXPECTED_ERROR_CONTEXT {
-		t.Errorf("invalid schema error context: expected `%v`; actual: `%v`)", EXPECTED_ERROR_CONTEXT, schemaErrors[0].Context().String())
+		t.Errorf("invalid schema error context: expected '%v'; actual: '%v')", EXPECTED_ERROR_CONTEXT, schemaErrors[0].Context().String())
 	}
 }
 
@@ -418,11 +418,11 @@ func TestValidateCdx14ErrorResultsFormatIriReferencesJson(t *testing.T) {
 	_, schemaErrors, _ := innerTestValidate(t, *vti)
 
 	if len(schemaErrors) != EXPECTED_ERROR_NUM {
-		t.Errorf("invalid schema error count: expected `%v`; actual: `%v`)", EXPECTED_ERROR_NUM, len(schemaErrors))
+		t.Errorf("invalid schema error count: expected '%v'; actual: '%v')", EXPECTED_ERROR_NUM, len(schemaErrors))
 	}
 
 	if schemaErrors[0].Context().String() != EXPECTED_ERROR_CONTEXT {
-		t.Errorf("invalid schema error context: expected `%v`; actual: `%v`)", EXPECTED_ERROR_CONTEXT, schemaErrors[0].Context().String())
+		t.Errorf("invalid schema error context: expected '%v'; actual: '%v')", EXPECTED_ERROR_CONTEXT, schemaErrors[0].Context().String())
 	}
 }
 

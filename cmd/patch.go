@@ -65,7 +65,7 @@ func preRunTestForPatchFile(args []string) error {
 	if patchFilename == "" {
 		return getLogger().Errorf("Missing required argument(s): %s", FLAG_PATCH_FILE)
 	} else if _, err := os.Stat(patchFilename); err != nil {
-		return getLogger().Errorf("File not found: `%s`", patchFilename)
+		return getLogger().Errorf("File not found: '%s'", patchFilename)
 	}
 	return nil
 }
@@ -105,7 +105,7 @@ func initCommandPatchFlags(command *cobra.Command) (err error) {
 	command.PersistentFlags().BoolVar(&utils.GlobalFlags.PersistentFlags.OutputNormalize, FLAG_OUTPUT_NORMALIZE, false, MSG_FLAG_OUTPUT_NORMALIZE)
 	err = command.MarkFlagRequired(FLAG_PATCH_FILE)
 	if err != nil {
-		err = getLogger().Errorf("unable to mark flag `%s` as required: %s", FLAG_PATCH_FILE, err)
+		err = getLogger().Errorf("unable to mark flag '%s' as required: %s", FLAG_PATCH_FILE, err)
 	}
 	return
 }
@@ -117,7 +117,7 @@ func patchCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	// Create output writer
 	outputFilename := utils.GlobalFlags.PersistentFlags.OutputFile
 	outputFile, writer, err := createOutputFile(outputFilename)
-	getLogger().Tracef("outputFile: `%v`; writer: `%v`", outputFilename, writer)
+	getLogger().Tracef("outputFile: '%v'; writer: '%v'", outputFilename, writer)
 
 	// Overcome Cobra limitation in variable reuse between diff. commands
 	// That is, as soon as ANY command sets a default value, it cannot be changed
@@ -128,7 +128,7 @@ func patchCmdImpl(cmd *cobra.Command, args []string) (err error) {
 		// always close the output file
 		if outputFile != nil {
 			outputFile.Close()
-			getLogger().Infof("Closed output file: `%s`", outputFilename)
+			getLogger().Infof("Closed output file: '%s'", outputFilename)
 		}
 	}()
 
@@ -212,13 +212,13 @@ func Patch(writer io.Writer, persistentFlags utils.PersistentCommandFlags, patch
 
 	// Output the "patched" version of the Input BOM
 	format := persistentFlags.OutputFormat
-	getLogger().Infof("Writing patched BOM (`%s` format)...", format)
+	getLogger().Infof("Writing patched BOM ('%s' format)...", format)
 	switch format {
 	case FORMAT_JSON:
 		err = document.WriteAsEncodedJSONInt(writer, utils.GlobalFlags.PersistentFlags.GetOutputIndentInt())
 	default:
 		// Default to Text output for anything else (set as flag default)
-		getLogger().Warningf("Patch not supported for `%s` format; defaulting to `%s` format...",
+		getLogger().Warningf("Patch not supported for '%s' format; defaulting to '%s' format...",
 			format, FORMAT_JSON)
 		err = document.WriteAsEncodedJSONInt(writer, utils.GlobalFlags.PersistentFlags.GetOutputIndentInt())
 	}

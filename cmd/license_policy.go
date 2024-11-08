@@ -133,12 +133,12 @@ func NewCommandPolicy() *cobra.Command {
 		// Make sure (optional) subcommand is known/valid
 		if len(args) == 1 {
 			if !preRunTestForSubcommand(VALID_SUBCOMMANDS_POLICY, args[0]) {
-				return getLogger().Errorf("Subcommand provided is not valid: `%v`", args[0])
+				return getLogger().Errorf("Subcommand provided is not valid: '%v'", args[0])
 			}
 		}
 
 		if len(args) == 0 {
-			getLogger().Tracef("No subcommands provided; defaulting to: `%s` subcommand", SUBCOMMAND_SCHEMA_LIST)
+			getLogger().Tracef("No subcommands provided; defaulting to: '%s' subcommand", SUBCOMMAND_SCHEMA_LIST)
 		}
 
 		return
@@ -158,7 +158,7 @@ func policyCmdImpl(cmd *cobra.Command, args []string) (err error) {
 		// always close the output file
 		if outputFile != nil {
 			err = outputFile.Close()
-			getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.PersistentFlags.OutputFile)
+			getLogger().Infof("Closed output file: '%s'", utils.GlobalFlags.PersistentFlags.OutputFile)
 		}
 	}()
 
@@ -226,7 +226,7 @@ func ListLicensePolicies(writer io.Writer, policyConfig *schema.LicensePolicyCon
 		err = DisplayLicensePoliciesMarkdown(writer, filteredMap, licenseFlags)
 	default:
 		// default to text format for anything else
-		getLogger().Warningf("Unsupported format: `%s`; using default format.",
+		getLogger().Warningf("Unsupported format: '%s'; using default format.",
 			utils.GlobalFlags.PersistentFlags.OutputFormat)
 		err = DisplayLicensePoliciesTabbedText(writer, filteredMap, licenseFlags)
 	}

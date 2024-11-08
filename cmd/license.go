@@ -57,7 +57,7 @@ func NewCommandLicense() *cobra.Command {
 		}
 		// Make sure subcommand is known
 		if !preRunTestForSubcommand(VALID_SUBCOMMANDS_LICENSE, args[0]) {
-			return getLogger().Errorf("Subcommand provided is not valid: `%v`", args[0])
+			return getLogger().Errorf("Subcommand provided is not valid: '%v'", args[0])
 		}
 		return
 	}
@@ -143,7 +143,7 @@ func warnNoLicenseFound(bom *schema.BOM, location int) {
 
 // Note: An actual error SHOULD ONLY be returned by the custom validation code.
 func warnInvalidResourceLicense(resourceType string, bomRef string, name string, version string) {
-	getLogger().Warningf("%s. resourceType: `%s`: bomRef: `%s`, name:`%s`, version: `%s`",
+	getLogger().Warningf("%s. resourceType: '%s': bomRef: '%s', name:'%s', version: '%s'",
 		MSG_LICENSE_NOT_FOUND,
 		resourceType, bomRef, name, version)
 }
@@ -162,7 +162,7 @@ func hashMetadataLicenses(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 
 	var licenseInfo schema.LicenseInfo
 	for _, pLicenseChoice := range *pLicenses {
-		getLogger().Tracef("hashing license: id: `%s`, name: `%s`",
+		getLogger().Tracef("hashing license: id: '%s', name: '%s'",
 			pLicenseChoice.License.Id, pLicenseChoice.License.Name)
 
 		licenseInfo.LicenseChoice = pLicenseChoice
@@ -233,7 +233,7 @@ func hashComponentLicense(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 	if pLicenses != nil && len(*pLicenses) > 0 {
 		for _, licenseChoice := range *pLicenses {
 			getLogger().Debugf("licenseChoice: %s", getLogger().FormatStruct(licenseChoice))
-			getLogger().Tracef("hashing license for component=`%s`", cdxComponent.Name)
+			getLogger().Tracef("hashing license for component='%s'", cdxComponent.Name)
 
 			licenseInfo = *schema.NewLicenseInfoFromComponent(cdxComponent, licenseChoice, location)
 			err = hashLicenseInfoByLicenseType(bom, policyConfig, licenseInfo, whereFilters, licenseFlags)
@@ -277,7 +277,7 @@ func hashServiceLicense(bom *schema.BOM, policyConfig *schema.LicensePolicyConfi
 	if pLicenses != nil && len(*pLicenses) > 0 {
 		for _, licenseChoice := range *pLicenses {
 			getLogger().Debugf("licenseChoice: %s", getLogger().FormatStruct(licenseChoice))
-			getLogger().Tracef("Hashing license for service=`%s`", cdxService.Name)
+			getLogger().Tracef("Hashing license for service='%s'", cdxService.Name)
 			licenseInfo = *schema.NewLicenseInfoFromService(cdxService, licenseChoice, location)
 			err = hashLicenseInfoByLicenseType(bom, policyConfig, licenseInfo, whereFilters, licenseFlags)
 			if err != nil {
@@ -338,7 +338,7 @@ func hashLicenseInfoByLicenseType(bom *schema.BOM, policyConfig *schema.LicenseP
 		// without schema validation (which would find this as an error)
 		// Note: licenseInfo.LicenseChoiceType = 0 // default, invalid
 		baseError := NewSbomLicenseDataError()
-		baseError.AppendMessage(fmt.Sprintf(": for entity: `%s` (%s)",
+		baseError.AppendMessage(fmt.Sprintf(": for entity: '%s' (%s)",
 			licenseInfo.BOMRef,
 			licenseInfo.ResourceName))
 		err = baseError
@@ -347,7 +347,7 @@ func hashLicenseInfoByLicenseType(bom *schema.BOM, policyConfig *schema.LicenseP
 
 	if err != nil {
 		baseError := NewSbomLicenseDataError()
-		baseError.AppendMessage(fmt.Sprintf(": for entity: `%s` (%s)",
+		baseError.AppendMessage(fmt.Sprintf(": for entity: '%s' (%s)",
 			licenseInfo.BOMRef,
 			licenseInfo.ResourceName))
 		err = baseError

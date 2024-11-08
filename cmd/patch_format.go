@@ -79,7 +79,7 @@ func (document *IETF6902Document) ReadRawBytes() (err error) {
 	if document.rawBytes == nil {
 		// validate filename
 		if len(document.filename) == 0 {
-			return fmt.Errorf("schema: invalid filename: `%s`", document.filename)
+			return fmt.Errorf("schema: invalid filename: '%s'", document.filename)
 		}
 
 		// Conditionally append working directory if no abs. path detected
@@ -103,7 +103,7 @@ func (document *IETF6902Document) ReadRawBytes() (err error) {
 			return
 		}
 
-		getLogger().Tracef("read data from: `%s`", document.filename)
+		getLogger().Tracef("read data from: '%s'", document.filename)
 		getLogger().Tracef("\n  >> rawBytes[:100]=[%s]", document.rawBytes[:100])
 	}
 	return

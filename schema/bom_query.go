@@ -40,11 +40,11 @@ func whereFilterMatch(mapObject map[string]interface{}, whereFilters []common.Wh
 
 		key = filter.Key
 		value, present := mapObject[key]
-		getLogger().Debugf("testing object map[%s]: `%v`", key, value)
+		getLogger().Debugf("testing object map[%s]: '%v'", key, value)
 
 		if !present {
 			match = false
-			err = getLogger().Errorf("key `%s` not found ib object map", key)
+			err = getLogger().Errorf("key '%s' not found ib object map", key)
 			break
 		}
 
@@ -69,13 +69,13 @@ func whereFilterMatch(mapObject map[string]interface{}, whereFilters []common.Wh
 			// NOTE: JSON Unmarshal() always decodes JSON Numbers as "float64" type
 			value = strconv.FormatFloat(data, 'f', -1, 64)
 		default:
-			getLogger().Errorf("unhandled datatype. key=%s, value=`%v`, type=`%T`", key, data, data)
+			getLogger().Errorf("unhandled datatype. key=%s, value='%v', type=`%T`", key, data, data)
 		}
 
 		err = enc.Encode(value)
 
 		if err != nil {
-			err = getLogger().Errorf("Unable to convert value: `%v`, to []byte", value)
+			err = getLogger().Errorf("Unable to convert value: '%v', to []byte", value)
 			return
 		}
 

@@ -230,8 +230,8 @@ func initConfigurations() {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	getLogger().Tracef("Executable Directory`: `%s`", utils.GlobalFlags.ExecDir)
-	getLogger().Tracef("Working Directory`: `%s`", utils.GlobalFlags.WorkingDir)
+	getLogger().Tracef("Executable Directory`: '%s'", utils.GlobalFlags.ExecDir)
+	getLogger().Tracef("Working Directory`: '%s'", utils.GlobalFlags.WorkingDir)
 
 	// Print global flags in debug mode
 	flagInfo, errFormat := getLogger().FormatStructE(utils.GlobalFlags)
@@ -259,7 +259,7 @@ func initConfigurations() {
 	err = LicensePolicyConfig.LoadHashPolicyConfigurationFile(licensePolicyFile, DEFAULT_LICENSE_POLICY_CONFIG)
 	if err != nil {
 		getLogger().Warning(err.Error())
-		getLogger().Warningf("All license policies will default to `%s`.", schema.POLICY_UNDEFINED)
+		getLogger().Warningf("All license policies will default to '%s'.", schema.POLICY_UNDEFINED)
 	}
 }
 
@@ -303,7 +303,7 @@ func preRunTestForInputFile(args []string) error {
 	} else if inputFilename == INPUT_TYPE_STDIN {
 		return nil
 	} else if _, err := os.Stat(inputFilename); err != nil {
-		return getLogger().Errorf("File not found: `%s`", inputFilename)
+		return getLogger().Errorf("File not found: '%s'", inputFilename)
 	}
 	return nil
 }
@@ -313,11 +313,11 @@ func preRunTestForInputFile(args []string) error {
 func preRunTestForSubcommand(validSubcommands []string, subcommand string) bool {
 	getLogger().Enter()
 	defer getLogger().Exit()
-	getLogger().Tracef("subcommands: %v, subcommand: `%v`", validSubcommands, subcommand)
+	getLogger().Tracef("subcommands: %v, subcommand: '%v'", validSubcommands, subcommand)
 
 	for _, value := range validSubcommands {
 		if value == subcommand {
-			getLogger().Tracef("Valid subcommand `%v` found", subcommand)
+			getLogger().Tracef("Valid subcommand '%v' found", subcommand)
 			return true
 		}
 	}

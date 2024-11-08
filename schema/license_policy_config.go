@@ -114,8 +114,8 @@ func (config *LicensePolicyConfig) GetLicenseIdMap() (hashmap *slicemultimap.Mul
 }
 
 func (config *LicensePolicyConfig) GetFilteredFamilyNameMap(whereFilters []common.WhereFilter) (hashmap *slicemultimap.MultiMap, err error) {
-	// NOTE: This call is necessary as this will cause all `licensePolicyConfig.PolicyList`
-	// entries to have alternative field names to be mapped (e.g., `usagePolicy` -> `usage-policy`)
+	// NOTE: This call is necessary as this will cause all 'licensePolicyConfig.PolicyList'
+	// entries to have alternative field names to be mapped (e.g., 'usagePolicy' -> 'usage-policy')
 	config.filteredFamilyNameMap, err = config.GetFamilyNameMap()
 
 	if err != nil {
@@ -161,21 +161,21 @@ func (config *LicensePolicyConfig) innerLoadLicensePolicies(policyFile string, d
 		config.policyConfigFile, err = utils.FindVerifyConfigFileAbsPath(getLogger(), policyFile)
 
 		if err != nil {
-			return fmt.Errorf("unable to find license policy file: `%s`", policyFile)
+			return fmt.Errorf("unable to find license policy file: '%s'", policyFile)
 		}
 
 		// attempt to read in contents of the policy config.
-		getLogger().Infof("Loading license policy file: `%s`...", config.policyConfigFile)
+		getLogger().Infof("Loading license policy file: '%s'...", config.policyConfigFile)
 		buffer, err = os.ReadFile(config.policyConfigFile)
 		if err != nil {
-			return fmt.Errorf("unable to `ReadFile`: `%s`", config.policyConfigFile)
+			return fmt.Errorf("unable to 'ReadFile': '%s'", config.policyConfigFile)
 		}
 	} else {
 		// Attempt to load the default config file from embedded file resources
-		getLogger().Infof("Loading (embedded) default license policy file: `%s`...", defaultPolicyFile)
+		getLogger().Infof("Loading (embedded) default license policy file: '%s'...", defaultPolicyFile)
 		buffer, err = resources.LoadConfigFile(defaultPolicyFile)
 		if err != nil {
-			return fmt.Errorf("unable to read schema config file: `%s` from embedded resources: `%s`",
+			return fmt.Errorf("unable to read schema config file: '%s' from embedded resources: '%s'",
 				defaultPolicyFile, resources.RESOURCES_CONFIG_DIR)
 		}
 	}
@@ -183,7 +183,7 @@ func (config *LicensePolicyConfig) innerLoadLicensePolicies(policyFile string, d
 	// NOTE: this cleverly unmarshals into the current config instance this function is associated with
 	errUnmarshal := json.Unmarshal(buffer, config)
 	if errUnmarshal != nil {
-		err = fmt.Errorf("cannot `Unmarshal`: `%s`", config.policyConfigFile)
+		err = fmt.Errorf("cannot 'Unmarshal': '%s'", config.policyConfigFile)
 		return
 	}
 
@@ -214,11 +214,11 @@ func (config *LicensePolicyConfig) innerHashLicensePolicies() (err error) {
 		// Map old JSON key names to new key names (as they appear as titles in report columns)
 
 		// Update the original entries in the []PolicyList stored in the global LicenseComplianceConfig
-		getLogger().Debugf("Mapping: `Id`: `%s` to `spdx-id`: `%s`\n", policy.Id, policy.AltSPDXId)
+		getLogger().Debugf("Mapping: 'Id': '%s' to 'spdx-id': '%s'\n", policy.Id, policy.AltSPDXId)
 		config.PolicyList[i].AltSPDXId = policy.Id
-		getLogger().Debugf("Mapping: `UsagePolicy`: `%s` to `usage-policy`: `%s`\n", policy.Id, policy.AltSPDXId)
+		getLogger().Debugf("Mapping: 'UsagePolicy': '%s' to 'usage-policy': '%s'\n", policy.Id, policy.AltSPDXId)
 		config.PolicyList[i].AltUsagePolicy = policy.UsagePolicy
-		getLogger().Debugf("Mapping: `AnnotationRefs`: `%s` to `annotations`: `%s`\n", policy.Id, policy.AltSPDXId)
+		getLogger().Debugf("Mapping: 'AnnotationRefs': '%s' to 'annotations': '%s'\n", policy.Id, policy.AltSPDXId)
 		config.PolicyList[i].AltAnnotationRefs = strings.Join(policy.AnnotationRefs, ",")
 
 		// Actually hash the policy
@@ -243,14 +243,14 @@ func (config *LicensePolicyConfig) hashPolicy(policy LicensePolicy) (err error) 
 	// ONLY hash valid policy records.
 	if !IsValidPolicyEntry(policy) {
 		// Do not add it to any hash table
-		getLogger().Tracef("WARNING: invalid policy entry (id: `%s`, name: `%s`). Skipping...", policy.Id, policy.Name)
+		getLogger().Tracef("WARNING: invalid policy entry (id: '%s', name: '%s'). Skipping...", policy.Id, policy.Name)
 		return
 	}
 
 	// Only add to "id" hashmap if "Id" value is valid
 	// NOTE: do NOT hash entries with "" (empty) Id values; however, they may represent a "family" entry
 	if policy.Id != "" {
-		getLogger().Debugf("ID Hashmap: Adding policy Id=`%s`, Name=`%s`, Family=`%s`", policy.Id, policy.Name, policy.Family)
+		getLogger().Debugf("ID Hashmap: Adding policy Id='%s', Name='%s', Family='%s'", policy.Id, policy.Name, policy.Family)
 		config.licenseIdMap.Put(policy.Id, policy)
 	} else {
 		getLogger().Debugf("WARNING: Skipping policy with no SPDX ID (empty)...")
@@ -263,11 +263,11 @@ func (config *LicensePolicyConfig) hashPolicy(policy LicensePolicy) (err error) 
 	// If a hashmap entry exists, see if current policy matches those
 	// already added for that key
 	if match {
-		getLogger().Debugf("Family Hashmap: Entries exist for policy Id=`%s`, Name=`%s`, Family=`%s`", policy.Id, policy.Name, policy.Family)
+		getLogger().Debugf("Family Hashmap: Entries exist for policy Id='%s', Name='%s', Family='%s'", policy.Id, policy.Name, policy.Family)
 		consistent := VerifyPoliciesMatch(policy, values)
 
 		if !consistent {
-			err = getLogger().Errorf("Multiple (possibly conflicting) policies declared for ID `%s`,family: `%s`, policy: `%s`",
+			err = getLogger().Errorf("Multiple (possibly conflicting) policies declared for ID '%s',family: '%s', policy: '%s'",
 				policy.Id,
 				policy.Family,
 				policy.UsagePolicy)
@@ -276,11 +276,11 @@ func (config *LicensePolicyConfig) hashPolicy(policy LicensePolicy) (err error) 
 	}
 
 	// NOTE: validation of policy struct (including "family" value) is done above
-	getLogger().Debugf("Family Hashmap: Adding policy Id=`%s`, Name=`%s`, Family=`%s`", policy.Id, policy.Name, policy.Family)
+	getLogger().Debugf("Family Hashmap: Adding policy Id='%s', Name='%s', Family='%s'", policy.Id, policy.Name, policy.Family)
 
 	// Do NOT hash entries with and empty "Family" (name) value
 	if policy.Family != "" {
-		getLogger().Debugf("ID Hashmap: Adding policy Id=`%s`, Name=`%s`, Family=`%s`", policy.Id, policy.Name, policy.Family)
+		getLogger().Debugf("ID Hashmap: Adding policy Id='%s', Name='%s', Family='%s'", policy.Id, policy.Name, policy.Family)
 		config.licenseFamilyNameMap.Put(policy.Family, policy)
 	} else {
 		err = getLogger().Errorf("invalid policy: Family: \"\" (empty)")
@@ -407,7 +407,7 @@ func (config *LicensePolicyConfig) FindPolicyBySpdxId(id string) (policyValue st
 	// Note: this will cause all policy hashmaps to be initialized (created), if it has not bee
 	licensePolicyIdMap, err := config.GetLicenseIdMap()
 	if err != nil {
-		err = getLogger().Errorf("license policy map error: `%w`", err)
+		err = getLogger().Errorf("license policy map error: '%w'", err)
 		return
 	}
 
@@ -416,7 +416,7 @@ func (config *LicensePolicyConfig) FindPolicyBySpdxId(id string) (policyValue st
 
 	// There MUST be ONLY one policy per (discrete) license ID
 	if len(arrPolicies) > 1 {
-		err = getLogger().Errorf("Multiple (possibly conflicting) policies declared for SPDX ID=`%s`", id)
+		err = getLogger().Errorf("Multiple (possibly conflicting) policies declared for SPDX ID='%s'", id)
 		return
 	}
 
@@ -425,7 +425,7 @@ func (config *LicensePolicyConfig) FindPolicyBySpdxId(id string) (policyValue st
 		matchedPolicy = arrPolicies[0].(LicensePolicy)
 		policyValue = matchedPolicy.UsagePolicy
 	} else {
-		getLogger().Tracef("No policy match found for SPDX ID=`%s` ", id)
+		getLogger().Tracef("No policy match found for SPDX ID='%s' ", id)
 		policyValue = POLICY_UNDEFINED
 	}
 
@@ -446,7 +446,7 @@ func (config *LicensePolicyConfig) FindPolicyByFamilyName(name string) (policyVa
 	// within the "name" field.  This prevents us from assigning policy
 	// return
 	if hasLogicalConjunctionOrPreposition(name) {
-		getLogger().Warningf("policy name contains logical conjunctions or preposition: `%s`", name)
+		getLogger().Warningf("policy name contains logical conjunctions or preposition: '%s'", name)
 		policyValue = POLICY_UNDEFINED
 		return
 	}
@@ -464,7 +464,7 @@ func (config *LicensePolicyConfig) FindPolicyByFamilyName(name string) (policyVa
 		arrPolicies, _ = familyNameMap.Get(key)
 
 		if len(arrPolicies) == 0 {
-			err = getLogger().Errorf("No policy match found in hashmap for family name key: `%s`", key)
+			err = getLogger().Errorf("No policy match found in hashmap for family name key: '%s'", key)
 			return
 		}
 
@@ -478,12 +478,12 @@ func (config *LicensePolicyConfig) FindPolicyByFamilyName(name string) (policyVa
 		if len(arrPolicies) > 1 {
 			conflict := policyConflictExists(arrPolicies)
 			if conflict {
-				getLogger().Tracef("Usage policy conflict for license family name=`%s` ", name)
+				getLogger().Tracef("Usage policy conflict for license family name='%s' ", name)
 				policyValue = POLICY_CONFLICT
 			}
 		}
 	} else {
-		getLogger().Tracef("No policy match found for license family name=`%s` ", name)
+		getLogger().Tracef("No policy match found for license family name='%s' ", name)
 		policyValue = POLICY_UNDEFINED
 	}
 
@@ -535,32 +535,32 @@ func IsValidUsagePolicy(usagePolicy string) bool {
 func IsValidPolicyEntry(policy LicensePolicy) bool {
 
 	if policy.Id != "" && !IsValidSpdxId(policy.Id) {
-		getLogger().Warningf("invalid SPDX ID: `%s` (Name=`%s`). Skipping...", policy.Id, policy.Name)
+		getLogger().Warningf("invalid SPDX ID: '%s' (Name='%s'). Skipping...", policy.Id, policy.Name)
 		return false
 	}
 
 	if strings.TrimSpace(policy.Name) == "" {
-		getLogger().Warningf("invalid Name: `%s` (Id=`%s`).", policy.Name, policy.Id)
+		getLogger().Warningf("invalid Name: '%s' (Id='%s').", policy.Name, policy.Id)
 	}
 
 	if !IsValidUsagePolicy(policy.UsagePolicy) {
-		getLogger().Warningf("invalid Usage Policy: `%s` (Id=`%s`, Name=`%s`). Skipping...", policy.UsagePolicy, policy.Id, policy.Name)
+		getLogger().Warningf("invalid Usage Policy: '%s' (Id='%s', Name='%s'). Skipping...", policy.UsagePolicy, policy.Id, policy.Name)
 		return false
 	}
 
 	if !IsValidFamilyKey(policy.Family) {
-		getLogger().Warningf("invalid Family: `%s` (Id=`%s`, Name=`%s`). Skipping...", policy.Family, policy.Id, policy.Name)
+		getLogger().Warningf("invalid Family: '%s' (Id='%s', Name='%s'). Skipping...", policy.Family, policy.Id, policy.Name)
 		return false
 	}
 
 	if policy.Id == "" {
 		if len(policy.Children) < 1 {
-			getLogger().Debugf("Family (policy): `%s`. Has no children (SPDX IDs) listed.", policy.Family)
+			getLogger().Debugf("Family (policy): '%s'. Has no children (SPDX IDs) listed.", policy.Family)
 		}
 		// Test to make sure "family" entries (i.e. policy.Id == "") have valid "children" (SPDX IDs)
 		for _, childId := range policy.Children {
 			if !IsValidSpdxId(childId) {
-				getLogger().Warningf("invalid Id: `%s` for Family: `%s`. Skipping...", childId, policy.Family)
+				getLogger().Warningf("invalid Id: '%s' for Family: '%s'. Skipping...", childId, policy.Family)
 			}
 		}
 	}

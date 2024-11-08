@@ -33,7 +33,7 @@ func FindVerifyConfigFileAbsPath(logger *log.MiniLogger, filename string) (absFi
 	logger.Tracef("filename: %s", filename)
 
 	if len(filename) == 0 {
-		err = fmt.Errorf("invalid config filename: `%s`", filename)
+		err = fmt.Errorf("invalid config filename: '%s'", filename)
 		return
 	}
 
@@ -41,7 +41,7 @@ func FindVerifyConfigFileAbsPath(logger *log.MiniLogger, filename string) (absFi
 	// that may have been provided via the command line argument
 	if _, err = os.Stat(filename); err == nil {
 		absFilename = filename
-		logger.Tracef("found config file `%s` at location provided.", absFilename)
+		logger.Tracef("found config file '%s' at location provided.", absFilename)
 		return
 	}
 
@@ -50,24 +50,24 @@ func FindVerifyConfigFileAbsPath(logger *log.MiniLogger, filename string) (absFi
 	if !filepath.IsAbs(filename) {
 		// first, attempt to find file relative to the executable
 		tmpFilename := filepath.Join(GlobalFlags.ExecDir, filename)
-		logger.Tracef("Checking for config relative to executable: `%s`...", tmpFilename)
+		logger.Tracef("Checking for config relative to executable: '%s'...", tmpFilename)
 		if _, err = os.Stat(tmpFilename); err == nil {
 			absFilename = tmpFilename
-			logger.Tracef("found config file relative to executable: `%s`", absFilename)
+			logger.Tracef("found config file relative to executable: '%s'", absFilename)
 			return
 		}
 
 		// Last, attempt to find the config file in the current working directory
 		// Note: this is sometimes needed in IDE/test environments
 		tmpFilename = filepath.Join(GlobalFlags.WorkingDir, filename)
-		logger.Tracef("Checking for config relative to working directory: `%s`...", tmpFilename)
+		logger.Tracef("Checking for config relative to working directory: '%s'...", tmpFilename)
 		if _, err = os.Stat(tmpFilename); err == nil {
 			absFilename = tmpFilename
-			logger.Tracef("found config file relative to working directory: `%s`", absFilename)
+			logger.Tracef("found config file relative to working directory: '%s'", absFilename)
 			return
 		}
 	}
 
-	logger.Tracef("returning config absolute filename: `%s`", absFilename)
+	logger.Tracef("returning config absolute filename: '%s'", absFilename)
 	return
 }

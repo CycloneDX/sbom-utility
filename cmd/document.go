@@ -32,21 +32,21 @@ func LoadInputBOMFileAndDetectSchema() (document *schema.BOM, err error) {
 	inputFile := utils.GlobalFlags.PersistentFlags.InputFile
 
 	// check for required fields on command
-	getLogger().Tracef("utils.Flags.InputFile: `%s`", inputFile)
+	getLogger().Tracef("utils.Flags.InputFile: '%s'", inputFile)
 	if inputFile == "" {
-		return nil, fmt.Errorf("invalid input file (-%s): `%s` ", FLAG_FILENAME_INPUT_SHORT, inputFile)
+		return nil, fmt.Errorf("invalid input file (-%s): '%s' ", FLAG_FILENAME_INPUT_SHORT, inputFile)
 	}
 
 	// Construct a BOM document object around the input file
 	document = schema.NewBOM(inputFile)
 
 	// Load the raw, candidate BOM (file) as JSON data
-	getLogger().Infof("Attempting to load and unmarshal data from: `%s`...", document.GetFilenameInterpolated())
+	getLogger().Infof("Attempting to load and unmarshal data from: '%s'...", document.GetFilenameInterpolated())
 	err = document.UnmarshalBOMAsJSONMap() // i.e., utils.Flags.InputFile
 	if err != nil {
 		return
 	}
-	getLogger().Infof("Successfully unmarshalled data from: `%s`", document.GetFilenameInterpolated())
+	getLogger().Infof("Successfully unmarshalled data from: '%s'", document.GetFilenameInterpolated())
 
 	// Search the document keys/values for known BOM formats and schema in the config. file
 	getLogger().Infof("Determining file's BOM format and version...")
@@ -56,7 +56,7 @@ func LoadInputBOMFileAndDetectSchema() (document *schema.BOM, err error) {
 	}
 
 	// Display detected format, version with (optional) schema variant (i.e., if requested on command line)
-	getLogger().Infof("Determined BOM format, version (variant): `%s`, `%s` %s",
+	getLogger().Infof("Determined BOM format, version (variant): '%s', '%s' %s",
 		document.FormatInfo.CanonicalName,
 		document.SchemaInfo.Version,
 		schema.FormatSchemaVariant(document.SchemaInfo.Variant))
@@ -69,19 +69,19 @@ func LoadBOMFile(inputFile string) (document *schema.BOM, err error) {
 	defer getLogger().Exit()
 
 	if inputFile == "" {
-		return nil, fmt.Errorf("invalid input file (-%s): `%s` ", FLAG_FILENAME_INPUT_SHORT, inputFile)
+		return nil, fmt.Errorf("invalid input file (-%s): '%s'", FLAG_FILENAME_INPUT_SHORT, inputFile)
 	}
 
 	// Construct a BOM document object around the input file
 	document = schema.NewBOM(inputFile)
 
 	// Load the raw, candidate BOM (file) as JSON data
-	getLogger().Infof("Attempting to load and unmarshal data from: `%s`...", document.GetFilenameInterpolated())
+	getLogger().Infof("Attempting to load and unmarshal data from: '%s'...", document.GetFilenameInterpolated())
 	err = document.UnmarshalBOMAsJSONMap() // i.e., utils.Flags.InputFile
 	if err != nil {
 		return
 	}
-	getLogger().Infof("Successfully unmarshalled data from: `%s`", document.GetFilenameInterpolated())
+	getLogger().Infof("Successfully unmarshalled data from: '%s'", document.GetFilenameInterpolated())
 
 	// Search the document keys/values for known BOM formats and schema in the config. file
 	getLogger().Infof("Determining file's BOM format and version...")
@@ -91,7 +91,7 @@ func LoadBOMFile(inputFile string) (document *schema.BOM, err error) {
 	}
 
 	// Display detected format, version with (optional) schema variant (i.e., if requested on command line)
-	getLogger().Infof("Determined BOM format, version (variant): `%s`, `%s` %s",
+	getLogger().Infof("Determined BOM format, version (variant): '%s', '%s' %s",
 		document.FormatInfo.CanonicalName,
 		document.SchemaInfo.Version,
 		schema.FormatSchemaVariant(document.SchemaInfo.Variant))

@@ -163,7 +163,7 @@ func listCmdImpl(cmd *cobra.Command, args []string) (err error) {
 		// always close the output file
 		if outputFile != nil {
 			err = outputFile.Close()
-			getLogger().Infof("Closed output file: `%s`", outputFilename)
+			getLogger().Infof("Closed output file: '%s'", outputFilename)
 		}
 	}()
 
@@ -212,7 +212,7 @@ func ListLicenses(writer io.Writer, policyConfig *schema.LicensePolicyConfig,
 	}
 
 	format := persistentFlags.OutputFormat
-	getLogger().Infof("Outputting listing (`%s` format)...", format)
+	getLogger().Infof("Outputting listing ('%s' format)...", format)
 	switch format {
 	case FORMAT_JSON:
 		err = DisplayLicenseListJson(document, writer, licenseFlags)
@@ -224,7 +224,7 @@ func ListLicenses(writer io.Writer, policyConfig *schema.LicensePolicyConfig,
 		err = DisplayLicenseListText(document, writer, licenseFlags)
 	default:
 		// Default to JSON output for anything else
-		getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
+		getLogger().Warningf("Listing not supported for '%s' format; defaulting to '%s' format...",
 			format, FORMAT_JSON)
 		err = DisplayLicenseListJson(document, writer, licenseFlags)
 	}

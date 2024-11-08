@@ -383,7 +383,7 @@ func (log MiniLogger) DumpStruct(structName string, field interface{}) error {
 	}
 
 	if structName != "" {
-		sb.WriteString(fmt.Sprintf("`%s` (%T) = %s", structName, reflect.TypeOf(field), formattedStruct))
+		sb.WriteString(fmt.Sprintf("'%s' (%T) = %s", structName, reflect.TypeOf(field), formattedStruct))
 	} else {
 		sb.WriteString(formattedStruct)
 	}
@@ -399,7 +399,7 @@ func (log MiniLogger) DumpArgs() {
 	for i, a := range args {
 		// TODO: print to output stream
 		fmt.Print(log.indentRunes)
-		fmt.Printf("os.Arg[%d]: `%v`\n", i, a)
+		fmt.Printf("os.Arg[%d]: '%v'\n", i, a)
 	}
 }
 

@@ -62,11 +62,11 @@ const (
 
 // Recurring / translatable messages
 const (
-	MSG_INFO_FORMATTING_ERROR_RESULTS = "Formatting error results (`%s` format)..."
+	MSG_INFO_FORMATTING_ERROR_RESULTS = "Formatting error results ('%s' format)..."
 	MSG_INFO_SCHEMA_ERRORS_DETECTED   = "(%d) schema errors detected."
 	MSG_INFO_TOO_MANY_ERRORS          = "Too many errors. Showing (%v/%v) errors."
 	MSG_ERROR_FORMATTING_ERROR        = "formatting error: %s"
-	MSG_WARN_INVALID_FORMAT           = "invalid format. error results not supported for `%s` format; defaulting to `%s` format..."
+	MSG_WARN_INVALID_FORMAT           = "invalid format. error results not supported for '%s' format; defaulting to '%s' format..."
 )
 
 var VALIDATION_ERROR_TITLES = []string{

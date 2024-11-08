@@ -27,7 +27,7 @@ func CompileRegex(test string) (expression *regexp.Regexp, err error) {
 	if test != "" {
 		expression, err = regexp.Compile(test)
 		if err != nil {
-			err = fmt.Errorf("invalid regular expression: `%s`", test)
+			err = fmt.Errorf("invalid regular expression: '%s'", test)
 		}
 	}
 	return

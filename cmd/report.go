@@ -85,7 +85,7 @@ func processWhereFlag(cmd *cobra.Command) (whereFilters []common.WhereFilter, er
 	whereValues, errGet := cmd.Flags().GetString(FLAG_REPORT_WHERE)
 
 	if errGet != nil {
-		err = getLogger().Errorf("failed to read flag `%s` value", FLAG_REPORT_WHERE)
+		err = getLogger().Errorf("failed to read flag '%s' value", FLAG_REPORT_WHERE)
 		return
 	}
 
@@ -153,10 +153,10 @@ func wrapTableRowText(maxChars int, joinChar string, columns ...interface{}) (ta
 			// NOTE: JSON Unmarshal() always decodes JSON Numbers as "float64" type
 			rowData[iCol] = strconv.FormatFloat(data, 'f', -1, 64)
 		case nil:
-			//getLogger().Tracef("nil value for column: `%v`", columnData.DataKey)
+			//getLogger().Tracef("nil value for column: '%v'", columnData.DataKey)
 			rowData[iCol] = REPORT_LIST_VALUE_NONE
 		default:
-			err = getLogger().Errorf("Unexpected type for report data: column: %s, type: `%T`, value: `%v`", rowData[iCol], data, data)
+			err = getLogger().Errorf("Unexpected type for report data: column: %s, type: `%T`, value: '%v'", rowData[iCol], data, data)
 		}
 	}
 
@@ -235,12 +235,12 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 
 		if !dataFound {
 			// TODO: change back?
-			getLogger().Errorf("data not found in structure: key: `%s`", columnData.DataKey)
+			getLogger().Errorf("data not found in structure: key: '%s'", columnData.DataKey)
 			data = "<error: not found>"
 			//return
 		}
 
-		//fmt.Printf("data: `%v` (%T)\n", data, data)
+		//fmt.Printf("data: '%v' (%T)\n", data, data)
 		switch typedData := data.(type) {
 		case string:
 			// replace line feeds with spaces in description
@@ -284,10 +284,10 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 
 			lineData = append(lineData, joinedData)
 		case nil:
-			//getLogger().Tracef("nil value for column: `%v`", columnData.DataKey)
+			//getLogger().Tracef("nil value for column: '%v'", columnData.DataKey)
 			lineData = append(lineData, REPORT_LIST_VALUE_NONE)
 		default:
-			err = getLogger().Errorf("Unexpected type for report data: column: %s, type: `%T`, value: `%v`", columnData.DataKey, data, data)
+			err = getLogger().Errorf("Unexpected type for report data: column: %s, type: `%T`, value: '%v'", columnData.DataKey, data, data)
 		}
 	}
 

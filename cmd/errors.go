@@ -57,7 +57,7 @@ const (
 
 // Validation messages
 const (
-	MSG_FORMAT_TYPE                    = "format: `%s`"
+	MSG_FORMAT_TYPE                    = "format: '%s'"
 	MSG_SCHEMA_ERRORS                  = "schema errors found"
 	MSG_PROPERTY_NOT_FOUND             = "property not found"
 	MSG_PROPERTY_REGEX_FAILED          = "check failed: property regex mismatch"

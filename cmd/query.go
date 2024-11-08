@@ -93,14 +93,14 @@ func queryCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	// Create output writer
 	outputFilename := utils.GlobalFlags.PersistentFlags.OutputFile
 	outputFile, writer, err := createOutputFile(outputFilename)
-	getLogger().Tracef("outputFile: `%v`; writer: `%v`", outputFilename, writer)
+	getLogger().Tracef("outputFile: '%v'; writer: '%v'", outputFilename, writer)
 
 	// use function closure to assure consistent error output based upon error type
 	defer func() {
 		// always close the output file
 		if outputFile != nil {
 			outputFile.Close()
-			getLogger().Infof("Closed output file: `%s`", outputFilename)
+			getLogger().Infof("Closed output file: '%s'", outputFilename)
 		}
 	}()
 
@@ -431,7 +431,7 @@ func whereFilterMatch(mapObject map[string]interface{}, whereFilters []common.Wh
 		value, present := mapObject[key]
 		if !present {
 			match = false
-			err = getLogger().Errorf("key `%s` not found in object map", key)
+			err = getLogger().Errorf("key '%s' not found in object map", key)
 			break
 		}
 
@@ -455,7 +455,7 @@ func whereFilterMatch(mapObject map[string]interface{}, whereFilters []common.Wh
 		err = enc.Encode(value)
 
 		if err != nil {
-			err = getLogger().Errorf("Unable to convert value: `%v`, to []byte", value)
+			err = getLogger().Errorf("Unable to convert value: '%v', to []byte", value)
 			return
 		}
 

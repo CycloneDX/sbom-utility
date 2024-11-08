@@ -92,11 +92,11 @@ func (bom *BOM) HashmapComponent(cdxComponent CDXComponent, whereFilters []commo
 	}
 
 	if cdxComponent.Version == "" {
-		getLogger().Warningf("component named `%s` missing `version`", cdxComponent.Name)
+		getLogger().Warningf("component named '%s' missing `version`", cdxComponent.Name)
 	}
 
 	if cdxComponent.BOMRef == nil || *cdxComponent.BOMRef == "" {
-		getLogger().Warningf("component named `%s` missing `bom-ref`", cdxComponent.Name)
+		getLogger().Warningf("component named '%s' missing `bom-ref`", cdxComponent.Name)
 	}
 
 	// Map CDX data struct to our internal structure used for reporting/stats gathering
@@ -174,11 +174,11 @@ func (bom *BOM) HashmapService(cdxService CDXService, whereFilters []common.Wher
 	}
 
 	if cdxService.Version == "" {
-		getLogger().Warningf("service named `%s` missing `version`", cdxService.Name)
+		getLogger().Warningf("service named '%s' missing `version`", cdxService.Name)
 	}
 
 	if cdxService.BOMRef == nil || *cdxService.BOMRef == "" {
-		getLogger().Warningf("service named `%s` missing `bom-ref`", cdxService.Name)
+		getLogger().Warningf("service named '%s' missing `bom-ref`", cdxService.Name)
 	}
 
 	// Map CDX data struct to our internal structure used for reporting/stats gathering
@@ -334,15 +334,15 @@ func (bom *BOM) HashmapVulnerability(cdxVulnerability CDXVulnerability, whereFil
 	}
 
 	if cdxVulnerability.Published == "" {
-		getLogger().Warningf("vulnerability (`%s`) missing `published` date", cdxVulnerability.Id)
+		getLogger().Warningf("vulnerability ('%s') missing `published` date", cdxVulnerability.Id)
 	}
 
 	if cdxVulnerability.Created == "" {
-		getLogger().Warningf("vulnerability (`%s`) missing `created` date", cdxVulnerability.Id)
+		getLogger().Warningf("vulnerability ('%s') missing `created` date", cdxVulnerability.Id)
 	}
 
 	if cdxVulnerability.Ratings == nil || len(*cdxVulnerability.Ratings) == 0 {
-		getLogger().Warningf("vulnerability (`%s`) missing `ratings`", cdxVulnerability.Id)
+		getLogger().Warningf("vulnerability ('%s') missing `ratings`", cdxVulnerability.Id)
 	}
 
 	// hash any component w/o a license using special key name

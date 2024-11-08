@@ -98,12 +98,12 @@ func NewCommandResource() *cobra.Command {
 		// Make sure (optional) subcommand is known/valid
 		if len(args) == 1 {
 			if !preRunTestForSubcommand(VALID_SUBCOMMANDS_RESOURCE, args[0]) {
-				return getLogger().Errorf("Subcommand provided is not valid: `%v`", args[0])
+				return getLogger().Errorf("Subcommand provided is not valid: '%v'", args[0])
 			}
 		}
 
 		if len(args) == 0 {
-			getLogger().Tracef("No subcommands provided; defaulting to: `%s` subcommand", SUBCOMMAND_SCHEMA_LIST)
+			getLogger().Tracef("No subcommands provided; defaulting to: '%s' subcommand", SUBCOMMAND_SCHEMA_LIST)
 		}
 
 		// Test for required flags (parameters)
@@ -124,7 +124,7 @@ func retrieveResourceType(cmd *cobra.Command) (resourceType string, err error) {
 	// validate resource type is a known keyword
 	if !schema.IsValidResourceType(resourceType) {
 		// invalid
-		err = getLogger().Errorf("invalid resource `%s`: `%s`", FLAG_RESOURCE_TYPE, resourceType)
+		err = getLogger().Errorf("invalid resource '%s': '%s'", FLAG_RESOURCE_TYPE, resourceType)
 	}
 
 	return
@@ -137,14 +137,14 @@ func resourceCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	// Create output writer
 	outputFilename := utils.GlobalFlags.PersistentFlags.OutputFile
 	outputFile, writer, err := createOutputFile(outputFilename)
-	getLogger().Tracef("outputFile: `%v`; writer: `%v`", outputFilename, writer)
+	getLogger().Tracef("outputFile: '%v'; writer: '%v'", outputFilename, writer)
 
 	// use function closure to assure consistent error output based upon error type
 	defer func() {
 		// always close the output file
 		if outputFile != nil {
 			outputFile.Close()
-			getLogger().Infof("Closed output file: `%s`", outputFilename)
+			getLogger().Infof("Closed output file: '%s'", outputFilename)
 		}
 	}()
 
@@ -201,7 +201,7 @@ func ListResources(writer io.Writer, persistentFlags utils.PersistentCommandFlag
 	}
 
 	format := persistentFlags.OutputFormat
-	getLogger().Infof("Outputting listing (`%s` format)...", format)
+	getLogger().Infof("Outputting listing ('%s' format)...", format)
 	switch format {
 	case FORMAT_TEXT:
 		DisplayResourceListText(document, writer)
@@ -211,7 +211,7 @@ func ListResources(writer io.Writer, persistentFlags utils.PersistentCommandFlag
 		DisplayResourceListMarkdown(document, writer)
 	default:
 		// Default to Text output for anything else (set as flag default)
-		getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
+		getLogger().Warningf("Listing not supported for '%s' format; defaulting to '%s' format...",
 			format, FORMAT_TEXT)
 		DisplayResourceListText(document, writer)
 	}

@@ -328,12 +328,19 @@ Use the [schema](#schema) command to list supported schemas formats, versions an
 
 Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file. See [adding schemas](#adding-schemas).
 
-- **"Customized" schema** variants, perhaps derived from standard BOM schemas, can be used for validation using the `--variant` flag (e.g., industry or company-specific schemas).
-- **Overriding default schema** - You can override an BOM's declared BOM version using the `--force` flag (e.g., verify a BOM against a newer specification version).
+- **Overriding default schema** 
+  - Using the [`--force` flag](#--force-flag) and passing in a URI to an alternative JSON schema.
+- **"Customized" schema** variants, perhaps derived from standard BOM schemas, can be used for validation using the `--variant` flag (e.g., industry or company-specific schemas). 
+  - **Note**: *These variants need to be built into the utility binary as a resource.*
 
 #### Validate flags
 
 The following flags can be used to improve performance when formatting error output results:
+
+##### `--force` flag
+
+You can override the schema used for validation *(which defaults to the schema that matches the declared format and version found in the input BOM file)* by providing a different one using the `--force` flag. This may be useful to verify a BOM contents against a newer specification version or provide a customized schema.
+  - **Note**: *The `--force` flag works with schema files with valid URIs which include URLs (e.g., 'https://') and files (e.g., 'file://').*
 
 ##### `--error-limit` flag
 
@@ -358,17 +365,15 @@ Validating the "juice shop" SBOM (CycloneDX 1.2) example provided in this reposi
 ```
 
 ```bash
-[INFO] Loading (embedded) default schema config file: `config.json`...
-[INFO] Loading (embedded) default license policy file: `license.json`...
-[INFO] Attempting to load and unmarshal data from: `examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json`...
-[INFO] Successfully unmarshalled data from: `examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json`
+[INFO] Attempting to load and unmarshal data from: 'examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json'...
+[INFO] Successfully unmarshalled data from: 'examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json'
 [INFO] Determining file's BOM format and version...
-[INFO] Determined BOM format, version (variant): `CycloneDX`, `1.2` (latest)
+[INFO] Determined BOM format, version (variant): 'CycloneDX', '1.2' (latest)
 [INFO] Matching BOM schema (for validation): schema/cyclonedx/1.2/bom-1.2.schema.json
-[INFO] Loading schema `schema/cyclonedx/1.2/bom-1.2.schema.json`...
-[INFO] Schema `schema/cyclonedx/1.2/bom-1.2.schema.json` loaded.
-[INFO] Validating `examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json`...
-[INFO] BOM valid against JSON schema: `true`
+[INFO] Loading schema 'schema/cyclonedx/1.2/bom-1.2.schema.json'...
+[INFO] Schema 'schema/cyclonedx/1.2/bom-1.2.schema.json' loaded.
+[INFO] Validating 'examples/cyclonedx/SBOM/juice-shop-11.1.2/bom.json'...
+[INFO] BOM valid against JSON schema: 'true'
 ```
 
 You can also verify the [exit code](#exit-codes) from the validate command:
@@ -381,7 +386,37 @@ echo $?
 0  // no error (valid)
 ```
 
-#### Example: Validate using "custom" schema variants
+##### Example: Validate using a remote JSON schema file using '--force' flag
+
+```bash
+./sbom-utility validate -i test/cyclonedx/1.6/cdx-1-6-valid-cbom-full-1.6.json --force https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.6.schema.json
+```
+
+```bash
+[INFO] Attempting to load and unmarshal data from: 'test/cyclonedx/1.6/cdx-1-6-valid-cbom-full-1.6.json'...
+[INFO] Successfully unmarshalled data from: 'test/cyclonedx/1.6/cdx-1-6-valid-cbom-full-1.6.json'
+[INFO] Determining file's BOM format and version...
+[INFO] Determined BOM format, version (variant): 'CycloneDX', '1.6' (latest)
+[INFO] Matching BOM schema (for validation): schema/cyclonedx/1.6/bom-1.6.schema.json
+[INFO] Loading schema from '--force' flag: 'https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.6.schema.json'...
+[INFO] Validating document using forced schema (i.e., '--force https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.6.schema.json')
+[INFO] Schema 'schema/cyclonedx/1.6/bom-1.6.schema.json' loaded.
+[INFO] Validating 'test/cyclonedx/1.6/cdx-1-6-valid-cbom-full-1.6.json'...
+[INFO] BOM valid against JSON schema: 'true'
+```
+
+You can also verify the [exit code](#exit-codes) from the validate command:
+
+```bash
+echo $?
+```
+
+```bash
+0  // no error (valid)
+```
+
+
+##### Example: Validate using "custom" schema variants
 
 The validation command will use the declared format and version found within the SBOM JSON file itself to lookup the default (latest) matching schema version (as declared in`config.json`; however, if variants of that same schema (same format and version) are declared, they can be requested via the `--variant` command line flag:
 
@@ -392,19 +427,17 @@ The validation command will use the declared format and version found within the
 If you run the sample command above, you would see several "custom" schema errors resulting in an invalid SBOM determination (i.e., `exit status 2`):
 
 ```text
-[INFO] Loading (embedded) default schema config file: `config.json`...
-[INFO] Loading (embedded) default license policy file: `license.json`...
-[INFO] Attempting to load and unmarshal data from: `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`...
-[INFO] Successfully unmarshalled data from: `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`
+[INFO] Attempting to load and unmarshal data from: 'test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json'...
+[INFO] Successfully unmarshalled data from: 'test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json'
 [INFO] Determining file's BOM format and version...
-[INFO] Determined BOM format, version (variant): `CycloneDX`, `1.4` custom
+[INFO] Determined BOM format, version (variant): 'CycloneDX', '1.4' custom
 [INFO] Matching BOM schema (for validation): schema/test/bom-1.4-custom.schema.json
-[INFO] Loading schema `schema/test/bom-1.4-custom.schema.json`...
-[INFO] Schema `schema/test/bom-1.4-custom.schema.json` loaded.
-[INFO] Validating `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`...
-[INFO] BOM valid against JSON schema: `false`
+[INFO] Loading schema 'schema/test/bom-1.4-custom.schema.json'...
+[INFO] Schema 'schema/test/bom-1.4-custom.schema.json' loaded.
+[INFO] Validating 'test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json'...
+[INFO] BOM valid against JSON schema: 'false'
 [INFO] (3) schema errors detected.
-[INFO] Formatting error results (`txt` format)...
+[INFO] Formatting error results ('txt' format)...
 1. {
         "type": "contains",
         "field": "metadata.properties",
@@ -445,7 +478,7 @@ If you run the sample command above, you would see several "custom" schema error
         ]
     }
 [ERROR] invalid SBOM: schema errors found (test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json)
-[INFO] document `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`: valid=[false]
+[INFO] document 'test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json': valid=[false]
 ```
 
 confirming the exit code:
@@ -458,7 +491,7 @@ echo $?
 2 // SBOM error
 ```
 
-##### Why validation failed
+###### Why validation failed
 
 The output shows a first schema error indicating the failing JSON object; in this case,
 
@@ -467,7 +500,7 @@ The output shows a first schema error indicating the failing JSON object; in thi
   - the `value` field SHOULD have had a constant value of `"This SBOM is current as of the date it was generated and is subject to change."` (as was required by the custom schema's regex).
   - However, it was found to have only a partial match of `"This SBOM is current as of the date it was generated."`.
 
-##### Details of the schema error
+###### Details of the schema error
 
 Use the `--debug` or `-d` flag to see all schema error details:
 
@@ -496,7 +529,7 @@ The details include the full context of the failing `metadata.properties` object
     }
 ```
 
-#### Example: Validate using "JSON" format
+###### Example: Validate using "JSON" output format
 
 The JSON format will provide an `array` of schema error results that can be post-processed as part of validation toolchain.
 
@@ -571,7 +604,7 @@ The JSON format will provide an `array` of schema error results that can be post
 ]
 ```
 
-##### Reducing output size using `error-value=false` flag
+###### Reducing output size using `error-value=false` flag
 
 In many cases, BOMs may have many errors and having the `value` information details included can be too verbose and lead to large output files to inspect.  In those cases, simply set the `error-value` flag to `false`.
 

@@ -119,14 +119,14 @@ func innerBufferedTestNormalize(testInfo *NormalizeTestInfo) (outputBuffer bytes
 		defer bufferedWriter.Flush()
 	} else {
 		outputFile, outputWriter, err = createOutputFile(testInfo.OutputFile)
-		getLogger().Tracef("outputFile: `%v`; writer: `%v`", testInfo.OutputFile, outputWriter)
+		getLogger().Tracef("outputFile: '%v'; writer: '%v'", testInfo.OutputFile, outputWriter)
 
 		// use function closure to assure consistent error output based upon error type
 		defer func() {
 			// always close the output file (even if error, as long as file handle returned)
 			if outputFile != nil {
 				outputFile.Close()
-				getLogger().Infof("Closed output file: `%s`", testInfo.OutputFile)
+				getLogger().Infof("Closed output file: '%s'", testInfo.OutputFile)
 			}
 		}()
 
@@ -251,7 +251,7 @@ func TestNormalizeCdx15VulnerabilitiesNatsBox(t *testing.T) {
 
 // 	// Immediately grab the Type of the dereferenced interface{}
 // 	rvoType := rvoItfc.Type()
-// 	fmt.Printf("Interface: Type: `%v`, Kind: `%v`\n", rvoType.String(), rvoType.Kind())
+// 	fmt.Printf("Interface: Type: '%v', Kind: '%v'\n", rvoType.String(), rvoType.Kind())
 
 // 	if rvoType.Kind() == reflect.Struct {
 // 		// Iterate over all fields of the Struct type (if any)
@@ -266,7 +266,7 @@ func TestNormalizeCdx15VulnerabilitiesNatsBox(t *testing.T) {
 // 			fvKind := fieldValue.Kind()
 // 			fvValueOf := reflect.ValueOf(fieldValue)
 // 			// TODO: explore `field.PkgPath`
-// 			fmt.Printf(">> Field(%v): `%s`, Kind: `%s`, Tags: `%s`, Value: `%v`\n", i, fieldName, fvKind.String(), field.Tag, fvValueOf)
+// 			fmt.Printf(">> Field(%v): '%s', Kind: '%s', Tags: '%s', Value: '%v'\n", i, fieldName, fvKind.String(), field.Tag, fvValueOf)
 
 // 			// TODO: explore use of isItfc := field.CanInterface()
 // 			if fvKind == reflect.Ptr || fvKind == reflect.Interface {
@@ -277,6 +277,6 @@ func TestNormalizeCdx15VulnerabilitiesNatsBox(t *testing.T) {
 // 			}
 // 		}
 // 	} else {
-// 		fmt.Printf("!!! Unhandled Kind(): `%v`", rvoType.Kind())
+// 		fmt.Printf("!!! Unhandled Kind(): '%v'", rvoType.Kind())
 // 	}
 // }

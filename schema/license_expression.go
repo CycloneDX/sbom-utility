@@ -109,7 +109,7 @@ func parseCompoundExpression(policyConfig *LicensePolicyConfig, expression *Comp
 		token = tokens[index]
 		switch token {
 		case LEFT_PARENS:
-			getLogger().Debugf("[%v] LEFT_PARENS: `%v`", index, token)
+			getLogger().Debugf("[%v] LEFT_PARENS: '%v'", index, token)
 			childExpression := NewCompoundExpression()
 
 			// if we have no conjunction, this compound expression represents the "left" operand
@@ -135,17 +135,17 @@ func parseCompoundExpression(policyConfig *LicensePolicyConfig, expression *Comp
 			}
 
 		case RIGHT_PARENS:
-			getLogger().Debugf("[%v] RIGHT_PARENS: `%v`", index, token)
+			getLogger().Debugf("[%v] RIGHT_PARENS: '%v'", index, token)
 			err = FinalizeCompoundPolicy(expression)
 			return index, err // Do NOT Increment, parent caller will do that
 		case AND:
-			getLogger().Debugf("[%v] AND (Conjunction): `%v`", index, token)
+			getLogger().Debugf("[%v] AND (Conjunction): '%v'", index, token)
 			expression.Conjunction = token
 		case OR:
-			getLogger().Debugf("[%v] OR (Conjunction): `%v`", index, token)
+			getLogger().Debugf("[%v] OR (Conjunction): '%v'", index, token)
 			expression.Conjunction = token
 		case WITH:
-			getLogger().Debugf("[%v] WITH (Preposition): `%v`", index, token)
+			getLogger().Debugf("[%v] WITH (Preposition): '%v'", index, token)
 			if expression.Conjunction == "" {
 				expression.PrepLeft = token
 			} else {
@@ -153,7 +153,7 @@ func parseCompoundExpression(policyConfig *LicensePolicyConfig, expression *Comp
 				expression.PrepRight = token
 			}
 		default:
-			getLogger().Debugf("[%v] Simple Expression: `%v`", index, token)
+			getLogger().Debugf("[%v] Simple Expression: '%v'", index, token)
 			// if we have no conjunction, this compound expression represents the "left" operand
 			if expression.Conjunction == CONJUNCTION_UNDEFINED {
 				if expression.PrepLeft == "" {
@@ -202,7 +202,7 @@ func FinalizeCompoundPolicy(expression *CompoundExpression) (err error) {
 		return getLogger().Errorf("Expression is nil")
 	}
 
-	getLogger().Debugf("Evaluating policy: (`%s` `%s` `%s`)",
+	getLogger().Debugf("Evaluating policy: ('%s' '%s' '%s')",
 		expression.LeftUsagePolicy,
 		expression.Conjunction,
 		expression.RightUsagePolicy)
@@ -298,7 +298,7 @@ func FinalizeCompoundPolicy(expression *CompoundExpression) (err error) {
 		} // else default expression.CompoundUsagePolicy is UNDEFINED
 	default:
 		expression.CompoundUsagePolicy = POLICY_UNDEFINED
-		return getLogger().Errorf("%s: %s: `%s`",
+		return getLogger().Errorf("%s: %s: '%s'",
 			MSG_LICENSE_INVALID_EXPRESSION,
 			MSG_LICENSE_EXPRESSION_INVALID_CONJUNCTION,
 			expression.Conjunction)

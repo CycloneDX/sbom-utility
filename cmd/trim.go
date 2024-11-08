@@ -78,7 +78,7 @@ func initCommandTrimFlags(command *cobra.Command) (err error) {
 	command.Flags().StringVarP(&utils.GlobalFlags.TrimFlags.RawKeys, FLAG_TRIM_MAP_KEYS, "", "", MSG_FLAG_TRIM_KEYS)
 	err = command.MarkFlagRequired(FLAG_TRIM_MAP_KEYS)
 	if err != nil {
-		err = getLogger().Errorf("unable to mark flag `%s` as required: %s", FLAG_TRIM_MAP_KEYS, err)
+		err = getLogger().Errorf("unable to mark flag '%s' as required: %s", FLAG_TRIM_MAP_KEYS, err)
 	}
 	return
 }
@@ -90,31 +90,31 @@ func trimCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	// Create output writer
 	outputFilename := utils.GlobalFlags.PersistentFlags.OutputFile
 	outputFile, writer, err := createOutputFile(outputFilename)
-	getLogger().Tracef("outputFile: `%v`; writer: `%v`", outputFilename, writer)
+	getLogger().Tracef("outputFile: '%v'; writer: '%v'", outputFilename, writer)
 
 	// use function closure to assure consistent error output based upon error type
 	defer func() {
 		// always close the output file
 		if outputFile != nil {
 			outputFile.Close()
-			getLogger().Infof("Closed output file: `%s`", outputFilename)
+			getLogger().Infof("Closed output file: '%s'", outputFilename)
 		}
 	}()
 
 	// --keys parameter
 	if keys := utils.GlobalFlags.TrimFlags.RawKeys; keys != "" {
 		utils.GlobalFlags.TrimFlags.Keys = strings.Split(keys, TRIM_KEYS_SEP)
-		getLogger().Tracef("Trim: keys: `%v`\n", keys)
+		getLogger().Tracef("Trim: keys: '%v'\n", keys)
 	} else {
-		getLogger().Tracef("Trim: required parameter NOT found for `%s` flag", FLAG_TRIM_MAP_KEYS)
+		getLogger().Tracef("Trim: required parameter NOT found for '%s' flag", FLAG_TRIM_MAP_KEYS)
 	}
 
 	// --from parameter
 	if paths := utils.GlobalFlags.TrimFlags.RawPaths; paths != "" {
 		utils.GlobalFlags.TrimFlags.FromPaths = common.ParseFromPaths(paths)
-		getLogger().Tracef("Trim: paths: `%v`\n", paths)
+		getLogger().Tracef("Trim: paths: '%v'\n", paths)
 	} else {
-		getLogger().Tracef("Trim: required parameter NOT found for `%s` flag", FLAG_TRIM_FROM_PATHS)
+		getLogger().Tracef("Trim: required parameter NOT found for '%s' flag", FLAG_TRIM_FROM_PATHS)
 	}
 
 	if err == nil {
@@ -213,13 +213,13 @@ func Trim(writer io.Writer, persistentFlags utils.PersistentCommandFlags, trimFl
 
 	// Output the "trimmed" version of the Input BOM
 	format := persistentFlags.OutputFormat
-	getLogger().Infof("Writing trimmed BOM (`%s` format)...", format)
+	getLogger().Infof("Writing trimmed BOM ('%s' format)...", format)
 	switch format {
 	case FORMAT_JSON:
 		err = document.WriteAsEncodedJSONInt(writer, utils.GlobalFlags.PersistentFlags.GetOutputIndentInt())
 	default:
 		// Default to Text output for anything else (set as flag default)
-		getLogger().Warningf("Trim not supported for `%s` format; defaulting to `%s` format...",
+		getLogger().Warningf("Trim not supported for '%s' format; defaulting to '%s' format...",
 			format, FORMAT_JSON)
 		err = document.WriteAsEncodedJSONInt(writer, utils.GlobalFlags.PersistentFlags.GetOutputIndentInt())
 	}

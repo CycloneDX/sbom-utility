@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"strings"
 
@@ -39,7 +40,7 @@ const (
 )
 
 // validation flags
-// TODO: support a `--truncate <int>“ flag (or similar... `err-value-truncate` <int>) used
+// TODO: support a '--truncate <int>“ flag (or similar... 'err-value-truncate' <int>) used
 // to truncate formatted "value" (details) to <int> bytes.
 // This would replace the hardcoded "DEFAULT_MAX_ERR_DESCRIPTION_LEN" value
 const (
@@ -72,7 +73,7 @@ const (
 )
 
 func NewCommandValidate() *cobra.Command {
-	// NOTE: `RunE` function takes precedent over `Run` (anonymous) function if both provided
+	// NOTE: 'RunE' function takes precedent over 'Run' (anonymous) function if both provided
 	var command = new(cobra.Command)
 	command.Use = CMD_USAGE_VALIDATE
 	command.Short = "Validate input file against its declared BOM schema"
@@ -122,7 +123,7 @@ func validateCmdImpl(cmd *cobra.Command, args []string) error {
 		// always close the output file
 		if outputFile != nil {
 			err = outputFile.Close()
-			getLogger().Infof("Closed output file: `%s`", outputFilename)
+			getLogger().Infof("Closed output file: '%s'", outputFilename)
 		}
 	}()
 
@@ -170,13 +171,13 @@ func validationError(document *schema.BOM, valid bool, err error) {
 			}
 			getLogger().Error(err)
 		default:
-			getLogger().Tracef("unhandled error type: `%v`", t)
+			getLogger().Tracef("unhandled error type: '%v'", t)
 			getLogger().Error(err)
 		}
 	}
 
 	// ALWAYS output valid/invalid result (as informational)
-	message := fmt.Sprintf("document `%s`: valid=[%t]", document.GetFilename(), valid)
+	message := fmt.Sprintf("document '%s': valid=[%t]", document.GetFilename(), valid)
 	getLogger().Info(message)
 }
 
@@ -229,7 +230,7 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	}
 
 	if documentLoader == nil {
-		return INVALID, bom, schemaErrors, fmt.Errorf("unable to load document: `%s`", bom.GetFilename())
+		return INVALID, bom, schemaErrors, fmt.Errorf("unable to load document: '%s'", bom.GetFilename())
 	}
 
 	schemaName := bom.SchemaInfo.File
@@ -239,15 +240,26 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	// TODO: support remote schema load (via URL) with a flag (default should always be local file for security)
 	forcedSchemaFile := validateFlags.ForcedJsonSchemaFile
 	if forcedSchemaFile != "" {
-		getLogger().Infof("Validating document using forced schema (i.e., `--force %s`)", forcedSchemaFile)
-		//schemaName = document.SchemaInfo.File
-		schemaName = "file://" + forcedSchemaFile
-		getLogger().Infof("Loading schema `%s`...", schemaName)
-		schemaLoader = gojsonschema.NewReferenceLoader(schemaName)
+
+		if !isValidURIPrefix(forcedSchemaFile) {
+			// attempt to load as a local file
+			forcedSchemaFile = "file://" + forcedSchemaFile
+			getLogger().Warningf("invalid schema URI: '%s'.  Attempting to load as a local file...", forcedSchemaFile)
+		}
+
+		_, errParseURI := url.ParseRequestURI(forcedSchemaFile)
+		if errParseURI != nil {
+			errSchemaURI := fmt.Errorf("invalid schema URI: '%s'. %w", forcedSchemaFile, errParseURI)
+			return INVALID, bom, schemaErrors, errSchemaURI
+		}
+
+		getLogger().Infof("Loading schema from '--force' flag: '%s'...", forcedSchemaFile)
+		schemaLoader = gojsonschema.NewReferenceLoader(forcedSchemaFile)
+		getLogger().Infof("Validating document using forced schema (i.e., '--force %s')", forcedSchemaFile)
 	} else {
 		// Load the matching JSON schema (format, version and variant) from embedded resources
 		// i.e., using the matching schema found in config.json (as SchemaInfo)
-		getLogger().Infof("Loading schema `%s`...", bom.SchemaInfo.File)
+		getLogger().Infof("Loading schema '%s'...", bom.SchemaInfo.File)
 		bSchema, errRead = resources.BOMSchemaFiles.ReadFile(bom.SchemaInfo.File)
 
 		if errRead != nil {
@@ -262,7 +274,7 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	if schemaLoader == nil {
 		// we force result to INVALID as any errors from the library means
 		// we could NOT actually confirm the input documents validity
-		return INVALID, bom, schemaErrors, fmt.Errorf("unable to read schema: `%s`", schemaName)
+		return INVALID, bom, schemaErrors, fmt.Errorf("unable to read schema: '%s'", schemaName)
 	}
 
 	// create a reusable schema object (TODO: validate multiple documents)
@@ -285,18 +297,18 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	}
 
 	if errLoad != nil {
-		return INVALID, bom, schemaErrors, fmt.Errorf("unable to load schema: `%s`", schemaName)
+		return INVALID, bom, schemaErrors, fmt.Errorf("unable to load schema: '%s'", schemaName)
 	}
 
-	getLogger().Infof("Schema `%s` loaded.", schemaName)
+	getLogger().Infof("Schema '%s' loaded.", schemaName)
 
 	// Validate against the schema and save result determination
-	getLogger().Infof("Validating `%s`...", bom.GetFilenameInterpolated())
+	getLogger().Infof("Validating '%s'...", bom.GetFilenameInterpolated())
 	result, errValidate := jsonBOMSchema.Validate(documentLoader)
 
 	// ALWAYS set the valid return parameter and provide user an informative message
 	valid = result.Valid()
-	getLogger().Infof("BOM valid against JSON schema: `%t`", valid)
+	getLogger().Infof("BOM valid against JSON schema: '%t'", valid)
 
 	// Catch general errors from the validation package/library itself and display them
 	if errValidate != nil {
@@ -305,8 +317,8 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 		return INVALID, bom, schemaErrors, errValidate
 	}
 
-	// Note: actual schema validation errors appear in the `result` object
-	// Save all schema errors found in the `result` object in an explicit, typed error
+	// Note: actual schema validation errors appear in the 'result' object
+	// Save all schema errors found in the 'result' object in an explicit, typed error
 	if schemaErrors = result.Errors(); len(schemaErrors) > 0 {
 		errInvalid := NewInvalidSBOMError(
 			bom,
@@ -375,6 +387,17 @@ func validateCustom(document *schema.BOM, policyConfig *schema.LicensePolicyConf
 	}
 
 	return VALID, nil
+}
+
+func isValidURIPrefix(str string) bool {
+	// Check for common URI prefixes
+	prefixes := []string{"http://", "https://", "file://"}
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(str, prefix) {
+			return true
+		}
+	}
+	return false
 }
 
 // func isJSONSchema(filePath string) (isSchema bool, err error) {

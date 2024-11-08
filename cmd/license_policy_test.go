@@ -157,7 +157,7 @@ func TestLicensePolicyUsageConjunctionsANDCombinations(t *testing.T) {
 	}
 	resolvedPolicy := parsedExpression.CompoundUsagePolicy
 	if resolvedPolicy != EXPECTED_USAGE_POLICY {
-		t.Errorf("schema.ParseExpression(): \"%s\" returned: `%s`; expected: `%s`", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
+		t.Errorf("schema.ParseExpression(): \"%s\" returned: '%s'; expected: '%s'", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
 	}
 
 	// 2. schema.POLICY_DENY AND schema.POLICY_NEEDS_REVIEW
@@ -169,7 +169,7 @@ func TestLicensePolicyUsageConjunctionsANDCombinations(t *testing.T) {
 	}
 	resolvedPolicy = parsedExpression.CompoundUsagePolicy
 	if resolvedPolicy != EXPECTED_USAGE_POLICY {
-		t.Errorf("schema.ParseExpression(): \"%s\" returned: `%s`; expected: `%s`", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
+		t.Errorf("schema.ParseExpression(): \"%s\" returned: '%s'; expected: '%s'", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
 	}
 
 	// 3. schema.POLICY_DENY AND schema.POLICY_DENY
@@ -181,7 +181,7 @@ func TestLicensePolicyUsageConjunctionsANDCombinations(t *testing.T) {
 	}
 	resolvedPolicy = parsedExpression.CompoundUsagePolicy
 	if resolvedPolicy != EXPECTED_USAGE_POLICY {
-		t.Errorf("schema.ParseExpression(): \"%s\" returned: `%s`; expected: `%s`", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
+		t.Errorf("schema.ParseExpression(): \"%s\" returned: '%s'; expected: '%s'", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
 	}
 
 	// 4. schema.POLICY_NEEDS_REVIEW AND schema.POLICY_ALLOW
@@ -193,7 +193,7 @@ func TestLicensePolicyUsageConjunctionsANDCombinations(t *testing.T) {
 	}
 	resolvedPolicy = parsedExpression.CompoundUsagePolicy
 	if resolvedPolicy != EXPECTED_USAGE_POLICY {
-		t.Errorf("schema.ParseExpression(): \"%s\" returned: `%s`; expected: `%s`", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
+		t.Errorf("schema.ParseExpression(): \"%s\" returned: '%s'; expected: '%s'", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
 	}
 
 	// 5. schema.POLICY_NEEDS_REVIEW AND schema.POLICY_NEEDS_REVIEW
@@ -205,7 +205,7 @@ func TestLicensePolicyUsageConjunctionsANDCombinations(t *testing.T) {
 	}
 	resolvedPolicy = parsedExpression.CompoundUsagePolicy
 	if resolvedPolicy != EXPECTED_USAGE_POLICY {
-		t.Errorf("schema.ParseExpression(): \"%s\" returned: `%s`; expected: `%s`", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
+		t.Errorf("schema.ParseExpression(): \"%s\" returned: '%s'; expected: '%s'", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
 	}
 
 	// 6. schema.POLICY_ALLOW AND schema.POLICY_ALLOW
@@ -217,7 +217,7 @@ func TestLicensePolicyUsageConjunctionsANDCombinations(t *testing.T) {
 	}
 	resolvedPolicy = parsedExpression.CompoundUsagePolicy
 	if resolvedPolicy != EXPECTED_USAGE_POLICY {
-		t.Errorf("schema.ParseExpression(): \"%s\" returned: `%s`; expected: `%s`", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
+		t.Errorf("schema.ParseExpression(): \"%s\" returned: '%s'; expected: '%s'", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
 	}
 }
 
@@ -247,7 +247,7 @@ func TestLicensePolicyUsageConjunctionsORCombinations(t *testing.T) {
 	}
 	resolvedPolicy := parsedExpression.CompoundUsagePolicy
 	if resolvedPolicy != EXPECTED_USAGE_POLICY {
-		t.Errorf("schema.ParseExpression(): \"%s\" returned: `%s`; expected: `%s`", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
+		t.Errorf("schema.ParseExpression(): \"%s\" returned: '%s'; expected: '%s'", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
 	}
 
 	// 2. schema.POLICY_ALLOW OR schema.POLICY_NEEDS_REVIEW
@@ -259,7 +259,7 @@ func TestLicensePolicyUsageConjunctionsORCombinations(t *testing.T) {
 	}
 	resolvedPolicy = parsedExpression.CompoundUsagePolicy
 	if resolvedPolicy != EXPECTED_USAGE_POLICY {
-		t.Errorf("schema.ParseExpression(): \"%s\" returned: `%s`; expected: `%s`", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
+		t.Errorf("schema.ParseExpression(): \"%s\" returned: '%s'; expected: '%s'", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
 	}
 
 	// 3. schema.POLICY_ALLOW OR schema.POLICY_ALLOW
@@ -271,7 +271,7 @@ func TestLicensePolicyUsageConjunctionsORCombinations(t *testing.T) {
 	}
 	resolvedPolicy = parsedExpression.CompoundUsagePolicy
 	if resolvedPolicy != EXPECTED_USAGE_POLICY {
-		t.Errorf("schema.ParseExpression(): \"%s\" returned: `%s`; expected: `%s`", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
+		t.Errorf("schema.ParseExpression(): \"%s\" returned: '%s'; expected: '%s'", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
 	}
 
 	// 4. schema.POLICY_NEEDS_REVIEW OR schema.POLICY_DENY
@@ -283,7 +283,7 @@ func TestLicensePolicyUsageConjunctionsORCombinations(t *testing.T) {
 	}
 	resolvedPolicy = parsedExpression.CompoundUsagePolicy
 	if resolvedPolicy != EXPECTED_USAGE_POLICY {
-		t.Errorf("schema.ParseExpression(): \"%s\" returned: `%s`; expected: `%s`", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
+		t.Errorf("schema.ParseExpression(): \"%s\" returned: '%s'; expected: '%s'", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
 	}
 
 	// 5. schema.POLICY_NEEDS_REVIEW OR schema.POLICY_NEEDS_REVIEW
@@ -295,7 +295,7 @@ func TestLicensePolicyUsageConjunctionsORCombinations(t *testing.T) {
 	}
 	resolvedPolicy = parsedExpression.CompoundUsagePolicy
 	if resolvedPolicy != EXPECTED_USAGE_POLICY {
-		t.Errorf("schema.ParseExpression(): \"%s\" returned: `%s`; expected: `%s`", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
+		t.Errorf("schema.ParseExpression(): \"%s\" returned: '%s'; expected: '%s'", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
 	}
 
 	// 6. schema.POLICY_DENY OR schema.POLICY_DENY
@@ -307,7 +307,7 @@ func TestLicensePolicyUsageConjunctionsORCombinations(t *testing.T) {
 	}
 	resolvedPolicy = parsedExpression.CompoundUsagePolicy
 	if resolvedPolicy != EXPECTED_USAGE_POLICY {
-		t.Errorf("schema.ParseExpression(): \"%s\" returned: `%s`; expected: `%s`", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
+		t.Errorf("schema.ParseExpression(): \"%s\" returned: '%s'; expected: '%s'", EXP, resolvedPolicy, EXPECTED_USAGE_POLICY)
 	}
 }
 
@@ -343,10 +343,10 @@ func TestLicensePolicyCustomListGoodBadMaybe(t *testing.T) {
 	TEST_VALUES := []string{REPORT_LIST_TITLE_ROW_SEPARATOR}
 	matchFoundLine, matchFound := bufferLineContainsValues(outputBuffer, TEST_LINE_NUM, TEST_VALUES...)
 	if !matchFound {
-		t.Errorf("policy file does not contain expected values: `%v` at line: %v\n", TEST_VALUES, TEST_LINE_NUM)
+		t.Errorf("policy file does not contain expected values: '%v' at line: %v\n", TEST_VALUES, TEST_LINE_NUM)
 		return
 	} else {
-		getLogger().Tracef("policy file contains expected values: `%v` at line: %v\n", TEST_VALUES, matchFoundLine)
+		getLogger().Tracef("policy file contains expected values: '%v' at line: %v\n", TEST_VALUES, matchFoundLine)
 	}
 
 	// Assure "bad" policy has usage "deny"
@@ -354,10 +354,10 @@ func TestLicensePolicyCustomListGoodBadMaybe(t *testing.T) {
 	TEST_VALUES = []string{LICENSE_ID_BAD, schema.POLICY_DENY}
 	matchFoundLine, matchFound = bufferLineContainsValues(outputBuffer, TEST_LINE_NUM, TEST_VALUES...)
 	if !matchFound {
-		t.Errorf("policy file does not contain expected values: `%v` at line: %v\n", TEST_VALUES, TEST_LINE_NUM)
+		t.Errorf("policy file does not contain expected values: '%v' at line: %v\n", TEST_VALUES, TEST_LINE_NUM)
 		return
 	} else {
-		getLogger().Tracef("policy file contains expected values: `%v` at line: %v\n", TEST_VALUES, matchFoundLine)
+		getLogger().Tracef("policy file contains expected values: '%v' at line: %v\n", TEST_VALUES, matchFoundLine)
 	}
 
 	// Assure "good" policy has usage "allow"
@@ -365,10 +365,10 @@ func TestLicensePolicyCustomListGoodBadMaybe(t *testing.T) {
 	TEST_VALUES = []string{LICENSE_ID_GOOD, schema.POLICY_ALLOW}
 	matchFoundLine, matchFound = bufferLineContainsValues(outputBuffer, TEST_LINE_NUM, TEST_VALUES...)
 	if !matchFound {
-		t.Errorf("policy file does not contain expected values: `%v` at line: %v\n", TEST_VALUES, TEST_LINE_NUM)
+		t.Errorf("policy file does not contain expected values: '%v' at line: %v\n", TEST_VALUES, TEST_LINE_NUM)
 		return
 	} else {
-		getLogger().Tracef("policy file contains expected values: `%v` at line: %v\n", TEST_VALUES, matchFoundLine)
+		getLogger().Tracef("policy file contains expected values: '%v' at line: %v\n", TEST_VALUES, matchFoundLine)
 	}
 
 	// Assure "maybe" policy has usage "needs-review"
@@ -376,10 +376,10 @@ func TestLicensePolicyCustomListGoodBadMaybe(t *testing.T) {
 	TEST_VALUES = []string{LICENSE_ID_MAYBE, schema.POLICY_NEEDS_REVIEW}
 	matchFoundLine, matchFound = bufferLineContainsValues(outputBuffer, TEST_LINE_NUM, TEST_VALUES...)
 	if !matchFound {
-		t.Errorf("policy file does not contain expected values: `%v` at line: %v\n", TEST_VALUES, TEST_LINE_NUM)
+		t.Errorf("policy file does not contain expected values: '%v' at line: %v\n", TEST_VALUES, TEST_LINE_NUM)
 		return
 	} else {
-		getLogger().Tracef("policy file contains expected values: `%v` at line: %v\n", TEST_VALUES, matchFoundLine)
+		getLogger().Tracef("policy file contains expected values: '%v' at line: %v\n", TEST_VALUES, matchFoundLine)
 	}
 }
 

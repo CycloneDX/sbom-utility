@@ -75,7 +75,7 @@ func NewCommandSchema() *cobra.Command {
 	var command = new(cobra.Command)
 	command.Use = CMD_USAGE_SCHEMA_LIST // "schema"
 	command.Short = "View supported SBOM schemas"
-	command.Long = fmt.Sprintf("View built-in BOM schemas supported by the utility. The default command produces a list based upon `%s`.", DEFAULT_SCHEMA_CONFIG)
+	command.Long = fmt.Sprintf("View built-in BOM schemas supported by the utility. The default command produces a list based upon '%s'.", DEFAULT_SCHEMA_CONFIG)
 	command.Flags().StringVarP(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
 		FLAG_SCHEMA_OUTPUT_FORMAT_HELP+SCHEMA_LIST_SUPPORTED_FORMATS)
 	command.Flags().StringP(FLAG_REPORT_WHERE, "", "", FLAG_REPORT_WHERE_HELP)
@@ -92,12 +92,12 @@ func NewCommandSchema() *cobra.Command {
 		// Make sure (optional) subcommand is known/valid
 		if len(args) == 1 {
 			if !preRunTestForSubcommand(VALID_SUBCOMMANDS_SCHEMA, args[0]) {
-				return getLogger().Errorf("Subcommand provided is not valid: `%v`", args[0])
+				return getLogger().Errorf("Subcommand provided is not valid: '%v'", args[0])
 			}
 		}
 
 		if len(args) == 0 {
-			getLogger().Tracef("No subcommands provided; defaulting to: `%s` subcommand", SUBCOMMAND_SCHEMA_LIST)
+			getLogger().Tracef("No subcommands provided; defaulting to: '%s' subcommand", SUBCOMMAND_SCHEMA_LIST)
 		}
 		return
 	}
@@ -111,14 +111,14 @@ func schemaCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	// Create output writer
 	outputFilename := utils.GlobalFlags.PersistentFlags.OutputFile
 	outputFile, writer, err := createOutputFile(outputFilename)
-	getLogger().Tracef("outputFile: `%v`; writer: `%v`", outputFile, writer)
+	getLogger().Tracef("outputFile: '%v'; writer: '%v'", outputFile, writer)
 
 	// use function closure to assure consistent error output based upon error type
 	defer func() {
 		// always close the output file
 		if outputFile != nil {
 			err = outputFile.Close()
-			getLogger().Infof("Closed output file: `%s`", outputFilename)
+			getLogger().Infof("Closed output file: '%s'", outputFilename)
 		}
 	}()
 
@@ -216,7 +216,7 @@ func ListSchemas(writer io.Writer, persistentFlags utils.PersistentCommandFlags,
 		err = DisplaySchemasMarkdown(writer, filteredSchemas)
 	default:
 		// default to text format for anything else
-		getLogger().Warningf("unsupported format: `%s`; using default format.", format)
+		getLogger().Warningf("unsupported format: '%s'; using default format.", format)
 		err = DisplaySchemasTabbedText(writer, filteredSchemas)
 	}
 	return
@@ -236,7 +236,7 @@ func DisplaySchemasTabbedText(writer io.Writer, filteredSchemas []schema.FormatS
 
 	// Emit no schemas found warning into output
 	if len(filteredSchemas) == 0 {
-		getLogger().Warningf("No supported built-in schemas found in `%s`.\n", DEFAULT_SCHEMA_CONFIG)
+		getLogger().Warningf("No supported built-in schemas found in '%s'.\n", DEFAULT_SCHEMA_CONFIG)
 		return
 	}
 

@@ -60,42 +60,42 @@ func TestLicenseExpressionTokenizerWhitespaceNewlineTabRemoval(t *testing.T) {
 func TestLicenseSpdxIdSimple(t *testing.T) {
 	ID := "MIT"
 	if !IsValidSpdxId(ID) {
-		t.Errorf("IsValidSpdxId(`%s`) == `false`: Expected `true`.", ID)
+		t.Errorf("IsValidSpdxId('%s') == `false`: Expected `true`.", ID)
 	}
 }
 
 func TestLicenseSpdxIdComplex(t *testing.T) {
 	ID := "AGPL-3.0-or-later"
 	if !IsValidSpdxId(ID) {
-		t.Errorf("IsValidSpdxId(`%s`) == `false`: Expected `true`.", ID)
+		t.Errorf("IsValidSpdxId('%s') == `false`: Expected `true`.", ID)
 	}
 }
 
 func TestLicenseSpdxIdFailEmptyString(t *testing.T) {
 	ID := ""
 	if IsValidSpdxId(ID) {
-		t.Errorf("IsValidSpdxId(`%s`) == `true`: Expected `false`.", ID)
+		t.Errorf("IsValidSpdxId('%s') == `true`: Expected `false`.", ID)
 	}
 }
 
 func TestLicenseSpdxIdFailBadCharacter1(t *testing.T) {
 	ID := "?"
 	if IsValidSpdxId(ID) {
-		t.Errorf("IsValidSpdxId(`%s`) == `true`: Expected `false`.", ID)
+		t.Errorf("IsValidSpdxId('%s') == `true`: Expected `false`.", ID)
 	}
 }
 
 func TestLicenseSpdxIdFailBadCharacter2(t *testing.T) {
 	ID := "MIT+Apache-2.0"
 	if IsValidSpdxId(ID) {
-		t.Errorf("IsValidSpdxId(`%s`) == `true`: Expected `false`.", ID)
+		t.Errorf("IsValidSpdxId('%s') == `true`: Expected `false`.", ID)
 	}
 }
 
 func TestLicenseSpdxIdFailWhiteSpace(t *testing.T) {
 	ID := "Apache 2.0"
 	if IsValidSpdxId(ID) {
-		t.Errorf("IsValidSpdxId(`%s`) == `true`: Expected `false`.", ID)
+		t.Errorf("IsValidSpdxId('%s') == `true`: Expected `false`.", ID)
 	}
 }
 
