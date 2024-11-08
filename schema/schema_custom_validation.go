@@ -40,21 +40,21 @@ func LoadCustomValidationConfig(filename string) (err error) {
 	cfgFilename, err := utils.FindVerifyConfigFileAbsPath(getLogger(), filename)
 
 	if err != nil {
-		return fmt.Errorf("unable to find custom validation config file: `%s`", filename)
+		return fmt.Errorf("unable to find custom validation config file: '%s'", filename)
 	}
 
 	// Note we actively supply informative error messages to help user
 	// understand exactly how the load failed
-	getLogger().Infof("Loading custom validation config file: `%s`...", cfgFilename)
+	getLogger().Infof("Loading custom validation config file: '%s'...", cfgFilename)
 	// #nosec G304 (suppress warning)
 	buffer, err := os.ReadFile(cfgFilename)
 	if err != nil {
-		return fmt.Errorf("unable to `ReadFile`: `%s`", cfgFilename)
+		return fmt.Errorf("unable to `ReadFile`: '%s'", cfgFilename)
 	}
 
 	err = json.Unmarshal(buffer, &CustomValidationChecks)
 	if err != nil {
-		return fmt.Errorf("cannot `Unmarshal`: `%s`", cfgFilename)
+		return fmt.Errorf("cannot `Unmarshal`: '%s'", cfgFilename)
 	}
 
 	return

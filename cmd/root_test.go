@@ -175,7 +175,7 @@ func TestMain(m *testing.M) {
 
 	// Run test
 	exitCode := m.Run()
-	getLogger().Tracef("exit code: `%v`", exitCode)
+	getLogger().Tracef("exit code: '%v'", exitCode)
 
 	// Exit with exit value from tests
 	os.Exit(exitCode)
@@ -224,7 +224,7 @@ func initTestApplicationDirectories() (err error) {
 
 		// Need 'workingDir' to prepend to relative test files
 		utils.GlobalFlags.WorkingDir, _ = os.Getwd()
-		getLogger().Infof("Set `utils.GlobalFlags.WorkingDir`: `%s`", utils.GlobalFlags.WorkingDir)
+		getLogger().Infof("Set `utils.GlobalFlags.WorkingDir`: '%s'", utils.GlobalFlags.WorkingDir)
 	}
 
 	return
@@ -242,7 +242,7 @@ func EvaluateErrorAndKeyPhrases(t *testing.T, err error, messages []string) (mat
 		for _, substring := range messages {
 			if !strings.Contains(errorMessage, substring) {
 				matched = false
-				t.Errorf("expected string: `%s` not found in error message: `%s`", substring, err.Error())
+				t.Errorf("expected string: '%s' not found in error message: '%s'", substring, err.Error())
 			}
 		}
 	}
@@ -276,7 +276,7 @@ func bufferLineContainsValues(buffer bytes.Buffer, lineNum int, values ...string
 				if !strings.Contains(line, value) {
 					// if we failed to match all values on the specified line return failure
 					if curLineNum == lineNum {
-						getLogger().Infof("Actual contents of line %v: `%s`", curLineNum, line)
+						getLogger().Infof("Actual contents of line %v: '%s'", curLineNum, line)
 						return curLineNum, false
 					}
 					// else, keep checking next line

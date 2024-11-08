@@ -180,14 +180,14 @@ func innerBufferedTestPatch(testInfo *PatchTestInfo) (outputBuffer bytes.Buffer,
 		defer bufferedWriter.Flush()
 	} else {
 		outputFile, outputWriter, err = createOutputFile(testInfo.OutputFile)
-		getLogger().Tracef("outputFile: `%v`; writer: `%v`", testInfo.OutputFile, outputWriter)
+		getLogger().Tracef("outputFile: '%v'; writer: '%v'", testInfo.OutputFile, outputWriter)
 
 		// use function closure to assure consistent error output based upon error type
 		defer func() {
 			// always close the output file (even if error, as long as file handle returned)
 			if outputFile != nil {
 				outputFile.Close()
-				getLogger().Infof("Closed output file: `%s`", testInfo.OutputFile)
+				getLogger().Infof("Closed output file: '%s'", testInfo.OutputFile)
 			}
 		}()
 
@@ -303,7 +303,7 @@ func TestPatchRFC6902AppendixA1Patch1(t *testing.T) {
 	getLogger().Tracef("%s\n", buffer.String())
 	TEST_RESULT := "{\"baz\":\"qux\",\"foo\":\"bar\"}\n"
 	if buffer.String() != TEST_RESULT {
-		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+		t.Errorf("invalid patch result. Expected:\n'%s',\nActual:\n'%s'", TEST_RESULT, buffer.String())
 	}
 }
 
@@ -321,7 +321,7 @@ func TestPatchRFC6902AppendixA1BaseAddInteger(t *testing.T) {
 	// Note: Go maps are not committed to preserving order; however, alpha. appears the default
 	TEST_RESULT := "{\"foo\":\"bar\",\"integer\":100}\n"
 	if buffer.String() != TEST_RESULT {
-		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+		t.Errorf("invalid patch result. Expected:\n'%s',\nActual:\n'%s'", TEST_RESULT, buffer.String())
 	}
 }
 
@@ -339,7 +339,7 @@ func TestPatchRFC6902AppendixA1BaseAddFloat(t *testing.T) {
 	// Note: Go maps are not committed to preserving order; however, alpha. appears the default
 	TEST_RESULT := "{\"float\":3.14,\"foo\":\"bar\"}\n"
 	if buffer.String() != TEST_RESULT {
-		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+		t.Errorf("invalid patch result. Expected:\n'%s',\nActual:\n'%s'", TEST_RESULT, buffer.String())
 	}
 }
 
@@ -357,7 +357,7 @@ func TestPatchRFC6902AppendixA1BaseAddBool(t *testing.T) {
 	// Note: Go maps are not committed to preserving order; however, alpha. appears the default
 	TEST_RESULT := "{\"boolean\":true,\"foo\":\"bar\"}\n"
 	if buffer.String() != TEST_RESULT {
-		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+		t.Errorf("invalid patch result. Expected:\n'%s',\nActual:\n'%s'", TEST_RESULT, buffer.String())
 	}
 }
 
@@ -384,7 +384,7 @@ func TestPatchRFC6902AppendixA2Patch1(t *testing.T) {
 	getLogger().Tracef("%s\n", buffer.String())
 	TEST_RESULT := "{\"foo\":[\"bar\",\"qux\",\"baz\"]}\n"
 	if buffer.String() != TEST_RESULT {
-		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+		t.Errorf("invalid patch result. Expected:\n'%s',\nActual:\n'%s'", TEST_RESULT, buffer.String())
 	}
 }
 
@@ -401,7 +401,7 @@ func TestPatchRFC6902AppendixA2Patch2(t *testing.T) {
 	getLogger().Tracef("%s\n", buffer.String())
 	TEST_RESULT := "{\"foo\":[\"bar\",\"baz\",\"qux\"]}\n"
 	if buffer.String() != TEST_RESULT {
-		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+		t.Errorf("invalid patch result. Expected:\n'%s',\nActual:\n'%s'", TEST_RESULT, buffer.String())
 	}
 }
 
@@ -418,7 +418,7 @@ func TestPatchRFC6902AppendixA2Patch3(t *testing.T) {
 	getLogger().Tracef("%s\n", buffer.String())
 	TEST_RESULT := "{\"foo\":[\"bar\",\"baz\",\"qux\"]}\n"
 	if buffer.String() != TEST_RESULT {
-		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+		t.Errorf("invalid patch result. Expected:\n'%s',\nActual:\n'%s'", TEST_RESULT, buffer.String())
 	}
 }
 
@@ -435,7 +435,7 @@ func TestPatchRFC6902AppendixA2Patch4(t *testing.T) {
 	getLogger().Tracef("%s\n", buffer.String())
 	TEST_RESULT := "{\"foo\":[\"bar\",\"baz\",\"qux\"]}\n"
 	if buffer.String() != TEST_RESULT {
-		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+		t.Errorf("invalid patch result. Expected:\n'%s',\nActual:\n'%s'", TEST_RESULT, buffer.String())
 	}
 }
 
@@ -452,7 +452,7 @@ func TestPatchRFC6902AppendixA3Patch1Remove(t *testing.T) {
 	getLogger().Tracef("%s\n", buffer.String())
 	TEST_RESULT := "{\"foo\":\"bar\"}\n"
 	if buffer.String() != TEST_RESULT {
-		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+		t.Errorf("invalid patch result. Expected:\n'%s',\nActual:\n'%s'", TEST_RESULT, buffer.String())
 	}
 }
 
@@ -469,7 +469,7 @@ func TestPatchRFC6902AppendixA4Patch1Remove(t *testing.T) {
 	getLogger().Tracef("%s\n", buffer.String())
 	TEST_RESULT := "{\"foo\":[\"bar\",\"baz\"]}\n"
 	if buffer.String() != TEST_RESULT {
-		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+		t.Errorf("invalid patch result. Expected:\n'%s',\nActual:\n'%s'", TEST_RESULT, buffer.String())
 	}
 }
 
@@ -486,7 +486,7 @@ func TestPatchRFC6902AppendixA5Patch1Replace(t *testing.T) {
 	getLogger().Tracef("%s\n", buffer.String())
 	TEST_RESULT := "{\"baz\":\"boo\",\"foo\":\"bar\"}\n"
 	if buffer.String() != TEST_RESULT {
-		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+		t.Errorf("invalid patch result. Expected:\n'%s',\nActual:\n'%s'", TEST_RESULT, buffer.String())
 	}
 }
 
@@ -544,7 +544,7 @@ func TestPatchRFC6902AppendixA10Patch1(t *testing.T) {
 	getLogger().Tracef("%s\n", buffer.String())
 	TEST_RESULT := "{\"child\":{\"grandchild\":{}},\"foo\":\"bar\"}\n"
 	if buffer.String() != TEST_RESULT {
-		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+		t.Errorf("invalid patch result. Expected:\n'%s',\nActual:\n'%s'", TEST_RESULT, buffer.String())
 	}
 }
 
@@ -561,7 +561,7 @@ func TestPatchRFC6902AppendixA16Patch1(t *testing.T) {
 	getLogger().Tracef("%s\n", buffer.String())
 	TEST_RESULT := "{\"foo\":[\"bar\",[\"abc\",\"def\"]]}\n"
 	if buffer.String() != TEST_RESULT {
-		t.Errorf("invalid patch result. Expected:\n`%s`,\nActual:\n`%s`", TEST_RESULT, buffer.String())
+		t.Errorf("invalid patch result. Expected:\n'%s',\nActual:\n'%s'", TEST_RESULT, buffer.String())
 	}
 }
 

@@ -58,11 +58,11 @@ func innerRunReportResultTests(t *testing.T, testInfo *CommonTestInfo, outputBuf
 	if len(testInfo.ResultLineContainsValues) > 0 {
 		matchFoundLine, matchFound := bufferLineContainsValues(outputBuffer, testInfo.ResultLineContainsValuesAtLineNum, testInfo.ResultLineContainsValues...)
 		if !matchFound {
-			err = getLogger().Errorf("output does not contain expected values: `%v` at line: %v\n", strings.Join(testInfo.ResultLineContainsValues, ","), testInfo.ResultLineContainsValuesAtLineNum)
+			err = getLogger().Errorf("output does not contain expected values: '%v' at line: %v\n", strings.Join(testInfo.ResultLineContainsValues, ","), testInfo.ResultLineContainsValuesAtLineNum)
 			t.Error(err.Error())
 			return
 		}
-		getLogger().Tracef("output contains expected values: `%v` at line: %v\n", testInfo.ResultLineContainsValues, matchFoundLine)
+		getLogger().Tracef("output contains expected values: '%v' at line: %v\n", testInfo.ResultLineContainsValues, matchFoundLine)
 	}
 
 	// TEST: valid JSON if format JSON
@@ -70,12 +70,12 @@ func innerRunReportResultTests(t *testing.T, testInfo *CommonTestInfo, outputBuf
 	if testInfo.OutputFormat == FORMAT_JSON {
 		// Use Marshal to test for validity
 		if !utils.IsValidJsonRaw(outputBuffer.Bytes()) {
-			err = getLogger().Errorf("output did not contain valid format data; expected: `%s`", FORMAT_JSON)
+			err = getLogger().Errorf("output did not contain valid format data; expected: '%s'", FORMAT_JSON)
 			t.Error(err.Error())
 			t.Logf("%s", outputBuffer.String())
 			return
 		}
-		getLogger().Tracef("success: validated output format: `%s`", FORMAT_JSON)
+		getLogger().Tracef("success: validated output format: '%s'", FORMAT_JSON)
 	}
 
 	// TODO: add general validation for CSV and Markdown formats

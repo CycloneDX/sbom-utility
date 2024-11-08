@@ -120,14 +120,14 @@ func innerBufferedTestTrim(testInfo *TrimTestInfo) (outputBuffer bytes.Buffer, e
 		defer bufferedWriter.Flush()
 	} else {
 		outputFile, outputWriter, err = createOutputFile(testInfo.OutputFile)
-		getLogger().Tracef("outputFile: `%v`; writer: `%v`", testInfo.OutputFile, outputWriter)
+		getLogger().Tracef("outputFile: '%v'; writer: '%v'", testInfo.OutputFile, outputWriter)
 
 		// use function closure to assure consistent error output based upon error type
 		defer func() {
 			// always close the output file (even if error, as long as file handle returned)
 			if outputFile != nil {
 				outputFile.Close()
-				getLogger().Infof("Closed output file: `%s`", testInfo.OutputFile)
+				getLogger().Infof("Closed output file: '%s'", testInfo.OutputFile)
 			}
 		}()
 
@@ -192,7 +192,7 @@ func VerifyTrimmed(pResult interface{}, key string) (err error) {
 			// verify map key was removed
 			if _, ok := typedValue[key]; ok {
 				formattedValue, _ := utils.MarshalAnyToFormattedJsonString(typedValue)
-				err = getLogger().Errorf("trim failed. Key `%s`, found in: `%s`", key, formattedValue)
+				err = getLogger().Errorf("trim failed. Key '%s', found in: '%s'", key, formattedValue)
 				return
 			}
 		case []interface{}:
@@ -232,11 +232,11 @@ func TestTrimCdx14PreserveUnencodedChars(t *testing.T) {
 	outputString := outputBuffer.String()
 
 	if strings.Contains(outputString, TEST1) {
-		t.Errorf("removed expected utf8 characters from string: `%s`", TEST1)
+		t.Errorf("removed expected utf8 characters from string: '%s'", TEST1)
 	}
 
 	if strings.Contains(outputString, TEST2) {
-		t.Errorf("removed expected utf8 characters from string: `%s`", TEST2)
+		t.Errorf("removed expected utf8 characters from string: '%s'", TEST2)
 	}
 }
 
@@ -249,7 +249,7 @@ func TestTrimCdx14ComponentPropertiesSampleXXLBuffered(t *testing.T) {
 	ti.ResultExpectedByteSize = 8121420
 	outputBuffer, _ := innerBufferedTestTrim(ti)
 	// verify "after" trim lengths and content have removed properties
-	getLogger().Tracef("Len(outputBuffer): `%v`\n", outputBuffer.Len())
+	getLogger().Tracef("Len(outputBuffer): '%v'\n", outputBuffer.Len())
 	if ti.ResultExpectedByteSize > 0 {
 		if outputBuffer.Len() != ti.ResultExpectedByteSize {
 			t.Error(fmt.Errorf("invalid trim result size (bytes): expected: %v, actual: %v", ti.ResultExpectedByteSize, outputBuffer.Len()))

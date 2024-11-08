@@ -77,9 +77,9 @@ func NewUnknownFormatError(f string) *UnsupportedFormatError {
 }
 
 func (err UnsupportedFormatError) Error() string {
-	baseMessage := fmt.Sprintf("%s: %s (`%s`)", err.Type, err.Message, err.InputFile)
+	baseMessage := fmt.Sprintf("%s: %s ('%s')", err.Type, err.Message, err.InputFile)
 	if err.Format != "" {
-		return fmt.Sprintf("%s: format: `%s`, command: `%s`, flags: `%s`",
+		return fmt.Sprintf("%s: format: '%s', command: '%s', flags: '%s'",
 			baseMessage,
 			err.Format,
 			err.Command,
@@ -89,7 +89,7 @@ func (err UnsupportedFormatError) Error() string {
 }
 
 func (err UnsupportedSchemaError) Error() string {
-	return fmt.Sprintf("%s: %s: Schema Format: `%s`, Version: `%s`, Variant: `%s` ",
+	return fmt.Sprintf("%s: %s: Schema Format: '%s', Version: '%s', Variant: '%s' ",
 		err.Type,
 		err.Message,
 		err.Format,

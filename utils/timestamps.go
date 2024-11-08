@@ -40,7 +40,7 @@ func TruncateTimeStampISO8601Date(fullTimestamp string) (date string, err error)
 			// return the (now validated) value passed in
 			return
 		} else {
-			err = fmt.Errorf("invalid ISO 8601 timestamp: `%s`", fullTimestamp)
+			err = fmt.Errorf("invalid ISO 8601 timestamp: '%s'", fullTimestamp)
 			// return what we were given
 			return
 		}
@@ -50,7 +50,7 @@ func TruncateTimeStampISO8601Date(fullTimestamp string) (date string, err error)
 	iSep := strings.IndexByte(fullTimestamp, ISO8601_TIME_SEPARATOR)
 
 	if iSep == -1 {
-		err = fmt.Errorf("invalid ISO 8601 timestamp: `%s`", fullTimestamp)
+		err = fmt.Errorf("invalid ISO 8601 timestamp: '%s'", fullTimestamp)
 		// return what we were given
 		return
 	}
@@ -59,7 +59,7 @@ func TruncateTimeStampISO8601Date(fullTimestamp string) (date string, err error)
 	date = fullTimestamp[:iSep]
 
 	if !ValidateISO8601TimestampISO8601DateTime(date, REGEX_ISO_8601_DATE) {
-		err = fmt.Errorf("invalid ISO 8601 timestamp: `%s`", fullTimestamp)
+		err = fmt.Errorf("invalid ISO 8601 timestamp: '%s'", fullTimestamp)
 		// return what we were given
 		date = fullTimestamp
 		return

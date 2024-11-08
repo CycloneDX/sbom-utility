@@ -103,14 +103,14 @@ func innerBufferedTestQuery(testInfo *CommonTestInfo, queryRequest *common.Query
 		defer bufferedWriter.Flush()
 	} else {
 		outputFile, outputWriter, err = createOutputFile(testInfo.OutputFile)
-		getLogger().Tracef("outputFile: `%v`; writer: `%v`", testInfo.OutputFile, outputWriter)
+		getLogger().Tracef("outputFile: '%v'; writer: '%v'", testInfo.OutputFile, outputWriter)
 
 		// use function closure to assure consistent error output based upon error type
 		defer func() {
 			// always close the output file (even if error, as long as file handle returned)
 			if outputFile != nil {
 				outputFile.Close()
-				getLogger().Infof("Closed output file: `%s`", testInfo.OutputFile)
+				getLogger().Infof("Closed output file: '%s'", testInfo.OutputFile)
 			}
 		}()
 
@@ -159,7 +159,7 @@ func VerifySelectedFieldsInJsonMap(t *testing.T, keys []string, results interfac
 	for _, key := range keys {
 		_, exists = resultMap[key]
 		if !exists {
-			t.Errorf("invalid results: key: `%s` does not exist.", key)
+			t.Errorf("invalid results: key: '%s' does not exist.", key)
 		}
 	}
 	return

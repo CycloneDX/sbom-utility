@@ -123,12 +123,12 @@ func innerTestLicenseExpressionParsing(t *testing.T, expression string, expected
 	var err error
 	parsedExpression, err = schema.ParseExpression(LicensePolicyConfig, expression)
 	if err != nil {
-		t.Errorf("unable to parse expression: `%s`\n", expression)
+		t.Errorf("unable to parse expression: '%s'\n", expression)
 	}
 
 	getLogger().Infof("expression:\n%v", parsedExpression)
 	if parsedExpression.CompoundUsagePolicy != expectedPolicy {
-		t.Errorf("License Expression: expected `%s`, actual `%s`\n",
+		t.Errorf("License Expression: expected '%s', actual '%s'\n",
 			expectedPolicy, parsedExpression.CompoundUsagePolicy)
 	}
 	return
@@ -355,7 +355,7 @@ func TestLicenseExpressionParsingTestComplex1(t *testing.T) {
 	EXPECTED_POLICY := schema.POLICY_ALLOW
 	result := innerTestLicenseExpressionParsing(t, SPDX_LICENSE_EXPRESSION_TEST1, EXPECTED_POLICY)
 	if result.LeftUsagePolicy != schema.POLICY_ALLOW && result.RightUsagePolicy != schema.POLICY_ALLOW {
-		t.Errorf("License Expression: expectedLeft `%s`, actualLeft `%s`, expectedRight `%s`, actualRight `%s`\n",
+		t.Errorf("License Expression: expectedLeft '%s', actualLeft '%s', expectedRight '%s', actualRight '%s'\n",
 			schema.POLICY_ALLOW, result.LeftUsagePolicy, schema.POLICY_ALLOW, result.RightUsagePolicy)
 	}
 }
@@ -365,7 +365,7 @@ func TestLicenseExpressionParsingTestComplex2(t *testing.T) {
 	EXPECTED_POLICY := schema.POLICY_NEEDS_REVIEW
 	result := innerTestLicenseExpressionParsing(t, SPDX_LICENSE_EXPRESSION_TEST1, EXPECTED_POLICY)
 	if result.LeftUsagePolicy != schema.POLICY_ALLOW && result.RightUsagePolicy != schema.POLICY_ALLOW {
-		t.Errorf("License Expression: expectedLeft `%s`, actualLeft `%s`, expectedRight `%s`, actualRight `%s`\n",
+		t.Errorf("License Expression: expectedLeft '%s', actualLeft '%s', expectedRight '%s', actualRight '%s'\n",
 			schema.POLICY_ALLOW, result.LeftUsagePolicy, schema.POLICY_ALLOW, result.RightUsagePolicy)
 	}
 }

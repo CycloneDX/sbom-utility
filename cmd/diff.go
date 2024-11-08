@@ -79,7 +79,7 @@ func preRunTestForFiles(args []string) error {
 	if baseFilename == "" {
 		return getLogger().Errorf("Missing required argument(s): %s", FLAG_FILENAME_INPUT)
 	} else if _, err := os.Stat(baseFilename); err != nil {
-		return getLogger().Errorf("File not found: `%s`", baseFilename)
+		return getLogger().Errorf("File not found: '%s'", baseFilename)
 	}
 
 	// Make sure the revision file is present and exists
@@ -87,7 +87,7 @@ func preRunTestForFiles(args []string) error {
 	if revisedFilename == "" {
 		return getLogger().Errorf("Missing required argument(s): %s", FLAG_DIFF_FILENAME_REVISION)
 	} else if _, err := os.Stat(revisedFilename); err != nil {
-		return getLogger().Errorf("File not found: `%s`", revisedFilename)
+		return getLogger().Errorf("File not found: '%s'", revisedFilename)
 	}
 
 	return nil
@@ -100,7 +100,7 @@ func diffCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	// Create output writer
 	outputFilename := utils.GlobalFlags.PersistentFlags.OutputFile
 	outputFile, writer, err := createOutputFile(outputFilename)
-	getLogger().Tracef("outputFile: `%v`; writer: `%v`", outputFile, writer)
+	getLogger().Tracef("outputFile: '%v'; writer: '%v'", outputFile, writer)
 
 	// use function closure to assure consistent error output based upon error type
 	defer func() {
@@ -110,7 +110,7 @@ func diffCmdImpl(cmd *cobra.Command, args []string) (err error) {
 			if err != nil {
 				return
 			}
-			getLogger().Infof("Closed output file: `%s`", utils.GlobalFlags.PersistentFlags.OutputFile)
+			getLogger().Infof("Closed output file: '%s'", utils.GlobalFlags.PersistentFlags.OutputFile)
 		}
 	}()
 
@@ -143,11 +143,11 @@ func Diff(persistentFlags utils.PersistentCommandFlags, flags utils.DiffCommandF
 		// always close the output file
 		if outputFile != nil {
 			err = outputFile.Close()
-			getLogger().Infof("Closed output file: `%s`", outputFilename)
+			getLogger().Infof("Closed output file: '%s'", outputFilename)
 		}
 	}()
 
-	getLogger().Infof("Reading file (--input-file): `%s` ...", inputFilename)
+	getLogger().Infof("Reading file (--input-file): '%s' ...", inputFilename)
 	// #nosec G304 (suppress warning)
 	bBaseData, errReadBase := os.ReadFile(inputFilename)
 	if errReadBase != nil {
@@ -158,7 +158,7 @@ func Diff(persistentFlags utils.PersistentCommandFlags, flags utils.DiffCommandF
 		return
 	}
 
-	getLogger().Infof("Reading file (--input-revision): `%s` ...", revisedFilename)
+	getLogger().Infof("Reading file (--input-revision): '%s' ...", revisedFilename)
 	// #nosec G304 (suppress warning)
 	bRevisedData, errReadDelta := os.ReadFile(revisedFilename)
 	if errReadDelta != nil {
@@ -170,7 +170,7 @@ func Diff(persistentFlags utils.PersistentCommandFlags, flags utils.DiffCommandF
 	}
 
 	// Compare the base with the revision
-	getLogger().Infof("Comparing files: `%s` (base) to `%s` (revised) ...", inputFilename, revisedFilename)
+	getLogger().Infof("Comparing files: '%s' (base) to '%s' (revised) ...", inputFilename, revisedFilename)
 	diffResults, errCompare := compareBinaryData(bBaseData, bRevisedData)
 	if errCompare != nil {
 		return errCompare
@@ -179,7 +179,7 @@ func Diff(persistentFlags utils.PersistentCommandFlags, flags utils.DiffCommandF
 	// Output the result
 	var diffString string
 	if diffResults.Modified() {
-		getLogger().Infof("Outputting listing (`%s` format)...", format)
+		getLogger().Infof("Outputting listing ('%s' format)...", format)
 		switch outputFormat {
 		case FORMAT_TEXT:
 			var aJson map[string]interface{}
@@ -202,14 +202,14 @@ func Diff(persistentFlags utils.PersistentCommandFlags, flags utils.DiffCommandF
 			// Note: JSON data files MUST ends in a newline as this is a POSIX standard
 		default:
 			// Default to Text output for anything else (set as flag default)
-			getLogger().Warningf("Diff output format not supported for `%s` format.", format)
+			getLogger().Warningf("Diff output format not supported for '%s' format.", format)
 		}
 
 		// Output complete diff in either supported format
 		fmt.Fprintf(output, "%s\n", diffString)
 
 	} else {
-		getLogger().Infof("No deltas found. baseFilename: `%s`, revisedFilename=`%s` match.",
+		getLogger().Infof("No deltas found. baseFilename: '%s', revisedFilename='%s' match.",
 			inputFilename, revisedFilename)
 	}
 

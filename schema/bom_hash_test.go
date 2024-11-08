@@ -106,7 +106,7 @@ func TestMain(m *testing.M) {
 
 	// Run test
 	exitCode := m.Run()
-	getLogger().Tracef("exit code: `%v`", exitCode)
+	getLogger().Tracef("exit code: '%v'", exitCode)
 
 	// Exit with exit value from tests
 	os.Exit(exitCode)
@@ -157,7 +157,7 @@ func initTestApplicationDirectories() (err error) {
 
 		// Need 'workingDir' to prepend to relative test files
 		utils.GlobalFlags.WorkingDir, _ = os.Getwd()
-		getLogger().Infof("Set `utils.GlobalFlags.WorkingDir`: `%s`", utils.GlobalFlags.WorkingDir)
+		getLogger().Infof("Set `utils.GlobalFlags.WorkingDir`: '%s'", utils.GlobalFlags.WorkingDir)
 	}
 
 	return
@@ -169,7 +169,7 @@ func loadBOMFile(inputFile string) (document *BOM, err error) {
 
 	// check for required fields on command
 	if inputFile == "" {
-		return nil, fmt.Errorf("invalid input file: `%s` ", inputFile)
+		return nil, fmt.Errorf("invalid input file: '%s' ", inputFile)
 	}
 
 	// Construct a BOM document object around the input file
@@ -177,12 +177,12 @@ func loadBOMFile(inputFile string) (document *BOM, err error) {
 	document.filename = inputFile
 
 	// Load the raw, candidate BOM (file) as JSON data
-	getLogger().Infof("Attempting to load and unmarshal data from: `%s`...", document.GetFilenameInterpolated())
+	getLogger().Infof("Attempting to load and unmarshal data from: '%s'...", document.GetFilenameInterpolated())
 	err = document.UnmarshalBOMAsJSONMap() // i.e., utils.Flags.InputFile
 	if err != nil {
 		return
 	}
-	getLogger().Infof("Successfully unmarshalled data from: `%s`", document.GetFilenameInterpolated())
+	getLogger().Infof("Successfully unmarshalled data from: '%s'", document.GetFilenameInterpolated())
 
 	// Search the document keys/values for known BOM formats and schema in the config. file
 	getLogger().Infof("Determining file's BOM format and version...")
@@ -192,7 +192,7 @@ func loadBOMFile(inputFile string) (document *BOM, err error) {
 	}
 
 	// Display detected format, version with (optional) schema variant (i.e., if requested on command line)
-	getLogger().Infof("Determined BOM format, version (variant): `%s`, `%s` %s",
+	getLogger().Infof("Determined BOM format, version (variant): '%s', '%s' %s",
 		document.FormatInfo.CanonicalName,
 		document.SchemaInfo.Version,
 		FormatSchemaVariant(document.SchemaInfo.Variant))

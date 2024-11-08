@@ -57,14 +57,14 @@ func statsCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	// Create output writer
 	outputFilename := utils.GlobalFlags.PersistentFlags.OutputFile
 	outputFile, writer, err := createOutputFile(outputFilename)
-	getLogger().Tracef("outputFile: `%v`; writer: `%v`", outputFilename, writer)
+	getLogger().Tracef("outputFile: '%v'; writer: '%v'", outputFilename, writer)
 
 	// use function closure to assure consistent error output based upon error type
 	defer func() {
 		// always close the output file
 		if outputFile != nil {
 			outputFile.Close()
-			getLogger().Infof("Closed output file: `%s`", outputFilename)
+			getLogger().Infof("Closed output file: '%s'", outputFilename)
 		}
 	}()
 
@@ -111,7 +111,7 @@ func ListStats(writer io.Writer, persistentFlags utils.PersistentCommandFlags, s
 	}
 
 	format := persistentFlags.OutputFormat
-	getLogger().Infof("Outputting listing (`%s` format)...", format)
+	getLogger().Infof("Outputting listing ('%s' format)...", format)
 	switch format {
 	case FORMAT_TEXT:
 		DisplayStatsText(document, writer)
@@ -121,7 +121,7 @@ func ListStats(writer io.Writer, persistentFlags utils.PersistentCommandFlags, s
 	// 	DisplayResourceListMarkdown(writer)
 	default:
 		// Default to Text output for anything else (set as flag default)
-		getLogger().Warningf("Stats not supported for `%s` format; defaulting to `%s` format...",
+		getLogger().Warningf("Stats not supported for '%s' format; defaulting to '%s' format...",
 			format, FORMAT_TEXT)
 		DisplayStatsText(document, writer)
 	}
@@ -152,7 +152,7 @@ func loadComponentStats(document *schema.BOM) (err error) {
 
 		if len(aComponents) > 1 {
 			// TODO: are they unique entries? or are DeepEqual() duplicates?
-			getLogger().Warningf("component `%v` has duplicate `%v` entries", key, len(aComponents))
+			getLogger().Warningf("component '%v' has duplicate '%v' entries", key, len(aComponents))
 		}
 
 		// for _, c := range aComponents {

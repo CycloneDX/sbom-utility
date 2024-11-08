@@ -64,7 +64,7 @@ func getLogger() *log.MiniLogger {
 		// ONLY if needed to debug init() methods in the "cmd" package
 		ProjectLogger = log.NewLogger(log.ERROR)
 
-		// Attempt to read in `--args` values such as `--trace`
+		// Attempt to read in '--args' values such as '--trace'
 		// Note: if they exist, quiet mode will be overridden
 		// Default to ERROR level and, turn on "Quiet mode" for tests
 		// This simplifies the test output to simply RUN/PASS|FAIL messages.
@@ -140,21 +140,21 @@ func (config *BOMFormatAndSchemaConfig) InnerLoadSchemaConfigFile(filename strin
 		absFilename, err = utils.FindVerifyConfigFileAbsPath(getLogger(), filename)
 
 		if err != nil {
-			return fmt.Errorf("unable to find schema config file: `%s`", filename)
+			return fmt.Errorf("unable to find schema config file: '%s'", filename)
 		}
 
 		// Attempt to load user-provided config file
-		getLogger().Infof("Loading schema config file: `%s`...", absFilename)
+		getLogger().Infof("Loading schema config file: '%s'...", absFilename)
 		buffer, err = os.ReadFile(absFilename)
 		if err != nil {
-			return fmt.Errorf("unable to read schema config file: `%s`", absFilename)
+			return fmt.Errorf("unable to read schema config file: '%s'", absFilename)
 		}
 	} else {
 		// Attempt to load the default config file from embedded file resources
-		getLogger().Infof("Loading (embedded) default schema config file: `%s`...", defaultFilename)
+		getLogger().Infof("Loading (embedded) default schema config file: '%s'...", defaultFilename)
 		buffer, err = resources.LoadConfigFile(defaultFilename)
 		if err != nil {
-			return fmt.Errorf("unable to read schema config file: `%s` from embedded resources: `%s`",
+			return fmt.Errorf("unable to read schema config file: '%s' from embedded resources: '%s'",
 				defaultFilename, resources.RESOURCES_CONFIG_DIR)
 		}
 	}
@@ -162,7 +162,7 @@ func (config *BOMFormatAndSchemaConfig) InnerLoadSchemaConfigFile(filename strin
 	//err = json.Unmarshal(buffer, &SupportedFormatConfig)
 	err = json.Unmarshal(buffer, config)
 	if err != nil {
-		return fmt.Errorf("cannot `Unmarshal`: `%s`", absFilename)
+		return fmt.Errorf("cannot 'Unmarshal': '%s'", absFilename)
 	}
 
 	return
@@ -210,17 +210,17 @@ func (bom *BOM) findSchemaVersionWithVariant(format FormatSchema, version string
 	// Iterate over known schema versions to see if SBOM's version is supported
 	for _, schema := range format.Schemas {
 		// Compare requested version to current schema version AND make sure variant matches
-		getLogger().Tracef("Comparing SBOM version: `%s` to schema.version: `%s`...", version, schema.Version)
+		getLogger().Tracef("Comparing SBOM version: '%s' to schema.version: '%s'...", version, schema.Version)
 		if version == schema.Version {
 
 			// Make note that we did find a viable matching schema and version
-			getLogger().Tracef("Match found for SBOM version: `%s`", version)
+			getLogger().Tracef("Match found for SBOM version: '%s'", version)
 			versionExists = true
 
 			// If a variant is also requested, see if we can find one for that criteria
 			// Note: the default value for "variant" is an empty string
 			if utils.GlobalFlags.ValidateFlags.SchemaVariant == schema.Variant {
-				getLogger().Tracef("Match found for requested schema variant: `%s`",
+				getLogger().Tracef("Match found for requested schema variant: '%s'",
 					FormatSchemaVariant(utils.GlobalFlags.ValidateFlags.SchemaVariant))
 				bom.SchemaInfo = schema
 				return

@@ -238,7 +238,7 @@ func (bom *BOM) GetKeyValueAsString(key string) (sValue string, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	getLogger().Tracef("key: `%s`", key)
+	getLogger().Tracef("key: '%s'", key)
 
 	if (bom.JsonMap) == nil {
 		err := fmt.Errorf("document object does not have a Map allocated")
@@ -248,18 +248,18 @@ func (bom *BOM) GetKeyValueAsString(key string) (sValue string, err error) {
 
 	value := bom.JsonMap[key]
 	if value == nil {
-		getLogger().Tracef("key: `%s` not found in document map", key)
+		getLogger().Tracef("key: '%s' not found in document map", key)
 		return "", nil
 	}
 
-	getLogger().Tracef("value: `%v` (%T)", value, value)
+	getLogger().Tracef("value: '%v' (%T)", value, value)
 	return value.(string), nil
 }
 
 func (bom *BOM) ReadRawBytes() (err error) {
 	// validate filename
 	if len(bom.filename) == 0 {
-		return fmt.Errorf("schema: invalid filename: `%s`", bom.filename)
+		return fmt.Errorf("schema: invalid filename: '%s'", bom.filename)
 	}
 
 	// Check to see of stdin is the BOM source data
@@ -290,7 +290,7 @@ func (bom *BOM) ReadRawBytes() (err error) {
 		}
 	}
 
-	getLogger().Tracef("read data from: `%s`", bom.filename)
+	getLogger().Tracef("read data from: '%s'", bom.filename)
 	getLogger().Tracef("\n  >> rawBytes[:100]=[%s]", bom.rawBytes[:100])
 	return
 }

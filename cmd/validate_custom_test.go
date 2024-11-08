@@ -88,7 +88,7 @@ func TestValidateCustomFormatUnsupportedSPDX(t *testing.T) {
 func TestValidateCustomErrorCdx14NoLicensesFound(t *testing.T) {
 	vti := NewValidateTestInfo(TEST_CUSTOM_CDX_1_4_INVALID_LICENSES_NOT_FOUND, FORMAT_ANY, SCHEMA_VARIANT_NONE, &InvalidSBOMError{})
 	document, results, _ := innerTestValidateCustom(t, *vti)
-	getLogger().Debugf("filename: `%s`, results:\n%v", document.GetFilename(), results)
+	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
 
 // -------------------------------------------
@@ -98,13 +98,13 @@ func TestValidateCustomErrorCdx14NoLicensesFound(t *testing.T) {
 func TestValidateCustomCdx14MetadataPropsMissingDisclaimer(t *testing.T) {
 	vti := NewValidateTestInfo(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_MISSING, FORMAT_TEXT, SCHEMA_VARIANT_CUSTOM, &InvalidSBOMError{})
 	document, results, _ := innerTestValidate(t, *vti)
-	getLogger().Debugf("filename: `%s`, results:\n%v", document.GetFilename(), results)
+	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
 
 func TestValidateCustomCdx14MetadataPropsMissingClassification(t *testing.T) {
 	vti := NewValidateTestInfo(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_MISSING, FORMAT_TEXT, SCHEMA_VARIANT_CUSTOM, &InvalidSBOMError{})
 	document, results, _ := innerTestValidate(t, *vti)
-	getLogger().Debugf("filename: `%s`, results:\n%v", document.GetFilename(), results)
+	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
 
 func TestValidateCustomCdx14MetadataPropsInvalidDisclaimer(t *testing.T) {
@@ -167,7 +167,7 @@ func TestValidateCustomCdx14MetadataPropertyUniqueDisclaimer(t *testing.T) {
 		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE,
 		SCHEMA_VARIANT_NONE,
 		&SBOMMetadataPropertyError{})
-	getLogger().Debugf("filename: `%s`, results:\n%v", document.GetFilename(), results)
+	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
 
 func TestValidateCustomCdx14MetadataPropertyUniqueClassification(t *testing.T) {
@@ -175,7 +175,7 @@ func TestValidateCustomCdx14MetadataPropertyUniqueClassification(t *testing.T) {
 		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE,
 		SCHEMA_VARIANT_NONE,
 		&SBOMMetadataPropertyError{})
-	getLogger().Debugf("filename: `%s`, results:\n%v", document.GetFilename(), results)
+	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
 
 // -------------------------------------------

@@ -56,7 +56,7 @@ func init() {
 	Logger.InitLogLevelAndModeFromFlags()
 
 	// Emit log level used from this point forward
-	Logger.Tracef("Logger (%T) created: with Level=`%v`", Logger, Logger.GetLevelName())
+	Logger.Tracef("Logger (%T) created: with Level='%v'", Logger, Logger.GetLevelName())
 
 	// Provide access to project logger to other modules
 	cmd.ProjectLogger = Logger
@@ -80,7 +80,7 @@ func init() {
 func printWelcome() {
 	if !Logger.QuietModeOn() {
 		goos := fmt.Sprintf("(%s/%s)", runtime.GOOS, runtime.GOARCH)
-		echo := fmt.Sprintf("Welcome to the %s! Version `%s` (%s) %s\n", Project, Version, Binary, goos)
+		echo := fmt.Sprintf("Welcome to the %s! Version '%s' (%s) %s\n", Project, Version, Binary, goos)
 		// Logger will only print the welcome if log level requested indicates INFO level (or higher)
 		Logger.DumpString(echo)
 		// Show intent to not check for error returns as there is no recovery

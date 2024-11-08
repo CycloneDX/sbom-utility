@@ -90,7 +90,7 @@ func innerDiffTest(t *testing.T, testInfo *DiffTestInfo) (actualError error) {
 	utils.GlobalFlags.DiffFlags.RevisedFile = testInfo.RevisedFilename
 	utils.GlobalFlags.DiffFlags.Colorize = testInfo.Colorize
 
-	getLogger().Tracef("baseFilename: `%s`, revisedFilename=`%s`, actualError=`%T`",
+	getLogger().Tracef("baseFilename: '%s', revisedFilename='%s', actualError=`%T`",
 		utils.GlobalFlags.PersistentFlags.InputFile,
 		utils.GlobalFlags.DiffFlags.RevisedFile,
 		actualError)
@@ -101,8 +101,8 @@ func innerDiffTest(t *testing.T, testInfo *DiffTestInfo) (actualError error) {
 	if !ErrorTypesMatch(actualError, testInfo.ResultExpectedError) {
 		switch t := actualError.(type) {
 		default:
-			fmt.Printf("unhandled error type: `%v`\n", t)
-			fmt.Printf(">> value: `%v`\n", t)
+			fmt.Printf("unhandled error type: '%v'\n", t)
+			fmt.Printf(">> value: '%v'\n", t)
 			getLogger().Error(actualError)
 		}
 		t.Errorf("expected error type: `%T`, actual type: `%T`", testInfo.ResultExpectedError, actualError)

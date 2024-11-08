@@ -177,12 +177,12 @@ func NewCommandComponent() *cobra.Command {
 		// Make sure (optional) subcommand is known/valid
 		if len(args) == 1 {
 			if !preRunTestForSubcommand(VALID_SUBCOMMANDS_COMPONENT, args[0]) {
-				return getLogger().Errorf("Subcommand provided is not valid: `%v`", args[0])
+				return getLogger().Errorf("Subcommand provided is not valid: '%v'", args[0])
 			}
 		}
 
 		if len(args) == 0 {
-			getLogger().Tracef("No subcommands provided; defaulting to: `%s` subcommand", SUBCOMMAND_SCHEMA_LIST)
+			getLogger().Tracef("No subcommands provided; defaulting to: '%s' subcommand", SUBCOMMAND_SCHEMA_LIST)
 		}
 
 		// Test for required flags (parameters)
@@ -200,14 +200,14 @@ func componentCmdImpl(cmd *cobra.Command, args []string) (err error) {
 	// Create output writer
 	outputFilename := utils.GlobalFlags.PersistentFlags.OutputFile
 	outputFile, writer, err := createOutputFile(outputFilename)
-	getLogger().Tracef("outputFile: `%v`; writer: `%v`", outputFilename, writer)
+	getLogger().Tracef("outputFile: '%v'; writer: '%v'", outputFilename, writer)
 
 	// use function closure to assure consistent error output based upon error type
 	defer func() {
 		// always close the output file
 		if outputFile != nil {
 			outputFile.Close()
-			getLogger().Infof("Closed output file: `%s`", outputFilename)
+			getLogger().Infof("Closed output file: '%s'", outputFilename)
 		}
 	}()
 
@@ -258,7 +258,7 @@ func ListComponents(writer io.Writer, persistentFlags utils.PersistentCommandFla
 	}
 
 	format := persistentFlags.OutputFormat
-	getLogger().Infof("Outputting listing (`%s` format)...", format)
+	getLogger().Infof("Outputting listing ('%s' format)...", format)
 	switch format {
 	case FORMAT_TEXT:
 		err = DisplayComponentListText(document, writer, flags)
@@ -268,7 +268,7 @@ func ListComponents(writer io.Writer, persistentFlags utils.PersistentCommandFla
 		err = DisplayComponentListMarkdown(document, writer, flags)
 	default:
 		// Default to Text output for anything else (set as flag default)
-		getLogger().Warningf("Listing not supported for `%s` format; defaulting to `%s` format...",
+		getLogger().Warningf("Listing not supported for '%s' format; defaulting to '%s' format...",
 			format, FORMAT_TEXT)
 		err = DisplayComponentListText(document, writer, flags)
 	}

@@ -113,7 +113,7 @@ func VerifyPatched(record IETF6902Record, pResult interface{}, key string) (err 
 			case IETF_RFC6902_OP_ADD:
 				if _, ok := typedResult[key]; !ok {
 					formattedResult, _ := utils.EncodeAnyToDefaultIndentedJSONStr(typedResult)
-					err = getLogger().Errorf("patch failed. Key `%s`, found in: `%s`", key, formattedResult.String())
+					err = getLogger().Errorf("patch failed. Key '%s', found in: '%s'", key, formattedResult.String())
 					return
 				}
 			case IETF_RFC6902_OP_REMOVE:
