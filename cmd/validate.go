@@ -253,8 +253,8 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 			return INVALID, bom, schemaErrors, errSchemaURI
 		}
 
-		getLogger().Infof("Loading schema: '%s'...", schemaName)
-		schemaLoader = gojsonschema.NewReferenceLoader(schemaName)
+		getLogger().Infof("Loading schema: '%s'...", forcedSchemaFile)
+		schemaLoader = gojsonschema.NewReferenceLoader(forcedSchemaFile)
 		getLogger().Infof("Validating document using forced schema (i.e., '--force %s')", forcedSchemaFile)
 	} else {
 		// Load the matching JSON schema (format, version and variant) from embedded resources
