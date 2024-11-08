@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"strings"
 
@@ -239,11 +240,22 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	// TODO: support remote schema load (via URL) with a flag (default should always be local file for security)
 	forcedSchemaFile := validateFlags.ForcedJsonSchemaFile
 	if forcedSchemaFile != "" {
-		getLogger().Infof("Validating document using forced schema (i.e., `--force %s`)", forcedSchemaFile)
-		//schemaName = document.SchemaInfo.File
-		schemaName = "file://" + forcedSchemaFile
-		getLogger().Infof("Loading schema `%s`...", schemaName)
+
+		if !isValidURIPrefix(forcedSchemaFile) {
+			// attempt to load as a local file
+			forcedSchemaFile = "file://" + forcedSchemaFile
+			getLogger().Warningf("invalid schema URI: '%s'.  Attempting to load as a local file...", forcedSchemaFile)
+		}
+
+		_, errParseURI := url.ParseRequestURI(forcedSchemaFile)
+		if errParseURI != nil {
+			errSchemaURI := fmt.Errorf("invalid schema URI: '%s'. %w", forcedSchemaFile, errParseURI)
+			return INVALID, bom, schemaErrors, errSchemaURI
+		}
+
+		getLogger().Infof("Loading schema: '%s'...", schemaName)
 		schemaLoader = gojsonschema.NewReferenceLoader(schemaName)
+		getLogger().Infof("Validating document using forced schema (i.e., '--force %s')", forcedSchemaFile)
 	} else {
 		// Load the matching JSON schema (format, version and variant) from embedded resources
 		// i.e., using the matching schema found in config.json (as SchemaInfo)
@@ -375,6 +387,17 @@ func validateCustom(document *schema.BOM, policyConfig *schema.LicensePolicyConf
 	}
 
 	return VALID, nil
+}
+
+func isValidURIPrefix(str string) bool {
+	// Check for common URI prefixes
+	prefixes := []string{"http://", "https://", "file://"}
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(str, prefix) {
+			return true
+		}
+	}
+	return false
 }
 
 // func isJSONSchema(filePath string) (isSchema bool, err error) {
