@@ -233,6 +233,9 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 		return INVALID, bom, schemaErrors, fmt.Errorf("unable to load document: '%s'", bom.GetFilename())
 	}
 
+	// Regardless of how or where we load JSON schemas from the final
+	// we define the overall Schema object used to validate the BOM document
+	var jsonBOMSchema *gojsonschema.Schema
 	schemaName := bom.SchemaInfo.File
 
 	// If caller "forced" a specific schema file (version), load it instead of
@@ -268,7 +271,30 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 			return INVALID, bom, schemaErrors, errRead
 		}
 
+		sl := gojsonschema.NewSchemaLoader()
+
 		schemaLoader = gojsonschema.NewBytesLoader(bSchema)
+
+		// NEW NEW NEW
+		JSF := "schema/cyclonedx/common/jsf-0.82.schema.json"
+		getLogger().Infof("Loading schema '%s'...", JSF)
+		bJsfSchema, _ := resources.BOMSchemaFiles.ReadFile(JSF)
+		getLogger().Tracef("schema: %s", bJsfSchema)
+		jsfSchemaLoader := gojsonschema.NewBytesLoader(bJsfSchema)
+		sl.AddSchema("http://cyclonedx.org/schema/jsf-0.82.schema.json", jsfSchemaLoader)
+
+		SPDXID := "schema/cyclonedx/common/spdx.schema.json"
+		getLogger().Infof("Loading schema '%s'...", SPDXID)
+		bSpdxIdSchema, _ := resources.BOMSchemaFiles.ReadFile(SPDXID)
+		getLogger().Tracef("schema: %s", bSpdxIdSchema)
+		spdxSchemaLoader := gojsonschema.NewBytesLoader(bSpdxIdSchema)
+		sl.AddSchema("http://cyclonedx.org/schema/spdx.schema.json", spdxSchemaLoader)
+
+		var errCompile error
+		jsonBOMSchema, errCompile = sl.Compile(schemaLoader)
+		if errCompile != nil {
+			getLogger().Error(errCompile)
+		}
 	}
 
 	if schemaLoader == nil {
@@ -280,24 +306,25 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	// create a reusable schema object (TODO: validate multiple documents)
 	var errLoad error = nil
 	const RETRY int = 3
-	var jsonBOMSchema *gojsonschema.Schema
 
 	// we force result to INVALID as any errors from the library means
 	// we could NOT actually confirm the input documents validity
 	// WARNING: if schemas reference "remote" schemas which are loaded
 	// over http... then there is a chance of 503 errors (as the pkg. loads
 	// externally referenced schemas over network)... attempt fixed retry...
-	for i := 0; i < RETRY; i++ {
-		jsonBOMSchema, errLoad = gojsonschema.NewSchema(schemaLoader)
+	if jsonBOMSchema == nil {
+		for i := 0; i < RETRY; i++ {
+			jsonBOMSchema, errLoad = gojsonschema.NewSchema(schemaLoader)
 
-		if errLoad == nil {
-			break
+			if errLoad == nil {
+				break
+			}
+			getLogger().Warningf("unable to load referenced schema over HTTP: \"%v\"\n retrying...", errLoad)
 		}
-		getLogger().Warningf("unable to load referenced schema over HTTP: \"%v\"\n retrying...", errLoad)
-	}
 
-	if errLoad != nil {
-		return INVALID, bom, schemaErrors, fmt.Errorf("unable to load schema: '%s'", schemaName)
+		if errLoad != nil {
+			return INVALID, bom, schemaErrors, fmt.Errorf("unable to load schema: '%s'", schemaName)
+		}
 	}
 
 	getLogger().Infof("Schema '%s' loaded.", schemaName)

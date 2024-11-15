@@ -1,6 +1,32 @@
 {
     "formats": [
         {
+            "canonicalName": "http://cyclonedx.org/schema/",
+            "propertyKeyFormat": "http://cyclonedx.org/schema/",
+            "propertyKeyVersion": "latest",
+            "propertyValueFormat": "latest",
+            "schemas": [
+                {
+                    "version": "",
+                    "variant": "",
+                    "name": "jsf-0.82.schema.json",
+                    "file": "resources/schema/cyclonedx/common/jsf-0.82.schema.json",
+                    "development": "",
+                    "url": "http://cyclonedx.org/schema/jsf-0.82.schema.json",
+                    "default": false
+                },
+                {
+                    "version": "",
+                    "variant": "",
+                    "name": "spdx.schema.json",
+                    "file": "resources/schema/cyclonedx/common/spdx.schema.json",
+                    "development": "",
+                    "url": "http://cyclonedx.org/schema/spdx.schema.json",
+                    "default": false
+                }                
+            ]
+        },        
+        {
             "canonicalName": "SPDX",
             "propertyKeyFormat": "SPDXID",
             "propertyKeyVersion": "spdxVersion",

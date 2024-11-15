@@ -386,6 +386,12 @@ echo $?
 0  // no error (valid)
 ```
 
+##### Example: Validate 1.5
+
+```bash
+./sbom-utility validate -i test/cyclonedx/cdx-1-5-mature-example-1.json
+```
+
 ##### Example: Validate using a remote JSON schema file using '--force' flag
 
 ```bash
