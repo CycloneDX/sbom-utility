@@ -332,10 +332,19 @@ Customized JSON schemas can also be permanently configured as named schema "vari
   - Using the [`--force` flag](#--force-flag) and passing in a URI to an alternative JSON schema.
 - **"Customized" schema** variants, perhaps derived from standard BOM schemas, can be used for validation using the `--variant` flag (e.g., industry or company-specific schemas). 
   - **Note**: *These variants need to be built into the utility binary as a resource.*
+- **Overriding default schema** 
+  - Using the [`--force` flag](#--force-flag) and passing in a URI to an alternative JSON schema.
+- **"Customized" schema** variants, perhaps derived from standard BOM schemas, can be used for validation using the `--variant` flag (e.g., industry or company-specific schemas). 
+  - **Note**: *These variants need to be built into the utility binary as a resource.*
 
 #### Validate flags
 
 The following flags can be used to improve performance when formatting error output results:
+
+##### `--force` flag
+
+You can override the schema used for validation *(which defaults to the schema that matches the declared format and version found in the input BOM file)* by providing a different one using the `--force` flag. This may be useful to verify a BOM contents against a newer specification version or provide a customized schema.
+  - **Note**: *The `--force` flag works with schema files with valid URIs which include URLs (e.g., 'https://') and files (e.g., 'file://').*
 
 ##### `--force` flag
 
@@ -384,12 +393,6 @@ echo $?
 
 ```bash
 0  // no error (valid)
-```
-
-##### Example: Validate 1.5
-
-```bash
-./sbom-utility validate -i test/cyclonedx/cdx-1-5-mature-example-1.json
 ```
 
 ##### Example: Validate using a remote JSON schema file using '--force' flag

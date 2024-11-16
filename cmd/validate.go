@@ -323,7 +323,7 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 		}
 
 		if errLoad != nil {
-			return INVALID, bom, schemaErrors, fmt.Errorf("unable to load schema: '%s'", schemaName)
+			return INVALID, bom, schemaErrors, fmt.Errorf("unable to load schema: `%s`", schemaName)
 		}
 	}
 
