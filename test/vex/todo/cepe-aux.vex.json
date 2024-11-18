@@ -1,0 +1,47 @@
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "version": 1,
+    "vulnerabilities": [
+        {
+            "description": "Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection') vulnerability in Minova Technology eTrace allows SQL Injection.This issue affects eTrace: before 23.05.20.\n\n",
+            "id": "CVE-2023-2064",
+            "ratings": [
+                {
+                    "score": 9.8,
+                    "severity": "critical",
+                    "method": "CVSSv31",
+                    "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+                }
+            ],
+            "published": "2023-05-24T14:15Z",
+            "updated": "2023-05-31T17:09Z",
+            "affects": [
+                {
+                    "ref": "cepe-aux",
+                    "versions": [
+                        {
+                            "version": "0.0.33",
+                            "status": "affected"
+                        }
+                    ]
+                }
+            ],
+            "analysis": {
+                "state": "in_triage",
+                "justification": "add justification here",
+                "response": [
+                    "add response here",
+                    "more than one response is possible"
+                ],
+                "detail": "the fields state, justification and response are enums, please see CycloneDX specification"
+            },
+            "properties": [
+                {
+                    "name": "internal:vulnerability:source_component",
+                    "value": "etrace@vcs_hash_parent:55f2008f5"
+                }
+            ]
+        }
+    ]
+}

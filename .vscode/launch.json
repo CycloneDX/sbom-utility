@@ -17,6 +17,27 @@
         },
         {
             "showGlobalVariables": true,
+            "name": "Debug: validate (offline)",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "main.go", // "program": "${file}",
+            "args": ["validate", "-i", "test/cyclonedx/cdx-1-5-mature-example-1.json"],
+            "dlvFlags": ["--check-go-version=false"]
+        },
+    
+        {
+            "showGlobalVariables": true,
+            "name": "Debug: validate",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "main.go", // "program": "${file}",
+            "args": ["validate", "-i", "examples/cyclonedx/SBOM/protonmail-webclient-v4-0912dff/bom.json"],
+            "dlvFlags": ["--check-go-version=false"]
+        },
+        {
+            "showGlobalVariables": true,
             "name": "Debug: validate",
             "type": "go",
             "request": "launch",

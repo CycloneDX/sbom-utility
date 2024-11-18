@@ -37,7 +37,7 @@ func LoadConfigFile(baseFilename string) (bData []byte, err error) {
 	return
 }
 
-func LoadSchemaFile(baseFilename string) (bData []byte, err error) {
-	bData, err = ConfigFiles.ReadFile(RESOURCES_SCHEMA_DIR + baseFilename)
-	return
-}
+// func LoadSchemaFile(baseFilename string) (bData []byte, err error) {
+// 	bData, err = BOMSchemaFiles.ReadFile(RESOURCES_SCHEMA_DIR + baseFilename)
+// 	return
+// }

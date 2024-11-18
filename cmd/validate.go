@@ -181,6 +181,71 @@ func validationError(document *schema.BOM, valid bool, err error) {
 	getLogger().Info(message)
 }
 
+func LoadSchemaDependencies(depSchemaLoader *gojsonschema.SchemaLoader, schemas []schema.FormatSchemaInstance, schemaNames []string) (err error) {
+	for _, schemaName := range schemaNames {
+		formatSchemaInstance, errMatch := schema.FindMatchingFormatSchemaInstance(
+			schemas, schemaName)
+		if errMatch != nil {
+			return fmt.Errorf("schema '%s' match not found in resources: '%s'", schemaName, schema.SCHEMA_FORMAT_COMMON)
+		}
+		getLogger().Debugf("Found: '%s': %v", schemaName, formatSchemaInstance)
+
+		getLogger().Infof("Added schema '%s' to loader:...", formatSchemaInstance.File)
+		err = AddDependencySchemaToLoader(depSchemaLoader, formatSchemaInstance)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+func AddDependencySchemaToLoader(depSchemaLoader *gojsonschema.SchemaLoader, formatSchemaInstance schema.FormatSchemaInstance) (err error) {
+	getLogger().Debugf("Reading schema: '%s'...", formatSchemaInstance.File)
+	bSchema, errRead := resources.BOMSchemaFiles.ReadFile(formatSchemaInstance.File)
+
+	if errRead != nil {
+		return errRead
+	}
+	getLogger().Tracef("schema: %s", bSchema)
+	sharedSchemaLoader := gojsonschema.NewBytesLoader(bSchema)
+	depSchemaLoader.AddSchema(formatSchemaInstance.Url, sharedSchemaLoader)
+	return
+}
+
+func LoadCompileSchemaDependencies(
+	bomSchemaLoader gojsonschema.JSONLoader,
+	bomSchemaInstance schema.FormatSchemaInstance,
+	bomSchemaDependencies []string,
+) (jsonBOMSchema *gojsonschema.Schema, err error) {
+
+	if len(bomSchemaDependencies) > 0 {
+		getLogger().Infof("Found schema dependencies: %v", bomSchemaDependencies)
+		// Create a schema loader we will add all dep. schemas into
+		depSchemaLoader := gojsonschema.NewSchemaLoader()
+
+		// Load common schema from application resources
+		var commonSchemas schema.FormatSchema
+		commonSchemas, err = SupportedFormatConfig.FindMatchingFormatSchema(schema.SCHEMA_FORMAT_COMMON)
+		if err != nil {
+			return
+		}
+		getLogger().Tracef("Found '%s' schemas: %v", schema.SCHEMA_FORMAT_COMMON, commonSchemas)
+
+		err = LoadSchemaDependencies(depSchemaLoader, commonSchemas.Schemas, bomSchemaDependencies)
+		if err != nil {
+			return
+		}
+
+		// Compile BOM schema (JSON) with the dependency schemas and return it
+		getLogger().Infof("Compiling schema: '%s'...", bomSchemaInstance.File)
+		jsonBOMSchema, err = depSchemaLoader.Compile(bomSchemaLoader)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
 func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, validateFlags utils.ValidateCommandFlags) (valid bool, bom *schema.BOM, schemaErrors []gojsonschema.ResultError, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
@@ -213,8 +278,8 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 
 	// Create a loader for the BOM (JSON) document
 	var documentLoader gojsonschema.JSONLoader
-	var schemaLoader gojsonschema.JSONLoader
-	var errRead error
+	var jsonBOMSchemaLoader gojsonschema.JSONLoader
+	var errRead, errLoadCompile error
 	var bSchema, bDocument []byte
 
 	if bDocument = bom.GetRawBytes(); len(bDocument) > 0 {
@@ -233,14 +298,15 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 		return INVALID, bom, schemaErrors, fmt.Errorf("unable to load document: '%s'", bom.GetFilename())
 	}
 
+	// Regardless of how or where we load JSON schemas from the final
+	// we define the overall Schema object used to validate the BOM document
+	var jsonBOMSchema *gojsonschema.Schema
 	schemaName := bom.SchemaInfo.File
 
 	// If caller "forced" a specific schema file (version), load it instead of
 	// any SchemaInfo found in config.json
-	// TODO: support remote schema load (via URL) with a flag (default should always be local file for security)
 	forcedSchemaFile := validateFlags.ForcedJsonSchemaFile
 	if forcedSchemaFile != "" {
-
 		if !isValidURIPrefix(forcedSchemaFile) {
 			// attempt to load as a local file
 			forcedSchemaFile = "file://" + forcedSchemaFile
@@ -254,7 +320,7 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 		}
 
 		getLogger().Infof("Loading schema from '--force' flag: '%s'...", forcedSchemaFile)
-		schemaLoader = gojsonschema.NewReferenceLoader(forcedSchemaFile)
+		jsonBOMSchemaLoader = gojsonschema.NewReferenceLoader(forcedSchemaFile)
 		getLogger().Infof("Validating document using forced schema (i.e., '--force %s')", forcedSchemaFile)
 	} else {
 		// Load the matching JSON schema (format, version and variant) from embedded resources
@@ -268,10 +334,19 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 			return INVALID, bom, schemaErrors, errRead
 		}
 
-		schemaLoader = gojsonschema.NewBytesLoader(bSchema)
+		// Create a schema loader for the primary BOM schema file
+		jsonBOMSchemaLoader = gojsonschema.NewBytesLoader(bSchema)
+
+		// If the BOM schema has $refs to other schemas, attempt to load and compile
+		// them from those included as built-in resources
+		jsonBOMSchema, errLoadCompile = LoadCompileSchemaDependencies(jsonBOMSchemaLoader, bom.SchemaInfo, bom.SchemaInfo.Dependencies)
+		if err != nil {
+			return INVALID, bom, schemaErrors, errLoadCompile
+		}
 	}
 
-	if schemaLoader == nil {
+	// At this point we should have a BOM schema loader
+	if jsonBOMSchemaLoader == nil {
 		// we force result to INVALID as any errors from the library means
 		// we could NOT actually confirm the input documents validity
 		return INVALID, bom, schemaErrors, fmt.Errorf("unable to read schema: '%s'", schemaName)
@@ -280,27 +355,28 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	// create a reusable schema object (TODO: validate multiple documents)
 	var errLoad error = nil
 	const RETRY int = 3
-	var jsonBOMSchema *gojsonschema.Schema
 
 	// we force result to INVALID as any errors from the library means
 	// we could NOT actually confirm the input documents validity
 	// WARNING: if schemas reference "remote" schemas which are loaded
 	// over http... then there is a chance of 503 errors (as the pkg. loads
 	// externally referenced schemas over network)... attempt fixed retry...
-	for i := 0; i < RETRY; i++ {
-		jsonBOMSchema, errLoad = gojsonschema.NewSchema(schemaLoader)
+	if jsonBOMSchema == nil {
+		for i := 0; i < RETRY; i++ {
+			jsonBOMSchema, errLoad = gojsonschema.NewSchema(jsonBOMSchemaLoader)
 
-		if errLoad == nil {
-			break
+			if errLoad == nil {
+				break
+			}
+			getLogger().Warningf("unable to load referenced schema over HTTP: \"%v\"\n retrying...", errLoad)
 		}
-		getLogger().Warningf("unable to load referenced schema over HTTP: \"%v\"\n retrying...", errLoad)
+
+		if errLoad != nil {
+			return INVALID, bom, schemaErrors, fmt.Errorf("unable to load schema: `%s`", schemaName)
+		}
 	}
 
-	if errLoad != nil {
-		return INVALID, bom, schemaErrors, fmt.Errorf("unable to load schema: '%s'", schemaName)
-	}
-
-	getLogger().Infof("Schema '%s' loaded.", schemaName)
+	getLogger().Infof("Schema '%s' loaded", schemaName)
 
 	// Validate against the schema and save result determination
 	getLogger().Infof("Validating '%s'...", bom.GetFilenameInterpolated())
