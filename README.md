@@ -320,7 +320,8 @@ See each command's section for contextual examples of the `--where` flag filter 
 
 This command will parse standardized SBOMs and validate it against its declared format and version (e.g., SPDX 2.3, CycloneDX 1.6). 
 
-Custom  variants of standard JSON schemas can be used for validation by supplying the `--variant` name as a flag. Explicit JSON schemas can be specified using the `--force` flag.
+- Custom  variants of standard JSON schemas can be used for validation by supplying the `--variant` name as a flag. 
+- Explicit JSON schemas can be specified using the `--force` flag.
 
 #### Validating using supported schemas
 
