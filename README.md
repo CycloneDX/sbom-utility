@@ -318,11 +318,16 @@ See each command's section for contextual examples of the `--where` flag filter 
 
 ### Validate
 
-This command will parse standardized SBOMs and validate it against its declared format and version (e.g., SPDX 2.3, CycloneDX 1.6). Custom  variants of standard JSON schemas can be used for validation by supplying the `--variant` name as a flag. Explicit JSON schemas can be specified using the `--force` flag.
+This command will parse standardized SBOMs and validate it against its declared format and version (e.g., SPDX 2.3, CycloneDX 1.6). 
+
+Custom  variants of standard JSON schemas can be used for validation by supplying the `--variant` name as a flag. Explicit JSON schemas can be specified using the `--force` flag.
 
 #### Validating using supported schemas
 
-Use the [schema](#schema) command to list supported schemas formats, versions and variants.
+Use the [schema](#schema) command to list supported schemas formats, versions and variants.  
+
+- A "supported" schema is already **"built-in"** to the utility resources along with any dependent schemas it imports.
+- This means that BOM files **can be validated when there is no network connection** to load the schemas from remote locations (a.k.a., *"off-line"* mode).
 
 #### Validating using "custom" schemas
 
@@ -332,7 +337,6 @@ Customized JSON schemas can also be permanently configured as named schema "vari
   - Using the [`--force` flag](#--force-flag) and passing in a URI to an alternative JSON schema.
 - **"Customized" schema** variants, perhaps derived from standard BOM schemas, can be used for validation using the `--variant` flag (e.g., industry or company-specific schemas). 
   - **Note**: *These variants need to be built into the utility binary as a resource.*
-
 
 #### Validate flags
 
