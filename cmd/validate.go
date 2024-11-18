@@ -191,7 +191,7 @@ func LoadSchemaDependencies(depSchemaLoader *gojsonschema.SchemaLoader, schemas 
 		getLogger().Debugf("Found: '%s': %v", schemaName, formatSchemaInstance)
 
 		getLogger().Debugf("Added schema '%s' to loader:...", formatSchemaInstance.File)
-		err = AddSharedSchemaToLoader(depSchemaLoader, formatSchemaInstance)
+		err = AddDependencySchemaToLoader(depSchemaLoader, formatSchemaInstance)
 		if err != nil {
 			return
 		}
@@ -199,7 +199,7 @@ func LoadSchemaDependencies(depSchemaLoader *gojsonschema.SchemaLoader, schemas 
 	return
 }
 
-func AddSharedSchemaToLoader(depSchemaLoader *gojsonschema.SchemaLoader, formatSchemaInstance schema.FormatSchemaInstance) (err error) {
+func AddDependencySchemaToLoader(depSchemaLoader *gojsonschema.SchemaLoader, formatSchemaInstance schema.FormatSchemaInstance) (err error) {
 	getLogger().Debugf("Reading schema: '%s'...", formatSchemaInstance.File)
 	bSchema, errRead := resources.BOMSchemaFiles.ReadFile(formatSchemaInstance.File)
 
