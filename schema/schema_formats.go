@@ -32,6 +32,7 @@ import (
 const (
 	SCHEMA_FORMAT_SPDX      = "SPDX"
 	SCHEMA_FORMAT_CYCLONEDX = "CycloneDX"
+	SCHEMA_FORMAT_COMMON    = "common"
 )
 
 const (
@@ -93,14 +94,15 @@ type FormatSchema struct {
 // e.g.,    key string
 // where key: SchemaKey{ID_CYCLONEDX, VERSION_CYCLONEDX_1_3, false},
 type FormatSchemaInstance struct {
-	Name        string `json:"name"`
-	Version     string `json:"version"`
-	Development string `json:"development"`
-	File        string `json:"file"`
-	Url         string `json:"url"`
-	Default     bool   `json:"default"`
-	Variant     string `json:"variant"`
-	Format      string `json:"format"` // value set from parent FormatSchema's `CanonicalName`
+	Name         string   `json:"name"`
+	Version      string   `json:"version"`
+	Development  string   `json:"development"`
+	File         string   `json:"file"`
+	Url          string   `json:"url"`
+	Default      bool     `json:"default"`
+	Variant      string   `json:"variant"`
+	Format       string   `json:"format"` // value set from parent FormatSchema's `CanonicalName`
+	Dependencies []string `json:"dependencies"`
 }
 
 func (config *BOMFormatAndSchemaConfig) Reset() {
@@ -198,6 +200,38 @@ func (schemaConfig *BOMFormatAndSchemaConfig) FindFormatAndSchema(bom *BOM) (err
 
 	// if we reach here, we did not find the format in our configuration (list)
 	err = NewUnknownFormatError(bom.filename)
+	return
+}
+
+func (schemaConfig *BOMFormatAndSchemaConfig) FindMatchingFormatSchema(name string) (formatSchema FormatSchema, err error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	// Iterate over configured schema formats to find matching name
+	for _, formatSchema = range schemaConfig.Formats {
+		if name == formatSchema.CanonicalName {
+			return
+		}
+	}
+
+	// Inform user we could not find a matching schema
+	err = NewUnsupportedSchemaError(MSG_CONFIG_SCHEMA_VERSION_NOT_FOUND, name, "", "")
+	return
+}
+
+func FindMatchingFormatSchemaInstance(formatSchemas []FormatSchemaInstance, schemaName string) (formatSchemaInstance FormatSchemaInstance, err error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	// Iterate over known formats to see if SBOM document contains a known value
+	for _, formatSchemaInstance = range formatSchemas {
+		if schemaName == formatSchemaInstance.Name {
+			return
+		}
+	}
+
+	// if we reach here, we did not find the format in our configuration (list)
+	err = NewUnsupportedSchemaError(MSG_CONFIG_SCHEMA_VERSION_NOT_FOUND, schemaName, "", "")
 	return
 }
 
