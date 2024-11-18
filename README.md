@@ -332,10 +332,7 @@ Customized JSON schemas can also be permanently configured as named schema "vari
   - Using the [`--force` flag](#--force-flag) and passing in a URI to an alternative JSON schema.
 - **"Customized" schema** variants, perhaps derived from standard BOM schemas, can be used for validation using the `--variant` flag (e.g., industry or company-specific schemas). 
   - **Note**: *These variants need to be built into the utility binary as a resource.*
-- **Overriding default schema** 
-  - Using the [`--force` flag](#--force-flag) and passing in a URI to an alternative JSON schema.
-- **"Customized" schema** variants, perhaps derived from standard BOM schemas, can be used for validation using the `--variant` flag (e.g., industry or company-specific schemas). 
-  - **Note**: *These variants need to be built into the utility binary as a resource.*
+
 
 #### Validate flags
 
