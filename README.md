@@ -343,11 +343,6 @@ The following flags can be used to improve performance when formatting error out
 You can override the schema used for validation *(which defaults to the schema that matches the declared format and version found in the input BOM file)* by providing a different one using the `--force` flag. This may be useful to verify a BOM contents against a newer specification version or provide a customized schema.
   - **Note**: *The `--force` flag works with schema files with valid URIs which include URLs (e.g., 'https://') and files (e.g., 'file://').*
 
-##### `--force` flag
-
-You can override the schema used for validation *(which defaults to the schema that matches the declared format and version found in the input BOM file)* by providing a different one using the `--force` flag. This may be useful to verify a BOM contents against a newer specification version or provide a customized schema.
-  - **Note**: *The `--force` flag works with schema files with valid URIs which include URLs (e.g., 'https://') and files (e.g., 'file://').*
-
 ##### `--error-limit` flag
 
 Use the `--error-limit x` (default: `10`) flag to reduce the formatted error result output to the first `x` errors.  By default, only the first 10 errors are output with an informational messaging indicating `x/y` errors were shown.
