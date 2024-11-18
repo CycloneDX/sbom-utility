@@ -190,7 +190,7 @@ func LoadSchemaDependencies(depSchemaLoader *gojsonschema.SchemaLoader, schemas 
 		}
 		getLogger().Debugf("Found: '%s': %v", schemaName, formatSchemaInstance)
 
-		getLogger().Debugf("Added schema '%s' to loader:...", formatSchemaInstance.File)
+		getLogger().Infof("Added schema '%s' to loader:...", formatSchemaInstance.File)
 		err = AddDependencySchemaToLoader(depSchemaLoader, formatSchemaInstance)
 		if err != nil {
 			return
@@ -212,7 +212,11 @@ func AddDependencySchemaToLoader(depSchemaLoader *gojsonschema.SchemaLoader, for
 	return
 }
 
-func LoadCompileSchemaDependencies(bomSchemaLoader gojsonschema.JSONLoader, bomSchemaDependencies []string) (jsonBOMSchema *gojsonschema.Schema, err error) {
+func LoadCompileSchemaDependencies(
+	bomSchemaLoader gojsonschema.JSONLoader,
+	bomSchemaInstance schema.FormatSchemaInstance,
+	bomSchemaDependencies []string,
+) (jsonBOMSchema *gojsonschema.Schema, err error) {
 
 	if len(bomSchemaDependencies) > 0 {
 		getLogger().Infof("Found schema dependencies: %v", bomSchemaDependencies)
@@ -233,6 +237,7 @@ func LoadCompileSchemaDependencies(bomSchemaLoader gojsonschema.JSONLoader, bomS
 		}
 
 		// Compile BOM schema (JSON) with the dependency schemas and return it
+		getLogger().Infof("Compiling schema: '%s'...", bomSchemaInstance.File)
 		jsonBOMSchema, err = depSchemaLoader.Compile(bomSchemaLoader)
 		if err != nil {
 			return
@@ -334,7 +339,7 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 
 		// If the BOM schema has $refs to other schemas, attempt to load and compile
 		// them from those included as built-in resources
-		jsonBOMSchema, errLoadCompile = LoadCompileSchemaDependencies(jsonBOMSchemaLoader, bom.SchemaInfo.Dependencies)
+		jsonBOMSchema, errLoadCompile = LoadCompileSchemaDependencies(jsonBOMSchemaLoader, bom.SchemaInfo, bom.SchemaInfo.Dependencies)
 		if err != nil {
 			return INVALID, bom, schemaErrors, errLoadCompile
 		}
