@@ -53,8 +53,8 @@ type CDXBom struct {
 	Annotations        *[]CDXAnnotation        `json:"annotations,omitempty" cdx:"added:1.5"`
 	Formulation        *[]CDXFormula           `json:"formulation,omitempty" cdx:"added:1.5"`
 	Properties         *[]CDXProperty          `json:"properties,omitempty" cdx:"added:1.5"`
-	Declarations       *[]CDXDeclaration       `json:"declarations,omitempty" cdx:"added:1.6"`
-	Definitions        *[]CDXDefinition        `json:"definitions,omitempty" cdx:"added:1.6"`
+	Declarations       *CDXDeclaration         `json:"declarations,omitempty" cdx:"added:1.6"`
+	Definitions        *CDXDefinition          `json:"definitions,omitempty" cdx:"added:1.6"`
 }
 
 // v1.2: existed
