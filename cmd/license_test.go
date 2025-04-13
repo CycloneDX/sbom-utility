@@ -35,6 +35,7 @@ const (
 	TEST_LICENSE_LIST_CDX_1_3_NONE_FOUND              = "test/cyclonedx/cdx-1-3-license-list-none-found.json"
 	TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND              = "test/cyclonedx/cdx-1-4-license-list-none-found.json"
 	TEST_LICENSE_LIST_CDX_1_5_LICENSE_CHOICE_VARIANTS = "test/cyclonedx/cdx-1-5-license-choice-variants.json"
+	TEST_LICENSE_LIST_CDX_1_5_MATURE_EXAMPLE_1        = "test/cyclonedx/cdx-1-5-mature-example-1.json"
 
 	TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_ID    = "test/cyclonedx/cdx-1-4-license-policy-invalid-spdx-id.json"
 	TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_NAME  = "test/cyclonedx/cdx-1-4-license-policy-invalid-license-name.json"
@@ -335,6 +336,25 @@ func TestLicenseListSummaryTextCdx14LicenseExpInName(t *testing.T) {
 	lti.ResultLineContainsValuesAtLineNum = 3
 	lti.ResultExpectedLineCount = 5 // title and data rows
 	innerTestLicenseList(t, lti)
+}
+
+func TestLicenseListTextCdx15WherePURLTypeIsNPM(t *testing.T) {
+	lti1 := NewLicenseTestInfo(
+		TEST_LICENSE_LIST_CDX_1_5_MATURE_EXAMPLE_1,
+		FORMAT_TEXT, false)
+	lti1.ResultLineContainsValues = []string{"Apache-1.0"}
+	lti1.ResultLineContainsValuesAtLineNum = 2
+	lti1.ResultExpectedLineCount = 10 // title and data rows
+	innerTestLicenseList(t, lti1)
+
+	lti2 := NewLicenseTestInfo(
+		TEST_LICENSE_LIST_CDX_1_5_MATURE_EXAMPLE_1,
+		FORMAT_TEXT, false)
+	lti2.WhereClause = "purl=pkg.npm.*"
+	lti2.ResultLineContainsValues = []string{"MIT"}
+	lti2.ResultLineContainsValuesAtLineNum = 2
+	lti2.ResultExpectedLineCount = 5 // title and data rows
+	innerTestLicenseList(t, lti2)
 }
 
 // Test custom marshal of CDXLicense (empty CDXAttachment)

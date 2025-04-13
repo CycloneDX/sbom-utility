@@ -46,7 +46,7 @@
     },
     "component": {
       "type": "application",
-      "bom-ref": "pkg:oci/example.com/product/application@10.0.4.0",
+      "bom-ref": "bom-ref_pkg:oci/example.com/product/application@10.0.4.0",
       "purl": "pkg:oci/example.com/product/application@10.0.4.0",
       "name": "Example Application v10.0.4",
       "description": "Example's Do-It-All application",
@@ -143,7 +143,7 @@
   "components": [
     {
       "type": "library",
-      "bom-ref": "pkg:npm/sample@2.0.0",
+      "bom-ref": "bom-ref_pkg:npm/sample@2.0.0",
       "purl": "pkg:npm/sample@2.0.0",
       "name": "sample",
       "version": "2.0.0",
@@ -158,7 +158,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "pkg:npm/body-parser@1.19.0",
+      "bom-ref": "bom-ref_pkg:npm/body-parser@1.19.0",
       "purl": "pkg:npm/body-parser@1.19.0",
       "name": "body-parser",
       "version": "1.19.0",
