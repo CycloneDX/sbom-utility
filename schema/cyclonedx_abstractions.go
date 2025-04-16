@@ -324,6 +324,7 @@ type LicenseInfo struct {
 	BOMRef                 CDXRefType       `json:"bom-ref"`
 	BOMLocationValue       int              `json:"bom-location-value"`
 	BOMLocation            string           `json:"bom-location"`
+	PURL                   string           `json:"purl"` 
 	LicenseChoice          CDXLicenseChoice // Do not marshal
 	Policy                 LicensePolicy    // Do not marshal
 	Component              CDXComponent     // Do not marshal
@@ -356,6 +357,7 @@ func (licenseInfo *LicenseInfo) MapCDXLicenseFromComponent(cdxComponent CDXCompo
 	if cdxComponent.BOMRef != nil {
 		licenseInfo.BOMRef = *cdxComponent.BOMRef
 	}
+	licenseInfo.PURL = cdxComponent.Purl
 }
 
 func NewLicenseInfoFromService(cdxService CDXService, licenseChoice CDXLicenseChoice, location int) (licenseInfo *LicenseInfo) {

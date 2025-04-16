@@ -59,6 +59,7 @@ const (
 	LICENSE_FILTER_KEY_RESOURCE_NAME = "resource-name"
 	LICENSE_FILTER_KEY_BOM_REF       = "bom-ref"
 	LICENSE_FILTER_KEY_BOM_LOCATION  = "bom-location"
+	LICENSE_FILTER_KEY_PURL          = "purl"
 )
 
 // var LICENSE_LIST_TITLES_LICENSE_CHOICE = []string{"License.Id", "License.Name", "License.Url", "Expression", "License.Text.ContentType", "License.Text.Encoding", "License.Text.Content"}
@@ -86,6 +87,7 @@ var LICENSE_LIST_ROW_DATA = []ColumnFormatData{
 	*NewColumnFormatData(LICENSE_FILTER_KEY_LICENSE_TEXT_ENCODING, -1, false, false),
 	*NewColumnFormatData(LICENSE_FILTER_KEY_LICENSE_TEXT_CONTENT_TYPE, -1, false, false),
 	*NewColumnFormatData(LICENSE_FILTER_KEY_LICENSE_TEXT_CONTENT, 8, false, false),
+	*NewColumnFormatData(LICENSE_FILTER_KEY_PURL, REPORT_DO_NOT_TRUNCATE, false, false),
 }
 
 // Command help formatting
