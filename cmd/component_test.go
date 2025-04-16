@@ -40,6 +40,9 @@ const (
 	TEST_COMPONENT_LIST_CDX_1_6_CBOM = TEST_CDX_1_6_CRYPTO_BOM
 	// test/cyclonedx/1.6/cdx-1-6-valid-mlbom-environmental-considerations.json
 	TEST_COMPONENT_LIST_CDX_1_6_MLBOM = TEST_CDX_1_6_MACHINE_LEARNING_BOM
+	// test/cyclonedx/1.6/specification/valid-empty-defns-decls.json
+	// Test general BOM with empty top-level bom objects, but valid components
+	TEST_COMPONENT_LIST_CDX_1_6_SBOM = "test/cyclonedx/1.6/specification/valid-empty-defns-decls.json"
 )
 
 var COMPONENT_TEST_DEFAULT_FLAGS utils.ComponentCommandFlags
@@ -223,5 +226,10 @@ func TestComponentListCdx16ValidComponentSwid(t *testing.T) {
 
 func TestComponentListCdx16ValidComponentTypes(t *testing.T) {
 	ti := NewComponentTestInfoBasic(TEST_CDX_SPEC_1_6_VALID_COMPONENT_TYPES, FORMAT_CSV, nil)
+	innerTestComponentList(t, ti, COMPONENT_TEST_DEFAULT_FLAGS)
+}
+
+func TestComponentListCdx16EmptyDefnsDecls(t *testing.T) {
+	ti := NewComponentTestInfoBasic(TEST_COMPONENT_LIST_CDX_1_6_SBOM, FORMAT_CSV, nil)
 	innerTestComponentList(t, ti, COMPONENT_TEST_DEFAULT_FLAGS)
 }
