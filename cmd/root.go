@@ -139,7 +139,7 @@ const (
 )
 
 var rootCmd = &cobra.Command{
-	Use:           fmt.Sprintf("%s [command] [flags]", utils.GlobalFlags.Project),
+	Use:           fmt.Sprintf("%s [command] [flags]", utils.PROJECT_NAME),
 	SilenceErrors: false,
 	SilenceUsage:  false,
 	Short:         MSG_APP_NAME,

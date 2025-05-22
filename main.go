@@ -29,13 +29,13 @@ import (
 	"github.com/CycloneDX/sbom-utility/utils"
 )
 
-// Struct used to hold tagged (release) build information
+// Declarations used to hold tagged (release) build information
 // Which is displayed by the `version` command.
 // These values can be overwritten by `go build ${LDFLAGS}`
 // for example, LDFLAGS=-ldflags "-X main.Version=${VERSION}
 var (
 	// public
-	Project = "sbom-utility"
+	Project = utils.PROJECT_NAME
 	Binary  = "unset"
 	Version = "x.y.z"
 	Logger  *log.MiniLogger

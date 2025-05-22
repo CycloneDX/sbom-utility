@@ -18,6 +18,10 @@
 
 package utils
 
+const (
+	PROJECT_NAME = "sbom-utility"
+)
+
 // Globals
 var GlobalFlags CommandFlags
 
