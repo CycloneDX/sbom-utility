@@ -74,6 +74,8 @@ const (
 	TEST_CDX_SPEC_1_6_VALID_METADATA_TOOL   = "test/cyclonedx/1.6/specification/valid-metadata-tool-1.6.json"
 	TEST_CDX_SPEC_1_6_VALID_SAASBOM         = "test/cyclonedx/1.6/specification/valid-saasbom-1.6.json"
 	TEST_CDX_SPEC_1_6_VALID_VULNERABILITY   = "test/cyclonedx/1.6/specification/valid-vulnerability-1.6.json"
+	TEST_CDX_SPEC_1_6_VALID_EXT_REF_IRI     = "test/validation/cdx-1-6-validate-component-ext-ref-iri-reference.json"
+	TEST_CDX_SPEC_1_6_1_VALID_SPDX_LICENSE  = "test/cyclonedx/1.6/specification/valid-license-spdx-licenses-1.6.1.json"
 )
 
 // -----------------------------------------------------------
@@ -176,4 +178,20 @@ func TestValidateSchemaCdx13InvalidLicenseChoice(t *testing.T) {
 		SCHEMA_ERROR_TYPE,
 		SCHEMA_ERROR_FIELD,
 		SCHEMA_ERROR_VALUE)
+}
+
+// 1.6 Tests
+func TestValidateCdx16ExtRefIRI(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_SPEC_1_6_VALID_EXT_REF_IRI)
+	innerTestValidate(t, *vti)
+}
+
+func TestValidateCdx16Licensing(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_SPEC_1_6_VALID_LICENSING)
+	innerTestValidate(t, *vti)
+}
+
+func TestValidateCdx16SpdxLicense(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_SPEC_1_6_1_VALID_SPDX_LICENSE)
+	innerTestValidate(t, *vti)
 }

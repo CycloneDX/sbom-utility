@@ -1,0 +1,41 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6ffff",
+  "metadata": {
+    "component": {
+      "type": "library",
+      "bom-ref": "pkg:nuget/Dapper@2.0.35",
+      "name": "Dapper",
+      "version": "2.0.35",
+      "description": "A high performance Micro-ORM supporting SQL Server, MySQL, Sqlite, SqlCE, Firebird etc..",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "E4E458FBDCF993F654704D916C40CC4FD6F040D952B8DF771141762FAB684022A711C9EBCF9290EA3DB83E0AC26A4CC896CC22F969E9A74F04BBD9E4C110236D"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "copyright": "2019 Stack Exchange, Inc.",
+      "purl": "pkg:nuget/Dapper@2.0.35",
+      "externalReferences": [
+        {
+          "url": "https://github.com/StackExchange/Dapper",
+          "type": "website"
+        },
+        {
+          "url": "https://github.com/StackExchange/Dapper",
+          "type": "vcs"
+        }
+      ]
+    }
+  }
+}
