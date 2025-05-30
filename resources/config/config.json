@@ -23,9 +23,9 @@
                     "development": "",
                     "url": "http://cyclonedx.org/schema/spdx.schema.json",
                     "default": false
-                }                
+                }
             ]
-        },        
+        },
         {
             "canonicalName": "SPDX",
             "propertyKeyFormat": "SPDXID",
@@ -124,7 +124,7 @@
                     "development": "https://github.com/CycloneDX/specification/blob/master/schema/bom-1.4.schema.json",
                     "url": "https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json",
                     "default": false,
-                    "dependencies": ["jsf-0.82.schema.json", "spdx.schema.json"]                    
+                    "dependencies": ["jsf-0.82.schema.json", "spdx.schema.json"]
                 },
                 {
                     "version": "1.5",
@@ -134,12 +134,12 @@
                     "development": "https://github.com/CycloneDX/specification/blob/master/schema/bom-1.5.schema.json",
                     "url": "https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.5.schema.json",
                     "default": false,
-                    "dependencies": ["jsf-0.82.schema.json", "spdx.schema.json"]                    
+                    "dependencies": ["jsf-0.82.schema.json", "spdx.schema.json"]
                 },
                 {
                     "version": "1.6",
                     "variant": "",
-                    "name": "CycloneDX v1.6",
+                    "name": "CycloneDX v1.6.1",
                     "file": "schema/cyclonedx/1.6/bom-1.6.schema.json",
                     "development": "https://github.com/CycloneDX/specification/blob/master/schema/bom-1.6.schema.json",
                     "url": "https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.6.schema.json",
