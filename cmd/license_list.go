@@ -242,16 +242,29 @@ func DisplayLicenseListJson(bom *schema.BOM, writer io.Writer, flags utils.Licen
 	defer getLogger().Exit()
 
 	var licenseInfo schema.LicenseInfo
-	var lc []schema.CDXLicenseChoice
+	var lc []map[string]string
+
+	var line, keys []string
+	keys, _ = prepareReportTitleData(LICENSE_LIST_ROW_DATA, flags.Summary)
 
 	for _, licenseName := range bom.LicenseMap.KeySet() {
 		arrLicenseInfo, _ := bom.LicenseMap.Get(licenseName)
 
 		for _, iInfo := range arrLicenseInfo {
 			licenseInfo = iInfo.(schema.LicenseInfo)
-			if licenseInfo.LicenseChoiceTypeValue != schema.LC_TYPE_INVALID {
-				lc = append(lc, licenseInfo.LicenseChoice)
+			line, err = prepareReportLineData(
+				licenseInfo,
+				LICENSE_LIST_ROW_DATA,
+				flags.Summary,
+			)
+			if err != nil {
+				return
 			}
+			entry := make(map[string]string)
+			for i, key := range keys {
+				entry[key] = line[i]
+			}
+			lc = append(lc, entry)
 		}
 	}
 
