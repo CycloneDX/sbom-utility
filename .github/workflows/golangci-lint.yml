@@ -9,10 +9,12 @@ on:
   pull_request:
     branches: [ main ]
 
+# see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/controlling-permissions-for-github_token
 permissions:
   contents: read
   # Optional: allow read access to pull request. Use with `only-new-issues` option.
   # pull-requests: read
+
 jobs:
   golangci:
     name: lint
