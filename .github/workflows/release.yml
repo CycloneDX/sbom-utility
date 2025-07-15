@@ -5,9 +5,8 @@ on:
     types: [created]
   workflow_dispatch:
 
-permissions:
-  contents: write
-  packages: write
+# see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/controlling-permissions-for-github_token
+permissions: {}
 
 jobs:
   releases-matrix:
@@ -28,6 +27,8 @@ jobs:
             goarch: ppc64
           - goos: windows
             goarch: s390x
+    permissions:
+      contents: write  # required for creating GH releases and uploading release assets
     steps:
     - uses: actions/checkout@v4
 
