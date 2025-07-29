@@ -1821,11 +1821,36 @@ The output will contain the canonical schema for the CycloneDX `LicenseChoice` d
 
 - `json` (default), `csv`, `md`
 
+###### sample json object output:
+
+```json
+    {
+        "license": {
+            "id": "MIT"
+        }
+    },
+```
+
+*which could be used to edit or rewrite a BOM with a summary of all `LicenseChoice` data.*
+
 ##### with `--summary` flag
 
 The output will contain a simplified, flattened set of key-value information form both the CycloneDX `LicenseChoice` structure, as well as user-customizable, license policy information (see [License policy notes](#license-policy-notes)).
 
 - `txt` (default), `csv`, `md`, `json`
+
+###### sample json object output:
+
+```json
+    {
+        "bom-location": "components",
+        "bom-ref": "pkg:lib/libraryA@1.0.0",
+        "license": "MIT",
+        "license-type": "id",
+        "resource-name": "Library A",
+        "usage-policy": "allow"
+    },
+```
 
 #### License list result sorting
 
