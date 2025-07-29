@@ -217,7 +217,11 @@ func ListLicenses(writer io.Writer, policyConfig *schema.LicensePolicyConfig,
 	getLogger().Infof("Outputting listing ('%s' format)...", format)
 	switch format {
 	case FORMAT_JSON:
-		err = DisplayLicenseListJson(document, writer, licenseFlags)
+		if licenseFlags.ReportCommandFlags.Summary {
+			err = DisplayLicenseListSummaryJson(document, writer, licenseFlags)
+		} else {
+			err = DisplayLicenseListJson(document, writer, licenseFlags)
+		}
 	case FORMAT_CSV:
 		err = DisplayLicenseListCSV(document, writer, licenseFlags)
 	case FORMAT_MARKDOWN:
@@ -233,16 +237,40 @@ func ListLicenses(writer io.Writer, policyConfig *schema.LicensePolicyConfig,
 	return
 }
 
-// NOTE: This list is NOT de-duplicated
-// NOTE: if no licenses are found, the "json.Marshal" method(s) will return a value of "null"
-// which is valid JSON (and not an empty array)
-// TODO: Support de-duplication (flag) (which MUST be exact using deep comparison)
 func DisplayLicenseListJson(bom *schema.BOM, writer io.Writer, flags utils.LicenseCommandFlags) (err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
 	var licenseInfo schema.LicenseInfo
-	var lc []map[string]string
+	var arrLicenseChoice []schema.CDXLicenseChoice
+
+	for _, licenseName := range bom.LicenseMap.KeySet() {
+		arrLicenseInfo, _ := bom.LicenseMap.Get(licenseName)
+
+		for _, iInfo := range arrLicenseInfo {
+			licenseInfo = iInfo.(schema.LicenseInfo)
+			if licenseInfo.LicenseChoiceTypeValue != schema.LC_TYPE_INVALID {
+				arrLicenseChoice = append(arrLicenseChoice, licenseInfo.LicenseChoice)
+			}
+		}
+	}
+
+	// Note: JSON data files MUST ends in a newline as this is a POSIX standard
+	// which is already accounted for by the JSON encoder.
+	_, err = utils.WriteAnyAsEncodedJSONInt(writer, arrLicenseChoice, utils.GlobalFlags.PersistentFlags.GetOutputIndentInt())
+	return
+}
+
+// NOTE: This list is NOT de-duplicated
+// NOTE: if no licenses are found, the "json.Marshal" method(s) will return a value of "null"
+// which is valid JSON (and not an empty array)
+// TODO: Support de-duplication (flag) (which MUST be exact using deep comparison)
+func DisplayLicenseListSummaryJson(bom *schema.BOM, writer io.Writer, flags utils.LicenseCommandFlags) (err error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	var licenseInfo schema.LicenseInfo
+	var arrLicenseSummaryData []map[string]string
 
 	var line, keys []string
 	keys, _ = prepareReportTitleData(LICENSE_LIST_ROW_DATA, flags.Summary)
@@ -264,13 +292,13 @@ func DisplayLicenseListJson(bom *schema.BOM, writer io.Writer, flags utils.Licen
 			for i, key := range keys {
 				entry[key] = line[i]
 			}
-			lc = append(lc, entry)
+			arrLicenseSummaryData = append(arrLicenseSummaryData, entry)
 		}
 	}
 
 	// Note: JSON data files MUST ends in a newline as this is a POSIX standard
 	// which is already accounted for by the JSON encoder.
-	_, err = utils.WriteAnyAsEncodedJSONInt(writer, lc, utils.GlobalFlags.PersistentFlags.GetOutputIndentInt())
+	_, err = utils.WriteAnyAsEncodedJSONInt(writer, arrLicenseSummaryData, utils.GlobalFlags.PersistentFlags.GetOutputIndentInt())
 	return
 }
 

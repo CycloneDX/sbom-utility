@@ -318,14 +318,14 @@ See each command's section for contextual examples of the `--where` flag filter 
 
 ### Validate
 
-This command will parse standardized SBOMs and validate it against its declared format and version (e.g., SPDX 2.3, CycloneDX 1.6). 
+This command will parse standardized SBOMs and validate it against its declared format and version (e.g., SPDX 2.3, CycloneDX 1.6).
 
-- Custom  variants of standard JSON schemas can be used for validation by supplying the `--variant` name as a flag. 
+- Custom  variants of standard JSON schemas can be used for validation by supplying the `--variant` name as a flag.
 - Explicit JSON schemas can be specified using the `--force` flag.
 
 #### Validating using supported schemas
 
-Use the [schema](#schema) command to list supported schemas formats, versions and variants.  
+Use the [schema](#schema) command to list supported schemas formats, versions and variants.
 
 - A "supported" schema is already **"built-in"** to the utility resources along with any dependent schemas it imports.
 - This means that BOM files **can be validated when there is no network connection** to load the schemas from remote locations (a.k.a., *"off-line"* mode).
@@ -334,9 +334,9 @@ Use the [schema](#schema) command to list supported schemas formats, versions an
 
 Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file. See [adding schemas](#adding-schemas).
 
-- **Overriding default schema** 
+- **Overriding default schema**
   - Using the [`--force` flag](#--force-flag) and passing in a URI to an alternative JSON schema.
-- **"Customized" schema** variants, perhaps derived from standard BOM schemas, can be used for validation using the `--variant` flag (e.g., industry or company-specific schemas). 
+- **"Customized" schema** variants, perhaps derived from standard BOM schemas, can be used for validation using the `--variant` flag (e.g., industry or company-specific schemas).
   - **Note**: *These variants need to be built into the utility binary as a resource.*
 
 #### Validate flags
@@ -1815,8 +1815,42 @@ The `list` subcommand produces JSON output which contains an array of CycloneDX 
 
 This command supports the `--format` flag with any of the following values:
 
+##### without `--summary` flag
+
+The output will contain the canonical schema for the CycloneDX `LicenseChoice` data objects.
+
 - `json` (default), `csv`, `md`
-  - using the `--summary` flag: `txt` (default), `csv`, `md`
+
+###### sample json object output:
+
+```json
+    {
+        "license": {
+            "id": "MIT"
+        }
+    },
+```
+
+*which could be used to edit or rewrite a BOM with a summary of all `LicenseChoice` data.*
+
+##### with `--summary` flag
+
+The output will contain a simplified, flattened set of key-value information form both the CycloneDX `LicenseChoice` structure, as well as user-customizable, license policy information (see [License policy notes](#license-policy-notes)).
+
+- `txt` (default), `csv`, `md`, `json`
+
+###### sample json object output:
+
+```json
+    {
+        "bom-location": "components",
+        "bom-ref": "pkg:lib/libraryA@1.0.0",
+        "license": "MIT",
+        "license-type": "id",
+        "resource-name": "Library A",
+        "usage-policy": "allow"
+    },
+```
 
 #### License list result sorting
 
