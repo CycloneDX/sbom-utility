@@ -206,7 +206,8 @@ func AddDependencySchemaToLoader(depSchemaLoader *gojsonschema.SchemaLoader, for
 	if errRead != nil {
 		return errRead
 	}
-	getLogger().Tracef("schema: %s", bSchema)
+	getLogger().Tracef("Adding schema: `%s` byte data to schema loader...", formatSchemaInstance.File)
+	// getLogger().Tracef(">> schema byte data:\n %s", bSchema)
 	sharedSchemaLoader := gojsonschema.NewBytesLoader(bSchema)
 	depSchemaLoader.AddSchema(formatSchemaInstance.Url, sharedSchemaLoader)
 	return

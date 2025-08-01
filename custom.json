@@ -1,7 +1,17 @@
 {
     "validation": {
+        "description": "An array of custom validation actions to perform on selected elements of a BOM document.",
+        "actions": [
+            {
+              "id": "custom-disclaimer-property",
+              "description": "Validate custom disclaimer BOM metadata property.",
+              "_selector": "metadata.properties",
+              "_functions": [ "KeyValueExists", "IsKeyUnique" ],
+              "_key": "name",
+              "_value": "urn:example.com:disclaimer"
+            }
+        ],
         "metadata": {
-            "_selector": "metadata.properties",
             "properties": [
                 {
                     "name": "urn:example.com:disclaimer",
