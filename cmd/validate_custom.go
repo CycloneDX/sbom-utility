@@ -151,7 +151,6 @@ func KeyValueExistsInArrayOfMap(arrayOfMap []map[string]interface{}, key string,
 }
 
 func KeyValueExistsInMap(jsonMap map[string]interface{}, key string, valueRegex string) (exists bool) {
-	exists = false
 	var value interface{}
 	value, exists = jsonMap[key]
 	if !exists {
