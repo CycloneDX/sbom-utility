@@ -19,10 +19,20 @@
 package cmd
 
 import (
+	"fmt"
+
+	"github.com/CycloneDX/sbom-utility/common"
+	"github.com/CycloneDX/sbom-utility/log"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/jwangsadinata/go-multimap/slicemultimap"
 )
+
+// const (
+// 	JSON_TYPE_INVALID      = -1
+// 	JSON_TYPE_MAP          = iota // 0
+// 	JSON_TYPE_ARRAY_OF_MAP        // 1
+// )
 
 // Validate all custom requirements that cannot be found be schema validation
 // These custom requirements are categorized by the following areas:
@@ -57,8 +67,153 @@ func validateCustomCDXDocument(document *schema.BOM, policyConfig *schema.Licens
 	if innerError = validateCustomMetadata(document); innerError != nil {
 		return
 	}
+
+	numCustomValidationActions := len(schema.CustomValidationChecks.Validation.ValidationActions)
+	if numCustomValidationActions > 0 {
+		getLogger().Tracef("Found %v custom validation actions.", numCustomValidationActions)
+		innerError = processValidationActions(document, schema.CustomValidationChecks.Validation.ValidationActions)
+	} else {
+		getLogger().Tracef("No custom validation actions found.")
+	}
 	return
 }
+
+func processValidationActions(document *schema.BOM, actions []schema.ValidationAction) (innerError error) {
+
+	for _, action := range actions {
+		getLogger().Tracef("processing action id: `%s`...", action.Id)
+
+		qr := common.NewQueryRequest()
+		// Use query function to obtain BOM document subsets (as JSON maps)
+		// using --from path values
+		path := action.Selector
+		qr.SetRawFromPaths(path)
+		result, errQuery := QueryJSONMap(document.GetJSONMap(), qr)
+
+		if errQuery != nil {
+			innerError = getLogger().Errorf("query error: invalid path: %s", path)
+			buffer, errEncode := utils.EncodeAnyToDefaultIndentedJSONStr(result)
+			if errEncode != nil {
+				getLogger().Tracef("result: %s", buffer.String())
+			}
+			return
+		}
+
+		// value found in BOM is either a map or array of map
+		jsonMap, jsonArrayOfMap, typeError := getJsonType(result)
+		if typeError != nil {
+			innerError = typeError
+			return
+		}
+
+		// Array of map
+		if jsonArrayOfMap != nil {
+			// for _, m := range jsonArrayOfMap {
+			// 	getLogger().Tracef("%v", m)
+			// }
+			for _, fx := range action.Functions {
+				getLogger().Tracef("processing function: `%s`...", fx)
+				switch fx {
+				case "KeyValueExists":
+					exists := KeyValueExistsInArrayOfMap(jsonArrayOfMap, action.Key, action.Value)
+					if !exists {
+						innerError = getLogger().Errorf("value exists error. key: `%s`, value: `%s` does not exist in array of map", action.Key, action.Value)
+						return
+					}
+				case "IsKeyUnique":
+					return
+				default:
+					innerError = getLogger().Errorf("unknown function: `%s`...", fx)
+				}
+			}
+		} else if jsonMap != nil { // redundant check, but leave for now
+			// Map
+			value, formatError := log.FormatMap("", jsonMap)
+			if formatError != nil {
+				innerError = formatError
+				return
+			}
+			getLogger().Tracef("value: %s", value)
+		}
+	}
+	return
+}
+
+func KeyValueExistsInArrayOfMap(arrayOfMap []map[string]interface{}, key string, valueRegex string) (exists bool) {
+	exists = false
+	for _, jsonMap := range arrayOfMap {
+		if KeyValueExistsInMap(jsonMap, key, valueRegex) {
+			exists = true
+			break
+		}
+	}
+	return
+}
+
+func KeyValueExistsInMap(jsonMap map[string]interface{}, key string, valueRegex string) (exists bool) {
+	exists = false
+	var value interface{}
+	value, exists = jsonMap[key]
+	if !exists {
+		return
+	}
+	// if value == valueRegex {
+	matches, _ := matchesRegex(value, valueRegex)
+	getLogger().Tracef("matches: `%v`", matches)
+	exists = true
+	// }
+	return
+}
+
+func matchesRegex(value interface{}, regex string) (matched bool, innerError error) {
+	if stringValue, ok := value.(string); ok {
+		compiledRegex, errCompile := utils.CompileRegex(regex)
+		if errCompile != nil {
+			innerError = errCompile
+			return
+		}
+
+		getLogger().Debugf(">> Testing value: '%s'...", stringValue)
+		matched = compiledRegex.Match([]byte(stringValue))
+		if !matched {
+			innerError = getLogger().Errorf("invalid value. Value '%s' does not match regex '%s'", value, regex)
+			return
+		} else {
+			getLogger().Debugf("matched:  ")
+		}
+
+	} else {
+		innerError = getLogger().Errorf("invalid value. Value '%s' was not a string", value)
+		return
+	}
+	return
+}
+
+func getJsonType(value interface{}) (jsonMap map[string]interface{}, jsonArrayOfMap []map[string]interface{}, innerError error) {
+	switch typedResult := value.(type) {
+	case []interface{}:
+		jsonArrayOfMap = convertToJsonArrayOfMaps(typedResult)
+	case map[string]interface{}:
+		return
+	default:
+		innerError = getLogger().Errorf("typedResult: type: '%T'", typedResult)
+	}
+	return
+}
+
+func convertToJsonArrayOfMaps(sourceInterfaces []interface{}) (targetMaps []map[string]interface{}) {
+	// Iterate and perform type assertion
+	for _, item := range sourceInterfaces {
+		if m, ok := item.(map[string]interface{}); ok {
+			targetMaps = append(targetMaps, m)
+		} else {
+			fmt.Printf("Skipping non-map element: %v (type: %T)\n", item, item)
+		}
+	}
+	return
+}
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 // This validation function checks for custom composition requirements as follows:
 // 1. Assure that the "metadata.component" does NOT have child Components

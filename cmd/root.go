@@ -230,8 +230,8 @@ func initConfigurations() {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	getLogger().Tracef("Executable Directory`: '%s'", utils.GlobalFlags.ExecDir)
-	getLogger().Tracef("Working Directory`: '%s'", utils.GlobalFlags.WorkingDir)
+	getLogger().Tracef("Executable Directory: '%s'", utils.GlobalFlags.ExecDir)
+	getLogger().Tracef("Working Directory: '%s'", utils.GlobalFlags.WorkingDir)
 
 	// Print global flags in debug mode
 	flagInfo, errFormat := getLogger().FormatStructE(utils.GlobalFlags)

@@ -35,12 +35,13 @@ const (
 // Custom-specific test files
 const (
 	// Metadata tests
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_INVALID     = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_MISSING     = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-missing.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE      = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-unique.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_INVALID = "test/custom/cdx-1-4-test-custom-metadata-property-classification-invalid.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_MISSING = "test/custom/cdx-1-4-test-custom-metadata-property-classification-missing.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_UNIQUE  = "test/custom/cdx-1-4-test-custom-metadata-property-classification-unique.json"
+	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_INVALID              = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json"
+	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_MISSING              = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-missing.json"
+	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE               = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-unique.json"
+	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_INVALID          = "test/custom/cdx-1-4-test-custom-metadata-property-classification-invalid.json"
+	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_MISSING          = "test/custom/cdx-1-4-test-custom-metadata-property-classification-missing.json"
+	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_UNIQUE           = "test/custom/cdx-1-4-test-custom-metadata-property-classification-unique.json"
+	TEST_CUSTOM_CDX_1_6_METADATA_PROPS_DISCLAIMER_CLASSIFICATION_VALID = "test/custom/cdx-1-6-test-custom-metadata-property-disclaimer-classification.json"
 
 	// License tests
 	// Note: The "invalid" tests below is also used in "list" command tests
