@@ -47,9 +47,17 @@ type ItemSelector struct {
 	PrimaryKey ItemKeyValue `json:"primaryKey"`
 }
 
+func (selector *ItemSelector) String() string {
+	return fmt.Sprintf("{ \"path\": \"%s\", \"primaryKey\": %s }", selector.Path, selector.PrimaryKey.String())
+}
+
 type ItemKeyValue struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
+}
+
+func (kv *ItemKeyValue) String() string {
+	return fmt.Sprintf("{ \"key\": \"%s\", \"value\": \"%s\" }", kv.Key, kv.Value)
 }
 
 type CustomValidation struct {

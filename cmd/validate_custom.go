@@ -73,7 +73,7 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 	var path, selectorKey, selectorKeyValue string
 
 	for _, action := range actions {
-		getLogger().Infof("Validating custom action (id: `%s`, selector: `%v`)...", action.Id, action.Selector)
+		getLogger().Infof("Validating custom action (id: `%s`, selector: `%s`)...", action.Id, action.Selector.String())
 
 		path = action.Selector.Path
 		selectorKey = action.Selector.PrimaryKey.Key
@@ -123,7 +123,7 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 					var unique bool
 					unique, innerError = IsUnique(hashmap, selectorKeyValue)
 					if !unique {
-						innerError = getLogger().Errorf("item not unique. selector: `%v`", action.Selector)
+						innerError = getLogger().Errorf("item not unique. selector: `%v`", action.Selector.String())
 					}
 				case "hasProperties":
 					properties := action.Properties
