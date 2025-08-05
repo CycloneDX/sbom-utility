@@ -36,12 +36,22 @@
         },
         {
             "showGlobalVariables": true,
-            "name": "Debug: validate (custom)",
+            "name": "Debug: validate (custom), --trace",
             "type": "go",
             "request": "launch",
             "mode": "debug",
             "program": "main.go", // "program": "${file}",
             "args": ["validate", "-i", "test/custom/cdx-1-6-test-custom-metadata-property-disclaimer-classification.json", "--custom", "-t"],
+            "dlvFlags": ["--check-go-version=false"]
+        },
+        {
+            "showGlobalVariables": true,
+            "name": "Debug: validate (custom)",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "main.go", // "program": "${file}",
+            "args": ["validate", "-i", "test/custom/cdx-1-6-test-custom-metadata-property-disclaimer-classification.json", "--custom"],
             "dlvFlags": ["--check-go-version=false"]
         },
         {

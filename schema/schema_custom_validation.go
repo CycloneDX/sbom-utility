@@ -44,12 +44,12 @@ type ValidationAction struct {
 
 type ItemSelector struct {
 	Path       string       `json:"path"`
-	PrimaryKey ItemKeyValue `json:"primary_key"`
+	PrimaryKey ItemKeyValue `json:"primaryKey"`
 }
 
 type ItemKeyValue struct {
-	Key   string `json:"_key"`
-	Value string `json:"_value"`
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }
 
 type CustomValidation struct {

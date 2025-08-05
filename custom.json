@@ -13,13 +13,13 @@
         ],
         "properties": [
           {
-            "_key": "timestamp"
+            "key": "timestamp"
           },
           {
-            "_key": "component"
+            "key": "component"
           },
           {
-            "_key": "supplier"
+            "key": "supplier"
           }
         ]
       },
@@ -34,10 +34,10 @@
         ],
         "properties": [
           {
-            "_key": "serialNumber"
+            "key": "serialNumber"
           },
           {
-            "_key": "components"
+            "key": "components"
           }
         ]
       }
@@ -48,9 +48,9 @@
         "description": "Validate BOM metadata properties has a unique, specific disclaimer value.",
         "selector": {
           "path": "metadata.properties",
-          "primary_key": {
-            "_key": "name",
-            "_value": "urn:example.com:disclaimer"
+          "primaryKey": {
+            "key": "name",
+            "value": "urn:example.com:disclaimer"
           }
         },
         "functions": [
@@ -59,12 +59,12 @@
         ],
         "properties": [
           {
-            "_key": "name",
-            "_value": "urn:example.com:disclaimer"
+            "key": "name",
+            "value": "urn:example.com:disclaimer"
           },
           {
-            "_key": "value",
-            "_value": "This SBOM is current as of the date it was generated and is subject to change\\."
+            "key": "value",
+            "value": "This SBOM is current as of the date it was generated and is subject to change\\."
           }
         ]
       },
@@ -73,23 +73,23 @@
         "description": "Validate BOM metadata component has a single, SHA-356 hash value.",
         "selector": {
           "path": "metadata.component.hashes",
-          "primary_key": {
-            "_key": "alg",
-            "_value": "SHA-256"
+          "primaryKey": {
+            "key": "alg",
+            "value": "SHA-256"
           }
         },
         "functions": [
           "isUnique",
           "hasProperties"
         ],
-        "primary_key": {
-          "_key": "alg",
-          "_value": "SHA-256"
+        "primaryKey": {
+          "key": "alg",
+          "value": "SHA-256"
         },
         "properties": [
           {
-            "_key": "content",
-            "_value": "^[0-9a-fA-F]{64}$"
+            "key": "content",
+            "value": "^[0-9a-fA-F]{64}$"
           }
         ]
       },
@@ -98,22 +98,22 @@
         "description": "Validate BOM metadata component has a single, SHA-356 hash value.",
         "selector": {
           "path": "externalReferences",
-          "primary_key": {
-            "_key": "url",
-            "_value": "support@example.com"
+          "primaryKey": {
+            "key": "url",
+            "value": "support@example.com"
           }
         },
         "functions": [
           "hasProperties"
         ],
-        "primary_key": {
-          "_key": "url",
-          "_value": "support@example.com"
+        "primaryKey": {
+          "key": "url",
+          "value": "support@example.com"
         },
         "properties": [
           {
-            "_key": "type",
-            "_value": "support"
+            "key": "type",
+            "value": "support"
           }
         ]
       },
@@ -122,9 +122,9 @@
         "description": "Validate BOM metadata properties has a unique, specific disclaimer value.",
         "selector": {
           "path": "metadata.properties",
-          "primary_key": {
-            "_key": "name",
-            "_value": "urn:example.com:disclaimer"
+          "primaryKey": {
+            "key": "name",
+            "value": "urn:example.com:disclaimer"
           }
         },
         "functions": [
@@ -133,12 +133,12 @@
         ],
         "properties": [
           {
-            "_key": "name",
-            "_value": "urn:example.com:disclaimer"
+            "key": "name",
+            "value": "urn:example.com:disclaimer"
           },
           {
-            "_key": "value",
-            "_value": "This SBOM is current as of the date it was generated and is subject to change\\."
+            "key": "value",
+            "value": "This SBOM is current as of the date it was generated and is subject to change\\."
           }
         ]
       }
