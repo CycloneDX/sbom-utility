@@ -19,8 +19,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/log"
 	"github.com/CycloneDX/sbom-utility/schema"
@@ -64,9 +62,9 @@ func validateCustomCDXDocument(document *schema.BOM, policyConfig *schema.Licens
 	// Validate all custom requirements for the CDX metadata structure
 	// TODO: move up, as second test, once all custom test files have
 	// required metadata
-	if innerError = validateCustomMetadata(document); innerError != nil {
-		return
-	}
+	// if innerError = validateCustomMetadata(document); innerError != nil {
+	// 	return
+	// }
 
 	numCustomValidationActions := len(schema.CustomValidationChecks.Validation.ValidationActions)
 	if numCustomValidationActions > 0 {
@@ -83,15 +81,32 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 	for _, action := range actions {
 		getLogger().Tracef("processing action id: `%s`...", action.Id)
 
+		// Use query function to obtain BOM document subsets (as JSON map(s))
+		path := action.Selector.Path
+		selectorKey := action.Selector.PrimaryKey.Key
+		selectorKeyValue := action.Selector.PrimaryKey.Value
+
+		var whereFilter = common.WhereFilter{}
+		whereFilter.Operand = common.QUERY_WHERE_OPERAND_EQUALS
+		whereFilter.Key = selectorKey
+		whereFilter.Value = selectorKeyValue
+
+		var errCompile error
+		whereFilter.ValueRegEx, errCompile = utils.CompileRegex(whereFilter.Value)
+		if errCompile != nil {
+			innerError = errCompile
+			return
+		}
+
 		qr := common.NewQueryRequest()
-		// Use query function to obtain BOM document subsets (as JSON maps)
-		// using --from path values
-		path := action.Selector
 		qr.SetRawFromPaths(path)
+		filters := []common.WhereFilter{whereFilter}
+		qr.SetWhereFilters(filters)
+
 		result, errQuery := QueryJSONMap(document.GetJSONMap(), qr)
 
 		if errQuery != nil {
-			innerError = getLogger().Errorf("query error: invalid path: %s", path)
+			innerError = getLogger().Errorf("%s. %s: %s", ERR_QUERY, MSG_QUERY_ERROR_SELECTOR, path)
 			buffer, errEncode := utils.EncodeAnyToDefaultIndentedJSONStr(result)
 			if errEncode != nil {
 				getLogger().Tracef("result: %s", buffer.String())
@@ -108,20 +123,44 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 
 		// Array of map
 		if jsonArrayOfMap != nil {
-			// for _, m := range jsonArrayOfMap {
-			// 	getLogger().Tracef("%v", m)
-			// }
+			// hash values using primary key-value specified; Note that "" (empty) is a valid key value
+			hashmap := slicemultimap.New()
+
+			for i, m := range jsonArrayOfMap {
+				// Assure primary key exists
+				if action.Selector.PrimaryKey.Key != "" {
+					_, exists := m[selectorKey]
+					if !exists {
+						innerError = getLogger().Errorf("invalid key. Key '%s' does not exist in element[%d] key-value map: %v", action.Selector.PrimaryKey, i, m)
+						return
+					}
+				}
+				primaryKeyValue := m[selectorKey]
+				getLogger().Tracef("hashing element[%d] with key-value[%s]: %s...", i, selectorKey, primaryKeyValue)
+				hashmap.Put(primaryKeyValue, m)
+			}
+
 			for _, fx := range action.Functions {
 				getLogger().Tracef("processing function: `%s`...", fx)
 				switch fx {
-				case "KeyValueExists":
-					exists := KeyValueExistsInArrayOfMap(jsonArrayOfMap, action.Key, action.Value)
-					if !exists {
-						innerError = getLogger().Errorf("value exists error. key: `%s`, value: `%s` does not exist in array of map", action.Key, action.Value)
+				case "IsElementUnique":
+					var unique bool
+					unique, innerError = IsElementUnique(hashmap, selectorKeyValue)
+					if !unique {
+						getLogger().Warningf("not unique")
+					}
+				case "PropertiesExist":
+					properties := action.Properties
+					// make sure we have properties to validate...
+					if len(properties) == 0 {
+						getLogger().Infof("No properties to validate")
 						return
 					}
-				case "IsKeyUnique":
-					return
+					exists := PropertiesExist(jsonArrayOfMap, properties)
+					if !exists {
+						innerError = getLogger().Errorf("value exists error. key: `%s`, value: `%s` does not exist in array of map", action.Selector.PrimaryKey.Key, action.Selector.PrimaryKey.Value)
+						return
+					}
 				default:
 					innerError = getLogger().Errorf("unknown function: `%s`...", fx)
 				}
@@ -139,12 +178,34 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 	return
 }
 
-func KeyValueExistsInArrayOfMap(arrayOfMap []map[string]interface{}, key string, valueRegex string) (exists bool) {
+func IsElementUnique(hashmap *slicemultimap.MultiMap, keyValue string) (unique bool, innerError error) {
+	getLogger().Tracef("Checking element keyValue: '%s'...", keyValue)
+	values, found := hashmap.Get(keyValue)
+
+	if !found {
+		innerError = getLogger().Errorf("%s. %s (keyValue: `%s`)", ERR_QUERY, MSG_QUERY_ERROR_ELEMENT_NOT_FOUND, keyValue)
+		return
+	}
+
+	// if multi-hashmap has more than one occurrence "value", property is NOT unique
+	numOccurrences := len(values)
+	if numOccurrences > 1 {
+		innerError = getLogger().Errorf("%s. %s (keyValue: `%s`, occurs: %v)", ERR_QUERY, MSG_QUERY_ERROR_ELEMENT_NOT_FOUND, keyValue, numOccurrences)
+		return
+	}
+	// Note: redundant for now with errors; but, may want to make errors optional and emit warnings...
+	unique = true
+	return
+}
+
+func PropertiesExist(arrayOfMap []map[string]interface{}, properties []schema.ItemKeyValue) (exists bool) {
 	exists = false
 	for _, jsonMap := range arrayOfMap {
-		if KeyValueExistsInMap(jsonMap, key, valueRegex) {
-			exists = true
-			break
+		for _, property := range properties {
+			exists = KeyValueExistsInMap(jsonMap, property.Key, property.Value)
+			if exists {
+				break
+			}
 		}
 	}
 	return
@@ -156,11 +217,9 @@ func KeyValueExistsInMap(jsonMap map[string]interface{}, key string, valueRegex 
 	if !exists {
 		return
 	}
-	// if value == valueRegex {
 	matches, _ := matchesRegex(value, valueRegex)
-	getLogger().Tracef("matches: `%v`", matches)
-	exists = true
-	// }
+	getLogger().Tracef("value: `%s` matches regex: `%s` (%v)", value, valueRegex, matches)
+	exists = matches
 	return
 }
 
@@ -191,23 +250,33 @@ func matchesRegex(value interface{}, regex string) (matched bool, innerError err
 func getJsonType(value interface{}) (jsonMap map[string]interface{}, jsonArrayOfMap []map[string]interface{}, innerError error) {
 	switch typedResult := value.(type) {
 	case []interface{}:
-		jsonArrayOfMap = convertToJsonArrayOfMaps(typedResult)
+		jsonArrayOfMap, innerError = convertToJsonArrayOfMaps(typedResult)
 	case map[string]interface{}:
-		return
+		jsonMap, innerError = convertToJsonMap(typedResult)
 	default:
-		innerError = getLogger().Errorf("typedResult: type: '%T'", typedResult)
+		innerError = getLogger().Errorf("%s. type: '%T'", ERR_TYPE_INVALID_JSON_TYPE, typedResult)
 	}
 	return
 }
 
-func convertToJsonArrayOfMaps(sourceInterfaces []interface{}) (targetMaps []map[string]interface{}) {
+func convertToJsonArrayOfMaps(sourceInterfaces []interface{}) (targetMaps []map[string]interface{}, innerError error) {
 	// Iterate and perform type assertion
 	for _, item := range sourceInterfaces {
 		if m, ok := item.(map[string]interface{}); ok {
 			targetMaps = append(targetMaps, m)
 		} else {
-			fmt.Printf("Skipping non-map element: %v (type: %T)\n", item, item)
+			innerError = getLogger().Errorf("%s", ERR_TYPE_INVALID_JSON_ARRAY)
 		}
+	}
+	return
+}
+
+func convertToJsonMap(sourceInterface interface{}) (targetMap map[string]interface{}, innerError error) {
+	// perform type assertion
+	if m, ok := sourceInterface.(map[string]interface{}); ok {
+		targetMap = m
+	} else {
+		innerError = getLogger().Errorf("%s", ERR_TYPE_INVALID_JSON_MAP)
 	}
 	return
 }
@@ -249,27 +318,27 @@ func validateCustomDocumentComposition(document *schema.BOM) (innerError error) 
 // 2. Supplier field is filled out according to custom requirements
 // 3. Manufacturer field is filled out according to custom requirements
 // TODO: test for custom values in other metadata/fields:
-func validateCustomMetadata(document *schema.BOM) (err error) {
-	getLogger().Enter()
-	defer getLogger().Exit(err)
+// func validateCustomMetadata(document *schema.BOM) (err error) {
+// 	getLogger().Enter()
+// 	defer getLogger().Exit(err)
 
-	// validate that the top-level pComponent is declared with all required values
-	if pComponent := document.GetCdxMetadataComponent(); pComponent == nil {
-		err := NewSBOMMetadataError(
-			document,
-			MSG_INVALID_METADATA_COMPONENT,
-			*document.GetCdxMetadata())
-		return err
-	}
+// 	// validate that the top-level pComponent is declared with all required values
+// 	if pComponent := document.GetCdxMetadataComponent(); pComponent == nil {
+// 		err := NewSBOMMetadataError(
+// 			document,
+// 			MSG_INVALID_METADATA_COMPONENT,
+// 			*document.GetCdxMetadata())
+// 		return err
+// 	}
 
-	// Validate required custom properties (by `name`) exist with appropriate values
-	err = validateCustomMetadataProperties(document)
-	if err != nil {
-		return err
-	}
+// 	// Validate required custom properties (by `name`) exist with appropriate values
+// 	err = validateCustomMetadataProperties(document)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return err
-}
+// 	return err
+// }
 
 // This validation function checks for custom metadata property requirements (i.e., names, values)
 // TODO: Evaluate need for this given new means to do this with JSON Schema v6 and 7

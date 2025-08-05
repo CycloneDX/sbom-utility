@@ -26,17 +26,30 @@ import (
 	"github.com/CycloneDX/sbom-utility/utils"
 )
 
+const (
+	REGEX_MATCH_ANY = ".+"
+)
+
 type CustomValidationConfig struct {
 	Validation CustomValidation `json:"validation"`
 }
 
 type ValidationAction struct {
-	Id          string   `json:"id"`
-	Description string   `json:"description"`
-	Selector    string   `json:"_selector"`
-	Functions   []string `json:"_functions"`
-	Key         string   `json:"_key"`
-	Value       string   `json:"_value"`
+	Id          string         `json:"id"`
+	Description string         `json:"description"`
+	Selector    ItemSelector   `json:"_selector"`
+	Functions   []string       `json:"_functions"`
+	Properties  []ItemKeyValue `json:"_properties"`
+}
+
+type ItemSelector struct {
+	Path       string       `json:"_path"`
+	PrimaryKey ItemKeyValue `json:"_primary_key"`
+}
+
+type ItemKeyValue struct {
+	Key   string `json:"_key"`
+	Value string `json:"_value"`
 }
 
 type CustomValidation struct {
@@ -59,20 +72,14 @@ type CustomValidationProperty struct {
 	CheckRegex  string `json:"_validate_regex"`
 }
 
-// TODO: if we keep using "custom" structs, then this needs to be updated to handle the new Creation Tools object
-// type CustomValidationTool struct {
-// 	CDXLegacyCreationTool
-// 	Description string `json:"_validate_description"`
-// }
-
 // Interfaces
 type ArrayActions interface {
-	KeyValueExists() bool
-	IsKeyUnique() bool
+	KeyValuesExist() bool
+	IsElementUnique() bool
 }
 
 type MapActions interface {
-	KeyValueExists() bool
+	KeyValuesExist() bool
 }
 
 // Globals

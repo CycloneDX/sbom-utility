@@ -34,6 +34,8 @@ const (
 
 // General error messages
 const (
+	ERR_TYPE_INVALID_JSON_TYPE        = "invalid JSON type"
+	ERR_TYPE_INVALID_JSON_ARRAY       = "invalid JSON array"
 	ERR_TYPE_INVALID_JSON_MAP         = "invalid JSON map"
 	ERR_TYPE_INVALID_SBOM             = "invalid SBOM"
 	ERR_TYPE_SBOM_COMPONENT           = "component error"
@@ -49,7 +51,8 @@ const (
 // Custom Validation messages
 // TODO: Need to define a profile that supports these validation checks/messages
 const (
-	MSG_PROPERTY_NOT_UNIQUE                   = "check failed: property not unique"
+	MSG_ELEMENT_NOT_UNIQUE                    = "custom validation error. Element not unique"
+	MSG_PROPERTY_NOT_UNIQUE                   = "check failed. Property not unique"
 	MSG_INVALID_METADATA_PROPERTIES           = "field `metadata.properties` is missing or invalid"
 	MSG_INVALID_METADATA_COMPONENT_COMPONENTS = "field `metadata.component.components` array should be empty"
 	MSG_INVALID_METADATA_COMPONENT            = "field `metadata.component` is missing or invalid"
@@ -64,6 +67,12 @@ const (
 	MSG_IETF_RFC6902_OPERATION_SUCCESS = "IETF RFC6902 test operation success"
 )
 
+// Custom validation messages
+const (
+	ERR_ELEMENT_NOT_FOUND  = "custom validation error. Element not found unique (key: `%s`, value: `%s`)"
+	ERR_ELEMENT_NOT_UNIQUE = "custom validation error. Element not unique (key: `%s`, value: `%s`)"
+)
+
 // License messages
 const (
 	MSG_LICENSE_INVALID_DATA   = "invalid license data"
@@ -75,6 +84,9 @@ const (
 
 // Query error details
 const (
+	ERR_QUERY                                  = "query error"
+	MSG_QUERY_ERROR_SELECTOR                   = "invalid selector path into JSON document"
+	MSG_QUERY_ERROR_ELEMENT_NOT_FOUND          = "element not found in JSON document"
 	MSG_QUERY_ERROR_FROM_KEY_NOT_FOUND         = "key not found in path"
 	MSG_QUERY_ERROR_FROM_KEY_SLICE_DEREFERENCE = "key attempts to dereference into an array"
 	MSG_QUERY_ERROR_SELECT_WILDCARD            = "wildcard cannot be used with other values"

@@ -1,33 +1,81 @@
 {
-    "validation": {
-        "description": "An array of custom validation actions to perform on selected elements of a BOM document.",
-        "actions": [
-            {
-              "id": "custom-disclaimer-property",
-              "description": "Validate custom disclaimer BOM metadata property.",
-              "_selector": "metadata.properties",
-              "_functions": [ "KeyValueExists", "IsKeyUnique" ],
-              "_key": "name",
-              "_value": "urn:example.com:disclaimer"
-            }
+  "validation": {
+    "description": "An array of custom validation actions to perform on selected elements of a BOM document.",
+    "actions": [
+      {
+        "id": "custom-metadata-component-hashes",
+        "description": "Validate BOM metadata component has a single, SHA-356 hash value.",
+        "_selector": {
+          "_path": "metadata.component.hashes",
+          "_primary_key": {
+            "_key": "alg",
+            "_value": "SHA-256"
+          }
+        },
+        "_functions": [
+          "IsElementUnique",
+          "PropertiesExist"
         ],
-        "metadata": {
-            "properties": [
-                {
-                    "name": "urn:example.com:disclaimer",
-                    "value": "This SBOM is current as of the date it was generated and is subject to change\\.",
-                    "_validate_description": "matches fixed value",
-                    "_validate_key": "name",
-                    "_validate_unique": "name"
-                },
-                {
-                    "name": "urn:example.com:classification",
-                    "value": "This SBOM is Confidential Information. Do not distribute\\.",
-                    "_validate_description": "matches fixed value",
-                    "_validate_key": "name",
-                    "_validate_unique": "name"
-                }
-            ]
-        }
-    }
+        "_primary_key": {
+          "_key": "alg",
+          "_value": "SHA-256"
+        },
+        "_properties": [
+          {
+            "_key": "content",
+            "_value": "^[0-9a-fA-F]{64}$"
+          }
+        ]
+      },
+      {
+        "id": "custom-external-reference-support",
+        "description": "Validate BOM metadata component has a single, SHA-356 hash value.",
+        "_selector": {
+          "_path": "externalReferences",
+          "_primary_key": {
+            "_key": "url",
+            "_value": "support@example.com"
+          }
+        },
+        "_functions": [
+          "PropertiesExist"
+        ],
+        "_primary_key": {
+          "_key": "url",
+          "_value": "support@example.com"
+        },
+        "_properties": [
+          {
+            "_key": "type",
+            "_value": "support"
+          }
+        ]
+      },
+      {
+        "id": "custom-metadata-properties-disclaimer-unique",
+        "description": "Validate BOM metadata properties has a unique, specific disclaimer value.",
+        "_selector": {
+          "path": "metadata.properties",
+          "_primary_key": {
+            "_key": "name",
+            "_value": "urn:example.com:disclaimer"
+          }
+        },
+        "_functions": [
+          "IsElementUnique",
+          "PropertiesExist"
+        ],
+        "_properties": [
+          {
+            "_key": "name",
+            "_value": "urn:example.com:disclaimer"
+          },
+          {
+            "_key": "value",
+            "_value": "This SBOM is current as of the date it was generated and is subject to change\\."
+          }
+        ]
+      }
+    ]
+  }
 }

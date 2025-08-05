@@ -14,8 +14,8 @@
 			"description": "Sample application",
 			"hashes": [
 				{
-					"alg": "SHA-1",
-					"content": "1111aaaa2222cccc3333dddd4444eeee5555ffff"
+					"alg": "SHA-256",
+					"content": "e7b382893a89df7f4e5c6a7e03c311d360e0b3c7ea4972a24f8eac69ec7db3bb"
 				}
 			]
 		},
@@ -67,10 +67,45 @@
 			],
 			"contact": [
 				{
-					"email": "support@example.com"
+					"email": "info@example.com"
 				}
 			]
 		}
+	},
+	"externalReferences": [
+		{
+           "url": "support@example.com",
+		   "type": "support"
+		}
+	],
+    "declarations": {
+		"attestations": [
+		    {
+				"summary": "Attestation summary here",
+				"assessor": "assessor-1",
+				"map": [
+					{
+						"requirement": "requirement-1",
+						"claims": [ "claim-1" ],
+						"counterClaims": [ "counterClaim-1" ],
+						"conformance": {
+						"score": 0.8,
+						"rationale": "Conformance rationale here",
+						"mitigationStrategies": [ "mitigationStrategy-1" ]
+						},
+						"confidence": {
+						"score": 1,
+						"rationale": "Confidence rationale here"
+						}
+					}
+				],
+				"signature": {
+					"algorithm": "ES256",
+					"certificatePath": [ "MIIB...", "MIID..." ],
+					"value": "tqIT..."
+				}
+		    }
+		]
 	},
 	"components": [
 		{
