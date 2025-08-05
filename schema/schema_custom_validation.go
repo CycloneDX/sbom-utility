@@ -37,14 +37,14 @@ type CustomValidationConfig struct {
 type ValidationAction struct {
 	Id          string         `json:"id"`
 	Description string         `json:"description"`
-	Selector    ItemSelector   `json:"_selector"`
-	Functions   []string       `json:"_functions"`
-	Properties  []ItemKeyValue `json:"_properties"`
+	Selector    ItemSelector   `json:"selector"`
+	Functions   []string       `json:"functions"`
+	Properties  []ItemKeyValue `json:"properties"`
 }
 
 type ItemSelector struct {
-	Path       string       `json:"_path"`
-	PrimaryKey ItemKeyValue `json:"_primary_key"`
+	Path       string       `json:"path"`
+	PrimaryKey ItemKeyValue `json:"primary_key"`
 }
 
 type ItemKeyValue struct {

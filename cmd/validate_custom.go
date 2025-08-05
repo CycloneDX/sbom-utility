@@ -20,7 +20,6 @@ package cmd
 
 import (
 	"github.com/CycloneDX/sbom-utility/common"
-	"github.com/CycloneDX/sbom-utility/log"
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/jwangsadinata/go-multimap/slicemultimap"
@@ -59,13 +58,6 @@ func validateCustomCDXDocument(document *schema.BOM, policyConfig *schema.Licens
 		return
 	}
 
-	// Validate all custom requirements for the CDX metadata structure
-	// TODO: move up, as second test, once all custom test files have
-	// required metadata
-	// if innerError = validateCustomMetadata(document); innerError != nil {
-	// 	return
-	// }
-
 	numCustomValidationActions := len(schema.CustomValidationChecks.Validation.ValidationActions)
 	if numCustomValidationActions > 0 {
 		getLogger().Tracef("Found %v custom validation actions.", numCustomValidationActions)
@@ -78,31 +70,28 @@ func validateCustomCDXDocument(document *schema.BOM, policyConfig *schema.Licens
 
 func processValidationActions(document *schema.BOM, actions []schema.ValidationAction) (innerError error) {
 
+	var path, selectorKey, selectorKeyValue string
+
 	for _, action := range actions {
-		getLogger().Tracef("processing action id: `%s`...", action.Id)
+		getLogger().Infof("Validating custom action (id: `%s`, selector: `%v`)...", action.Id, action.Selector)
 
-		// Use query function to obtain BOM document subsets (as JSON map(s))
-		path := action.Selector.Path
-		selectorKey := action.Selector.PrimaryKey.Key
-		selectorKeyValue := action.Selector.PrimaryKey.Value
+		path = action.Selector.Path
+		selectorKey = action.Selector.PrimaryKey.Key
+		selectorKeyValue = action.Selector.PrimaryKey.Value
 
-		var whereFilter = common.WhereFilter{}
-		whereFilter.Operand = common.QUERY_WHERE_OPERAND_EQUALS
-		whereFilter.Key = selectorKey
-		whereFilter.Value = selectorKeyValue
-
-		var errCompile error
-		whereFilter.ValueRegEx, errCompile = utils.CompileRegex(whereFilter.Value)
-		if errCompile != nil {
-			innerError = errCompile
-			return
-		}
-
+		// Use utility's "query" function to obtain BOM document subsets (as JSON map(s))
+		// Prepare a "QueryRequest"
+		// First, use "path" to locate the subset of the BOM document to be processed
 		qr := common.NewQueryRequest()
-		qr.SetRawFromPaths(path)
+		qr.SetRawFromPaths(action.Selector.Path)
+
+		// then add "where" filter if we have a selector key-value (into an array)
+		var whereFilter common.WhereFilter
+		whereFilter, innerError = prepareWhereFilter(action.Selector)
 		filters := []common.WhereFilter{whereFilter}
 		qr.SetWhereFilters(filters)
 
+		// Perform the query and validate the result
 		result, errQuery := QueryJSONMap(document.GetJSONMap(), qr)
 
 		if errQuery != nil {
@@ -124,41 +113,28 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 		// Array of map
 		if jsonArrayOfMap != nil {
 			// hash values using primary key-value specified; Note that "" (empty) is a valid key value
-			hashmap := slicemultimap.New()
-
-			for i, m := range jsonArrayOfMap {
-				// Assure primary key exists
-				if action.Selector.PrimaryKey.Key != "" {
-					_, exists := m[selectorKey]
-					if !exists {
-						innerError = getLogger().Errorf("invalid key. Key '%s' does not exist in element[%d] key-value map: %v", action.Selector.PrimaryKey, i, m)
-						return
-					}
-				}
-				primaryKeyValue := m[selectorKey]
-				getLogger().Tracef("hashing element[%d] with key-value[%s]: %s...", i, selectorKey, primaryKeyValue)
-				hashmap.Put(primaryKeyValue, m)
-			}
+			var hashmap *slicemultimap.MultiMap
+			hashmap, innerError = hashJsonArrayElements(jsonArrayOfMap, selectorKey)
 
 			for _, fx := range action.Functions {
-				getLogger().Tracef("processing function: `%s`...", fx)
+				getLogger().Infof(">> Checking %s: (selector: `%v`)...", fx, action.Selector)
 				switch fx {
-				case "IsElementUnique":
+				case "isUnique":
 					var unique bool
-					unique, innerError = IsElementUnique(hashmap, selectorKeyValue)
+					unique, innerError = IsUnique(hashmap, selectorKeyValue)
 					if !unique {
-						getLogger().Warningf("not unique")
+						innerError = getLogger().Errorf("item not unique. selector: `%v`", action.Selector)
 					}
-				case "PropertiesExist":
+				case "hasProperties":
 					properties := action.Properties
 					// make sure we have properties to validate...
 					if len(properties) == 0 {
-						getLogger().Infof("No properties to validate")
+						innerError = getLogger().Errorf("no properties declared. Action id: `%s`, selector path: `%v`", action.Id, path)
 						return
 					}
-					exists := PropertiesExist(jsonArrayOfMap, properties)
+					exists, propertyError := JsonArrayElementsHaveProperties(jsonArrayOfMap, properties)
 					if !exists {
-						innerError = getLogger().Errorf("value exists error. key: `%s`, value: `%s` does not exist in array of map", action.Selector.PrimaryKey.Key, action.Selector.PrimaryKey.Value)
+						innerError = propertyError
 						return
 					}
 				default:
@@ -166,19 +142,62 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 				}
 			}
 		} else if jsonMap != nil { // redundant check, but leave for now
-			// Map
-			value, formatError := log.FormatMap("", jsonMap)
-			if formatError != nil {
-				innerError = formatError
-				return
+			for _, fx := range action.Functions {
+				getLogger().Tracef("processing function: `%s`...", fx)
+				switch fx {
+				case "hasProperties":
+					properties := action.Properties
+					// make sure we have properties to validate...
+					if len(properties) == 0 {
+						innerError = getLogger().Errorf("No properties declared. Action id: `%s`, selector path: `%v`", action.Id, path)
+						return
+					}
+					exists, propertyError := JsonMapHasProperties(jsonMap, properties)
+					if !exists {
+						innerError = propertyError
+						return
+					}
+				default:
+					innerError = getLogger().Errorf("unknown function: `%s`...", fx)
+				}
 			}
-			getLogger().Tracef("value: %s", value)
 		}
 	}
 	return
 }
 
-func IsElementUnique(hashmap *slicemultimap.MultiMap, keyValue string) (unique bool, innerError error) {
+func hashJsonArrayElements(jsonArrayOfMap []map[string]interface{}, selectorKey string) (hashmap *slicemultimap.MultiMap, innerError error) {
+	hashmap = slicemultimap.New()
+
+	for i, m := range jsonArrayOfMap {
+		// Assure primary key exists
+		if selectorKey != "" {
+			_, exists := m[selectorKey]
+			if !exists {
+				innerError = getLogger().Errorf("invalid key. Key '%s' does not exist in element[%d] key-value map: %v", selectorKey, i, m)
+				return
+			}
+		}
+		primaryKeyValue := m[selectorKey]
+		getLogger().Tracef("hashing element[%d] with key-value[%s]: %s...", i, selectorKey, primaryKeyValue)
+		hashmap.Put(primaryKeyValue, m)
+	}
+	return
+}
+
+func prepareWhereFilter(selector schema.ItemSelector) (whereFilter common.WhereFilter, innerError error) {
+	// var whereFilter = common.WhereFilter{}
+	selectorKey := selector.PrimaryKey.Key
+	selectorKeyValue := selector.PrimaryKey.Value
+
+	whereFilter.Operand = common.QUERY_WHERE_OPERAND_EQUALS
+	whereFilter.Key = selectorKey
+	whereFilter.Value = selectorKeyValue
+	whereFilter.ValueRegEx, innerError = utils.CompileRegex(whereFilter.Value)
+	return
+}
+
+func IsUnique(hashmap *slicemultimap.MultiMap, keyValue string) (unique bool, innerError error) {
 	getLogger().Tracef("Checking element keyValue: '%s'...", keyValue)
 	values, found := hashmap.Get(keyValue)
 
@@ -198,14 +217,24 @@ func IsElementUnique(hashmap *slicemultimap.MultiMap, keyValue string) (unique b
 	return
 }
 
-func PropertiesExist(arrayOfMap []map[string]interface{}, properties []schema.ItemKeyValue) (exists bool) {
+func JsonArrayElementsHaveProperties(arrayOfMap []map[string]interface{}, properties []schema.ItemKeyValue) (exists bool, innerError error) {
 	exists = false
 	for _, jsonMap := range arrayOfMap {
-		for _, property := range properties {
-			exists = KeyValueExistsInMap(jsonMap, property.Key, property.Value)
-			if exists {
-				break
-			}
+		exists, innerError = JsonMapHasProperties(jsonMap, properties)
+		if !exists {
+			break
+		}
+	}
+	return
+}
+
+func JsonMapHasProperties(jsonMap map[string]interface{}, properties []schema.ItemKeyValue) (exists bool, innerError error) {
+	exists = false
+	for _, property := range properties {
+		exists = KeyValueExistsInMap(jsonMap, property.Key, property.Value)
+		if !exists {
+			innerError = getLogger().Errorf("property not found. Property key: `%s`, value: `%s`", property.Key, property.Value)
+			break
 		}
 	}
 	return
@@ -217,13 +246,19 @@ func KeyValueExistsInMap(jsonMap map[string]interface{}, key string, valueRegex 
 	if !exists {
 		return
 	}
-	matches, _ := matchesRegex(value, valueRegex)
-	getLogger().Tracef("value: `%s` matches regex: `%s` (%v)", value, valueRegex, matches)
-	exists = matches
+	if valueRegex != "" {
+		matches, _ := matchesRegex(value, valueRegex)
+		getLogger().Tracef("value: `%s` matches regex: `%s` (%v)", value, valueRegex, matches)
+		exists = matches
+	}
 	return
 }
 
 func matchesRegex(value interface{}, regex string) (matched bool, innerError error) {
+	if regex == "" {
+		innerError = getLogger().Errorf("invalid regex. regex is empty.")
+		return
+	}
 	if stringValue, ok := value.(string); ok {
 		compiledRegex, errCompile := utils.CompileRegex(regex)
 		if errCompile != nil {

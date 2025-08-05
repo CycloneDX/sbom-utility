@@ -2,25 +2,91 @@
   "validation": {
     "description": "An array of custom validation actions to perform on selected elements of a BOM document.",
     "actions": [
+       {
+        "id": "custom-test-metadata-has-values",
+        "description": "metadata-tests",
+        "selector": {
+          "path": "metadata"
+        },
+        "functions": [
+          "hasProperties"
+        ],
+        "properties": [
+          {
+            "_key": "timestamp"
+          },
+          {
+            "_key": "component"
+          },
+          {
+            "_key": "supplier"
+          }
+        ]
+      },
+      {
+        "id": "custom-test-bom-has-values",
+        "description": "bom-tests",
+        "selector": {
+          "path": ""
+        },
+        "functions": [
+          "hasProperties"
+        ],
+        "properties": [
+          {
+            "_key": "serialNumber"
+          },
+          {
+            "_key": "components"
+          }
+        ]
+      }
+    ],
+     "other": [
+       {
+        "id": "custom-metadata-properties-disclaimer",
+        "description": "Validate BOM metadata properties has a unique, specific disclaimer value.",
+        "selector": {
+          "path": "metadata.properties",
+          "primary_key": {
+            "_key": "name",
+            "_value": "urn:example.com:disclaimer"
+          }
+        },
+        "functions": [
+          "isUnique",
+          "hasProperties"
+        ],
+        "properties": [
+          {
+            "_key": "name",
+            "_value": "urn:example.com:disclaimer"
+          },
+          {
+            "_key": "value",
+            "_value": "This SBOM is current as of the date it was generated and is subject to change\\."
+          }
+        ]
+      },
       {
         "id": "custom-metadata-component-hashes",
         "description": "Validate BOM metadata component has a single, SHA-356 hash value.",
-        "_selector": {
-          "_path": "metadata.component.hashes",
-          "_primary_key": {
+        "selector": {
+          "path": "metadata.component.hashes",
+          "primary_key": {
             "_key": "alg",
             "_value": "SHA-256"
           }
         },
-        "_functions": [
-          "IsElementUnique",
-          "PropertiesExist"
+        "functions": [
+          "isUnique",
+          "hasProperties"
         ],
-        "_primary_key": {
+        "primary_key": {
           "_key": "alg",
           "_value": "SHA-256"
         },
-        "_properties": [
+        "properties": [
           {
             "_key": "content",
             "_value": "^[0-9a-fA-F]{64}$"
@@ -30,21 +96,21 @@
       {
         "id": "custom-external-reference-support",
         "description": "Validate BOM metadata component has a single, SHA-356 hash value.",
-        "_selector": {
-          "_path": "externalReferences",
-          "_primary_key": {
+        "selector": {
+          "path": "externalReferences",
+          "primary_key": {
             "_key": "url",
             "_value": "support@example.com"
           }
         },
-        "_functions": [
-          "PropertiesExist"
+        "functions": [
+          "hasProperties"
         ],
-        "_primary_key": {
+        "primary_key": {
           "_key": "url",
           "_value": "support@example.com"
         },
-        "_properties": [
+        "properties": [
           {
             "_key": "type",
             "_value": "support"
@@ -54,18 +120,18 @@
       {
         "id": "custom-metadata-properties-disclaimer-unique",
         "description": "Validate BOM metadata properties has a unique, specific disclaimer value.",
-        "_selector": {
+        "selector": {
           "path": "metadata.properties",
-          "_primary_key": {
+          "primary_key": {
             "_key": "name",
             "_value": "urn:example.com:disclaimer"
           }
         },
-        "_functions": [
-          "IsElementUnique",
-          "PropertiesExist"
+        "functions": [
+          "isUnique",
+          "hasProperties"
         ],
-        "_properties": [
+        "properties": [
           {
             "_key": "name",
             "_value": "urn:example.com:disclaimer"
