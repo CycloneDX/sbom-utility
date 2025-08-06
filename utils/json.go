@@ -143,3 +143,23 @@ func PrintlnLabeledJSONObject(any interface{}, label string) {
 	}
 	fmt.Printf("Print error: %s\n", err.Error())
 }
+
+// func isJSONSchema(filePath string) (isSchema bool, err error) {
+// 	isSchema = false
+// 	file, err := os.Open(filePath)
+// 	if err != nil {
+// 		return
+// 	}
+// 	defer file.Close()
+// 	// decode
+// 	decoder := json.NewDecoder(file)
+// 	var jsonData map[string]interface{}
+// 	err = decoder.Decode(&jsonData)
+// 	if err != nil {
+// 		return
+// 	}
+// 	// if schema tag present then likely a schema file (for now)
+// 	_, hasSchema := jsonData["$schema"]
+// 	isSchema = hasSchema
+// 	return
+// }

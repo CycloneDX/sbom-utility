@@ -57,6 +57,7 @@ const (
 // Test wrappers
 // -------------------------------------------
 
+// TODO
 func innerTestValidateCustom(t *testing.T, vti ValidateTestInfo) (document *schema.BOM, schemaErrors []gojsonschema.ResultError, actualError error) {
 	utils.GlobalFlags.ValidateFlags.CustomValidation = true
 	document, schemaErrors, actualError = innerTestValidate(t, vti)
@@ -77,7 +78,11 @@ func innerTestValidateCustomInvalidSBOMInnerError(t *testing.T, filename string,
 
 // Test format unsupported (SPDX) for "--custom" flag
 func TestValidateCustomFormatUnsupportedSPDX(t *testing.T) {
-	vti := NewValidateTestInfo(TEST_SPDX_2_2_MIN_REQUIRED, FORMAT_ANY, SCHEMA_VARIANT_NONE, &schema.UnsupportedFormatError{})
+	vti := NewValidateTestInfo(TEST_SPDX_2_2_MIN_REQUIRED,
+		FORMAT_ANY,
+		SCHEMA_VARIANT_NONE,
+		&schema.UnsupportedFormatError{})
+	vti.CustomSchema = DEFAULT_CUSTOM_VALIDATION_CONFIG
 	innerTestValidateCustom(t, *vti)
 }
 
@@ -87,7 +92,11 @@ func TestValidateCustomFormatUnsupportedSPDX(t *testing.T) {
 
 // Error if no licenses found in entirety of SBOM (variant none)
 func TestValidateCustomErrorCdx14NoLicensesFound(t *testing.T) {
-	vti := NewValidateTestInfo(TEST_CUSTOM_CDX_1_4_INVALID_LICENSES_NOT_FOUND, FORMAT_ANY, SCHEMA_VARIANT_NONE, &InvalidSBOMError{})
+	vti := NewValidateTestInfo(TEST_CUSTOM_CDX_1_4_INVALID_LICENSES_NOT_FOUND,
+		FORMAT_ANY,
+		SCHEMA_VARIANT_NONE,
+		&InvalidSBOMError{})
+	vti.CustomSchema = DEFAULT_CUSTOM_VALIDATION_CONFIG
 	document, results, _ := innerTestValidateCustom(t, *vti)
 	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
@@ -97,13 +106,21 @@ func TestValidateCustomErrorCdx14NoLicensesFound(t *testing.T) {
 // -------------------------------------------
 
 func TestValidateCustomCdx14MetadataPropsMissingDisclaimer(t *testing.T) {
-	vti := NewValidateTestInfo(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_MISSING, FORMAT_TEXT, SCHEMA_VARIANT_CUSTOM, &InvalidSBOMError{})
+	vti := NewValidateTestInfo(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_MISSING,
+		FORMAT_TEXT,
+		SCHEMA_VARIANT_CUSTOM,
+		&InvalidSBOMError{})
+	vti.CustomSchema = DEFAULT_CUSTOM_VALIDATION_CONFIG
 	document, results, _ := innerTestValidate(t, *vti)
 	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
 
 func TestValidateCustomCdx14MetadataPropsMissingClassification(t *testing.T) {
-	vti := NewValidateTestInfo(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_MISSING, FORMAT_TEXT, SCHEMA_VARIANT_CUSTOM, &InvalidSBOMError{})
+	vti := NewValidateTestInfo(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_MISSING,
+		FORMAT_TEXT,
+		SCHEMA_VARIANT_CUSTOM,
+		&InvalidSBOMError{})
+	vti.CustomSchema = DEFAULT_CUSTOM_VALIDATION_CONFIG
 	document, results, _ := innerTestValidate(t, *vti)
 	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
@@ -198,12 +215,3 @@ func TestValidateCustomErrorCdx13InvalidCompositionComponents(t *testing.T) {
 		SCHEMA_VARIANT_NONE,
 		&SBOMCompositionError{})
 }
-
-// Make sure we can List all components in an SBOM, including those in hierarchical compositions
-// TODO: Actually verify one or more of the hierarchical comps. appear in list results
-// func TestValidateCustomCompositionHierarchicalComponentList(t *testing.T) {
-// 	innerCustomValidateError(t,
-// 		TEST_CUSTOM_CDX_1_4_COMPOSITION_HIERARCHICAL_COMPONENTS,
-// 		SCHEMA_VARIANT_NONE,
-// 		nil)
-// }

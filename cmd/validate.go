@@ -51,7 +51,7 @@ const (
 	FLAG_VALIDATE_ERR_VALUE        = "error-value"
 	MSG_VALIDATE_SCHEMA_FORCE      = "force specified schema file for validation; overrides inferred schema"
 	MSG_VALIDATE_SCHEMA_VARIANT    = "select named schema variant (e.g., \"strict\"); variant must be declared in configuration file (i.e., \"config.json\")"
-	MSG_VALIDATE_FLAG_CUSTOM       = "perform custom validation using custom configuration settings (i.e., \"custom.json\")"
+	MSG_VALIDATE_FLAG_CUSTOM       = "perform custom validation using a custom configuration settings (i.e., \"custom.json\")"
 	MSG_VALIDATE_FLAG_ERR_COLORIZE = "Colorize formatted error output (true|false); default true"
 	MSG_VALIDATE_FLAG_ERR_LIMIT    = "Limit number of errors output to specified (integer) (default 10)"
 	MSG_VALIDATE_FLAG_ERR_FORMAT   = "format error results using the specified format type"
@@ -97,10 +97,11 @@ func initCommandValidateFlags(command *cobra.Command) {
 	command.Flags().StringVarP(&utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile, FLAG_VALIDATE_SCHEMA_FORCE, "", "", MSG_VALIDATE_SCHEMA_FORCE)
 	// Optional schema "variant" of inferred schema (e.g, "strict")
 	command.Flags().StringVarP(&utils.GlobalFlags.ValidateFlags.SchemaVariant, FLAG_VALIDATE_SCHEMA_VARIANT, "", "", MSG_VALIDATE_SCHEMA_VARIANT)
-	command.Flags().BoolVarP(&utils.GlobalFlags.ValidateFlags.CustomValidation, FLAG_VALIDATE_CUSTOM, "", false, MSG_VALIDATE_FLAG_CUSTOM)
+	// command.Flags().BoolVarP(&utils.GlobalFlags.ValidateFlags.CustomValidation, FLAG_VALIDATE_CUSTOM, "", false, MSG_VALIDATE_FLAG_CUSTOM)
 	command.Flags().BoolVarP(&utils.GlobalFlags.ValidateFlags.ColorizeErrorOutput, FLAG_COLORIZE_OUTPUT, "", false, MSG_VALIDATE_FLAG_ERR_COLORIZE)
 	command.Flags().IntVarP(&utils.GlobalFlags.ValidateFlags.MaxNumErrors, FLAG_VALIDATE_ERR_LIMIT, "", DEFAULT_MAX_ERROR_LIMIT, MSG_VALIDATE_FLAG_ERR_LIMIT)
 	command.Flags().BoolVarP(&utils.GlobalFlags.ValidateFlags.ShowErrorValue, FLAG_VALIDATE_ERR_VALUE, "", true, MSG_VALIDATE_FLAG_ERR_COLORIZE)
+	command.Flags().StringVarP(&utils.GlobalFlags.ValidateFlags.ConfigCustomValidationFile, FLAG_VALIDATE_CUSTOM, "", "", MSG_VALIDATE_FLAG_CUSTOM)
 }
 
 func validateCmdImpl(cmd *cobra.Command, args []string) error {
@@ -266,6 +267,11 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 		return INVALID, bom, schemaErrors, err
 	}
 
+	// If a custom validation file (e.g., custom.json) is provided on the `--custom` flag
+	if validateFlags.ConfigCustomValidationFile != "" {
+		validateFlags.CustomValidation = true
+	}
+
 	// if "custom" flag exists, then assure we support the format
 	if validateFlags.CustomValidation && !bom.FormatInfo.IsCycloneDx() {
 		err = schema.NewUnsupportedFormatError(
@@ -428,14 +434,15 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	// Perform additional validation in document composition/structure
 	// and "custom" required data within specified fields
 	if validateFlags.CustomValidation {
-		valid, err = validateCustom(bom, LicensePolicyConfig)
+		valid, err = validateCustom(bom, validateFlags, LicensePolicyConfig)
+		getLogger().Infof("BOM valid against custom JSON configuration: '%s'", validateFlags.ConfigCustomValidationFile)
 	}
 
 	// All validation tests passed; return VALID
 	return
 }
 
-func validateCustom(document *schema.BOM, policyConfig *schema.LicensePolicyConfig) (valid bool, err error) {
+func validateCustom(document *schema.BOM, validateFlags utils.ValidateCommandFlags, policyConfig *schema.LicensePolicyConfig) (valid bool, err error) {
 
 	// If the validated BOM is of a known format, we can unmarshal it into
 	// more convenient typed structures for simplified custom validation
@@ -449,7 +456,7 @@ func validateCustom(document *schema.BOM, policyConfig *schema.LicensePolicyConf
 	// Perform all custom validation
 	// TODO Implement customValidation as an interface supported by the CDXDocument type
 	// and later supported by a SPDXDocument type.
-	err = validateCustomCDXDocument(document, policyConfig)
+	err = validateCustomCDXDocument(document, validateFlags, policyConfig)
 	if err != nil {
 		// Wrap any specific validation error in a single invalid BOM error
 		if !IsInvalidBOMError(err) {
@@ -476,23 +483,3 @@ func isValidURIPrefix(str string) bool {
 	}
 	return false
 }
-
-// func isJSONSchema(filePath string) (isSchema bool, err error) {
-// 	isSchema = false
-// 	file, err := os.Open(filePath)
-// 	if err != nil {
-// 		return
-// 	}
-// 	defer file.Close()
-// 	// decode
-// 	decoder := json.NewDecoder(file)
-// 	var jsonData map[string]interface{}
-// 	err = decoder.Decode(&jsonData)
-// 	if err != nil {
-// 		return
-// 	}
-// 	// if schema tag present then likely a schema file (for now)
-// 	_, hasSchema := jsonData["$schema"]
-// 	isSchema = hasSchema
-// 	return
-// }

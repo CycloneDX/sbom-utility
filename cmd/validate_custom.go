@@ -36,12 +36,12 @@ import (
 // 1. Composition - document elements are organized as required (even though allowed by schema)
 // 2. Metadata - Top-level, document metadata includes specific fields and/or values that match required criteria (e.g., regex)
 // 3. License data - Components, Services (or any object that carries a License) meets specified requirements
-func validateCustomCDXDocument(document *schema.BOM, policyConfig *schema.LicensePolicyConfig) (innerError error) {
+func validateCustomCDXDocument(document *schema.BOM, validateFlags utils.ValidateCommandFlags, policyConfig *schema.LicensePolicyConfig) (innerError error) {
 	getLogger().Enter()
 	defer getLogger().Exit(innerError)
 
 	// Load custom validation file
-	errCfg := schema.LoadCustomValidationConfig(utils.GlobalFlags.ConfigCustomValidationFile)
+	errCfg := schema.LoadCustomValidationConfig(validateFlags.ConfigCustomValidationFile)
 	if errCfg != nil {
 		getLogger().Warningf("custom validation not possible: %s", errCfg.Error())
 		innerError = errCfg
@@ -86,10 +86,12 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 		qr.SetRawFromPaths(action.Selector.Path)
 
 		// then add "where" filter if we have a selector key-value (into an array)
-		var whereFilter common.WhereFilter
-		whereFilter, innerError = prepareWhereFilter(action.Selector)
-		filters := []common.WhereFilter{whereFilter}
-		qr.SetWhereFilters(filters)
+		if selectorKey != "" {
+			var whereFilter common.WhereFilter
+			whereFilter, innerError = prepareWhereFilter(action.Selector)
+			filters := []common.WhereFilter{whereFilter}
+			qr.SetWhereFilters(filters)
+		}
 
 		// Perform the query and validate the result
 		result, errQuery := QueryJSONMap(document.GetJSONMap(), qr)

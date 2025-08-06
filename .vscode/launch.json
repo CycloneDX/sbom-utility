@@ -41,7 +41,7 @@
             "request": "launch",
             "mode": "debug",
             "program": "main.go", // "program": "${file}",
-            "args": ["validate", "-i", "test/custom/cdx-1-6-test-custom-metadata-property-disclaimer-classification.json", "--custom", "-t"],
+            "args": ["validate", "-i", "test/custom/cdx-1-6-test-custom-metadata-property-disclaimer-classification.json", "--custom", "custom.json", "-t"],
             "dlvFlags": ["--check-go-version=false"]
         },
         {
@@ -51,7 +51,7 @@
             "request": "launch",
             "mode": "debug",
             "program": "main.go", // "program": "${file}",
-            "args": ["validate", "-i", "test/custom/cdx-1-6-test-custom-metadata-property-disclaimer-classification.json", "--custom"],
+            "args": ["validate", "-i", "test/custom/cdx-1-6-test-custom-metadata-property-disclaimer-classification.json", "--custom", "custom.json"],
             "dlvFlags": ["--check-go-version=false"]
         },
         {
