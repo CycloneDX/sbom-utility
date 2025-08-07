@@ -452,20 +452,20 @@ func convertToJsonMap(sourceInterface interface{}) (targetMap map[string]interfa
 // 	return err
 // }
 
-func hashMetadataProperties(hashmap *slicemultimap.MultiMap, properties []schema.CDXProperty) (err error) {
-	getLogger().Enter()
-	defer getLogger().Exit()
+// func hashMetadataProperties(hashmap *slicemultimap.MultiMap, properties []schema.CDXProperty) (err error) {
+// 	getLogger().Enter()
+// 	defer getLogger().Exit()
 
-	if hashmap == nil {
-		return getLogger().Errorf("invalid hashmap: %v", hashmap)
-	}
+// 	if hashmap == nil {
+// 		return getLogger().Errorf("invalid hashmap: %v", hashmap)
+// 	}
 
-	for _, prop := range properties {
-		hashmap.Put(prop.Name, prop.Value)
-	}
+// 	for _, prop := range properties {
+// 		hashmap.Put(prop.Name, prop.Value)
+// 	}
 
-	return
-}
+// 	return
+// }
 
 // TODO: Assure that after hashing "license" data within the "components" array
 // that at least one valid license is found

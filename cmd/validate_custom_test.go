@@ -201,7 +201,8 @@ func TestValidateCustomCdx14MetadataPropsInvalidClassification(t *testing.T) {
 const (
 	TEST_CUSTOM_JSON_BOM_STRUCTURE              = "test/custom/custom-bom-structure.json"
 	TEST_CUSTOM_JSON_METADATA_HAS_ELEMENTS      = "test/custom/custom-metadata-has-elements.json"
-	TEST_CUSTOM_JSON_METADATA_UNIQUE_DISCLAIMER = "test/custom/custom-metadata-properties-unique-disclaimer.json"
+	TEST_CUSTOM_JSON_METADATA_DISCLAIMER_UNIQUE = "test/custom/custom-metadata-properties-disclaimer-unique.json"
+	TEST_CUSTOM_JSON_METADATA_DISCLAIMER_MATCH  = "test/custom/custom-metadata-properties-disclaimer-match.json"
 )
 
 func TestValidateCustomCdx16_BOMStructure(t *testing.T) {
@@ -220,7 +221,7 @@ func TestValidateCustomCdx16_MetadataHasElements(t *testing.T) {
 
 func TestValidateCustomCdx16_MetadataUniqueDisclaimer(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_CUSTOM)
-	vti.CustomConfig = TEST_CUSTOM_JSON_METADATA_UNIQUE_DISCLAIMER
+	vti.CustomConfig = TEST_CUSTOM_JSON_METADATA_DISCLAIMER_UNIQUE
 	document, results, _ := innerTestValidate(t, *vti)
 	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
@@ -231,14 +232,8 @@ func TestValidateCustomCdx16_MetadataUniqueDisclaimer(t *testing.T) {
 
 // Error if hierarchical components in top-level "components" array
 func TestValidateCustomErrorCdx13InvalidCompositionComponents(t *testing.T) {
-	// vti := NewValidateTestInfoBasic(
-	// 	TEST_CUSTOM_CDX_1_3_INVALID_COMPOSITION_METADATA_COMPONENT,
-	// 	FORMAT_ANY,
-	// 	&InvalidSBOMError{},
-	// )
-	//vti.ResultExpectedInnerError = &SBOMCompositionError{}
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_3_INVALID_COMPOSITION_METADATA_COMPONENT)
-	vti.CustomConfig = TEST_CUSTOM_JSON_METADATA_UNIQUE_DISCLAIMER
+	vti.CustomConfig = TEST_CUSTOM_JSON_METADATA_DISCLAIMER_MATCH
 	vti.ResultExpectedError = &InvalidSBOMError{}
 	vti.ResultExpectedInnerError = &ItemIsUniqueError{}
 	vti.CustomConfig = TEST_CUSTOM_JSON_BOM_STRUCTURE
@@ -248,9 +243,17 @@ func TestValidateCustomErrorCdx13InvalidCompositionComponents(t *testing.T) {
 // -------------------------------------------
 // FAIL - Uniqueness tests
 // -------------------------------------------
-func TestValidateCustomCdx14MetadataPropertyUniqueDisclaimer(t *testing.T) {
+func TestValidateCustomCdx14MetadataPropertyDisclaimerUnique(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE)
-	vti.CustomConfig = TEST_CUSTOM_JSON_METADATA_UNIQUE_DISCLAIMER
+	vti.CustomConfig = TEST_CUSTOM_JSON_METADATA_DISCLAIMER_UNIQUE
+	vti.ResultExpectedError = &InvalidSBOMError{}
+	vti.ResultExpectedInnerError = &ItemIsUniqueError{}
+	innerValidateInvalidSBOMInnerError(t, *vti)
+}
+
+func TestValidateCustomCdx14MetadataPropertyDisclaimerMatch(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE)
+	vti.CustomConfig = TEST_CUSTOM_JSON_METADATA_DISCLAIMER_MATCH
 	vti.ResultExpectedError = &InvalidSBOMError{}
 	vti.ResultExpectedInnerError = &ItemHasPropertiesError{}
 	innerValidateInvalidSBOMInnerError(t, *vti)
