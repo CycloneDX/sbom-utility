@@ -176,37 +176,25 @@ func TestValidateCustomCdx14MetadataPropsInvalidClassification(t *testing.T) {
 }
 
 // -------------------------------------------
-// Property uniqueness tests
-// -------------------------------------------
-// Note: The "uniqueness" constraint for objects is not supported in JSON schema v7
-
-// func TestValidateCustomCdx14MetadataPropertyUniqueDisclaimer(t *testing.T) {
-// 	document, results, _ := innerTestValidateCustomInvalidSBOMInnerError(t,
-// 		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE,
-// 		SCHEMA_VARIANT_NONE,
-// 		&SBOMMetadataPropertyError{})
-// 	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
-// }
-
-// func TestValidateCustomCdx14MetadataPropertyUniqueClassification(t *testing.T) {
-// 	document, results, _ := innerTestValidateCustomInvalidSBOMInnerError(t,
-// 		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE,
-// 		SCHEMA_VARIANT_NONE,
-// 		&SBOMMetadataPropertyError{})
-// 	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
-// }
-
-// -------------------------------------------
 // "custom.json" test variants (1.6 BOM)
 // -------------------------------------------
 const (
 	TEST_CUSTOM_BOM_STRUCTURE_COMPONENTS         = "test/custom/custom-bom-structure-components.json"
-	TEST_CUSTOM_METADATA_HAS_ELEMENTS            = "test/custom/custom-metadata-has-elements.json"
-	TEST_CUSTOM_METADATA_ELEMENT_NOT_FOUND       = "test/custom/custom-metadata-element-not-found.json"
-	TEST_CUSTOM_METADATA_PROPS_DISCLAIMER_UNIQUE = "test/custom/custom-metadata-properties-disclaimer-unique.json"
+	TEST_CUSTOM_BOM_PROPS_NOT_UNIQUE             = "test/custom/custom-bom-properties-not-unique.json"
+	TEST_CUSTOM_METADATA_HAS_ELEMENTS_FAIL       = "test/custom/custom-metadata-element-not-found.json"
+	TEST_CUSTOM_METADATA_HAS_ELEMENTS_SUCCESS    = "test/custom/custom-metadata-has-elements.json"
 	TEST_CUSTOM_METADATA_PROPS_DISCLAIMER_MATCH  = "test/custom/custom-metadata-properties-disclaimer-match.json"
-	TEST_CUSTOM_METADATA_PROPS_FOO_NOT_UNIQUE    = "test/custom/custom-metadata-properties-not-unique.json"
+	TEST_CUSTOM_METADATA_PROPS_DISCLAIMER_UNIQUE = "test/custom/custom-metadata-properties-disclaimer-unique.json"
 )
+
+func TestValidateCustomCdx16_BOMPropertiesNotUnique(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_CUSTOM)
+	vti.CustomConfig = TEST_CUSTOM_BOM_PROPS_NOT_UNIQUE
+	vti.ResultExpectedError = &InvalidSBOMError{}
+	vti.ResultExpectedInnerError = &ItemIsUniqueError{}
+	document, results, _ := innerValidateInvalidSBOMInnerError(t, *vti)
+	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
+}
 
 func TestValidateCustomCdx16_BOMStructureComponents(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_CUSTOM)
@@ -217,14 +205,14 @@ func TestValidateCustomCdx16_BOMStructureComponents(t *testing.T) {
 
 func TestValidateCustomCdx16_MetadataHasElements(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_CUSTOM)
-	vti.CustomConfig = TEST_CUSTOM_METADATA_HAS_ELEMENTS
+	vti.CustomConfig = TEST_CUSTOM_METADATA_HAS_ELEMENTS_SUCCESS
 	document, results, _ := innerTestValidate(t, *vti)
 	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
 
 func TestValidateCustomCdx16_MetadataElementNotFound(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_CUSTOM)
-	vti.CustomConfig = TEST_CUSTOM_METADATA_ELEMENT_NOT_FOUND
+	vti.CustomConfig = TEST_CUSTOM_METADATA_HAS_ELEMENTS_FAIL
 	vti.ResultExpectedError = &InvalidSBOMError{}
 	vti.ResultExpectedInnerError = &ItemHasPropertiesError{}
 	document, results, _ := innerTestValidate(t, *vti)
@@ -243,14 +231,6 @@ func TestValidateCustomCdx16_MetadataPropsNotUnique(t *testing.T) {
 	vti.CustomConfig = TEST_CUSTOM_METADATA_PROPS_DISCLAIMER_UNIQUE
 	document, results, _ := innerTestValidate(t, *vti)
 	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
-}
-
-func TestValidateCustomCdx16MetadataPropertyNotUnique(t *testing.T) {
-	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_CUSTOM)
-	vti.CustomConfig = TEST_CUSTOM_METADATA_PROPS_DISCLAIMER_UNIQUE
-	vti.ResultExpectedError = &InvalidSBOMError{}
-	vti.ResultExpectedInnerError = &ItemIsUniqueError{}
-	innerValidateInvalidSBOMInnerError(t, *vti)
 }
 
 // -------------------------------------------
@@ -272,6 +252,8 @@ func TestValidateCustomErrorCdx13InvalidCompositionComponents(t *testing.T) {
 // -------------------------------------------
 // FAIL - Uniqueness tests
 // -------------------------------------------
+// Note: The "uniqueness" constraint for objects is not supported in JSON schema v7
+
 func TestValidateCustomCdx14MetadataPropertyDisclaimerUnique(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE)
 	vti.CustomConfig = TEST_CUSTOM_METADATA_PROPS_DISCLAIMER_UNIQUE
@@ -288,4 +270,12 @@ func TestValidateCustomCdx14MetadataPropertyDisclaimerMatch(t *testing.T) {
 	vti.ResultExpectedInnerError = &ItemHasPropertiesError{}
 	document, _, err := innerValidateInvalidSBOMInnerError(t, *vti)
 	getLogger().Tracef("filename: '%s', error: '%s'", document.GetFilename(), err)
+}
+
+func TestValidateCustomCdx14MetadataPropertyUniqueClassification(t *testing.T) {
+	// document, results, _ := innerTestValidateCustomInvalidSBOMInnerError(t,
+	// 	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE,
+	// 	SCHEMA_VARIANT_NONE,
+	// 	&SBOMMetadataPropertyError{})
+	// getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
 }

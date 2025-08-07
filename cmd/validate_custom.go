@@ -106,7 +106,6 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 			return
 		}
 
-		// Array of map
 		if jsonArrayOfMap != nil {
 			// hash values using primary key-value specified; Note that "" (empty) is a valid key value
 			var hashmap *slicemultimap.MultiMap
@@ -116,7 +115,6 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 				getLogger().Infof(">> Checking %s: (selector: `%v`)...", fx, action.Selector)
 				switch fx {
 				case "isUnique":
-					// var unique bool
 					unique, numOccurrences := IsUnique(hashmap, selectorKeyValue)
 					if !unique {
 						innerError = NewItemIsUniqueError(action, numOccurrences)
@@ -125,7 +123,6 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 					properties := action.Properties
 					// make sure we have properties to validate...
 					if len(properties) == 0 {
-						//innerError = getLogger().Errorf("no properties declared. Action id: `%s`, selector path: `%v`", action.Id, path)
 						// TODO need a special error for "no properties found"
 						innerError = NewItemHasPropertiesError(action, schema.ItemKeyValue{})
 						return

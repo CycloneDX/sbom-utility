@@ -27,14 +27,6 @@
 			{
 				"name": "urn:example.com:classification",
 				"value": "This SBOM is Confidential Information. Do not distribute."
-			},
-			{
-				"name": "foo",
-				"value": "bar1"
-			},
-			{
-				"name": "foo",
-				"value": "bar2"
 			}
 		],
 		"licenses": [
@@ -140,6 +132,20 @@
 				"pkg:npm/libraryA@1.0.0",
 				"pkg:npm/libraryB@1.0.0"
 			]
+		}
+	],
+	"properties": [
+		{
+			"name": "foo",
+			"value": "bar1"
+		},
+		{
+			"name": "foo",
+			"value": "bar2"
+		},
+		{
+			"name": "yyz",
+			"value": "rush"
 		}
 	]
 }
