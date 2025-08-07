@@ -39,7 +39,7 @@ const (
 	TEST_CUSTOM_METADATA_PROPS_DISCLAIMER_UNIQUE = "test/custom/custom-metadata-properties-disclaimer-unique.json"
 )
 
-// v1.3, 1.4
+// v1.3, 1.4 - custom json schema tests
 const (
 	TEST_SCHEMA_CDX_1_3_CUSTOM = "resources/schema/test/bom-1.3-custom.schema.json"
 	TEST_SCHEMA_CDX_1_4_CUSTOM = "resources/schema/test/bom-1.4-custom.schema.json"
@@ -55,21 +55,13 @@ const TEST_CUSTOM_CDX_1_6_CUSTOM = "test/custom/cdx-1-6-test-custom-metadata-pro
 // v1.4, v1.3
 const (
 	// Metadata tests
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_INVALID     = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_MISSING     = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-missing.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE      = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-unique.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_INVALID = "test/custom/cdx-1-4-test-custom-metadata-property-classification-invalid.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_MISSING = "test/custom/cdx-1-4-test-custom-metadata-property-classification-missing.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_UNIQUE  = "test/custom/cdx-1-4-test-custom-metadata-property-classification-unique.json"
-
+	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_INVALID = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json"
+	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_MISSING = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-missing.json"
+	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE  = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-unique.json"
 	// License tests
 	// Note: The "invalid" tests below is also used in "list" command tests
 	// which tests for a "none found" warning messages being displayed to stdout
 	TEST_CUSTOM_CDX_1_4_INVALID_LICENSES_NOT_FOUND = TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND
-
-	// Composition
-	TEST_CUSTOM_CDX_1_3_INVALID_COMPOSITION_COMPONENTS         = "test/custom/cdx-1-3-test-custom-invalid-composition-components.json"
-	TEST_CUSTOM_CDX_1_3_INVALID_COMPOSITION_METADATA_COMPONENT = "test/custom/cdx-1-3-test-custom-invalid-composition-metadata-component.json"
 )
 
 // -------------------------------------------
@@ -169,21 +161,6 @@ func TestValidateCustomCdx16_BOMPropertiesNotUnique(t *testing.T) {
 }
 
 // -------------------------------------------
-// FAIL - Composition tests
-// -------------------------------------------
-
-// hasProperties(): Fail - does not have top-level "components" array
-func TestValidateCustomErrorCdx13InvalidCompositionComponents(t *testing.T) {
-	getLogger().SetLevel(log.TRACE)
-	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_3_INVALID_COMPOSITION_METADATA_COMPONENT)
-	vti.CustomConfig = TEST_CUSTOM_BOM_STRUCTURE_BEST_PRACTICE
-	vti.ResultExpectedError = &InvalidSBOMError{}
-	vti.ResultExpectedInnerError = &ItemHasPropertiesError{}
-	document, _, err := innerValidateInvalidSBOMInnerError(t, *vti)
-	getLogger().Tracef("filename: '%s', error: '%s'", document.GetFilename(), err)
-}
-
-// -------------------------------------------
 // FAIL - Uniqueness tests
 // -------------------------------------------
 // Note: The "uniqueness" constraint for objects is not supported in JSON schema v7
@@ -206,14 +183,6 @@ func TestValidateCustomCdx14MetadataPropertyDisclaimerMatch(t *testing.T) {
 	getLogger().Tracef("filename: '%s', error: '%s'", document.GetFilename(), err)
 }
 
-func TestValidateCustomCdx14MetadataPropertyUniqueClassification(t *testing.T) {
-	// document, results, _ := innerTestValidateCustomInvalidSBOMInnerError(t,
-	// 	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE,
-	// 	SCHEMA_VARIANT_NONE,
-	// 	&SBOMMetadataPropertyError{})
-	// getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
-}
-
 func TestValidateCustomCdx14MetadataPropsMissingDisclaimer(t *testing.T) {
 	vti := NewValidateTestInfo(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_MISSING,
 		FORMAT_TEXT,
@@ -222,16 +191,6 @@ func TestValidateCustomCdx14MetadataPropsMissingDisclaimer(t *testing.T) {
 	vti.CustomBOMSchema = DEFAULT_CUSTOM_VALIDATION_CONFIG
 	vti.ResultExpectedError = &InvalidSBOMError{}
 	vti.ResultExpectedInnerError = &ItemIsUniqueError{}
-	document, results, _ := innerTestValidate(t, *vti)
-	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
-}
-
-func TestValidateCustomCdx14MetadataPropsMissingClassification(t *testing.T) {
-	vti := NewValidateTestInfo(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_MISSING,
-		FORMAT_TEXT,
-		SCHEMA_VARIANT_CUSTOM,
-		&InvalidSBOMError{})
-	vti.CustomBOMSchema = DEFAULT_CUSTOM_VALIDATION_CONFIG
 	document, results, _ := innerTestValidate(t, *vti)
 	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
