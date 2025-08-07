@@ -2,7 +2,7 @@
   "validation": {
     "description": "Custom validation actions to perform on selected elements of a BOM document.",
     "actions": [
-            {
+      {
         "id": "custom-test-bom-structure",
         "description": "Test the BOM has 'components' and 'dependencies' at the top level as \"best practice\".",
         "selector": {

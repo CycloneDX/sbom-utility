@@ -1,0 +1,42 @@
+{
+  "validation": {
+    "actions": [
+      {
+        "id": "custom-test-bom-structure-best-practice",
+        "description": "Test the BOM has 'metadata', 'components' and 'dependencies' at the top level as \"best practice\".",
+        "selector": {
+          "path": ""
+        },
+        "functions": [
+          "hasProperties"
+        ],
+        "properties": [
+          {
+            "key": "metadata"
+          },
+          {
+            "key": "components"
+          },
+          {
+            "key": "dependencies"
+          }
+        ]
+      },
+       {
+        "id": "custom-test-bom-structure-best-practice-metadata",
+        "description": "Test the BOM has 'metadata.component' as \"best practice\".",
+        "selector": {
+          "path": "metadata"
+        },
+        "functions": [
+          "hasProperties"
+        ],
+        "properties": [
+          {
+            "key": "component"
+          }
+        ]
+      }
+    ]
+  }
+}
