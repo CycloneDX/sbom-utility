@@ -196,22 +196,6 @@ func TestValidateCustomCdx14MetadataPropsInvalidClassification(t *testing.T) {
 // }
 
 // -------------------------------------------
-// Composition tests
-// -------------------------------------------
-
-// Error if hierarchical components in top-level "components" array
-func TestValidateCustomErrorCdx13InvalidCompositionComponents(t *testing.T) {
-	vti := NewValidateTestInfoBasic(
-		TEST_CUSTOM_CDX_1_3_INVALID_COMPOSITION_METADATA_COMPONENT,
-		FORMAT_ANY,
-		&InvalidSBOMError{},
-	)
-	//vti.ResultExpectedInnerError = &SBOMCompositionError{}
-	vti.CustomConfig = TEST_CUSTOM_JSON_BOM_STRUCTURE
-	innerValidateInvalidSBOMInnerError(t, *vti)
-}
-
-// -------------------------------------------
 // "custom.json" test variants
 // -------------------------------------------
 const (
@@ -241,11 +225,33 @@ func TestValidateCustomCdx16_MetadataUniqueDisclaimer(t *testing.T) {
 	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
 
-// FAIL tests
+// -------------------------------------------
+// FAIL - Composition tests
+// -------------------------------------------
+
+// Error if hierarchical components in top-level "components" array
+func TestValidateCustomErrorCdx13InvalidCompositionComponents(t *testing.T) {
+	// vti := NewValidateTestInfoBasic(
+	// 	TEST_CUSTOM_CDX_1_3_INVALID_COMPOSITION_METADATA_COMPONENT,
+	// 	FORMAT_ANY,
+	// 	&InvalidSBOMError{},
+	// )
+	//vti.ResultExpectedInnerError = &SBOMCompositionError{}
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_3_INVALID_COMPOSITION_METADATA_COMPONENT)
+	vti.CustomConfig = TEST_CUSTOM_JSON_METADATA_UNIQUE_DISCLAIMER
+	vti.ResultExpectedError = &InvalidSBOMError{}
+	vti.ResultExpectedInnerError = &ItemIsUniqueError{}
+	vti.CustomConfig = TEST_CUSTOM_JSON_BOM_STRUCTURE
+	innerValidateInvalidSBOMInnerError(t, *vti)
+}
+
+// -------------------------------------------
+// FAIL - Uniqueness tests
+// -------------------------------------------
 func TestValidateCustomCdx14MetadataPropertyUniqueDisclaimer(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE)
 	vti.CustomConfig = TEST_CUSTOM_JSON_METADATA_UNIQUE_DISCLAIMER
 	vti.ResultExpectedError = &InvalidSBOMError{}
-	vti.ResultExpectedInnerError = &ItemIsUniqueError{}
+	vti.ResultExpectedInnerError = &ItemHasPropertiesError{}
 	innerValidateInvalidSBOMInnerError(t, *vti)
 }

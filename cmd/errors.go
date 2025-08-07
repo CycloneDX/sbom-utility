@@ -218,11 +218,12 @@ type ItemHasPropertiesError struct {
 	ExpectedProperty schema.ItemKeyValue
 }
 
-func NewItemHasPropertiesError(action schema.ValidationAction) *ItemHasPropertiesError {
+func NewItemHasPropertiesError(action schema.ValidationAction, missingProperty schema.ItemKeyValue) *ItemHasPropertiesError {
 	var err = new(ItemHasPropertiesError)
 	err.Message = "item not unique"
 	err.ActionId = action.Id
 	err.Selector = action.Selector
+	err.ExpectedProperty = missingProperty
 	return err
 }
 

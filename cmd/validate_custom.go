@@ -125,12 +125,14 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 					properties := action.Properties
 					// make sure we have properties to validate...
 					if len(properties) == 0 {
-						innerError = getLogger().Errorf("no properties declared. Action id: `%s`, selector path: `%v`", action.Id, path)
+						//innerError = getLogger().Errorf("no properties declared. Action id: `%s`, selector path: `%v`", action.Id, path)
+						// TODO need a special error for "no properties found"
+						innerError = NewItemHasPropertiesError(action, schema.ItemKeyValue{})
 						return
 					}
-					exists, propertyError := JsonArrayElementsHaveProperties(jsonArrayOfMap, properties)
+					exists, missingProperty := JsonArrayElementsHaveProperties(jsonArrayOfMap, properties)
 					if !exists {
-						innerError = propertyError
+						innerError = NewItemHasPropertiesError(action, missingProperty)
 						return
 					}
 				default:
@@ -145,12 +147,15 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 					properties := action.Properties
 					// make sure we have properties to validate...
 					if len(properties) == 0 {
-						innerError = getLogger().Errorf("No properties declared. Action id: `%s`, selector path: `%v`", action.Id, path)
+						//innerError = getLogger().Errorf("No properties declared. Action id: `%s`, selector path: `%v`", action.Id, path)
+						// TODO need a special error for "no properties found"
+						innerError = NewItemHasPropertiesError(action, schema.ItemKeyValue{})
 						return
 					}
-					exists, propertyError := JsonMapHasProperties(jsonMap, properties)
+					exists, missingProperty := JsonMapHasProperties(jsonMap, properties)
 					if !exists {
-						innerError = propertyError
+						// innerError = propertyError
+						innerError = NewItemHasPropertiesError(action, missingProperty)
 						return
 					}
 				default:
@@ -203,23 +208,26 @@ func IsUnique(hashmap *slicemultimap.MultiMap, keyValue string) (unique bool, nu
 	return
 }
 
-func JsonArrayElementsHaveProperties(arrayOfMap []map[string]interface{}, properties []schema.ItemKeyValue) (exists bool, innerError error) {
+func JsonArrayElementsHaveProperties(arrayOfMap []map[string]interface{}, properties []schema.ItemKeyValue) (exists bool, missingProperty schema.ItemKeyValue) {
 	exists = false
 	for _, jsonMap := range arrayOfMap {
-		exists, innerError = JsonMapHasProperties(jsonMap, properties)
+		exists, missingProperty = JsonMapHasProperties(jsonMap, properties)
 		if !exists {
+			// TODO: print map of failed array item
+			getLogger().Tracef("property not found. Property key: `%s`, value: `%s`", missingProperty.Key, missingProperty.Value)
 			break
 		}
 	}
 	return
 }
 
-func JsonMapHasProperties(jsonMap map[string]interface{}, properties []schema.ItemKeyValue) (exists bool, innerError error) {
+func JsonMapHasProperties(jsonMap map[string]interface{}, properties []schema.ItemKeyValue) (exists bool, missingProperty schema.ItemKeyValue) {
 	exists = false
 	for _, property := range properties {
 		exists = KeyValueExistsInMap(jsonMap, property.Key, property.Value)
 		if !exists {
-			innerError = getLogger().Errorf("property not found. Property key: `%s`, value: `%s`", property.Key, property.Value)
+			getLogger().Tracef("property not found. Property key: `%s`, value: `%s`", property.Key, property.Value)
+			missingProperty = property
 			break
 		}
 	}
