@@ -1,0 +1,21 @@
+{
+  "validation": {
+    "actions": [
+      {
+        "id": "custom-test-metadata-property-not-found",
+        "description": "Test the error if metadata property is not found",
+        "selector": {
+          "path": "metadata"
+        },
+        "functions": [
+          "hasProperties"
+        ],
+        "properties": [
+          {
+            "key": "authors"
+          }
+        ]
+      }
+    ]
+  }
+}

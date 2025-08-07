@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/CycloneDX/sbom-utility/schema"
+	"github.com/CycloneDX/sbom-utility/utils"
 	"github.com/xeipuuv/gojsonschema"
 )
 
@@ -196,34 +197,60 @@ func TestValidateCustomCdx14MetadataPropsInvalidClassification(t *testing.T) {
 // }
 
 // -------------------------------------------
-// "custom.json" test variants
+// "custom.json" test variants (1.6 BOM)
 // -------------------------------------------
 const (
-	TEST_CUSTOM_JSON_BOM_STRUCTURE              = "test/custom/custom-bom-structure.json"
-	TEST_CUSTOM_JSON_METADATA_HAS_ELEMENTS      = "test/custom/custom-metadata-has-elements.json"
-	TEST_CUSTOM_JSON_METADATA_DISCLAIMER_UNIQUE = "test/custom/custom-metadata-properties-disclaimer-unique.json"
-	TEST_CUSTOM_JSON_METADATA_DISCLAIMER_MATCH  = "test/custom/custom-metadata-properties-disclaimer-match.json"
+	TEST_CUSTOM_BOM_STRUCTURE_COMPONENTS         = "test/custom/custom-bom-structure-components.json"
+	TEST_CUSTOM_METADATA_HAS_ELEMENTS            = "test/custom/custom-metadata-has-elements.json"
+	TEST_CUSTOM_METADATA_ELEMENT_NOT_FOUND       = "test/custom/custom-metadata-element-not-found.json"
+	TEST_CUSTOM_METADATA_PROPS_DISCLAIMER_UNIQUE = "test/custom/custom-metadata-properties-disclaimer-unique.json"
+	TEST_CUSTOM_METADATA_PROPS_DISCLAIMER_MATCH  = "test/custom/custom-metadata-properties-disclaimer-match.json"
+	TEST_CUSTOM_METADATA_PROPS_FOO_NOT_UNIQUE    = "test/custom/custom-metadata-properties-not-unique.json"
 )
 
-func TestValidateCustomCdx16_BOMStructure(t *testing.T) {
+func TestValidateCustomCdx16_BOMStructureComponents(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_CUSTOM)
-	vti.CustomConfig = TEST_CUSTOM_JSON_BOM_STRUCTURE
+	vti.CustomConfig = TEST_CUSTOM_BOM_STRUCTURE_COMPONENTS
 	document, results, _ := innerTestValidate(t, *vti)
 	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
 
 func TestValidateCustomCdx16_MetadataHasElements(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_CUSTOM)
-	vti.CustomConfig = TEST_CUSTOM_JSON_METADATA_HAS_ELEMENTS
+	vti.CustomConfig = TEST_CUSTOM_METADATA_HAS_ELEMENTS
 	document, results, _ := innerTestValidate(t, *vti)
 	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
 
-func TestValidateCustomCdx16_MetadataUniqueDisclaimer(t *testing.T) {
+func TestValidateCustomCdx16_MetadataElementNotFound(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_CUSTOM)
-	vti.CustomConfig = TEST_CUSTOM_JSON_METADATA_DISCLAIMER_UNIQUE
+	vti.CustomConfig = TEST_CUSTOM_METADATA_ELEMENT_NOT_FOUND
+	vti.ResultExpectedError = &InvalidSBOMError{}
+	vti.ResultExpectedInnerError = &ItemHasPropertiesError{}
 	document, results, _ := innerTestValidate(t, *vti)
 	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
+}
+
+func TestValidateCustomCdx16_MetadataPropsUniqueDisclaimer(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_CUSTOM)
+	vti.CustomConfig = TEST_CUSTOM_METADATA_PROPS_DISCLAIMER_UNIQUE
+	document, results, _ := innerTestValidate(t, *vti)
+	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
+}
+
+func TestValidateCustomCdx16_MetadataPropsNotUnique(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_CUSTOM)
+	vti.CustomConfig = TEST_CUSTOM_METADATA_PROPS_DISCLAIMER_UNIQUE
+	document, results, _ := innerTestValidate(t, *vti)
+	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
+}
+
+func TestValidateCustomCdx16MetadataPropertyNotUnique(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_CUSTOM)
+	vti.CustomConfig = TEST_CUSTOM_METADATA_PROPS_DISCLAIMER_UNIQUE
+	vti.ResultExpectedError = &InvalidSBOMError{}
+	vti.ResultExpectedInnerError = &ItemIsUniqueError{}
+	innerValidateInvalidSBOMInnerError(t, *vti)
 }
 
 // -------------------------------------------
@@ -232,12 +259,14 @@ func TestValidateCustomCdx16_MetadataUniqueDisclaimer(t *testing.T) {
 
 // Error if hierarchical components in top-level "components" array
 func TestValidateCustomErrorCdx13InvalidCompositionComponents(t *testing.T) {
+	utils.GlobalFlags.PersistentFlags.Trace = true
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_3_INVALID_COMPOSITION_METADATA_COMPONENT)
-	vti.CustomConfig = TEST_CUSTOM_JSON_METADATA_DISCLAIMER_MATCH
+	vti.CustomConfig = TEST_CUSTOM_METADATA_PROPS_DISCLAIMER_MATCH
 	vti.ResultExpectedError = &InvalidSBOMError{}
-	vti.ResultExpectedInnerError = &ItemIsUniqueError{}
-	vti.CustomConfig = TEST_CUSTOM_JSON_BOM_STRUCTURE
-	innerValidateInvalidSBOMInnerError(t, *vti)
+	vti.ResultExpectedInnerError = &ItemHasPropertiesError{}
+	vti.CustomConfig = TEST_CUSTOM_BOM_STRUCTURE_COMPONENTS
+	document, _, err := innerValidateInvalidSBOMInnerError(t, *vti)
+	getLogger().Tracef("filename: '%s', error: '%s'", document.GetFilename(), err)
 }
 
 // -------------------------------------------
@@ -245,16 +274,18 @@ func TestValidateCustomErrorCdx13InvalidCompositionComponents(t *testing.T) {
 // -------------------------------------------
 func TestValidateCustomCdx14MetadataPropertyDisclaimerUnique(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE)
-	vti.CustomConfig = TEST_CUSTOM_JSON_METADATA_DISCLAIMER_UNIQUE
+	vti.CustomConfig = TEST_CUSTOM_METADATA_PROPS_DISCLAIMER_UNIQUE
 	vti.ResultExpectedError = &InvalidSBOMError{}
 	vti.ResultExpectedInnerError = &ItemIsUniqueError{}
-	innerValidateInvalidSBOMInnerError(t, *vti)
+	document, _, err := innerValidateInvalidSBOMInnerError(t, *vti)
+	getLogger().Tracef("filename: '%s', error: '%s'", document.GetFilename(), err)
 }
 
 func TestValidateCustomCdx14MetadataPropertyDisclaimerMatch(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_INVALID)
-	vti.CustomConfig = TEST_CUSTOM_JSON_METADATA_DISCLAIMER_MATCH
+	vti.CustomConfig = TEST_CUSTOM_METADATA_PROPS_DISCLAIMER_MATCH
 	vti.ResultExpectedError = &InvalidSBOMError{}
 	vti.ResultExpectedInnerError = &ItemHasPropertiesError{}
-	innerValidateInvalidSBOMInnerError(t, *vti)
+	document, _, err := innerValidateInvalidSBOMInnerError(t, *vti)
+	getLogger().Tracef("filename: '%s', error: '%s'", document.GetFilename(), err)
 }

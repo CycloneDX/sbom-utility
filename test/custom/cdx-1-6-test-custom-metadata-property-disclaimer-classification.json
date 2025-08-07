@@ -27,6 +27,14 @@
 			{
 				"name": "urn:example.com:classification",
 				"value": "This SBOM is Confidential Information. Do not distribute."
+			},
+			{
+				"name": "foo",
+				"value": "bar1"
+			},
+			{
+				"name": "foo",
+				"value": "bar2"
 			}
 		],
 		"licenses": [
