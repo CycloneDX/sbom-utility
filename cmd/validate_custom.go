@@ -116,10 +116,10 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 				getLogger().Infof(">> Checking %s: (selector: `%v`)...", fx, action.Selector)
 				switch fx {
 				case "isUnique":
-					var unique bool
-					unique, innerError = IsUnique(hashmap, selectorKeyValue)
+					// var unique bool
+					unique, numOccurrences := IsUnique(hashmap, selectorKeyValue)
 					if !unique {
-						innerError = getLogger().Errorf("item not unique. selector: `%v`", action.Selector.String())
+						innerError = NewItemIsUniqueError(action, numOccurrences)
 					}
 				case "hasProperties":
 					properties := action.Properties
@@ -193,23 +193,13 @@ func prepareWhereFilter(selector schema.ItemSelector) (whereFilter common.WhereF
 	return
 }
 
-func IsUnique(hashmap *slicemultimap.MultiMap, keyValue string) (unique bool, innerError error) {
-	getLogger().Tracef("Checking element keyValue: '%s'...", keyValue)
+func IsUnique(hashmap *slicemultimap.MultiMap, keyValue string) (unique bool, numOccurrences int) {
 	values, found := hashmap.Get(keyValue)
-
-	if !found {
-		innerError = getLogger().Errorf("%s. %s (keyValue: `%s`)", ERR_QUERY, MSG_QUERY_ERROR_ELEMENT_NOT_FOUND, keyValue)
-		return
-	}
-
 	// if multi-hashmap has more than one occurrence "value", property is NOT unique
-	numOccurrences := len(values)
-	if numOccurrences > 1 {
-		innerError = getLogger().Errorf("%s. %s (keyValue: `%s`, occurs: %v)", ERR_QUERY, MSG_QUERY_ERROR_ELEMENT_NOT_FOUND, keyValue, numOccurrences)
-		return
+	numOccurrences = len(values)
+	if found && numOccurrences == 1 {
+		unique = true
 	}
-	// Note: redundant for now with errors; but, may want to make errors optional and emit warnings...
-	unique = true
 	return
 }
 

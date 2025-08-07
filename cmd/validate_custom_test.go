@@ -241,13 +241,11 @@ func TestValidateCustomCdx16_MetadataUniqueDisclaimer(t *testing.T) {
 	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
 
+// FAIL tests
 func TestValidateCustomCdx14MetadataPropertyUniqueDisclaimer(t *testing.T) {
-	// document, results, _ := innerTestValidateCustomInvalidSBOMInnerError(t,
-	// 	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE,
-	// 	SCHEMA_VARIANT_NONE,
-	// 	&SBOMMetadataPropertyError{})
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE)
 	vti.CustomConfig = TEST_CUSTOM_JSON_METADATA_UNIQUE_DISCLAIMER
-	// vti.ResultExpectedInnerError = &SBOMMetadataPropertyError{}
+	vti.ResultExpectedError = &InvalidSBOMError{}
+	vti.ResultExpectedInnerError = &ItemIsUniqueError{}
 	innerValidateInvalidSBOMInnerError(t, *vti)
 }
