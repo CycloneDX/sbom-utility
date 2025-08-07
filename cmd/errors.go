@@ -21,7 +21,6 @@ package cmd
 import (
 	"fmt"
 	"reflect"
-	"strings"
 
 	"github.com/CycloneDX/sbom-utility/schema"
 	"github.com/xeipuuv/gojsonschema"
@@ -51,11 +50,11 @@ const (
 // Custom Validation messages
 // TODO: Need to define a profile that supports these validation checks/messages
 const (
-	MSG_ELEMENT_NOT_UNIQUE                    = "custom validation error. Element not unique"
-	MSG_PROPERTY_NOT_UNIQUE                   = "check failed. Property not unique"
-	MSG_INVALID_METADATA_PROPERTIES           = "field `metadata.properties` is missing or invalid"
-	MSG_INVALID_METADATA_COMPONENT_COMPONENTS = "field `metadata.component.components` array should be empty"
-	MSG_INVALID_METADATA_COMPONENT            = "field `metadata.component` is missing or invalid"
+	MSG_ELEMENT_NOT_UNIQUE  = "custom validation error. Element not unique"
+	MSG_PROPERTY_NOT_UNIQUE = "check failed. Property not unique"
+	// MSG_INVALID_METADATA_PROPERTIES = "field `metadata.properties` is missing or invalid"
+	// MSG_INVALID_METADATA_COMPONENT_COMPONENTS = "field `metadata.component.components` array should be empty"
+	// MSG_INVALID_METADATA_COMPONENT            = "field `metadata.component` is missing or invalid"
 )
 
 // Validation messages
@@ -180,27 +179,58 @@ type InvalidSBOMError struct {
 	SchemaErrors []gojsonschema.ResultError
 }
 
-// Define more specific invalid SBOM errors
-type SBOMCompositionError struct {
-	InvalidSBOMError
-}
-
 // NOTE: Current sub-type is "no license found"; other, more specific subtypes may be created
 type SBOMLicenseError struct {
 	InvalidSBOMError
 }
 
 // Define more specific invalid SBOM errors
-type SBOMMetadataError struct {
-	InvalidSBOMError
-	Metadata schema.CDXMetadata
+// type SBOMCompositionError struct {
+// 	InvalidSBOMError
+// }
+
+// Define more specific invalid SBOM errors
+// type SBOMMetadataError struct {
+// 	InvalidSBOMError
+// 	Metadata schema.CDXMetadata
+// }
+
+type ItemIsUniqueError struct {
+	BaseError
+	ActionId        string
+	Selector        schema.ItemSelector
+	NumMatchesFound int
 }
 
-type SBOMMetadataPropertyError struct {
-	SBOMMetadataError
-	Expected *schema.CustomValidationProperty
-	Actual   []schema.CDXProperty
+func NewItemIsUniqueError(action schema.ValidationAction, numMatches int) *ItemIsUniqueError {
+	var err = new(ItemIsUniqueError)
+	err.Message = "item not unique"
+	err.ActionId = action.Id
+	err.Selector = action.Selector
+	err.NumMatchesFound = numMatches
+	return err
 }
+
+type ItemHasPropertiesError struct {
+	BaseError
+	ActionId         string
+	Selector         schema.ItemSelector
+	ExpectedProperty schema.ItemKeyValue
+}
+
+func NewItemHasPropertiesError(action schema.ValidationAction) *ItemHasPropertiesError {
+	var err = new(ItemHasPropertiesError)
+	err.Message = "item not unique"
+	err.ActionId = action.Id
+	err.Selector = action.Selector
+	return err
+}
+
+// type SBOMMetadataPropertyError struct {
+// 	SBOMMetadataError
+// 	Expected *schema.CustomValidationProperty
+// 	Actual   []schema.CDXProperty
+// }
 
 func NewInvalidSBOMError(sbom *schema.BOM, m string, errIn error, schemaErrors []gojsonschema.ResultError) *InvalidSBOMError {
 	var err = new(InvalidSBOMError)
@@ -233,53 +263,53 @@ func NewSbomLicenseDataError() *SBOMLicenseError {
 	return err
 }
 
-func NewSBOMCompositionError(m string, sbom *schema.BOM, fields []string) *SBOMCompositionError {
-	var err = new(SBOMCompositionError)
-	err.Type = ERR_TYPE_SBOM_COMPOSITION
-	err.Message = m
-	err.FieldKeys = fields
-	err.SBOM = sbom
-	if sbom != nil {
-		err.InputFile = sbom.GetFilename()
-	}
-	return err
-}
+// func NewSBOMCompositionError(m string, sbom *schema.BOM, fields []string) *SBOMCompositionError {
+// 	var err = new(SBOMCompositionError)
+// 	err.Type = ERR_TYPE_SBOM_COMPOSITION
+// 	err.Message = m
+// 	err.FieldKeys = fields
+// 	err.SBOM = sbom
+// 	if sbom != nil {
+// 		err.InputFile = sbom.GetFilename()
+// 	}
+// 	return err
+// }
 
 // TODO: create Error() (interface) method that displays CDXMetadata
-func NewSBOMMetadataError(sbom *schema.BOM, m string, metadata schema.CDXMetadata) *SBOMMetadataError {
-	var err = new(SBOMMetadataError)
-	err.Type = ERR_TYPE_SBOM_METADATA
-	err.Message = m
-	err.SBOM = sbom
-	err.Metadata = metadata
-	if sbom != nil {
-		err.InputFile = sbom.GetFilename()
-	}
-	return err
-}
+// func NewSBOMMetadataError(sbom *schema.BOM, m string, metadata schema.CDXMetadata) *SBOMMetadataError {
+// 	var err = new(SBOMMetadataError)
+// 	err.Type = ERR_TYPE_SBOM_METADATA
+// 	err.Message = m
+// 	err.SBOM = sbom
+// 	err.Metadata = metadata
+// 	if sbom != nil {
+// 		err.InputFile = sbom.GetFilename()
+// 	}
+// 	return err
+// }
 
 // TODO: create Error() (interface) method that displays CDXProperty
-func NewSbomMetadataPropertyError(sbom *schema.BOM, m string,
-	expected *schema.CustomValidationProperty,
-	values []schema.CDXProperty) *SBOMMetadataPropertyError {
+// func NewSbomMetadataPropertyError(sbom *schema.BOM, m string,
+// 	expected *schema.CustomValidationProperty,
+// 	values []schema.CDXProperty) *SBOMMetadataPropertyError {
 
-	var err = new(SBOMMetadataPropertyError)
-	err.Type = ERR_TYPE_SBOM_METADATA_PROPERTY
-	err.Message = m
-	err.SBOM = sbom
-	if sbom != nil {
-		err.InputFile = sbom.GetFilename()
-	}
-	err.Expected = expected
-	err.Actual = values
-	return err
-}
+// 	var err = new(SBOMMetadataPropertyError)
+// 	err.Type = ERR_TYPE_SBOM_METADATA_PROPERTY
+// 	err.Message = m
+// 	err.SBOM = sbom
+// 	if sbom != nil {
+// 		err.InputFile = sbom.GetFilename()
+// 	}
+// 	err.Expected = expected
+// 	err.Actual = values
+// 	return err
+// }
 
 // Support the error interface
-func (err SBOMCompositionError) Error() string {
-	text := err.BaseError.Error()
-	return fmt.Sprintf("%s: Field(s): %s", text, strings.Join(err.FieldKeys[:], "."))
-}
+// func (err SBOMCompositionError) Error() string {
+// 	text := err.BaseError.Error()
+// 	return fmt.Sprintf("%s: Field(s): %s", text, strings.Join(err.FieldKeys[:], "."))
+// }
 
 // ------------------------------------------------
 // Error type checks (for convenience)

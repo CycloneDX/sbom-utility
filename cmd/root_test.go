@@ -67,6 +67,7 @@ type CommonTestInfo struct {
 	WhereClause                       string
 	ResultExpectedByteSize            int
 	ResultExpectedError               error
+	ResultExpectedInnerError          error
 	ResultExpectedIndentLength        int
 	ResultExpectedIndentAtLineNum     int
 	ResultExpectedLineCount           int

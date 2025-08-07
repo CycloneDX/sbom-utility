@@ -267,13 +267,8 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 		return INVALID, bom, schemaErrors, err
 	}
 
-	// If a custom validation file (e.g., custom.json) is provided on the `--custom` flag
-	if validateFlags.ConfigCustomValidationFile != "" {
-		validateFlags.CustomValidation = true
-	}
-
 	// if "custom" flag exists, then assure we support the format
-	if validateFlags.CustomValidation && !bom.FormatInfo.IsCycloneDx() {
+	if validateFlags.ConfigCustomValidationFile != "" && !bom.FormatInfo.IsCycloneDx() {
 		err = schema.NewUnsupportedFormatError(
 			schema.MSG_FORMAT_UNSUPPORTED_COMMAND,
 			bom.GetFilename(),
@@ -356,6 +351,7 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	if jsonBOMSchemaLoader == nil {
 		// we force result to INVALID as any errors from the library means
 		// we could NOT actually confirm the input documents validity
+		// TODO: return a typed,schema error that we should define by name
 		return INVALID, bom, schemaErrors, fmt.Errorf("unable to read schema: '%s'", schemaName)
 	}
 
@@ -430,11 +426,16 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 		return INVALID, bom, schemaErrors, errInvalid
 	}
 
-	// TODO: Perhaps factor in these errors into the JSON output as if they were actual schema errors...
-	// Perform additional validation in document composition/structure
-	// and "custom" required data within specified fields
-	if validateFlags.CustomValidation {
+	// If a custom validation file (e.g., custom.json) is provided on the `--custom` flag
+	if validateFlags.ConfigCustomValidationFile != "" {
 		valid, err = validateCustom(bom, validateFlags, LicensePolicyConfig)
+
+		// return an "invalid" result with error
+		if !valid {
+			return INVALID, bom, schemaErrors, err
+		}
+
+		// else assert custom validation passed
 		getLogger().Infof("BOM valid against custom JSON configuration: '%s'", validateFlags.ConfigCustomValidationFile)
 	}
 

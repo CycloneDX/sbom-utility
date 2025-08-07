@@ -1,10 +1,28 @@
 {
   "validation": {
-    "description": "An array of custom validation actions to perform on selected elements of a BOM document.",
+    "description": "Custom validation actions to perform on selected elements of a BOM document.",
     "actions": [
-       {
-        "id": "custom-test-metadata-has-values",
-        "description": "metadata-tests",
+            {
+        "id": "custom-test-bom-structure",
+        "description": "Test the BOM has 'components' and 'dependencies' at the top level as \"best practice\".",
+        "selector": {
+          "path": ""
+        },
+        "functions": [
+          "hasProperties"
+        ],
+        "properties": [
+          {
+            "key": "components"
+          },
+          {
+            "key": "dependencies"
+          }
+        ]
+      },
+      {
+        "id": "custom-test-metadata-has-elements",
+        "description": "Test the 'metadata' element contains required child elements which are a mix of primitives and complex types.",
         "selector": {
           "path": "metadata"
         },
@@ -24,27 +42,7 @@
         ]
       },
       {
-        "id": "custom-test-bom-has-values",
-        "description": "bom-tests",
-        "selector": {
-          "path": ""
-        },
-        "functions": [
-          "hasProperties"
-        ],
-        "properties": [
-          {
-            "key": "serialNumber"
-          },
-          {
-            "key": "components"
-          }
-        ]
-      }
-    ],
-     "other": [
-       {
-        "id": "custom-metadata-properties-disclaimer",
+        "id": "custom-metadata-properties-unique-disclaimer",
         "description": "Validate BOM metadata properties has a unique, specific disclaimer value.",
         "selector": {
           "path": "metadata.properties",

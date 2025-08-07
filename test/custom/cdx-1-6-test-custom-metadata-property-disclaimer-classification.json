@@ -124,5 +124,14 @@
 			"version": "1.0.0",
 			"description": "Library B description."
 		}
+	],
+	"dependencies": [
+		{
+			"ref":"pkg:app/sample@2.0.0",
+			"dependsOn":[
+				"pkg:npm/libraryA@1.0.0",
+				"pkg:npm/libraryB@1.0.0"
+			]
+		}
 	]
 }

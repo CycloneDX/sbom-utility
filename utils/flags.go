@@ -87,7 +87,7 @@ type ValidateCommandFlags struct {
 	SchemaVariant              string
 	ForcedJsonSchemaFile       string
 	ConfigCustomValidationFile string // e.g., "custom.json"
-	CustomValidation           bool
+	// CustomValidation           bool
 	// validation error result (output) processing
 	MaxNumErrors              int
 	MaxErrorDescriptionLength int
