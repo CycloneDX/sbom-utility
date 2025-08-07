@@ -252,7 +252,7 @@ func TestValidateCustomCdx14MetadataPropertyDisclaimerUnique(t *testing.T) {
 }
 
 func TestValidateCustomCdx14MetadataPropertyDisclaimerMatch(t *testing.T) {
-	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE)
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_INVALID)
 	vti.CustomConfig = TEST_CUSTOM_JSON_METADATA_DISCLAIMER_MATCH
 	vti.ResultExpectedError = &InvalidSBOMError{}
 	vti.ResultExpectedInnerError = &ItemHasPropertiesError{}
