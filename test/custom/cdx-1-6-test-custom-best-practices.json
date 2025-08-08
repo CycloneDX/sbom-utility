@@ -4,7 +4,7 @@
 	"version": 1,
 	"serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7e0",
 	"metadata": {
-		"timestamp": "2021-04-14T07:20:00.000Z",
+		"timestamp": "2025-08-09T07:20:00.000Z",
 		"component": {
 			"type": "application",
 			"bom-ref": "pkg:app/sample@2.0.0",
