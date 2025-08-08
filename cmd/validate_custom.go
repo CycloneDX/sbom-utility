@@ -312,20 +312,17 @@ func convertToJsonMap(sourceInterface interface{}) (targetMap map[string]interfa
 // that at least one valid license is found
 // TODO: Assure top-level "metadata.component"
 // TODO support []WhereFilter
-func validateLicenseData(document *schema.BOM, policyConfig *schema.LicensePolicyConfig) (err error) {
-	getLogger().Enter()
-	defer getLogger().Exit(err)
-
-	// Now we need to validate that the input file contains licenses
-	// the license "hash" function does this validation checking for us...
-	// TODO support []WhereFilter
-	// NOTE: licenseFlags will be all defaults (should not matter for simple true/false validation)
-	err = loadDocumentLicenses(document, policyConfig, nil, utils.GlobalFlags.LicenseFlags)
-
-	if err != nil {
-		return
-	}
-
-	// TODO: verify that the input file contained valid license data
-	return
-}
+// func validateLicenseData(document *schema.BOM, policyConfig *schema.LicensePolicyConfig) (err error) {
+// 	getLogger().Enter()
+// 	defer getLogger().Exit(err)
+// 	// Now we need to validate that the input file contains licenses
+// 	// the license "hash" function does this validation checking for us...
+// 	// TODO support []WhereFilter
+// 	// NOTE: licenseFlags will be all defaults (should not matter for simple true/false validation)
+// 	err = loadDocumentLicenses(document, policyConfig, nil, utils.GlobalFlags.LicenseFlags)
+// 	if err != nil {
+// 		return
+// 	}
+// 	// TODO: verify that the input file contained valid license data
+// 	return
+// }

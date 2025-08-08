@@ -23,9 +23,9 @@ In addition, the utility features "report" commands that can easily *extract*, *
 
 <h5><img alt="New!" src="docs/new-3d.png" align="left" width="100" height="100" style="height: 8em; width:8em; vertical-align: middle;"></h5>
 
- **Custom JSON Validation**</br>Don't want to create custom CycloneDX schemas to enforce your requirements on the structure, fields, values and more?  Good news! Now you can add your own custom validation of BOM content using the new `--custom-config` flag on the `validate` command!
+ **Custom JSON Validation**</br>Don't want to create custom CycloneDX and SPDX schemas to enforce your BOM requirements on the structure, fields, values and more?  Good news! Now you can add your own custom validation of BOM content using the new `--custom` flag on the `validate` command!
 
-- Learn how to use this long-awaited, **experimental** feature by reading the [Custom validation examples](custom-examples.md) page.
+- Learn how to use this long-awaited, **experimental** feature by reading the [Custom validation examples](docs/custom-examples.md) page.
 
 ---
 
@@ -355,6 +355,19 @@ The following flags can be used to improve performance when formatting error out
 
 You can override the schema used for validation *(which defaults to the schema that matches the declared format and version found in the input BOM file)* by providing a different one using the `--force` flag. This may be useful to verify a BOM contents against a newer specification version or provide a customized schema.
   - **Note**: *The `--force` flag works with schema files with valid URIs which include URLs (e.g., 'https://') and files (e.g., 'file://').*
+
+##### `--custom <filename>` flag *`(experimental)`*
+
+In addition to validating the the BOM input file using the standard CycloneDX schema, you now can provide a custom JSON file that will apply a built-in set of validation functions to selected parts of the BOM document that can validate JSON elements, property keys and values.
+
+- Learn how to use this long-awaited, **experimental** feature by reading the [Custom validation examples](docs/custom-examples.md) page.
+
+The current set of functions that can achieve this includes:
+
+- `isUnique` - checks uniqueness of array items given a property name as key
+- `hasProperties` - can verify that a named property exists on a select element and can also enforce the corresponding property has the expected value using regex.
+
+**Note**: *More functions are planned for future releases if use cases are found.*
 
 ##### `--error-limit` flag
 
