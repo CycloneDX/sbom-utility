@@ -21,12 +21,17 @@ In addition, the utility features "report" commands that can easily *extract*, *
 
 ---
 
-<h4><img alt="</> logotype" src="docs/new-3d.png" style="height: 5em; vertical-align: middle;"> Custom JSON Validation</h4>
+<h5><img alt="New!" src="docs/new-3d.png" align="left" width="100" height="100" style="height: 8em; width:8em; vertical-align: middle;"></h5>
 
-> Don't want to create custom CycloneDX schemas to enforce your requirements on the structure, fields, values and more?  Good news! Now you can add your own custom validation of JSON BOM content using the new `--custom-config` flag on the `validate` command!
-> - Learn how to use this long-awaited **experimental** feature by reading the [Custom validation examples](custom-examples.md) page.
+ **Custom JSON Validation**</br>Don't want to create custom CycloneDX schemas to enforce your requirements on the structure, fields, values and more?  Good news! Now you can add your own custom validation of BOM content using the new `--custom-config` flag on the `validate` command!
+
+- Learn how to use this long-awaited **experimental** feature by reading the [Custom validation examples](custom-examples.md) page.
 
 ---
+
+<img alt="New!" src="docs/new-3d.png" align="left" width="100" height="100" style="vertical-align: middle;">
+
+> **Custom JSON Validation** </br> Don't want to create custom CycloneDX schemas to enforce your requirements on the structure, fields, values and more?  Good news! Now you can add your own custom validation of BOM content using the new `--custom-config` flag on the `validate` command!
 
 ### Command Overview
 
