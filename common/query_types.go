@@ -224,6 +224,10 @@ func (qr *QueryRequest) GetWhereFilters() ([]WhereFilter, error) {
 	return qr.whereFilters, nil
 }
 
+func (qr *QueryRequest) SetWhereFilters(filters []WhereFilter) {
+	qr.whereFilters = filters
+}
+
 func (qr *QueryRequest) SetRawWherePredicates(rawWherePredicates string) []WhereFilter {
 	qr.wherePredicatesRaw = rawWherePredicates
 	// Note: it is an intentional side-effect to update the parsed, slice versions

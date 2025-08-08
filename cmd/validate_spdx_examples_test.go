@@ -20,17 +20,6 @@ package cmd
 
 import "testing"
 
-const (
-	// SPDX - Examples
-	TEST_SPDX_2_2_EXAMPLE_1     = "examples/spdx/example1/example1.json"
-	TEST_SPDX_2_2_EXAMPLE_2_BIN = "examples/spdx/example2/example2-bin.json"
-	TEST_SPDX_2_2_EXAMPLE_2_SRC = "examples/spdx/example2/example2-src.json"
-	TEST_SPDX_2_2_EXAMPLE_5_BIN = "examples/spdx/example5/example5-bin.json"
-	TEST_SPDX_2_2_EXAMPLE_5_SRC = "examples/spdx/example5/example5-src.json"
-	TEST_SPDX_2_2_EXAMPLE_6_LIB = "examples/spdx/example6/example6-lib.json"
-	TEST_SPDX_2_2_EXAMPLE_6_SRC = "examples/spdx/example6/example6-src.json"
-)
-
 // SPDX - Examples
 func TestValidateSpdx22Example1(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_SPDX_2_2_EXAMPLE_1)
@@ -66,3 +55,18 @@ func TestValidateSpdx22Example6Src(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_SPDX_2_2_EXAMPLE_6_SRC)
 	innerTestValidate(t, *vti)
 }
+
+func TestValidateSpdx23MinRequired(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_SPDX_2_3_MIN_REQUIRED)
+	innerTestValidate(t, *vti)
+}
+
+func TestValidateSpdx23ExamplePackage(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_SPDX_2_3_EXAMPLE_PACKAGE_BOM)
+	innerTestValidate(t, *vti)
+}
+
+// func TestValidateSpdx23SchemaErrAddPropsNotAllowed(t *testing.T) {
+// 	vti := NewValidateTestInfoMinimum(TEST_SPDX_2_3_SCHEMA_ERROR_ADD_PROPS_NOT_ALLOWED)
+// 	innerTestValidate(t, *vti)
+// }

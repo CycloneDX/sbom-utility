@@ -34,9 +34,8 @@ type CommandFlags struct {
 	ExecDir    string
 
 	// Configurations
-	ConfigSchemaFile           string
-	ConfigCustomValidationFile string
-	ConfigLicensePolicyFile    string
+	ConfigSchemaFile        string
+	ConfigLicensePolicyFile string
 
 	// persistent flags (common to all commands)
 	PersistentFlags PersistentCommandFlags
@@ -85,9 +84,10 @@ type LicenseCommandFlags struct {
 }
 
 type ValidateCommandFlags struct {
-	SchemaVariant        string
-	ForcedJsonSchemaFile string
-	CustomValidation     bool // Uses custom validation flags if "true"; defaults to config. "custom.json"
+	SchemaVariant              string
+	ForcedJsonSchemaFile       string
+	ConfigCustomValidationFile string // e.g., "custom.json"
+	// CustomValidation           bool
 	// validation error result (output) processing
 	MaxNumErrors              int
 	MaxErrorDescriptionLength int

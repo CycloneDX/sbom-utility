@@ -21,188 +21,183 @@ package cmd
 import (
 	"testing"
 
+	"github.com/CycloneDX/sbom-utility/log"
 	"github.com/CycloneDX/sbom-utility/schema"
-	"github.com/CycloneDX/sbom-utility/utils"
-	"github.com/xeipuuv/gojsonschema"
 )
 
-// Custom JSON schema files for testing
+// -------------------------------------------
+// Custom CycloneDX JSON schema
+// -------------------------------------------
+
+// v1.3, 1.4 - custom json schema tests
 const (
 	TEST_SCHEMA_CDX_1_3_CUSTOM = "resources/schema/test/bom-1.3-custom.schema.json"
 	TEST_SCHEMA_CDX_1_4_CUSTOM = "resources/schema/test/bom-1.4-custom.schema.json"
 )
 
-// Custom-specific test files
+// -------------------------------------------
+// Custom validation - test configuration files
+// -------------------------------------------
+
 const (
-	// Metadata tests
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_INVALID     = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_MISSING     = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-missing.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE      = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-unique.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_INVALID = "test/custom/cdx-1-4-test-custom-metadata-property-classification-invalid.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_MISSING = "test/custom/cdx-1-4-test-custom-metadata-property-classification-missing.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_UNIQUE  = "test/custom/cdx-1-4-test-custom-metadata-property-classification-unique.json"
-
-	// License tests
-	// Note: The "invalid" tests below is also used in "list" command tests
-	// which tests for a "none found" warning messages being displayed to stdout
-	TEST_CUSTOM_CDX_1_4_INVALID_LICENSES_NOT_FOUND = TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND
-
-	// Composition
-	TEST_CUSTOM_CDX_1_3_INVALID_COMPOSITION_COMPONENTS         = "test/custom/cdx-1-3-test-custom-invalid-composition-components.json"
-	TEST_CUSTOM_CDX_1_3_INVALID_COMPOSITION_METADATA_COMPONENT = "test/custom/cdx-1-3-test-custom-invalid-composition-metadata-component.json"
+	// CycloneDX
+	TEST_CUSTOM_BOM_STRUCTURE_BEST_PRACTICE       = "test/custom/custom-bom-structure-best-practice.json"
+	TEST_CUSTOM_BOM_PROPS_NOT_UNIQUE              = "test/custom/custom-bom-properties-not-unique.json"
+	TEST_CUSTOM_METADATA_HAS_ELEMENTS_FAIL        = "test/custom/custom-metadata-element-not-found.json"
+	TEST_CUSTOM_METADATA_HAS_ELEMENTS_SUCCESS     = "test/custom/custom-metadata-has-elements.json"
+	TEST_CUSTOM_METADATA_PROPS_DISCLAIMER_MATCH   = "test/custom/custom-metadata-properties-disclaimer-match.json"
+	TEST_CUSTOM_METADATA_PROPS_DISCLAIMER_UNIQUE  = "test/custom/custom-metadata-properties-disclaimer-unique.json"
+	TEST_CUSTOM_METADATA_PROPS_DISCLAIMER_MISSING = "test/custom/custom-metadata-properties-disclaimer-missing.json"
+	// SPDX
+	TEST_CUSTOM_SPDX_2_X_STRUCTURE = "test/custom/spdx-custom-bom-properties.json"
 )
 
 // -------------------------------------------
-// Test wrappers
+// BOM test files
 // -------------------------------------------
 
-func innerTestValidateCustom(t *testing.T, vti ValidateTestInfo) (document *schema.BOM, schemaErrors []gojsonschema.ResultError, actualError error) {
-	utils.GlobalFlags.ValidateFlags.CustomValidation = true
-	document, schemaErrors, actualError = innerTestValidate(t, vti)
-	utils.GlobalFlags.ValidateFlags.CustomValidation = false
-	return
-}
+// CycloneDX v1.6, v1.4
+const (
+	TEST_CUSTOM_CDX_1_6_CUSTOM                            = "test/custom/cdx-1-6-test-custom-best-practices.json"
+	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_INVALID = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json"
+	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_MISSING = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-missing.json"
+	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE  = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-unique.json"
+)
 
-func innerTestValidateCustomInvalidSBOMInnerError(t *testing.T, filename string, variant string, innerError error) (document *schema.BOM, schemaErrors []gojsonschema.ResultError, actualError error) {
-	utils.GlobalFlags.ValidateFlags.CustomValidation = true
-	document, schemaErrors, actualError = innerValidateInvalidSBOMInnerError(t, filename, variant, innerError)
-	utils.GlobalFlags.ValidateFlags.CustomValidation = false
-	return
-}
+// License tests
+const (
+	// Note: The "invalid" tests below is also used in "list" command tests
+	// which tests for a "none found" warning messages being displayed to stdout
+	TEST_CUSTOM_CDX_1_4_INVALID_LICENSES_NOT_FOUND = TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND
+)
 
 // -------------------------------------------
-// Command & flag tests
+// SPDX Tests
 // -------------------------------------------
 
 // Test format unsupported (SPDX) for "--custom" flag
-func TestValidateCustomFormatUnsupportedSPDX(t *testing.T) {
-	vti := NewValidateTestInfo(TEST_SPDX_2_2_MIN_REQUIRED, FORMAT_ANY, SCHEMA_VARIANT_NONE, &schema.UnsupportedFormatError{})
-	innerTestValidateCustom(t, *vti)
+// TODO - The latest code SHOULD be able to support SPDX 2.2, 2.3 using custom validation!
+// Currently, we just throw an "UnsupportedFormatError" once SPDX is detected
+func TestValidateCustomFormatUnsupportedSPDX_2_2(t *testing.T) {
+	// getLogger().SetLevel(log.TRACE)
+	vti := NewValidateTestInfo(TEST_SPDX_2_2_MIN_REQUIRED,
+		FORMAT_ANY,
+		SCHEMA_VARIANT_NONE,
+		&schema.UnsupportedFormatError{})
+	vti.CustomConfig = TEST_CUSTOM_SPDX_2_X_STRUCTURE
+	innerTestValidate(t, *vti)
+}
+
+func TestValidateCustomFormatUnsupportedSPDX_2_3(t *testing.T) {
+	// getLogger().SetLevel(log.TRACE)
+	vti := NewValidateTestInfo(TEST_SPDX_2_3_EXAMPLE_PACKAGE_BOM,
+		FORMAT_ANY,
+		SCHEMA_VARIANT_NONE,
+		&schema.UnsupportedFormatError{})
+	vti.CustomConfig = TEST_CUSTOM_SPDX_2_X_STRUCTURE
+	innerTestValidate(t, *vti)
 }
 
 // -------------------------------------------
-// Schema: cross-document tests
+// CycloneDX - valid license tests
 // -------------------------------------------
 
 // Error if no licenses found in entirety of SBOM (variant none)
 func TestValidateCustomErrorCdx14NoLicensesFound(t *testing.T) {
-	vti := NewValidateTestInfo(TEST_CUSTOM_CDX_1_4_INVALID_LICENSES_NOT_FOUND, FORMAT_ANY, SCHEMA_VARIANT_NONE, &InvalidSBOMError{})
-	document, results, _ := innerTestValidateCustom(t, *vti)
-	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
-}
-
-// -------------------------------------------
-// Schema: metadata tests
-// -------------------------------------------
-
-func TestValidateCustomCdx14MetadataPropsMissingDisclaimer(t *testing.T) {
-	vti := NewValidateTestInfo(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_MISSING, FORMAT_TEXT, SCHEMA_VARIANT_CUSTOM, &InvalidSBOMError{})
+	// getLogger().SetLevel(log.TRACE)
+	vti := NewValidateTestInfo(TEST_CUSTOM_CDX_1_4_INVALID_LICENSES_NOT_FOUND,
+		FORMAT_ANY,
+		SCHEMA_VARIANT_NONE,
+		&InvalidSBOMError{})
+	vti.CustomConfig = DEFAULT_CUSTOM_VALIDATION_CONFIG
 	document, results, _ := innerTestValidate(t, *vti)
-	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
+	getLogger().Tracef("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
 
-func TestValidateCustomCdx14MetadataPropsMissingClassification(t *testing.T) {
-	vti := NewValidateTestInfo(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_MISSING, FORMAT_TEXT, SCHEMA_VARIANT_CUSTOM, &InvalidSBOMError{})
+// -------------------------------------------
+// CycloneDX - isUnique, hasProperties tests
+// -------------------------------------------
+
+// hasProperties(): Success - has a top-level "metadata", "components" and "dependencies"
+func TestValidateCustomCdx16_BOMStructureBestPractice(t *testing.T) {
+	// getLogger().SetLevel(log.TRACE)
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_CUSTOM)
+	vti.CustomConfig = TEST_CUSTOM_BOM_STRUCTURE_BEST_PRACTICE
 	document, results, _ := innerTestValidate(t, *vti)
-	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
+	getLogger().Tracef("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
 
-func TestValidateCustomCdx14MetadataPropsInvalidDisclaimer(t *testing.T) {
-	// disclaimer property
-	SCHEMA_ERROR_TYPE := "contains"
-	SCHEMA_ERROR_FIELD := "metadata.properties"
-	SCHEMA_ERROR_VALUE := ""
-
-	innerTestSchemaErrorAndErrorResults(t,
-		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_INVALID,
-		SCHEMA_VARIANT_CUSTOM,
-		SCHEMA_ERROR_TYPE,
-		SCHEMA_ERROR_FIELD,
-		SCHEMA_ERROR_VALUE)
-
-	SCHEMA_ERROR_TYPE = "const"
-	SCHEMA_ERROR_FIELD = "metadata.properties.0.value"
-	SCHEMA_ERROR_VALUE = ""
-
-	innerTestSchemaErrorAndErrorResults(t,
-		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_INVALID,
-		SCHEMA_VARIANT_CUSTOM,
-		SCHEMA_ERROR_TYPE,
-		SCHEMA_ERROR_FIELD,
-		SCHEMA_ERROR_VALUE)
+// hasProperties(): Success - Has elements in BOM "metadata"
+func TestValidateCustomCdx16_MetadataHasElements(t *testing.T) {
+	// getLogger().SetLevel(log.TRACE)
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_CUSTOM)
+	vti.CustomConfig = TEST_CUSTOM_METADATA_HAS_ELEMENTS_SUCCESS
+	document, results, _ := innerTestValidate(t, *vti)
+	getLogger().Tracef("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
 
-func TestValidateCustomCdx14MetadataPropsInvalidClassification(t *testing.T) {
+// hasProperties(): Fail - missing element in BOM "metadata"
+func TestValidateCustomCdx16_MetadataElementNotFound(t *testing.T) {
+	// getLogger().SetLevel(log.TRACE)
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_CUSTOM)
+	vti.CustomConfig = TEST_CUSTOM_METADATA_HAS_ELEMENTS_FAIL
+	vti.ResultExpectedError = &InvalidSBOMError{}
+	vti.ResultExpectedInnerError = &ItemHasPropertiesError{}
+	document, _, err := innerValidateInvalidSBOMInnerError(t, *vti)
+	getLogger().Tracef("filename: '%s', error: '%s'", document.GetFilename(), err)
+}
 
-	SCHEMA_ERROR_TYPE := "contains"
-	SCHEMA_ERROR_FIELD := "metadata.properties"
-	SCHEMA_ERROR_VALUE := ""
+// isUnique(): Success - BOM "metadata.properties" has a unique "disclaimer" property
+func TestValidateCustomCdx16_MetadataPropsUniqueDisclaimer(t *testing.T) {
+	// getLogger().SetLevel(log.TRACE)
+	getLogger().SetLevel(log.TRACE)
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_CUSTOM)
+	vti.CustomConfig = TEST_CUSTOM_METADATA_PROPS_DISCLAIMER_UNIQUE
+	document, results, _ := innerTestValidate(t, *vti)
+	getLogger().Tracef("filename: '%s', results:\n%v", document.GetFilename(), results)
+}
 
-	innerTestSchemaErrorAndErrorResults(t,
-		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_INVALID,
-		SCHEMA_VARIANT_CUSTOM,
-		SCHEMA_ERROR_TYPE,
-		SCHEMA_ERROR_FIELD,
-		SCHEMA_ERROR_VALUE)
-
-	SCHEMA_ERROR_TYPE = "const"
-	SCHEMA_ERROR_FIELD = "metadata.properties.1.value"
-	SCHEMA_ERROR_VALUE = ""
-
-	innerTestSchemaErrorAndErrorResults(t,
-		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_CLASSIFICATION_INVALID,
-		SCHEMA_VARIANT_CUSTOM,
-		SCHEMA_ERROR_TYPE,
-		SCHEMA_ERROR_FIELD,
-		SCHEMA_ERROR_VALUE)
+// isUnique(): Fail - BOM "properties" does not have a unique "name" property
+func TestValidateCustomCdx16_BOMPropsNotUnique(t *testing.T) {
+	// getLogger().SetLevel(log.TRACE)
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_CUSTOM)
+	vti.CustomConfig = TEST_CUSTOM_BOM_PROPS_NOT_UNIQUE
+	vti.ResultExpectedError = &InvalidSBOMError{}
+	vti.ResultExpectedInnerError = &ItemIsUniqueError{}
+	document, _, err := innerValidateInvalidSBOMInnerError(t, *vti)
+	getLogger().Tracef("filename: '%s', error: '%s'", document.GetFilename(), err)
 }
 
 // -------------------------------------------
-// Property uniqueness tests
-// -------------------------------------------
-// Note: The "uniqueness" constraint for objects is not supported in JSON schema v7
-
-func TestValidateCustomCdx14MetadataPropertyUniqueDisclaimer(t *testing.T) {
-	document, results, _ := innerTestValidateCustomInvalidSBOMInnerError(t,
-		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE,
-		SCHEMA_VARIANT_NONE,
-		&SBOMMetadataPropertyError{})
-	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
-}
-
-func TestValidateCustomCdx14MetadataPropertyUniqueClassification(t *testing.T) {
-	document, results, _ := innerTestValidateCustomInvalidSBOMInnerError(t,
-		TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE,
-		SCHEMA_VARIANT_NONE,
-		&SBOMMetadataPropertyError{})
-	getLogger().Debugf("filename: '%s', results:\n%v", document.GetFilename(), results)
-}
-
-// -------------------------------------------
-// Composition tests
+// FAIL - Uniqueness tests
 // -------------------------------------------
 
-// Error if hierarchical components found in top-level "metadata.component" object
-func TestValidateCustomErrorCdx13InvalidCompositionMetadataComponent(t *testing.T) {
-	innerTestValidateCustomInvalidSBOMInnerError(t,
-		TEST_CUSTOM_CDX_1_3_INVALID_COMPOSITION_METADATA_COMPONENT,
-		SCHEMA_VARIANT_NONE,
-		&SBOMCompositionError{})
+func TestValidateCustomCdx14MetadataPropertyDisclaimerUnique(t *testing.T) {
+	// getLogger().SetLevel(log.TRACE)
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE)
+	vti.CustomConfig = TEST_CUSTOM_METADATA_PROPS_DISCLAIMER_UNIQUE
+	vti.ResultExpectedError = &InvalidSBOMError{}
+	vti.ResultExpectedInnerError = &ItemIsUniqueError{}
+	document, _, err := innerValidateInvalidSBOMInnerError(t, *vti)
+	getLogger().Tracef("filename: '%s', error: '%s'", document.GetFilename(), err)
 }
 
-// Error if hierarchical components in top-level "components" array
-func TestValidateCustomErrorCdx13InvalidCompositionComponents(t *testing.T) {
-	innerTestValidateCustomInvalidSBOMInnerError(t,
-		TEST_CUSTOM_CDX_1_3_INVALID_COMPOSITION_METADATA_COMPONENT,
-		SCHEMA_VARIANT_NONE,
-		&SBOMCompositionError{})
+func TestValidateCustomCdx14MetadataPropertyDisclaimerMatch(t *testing.T) {
+	// getLogger().SetLevel(log.TRACE)
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_INVALID)
+	vti.CustomConfig = TEST_CUSTOM_METADATA_PROPS_DISCLAIMER_MATCH
+	vti.ResultExpectedError = &InvalidSBOMError{}
+	vti.ResultExpectedInnerError = &ItemHasPropertiesError{}
+	document, _, err := innerValidateInvalidSBOMInnerError(t, *vti)
+	getLogger().Tracef("filename: '%s', error: '%s'", document.GetFilename(), err)
 }
 
-// Make sure we can List all components in an SBOM, including those in hierarchical compositions
-// TODO: Actually verify one or more of the hierarchical comps. appear in list results
-// func TestValidateCustomCompositionHierarchicalComponentList(t *testing.T) {
-// 	innerCustomValidateError(t,
-// 		TEST_CUSTOM_CDX_1_4_COMPOSITION_HIERARCHICAL_COMPONENTS,
-// 		SCHEMA_VARIANT_NONE,
-// 		nil)
-// }
+func TestValidateCustomCdx14MetadataPropertyDisclaimerMissing(t *testing.T) {
+	// getLogger().SetLevel(log.TRACE)
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_MISSING)
+	vti.CustomConfig = TEST_CUSTOM_METADATA_PROPS_DISCLAIMER_MISSING
+	vti.ResultExpectedError = &InvalidSBOMError{}
+	vti.ResultExpectedInnerError = &JSONElementNotFoundError{}
+	document, _, err := innerValidateInvalidSBOMInnerError(t, *vti)
+	getLogger().Tracef("filename: '%s', error: '%s'", document.GetFilename(), err)
+}

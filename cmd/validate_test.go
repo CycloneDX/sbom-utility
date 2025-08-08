@@ -53,7 +53,8 @@ const (
 type ValidateTestInfo struct {
 	CommonTestInfo
 	SchemaVariant              string
-	CustomSchema               string
+	CustomBOMSchema            string
+	CustomConfig               string
 	SchemaErrorExpectedLineNum int
 	SchemaErrorExpectedCharNum int
 }
@@ -102,6 +103,8 @@ func innerTestValidate(t *testing.T, vti ValidateTestInfo) (document *schema.BOM
 	utils.GlobalFlags.PersistentFlags.OutputFormat = vti.OutputFormat
 	// Set the schema variant where the command line flag would
 	utils.GlobalFlags.ValidateFlags.SchemaVariant = vti.SchemaVariant
+	// Set the custom validation config used by the test
+	utils.GlobalFlags.ValidateFlags.ConfigCustomValidationFile = vti.CustomConfig
 
 	// Mock stdin if requested
 	if vti.MockStdin == true {
@@ -135,7 +138,7 @@ func innerTestValidate(t *testing.T, vti ValidateTestInfo) (document *schema.BOM
 
 	if !ErrorTypesMatch(actualError, expectedError) {
 		if len(schemaErrors) > 0 {
-			getLogger().Debugf("schemaErrors='%s'", schemaErrors)
+			getLogger().Tracef("schemaErrors='%s'", schemaErrors)
 		}
 
 		switch t := actualError.(type) {
@@ -177,6 +180,31 @@ func innerTestValidate(t *testing.T, vti ValidateTestInfo) (document *schema.BOM
 	return
 }
 
+// Tests *ErrorInvalidSBOM error types and any (lower-level) errors they "wrapped"
+// filename string, variant string,
+func innerValidateInvalidSBOMInnerError(t *testing.T, vti ValidateTestInfo) (document *schema.BOM, schemaErrors []gojsonschema.ResultError, actualError error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	document, schemaErrors, actualError = innerTestValidate(t, vti)
+
+	// Outer error should always be an "InvalidSBOMError"
+	invalidSBOMError, ok := actualError.(*InvalidSBOMError)
+
+	if !ok {
+		t.Errorf("Unable to cast actual error type (%T) to `InvalidSBOMError`: (%T)", actualError, &InvalidSBOMError{})
+		return
+	}
+
+	// and it should "wrap" the expected (inner) error passed for the test
+	innerError := vti.ResultExpectedInnerError
+
+	if !ErrorTypesMatch(invalidSBOMError.InnerError, innerError) {
+		t.Errorf("expected wrapped error type: `%T`, actual type: `%T`", innerError, invalidSBOMError.InnerError)
+	}
+	return
+}
+
 func innerValidateErrorBuffered(persistentFlags utils.PersistentCommandFlags, validationFlags utils.ValidateCommandFlags) (isValid bool, document *schema.BOM, schemaErrors []gojsonschema.ResultError, outputBuffer bytes.Buffer, err error) {
 	// Declare an output outputBuffer/outputWriter to use used during tests
 	var outputWriter = bufio.NewWriter(&outputBuffer)
@@ -184,7 +212,7 @@ func innerValidateErrorBuffered(persistentFlags utils.PersistentCommandFlags, va
 	defer outputWriter.Flush()
 
 	// Invoke the actual command (API)
-	isValid, document, schemaErrors, err = Validate(outputWriter, persistentFlags, utils.GlobalFlags.ValidateFlags)
+	isValid, document, schemaErrors, err = Validate(outputWriter, persistentFlags, validationFlags)
 	getLogger().Tracef("document: '%s', isValid=`%t`, err=`%T`", document.GetFilename(), isValid, err)
 
 	return
@@ -199,24 +227,6 @@ func innerValidateForcedSchema(t *testing.T, filename string, forcedSchema strin
 	defer func() { utils.GlobalFlags.ValidateFlags.ForcedJsonSchemaFile = "" }()
 	vti := NewValidateTestInfo(filename, outputFormat, SCHEMA_VARIANT_NONE, expectedError)
 	innerTestValidate(t, *vti)
-	return
-}
-
-// Tests *ErrorInvalidSBOM error types and any (lower-level) errors they "wrapped"
-func innerValidateInvalidSBOMInnerError(t *testing.T, filename string, variant string, innerError error) (document *schema.BOM, schemaErrors []gojsonschema.ResultError, actualError error) {
-	getLogger().Enter()
-	defer getLogger().Exit()
-
-	vti := NewValidateTestInfo(filename, FORMAT_TEXT, variant, &InvalidSBOMError{})
-	document, schemaErrors, actualError = innerTestValidate(t, *vti)
-
-	invalidSBOMError, ok := actualError.(*InvalidSBOMError)
-
-	if !ok {
-		t.Errorf("Unable to cast actual error type (%T) to `InvalidSBOMError`: (%T)", actualError, &InvalidSBOMError{})
-	} else if !ErrorTypesMatch(invalidSBOMError.InnerError, innerError) {
-		t.Errorf("expected wrapped error type: `%T`, actual type: `%T`", innerError, invalidSBOMError.InnerError)
-	}
 	return
 }
 

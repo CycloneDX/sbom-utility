@@ -1,0 +1,20 @@
+{
+  "validation": {
+    "actions": [
+      {
+        "id": "custom-metadata-properties-not-unique",
+        "description": "Validate BOM metadata properties no unique",
+        "selector": {
+          "path": "properties",
+          "primaryKey": {
+            "key": "name",
+            "value": "foo"
+          }
+        },
+        "functions": [
+          "isUnique"
+        ]
+      }
+    ]
+  }
+}

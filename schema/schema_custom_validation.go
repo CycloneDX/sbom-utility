@@ -26,6 +26,70 @@ import (
 	"github.com/CycloneDX/sbom-utility/utils"
 )
 
+const (
+	REGEX_MATCH_ANY = ".+"
+)
+
+type CustomValidationConfig struct {
+	Validation CustomValidation `json:"validation"`
+}
+
+type ValidationAction struct {
+	Id          string         `json:"id"`
+	Description string         `json:"description"`
+	Selector    ItemSelector   `json:"selector"`
+	Functions   []string       `json:"functions"`
+	Properties  []ItemKeyValue `json:"properties"`
+}
+
+type ItemSelector struct {
+	Path       string       `json:"path"`
+	PrimaryKey ItemKeyValue `json:"primaryKey"`
+}
+
+func (selector *ItemSelector) String() string {
+	return fmt.Sprintf("{ \"path\": \"%s\", \"primaryKey\": %s }", selector.Path, selector.PrimaryKey.String())
+}
+
+type ItemKeyValue struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+func (kv *ItemKeyValue) String() string {
+	return fmt.Sprintf("{ \"key\": \"%s\", \"value\": \"%s\" }", kv.Key, kv.Value)
+}
+
+type CustomValidation struct {
+	Metadata          CustomValidationMetadata `json:"metadata"`
+	Description       string                   `json:"description"`
+	ValidationActions []ValidationAction       `json:"actions"`
+}
+
+type CustomValidationMetadata struct {
+	Properties []CustomValidationProperty `json:"properties"`
+	//Tools      []CustomValidationTool     `json:"tools"`
+}
+
+// NOTE: Assumes property "key" is the value in the "name" field
+type CustomValidationProperty struct {
+	CDXProperty
+	Description string `json:"_validate_description"`
+	Key         string `json:"_validate_key"`
+	CheckUnique string `json:"_validate_unique"`
+	CheckRegex  string `json:"_validate_regex"`
+}
+
+// Interfaces
+type ArrayActions interface {
+	KeyValuesExist() bool
+	IsElementUnique() bool
+}
+
+type MapActions interface {
+	KeyValuesExist() bool
+}
+
 // Globals
 var CustomValidationChecks CustomValidationConfig
 
@@ -57,6 +121,8 @@ func LoadCustomValidationConfig(filename string) (err error) {
 		return fmt.Errorf("cannot `Unmarshal`: '%s'", cfgFilename)
 	}
 
+	getLogger().Tracef("CustomValidationChecks: '%v'", CustomValidationChecks)
+
 	return
 }
 
@@ -80,31 +146,3 @@ func (config *CustomValidationConfig) GetCustomValidationMetadataProperties() []
 	}
 	return nil
 }
-
-type CustomValidationConfig struct {
-	Validation CustomValidation `json:"validation"`
-}
-
-type CustomValidation struct {
-	Metadata CustomValidationMetadata `json:"metadata"`
-}
-
-type CustomValidationMetadata struct {
-	Properties []CustomValidationProperty `json:"properties"`
-	//Tools      []CustomValidationTool     `json:"tools"`
-}
-
-// NOTE: Assumes property "key" is the value in the "name" field
-type CustomValidationProperty struct {
-	CDXProperty
-	Description string `json:"_validate_description"`
-	Key         string `json:"_validate_key"`
-	CheckUnique string `json:"_validate_unique"`
-	CheckRegex  string `json:"_validate_regex"`
-}
-
-// TODO: if we keep using "custom" structs, then this needs to be updated to handle the new Creation Tools object
-// type CustomValidationTool struct {
-// 	CDXLegacyCreationTool
-// 	Description string `json:"_validate_description"`
-// }

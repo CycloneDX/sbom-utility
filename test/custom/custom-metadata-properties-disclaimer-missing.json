@@ -1,0 +1,26 @@
+{
+  "validation": {
+    "actions": [
+      {
+        "id": "custom-metadata-properties-missing-primary-key",
+        "description": "Validate BOM metadata properties is missing the primary key",
+        "selector": {
+          "path": "metadata.properties",
+          "primaryKey": {
+            "key": "name",
+            "value": "urn:example.com:disclaimer"
+          }
+        },
+        "functions": [
+          "hasProperties"
+        ],
+        "properties": [
+          {
+            "key": "name",
+            "value": "urn:example.com:disclaimer"
+          }
+        ]
+      }
+    ]
+  }
+}

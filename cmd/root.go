@@ -69,24 +69,24 @@ const (
 )
 
 const (
-	FLAG_CONFIG_SCHEMA            = "config-schema"
-	FLAG_CONFIG_LICENSE_POLICY    = "config-license"
-	FLAG_CONFIG_CUSTOM_VALIDATION = "config-validation"
-	FLAG_TRACE                    = "trace"
-	FLAG_TRACE_SHORT              = "t"
-	FLAG_DEBUG                    = "debug"
-	FLAG_DEBUG_SHORT              = "d"
-	FLAG_FILENAME_INPUT           = "input-file"
-	FLAG_FILENAME_INPUT_SHORT     = "i"
-	FLAG_FILENAME_OUTPUT          = "output-file"
-	FLAG_FILENAME_OUTPUT_SHORT    = "o"
-	FLAG_QUIET_MODE               = "quiet"
-	FLAG_QUIET_MODE_SHORT         = "q"
-	FLAG_OUTPUT_INDENT            = "indent"
-	FLAG_OUTPUT_NORMALIZE         = "normalize"
-	FLAG_LOG_OUTPUT_INDENT        = "log-indent"
-	FLAG_FILE_OUTPUT_FORMAT       = "format"
-	FLAG_COLORIZE_OUTPUT          = "colorize"
+	FLAG_CONFIG_SCHEMA         = "config-schema"
+	FLAG_CONFIG_LICENSE_POLICY = "config-license"
+	// FLAG_CONFIG_CUSTOM_VALIDATION = "config-custom"
+	FLAG_TRACE                 = "trace"
+	FLAG_TRACE_SHORT           = "t"
+	FLAG_DEBUG                 = "debug"
+	FLAG_DEBUG_SHORT           = "d"
+	FLAG_FILENAME_INPUT        = "input-file"
+	FLAG_FILENAME_INPUT_SHORT  = "i"
+	FLAG_FILENAME_OUTPUT       = "output-file"
+	FLAG_FILENAME_OUTPUT_SHORT = "o"
+	FLAG_QUIET_MODE            = "quiet"
+	FLAG_QUIET_MODE_SHORT      = "q"
+	FLAG_OUTPUT_INDENT         = "indent"
+	FLAG_OUTPUT_NORMALIZE      = "normalize"
+	FLAG_LOG_OUTPUT_INDENT     = "log-indent"
+	FLAG_FILE_OUTPUT_FORMAT    = "format"
+	FLAG_COLORIZE_OUTPUT       = "colorize"
 )
 
 const (
@@ -178,9 +178,6 @@ func init() {
 	// as we want the init/load methods to work apart from Cobra.
 	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigSchemaFile, FLAG_CONFIG_SCHEMA, "", "", MSG_FLAG_CONFIG_SCHEMA)
 	rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigLicensePolicyFile, FLAG_CONFIG_LICENSE_POLICY, "", "", MSG_FLAG_CONFIG_LICENSE)
-	// TODO: Make configurable once we have organized the set of custom validation configurations
-	utils.GlobalFlags.ConfigCustomValidationFile = DEFAULT_CUSTOM_VALIDATION_CONFIG
-	//rootCmd.PersistentFlags().StringVarP(&utils.GlobalFlags.ConfigCustomValidationFile, FLAG_CONFIG_CUSTOM_VALIDATION, "", DEFAULT_CUSTOM_VALIDATION_CONFIG, "TODO")
 
 	// Declare top-level, persistent flags and where to place the post-parse values
 	rootCmd.PersistentFlags().BoolVarP(&utils.GlobalFlags.PersistentFlags.Trace, FLAG_TRACE, FLAG_TRACE_SHORT, false, MSG_FLAG_TRACE)
@@ -224,14 +221,13 @@ func init() {
 // includes JSON files:
 // config.json (SBOM format/schema definitions),
 // license.json (license policy definitions),
-// custom.json (custom validation settings)
 // Note: This method cannot return values as it is used as a callback by the Cobra framework
 func initConfigurations() {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	getLogger().Tracef("Executable Directory`: '%s'", utils.GlobalFlags.ExecDir)
-	getLogger().Tracef("Working Directory`: '%s'", utils.GlobalFlags.WorkingDir)
+	getLogger().Tracef("Executable Directory: '%s'", utils.GlobalFlags.ExecDir)
+	getLogger().Tracef("Working Directory: '%s'", utils.GlobalFlags.WorkingDir)
 
 	// Print global flags in debug mode
 	flagInfo, errFormat := getLogger().FormatStructE(utils.GlobalFlags)

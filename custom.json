@@ -1,23 +1,145 @@
 {
-    "validation": {
-        "metadata": {
-            "_selector": "metadata.properties",
-            "properties": [
-                {
-                    "name": "urn:example.com:disclaimer",
-                    "value": "This SBOM is current as of the date it was generated and is subject to change\\.",
-                    "_validate_description": "matches fixed value",
-                    "_validate_key": "name",
-                    "_validate_unique": "name"
-                },
-                {
-                    "name": "urn:example.com:classification",
-                    "value": "This SBOM is Confidential Information. Do not distribute\\.",
-                    "_validate_description": "matches fixed value",
-                    "_validate_key": "name",
-                    "_validate_unique": "name"
-                }
-            ]
-        }
-    }
+  "validation": {
+    "description": "Custom validation actions to perform on selected elements of a BOM document.",
+    "actions": [
+      {
+        "id": "custom-test-bom-structure",
+        "description": "Test the BOM has 'components' and 'dependencies' at the top level as \"best practice\".",
+        "selector": {
+          "path": ""
+        },
+        "functions": [
+          "hasProperties"
+        ],
+        "properties": [
+          {
+            "key": "components"
+          },
+          {
+            "key": "dependencies"
+          }
+        ]
+      },
+      {
+        "id": "custom-test-metadata-has-elements",
+        "description": "Test the 'metadata' element contains required child elements which are a mix of primitives and complex types.",
+        "selector": {
+          "path": "metadata"
+        },
+        "functions": [
+          "hasProperties"
+        ],
+        "properties": [
+          {
+            "key": "timestamp"
+          },
+          {
+            "key": "component"
+          },
+          {
+            "key": "supplier"
+          }
+        ]
+      },
+      {
+        "id": "custom-metadata-properties-unique-disclaimer",
+        "description": "Validate BOM metadata properties has a unique, specific disclaimer value.",
+        "selector": {
+          "path": "metadata.properties",
+          "primaryKey": {
+            "key": "name",
+            "value": "urn:example.com:disclaimer"
+          }
+        },
+        "functions": [
+          "isUnique",
+          "hasProperties"
+        ],
+        "properties": [
+          {
+            "key": "name",
+            "value": "urn:example.com:disclaimer"
+          },
+          {
+            "key": "value",
+            "value": "This SBOM is current as of the date it was generated and is subject to change\\."
+          }
+        ]
+      },
+      {
+        "id": "custom-metadata-component-hashes",
+        "description": "Validate BOM metadata component has a single, SHA-356 hash value.",
+        "selector": {
+          "path": "metadata.component.hashes",
+          "primaryKey": {
+            "key": "alg",
+            "value": "SHA-256"
+          }
+        },
+        "functions": [
+          "isUnique",
+          "hasProperties"
+        ],
+        "primaryKey": {
+          "key": "alg",
+          "value": "SHA-256"
+        },
+        "properties": [
+          {
+            "key": "content",
+            "value": "^[0-9a-fA-F]{64}$"
+          }
+        ]
+      },
+      {
+        "id": "custom-external-reference-support",
+        "description": "Validate BOM metadata component has a single, SHA-356 hash value.",
+        "selector": {
+          "path": "externalReferences",
+          "primaryKey": {
+            "key": "url",
+            "value": "support@example.com"
+          }
+        },
+        "functions": [
+          "hasProperties"
+        ],
+        "primaryKey": {
+          "key": "url",
+          "value": "support@example.com"
+        },
+        "properties": [
+          {
+            "key": "type",
+            "value": "support"
+          }
+        ]
+      },
+      {
+        "id": "custom-metadata-properties-disclaimer-unique",
+        "description": "Validate BOM metadata properties has a unique, specific disclaimer value.",
+        "selector": {
+          "path": "metadata.properties",
+          "primaryKey": {
+            "key": "name",
+            "value": "urn:example.com:disclaimer"
+          }
+        },
+        "functions": [
+          "isUnique",
+          "hasProperties"
+        ],
+        "properties": [
+          {
+            "key": "name",
+            "value": "urn:example.com:disclaimer"
+          },
+          {
+            "key": "value",
+            "value": "This SBOM is current as of the date it was generated and is subject to change\\."
+          }
+        ]
+      }
+    ]
+  }
 }

@@ -1,0 +1,24 @@
+{
+  "validation": {
+    "actions": [
+      {
+        "id": "cdx-1-6-test-custom-best-practices",
+        "description": "Validate SPDX BOM top-level fields",
+        "selector": {
+          "path": ""
+        },
+        "functions": [
+          "hasProperties"
+        ],
+        "properties": [
+          {
+            "key": "documentNamespace"
+          },
+          {
+            "key": "creationInfo"
+          }
+        ]
+      }
+    ]
+  }
+}
