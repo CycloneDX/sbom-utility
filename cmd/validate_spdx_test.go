@@ -25,15 +25,24 @@ import (
 // Consolidate test file name declarations
 const (
 	// SPDX - Test versioned documents meet min. schema requirements
-	TEST_SPDX_2_2_MIN_REQUIRED        = "test/spdx/spdx-2-2-min-required.json"
-	TEST_SPDX_2_3_MIN_REQUIRED        = "test/spdx/spdx-2-3-min-required.json"
+	TEST_SPDX_2_2_MIN_REQUIRED = "test/spdx/spdx-2-2-min-required.json"
+	TEST_SPDX_2_3_MIN_REQUIRED = "test/spdx/spdx-2-3-min-required.json"
+)
+
+const (
+	// SPDX - (valid) Examples
+	TEST_SPDX_2_2_EXAMPLE_1           = "examples/spdx/example1/example1.json"
+	TEST_SPDX_2_2_EXAMPLE_2_BIN       = "examples/spdx/example2/example2-bin.json"
+	TEST_SPDX_2_2_EXAMPLE_2_SRC       = "examples/spdx/example2/example2-src.json"
+	TEST_SPDX_2_2_EXAMPLE_5_BIN       = "examples/spdx/example5/example5-bin.json"
+	TEST_SPDX_2_2_EXAMPLE_5_SRC       = "examples/spdx/example5/example5-src.json"
+	TEST_SPDX_2_2_EXAMPLE_6_LIB       = "examples/spdx/example6/example6-lib.json"
+	TEST_SPDX_2_2_EXAMPLE_6_SRC       = "examples/spdx/example6/example6-src.json"
 	TEST_SPDX_2_3_EXAMPLE_PACKAGE_BOM = "test/spdx/spdx-2-3-example-package-bom.json"
 
 	// SPDX - (invalid) Schema tests
-	TEST_SPDX_2_2_INVALID_CREATION_INFO_MISSING = "test/spdx/spdx-2-2-missing-creationinfo.json"
-
-	// SPDX - Tool samples
-	//TEST_SPDX_SAMPLE_MEND_PACKAGE_NPM_ASYNC_WS = "test/spdx/samples/whitesource.json"
+	TEST_SPDX_2_2_INVALID_CREATION_INFO_MISSING      = "test/spdx/spdx-2-2-missing-creationinfo.json"
+	TEST_SPDX_2_3_SCHEMA_ERROR_ADD_PROPS_NOT_ALLOWED = "test/spdx/spdx-2-3-schema-error-add-props-not-allowed.json"
 )
 
 // -----------------------------------------------------------
