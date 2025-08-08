@@ -21,6 +21,13 @@ In addition, the utility features "report" commands that can easily *extract*, *
 
 ---
 
+<h4><img alt="</> logotype" src="docs/new-3d.png" style="height: 5em; vertical-align: middle;"> Custom JSON Validation</h4>
+
+> Don't want to create custom CycloneDX schemas to enforce your requirements on the structure, fields, values and more?  Good news! Now you can add your own custom validation of JSON BOM content using the new `--custom-config` flag on the `validate` command!
+> - Learn how to use this long-awaited **experimental** feature by reading the [Custom validation examples](custom-examples.md) page.
+
+---
+
 ### Command Overview
 
 The following commands, which operate against input BOMs and their data, are offered by the utility:
@@ -318,14 +325,14 @@ See each command's section for contextual examples of the `--where` flag filter 
 
 ### Validate
 
-This command will parse standardized SBOMs and validate it against its declared format and version (e.g., SPDX 2.3, CycloneDX 1.6). 
+This command will parse standardized SBOMs and validate it against its declared format and version (e.g., SPDX 2.3, CycloneDX 1.6).
 
-- Custom  variants of standard JSON schemas can be used for validation by supplying the `--variant` name as a flag. 
+- Custom  variants of standard JSON schemas can be used for validation by supplying the `--variant` name as a flag.
 - Explicit JSON schemas can be specified using the `--force` flag.
 
 #### Validating using supported schemas
 
-Use the [schema](#schema) command to list supported schemas formats, versions and variants.  
+Use the [schema](#schema) command to list supported schemas formats, versions and variants.
 
 - A "supported" schema is already **"built-in"** to the utility resources along with any dependent schemas it imports.
 - This means that BOM files **can be validated when there is no network connection** to load the schemas from remote locations (a.k.a., *"off-line"* mode).
@@ -334,9 +341,9 @@ Use the [schema](#schema) command to list supported schemas formats, versions an
 
 Customized JSON schemas can also be permanently configured as named schema "variants" within the utility's configuration file. See [adding schemas](#adding-schemas).
 
-- **Overriding default schema** 
+- **Overriding default schema**
   - Using the [`--force` flag](#--force-flag) and passing in a URI to an alternative JSON schema.
-- **"Customized" schema** variants, perhaps derived from standard BOM schemas, can be used for validation using the `--variant` flag (e.g., industry or company-specific schemas). 
+- **"Customized" schema** variants, perhaps derived from standard BOM schemas, can be used for validation using the `--variant` flag (e.g., industry or company-specific schemas).
   - **Note**: *These variants need to be built into the utility binary as a resource.*
 
 #### Validate flags
