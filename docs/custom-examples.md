@@ -25,7 +25,7 @@ The minimum set of required command flags to invoke custom validation using the 
 
 The `isUnique` function can be used to validate that all array items in a specific property have unique values.
 
-##### Example: Unique propery `name` in `metadata.properties` array
+##### Example: Unique property `name` in `metadata.properties` array
 
 
 Using the custom configuration file `test/custom/custom-metadata-properties-disclaimer-unique.json` for this validation check is as follows;
@@ -96,6 +96,101 @@ produces the following result:
 [INFO] BOM valid against custom JSON configuration: 'test/custom/custom-metadata-properties-disclaimer-unique.json'
 ```
 
-As you can see, the standard schema validation is first applied and returns "`BOM valid against JSON schema: 'true'`" then the custom checks are applied which also returns "`BOM valid against custom JSON configuration`" with the details of each check provided..
+As you can see, the standard schema validation is first applied and returns "`BOM valid against JSON schema: 'true'`" then the custom checks are applied which also returns "`BOM valid against custom JSON configuration`" with the details of each check provided.
+
+---
+
+#### `hasProperties` - BOM has required elements
+
+The `hasProperties` function can be used to validate that specific elements are present in the BOM document.
+
+##### Example:
+
+Using the custom configuration file `test/custom/custom-metadata-has-elements.json` for this validation check is as follows;
+
+```json
+{
+  "validation": {
+    "actions": [
+      {
+        "id": "custom-test-metadata-has-elements",
+        "description": "Test the 'metadata' element contains required child elements which are a mix of primitives and complex types.",
+        "selector": {
+          "path": "metadata"
+        },
+        "functions": [
+          "hasProperties"
+        ],
+        "properties": [
+          {
+            "key": "timestamp"
+          },
+          {
+            "key": "supplier"
+          },
+          {
+            "key": "component"
+          },
+          {
+            "key": "licenses"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+When applied to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-metadata-has-elements.json`:
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7e0",
+  "metadata": {
+    "timestamp": "2025-08-09T07:20:00.000Z",
+    "component": {
+      "name": "sample app",
+      "type": "application"
+    },
+    "licenses": [
+      {
+        "license": {
+          "id": "Apache-2.0"
+        }
+      }
+    ],
+    "supplier": {
+      "name": "Example.com",
+      "url": [
+        "https://example.com"
+      ],
+      "contact": [
+        {
+          "email": "info@example.com"
+        }
+      ]
+    }
+  }
+}
+```
+
+and running it from the command line:
+
+```bash
+./sbom-utility validate -i test/custom/cdx-1-6-test-metadata-has-elements.json --custom test/custom/custom-metadata-has-elements.json
+```
+
+produces the following result:
+
+```bash
+[INFO] Validating 'test/custom/cdx-1-6-test-metadata-has-elements.json'...
+[INFO] BOM valid against JSON schema: 'true'
+[INFO] Loading custom validation config file: 'test/custom/custom-metadata-has-elements.json'...
+[INFO] Validating custom action (id: `custom-test-metadata-has-elements`, selector: `{ "path": "metadata", "primaryKey": { "key": "", "value": "" } }`)...
+[INFO] BOM valid against custom JSON configuration: 'test/custom/custom-metadata-has-elements.json'
+```
 
 ---

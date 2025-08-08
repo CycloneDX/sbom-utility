@@ -138,7 +138,7 @@ func innerTestValidate(t *testing.T, vti ValidateTestInfo) (document *schema.BOM
 
 	if !ErrorTypesMatch(actualError, expectedError) {
 		if len(schemaErrors) > 0 {
-			getLogger().Debugf("schemaErrors='%s'", schemaErrors)
+			getLogger().Tracef("schemaErrors='%s'", schemaErrors)
 		}
 
 		switch t := actualError.(type) {

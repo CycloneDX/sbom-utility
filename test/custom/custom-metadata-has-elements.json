@@ -15,10 +15,13 @@
             "key": "timestamp"
           },
           {
+            "key": "supplier"
+          },
+          {
             "key": "component"
           },
           {
-            "key": "supplier"
+            "key": "licenses"
           }
         ]
       }
