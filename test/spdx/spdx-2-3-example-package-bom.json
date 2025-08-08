@@ -1,0 +1,70 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "Example Software BOM",
+  "documentNamespace": "http://spdx.org/spdxdocs/spdx-example-1.0",
+  "creationInfo": {
+    "created": "2025-08-07T17:35:00Z",
+    "creators": [
+      "Tool: SPDX-Tools-v1.0",
+      "Organization: Example Org"
+    ]
+  },
+  "packages": [
+    {
+      "name": "Example-Package",
+      "SPDXID": "SPDXRef-Package-Example",
+      "versionInfo": "1.0.0",
+      "supplier": "Organization: Example Org (example.org)",
+      "originator": "Person: Original Author (original.author@example.com)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "copyrightText": "Copyright 2024 Example Org",
+      "externalRefs": [
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Uri",
+          "referenceLocator": "cpe:2.3:a:example:example-package:1.0.0:*:*:*:*:*:*:"
+        }
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a1b2c3d4e5f67890a1b2c3d4e5f67890a1b2c3d4e5f67890a1b2c3d4e5f67890"
+        }
+      ],
+      "primaryPackagePurpose": "APPLICATION"
+    }
+  ],
+  "files": [
+    {
+      "fileName": "./src/main.c",
+      "SPDXID": "SPDXRef-File-MainC",
+      "fileTypes": ["SOURCE"],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "f1e2d3c4b5a69870f1e2d3c4b5a69870f1e2d3c4"
+        }
+      ],
+      "licenseConcluded": "MIT",
+      "licenseInfoInFiles": ["MIT"],
+      "copyrightText": "Copyright 2024 Example Org"
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-Package-Example"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-Example",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-MainC"
+    }
+  ]
+}

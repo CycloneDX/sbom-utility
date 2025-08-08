@@ -66,3 +66,13 @@ func TestValidateSpdx22Example6Src(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_SPDX_2_2_EXAMPLE_6_SRC)
 	innerTestValidate(t, *vti)
 }
+
+func TestValidateSpdx23MinRequired(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_SPDX_2_3_MIN_REQUIRED)
+	innerTestValidate(t, *vti)
+}
+
+func TestValidateSpdx23ExamplePackage(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_SPDX_2_3_EXAMPLE_PACKAGE_BOM)
+	innerTestValidate(t, *vti)
+}

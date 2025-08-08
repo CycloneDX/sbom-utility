@@ -47,29 +47,19 @@ const (
 	ERR_TYPE_IETF_RFC6902_TEST_FAILED = "IETF RFC6902 test operation error"
 )
 
-// Custom Validation messages
-// TODO: Need to define a profile that supports these validation checks/messages
-const (
-	MSG_ELEMENT_NOT_UNIQUE  = "custom validation error. Element not unique"
-	MSG_PROPERTY_NOT_UNIQUE = "check failed. Property not unique"
-	// MSG_INVALID_METADATA_PROPERTIES = "field `metadata.properties` is missing or invalid"
-	// MSG_INVALID_METADATA_COMPONENT_COMPONENTS = "field `metadata.component.components` array should be empty"
-	// MSG_INVALID_METADATA_COMPONENT            = "field `metadata.component` is missing or invalid"
-)
-
 // Validation messages
 const (
 	MSG_FORMAT_TYPE                    = "format: '%s'"
 	MSG_SCHEMA_ERRORS                  = "schema errors found"
-	MSG_PROPERTY_NOT_FOUND             = "property not found"
-	MSG_PROPERTY_REGEX_FAILED          = "check failed: property regex mismatch"
 	MSG_IETF_RFC6902_OPERATION_SUCCESS = "IETF RFC6902 test operation success"
 )
 
 // Custom validation messages
 const (
-	ERR_ELEMENT_NOT_FOUND  = "custom validation error. Element not found unique (key: `%s`, value: `%s`)"
-	ERR_ELEMENT_NOT_UNIQUE = "custom validation error. Element not unique (key: `%s`, value: `%s`)"
+	ERR_TYPE_CUSTOM_VALIDATION  = "custom validation failed"
+	MSG_JSON_ELEMENT_NOT_FOUND  = "Unable to find JSON element using selector: %s"
+	MSG_ITEM_PROPERTY_NOT_FOUND = "Function: 'hasProperties' selector: %s, property: %s"
+	MSG_ITEM_NOT_UNIQUE         = "Function: 'isUnique', selector: %s, matches found: %v"
 )
 
 // License messages
@@ -110,6 +100,10 @@ type BaseError struct {
 	Details    string
 }
 
+// ------------------------------------------------
+// General error types
+// ------------------------------------------------
+
 // Support the error interface
 func (err BaseError) Error() string {
 	formattedMessage := fmt.Sprintf("%s: %s (%s)", err.Type, err.Message, err.InputFile)
@@ -145,7 +139,34 @@ func (err UnsupportedError) Error() string {
 	return formattedMessage
 }
 
+// ------------------------------------------------
+// SBOM error types
+// ------------------------------------------------
+
+// Extend the base error type
+type InvalidSBOMError struct {
+	BaseError
+	SBOM         *schema.BOM
+	FieldKeys    []string // Keys used to dereference into JSON map where error found
+	SchemaErrors []gojsonschema.ResultError
+}
+
+func NewInvalidSBOMError(sbom *schema.BOM, m string, errIn error, schemaErrors []gojsonschema.ResultError) *InvalidSBOMError {
+	var err = new(InvalidSBOMError)
+	err.Type = ERR_TYPE_INVALID_SBOM
+	err.Message = m
+	err.InnerError = errIn
+	err.SBOM = sbom
+	if sbom != nil {
+		err.InputFile = sbom.GetFilename()
+	}
+	err.SchemaErrors = schemaErrors
+	return err
+}
+
+// ------------------------------------------------
 // IETF RFC6902 "Test" error
+// ------------------------------------------------
 type IETFRFC6902TestError struct {
 	BaseError
 	Operation string
@@ -168,22 +189,31 @@ func (err IETFRFC6902TestError) Error() string {
 }
 
 // ------------------------------------------------
-// SBOM error types
+// Custom validation error types
 // ------------------------------------------------
 
-// Extend the base error type
-type InvalidSBOMError struct {
+// JSON element not found in BOM
+type JSONElementNotFoundError struct {
 	BaseError
-	SBOM         *schema.BOM
-	FieldKeys    []string // Keys used to dereference into JSON map where error found
-	SchemaErrors []gojsonschema.ResultError
+	ActionId string
+	Selector schema.ItemSelector
 }
 
-// NOTE: Current sub-type is "no license found"; other, more specific subtypes may be created
-type SBOMLicenseError struct {
-	InvalidSBOMError
+func NewJSONElementNotFoundError(action schema.ValidationAction) *JSONElementNotFoundError {
+	var err = new(JSONElementNotFoundError)
+	err.Type = ERR_TYPE_CUSTOM_VALIDATION
+	err.Message = MSG_JSON_ELEMENT_NOT_FOUND
+	err.ActionId = action.Id
+	err.Selector = action.Selector
+	return err
 }
 
+func (err JSONElementNotFoundError) Error() string {
+	text := err.BaseError.Error()
+	return fmt.Sprintf(text, err.Selector.String())
+}
+
+// Check: "isUnique"
 type ItemIsUniqueError struct {
 	BaseError
 	ActionId        string
@@ -193,13 +223,20 @@ type ItemIsUniqueError struct {
 
 func NewItemIsUniqueError(action schema.ValidationAction, numMatches int) *ItemIsUniqueError {
 	var err = new(ItemIsUniqueError)
-	err.Message = "item not unique"
+	err.Type = ERR_TYPE_CUSTOM_VALIDATION
+	err.Message = MSG_ITEM_NOT_UNIQUE
 	err.ActionId = action.Id
 	err.Selector = action.Selector
 	err.NumMatchesFound = numMatches
 	return err
 }
 
+func (err ItemIsUniqueError) Error() string {
+	text := err.BaseError.Error()
+	return fmt.Sprintf(text, err.Selector.String(), err.NumMatchesFound)
+}
+
+// Check: "hasProperties"
 type ItemHasPropertiesError struct {
 	BaseError
 	ActionId         string
@@ -207,32 +244,28 @@ type ItemHasPropertiesError struct {
 	ExpectedProperty schema.ItemKeyValue
 }
 
-// Support the error interface
-// func (err ItemHasPropertiesError) Error() string {
-// 	text := err.BaseError.Error()
-// 	return fmt.Sprintf("%s: Field(s): %s", text, strings.Join(err.FieldKeys[:], "."))
-// }
+func (err ItemHasPropertiesError) Error() string {
+	text := err.BaseError.Error()
+	return fmt.Sprintf(text, err.Selector.String(), err.ExpectedProperty.String())
+}
 
 func NewItemHasPropertiesError(action schema.ValidationAction, missingProperty schema.ItemKeyValue) *ItemHasPropertiesError {
 	var err = new(ItemHasPropertiesError)
-	err.Message = "item not unique"
+	err.Type = ERR_TYPE_CUSTOM_VALIDATION
+	err.Message = MSG_ITEM_PROPERTY_NOT_FOUND
 	err.ActionId = action.Id
 	err.Selector = action.Selector
 	err.ExpectedProperty = missingProperty
 	return err
 }
 
-func NewInvalidSBOMError(sbom *schema.BOM, m string, errIn error, schemaErrors []gojsonschema.ResultError) *InvalidSBOMError {
-	var err = new(InvalidSBOMError)
-	err.Type = ERR_TYPE_INVALID_SBOM
-	err.Message = m
-	err.InnerError = errIn
-	err.SBOM = sbom
-	if sbom != nil {
-		err.InputFile = sbom.GetFilename()
-	}
-	err.SchemaErrors = schemaErrors
-	return err
+// ------------------------------------------------
+// License validation error types
+// ------------------------------------------------
+
+// NOTE: Current sub-type is "no license found"; other, more specific subtypes may be created
+type SBOMLicenseError struct {
+	InvalidSBOMError
 }
 
 func NewSbomLicenseNotFoundError(sbom *schema.BOM) *SBOMLicenseError {

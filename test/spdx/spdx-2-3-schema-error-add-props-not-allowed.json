@@ -1,0 +1,29 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "Example Software BOM",
+  "documentNamespace": "http://spdx.org/spdxdocs/spdx-example-1.0",
+  "creationInfo": {
+    "created": "2025-08-07T17:35:00Z",
+    "creators": [
+      "Tool: SPDX-Tools-v1.0",
+      "Organization: Example Org"
+    ]
+  },
+  "packages": [
+    {
+      "name": "Example-Package",
+      "SPDXID": "SPDXRef-Package-Example",
+      "copyrightText": "Copyright 2024 Example Org",
+      "versionInfo": "1.0.0",
+      "supplier": "Organization: Example Org (example.org)",
+      "originator": "Person: Original Author (original.author@example.com)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "packagePurpose": "APPLICATION"
+    }
+  ]
+}

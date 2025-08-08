@@ -25,7 +25,9 @@ import (
 // Consolidate test file name declarations
 const (
 	// SPDX - Test versioned documents meet min. schema requirements
-	TEST_SPDX_2_2_MIN_REQUIRED = "test/spdx/spdx-2-2-min-required.json"
+	TEST_SPDX_2_2_MIN_REQUIRED        = "test/spdx/spdx-2-2-min-required.json"
+	TEST_SPDX_2_3_MIN_REQUIRED        = "test/spdx/spdx-2-3-min-required.json"
+	TEST_SPDX_2_3_EXAMPLE_PACKAGE_BOM = "test/spdx/spdx-2-3-example-package-bom.json"
 
 	// SPDX - (invalid) Schema tests
 	TEST_SPDX_2_2_INVALID_CREATION_INFO_MISSING = "test/spdx/spdx-2-2-missing-creationinfo.json"

@@ -26,10 +26,8 @@ import (
 )
 
 // Validate all custom requirements that cannot be found be schema validation
-// These custom requirements are categorized by the following areas:
-// 1. Composition - document elements are organized as required (even though allowed by schema)
-// 2. Metadata - Top-level, document metadata includes specific fields and/or values that match required criteria (e.g., regex)
-// 3. License data - Components, Services (or any object that carries a License) meets specified requirements
+// These is accomplished using specific "check" functions against JSON document types:
+// - isUnique, hasProperties
 func validateCustomCDXDocument(document *schema.BOM, validateFlags utils.ValidateCommandFlags, policyConfig *schema.LicensePolicyConfig) (innerError error) {
 	getLogger().Enter()
 	defer getLogger().Exit(innerError)
@@ -42,15 +40,11 @@ func validateCustomCDXDocument(document *schema.BOM, validateFlags utils.Validat
 		return
 	}
 
-	// Validate all custom composition requirements for overall CDX SBOM are met
-	// if innerError = validateCustomDocumentComposition(document); innerError != nil {
+	// Validate that at least required (e.g., valid, approved) "License" data exists
+	// TODO: Use different command line flag to trigger custom license validation
+	// if innerError = validateLicenseData(document, policyConfig); innerError != nil {
 	// 	return
 	// }
-
-	// Validate that at least required (e.g., valid, approved) "License" data exists
-	if innerError = validateLicenseData(document, policyConfig); innerError != nil {
-		return
-	}
 
 	numCustomValidationActions := len(schema.CustomValidationChecks.Validation.ValidationActions)
 	if numCustomValidationActions > 0 {
@@ -63,7 +57,6 @@ func validateCustomCDXDocument(document *schema.BOM, validateFlags utils.Validat
 }
 
 func processValidationActions(document *schema.BOM, actions []schema.ValidationAction) (innerError error) {
-
 	var path, selectorKey, selectorKeyValue string
 
 	for _, action := range actions {
@@ -91,6 +84,7 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 		result, errQuery := QueryJSONMap(document.GetJSONMap(), qr)
 
 		if errQuery != nil {
+			// TODO: leverage Query error type or create new type
 			innerError = getLogger().Errorf("%s. %s: %s", ERR_QUERY, MSG_QUERY_ERROR_SELECTOR, path)
 			buffer, errEncode := utils.EncodeAnyToDefaultIndentedJSONStr(result)
 			if errEncode != nil {
@@ -103,6 +97,12 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 		jsonMap, jsonArrayOfMap, typeError := getJsonType(result)
 		if typeError != nil {
 			innerError = typeError
+			return
+		}
+
+		// error out if selector (i.e., path with optional primary key) was not found in BOM
+		if len(jsonMap) == 0 && len(jsonArrayOfMap) == 0 {
+			innerError = NewJSONElementNotFoundError(action)
 			return
 		}
 
@@ -184,7 +184,6 @@ func hashJsonArrayElements(jsonArrayOfMap []map[string]interface{}, selectorKey 
 }
 
 func prepareWhereFilter(selector schema.ItemSelector) (whereFilter common.WhereFilter, innerError error) {
-	// var whereFilter = common.WhereFilter{}
 	selectorKey := selector.PrimaryKey.Key
 	selectorKeyValue := selector.PrimaryKey.Value
 
@@ -307,163 +306,8 @@ func convertToJsonMap(sourceInterface interface{}) (targetMap map[string]interfa
 	return
 }
 
-// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-// This validation function checks for custom composition requirements as follows:
-// 1. Assure that the "metadata.component" does NOT have child Components
-// 2. TODO: Assure that the "components" list is a "flat" list
-// func validateCustomDocumentComposition(document *schema.BOM) (innerError error) {
-// 	getLogger().Enter()
-// 	defer getLogger().Exit(innerError)
-
-// 	// retrieve top-level component data from metadata
-// 	component := document.GetCdxMetadataComponent()
-
-// 	// NOTE: The absence of a top-level component in the metadata
-// 	// SHOULD be a composition error
-// 	if component == nil {
-// 		return
-// 	}
-
-// 	// Generate a (composition) validation error
-// 	pComponent := component.Components
-// 	if pComponent != nil && len(*pComponent) > 0 {
-// 		var fields = []string{"metadata", "component", "components"}
-// 		innerError = NewSBOMCompositionError(
-// 			MSG_INVALID_METADATA_COMPONENT_COMPONENTS,
-// 			document,
-// 			fields)
-// 		return
-// 	}
-
-// 	return
-// }
-
-// This validation function checks for custom metadata requirements are as follows:
-// 1. required "Properties" exist and have valid values (against supplied regex)
-// 2. Supplier field is filled out according to custom requirements
-// 3. Manufacturer field is filled out according to custom requirements
-// TODO: test for custom values in other metadata/fields:
-// func validateCustomMetadata(document *schema.BOM) (err error) {
-// 	getLogger().Enter()
-// 	defer getLogger().Exit(err)
-
-// 	// validate that the top-level pComponent is declared with all required values
-// 	if pComponent := document.GetCdxMetadataComponent(); pComponent == nil {
-// 		err := NewSBOMMetadataError(
-// 			document,
-// 			MSG_INVALID_METADATA_COMPONENT,
-// 			*document.GetCdxMetadata())
-// 		return err
-// 	}
-
-// 	// Validate required custom properties (by `name`) exist with appropriate values
-// 	err = validateCustomMetadataProperties(document)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return err
-// }
-
-// This validation function checks for custom metadata property requirements (i.e., names, values)
-// TODO: Evaluate need for this given new means to do this with JSON Schema v6 and 7
-// func validateCustomMetadataProperties(document *schema.BOM) (err error) {
-// 	getLogger().Enter()
-// 	defer getLogger().Exit(err)
-
-// 	validationProps := schema.CustomValidationChecks.GetCustomValidationMetadataProperties()
-// 	if len(validationProps) == 0 {
-// 		getLogger().Infof("No properties to validate")
-// 		return
-// 	}
-
-// 	// TODO: move map to BOM object
-// 	hashmap := slicemultimap.New()
-// 	pProperties := document.GetCdxMetadataProperties()
-// 	if pProperties != nil {
-// 		err = hashMetadataProperties(hashmap, *pProperties)
-// 		if err != nil {
-// 			return
-// 		}
-// 	}
-
-// 	for _, checks := range validationProps {
-// 		getLogger().Tracef("Running validation checks: Property name: '%s', checks(s): '%v'...", checks.Name, checks)
-// 		values, found := hashmap.Get(checks.Name)
-// 		if !found {
-// 			err = NewSbomMetadataPropertyError(
-// 				document,
-// 				MSG_PROPERTY_NOT_FOUND,
-// 				&checks, nil)
-// 			return err
-// 		}
-
-// 		// Check: (key) uniqueness
-// 		// i.e., Multiple values with same "key" (specified), not provided
-// 		// TODO: currently hashmap assumes "name" as the key; this could be dynamic (using reflect)
-// 		if checks.CheckUnique != "" {
-// 			getLogger().Tracef("CheckUnique: key: '%s', '%s', value(s): '%v'...", checks.Key, checks.CheckUnique, values)
-// 			// if multi-hashmap has more than one value, property is NOT unique
-// 			if len(values) > 1 {
-// 				err := NewSbomMetadataPropertyError(
-// 					document,
-// 					MSG_PROPERTY_NOT_UNIQUE,
-// 					&checks, nil)
-// 				return err
-// 			}
-// 		}
-
-// 		if checks.CheckRegex != "" {
-// 			getLogger().Tracef("CheckRegex: field: '%s', regex: '%v'...", checks.CheckRegex, checks.Value)
-// 			compiledRegex, errCompile := utils.CompileRegex(checks.Value)
-// 			if errCompile != nil {
-// 				return errCompile
-// 			}
-
-// 			// TODO: check multiple values if provided
-// 			value := values[0]
-// 			if stringValue, ok := value.(string); ok {
-// 				getLogger().Debugf(">> Testing value: '%s'...", stringValue)
-// 				matched := compiledRegex.Match([]byte(stringValue))
-// 				if !matched {
-// 					err = NewSbomMetadataPropertyError(
-// 						document,
-// 						MSG_PROPERTY_REGEX_FAILED,
-// 						&checks, nil)
-// 					return err
-// 				} else {
-// 					getLogger().Debugf("matched:  ")
-// 				}
-
-// 			} else {
-// 				err = NewSbomMetadataPropertyError(
-// 					document,
-// 					MSG_PROPERTY_NOT_UNIQUE,
-// 					&checks, nil)
-// 				return err
-// 			}
-
-// 		}
-// 	}
-// 	return err
-// }
-
-// func hashMetadataProperties(hashmap *slicemultimap.MultiMap, properties []schema.CDXProperty) (err error) {
-// 	getLogger().Enter()
-// 	defer getLogger().Exit()
-
-// 	if hashmap == nil {
-// 		return getLogger().Errorf("invalid hashmap: %v", hashmap)
-// 	}
-
-// 	for _, prop := range properties {
-// 		hashmap.Put(prop.Name, prop.Value)
-// 	}
-
-// 	return
-// }
-
+// =================================================================================
+// TODO: Use different command line flag to trigger custom license validation
 // TODO: Assure that after hashing "license" data within the "components" array
 // that at least one valid license is found
 // TODO: Assure top-level "metadata.component"
