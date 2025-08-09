@@ -53,7 +53,9 @@ Using the custom configuration file `test/custom/custom-metadata-properties-disc
 }
 ```
 
-When applied to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-metedata-properties-unique-disclaimer.json`:
+The `path` value of the `selector` object is set to `metadata.properties` and will be used to locate the JSON array that holds the `property` items.  As each item is a JSON map object, the `primaryKey` can be used to identify the map `key` and `value` used as identify the specific entry to validate as unique within the array.
+
+When the custom validation configuration (above) is applied to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-metedata-properties-unique-disclaimer.json` with contents:
 
 ```json
 {
@@ -85,7 +87,7 @@ and running it from the command line:
 ./sbom-utility validate -i test/custom/cdx-1-6-test-metedata-properties-unique-disclaimer.json --custom test/custom/custom-metadata-properties-disclaimer-unique.json
 ```
 
-produces the following result:
+it produces the following result:
 
 ```bash
 [INFO] Validating 'test/custom/cdx-1-6-test-metedata-properties-unique-disclaimer.json'...
@@ -97,6 +99,13 @@ produces the following result:
 ```
 
 As you can see, the standard schema validation is first applied and returns "`BOM valid against JSON schema: 'true'`" then the custom checks are applied which also returns "`BOM valid against custom JSON configuration`" with the details of each check provided.
+
+The `validate` command factors in the custom validation along with the normal schema validation when setting the exit code (i.e., `0`, zero in this valid case).  This preserves the ability to test exit code from the command line and within test scripts:
+
+```
+$ echo $?
+0
+```
 
 ---
 
