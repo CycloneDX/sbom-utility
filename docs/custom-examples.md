@@ -2,16 +2,16 @@
 
 In addition to validating the the BOM input file using the standard CycloneDX schema, you now can provide a custom JSON file that will apply a built-in set of validation functions to selected parts of the BOM document that can validate JSON elements, property keys and values.
 
+#### Check functions
+
 The current set of functions that can achieve this includes:
 
 - `isUnique` - checks uniqueness of array items given a property name as key
-- `hasProperties` - can verify that a named property exists on a select element and can also enforce the corresponding property has the expected value using regex.
+- `hasProperties` - can verify that a named property exists on a selected JSON element and can also enforce the corresponding property has the expected value using regex.
 
 **Note**: *More functions are planned for future releases if use cases are found.*
 
----
-
-### Usage
+#### Usage
 
 The minimum set of required command flags to invoke custom validation using the utility's `validate` command would be:
 
@@ -19,9 +19,20 @@ The minimum set of required command flags to invoke custom validation using the 
 ./sbom-utility validate -i <input-bom.json> --custom <custom-validation-config.json>
 ```
 
-### Custom validation examples
+---
 
-#### `isUnique` - Array item uniqueness
+### Examples by function
+
+Examples are provided for each custom validation function or "check":
+
+- [`isUnique` examples](#isunique-examples) - used to validate array item uniqueness.
+- [`hasProperties` examples](#hasproperties-examples) - used to validate that a selected JSON object has specified properties.
+
+---
+
+#### `isUnique` examples
+
+ - Array item uniqueness
 
 The `isUnique` function can be used to validate that all array items in a specific property have unique values.
 
@@ -109,11 +120,11 @@ $ echo $?
 
 ---
 
-#### `hasProperties` - BOM has required elements
+#### `hasProperties` examples
 
-The `hasProperties` function can be used to validate that specific elements are present in the BOM document.
+The `hasProperties` function can be used to validate that specific properties (i.e., key-values) are present in a selected object within the BOM document.
 
-##### Example:
+##### Example: BOM `metadata` has `timestamp`, `supplier`, `component` and `licenses` properties
 
 Using the custom configuration file `test/custom/custom-metadata-has-elements.json` for this validation check is as follows;
 
