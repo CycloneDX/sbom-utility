@@ -1,0 +1,26 @@
+{
+  "validation": {
+    "actions": [
+      {
+        "id": "custom-metadata-properties-unique-match",
+        "description": "Validate BOM metadata properties has a unique disclaimer with a specific value.",
+        "selector": {
+          "path": "metadata.properties",
+          "primaryKey": {
+            "key": "name",
+            "value": "urn:example.com:disclaimer"
+          }
+        },
+        "functions": [
+          "isUnique", "hasProperties"
+        ],
+        "properties": [
+          {
+            "key": "value",
+            "value": "This SBOM is current as of the date it was generated and is subject to change\\."
+          }
+        ]
+      }
+    ]
+  }
+}
