@@ -67,8 +67,8 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 		selectorKeyValue = action.Selector.PrimaryKey.Value
 
 		// Use utility's "query" function to obtain BOM document subsets (as JSON map(s))
-		// Prepare a "QueryRequest"
-		// First, use "path" to locate the subset of the BOM document to be processed
+		// Prepare a "QueryRequest" by first using "path" to locate the subset of the BOM
+		// document to be processed
 		qr := common.NewQueryRequest()
 		qr.SetRawFromPaths(action.Selector.Path)
 
@@ -134,6 +134,7 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 					}
 				default:
 					innerError = getLogger().Errorf("unknown function: `%s`...", fx)
+					return
 				}
 			}
 		} else if jsonMap != nil { // redundant check, but leave for now
@@ -157,6 +158,7 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 					}
 				default:
 					innerError = getLogger().Errorf("unknown function: `%s`...", fx)
+					return
 				}
 			}
 		}
