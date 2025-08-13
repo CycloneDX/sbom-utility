@@ -1,0 +1,25 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "metadata": {
+    "timestamp": "2025-08-09T07:20:00.000Z",
+    "component": {
+      "name": "sample app",
+      "type": "application"
+    }
+  },
+  "properties": [
+    {
+      "name": "foo",
+      "value": "bar1"
+    },
+    {
+      "name": "foo",
+      "value": "bar2"
+    },
+    {
+      "name": "yyz",
+      "value": "rush"
+    }
+  ]
+}
