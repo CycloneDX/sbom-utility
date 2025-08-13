@@ -32,9 +32,9 @@ Examples are provided for each custom validation function or "check":
 
 ### `isUnique` examples
 
-The `isUnique` function can be used to validate that an item in a JSON array is "unique" using a specified property which is treated as a *primary key* and *value* in the item's JSON map.
+The `isUnique` function can be used to validate that an item in a JSON array is "unique" using a specified `primaryKey` property. The `primaryKey` property specifies the JSON map `key` used as the *primary key* for for items in the array and its `value` tested for uniqueness.
 
-#### Example: Unique property `name` in `metadata.properties` array
+#### Example: Unique CycloneDX `property` using primary key `name` in `metadata.properties` array
 
 Using the custom configuration file `test/custom/cdx-1-6-test-metedata-properties-disclaimer-examples.json` for this validation check is as follows;
 
@@ -61,7 +61,7 @@ Using the custom configuration file `test/custom/cdx-1-6-test-metedata-propertie
 }
 ```
 
-The `path` value of the `selector` object is set to `metadata.properties` and will be used to locate the JSON array that holds the `property` items.  As each item is a JSON map object, the `primaryKey` can be used to identify the map `key` and `value` used as identify the specific entry to validate as unique within the array.
+The `path` value of the `selector` object is set to `metadata.properties` and will be used to locate the JSON array that holds the `property` items.  As each item is a JSON map object, the `primaryKey` can be used to identify the map `key` (in this case the `name` map key) and `value` (i.e., `urn:example.com:disclaimer`) used to  identify the specific key value to validate as unique within the array.
 
 When the custom validation configuration (above) is applied to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-metedata-properties-disclaimer.json` with contents:
 
@@ -117,30 +117,87 @@ $ echo $?
 
 ---
 
-#### Example:
+#### Example: Item is not unique in BOM `properties`
 
-Using the custom configuration file `test/custom/custom-metadata-has-elements.json` for this validation check is as follows;
+Using the custom configuration file `test/custom/custom-bom-properties-not-unique.json` for this validation check is as follows;
 
 ```json
-
+{
+  "validation": {
+    "actions": [
+      {
+        "id": "custom-bom-properties-not-unique",
+        "description": "Validate BOM properties no unique",
+        "selector": {
+          "path": "properties",
+          "primaryKey": {
+            "key": "name",
+            "value": "foo"
+          }
+        },
+        "functions": [
+          "isUnique"
+        ]
+      }
+    ]
+  }
+}
 ```
 
 When applied to the test CycloneDX BOM file: `TBD`:
 
 ```json
-
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "metadata": {
+    "timestamp": "2025-08-09T07:20:00.000Z",
+    "component": {
+      "name": "sample app",
+      "type": "application"
+    }
+  },
+  "properties": [
+    {
+      "name": "foo",
+      "value": "bar1"
+    },
+    {
+      "name": "foo",
+      "value": "bar2"
+    },
+    {
+      "name": "yyz",
+      "value": "rush"
+    }
+  ]
+}
 ```
 
 and running it from the command line:
 
 ```bash
-TBD
+./sbom-utility validate -i test/custom/cdx-1-6-test-custom-bom-properties.json --custom test/custom/custom-bom-properties-not-unique.json
 ```
 
 produces the following result:
 
 ```bash
-TBD
+[INFO] BOM valid against JSON schema: 'true'
+[INFO] Loading custom validation config file: 'test/custom/custom-bom-properties-not-unique.json'...
+[INFO] Validating custom action (id: `custom-bom-properties-not-unique`, selector: `{ "path": "properties", "primaryKey": { "key": "name", "value": "foo" } }`)...
+[INFO] >> Checking isUnique: (selector: `{properties {name foo}}`)...
+[ERROR] invalid SBOM: custom validation failed: Function: 'isUnique', selector: { "path": "properties", "primaryKey": { "key": "name", "value": "foo" } }, matches found: 2 () (test/custom/cdx-1-6-test-custom-bom-properties.json)
+[INFO] document 'test/custom/cdx-1-6-test-custom-bom-properties.json': valid=[false]
+```
+
+which indicates the `property` designated as the "primary key" resulted in multiple (i.e., two (2)) results.
+
+The exist code will reflect the validation failure with a non-zero exit code:
+
+```bash
+echo $?
+2
 ```
 
 ---

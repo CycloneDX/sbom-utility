@@ -2,8 +2,8 @@
   "validation": {
     "actions": [
       {
-        "id": "custom-metadata-properties-not-unique",
-        "description": "Validate BOM metadata properties no unique",
+        "id": "custom-bom-properties-not-unique",
+        "description": "Validate BOM properties no unique",
         "selector": {
           "path": "properties",
           "primaryKey": {
