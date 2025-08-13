@@ -34,7 +34,7 @@ Examples are provided for each custom validation function or "check":
 
 The `isUnique` function can be used to validate that an item in a JSON array is "unique" using a specified `primaryKey` property. The `primaryKey` property specifies the JSON map `key` used as the *primary key* for for items in the array and its `value` tested for uniqueness.
 
-#### Example: Unique CycloneDX `property` using primary key `name` in `metadata.properties` array
+#### Example: Valid: `property` is unique in the `metadata.properties` array
 
 Using the custom configuration file `test/custom/cdx-1-6-test-metedata-properties-disclaimer-examples.json` for this validation check is as follows;
 
@@ -117,7 +117,7 @@ $ echo $?
 
 ---
 
-#### Example: Item is not unique in BOM `properties`
+#### Example: Invalid: `property` item is not unique in BOM `properties` array
 
 Using the custom configuration file `test/custom/custom-bom-properties-not-unique.json` for this validation check is as follows;
 
@@ -191,9 +191,11 @@ produces the following result:
 [INFO] document 'test/custom/cdx-1-6-test-custom-bom-properties.json': valid=[false]
 ```
 
-which indicates the `property` designated as the "primary key" resulted in multiple (i.e., two (2)) results.
+which indicates the `property` designated as the "primary key" (i.e., the `name` key) resulted in multiple (i.e., two (2)) items and therefore not unique.
 
-The exist code will reflect the validation failure with a non-zero exit code:
+Specifically, there are 2 CycloneDX `property` in the array items that have the `foo` value in the `name` key designated a the `primaryKey`.
+
+In this invalid example, the exit code will reflect the custom validation failure with a non-zero exit code:
 
 ```bash
 echo $?
