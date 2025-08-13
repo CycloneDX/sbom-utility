@@ -144,7 +144,7 @@ Using the custom configuration file `test/custom/custom-bom-properties-not-uniqu
 }
 ```
 
-When applied to the test CycloneDX BOM file: `TBD`:
+When applied to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-custom-bom-properties.json`:
 
 ```json
 {
