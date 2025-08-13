@@ -21,7 +21,7 @@ The minimum set of required command flags to invoke custom validation using the 
 
 ---
 
-### Examples by function
+## Examples by function
 
 Examples are provided for each custom validation function or "check":
 
@@ -30,14 +30,11 @@ Examples are provided for each custom validation function or "check":
 
 ---
 
-#### `isUnique` examples
+### `isUnique` examples
 
- - Array item uniqueness
+The `isUnique` function can be used to validate that an item in a JSON array is "unique" using a specified property which is treated as a *primary key* and *value* in the item's JSON map.
 
-The `isUnique` function can be used to validate that all array items in a specific property have unique values.
-
-##### Example: Unique property `name` in `metadata.properties` array
-
+#### Example: Unique property `name` in `metadata.properties` array
 
 Using the custom configuration file `test/custom/cdx-1-6-test-metedata-properties-disclaimer-examples.json` for this validation check is as follows;
 
@@ -120,11 +117,39 @@ $ echo $?
 
 ---
 
-#### `hasProperties` examples
+#### Example:
 
-The `hasProperties` function can be used to validate that specific properties (i.e., key-values) are present in a selected object within the BOM document.
+Using the custom configuration file `test/custom/custom-metadata-has-elements.json` for this validation check is as follows;
 
-##### Example: BOM `metadata` has `timestamp`, `supplier`, `component` and `licenses` properties
+```json
+
+```
+
+When applied to the test CycloneDX BOM file: `TBD`:
+
+```json
+
+```
+
+and running it from the command line:
+
+```bash
+TBD
+```
+
+produces the following result:
+
+```bash
+TBD
+```
+
+---
+
+### `hasProperties` examples
+
+The `hasProperties` function can be used to validate that specific properties (i.e., key-value pairs) are present in a selected object within the BOM document.
+
+#### Example: BOM `metadata` has `timestamp`, `supplier`, `component` and `licenses` properties
 
 Using the custom configuration file `test/custom/custom-metadata-has-elements.json` for this validation check is as follows;
 
@@ -215,9 +240,39 @@ produces the following result:
 
 ---
 
-### Combined `isUnique` and `hasProperties` examples
+#### Example:
 
-##### Example: Verify unique disclaimer in `metadata.properties` with specif value
+Using the custom configuration file `test/custom/custom-metadata-has-elements.json` for this validation check is as follows;
+
+```json
+
+```
+
+When applied to the test CycloneDX BOM file: `TBD`:
+
+```json
+
+```
+
+and running it from the command line:
+
+```bash
+TBD
+```
+
+produces the following result:
+
+```bash
+TBD
+```
+
+---
+
+### Combined examples
+
+These examples perform both a `isUnique` validation and then further inspec the unique item to validate its other properties (i.e., key-value pairs) using the `hasProperties` function.
+
+#### Example: Verify unique disclaimer item in `metadata.properties` array and then its `value` property
 
 Using the custom configuration file `test/custom/custom-metadata-properties-disclaimer-unique-match.json` for this validation check is as follows;
 
@@ -296,7 +351,7 @@ produces the following result:
 
 ---
 
-##### Example:
+#### Example:
 
 Using the custom configuration file `test/custom/custom-metadata-has-elements.json` for this validation check is as follows;
 
@@ -324,7 +379,7 @@ TBD
 
 ---
 
-##### Example:
+#### Example:
 
 Using the custom configuration file `test/custom/custom-metadata-has-elements.json` for this validation check is as follows;
 
