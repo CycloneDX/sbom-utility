@@ -208,7 +208,7 @@ echo $?
 
 The `hasProperties` function can be used to validate that specific properties (i.e., key-value pairs) are present in a selected object within the BOM document.
 
-#### Example: BOM `metadata` has `timestamp`, `supplier`, `component` and `licenses` properties
+#### Example: Valid: `metadata` has `timestamp`, `supplier`, `component` and `licenses` properties
 
 Using the custom configuration file `test/custom/custom-metadata-has-elements.json` for this validation check is as follows;
 
@@ -297,32 +297,91 @@ produces the following result:
 [INFO] BOM valid against custom JSON configuration: 'test/custom/custom-metadata-has-elements.json'
 ```
 
----
+This indicates all four properties exist in the BOM where they are expected int the `component.metadata` object (i.e., `timestamp`, `supplier`, `component` and `licenses`).
 
-#### Example:
+and the exit code aligns with the logged output:
 
-Using the custom configuration file `test/custom/custom-metadata-has-elements.json` for this validation check is as follows;
-
-```json
-
+```bash
+$ echo $?
+0
 ```
 
-When applied to the test CycloneDX BOM file: `TBD`:
+#### Example: Invalid: `metadata` missing `authors` element
+
+Using the custom configuration file `test/custom/custom-metadata-element-not-found.json` for this validation check is as follows;
 
 ```json
+{
+  "validation": {
+    "actions": [
+      {
+        "id": "custom-test-metadata-property-not-found",
+        "description": "Test the error if metadata property is not found",
+        "selector": {
+          "path": "metadata"
+        },
+        "functions": [
+          "hasProperties"
+        ],
+        "properties": [
+          {
+            "key": "authors"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
 
+When applied to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-metadata-has-elements.json` whose metadata contains many elements, but not `authors`:
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7e0",
+  "metadata": {
+    "timestamp": "2025-08-09T07:20:00.000Z",
+    "component": {
+      "name": "sample app",
+      "type": "application"
+    },
+    "licenses": [
+      {
+        ...
+      }
+    ],
+    "supplier": {
+      ...
+    }
+  }
+}
 ```
 
 and running it from the command line:
 
 ```bash
-TBD
+./sbom-utility validate -i test/custom/cdx-1-6-test-metadata-has-elements.json --custom test/custom/custom-metadata-element-not-found.json
 ```
 
 produces the following result:
 
 ```bash
-TBD
+[INFO] Validating 'test/custom/cdx-1-6-test-metadata-has-elements.json'...
+[INFO] BOM valid against JSON schema: 'true'
+[INFO] Loading custom validation config file: 'test/custom/custom-metadata-element-not-found.json'...
+[INFO] Validating custom action (id: `custom-test-metadata-property-not-found`, selector: `{ "path": "metadata", "primaryKey": { "key": "", "value": "" } }`)...
+[ERROR] invalid SBOM: custom validation failed: Function: 'hasProperties' selector: { "path": "metadata", "primaryKey": { "key": "", "value": "" } }, property: { "key": "authors", "value": "" } () (test/custom/cdx-1-6-test-metadata-has-elements.json)
+[INFO] document 'test/custom/cdx-1-6-test-metadata-has-elements.json': valid=[false]
+```
+
+As expected, the exit code reflects this result:
+
+```bash
+$ echo $?
+2
 ```
 
 ---
