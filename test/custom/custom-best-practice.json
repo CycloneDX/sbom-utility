@@ -1,10 +1,10 @@
 {
   "validation": {
-    "description": "Custom validation actions to perform on selected elements of a BOM document.",
+    "description": "Custom validation actions to test that a BOM includes a set of minimum \"best practices\" elements.",
     "actions": [
       {
-        "id": "custom-test-bom-structure",
-        "description": "Test the BOM has 'components' and 'dependencies' at the top level as \"best practice\".",
+        "id": "custom-best-practices",
+        "description": "Test the BOM has 'metadata', 'components' and 'dependencies' at the top level as \"best practice\".",
         "selector": {
           "path": ""
         },
@@ -12,6 +12,9 @@
           "hasProperties"
         ],
         "properties": [
+          {
+            "key": "metadata"
+          },
           {
             "key": "components"
           },
@@ -93,7 +96,7 @@
       },
       {
         "id": "custom-external-reference-support",
-        "description": "Validate BOM metadata component has a single, SHA-356 hash value.",
+        "description": "Validate BOM 'externalReferences' include a support URL.",
         "selector": {
           "path": "externalReferences",
           "primaryKey": {
@@ -112,31 +115,6 @@
           {
             "key": "type",
             "value": "support"
-          }
-        ]
-      },
-      {
-        "id": "custom-metadata-properties-disclaimer-unique",
-        "description": "Validate BOM metadata properties has a unique, specific disclaimer value.",
-        "selector": {
-          "path": "metadata.properties",
-          "primaryKey": {
-            "key": "name",
-            "value": "urn:example.com:disclaimer"
-          }
-        },
-        "functions": [
-          "isUnique",
-          "hasProperties"
-        ],
-        "properties": [
-          {
-            "key": "name",
-            "value": "urn:example.com:disclaimer"
-          },
-          {
-            "key": "value",
-            "value": "This SBOM is current as of the date it was generated and is subject to change\\."
           }
         ]
       }
