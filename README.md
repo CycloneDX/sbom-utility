@@ -448,20 +448,20 @@ echo $?
 The validation command will use the declared format and version found within the SBOM JSON file itself to lookup the default (latest) matching schema version (as declared in`config.json`; however, if variants of that same schema (same format and version) are declared, they can be requested via the `--variant` command line flag:
 
 ```bash
-./sbom-utility validate -i test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json --variant custom
+./sbom-utility validate -i test/custom/cdx-1-4-test-metadata-property-disclaimer-invalid.json --variant custom
 ```
 
 If you run the sample command above, you would see several "custom" schema errors resulting in an invalid SBOM determination (i.e., `exit status 2`):
 
 ```text
-[INFO] Attempting to load and unmarshal data from: 'test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json'...
-[INFO] Successfully unmarshalled data from: 'test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json'
+[INFO] Attempting to load and unmarshal data from: 'test/custom/cdx-1-4-test-metadata-property-disclaimer-invalid.json'...
+[INFO] Successfully unmarshalled data from: 'test/custom/cdx-1-4-test-metadata-property-disclaimer-invalid.json'
 [INFO] Determining file's BOM format and version...
 [INFO] Determined BOM format, version (variant): 'CycloneDX', '1.4' custom
 [INFO] Matching BOM schema (for validation): schema/test/bom-1.4-custom.schema.json
 [INFO] Loading schema 'schema/test/bom-1.4-custom.schema.json'...
 [INFO] Schema 'schema/test/bom-1.4-custom.schema.json' loaded.
-[INFO] Validating 'test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json'...
+[INFO] Validating 'test/custom/cdx-1-4-test-metadata-property-disclaimer-invalid.json'...
 [INFO] BOM valid against JSON schema: 'false'
 [INFO] (3) schema errors detected.
 [INFO] Formatting error results ('txt' format)...
@@ -504,8 +504,8 @@ If you run the sample command above, you would see several "custom" schema error
             }
         ]
     }
-[ERROR] invalid SBOM: schema errors found (test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json)
-[INFO] document 'test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json': valid=[false]
+[ERROR] invalid SBOM: schema errors found (test/custom/cdx-1-4-test-metadata-property-disclaimer-invalid.json)
+[INFO] document 'test/custom/cdx-1-4-test-metadata-property-disclaimer-invalid.json': valid=[false]
 ```
 
 confirming the exit code:
@@ -532,7 +532,7 @@ The output shows a first schema error indicating the failing JSON object; in thi
 Use the `--debug` or `-d` flag to see all schema error details:
 
 ```bash
-./sbom-utility validate -i test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json --variant custom -d
+./sbom-utility validate -i test/custom/cdx-1-4-test-metadata-property-disclaimer-invalid.json --variant custom -d
 ```
 
 The details include the full context of the failing `metadata.properties` object which also includes a `"urn:example.com:classification"` property:

@@ -58,10 +58,10 @@ const (
 
 // CycloneDX v1.6, v1.4
 const (
-	TEST_CUSTOM_CDX_1_6_CUSTOM                            = "test/custom/cdx-1-6-test-custom-best-practices.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_INVALID = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_MISSING = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-missing.json"
-	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE  = "test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-unique.json"
+	TEST_CUSTOM_CDX_1_6_CUSTOM                            = "test/custom/cdx-1-6-test--best-practices.json"
+	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_INVALID = "test/custom/cdx-1-4-test-metadata-property-disclaimer-invalid.json"
+	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_MISSING = "test/custom/cdx-1-4-test-metadata-property-disclaimer-missing.json"
+	TEST_CUSTOM_CDX_1_4_METADATA_PROPS_DISCLAIMER_UNIQUE  = "test/custom/cdx-1-4-test-metadata-property-disclaimer-unique.json"
 )
 
 // License tests

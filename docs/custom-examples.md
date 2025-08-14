@@ -144,7 +144,7 @@ Using the custom configuration file `test/custom/custom-bom-properties-not-uniqu
 }
 ```
 
-When applied to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-custom-bom-properties.json`:
+When applied to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-bom-properties.json`:
 
 ```json
 {
@@ -177,7 +177,7 @@ When applied to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-custom-bo
 and running it from the command line:
 
 ```bash
-./sbom-utility validate -i test/custom/cdx-1-6-test-custom-bom-properties.json --custom test/custom/custom-bom-properties-not-unique.json
+./sbom-utility validate -i test/custom/cdx-1-6-test-bom-properties.json --custom test/custom/custom-bom-properties-not-unique.json
 ```
 
 produces the following result:
@@ -187,8 +187,8 @@ produces the following result:
 [INFO] Loading custom validation config file: 'test/custom/custom-bom-properties-not-unique.json'...
 [INFO] Validating custom action (id: `custom-bom-properties-not-unique`, selector: `{ "path": "properties", "primaryKey": { "key": "name", "value": "foo" } }`)...
 [INFO] >> Checking isUnique: (selector: `{properties {name foo}}`)...
-[ERROR] invalid SBOM: custom validation failed: Function: 'isUnique', selector: { "path": "properties", "primaryKey": { "key": "name", "value": "foo" } }, matches found: 2 () (test/custom/cdx-1-6-test-custom-bom-properties.json)
-[INFO] document 'test/custom/cdx-1-6-test-custom-bom-properties.json': valid=[false]
+[ERROR] invalid SBOM: custom validation failed: Function: 'isUnique', selector: { "path": "properties", "primaryKey": { "key": "name", "value": "foo" } }, matches found: 2 () (test/custom/cdx-1-6-test-bom-properties.json)
+[INFO] document 'test/custom/cdx-1-6-test-bom-properties.json': valid=[false]
 ```
 
 which indicates the `property` designated as the "primary key" (i.e., the `name` key) resulted in multiple (i.e., two (2)) items and therefore not unique.
