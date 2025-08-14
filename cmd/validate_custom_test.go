@@ -41,9 +41,9 @@ const (
 
 // CycloneDX v1.6
 const (
-	TEST_CUSTOM_CDX_1_6_BEST_PRACTICES        = "test/custom/cdx-1-6-test-best-practices.json"
-	TEST_CUSTOM_CDX_1_6_BOM_PROPERTIES        = "test/custom/cdx-1-6-test-bom-properties.json"
-	TEST_CUSTOM_CDX_1_6_METADATA_HAS_ELEMENTS = "test/custom/cdx-1-6-test-metadata-has-elements.json"
+	TEST_CUSTOM_CDX_1_6_BEST_PRACTICES      = "test/custom/cdx-1-6-test-best-practices.json"
+	TEST_CUSTOM_CDX_1_6_BOM_PROPERTIES      = "test/custom/cdx-1-6-test-bom-properties.json"
+	TEST_CUSTOM_CDX_1_6_METADATA_PROPERTIES = "test/custom/cdx-1-6-test-metadata-properties.json"
 
 	TEST_CUSTOM_CDX_1_6_METADATA_PROPS_CLASSIFICATION_MULTIPLE = "test/custom/cdx-1-6-test-metedata-properties-classification-multiple.json"
 	TEST_CUSTOM_CDX_1_6_METADATA_PROPS_DISCLAIMER_MISMATCH     = "test/custom/cdx-1-6-test-metedata-properties-disclaimer-mismatch.json"
@@ -52,7 +52,7 @@ const (
 )
 
 // -------------------------------------------
-// Custom validation - test configuration files
+// Custom Configuration test files
 // -------------------------------------------
 
 // SPDX
@@ -62,11 +62,11 @@ const (
 
 // CycloneDX
 const (
-	CUSTOM_CONFIG_BOM_STRUCTURE_BEST_PRACTICE       = "test/custom/custom-bom-structure-best-practice.json"
+	CUSTOM_CONFIG_BOM_BEST_PRACTICE_PROFILE         = "test/custom/custom-best-practices-profile.json"
 	CUSTOM_CONFIG_BOM_PROPS_UNIQUE                  = "test/custom/custom-bom-properties-unique.json"
 	CUSTOM_CONFIG_BOM_PROPS_NOT_UNIQUE              = "test/custom/custom-bom-properties-not-unique.json"
-	CUSTOM_CONFIG_METADATA_HAS_ELEMENTS_FAIL        = "test/custom/custom-metadata-element-not-found.json"
-	CUSTOM_CONFIG_METADATA_HAS_ELEMENTS_SUCCESS     = "test/custom/custom-metadata-has-elements.json"
+	CUSTOM_CONFIG_METADATA_ELEMENTS_NOT_FOUND       = "test/custom/custom-metadata-elements-not-found.json"
+	CUSTOM_CONFIG_METADATA_ELEMENTS_FOUND           = "test/custom/custom-metadata-elements-found.json"
 	CUSTOM_CONFIG_METADATA_PROPS_DISCLAIMER_MATCH   = "test/custom/custom-metadata-properties-disclaimer-match.json"
 	CUSTOM_CONFIG_METADATA_PROPS_DISCLAIMER_UNIQUE  = "test/custom/custom-metadata-properties-disclaimer-unique.json"
 	CUSTOM_CONFIG_METADATA_PROPS_DISCLAIMER_MISSING = "test/custom/custom-metadata-properties-disclaimer-missing.json"
@@ -126,16 +126,7 @@ func TestValidateCustomErrorCdx14NoLicensesFound(t *testing.T) {
 // CycloneDX - isUnique tests
 // -------------------------------------------
 
-// isUnique(): Success - BOM "metadata.properties" has a unique "disclaimer" property
-func TestValidateCustomCdx16_MetadataPropsUniqueDisclaimer(t *testing.T) {
-	// getLogger().SetLevel(log.TRACE)
-	getLogger().SetLevel(log.TRACE)
-	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_METADATA_PROPS_DISCLAIMER_UNIQUE)
-	vti.CustomConfig = CUSTOM_CONFIG_METADATA_PROPS_DISCLAIMER_UNIQUE
-	document, results, _ := innerTestValidate(t, *vti)
-	getLogger().Tracef("filename: '%s', results:\n%v", document.GetFilename(), results)
-}
-
+// isUnique(): Success - BOM "properties" has a unique property with key-value: "name": "yyz"
 func TestValidateCustomCdx16_BOMPropsUnique(t *testing.T) {
 	// getLogger().SetLevel(log.TRACE)
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_BOM_PROPERTIES)
@@ -144,7 +135,7 @@ func TestValidateCustomCdx16_BOMPropsUnique(t *testing.T) {
 	getLogger().Tracef("filename: '%s', error: '%s'", document.GetFilename(), err)
 }
 
-// isUnique(): Fail - BOM "properties" does not have a unique "name" property (i.e., "foo" appears twice)
+// isUnique(): Fail - BOM "properties" does not have a unique property with key-value: "name": "foo" (i.e., "foo" appears twice)
 func TestValidateCustomCdx16_BOMPropsNotUnique(t *testing.T) {
 	// getLogger().SetLevel(log.TRACE)
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_BOM_PROPERTIES)
@@ -155,33 +146,51 @@ func TestValidateCustomCdx16_BOMPropsNotUnique(t *testing.T) {
 	getLogger().Tracef("filename: '%s', error: '%s'", document.GetFilename(), err)
 }
 
+// isUnique(): Success - BOM "metadata.properties" has a unique "disclaimer" property
+func TestValidateCustomCdx16_MetadataPropsUniqueDisclaimer(t *testing.T) {
+	// getLogger().SetLevel(log.TRACE)
+	getLogger().SetLevel(log.TRACE)
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_METADATA_PROPS_DISCLAIMER_UNIQUE)
+	vti.CustomConfig = CUSTOM_CONFIG_METADATA_PROPS_DISCLAIMER_UNIQUE
+	document, results, _ := innerTestValidate(t, *vti)
+	getLogger().Tracef("filename: '%s', results:\n%v", document.GetFilename(), results)
+}
+
 // -------------------------------------------
 // CycloneDX - hasProperties tests
 // -------------------------------------------
 
-// hasProperties(): Success - has a top-level "metadata", "components" and "dependencies"
-func TestValidateCustomCdx16_BOMStructureBestPractice(t *testing.T) {
+// hasProperties(): Success - BOM has a representative set of min. "best practice" elements
+func TestValidateCustomCdx16_BOMBestPracticeElements(t *testing.T) {
 	// getLogger().SetLevel(log.TRACE)
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_BEST_PRACTICES)
-	vti.CustomConfig = CUSTOM_CONFIG_BOM_STRUCTURE_BEST_PRACTICE
+	vti.CustomConfig = CUSTOM_CONFIG_BOM_BEST_PRACTICE_PROFILE
+	document, results, _ := innerTestValidate(t, *vti)
+	getLogger().Tracef("filename: '%s', results:\n%v", document.GetFilename(), results)
+}
+
+func TestValidateCustomCdx16_BOMStructure(t *testing.T) {
+	// getLogger().SetLevel(log.TRACE)
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_BEST_PRACTICES)
+	vti.CustomConfig = CUSTOM_CONFIG_BOM_BEST_PRACTICE_PROFILE
 	document, results, _ := innerTestValidate(t, *vti)
 	getLogger().Tracef("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
 
 // hasProperties(): Success - Has elements in BOM "metadata"
-func TestValidateCustomCdx16_MetadataHasElements(t *testing.T) {
+func TestValidateCustomCdx16_MetadataElementsFound(t *testing.T) {
 	// getLogger().SetLevel(log.TRACE)
-	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_BEST_PRACTICES)
-	vti.CustomConfig = CUSTOM_CONFIG_METADATA_HAS_ELEMENTS_SUCCESS
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_METADATA_PROPERTIES)
+	vti.CustomConfig = CUSTOM_CONFIG_METADATA_ELEMENTS_FOUND
 	document, results, _ := innerTestValidate(t, *vti)
 	getLogger().Tracef("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
 
 // hasProperties(): Fail - missing element in BOM "metadata"
-func TestValidateCustomCdx16_MetadataElementNotFound(t *testing.T) {
+func TestValidateCustomCdx16_MetadataElementsNotFound(t *testing.T) {
 	// getLogger().SetLevel(log.TRACE)
-	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_BEST_PRACTICES)
-	vti.CustomConfig = CUSTOM_CONFIG_METADATA_HAS_ELEMENTS_FAIL
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_METADATA_PROPERTIES)
+	vti.CustomConfig = CUSTOM_CONFIG_METADATA_ELEMENTS_NOT_FOUND
 	vti.ResultExpectedError = &InvalidSBOMError{}
 	vti.ResultExpectedInnerError = &ItemHasPropertiesError{}
 	document, _, err := innerValidateInvalidSBOMInnerError(t, *vti)

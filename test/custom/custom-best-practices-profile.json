@@ -1,9 +1,9 @@
 {
   "validation": {
-    "description": "Custom validation actions to test that a BOM includes a set of minimum \"best practices\" elements.",
+    "description": "Custom validation actions test a BOM for a representative set of \"best practices\" elements or \"profile\".",
     "actions": [
       {
-        "id": "custom-best-practices",
+        "id": "custom-best-practices-profile",
         "description": "Test the BOM has 'metadata', 'components' and 'dependencies' at the top level as \"best practice\".",
         "selector": {
           "path": ""
