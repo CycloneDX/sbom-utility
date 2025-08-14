@@ -3,7 +3,7 @@
     "actions": [
       {
         "id": "custom-metadata-properties-unique-match",
-        "description": "Validate BOM metadata properties has a unique disclaimer with a specific value.",
+        "description": "Validate BOM metadata properties has a unique, specific named disclaimer property.",
         "selector": {
           "path": "metadata.properties",
           "primaryKey": {

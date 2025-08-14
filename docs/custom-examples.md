@@ -44,7 +44,7 @@ Using the custom configuration file `test/custom/cdx-1-6-test-metedata-propertie
     "actions": [
       {
         "id": "custom-metadata-properties-disclaimer-examples",
-        "description": "Validate BOM metadata properties has a unique, specific disclaimer value.",
+        "description": "Validate BOM metadata properties has a unique, specific named disclaimer property",
         "selector": {
           "path": "metadata.properties",
           "primaryKey": {
@@ -61,7 +61,7 @@ Using the custom configuration file `test/custom/cdx-1-6-test-metedata-propertie
 }
 ```
 
-The `path` value of the `selector` object is set to `metadata.properties` and will be used to locate the JSON array that holds the `property` items.  As each item is a JSON map object, the `primaryKey` can be used to identify the map `key` (in this case the `name` map key) and `value` (i.e., `urn:example.com:disclaimer`) used to  identify the specific key value to validate as unique within the array.
+The `path` value of the `selector` object is set to `metadata.properties` and will be used to locate the JSON array that holds the `property` items.  As each item is a JSON map object, the `primaryKey` can be used to identify the map `key` (in this case the `name` map key) and its `value` (i.e., `urn:example.com:disclaimer`) used to identify the specific key value to validate as unique within the array.
 
 When the custom validation configuration (above) is applied to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-metedata-properties-disclaimer.json` with contents:
 
@@ -191,9 +191,9 @@ produces the following result:
 [INFO] document 'test/custom/cdx-1-6-test-bom-properties.json': valid=[false]
 ```
 
-which indicates the `property` designated as the "primary key" (i.e., the `name` key) resulted in multiple (i.e., two (2)) items and therefore not unique.
+which indicates the `property` designated as the "primary key" (i.e., the `name` key with value `foo`) resulted in multiple (i.e., two (2)) items and therefore not unique.
 
-Specifically, there are 2 CycloneDX `property` in the array items that have the `foo` value in the `name` key designated a the `primaryKey`.
+In other words, there were two CycloneDX `property` items in the array that have the `foo` value in the `name` key which was designated as  the `primaryKey`.
 
 In this invalid example, the exit code will reflect the custom validation failure with a non-zero exit code:
 
@@ -377,7 +377,7 @@ produces the following result:
 [INFO] document 'test/custom/cdx-1-6-test-metadata-has-elements.json': valid=[false]
 ```
 
-As expected, the exit code reflects this result:
+As expected, the exit code reflects the failed result:
 
 ```bash
 $ echo $?
