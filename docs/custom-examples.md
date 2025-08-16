@@ -36,7 +36,7 @@ The `isUnique` function can be used to validate that an item in a JSON array is 
 
 #### Example: Valid: `property` is unique in the BOM's `properties` array
 
-Using the custom configuration file `test/custom/config-cdx-bom-properties-unique.json` for this validation check whose contents is as follows:
+The custom validation configuration file `test/custom/config-cdx-bom-properties-unique.json` with contents::
 
 ```json
 {
@@ -61,7 +61,7 @@ Using the custom configuration file `test/custom/config-cdx-bom-properties-uniqu
 }
 ```
 
-The `path` value of the `selector` object is set to BOM's top-level `properties` and will be used to locate the JSON array that holds the `property` items.  As each item is a JSON map object, the `primaryKey` can be used to identify the map `key` (in this case the `name` map key) and its `value` (i.e., `urn:example.com:disclaimer`) used to identify the specific key value to validate as unique within the array.
+provides a `path` value as part of the `selector` object which is set to BOM's top-level `properties` array. This array will be used to locate the `property` items that will be validated for uniqueness.  As each item is itself a JSON map object, the `primaryKey` of the `selector` can be used to identify the map `key` (in this case the `name` map key) and its `value` (i.e., `urn:example.com:disclaimer`) used to identify the specific key value to validate as unique within the array.
 
 When the custom validation configuration (above) is applied to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-bom-properties.json` with contents:
 
@@ -110,7 +110,7 @@ it produces the following result:
 [INFO] BOM valid against custom JSON configuration: 'test/custom/config-cdx-bom-properties-unique.json': 'true'
 ```
 
-As you can see, the standard schema validation is first applied and returns "`BOM valid against JSON schema: 'true'`" then the custom checks are applied which also returns "`BOM valid against custom JSON configuration`" with the details of each check provided.
+As you can see, the standard schema validation is first applied and returns "`BOM valid against JSON schema: 'true'`" then the custom checks are applied which also returns "`BOM valid against custom JSON configuration`: `true`" with the details of each check provided.
 
 The `validate` command factors in the custom validation along with the normal schema validation when setting the exit code (i.e., `0`, zero in this valid case).  This preserves the ability to test exit code from the command line and within test scripts:
 
@@ -123,7 +123,7 @@ $ echo $?
 
 #### Example: Invalid: `property` item is not unique in BOM `properties` array
 
-Using the custom configuration file `test/custom/config-cdx-bom-properties-not-unique.json` for this validation check whose contents is as follows:
+Using the custom validation configuration file `test/custom/config-cdx-bom-properties-not-unique.json` with contents::
 
 ```json
 {
@@ -148,7 +148,7 @@ Using the custom configuration file `test/custom/config-cdx-bom-properties-not-u
 }
 ```
 
-When applied to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-bom-properties.json`:
+and applying it to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-bom-properties.json`:
 
 ```json
 {
@@ -199,7 +199,7 @@ produces the following result:
 
 which indicates the `property` designated as the "primary key" (i.e., the `name` key with value `foo`) resulted in multiple (i.e., two (2)) items and therefore not unique.
 
-In other words, there were two CycloneDX `property` items in the array that have the `foo` value in the `name` key which was designated as  the `primaryKey`.
+In other words, there were two CycloneDX `property` items in the array that have the `foo` value in the `name` key which was designated as the `primaryKey`.
 
 In this invalid example, the exit code will reflect the custom validation failure with a non-zero exit code:
 
@@ -216,7 +216,7 @@ The `hasProperties` function can be used to validate that specific properties (i
 
 #### Example: Valid: `metadata` has `timestamp`, `supplier`, `component` and `licenses` properties
 
-Using the custom configuration file `test/custom/config-cdx-metadata-elements-found.json` for this validation check whose contents is as follows:
+Using the custom validation configuration file `test/custom/config-cdx-metadata-elements-found.json` with contents::
 
 ```json
 {
@@ -251,7 +251,7 @@ Using the custom configuration file `test/custom/config-cdx-metadata-elements-fo
 }
 ```
 
-When applied to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-bom-metadata.json`:
+and applying it to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-bom-metadata.json`:
 
 ```json
 {
@@ -315,7 +315,7 @@ $ echo $?
 
 #### Example: Invalid: `metadata` missing `authors` element
 
-Using the custom configuration file `test/custom/config-cdx-metadata-elements-not-found.json` for this validation check whose contents is as follows:
+Using the custom validation configuration file `test/custom/config-cdx-metadata-elements-not-found.json` with contents::
 
 ```json
 {
@@ -341,7 +341,7 @@ Using the custom configuration file `test/custom/config-cdx-metadata-elements-no
 }
 ```
 
-When applied to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-bom-metadata.json` whose metadata contains many elements, but not `authors`:
+and applying it to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-bom-metadata.json` whose metadata contains many elements, but not `authors`:
 
 ```json
 {
@@ -401,7 +401,7 @@ These examples perform both a `isUnique` validation and then further inspec the 
 
 #### Example: Verify unique disclaimer item in `metadata.properties` array and then its `value` property
 
-Using the custom configuration file `test/custom/config-cdx-metadata-properties-disclaimer-unique-match.json` for this validation check whose contents is as follows:
+Using the custom validation configuration file `test/custom/config-cdx-metadata-properties-disclaimer-unique-match.json` with contents::
 
 ```json
 {
@@ -432,7 +432,7 @@ Using the custom configuration file `test/custom/config-cdx-metadata-properties-
 }
 ```
 
-When applied to the same test CycloneDX BOM file that was used on the first `isUnique` example: `test/custom/cdx-1-6-test-metedata-properties-disclaimer.json`:
+and applying it to the same test CycloneDX BOM file that was used on the first `isUnique` example: `test/custom/cdx-1-6-test-metedata-properties-disclaimer.json`:
 
 ```json
 {
@@ -484,7 +484,7 @@ produces the following result:
 
 #### Example: Valid: `property` is unique in the `metadata.properties` array
 
-Using the custom configuration file `test/custom/config-cdx-metadata-properties-disclaimer-unique.json` for this validation check whose contents is as follows:
+Using the custom validation configuration file `test/custom/config-cdx-metadata-properties-disclaimer-unique.json` with contents::
 
 ```json
 {
@@ -567,7 +567,7 @@ $ echo $?
 
 #### Example: unique `disclaimer` and `value` property matches
 
-Using the custom configuration file `test/custom/config-cdx-metadata-properties-disclaimer-unique-match.json` for this validation check whose contents is as follows:
+Using the custom validation configuration file `test/custom/config-cdx-metadata-properties-disclaimer-unique-match.json` with contents::
 
 ```json
 {
@@ -598,7 +598,7 @@ Using the custom configuration file `test/custom/config-cdx-metadata-properties-
 }
 ```
 
-When applied to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-metedata-properties-disclaimer.json`:
+and applying it to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-metedata-properties-disclaimer.json`:
 
 ```json
 {
@@ -644,13 +644,13 @@ produces the following result:
 
 <!-- #### Example:
 
-Using the custom configuration file `TBD` for this validation check whose contents is as follows:
+Using the custom validation configuration file `TBD` with contents::
 
 ```json
 
 ```
 
-When applied to the test CycloneDX BOM file: `TBD`:
+and applying it to the test CycloneDX BOM file: `TBD`:
 
 ```json
 
