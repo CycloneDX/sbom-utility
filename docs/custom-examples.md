@@ -106,8 +106,8 @@ it produces the following result:
 [INFO] BOM valid against JSON schema: 'true'
 [INFO] Loading custom validation config file: 'test/custom/config-cdx-bom-properties-unique.json'...
 [INFO] Validating custom action (id: `custom-bom-properties-unique`, selector: `{ "path": "properties", "primaryKey": { "key": "name", "value": "yyz" } }`)...
-[INFO] >> Checking isUnique: (selector: `{properties {name yyz}}`)...
-[INFO] BOM valid against custom JSON configuration: 'test/custom/config-cdx-bom-properties-unique.json': `true'
+[INFO] >> Checking isUnique: (selector: `{ "path": "properties", "primaryKey": { "key": "name", "value": "yyz" } }`)...
+[INFO] BOM valid against custom JSON configuration: 'test/custom/config-cdx-bom-properties-unique.json': 'true'
 ```
 
 As you can see, the standard schema validation is first applied and returns "`BOM valid against JSON schema: 'true'`" then the custom checks are applied which also returns "`BOM valid against custom JSON configuration`" with the details of each check provided.
@@ -191,11 +191,10 @@ produces the following result:
 [INFO] BOM valid against JSON schema: 'true'
 [INFO] Loading custom validation config file: 'test/custom/config-cdx-bom-properties-not-unique.json'...
 [INFO] Validating custom action (id: `custom-bom-properties-not-unique`, selector: `{ "path": "properties", "primaryKey": { "key": "name", "value": "foo" } }`)...
-[INFO] >> Checking isUnique: (selector: `{properties {name foo}}`)...
+[INFO] >> Checking isUnique: (selector: `{ "path": "properties", "primaryKey": { "key": "name", "value": "foo" } }`)...
 [INFO] BOM valid against custom JSON configuration: 'test/custom/config-cdx-bom-properties-not-unique.json': 'false'
 [ERROR] invalid SBOM: custom validation failed: Function: 'isUnique', selector: { "path": "properties", "primaryKey": { "key": "name", "value": "foo" } }, matches found: 2 () (test/custom/cdx-1-6-test-bom-properties.json)
 [INFO] document 'test/custom/cdx-1-6-test-bom-properties.json': valid=[false]
-(base) matt sbom-utility [custom3] $
 ```
 
 which indicates the `property` designated as the "primary key" (i.e., the `name` key with value `foo`) resulted in multiple (i.e., two (2)) items and therefore not unique.
@@ -301,10 +300,10 @@ produces the following result:
 [INFO] BOM valid against JSON schema: 'true'
 [INFO] Loading custom validation config file: 'test/custom/config-cdx-metadata-elements-found.json'...
 [INFO] Validating custom action (id: `custom-metadata-elements-found`, selector: `{ "path": "metadata", "primaryKey": { "key": "", "value": "" } }`)...
-[INFO] BOM valid against custom JSON configuration: 'test/custom/config-cdx-metadata-elements-found.json`: `true'
+[INFO] BOM valid against custom JSON configuration: 'test/custom/config-cdx-metadata-elements-found.json': 'true'
 ```
 
-This indicates all four properties exist in the BOM where they are expected int the `component.metadata` object (i.e., `timestamp`, `supplier`, `component` and `licenses`).
+This indicates all four properties exist in the BOM where they are expected in the BOM `metadata` object (i.e., `timestamp`, `supplier`, `component` and `licenses`).
 
 and the exit code aligns with the logged output:
 
@@ -373,7 +372,7 @@ and running it from the command line:
 ./sbom-utility validate -i test/custom/cdx-1-6-test-bom-metadata.json --custom test/custom/config-cdx-metadata-elements-not-found.json
 ```
 
-produces the following result:
+produces the following error result since no `authors` property was found:
 
 ```bash
 [INFO] Validating 'test/custom/cdx-1-6-test-bom-metadata.json'...
@@ -400,10 +399,35 @@ These examples perform both a `isUnique` validation and then further inspec the 
 
 #### Example: Verify unique disclaimer item in `metadata.properties` array and then its `value` property
 
-Using the custom configuration file `test/custom/cdx-1-6-test-metedata-properties-disclaimer.json` for this validation check is as follows:
+Using the custom configuration file `test/custom/config-cdx-metadata-properties-disclaimer-unique-match.json` for this validation check is as follows:
 
 ```json
-
+{
+  "validation": {
+    "actions": [
+      {
+        "id": "custom-metadata-properties-disclaimer-unique-match",
+        "description": "Validate BOM metadata properties has a unique disclaimer property and specified value.",
+        "selector": {
+          "path": "metadata.properties",
+          "primaryKey": {
+            "key": "name",
+            "value": "urn:example.com:disclaimer"
+          }
+        },
+        "functions": [
+          "isUnique", "hasProperties"
+        ],
+        "properties": [
+          {
+            "key": "value",
+            "value": "This SBOM is current as of the date it was generated and is subject to change."
+          }
+        ]
+      }
+    ]
+  }
+}
 ```
 
 When applied to the same test CycloneDX BOM file that was used on the first `isUnique` example: `test/custom/cdx-1-6-test-metedata-properties-disclaimer.json`:
