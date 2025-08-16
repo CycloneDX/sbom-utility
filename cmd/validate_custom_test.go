@@ -62,18 +62,19 @@ const (
 
 // CycloneDX
 const (
-	CONFIG_CDX_BOM_BEST_PRACTICE_PROFILE         = "test/custom/config-cdx-best-practices-profile.json"
-	CONFIG_CDX_BOM_PROPS_NOT_UNIQUE              = "test/custom/config-cdx-bom-properties-not-unique.json"
-	CONFIG_CDX_BOM_PROPS_PK_MISSING              = "test/custom/config-cdx-bom-properties-primary-key-missing.json"
-	CONFIG_CDX_BOM_PROPS_UNIQUE                  = "test/custom/config-cdx-bom-properties-unique.json"
-	CONFIG_CDX_BOM_STRUCTURE                     = "test/custom/config-cdx-bom-structure.json"
-	CONFIG_CDX_METADATA_ELEMENTS_FOUND           = "test/custom/config-cdx-metadata-elements-found.json"
-	CONFIG_CDX_METADATA_ELEMENTS_NOT_FOUND       = "test/custom/config-cdx-metadata-elements-not-found.json"
-	CONFIG_CDX_METADATA_PROPS_DISCLAIMER_MATCH   = "test/custom/config-cdx-metadata-properties-disclaimer-match.json"
-	CONFIG_CDX_METADATA_PROPS_DISCLAIMER_MISSING = "test/custom/config-cdx-metadata-properties-disclaimer-missing.json"
-	// TODO
+	CONFIG_CDX_BOM_BEST_PRACTICE_PROFILE              = "test/custom/config-cdx-best-practices-profile.json"
+	CONFIG_CDX_BOM_PROPS_NOT_UNIQUE                   = "test/custom/config-cdx-bom-properties-not-unique.json"
+	CONFIG_CDX_BOM_PROPS_UNIQUE                       = "test/custom/config-cdx-bom-properties-unique.json"
+	CONFIG_CDX_BOM_STRUCTURE                          = "test/custom/config-cdx-bom-structure.json"
+	CONFIG_CDX_METADATA_ELEMENTS_FOUND                = "test/custom/config-cdx-metadata-elements-found.json"
+	CONFIG_CDX_METADATA_ELEMENTS_NOT_FOUND            = "test/custom/config-cdx-metadata-elements-not-found.json"
+	CONFIG_CDX_METADATA_PROPS_DISCLAIMER_MATCH        = "test/custom/config-cdx-metadata-properties-disclaimer-match.json"
+	CONFIG_CDX_METADATA_PROPS_DISCLAIMER_MISSING      = "test/custom/config-cdx-metadata-properties-disclaimer-missing.json"
 	CONFIG_CDX_METADATA_PROPS_DISCLAIMER_UNIQUE       = "test/custom/config-cdx-metadata-properties-disclaimer-unique.json"
 	CONFIG_CDX_METADATA_PROPS_DISCLAIMER_UNIQUE_MATCH = "test/custom/config-cdx-metadata-properties-disclaimer-unique-match.json"
+
+	// TODO
+	CONFIG_CDX_BOM_PROPS_PK_MISSING = "test/custom/config-cdx-bom-properties-primary-key-missing.json"
 )
 
 // License tests
@@ -226,4 +227,14 @@ func TestValidateCustomCdx16MetadataPropertyDisclaimerMissing(t *testing.T) {
 	vti.ResultExpectedInnerError = &JSONElementNotFoundError{}
 	document, _, err := innerValidateInvalidSBOMInnerError(t, *vti)
 	getLogger().Tracef("filename: '%s', error: '%s'", document.GetFilename(), err)
+}
+
+// isUnique(): Success - BOM "metadata.properties" has a unique "disclaimer" property
+func TestValidateCustomCdx16_MetadataPropsDisclaimerUniqueAndMatch(t *testing.T) {
+	// getLogger().SetLevel(log.TRACE)
+	getLogger().SetLevel(log.TRACE)
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_METADATA_PROPS_DISCLAIMER_UNIQUE)
+	vti.CustomConfig = CONFIG_CDX_METADATA_PROPS_DISCLAIMER_UNIQUE_MATCH
+	document, results, _ := innerTestValidate(t, *vti)
+	getLogger().Tracef("filename: '%s', results:\n%v", document.GetFilename(), results)
 }

@@ -563,7 +563,86 @@ $ echo $?
 0
 ```
 
-#### Example:
+---
+
+#### Example: unique `disclaimer` and `value` property matches
+
+Using the custom configuration file `test/custom/config-cdx-metadata-properties-disclaimer-unique-match.json` for this validation check is as follows:
+
+```json
+{
+  "validation": {
+    "actions": [
+      {
+        "id": "custom-metadata-properties-disclaimer-unique-match",
+        "description": "Validate BOM metadata properties has a unique disclaimer property and specified value.",
+        "selector": {
+          "path": "metadata.properties",
+          "primaryKey": {
+            "key": "name",
+            "value": "urn:example.com:disclaimer"
+          }
+        },
+        "functions": [
+          "isUnique", "hasProperties"
+        ],
+        "properties": [
+          {
+            "key": "value",
+            "value": "This SBOM is current as of the date it was generated and is subject to change."
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+When applied to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-metedata-properties-disclaimer.json`:
+
+```json
+{
+	"bomFormat": "CycloneDX",
+	"specVersion": "1.6",
+	"metadata": {
+		"timestamp": "2025-08-09T07:20:00.000Z",
+		"component": {
+			"type": "application",
+			"name": "sample app"
+		},
+		"properties": [
+			{
+				"name": "urn:example.com:disclaimer",
+				"value": "This SBOM is current as of the date it was generated and is subject to change."
+			},
+			{
+				"name": "urn:example.com:classification",
+				"value": "This SBOM is Confidential Information. Do not distribute."
+			}
+		]
+  }
+}
+```
+
+and running it from the command line:
+
+```bash
+./sbom-utility validate -i test/custom/cdx-1-6-test-metedata-properties-disclaimer.json --custom test/custom/config-cdx-metadata-properties-disclaimer-unique-match.json
+```
+
+produces the following result:
+
+```bash
+[INFO] Validating 'test/custom/cdx-1-6-test-metedata-properties-disclaimer.json'...
+[INFO] BOM valid against JSON schema: 'true'
+[INFO] Loading custom validation config file: 'test/custom/config-cdx-metadata-properties-disclaimer-unique-match.json'...
+[INFO] Validating custom action (id: `custom-metadata-properties-disclaimer-unique-match`, selector: `{ "path": "metadata.properties", "primaryKey": { "key": "name", "value": "urn:example.com:disclaimer" } }`)...
+[INFO] >> Checking isUnique: (selector: `{ "path": "metadata.properties", "primaryKey": { "key": "name", "value": "urn:example.com:disclaimer" } }`)...
+[INFO] >> Checking hasProperties: (selector: `{ "path": "metadata.properties", "primaryKey": { "key": "name", "value": "urn:example.com:disclaimer" } }`)...
+[INFO] BOM valid against custom JSON configuration: 'test/custom/config-cdx-metadata-properties-disclaimer-unique-match.json': 'true'
+```
+
+<!-- #### Example:
 
 Using the custom configuration file `TBD` for this validation check is as follows:
 
@@ -587,34 +666,4 @@ produces the following result:
 
 ```bash
 TBD
-```
-
----
-
-#### Example:
-
-Using the custom configuration file `TBD` for this validation check is as follows:
-
-```json
-
-```
-
-When applied to the test CycloneDX BOM file: `TBD`:
-
-```json
-
-```
-
-and running it from the command line:
-
-```bash
-TBD
-```
-
-produces the following result:
-
-```bash
-TBD
-```
-
----
+``` -->
