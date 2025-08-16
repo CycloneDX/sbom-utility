@@ -61,7 +61,9 @@ The custom validation configuration file `test/custom/config-cdx-bom-properties-
 }
 ```
 
-provides a `path` value as part of the `selector` object which is set to BOM's top-level `properties` array. This array will be used to locate the `property` items that will be validated for uniqueness.  As each item is itself a JSON map object, the `primaryKey` of the `selector` can be used to identify the map `key` (in this case the `name` map key) and its `value` (i.e., `urn:example.com:disclaimer`) used to identify the specific key value to validate as unique within the array.
+provides a `path` value as part of the `selector` object which is used to locate the BOM's top-level `properties` array which contains the `property` items that will be validated for uniqueness.
+
+As each item of the selected JSON array is itself a JSON map object, the `primaryKey` of the `selector` is used to identify the map `key` (i.e., `name` in this case) and specified `value` (i.e., `yyz`) for to test for uniqueness within the array.
 
 When the custom validation configuration (above) is applied to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-bom-properties.json` with contents:
 
