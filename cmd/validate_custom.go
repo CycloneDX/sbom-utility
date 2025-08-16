@@ -139,7 +139,7 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 			}
 		} else if jsonMap != nil { // redundant check, but leave for now
 			for _, fx := range action.Functions {
-				getLogger().Tracef("processing function: `%s`...", fx)
+				getLogger().Infof(">> Checking %s: (selector: `%v`)...", fx, action.Selector.String())
 				switch fx {
 				case "hasProperties":
 					properties := action.Properties
