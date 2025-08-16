@@ -36,7 +36,7 @@ The `isUnique` function can be used to validate that an item in a JSON array is 
 
 #### Example: Valid: `property` is unique in the `metadata.properties` array
 
-Using the custom configuration file `test/custom/config-cdx-metadata-properties-disclaimer-unique.json` for this validation check is as follows;
+Using the custom configuration file `test/custom/config-cdx-metadata-properties-disclaimer-unique.json` for this validation check is as follows:
 
 ```json
 {
@@ -119,7 +119,7 @@ $ echo $?
 
 #### Example: Invalid: `property` item is not unique in BOM `properties` array
 
-Using the custom configuration file `test/custom/config-cdx-bom-properties-not-unique.json` for this validation check is as follows;
+Using the custom configuration file `test/custom/config-cdx-bom-properties-not-unique.json` for this validation check is as follows:
 
 ```json
 {
@@ -211,7 +211,7 @@ The `hasProperties` function can be used to validate that specific properties (i
 
 #### Example: Valid: `metadata` has `timestamp`, `supplier`, `component` and `licenses` properties
 
-Using the custom configuration file `test/custom/config-cdx-metadata-elements-found.json` for this validation check is as follows;
+Using the custom configuration file `test/custom/config-cdx-metadata-elements-found.json` for this validation check is as follows:
 
 ```json
 {
@@ -309,7 +309,7 @@ $ echo $?
 
 #### Example: Invalid: `metadata` missing `authors` element
 
-Using the custom configuration file `test/custom/config-cdx-metadata-elements-not-found.json` for this validation check is as follows;
+Using the custom configuration file `test/custom/config-cdx-metadata-elements-not-found.json` for this validation check is as follows:
 
 ```json
 {
@@ -393,7 +393,7 @@ These examples perform both a `isUnique` validation and then further inspec the 
 
 #### Example: Verify unique disclaimer item in `metadata.properties` array and then its `value` property
 
-Using the custom configuration file `test/custom/cdx-1-6-test-metedata-properties-disclaimer.json` for this validation check is as follows;
+Using the custom configuration file `test/custom/cdx-1-6-test-metedata-properties-disclaimer.json` for this validation check is as follows:
 
 ```json
 
@@ -445,9 +445,13 @@ produces the following result:
 
 ---
 
+## Practical use cases
+
+### BOM Disclaimer and Classification
+
 #### Example:
 
-Using the custom configuration file `test/custom/config-cdx-metadata-has-elements.json` for this validation check is as follows;
+Using the custom configuration file `TBD` for this validation check is as follows:
 
 ```json
 
@@ -475,7 +479,7 @@ TBD
 
 #### Example:
 
-Using the custom configuration file `test/custom/config-cdx-metadata-has-elements.json` for this validation check is as follows;
+Using the custom configuration file `TBD` for this validation check is as follows:
 
 ```json
 
