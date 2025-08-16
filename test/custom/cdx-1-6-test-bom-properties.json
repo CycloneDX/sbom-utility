@@ -10,16 +10,16 @@
   },
   "properties": [
     {
+      "name": "yyz",
+      "value": "rush"
+    },
+    {
       "name": "foo",
       "value": "bar1"
     },
     {
       "name": "foo",
       "value": "bar2"
-    },
-    {
-      "name": "yyz",
-      "value": "rush"
     }
   ]
 }
