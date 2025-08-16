@@ -65,7 +65,7 @@ provides a `path` value as part of the `selector` object which is used to locate
 
 As each item of the selected JSON array is itself a JSON map object, the `primaryKey` of the `selector` is used to identify the map `key` (i.e., `name` in this case) and specified `value` (i.e., `yyz`) for to test for uniqueness within the array.
 
-When the custom validation configuration (above) is applied to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-bom-properties.json` with contents:
+When this example's custom validation configuration is applied to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-bom-properties.json` with contents:
 
 ```json
 {
@@ -95,13 +95,13 @@ When the custom validation configuration (above) is applied to the test CycloneD
 }
 ```
 
-and running it from the command line:
+by running it from the command line:
 
 ```bash
 ./sbom-utility validate -i test/custom/cdx-1-6-test-bom-properties.json --custom test/custom/config-cdx-bom-properties-unique.json
 ```
 
-it produces the following result:
+produces the following result:
 
 ```bash
 [INFO] Validating 'test/custom/cdx-1-6-test-bom-properties.json'...
@@ -180,7 +180,7 @@ and applying it to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-bom-pr
 }
 ```
 
-and running it from the command line:
+by running it from the command line:
 
 ```bash
 ./sbom-utility validate -i test/custom/cdx-1-6-test-bom-properties.json --custom test/custom/config-cdx-bom-properties-not-unique.json
@@ -289,7 +289,7 @@ and applying it to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-bom-me
 }
 ```
 
-and running it from the command line:
+by running it from the command line:
 
 ```bash
 ./sbom-utility validate -i test/custom/cdx-1-6-test-bom-metadata.json --custom test/custom/config-cdx-metadata-elements-found.json
@@ -369,7 +369,7 @@ and applying it to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-bom-me
 }
 ```
 
-and running it from the command line:
+by running it from the command line:
 
 ```bash
 ./sbom-utility validate -i test/custom/cdx-1-6-test-bom-metadata.json --custom test/custom/config-cdx-metadata-elements-not-found.json
@@ -460,7 +460,7 @@ and applying it to the same test CycloneDX BOM file that was used on the first `
 }
 ```
 
-and running it from the command line:
+by running it from the command line:
 
 ```bash
 ./sbom-utility validate -i test/custom/cdx-1-6-test-metedata-properties-disclaimer.json --custom test/custom/config-cdx-metadata-properties-disclaimer-unique-match.json
@@ -480,7 +480,7 @@ produces the following result:
 
 ---
 
-## Practical use cases
+## Additional use cases
 
 ### BOM Disclaimer and Classification
 
@@ -539,7 +539,7 @@ When the custom validation configuration (above) is applied to the test CycloneD
 }
 ```
 
-and running it from the command line:
+by running it from the command line:
 
 ```bash
 ./sbom-utility validate -i test/custom/cdx-1-6-test-metedata-properties-disclaimer.json --custom test/custom/config-cdx-metadata-properties-disclaimer-unique.json
@@ -626,7 +626,7 @@ and applying it to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-meteda
 }
 ```
 
-and running it from the command line:
+by running it from the command line:
 
 ```bash
 ./sbom-utility validate -i test/custom/cdx-1-6-test-metedata-properties-disclaimer.json --custom test/custom/config-cdx-metadata-properties-disclaimer-unique-match.json
@@ -658,7 +658,7 @@ and applying it to the test CycloneDX BOM file: `TBD`:
 
 ```
 
-and running it from the command line:
+by running it from the command line:
 
 ```bash
 TBD
