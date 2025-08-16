@@ -106,7 +106,13 @@ type BaseError struct {
 
 // Support the error interface
 func (err BaseError) Error() string {
-	formattedMessage := fmt.Sprintf("%s: %s (%s)", err.Type, err.Message, err.InputFile)
+	if err.Type == "" {
+		err.Type = "UNSPECIFIED"
+	}
+	formattedMessage := fmt.Sprintf("%s: %s", err.Type, err.Message)
+	if err.InputFile != "" {
+		formattedMessage = fmt.Sprintf("%s, BOM: (%s)", formattedMessage, err.InputFile)
+	}
 	if err.Details != "" {
 		return fmt.Sprintf("%s: %s", formattedMessage, err.Details)
 	}

@@ -2,7 +2,7 @@
   "validation": {
     "actions": [
       {
-        "id": "custom-test-metadata-has-elements",
+        "id": "custom-metadata-elements-found",
         "description": "Test the 'metadata' element contains required child elements which are a mix of primitives and complex types.",
         "selector": {
           "path": "metadata"

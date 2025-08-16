@@ -1,0 +1,17 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "metadata": {
+    "timestamp": "2025-08-09T07:20:00.000Z",
+    "component": {
+      "type": "application",
+      "name": "sample app"
+    },
+    "properties": [
+      {
+        "name": "urn:example.com:classification",
+        "value": "This SBOM is Confidential Information. Do not distribute."
+      }
+    ]
+  }
+}

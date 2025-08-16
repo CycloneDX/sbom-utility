@@ -67,8 +67,8 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 		selectorKeyValue = action.Selector.PrimaryKey.Value
 
 		// Use utility's "query" function to obtain BOM document subsets (as JSON map(s))
-		// Prepare a "QueryRequest"
-		// First, use "path" to locate the subset of the BOM document to be processed
+		// Prepare a "QueryRequest" by first using "path" to locate the subset of the BOM
+		// document to be processed
 		qr := common.NewQueryRequest()
 		qr.SetRawFromPaths(action.Selector.Path)
 
@@ -112,7 +112,7 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 			hashmap, innerError = hashJsonArrayElements(jsonArrayOfMap, selectorKey)
 
 			for _, fx := range action.Functions {
-				getLogger().Infof(">> Checking %s: (selector: `%v`)...", fx, action.Selector)
+				getLogger().Infof(">> Checking %s: (selector: `%v`)...", fx, action.Selector.String())
 				switch fx {
 				case "isUnique":
 					unique, numOccurrences := IsUnique(hashmap, selectorKeyValue)
@@ -134,11 +134,12 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 					}
 				default:
 					innerError = getLogger().Errorf("unknown function: `%s`...", fx)
+					return
 				}
 			}
 		} else if jsonMap != nil { // redundant check, but leave for now
 			for _, fx := range action.Functions {
-				getLogger().Tracef("processing function: `%s`...", fx)
+				getLogger().Infof(">> Checking %s: (selector: `%v`)...", fx, action.Selector.String())
 				switch fx {
 				case "hasProperties":
 					properties := action.Properties
@@ -157,6 +158,7 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 					}
 				default:
 					innerError = getLogger().Errorf("unknown function: `%s`...", fx)
+					return
 				}
 			}
 		}

@@ -295,7 +295,7 @@ as you can see, the `schema/test/bom-1.4-custom.schema.json` schema variant was 
 Let us use the `--variant custom` flag and explore a schema failure against another CycloneDX v1.4 SBOM:
 
 ```bash
-./sbom-utility validate -i test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json --variant custom
+./sbom-utility validate -i test/custom/cdx-1-4-test-metadata-property-disclaimer-invalid.json --variant custom
 ```
 
 If you run the sample command above, you would see several "custom" schema errors resulting in an invalid SBOM determination (i.e., `exit status 2`):
@@ -305,9 +305,9 @@ If you run the sample command above, you would see several "custom" schema error
 [INFO] Matching SBOM schema (for validation): schema/test/bom-1.4-custom.schema.json
 [INFO] Loading schema `schema/test/bom-1.4-custom.schema.json`...
 [INFO] Schema `schema/test/bom-1.4-custom.schema.json` loaded.
-[INFO] Validating `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`...
+[INFO] Validating `test/custom/cdx-1-4-test-metadata-property-disclaimer-invalid.json`...
 [INFO] SBOM valid against JSON schema: `false`
-[ERROR] invalid SBOM: schema errors found (test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json):
+[ERROR] invalid SBOM: schema errors found (test/custom/cdx-1-4-test-metadata-property-disclaimer-invalid.json):
 (3) Schema errors detected (use `--debug` for more details):
 	1. Type: [contains], Field: [metadata.properties], Description: [At least one of the items must match]
 	Failing object: [[
@@ -321,7 +321,7 @@ If you run the sample command above, you would see several "custom" schema error
 	  {
 	    "name": "urn:example.com:disclaimer",
 	    "value": "This ... (truncated)
-[INFO] document `test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json`: valid=[false]
+[INFO] document `test/custom/cdx-1-4-test-metadata-property-disclaimer-invalid.json`: valid=[false]
 exit status 2
 ```
 
@@ -348,7 +348,7 @@ The output shows a first schema error indicating the failing JSON object; in thi
 Use the `--debug` or `-d` flag to see all schema error details:
 
 ```bash
-./sbom-utility validate -i test/custom/cdx-1-4-test-custom-metadata-property-disclaimer-invalid.json --variant custom -d
+./sbom-utility validate -i test/custom/cdx-1-4-test-metadata-property-disclaimer-invalid.json --variant custom -d
 ```
 
 The details include the full context of the failing `metadata.properties` object which also includes a `"urn:example.com:classification"` property:

@@ -2,8 +2,8 @@
   "validation": {
     "actions": [
       {
-        "id": "custom-test-bom-structure-best-practice",
-        "description": "Test the BOM has 'metadata', 'components' and 'dependencies' at the top level as \"best practice\".",
+        "id": "custom-bom-structure",
+        "description": "Test the BOM has the top-level properties: 'metadata', 'components' and 'dependencies'.",
         "selector": {
           "path": ""
         },

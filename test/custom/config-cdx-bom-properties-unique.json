@@ -1,0 +1,20 @@
+{
+  "validation": {
+    "actions": [
+      {
+        "id": "custom-bom-properties-unique",
+        "description": "Validate BOM properties unique",
+        "selector": {
+          "path": "properties",
+          "primaryKey": {
+            "key": "name",
+            "value": "yyz"
+          }
+        },
+        "functions": [
+          "isUnique"
+        ]
+      }
+    ]
+  }
+}

@@ -2,7 +2,7 @@
   "validation": {
     "actions": [
       {
-        "id": "custom-metadata-properties-match",
+        "id": "custom-bom-properties-primary-key-missing",
         "description": "Validate BOM metadata properties has a specific disclaimer value.",
         "selector": {
           "path": "metadata.properties",
