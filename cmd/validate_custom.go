@@ -112,7 +112,7 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 			hashmap, innerError = hashJsonArrayElements(jsonArrayOfMap, selectorKey)
 
 			for _, fx := range action.Functions {
-				getLogger().Infof(">> Checking %s: (selector: `%v`)...", fx, action.Selector)
+				getLogger().Infof(">> Checking %s: (selector: `%v`)...", fx, action.Selector.String())
 				switch fx {
 				case "isUnique":
 					unique, numOccurrences := IsUnique(hashmap, selectorKeyValue)
