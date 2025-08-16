@@ -10,7 +10,7 @@
     "properties": [
       {
         "name": "urn:example.com:disclaimer",
-        "value": "This SBOM is current as of the date it was generated and is subject to change."
+        "value": "This SBOM is current as of the date it was generated and will never change."
       },
       {
         "name": "urn:example.com:classification",

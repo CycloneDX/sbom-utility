@@ -2,7 +2,7 @@
   "validation": {
     "actions": [
       {
-        "id": "custom-test-metadata-property-not-found",
+        "id": "custom-metadata-elements-not-found",
         "description": "Test the error if metadata property is not found",
         "selector": {
           "path": "metadata"

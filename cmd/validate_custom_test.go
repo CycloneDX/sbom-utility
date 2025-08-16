@@ -41,14 +41,14 @@ const (
 
 // CycloneDX v1.6
 const (
-	TEST_CUSTOM_CDX_1_6_BEST_PRACTICES      = "test/custom/cdx-1-6-test-best-practices.json"
-	TEST_CUSTOM_CDX_1_6_BOM_PROPERTIES      = "test/custom/cdx-1-6-test-bom-properties.json"
-	TEST_CUSTOM_CDX_1_6_METADATA_PROPERTIES = "test/custom/cdx-1-6-test-metadata-properties.json"
+	TEST_CUSTOM_CDX_1_6_BOM_BEST_PRACTICES_EXAMPLE = "test/custom/cdx-1-6-test-bom-best-practices.json"
+	TEST_CUSTOM_CDX_1_6_BOM_PROPERTIES             = "test/custom/cdx-1-6-test-bom-properties.json"
+	TEST_CUSTOM_CDX_1_6_METADATA_PROPERTIES        = "test/custom/cdx-1-6-test-bom-metadata.json"
 
 	TEST_CUSTOM_CDX_1_6_METADATA_PROPS_CLASSIFICATION_MULTIPLE = "test/custom/cdx-1-6-test-metedata-properties-classification-multiple.json"
 	TEST_CUSTOM_CDX_1_6_METADATA_PROPS_DISCLAIMER_MISMATCH     = "test/custom/cdx-1-6-test-metedata-properties-disclaimer-mismatch.json"
 	TEST_CUSTOM_CDX_1_6_METADATA_PROPS_DISCLAIMER_MISSING      = "test/custom/cdx-1-6-test-metedata-properties-disclaimer-missing.json"
-	TEST_CUSTOM_CDX_1_6_METADATA_PROPS_DISCLAIMER_UNIQUE       = "test/custom/cdx-1-6-test-metedata-properties-disclaimer-unique.json"
+	TEST_CUSTOM_CDX_1_6_METADATA_PROPS_DISCLAIMER_UNIQUE       = "test/custom/cdx-1-6-test-metedata-properties-disclaimer.json"
 )
 
 // -------------------------------------------
@@ -57,19 +57,23 @@ const (
 
 // SPDX
 const (
-	CUSTOM_CONFIG_SPDX_2_X_STRUCTURE = "test/custom/spdx-custom-bom-properties.json"
+	CONFIG_SPDX_2_X_STRUCTURE = "test/custom/config-spdx-bom-properties.json"
 )
 
 // CycloneDX
 const (
-	CUSTOM_CONFIG_BOM_BEST_PRACTICE_PROFILE         = "test/custom/custom-best-practices-profile.json"
-	CUSTOM_CONFIG_BOM_PROPS_UNIQUE                  = "test/custom/custom-bom-properties-unique.json"
-	CUSTOM_CONFIG_BOM_PROPS_NOT_UNIQUE              = "test/custom/custom-bom-properties-not-unique.json"
-	CUSTOM_CONFIG_METADATA_ELEMENTS_NOT_FOUND       = "test/custom/custom-metadata-elements-not-found.json"
-	CUSTOM_CONFIG_METADATA_ELEMENTS_FOUND           = "test/custom/custom-metadata-elements-found.json"
-	CUSTOM_CONFIG_METADATA_PROPS_DISCLAIMER_MATCH   = "test/custom/custom-metadata-properties-disclaimer-match.json"
-	CUSTOM_CONFIG_METADATA_PROPS_DISCLAIMER_UNIQUE  = "test/custom/custom-metadata-properties-disclaimer-unique.json"
-	CUSTOM_CONFIG_METADATA_PROPS_DISCLAIMER_MISSING = "test/custom/custom-metadata-properties-disclaimer-missing.json"
+	CONFIG_CDX_BOM_BEST_PRACTICE_PROFILE         = "test/custom/config-cdx-best-practices-profile.json"
+	CONFIG_CDX_BOM_PROPS_NOT_UNIQUE              = "test/custom/config-cdx-bom-properties-not-unique.json"
+	CONFIG_CDX_BOM_PROPS_PK_MISSING              = "test/custom/config-cdx-bom-properties-primary-key-missing.json"
+	CONFIG_CDX_BOM_PROPS_UNIQUE                  = "test/custom/config-cdx-bom-properties-unique.json"
+	CONFIG_CDX_BOM_STRUCTURE                     = "test/custom/config-cdx-bom-structure.json"
+	CONFIG_CDX_METADATA_ELEMENTS_FOUND           = "test/custom/config-cdx-metadata-elements-found.json"
+	CONFIG_CDX_METADATA_ELEMENTS_NOT_FOUND       = "test/custom/config-cdx-metadata-elements-not-found.json"
+	CONFIG_CDX_METADATA_PROPS_DISCLAIMER_MATCH   = "test/custom/config-cdx-metadata-properties-disclaimer-match.json"
+	CONFIG_CDX_METADATA_PROPS_DISCLAIMER_MISSING = "test/custom/config-cdx-metadata-properties-disclaimer-missing.json"
+	// TODO
+	CONFIG_CDX_METADATA_PROPS_DISCLAIMER_UNIQUE       = "test/custom/config-cdx-metadata-properties-disclaimer-unique.json"
+	CONFIG_CDX_METADATA_PROPS_DISCLAIMER_UNIQUE_MATCH = "test/custom/config-cdx-metadata-properties-disclaimer-unique-match.json"
 )
 
 // License tests
@@ -92,7 +96,7 @@ func TestValidateCustomFormatUnsupportedSPDX_2_2(t *testing.T) {
 		FORMAT_ANY,
 		SCHEMA_VARIANT_NONE,
 		&schema.UnsupportedFormatError{})
-	vti.CustomConfig = CUSTOM_CONFIG_SPDX_2_X_STRUCTURE
+	vti.CustomConfig = CONFIG_SPDX_2_X_STRUCTURE
 	innerTestValidate(t, *vti)
 }
 
@@ -102,7 +106,7 @@ func TestValidateCustomFormatUnsupportedSPDX_2_3(t *testing.T) {
 		FORMAT_ANY,
 		SCHEMA_VARIANT_NONE,
 		&schema.UnsupportedFormatError{})
-	vti.CustomConfig = CUSTOM_CONFIG_SPDX_2_X_STRUCTURE
+	vti.CustomConfig = CONFIG_SPDX_2_X_STRUCTURE
 	innerTestValidate(t, *vti)
 }
 
@@ -130,7 +134,7 @@ func TestValidateCustomErrorCdx14NoLicensesFound(t *testing.T) {
 func TestValidateCustomCdx16_BOMPropsUnique(t *testing.T) {
 	// getLogger().SetLevel(log.TRACE)
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_BOM_PROPERTIES)
-	vti.CustomConfig = CUSTOM_CONFIG_BOM_PROPS_UNIQUE
+	vti.CustomConfig = CONFIG_CDX_BOM_PROPS_UNIQUE
 	document, _, err := innerTestValidate(t, *vti)
 	getLogger().Tracef("filename: '%s', error: '%s'", document.GetFilename(), err)
 }
@@ -139,7 +143,7 @@ func TestValidateCustomCdx16_BOMPropsUnique(t *testing.T) {
 func TestValidateCustomCdx16_BOMPropsNotUnique(t *testing.T) {
 	// getLogger().SetLevel(log.TRACE)
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_BOM_PROPERTIES)
-	vti.CustomConfig = CUSTOM_CONFIG_BOM_PROPS_NOT_UNIQUE
+	vti.CustomConfig = CONFIG_CDX_BOM_PROPS_NOT_UNIQUE
 	vti.ResultExpectedError = &InvalidSBOMError{}
 	vti.ResultExpectedInnerError = &ItemIsUniqueError{}
 	document, _, err := innerValidateInvalidSBOMInnerError(t, *vti)
@@ -151,28 +155,39 @@ func TestValidateCustomCdx16_MetadataPropsUniqueDisclaimer(t *testing.T) {
 	// getLogger().SetLevel(log.TRACE)
 	getLogger().SetLevel(log.TRACE)
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_METADATA_PROPS_DISCLAIMER_UNIQUE)
-	vti.CustomConfig = CUSTOM_CONFIG_METADATA_PROPS_DISCLAIMER_UNIQUE
+	vti.CustomConfig = CONFIG_CDX_METADATA_PROPS_DISCLAIMER_UNIQUE
 	document, results, _ := innerTestValidate(t, *vti)
 	getLogger().Tracef("filename: '%s', results:\n%v", document.GetFilename(), results)
+}
+
+func TestValidateCustomCdx14MetadataPropertyDisclaimerUnique(t *testing.T) {
+	// getLogger().SetLevel(log.TRACE)
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_METADATA_PROPS_DISCLAIMER_UNIQUE)
+	vti.CustomConfig = CONFIG_CDX_METADATA_PROPS_DISCLAIMER_UNIQUE
+	vti.ResultExpectedError = &InvalidSBOMError{}
+	vti.ResultExpectedInnerError = &ItemIsUniqueError{}
+	document, _, err := innerValidateInvalidSBOMInnerError(t, *vti)
+	getLogger().Tracef("filename: '%s', error: '%s'", document.GetFilename(), err)
 }
 
 // -------------------------------------------
 // CycloneDX - hasProperties tests
 // -------------------------------------------
 
-// hasProperties(): Success - BOM has a representative set of min. "best practice" elements
-func TestValidateCustomCdx16_BOMBestPracticeElements(t *testing.T) {
+// hasProperties(): Success - BOM has a representative set of "best practice" elements or "profile"
+func TestValidateCustomCdx16_BOMBestPracticeExample(t *testing.T) {
 	// getLogger().SetLevel(log.TRACE)
-	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_BEST_PRACTICES)
-	vti.CustomConfig = CUSTOM_CONFIG_BOM_BEST_PRACTICE_PROFILE
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_BOM_BEST_PRACTICES_EXAMPLE)
+	vti.CustomConfig = CONFIG_CDX_BOM_BEST_PRACTICE_PROFILE
 	document, results, _ := innerTestValidate(t, *vti)
 	getLogger().Tracef("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
 
+// hasProperties(): Success - BOM elements are structured against a "best practice" profile
 func TestValidateCustomCdx16_BOMStructure(t *testing.T) {
 	// getLogger().SetLevel(log.TRACE)
-	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_BEST_PRACTICES)
-	vti.CustomConfig = CUSTOM_CONFIG_BOM_BEST_PRACTICE_PROFILE
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_BOM_BEST_PRACTICES_EXAMPLE)
+	vti.CustomConfig = CONFIG_CDX_BOM_STRUCTURE
 	document, results, _ := innerTestValidate(t, *vti)
 	getLogger().Tracef("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
@@ -181,7 +196,7 @@ func TestValidateCustomCdx16_BOMStructure(t *testing.T) {
 func TestValidateCustomCdx16_MetadataElementsFound(t *testing.T) {
 	// getLogger().SetLevel(log.TRACE)
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_METADATA_PROPERTIES)
-	vti.CustomConfig = CUSTOM_CONFIG_METADATA_ELEMENTS_FOUND
+	vti.CustomConfig = CONFIG_CDX_METADATA_ELEMENTS_FOUND
 	document, results, _ := innerTestValidate(t, *vti)
 	getLogger().Tracef("filename: '%s', results:\n%v", document.GetFilename(), results)
 }
@@ -190,7 +205,7 @@ func TestValidateCustomCdx16_MetadataElementsFound(t *testing.T) {
 func TestValidateCustomCdx16_MetadataElementsNotFound(t *testing.T) {
 	// getLogger().SetLevel(log.TRACE)
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_METADATA_PROPERTIES)
-	vti.CustomConfig = CUSTOM_CONFIG_METADATA_ELEMENTS_NOT_FOUND
+	vti.CustomConfig = CONFIG_CDX_METADATA_ELEMENTS_NOT_FOUND
 	vti.ResultExpectedError = &InvalidSBOMError{}
 	vti.ResultExpectedInnerError = &ItemHasPropertiesError{}
 	document, _, err := innerValidateInvalidSBOMInnerError(t, *vti)
@@ -198,23 +213,13 @@ func TestValidateCustomCdx16_MetadataElementsNotFound(t *testing.T) {
 }
 
 // -------------------------------------------
-// FAIL - Uniqueness tests
+// FAIL - Other Tests
 // -------------------------------------------
-
-func TestValidateCustomCdx14MetadataPropertyDisclaimerUnique(t *testing.T) {
-	// getLogger().SetLevel(log.TRACE)
-	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_METADATA_PROPS_DISCLAIMER_UNIQUE)
-	vti.CustomConfig = CUSTOM_CONFIG_METADATA_PROPS_DISCLAIMER_UNIQUE
-	vti.ResultExpectedError = &InvalidSBOMError{}
-	vti.ResultExpectedInnerError = &ItemIsUniqueError{}
-	document, _, err := innerValidateInvalidSBOMInnerError(t, *vti)
-	getLogger().Tracef("filename: '%s', error: '%s'", document.GetFilename(), err)
-}
 
 func TestValidateCustomCdx14MetadataPropertyDisclaimerMismatch(t *testing.T) {
 	// getLogger().SetLevel(log.TRACE)
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_METADATA_PROPS_DISCLAIMER_MISMATCH)
-	vti.CustomConfig = CUSTOM_CONFIG_METADATA_PROPS_DISCLAIMER_MATCH
+	vti.CustomConfig = CONFIG_CDX_METADATA_PROPS_DISCLAIMER_MATCH
 	vti.ResultExpectedError = &InvalidSBOMError{}
 	vti.ResultExpectedInnerError = &ItemHasPropertiesError{}
 	document, _, err := innerValidateInvalidSBOMInnerError(t, *vti)
@@ -224,7 +229,7 @@ func TestValidateCustomCdx14MetadataPropertyDisclaimerMismatch(t *testing.T) {
 func TestValidateCustomCdx14MetadataPropertyDisclaimerMissing(t *testing.T) {
 	// getLogger().SetLevel(log.TRACE)
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_METADATA_PROPS_DISCLAIMER_MISSING)
-	vti.CustomConfig = CUSTOM_CONFIG_METADATA_PROPS_DISCLAIMER_MISSING
+	vti.CustomConfig = CONFIG_CDX_METADATA_PROPS_DISCLAIMER_MISSING
 	vti.ResultExpectedError = &InvalidSBOMError{}
 	vti.ResultExpectedInnerError = &JSONElementNotFoundError{}
 	document, _, err := innerValidateInvalidSBOMInnerError(t, *vti)

@@ -2,8 +2,8 @@
   "validation": {
     "actions": [
       {
-        "id": "custom-metadata-properties-missing-primary-key",
-        "description": "Validate BOM metadata properties is missing the primary key",
+        "id": "custom-metadata-properties-disclaimer-missing",
+        "description": "Validate BOM metadata properties is missing the disclaimer primary key",
         "selector": {
           "path": "metadata.properties",
           "primaryKey": {

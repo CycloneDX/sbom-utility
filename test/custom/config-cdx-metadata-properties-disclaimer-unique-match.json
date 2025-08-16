@@ -2,8 +2,8 @@
   "validation": {
     "actions": [
       {
-        "id": "custom-metadata-properties-match",
-        "description": "Validate BOM metadata properties has a specific disclaimer value.",
+        "id": "custom-metadata-properties-disclaimer-unique-match",
+        "description": "Validate BOM metadata properties has a unique disclaimer property and specified value.",
         "selector": {
           "path": "metadata.properties",
           "primaryKey": {
@@ -12,12 +12,12 @@
           }
         },
         "functions": [
-          "hasProperties"
+          "isUnique", "hasProperties"
         ],
         "properties": [
           {
             "key": "value",
-            "value": "This SBOM is current as of the date it was generated and is subject to change\\."
+            "value": "This SBOM is current as of the date it was generated and is subject to change."
           }
         ]
       }
