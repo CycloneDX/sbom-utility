@@ -489,7 +489,7 @@ $ echo $?
 
 ---
 
-#### Example: `metadata.component` has a `purl` whose valid OCI container prefix
+#### Example: `metadata.component` has a `purl` key with a valid OCI container prefix
 
 Using the custom validation configuration file `test/custom/config-cdx-metadata-component-purl-oci.json` with contents::
 
@@ -551,7 +551,12 @@ by running it from the command line:
 produces the following result:
 
 ```bash
-TBD
+[INFO] Validating 'test/custom/cdx-1-6-test-bom-metadata.json'...
+[INFO] BOM valid against JSON schema: 'true'
+[INFO] Loading custom validation config file: 'test/custom/config-cdx-metadata-component-purl-oci.json'...
+[INFO] Validating custom action (id: `custom-metadata-component-purl-oci`, selector: `{ "path": "metadata.component", "primaryKey": { "key": "", "value": "" } }`)...
+[INFO] >> Checking hasProperties: (selector: `{ "path": "metadata.component", "primaryKey": { "key": "", "value": "" } }`), properties: '[{purl ^pkg:oci}]'...
+[INFO] BOM valid against custom JSON configuration: 'test/custom/config-cdx-metadata-component-purl-oci.json': 'true'
 ```
 
 ---
