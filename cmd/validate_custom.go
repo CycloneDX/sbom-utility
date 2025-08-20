@@ -60,7 +60,7 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 	var selectorKey, selectorKeyValue string
 
 	for _, action := range actions {
-		getLogger().Infof("Validating custom action (id: `%s`, selector: `%s`)...", action.Id, action.Selector.String())
+		getLogger().Infof("Validating custom action (id: `%s`, selector: `%s`...", action.Id, action.Selector.String())
 
 		// local selector kv copy
 		selectorKey = action.Selector.PrimaryKey.Key
@@ -115,14 +115,14 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 			for _, fx := range action.Functions {
 				switch fx {
 				case "isUnique":
-					getLogger().Infof(">> Checking %s: (selector: `%v`)...", fx, action.Selector.String())
+					getLogger().Infof(">> Checking %s: selector: `%v`...", fx, action.Selector.String())
 					unique, numOccurrences := IsUnique(hashmap, selectorKeyValue)
 					if !unique {
 						innerError = NewItemIsUniqueError(action, numOccurrences)
 					}
 				case "hasProperties":
 					properties := action.Properties
-					getLogger().Infof(">> Checking %s: (selector: `%v`), properties: '%v'...", fx, action.Selector.String(), properties)
+					getLogger().Infof(">> Checking %s: selector: `%v`, properties: '%v'...", fx, action.Selector.String(), properties)
 					// make sure we have properties to validate...
 					if len(properties) == 0 {
 						// TODO need a special error for "no properties found"
@@ -144,7 +144,7 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 				switch fx {
 				case "hasProperties":
 					properties := action.Properties
-					getLogger().Infof(">> Checking %s: (selector: `%v`), properties: '%v'...", fx, action.Selector.String(), properties)
+					getLogger().Infof(">> Checking %s: selector: `%v`, properties: '%v'...", fx, action.Selector.String(), properties)
 					// make sure we have properties to validate...
 					if len(properties) == 0 {
 						//innerError = getLogger().Errorf("No properties declared. Action id: `%s`, selector path: `%v`", action.Id, path)
