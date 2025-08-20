@@ -48,7 +48,7 @@ type ItemSelector struct {
 }
 
 func (selector *ItemSelector) String() string {
-	return fmt.Sprintf("{ \"path\": \"%s\", \"primaryKey\": %s }", selector.Path, selector.PrimaryKey.String())
+	return fmt.Sprintf("{\"path\": \"%s\", \"primaryKey\": %s}", selector.Path, selector.PrimaryKey.String())
 }
 
 type ItemKeyValue struct {
@@ -57,7 +57,7 @@ type ItemKeyValue struct {
 }
 
 func (kv *ItemKeyValue) String() string {
-	return fmt.Sprintf("{ \"key\": \"%s\", \"value\": \"%s\" }", kv.Key, kv.Value)
+	return fmt.Sprintf("{\"key\": \"%s\", \"value\": \"%s\"}", kv.Key, kv.Value)
 }
 
 type CustomValidation struct {
