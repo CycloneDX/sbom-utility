@@ -21,6 +21,7 @@ package cmd
 import (
 	"testing"
 
+	"github.com/CycloneDX/sbom-utility/common"
 	"github.com/CycloneDX/sbom-utility/log"
 	"github.com/CycloneDX/sbom-utility/schema"
 )
@@ -232,9 +233,19 @@ func TestValidateCustomCdx16MetadataPropertyDisclaimerMissing(t *testing.T) {
 // isUnique(): Success - BOM "metadata.properties" has a unique "disclaimer" property
 func TestValidateCustomCdx16_MetadataPropsDisclaimerUniqueAndMatch(t *testing.T) {
 	// getLogger().SetLevel(log.TRACE)
-	getLogger().SetLevel(log.TRACE)
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_METADATA_PROPS_DISCLAIMER_UNIQUE)
 	vti.CustomConfig = CONFIG_CDX_METADATA_PROPS_DISCLAIMER_UNIQUE_MATCH
 	document, results, _ := innerTestValidate(t, *vti)
 	getLogger().Tracef("filename: '%s', results:\n%v", document.GetFilename(), results)
+}
+
+// Failure: selector's primary key missing
+func TestValidateCustomCdx16_BOMPropertiesPrimaryKeyNotFound(t *testing.T) {
+	getLogger().SetLevel(log.INFO)
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_BOM_PROPERTIES)
+	vti.CustomConfig = CONFIG_CDX_BOM_PROPS_PK_MISSING
+	vti.ResultExpectedError = &InvalidSBOMError{}
+	vti.ResultExpectedInnerError = &common.QueryError{}
+	document, _, err := innerValidateInvalidSBOMInnerError(t, *vti)
+	getLogger().Tracef("filename: '%s', error: '%s'", document.GetFilename(), err)
 }

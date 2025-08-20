@@ -2,23 +2,17 @@
   "validation": {
     "actions": [
       {
-        "id": "custom-bom-properties-primary-key-missing",
-        "description": "Validate BOM metadata properties has a specific disclaimer value.",
+        "id": "custom-bom-properties-unique",
+        "description": "Validate BOM properties unique",
         "selector": {
-          "path": "metadata.properties",
+          "path": "properties",
           "primaryKey": {
-            "key": "name",
-            "value": "urn:example.com:disclaimer"
+            "key": "kwarg",
+            "value": "baz"
           }
         },
         "functions": [
-          "hasProperties"
-        ],
-        "properties": [
-          {
-            "key": "name",
-            "value": "urn:example.com:disclaimer"
-          }
+          "isUnique"
         ]
       }
     ]

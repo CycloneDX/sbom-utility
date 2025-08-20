@@ -57,12 +57,12 @@ func validateCustomCDXDocument(document *schema.BOM, validateFlags utils.Validat
 }
 
 func processValidationActions(document *schema.BOM, actions []schema.ValidationAction) (innerError error) {
-	var path, selectorKey, selectorKeyValue string
+	var selectorKey, selectorKeyValue string
 
 	for _, action := range actions {
 		getLogger().Infof("Validating custom action (id: `%s`, selector: `%s`)...", action.Id, action.Selector.String())
 
-		path = action.Selector.Path
+		// local selector kv copy
 		selectorKey = action.Selector.PrimaryKey.Key
 		selectorKeyValue = action.Selector.PrimaryKey.Value
 
@@ -84,8 +84,9 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 		result, errQuery := QueryJSONMap(document.GetJSONMap(), qr)
 
 		if errQuery != nil {
-			// TODO: leverage Query error type or create new type
-			innerError = getLogger().Errorf("%s. %s: %s", ERR_QUERY, MSG_QUERY_ERROR_SELECTOR, path)
+			// normalize to QueryError{} type, but do not display the internal QueryRequest structure
+			innerError = common.NewQuerySelectorError(nil, action.Selector.String())
+			// emit any partial results
 			buffer, errEncode := utils.EncodeAnyToDefaultIndentedJSONStr(result)
 			if errEncode != nil {
 				getLogger().Tracef("result: %s", buffer.String())

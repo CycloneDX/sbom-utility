@@ -47,28 +47,34 @@ const (
 // e.g.,SELECT * FROM product.customers WHERE country="Germany";
 type QueryRequest struct {
 	selectKeysRaw      string
-	selectKeys         []string
+	SelectKeys         []string
 	fromPathsRaw       string
-	fromPathSelectors  []string
+	FromPathSelectors  []string
 	wherePredicatesRaw string
 	wherePredicates    []string
-	whereFilters       []WhereFilter
+	WhereFilters       []WhereFilter
 	orderByKeysRaw     string
 	//orderByKeys       []string // TODO
 }
 
 // Implement the Stringer interface for QueryRequest
-func (qr *QueryRequest) String() string {
-	buffer, _ := utils.EncodeAnyToDefaultIndentedJSONStr(qr)
-	return buffer.String()
+// TODO: BUG: QueryRequest is NOT formatting (returns "{}\n")
+func (request *QueryRequest) Encode() string {
+	buffer, _ := utils.EncodeAnyToDefaultIndentedJSONStr(request)
+	trimmed := strings.TrimSuffix(buffer.String(), "\n")
+	return trimmed
 }
 
-func (qr *QueryRequest) StringAsParameters() string {
+func (request *QueryRequest) String() string {
+	return request.Encode()
+}
+
+func (request *QueryRequest) StringAsParameters() string {
 	sb := new(strings.Builder)
-	sb.WriteString(fmt.Sprintf("--select: %s\n", qr.selectKeysRaw))
-	sb.WriteString(fmt.Sprintf("--from: %s\n", qr.fromPathsRaw))
-	sb.WriteString(fmt.Sprintf("--where: %s\n", qr.wherePredicatesRaw))
-	sb.WriteString(fmt.Sprintf("--orderby: %s\n", qr.orderByKeysRaw))
+	sb.WriteString(fmt.Sprintf("--select: %s\n", request.selectKeysRaw))
+	sb.WriteString(fmt.Sprintf("--from: %s\n", request.fromPathsRaw))
+	sb.WriteString(fmt.Sprintf("--where: %s\n", request.wherePredicatesRaw))
+	sb.WriteString(fmt.Sprintf("--orderby: %s\n", request.orderByKeysRaw))
 	return sb.String()
 }
 
@@ -111,15 +117,15 @@ func ParseSelectKeys(rawSelectKeys string) (selectKeys []string) {
 	return
 }
 
-func (qr *QueryRequest) SetRawSelectKeys(rawSelectKeys string) []string {
-	qr.selectKeysRaw = rawSelectKeys
+func (request *QueryRequest) SetRawSelectKeys(rawSelectKeys string) []string {
+	request.selectKeysRaw = rawSelectKeys
 	// Note: it is an intentional side-effect to update the parsed, slice version
-	qr.selectKeys = ParseSelectKeys(rawSelectKeys)
-	return qr.selectKeys
+	request.SelectKeys = ParseSelectKeys(rawSelectKeys)
+	return request.SelectKeys
 }
 
-func (qr *QueryRequest) GetSelectKeys() []string {
-	return qr.selectKeys
+func (request *QueryRequest) GetSelectKeys() []string {
+	return request.SelectKeys
 }
 
 // ------------
@@ -135,15 +141,15 @@ func ParseFromPaths(rawFromPaths string) (fromPaths []string) {
 	return
 }
 
-func (qr *QueryRequest) SetRawFromPaths(rawFromPaths string) []string {
-	qr.fromPathsRaw = rawFromPaths
+func (request *QueryRequest) SetRawFromPaths(rawFromPaths string) []string {
+	request.fromPathsRaw = rawFromPaths
 	// Note: it is an intentional side-effect to update the parsed, slice version
-	qr.fromPathSelectors = ParseFromPaths(rawFromPaths)
-	return qr.fromPathSelectors
+	request.FromPathSelectors = ParseFromPaths(rawFromPaths)
+	return request.FromPathSelectors
 }
 
-func (qr *QueryRequest) GetFromKeys() []string {
-	return qr.fromPathSelectors
+func (request *QueryRequest) GetFromKeys() []string {
+	return request.FromPathSelectors
 }
 
 // ------------
@@ -166,14 +172,12 @@ func ParseWhereFilters(wherePredicates []string) (whereFilters []WhereFilter, er
 
 	var filter *WhereFilter
 	for _, predicate := range wherePredicates {
-
 		filter = ParseWhereFilter(predicate)
 
 		if filter == nil {
 			err = NewQueryWhereClauseError(nil, predicate)
 			return
 		}
-
 		whereFilters = append(whereFilters, *filter)
 	}
 
@@ -213,29 +217,29 @@ func ParseWhereFilter(rawExpression string) (pWhereSelector *WhereFilter) {
 	return &whereFilter
 }
 
-func (qr *QueryRequest) GetWhereFilters() ([]WhereFilter, error) {
-	if len(qr.wherePredicates) == 0 && qr.wherePredicatesRaw != "" {
+func (request *QueryRequest) GetWhereFilters() ([]WhereFilter, error) {
+	if len(request.wherePredicates) == 0 && request.wherePredicatesRaw != "" {
 		// TODO: consider if we really need error handling
-		err := qr.parseWhereFilterClauses()
+		err := request.parseWhereFilterClauses()
 		if err != nil {
 			return nil, err
 		}
 	}
-	return qr.whereFilters, nil
+	return request.WhereFilters, nil
 }
 
-func (qr *QueryRequest) SetWhereFilters(filters []WhereFilter) {
-	qr.whereFilters = filters
+func (request *QueryRequest) SetWhereFilters(filters []WhereFilter) {
+	request.WhereFilters = filters
 }
 
-func (qr *QueryRequest) SetRawWherePredicates(rawWherePredicates string) []WhereFilter {
-	qr.wherePredicatesRaw = rawWherePredicates
+func (request *QueryRequest) SetRawWherePredicates(rawWherePredicates string) []WhereFilter {
+	request.wherePredicatesRaw = rawWherePredicates
 	// Note: it is an intentional side-effect to update the parsed, slice versions
 	// of the predicates as well as the  subsequent filters.
-	qr.wherePredicates = ParseWherePredicates(qr.wherePredicatesRaw)
+	request.wherePredicates = ParseWherePredicates(request.wherePredicatesRaw)
 	// TODO: implement a getLogger() and log (and perhaps return) the parsing error
-	qr.whereFilters, _ = ParseWhereFilters(qr.wherePredicates)
-	return qr.whereFilters
+	request.WhereFilters, _ = ParseWhereFilters(request.wherePredicates)
+	return request.WhereFilters
 }
 
 // --------------
@@ -244,33 +248,30 @@ func (qr *QueryRequest) SetRawWherePredicates(rawWherePredicates string) []Where
 
 // Parse command-line flag values including:
 // --select <clause> --from <clause> and --where <clause>
-func (qr *QueryRequest) parseQueryClauses() (err error) {
-	qr.selectKeys = ParseSelectKeys(qr.selectKeysRaw)
-	qr.fromPathSelectors = ParseFromPaths(qr.fromPathsRaw)
-	qr.wherePredicates = ParseWherePredicates(qr.wherePredicatesRaw)
-	qr.whereFilters, err = ParseWhereFilters(qr.wherePredicates)
+func (request *QueryRequest) parseQueryClauses() (err error) {
+	request.SelectKeys = ParseSelectKeys(request.selectKeysRaw)
+	request.FromPathSelectors = ParseFromPaths(request.fromPathsRaw)
+	request.wherePredicates = ParseWherePredicates(request.wherePredicatesRaw)
+	request.WhereFilters, err = ParseWhereFilters(request.wherePredicates)
 	return
 }
 
 // Parse/validate each key=<regex> expression found on WHERE clause
-func (qr *QueryRequest) parseWhereFilterClauses() (err error) {
-	if len(qr.wherePredicates) == 0 {
-		return NewQueryWhereClauseError(qr, qr.wherePredicatesRaw)
+func (request *QueryRequest) parseWhereFilterClauses() (err error) {
+	if len(request.wherePredicates) == 0 {
+		return NewQueryWhereClauseError(request, request.wherePredicatesRaw)
 	}
 
 	var filter *WhereFilter
-	for _, predicate := range qr.wherePredicates {
-
+	for _, predicate := range request.wherePredicates {
 		filter = ParseWhereFilter(predicate)
 
 		if filter == nil {
-			err = NewQueryWhereClauseError(qr, predicate)
+			err = NewQueryWhereClauseError(request, predicate)
 			return
 		}
-
-		qr.whereFilters = append(qr.whereFilters, *filter)
+		request.WhereFilters = append(request.WhereFilters, *filter)
 	}
-
 	return
 }
 
@@ -282,8 +283,8 @@ type QueryResponse struct {
 }
 
 // Implement the Stringer interface for QueryRequest
-func (qr *QueryResponse) String() string {
-	buffer, _ := utils.EncodeAnyToDefaultIndentedJSONStr(qr)
+func (response *QueryResponse) String() string {
+	buffer, _ := utils.EncodeAnyToDefaultIndentedJSONStr(response)
 	return buffer.String()
 }
 
@@ -305,8 +306,13 @@ type WhereFilter struct {
 
 // Implement the Stringer interface for QueryRequest
 func (filter *WhereFilter) String() string {
+	return filter.Encode()
+}
+
+func (filter *WhereFilter) Encode() string {
 	buffer, _ := utils.EncodeAnyToDefaultIndentedJSONStr(filter)
-	return buffer.String()
+	trimmed := strings.TrimSuffix(buffer.String(), "\n")
+	return trimmed
 }
 
 // Note: Used to normalize key lookups in maps accounting for changes in

@@ -195,7 +195,7 @@ produces the following result:
 [INFO] Validating custom action (id: `custom-bom-properties-not-unique`, selector: `{ "path": "properties", "primaryKey": { "key": "name", "value": "foo" } }`)...
 [INFO] >> Checking isUnique: (selector: `{ "path": "properties", "primaryKey": { "key": "name", "value": "foo" } }`)...
 [INFO] BOM valid against custom JSON configuration: 'test/custom/config-cdx-bom-properties-not-unique.json': 'false'
-[ERROR] invalid SBOM: custom validation failed: Function: 'isUnique', selector: { "path": "properties", "primaryKey": { "key": "name", "value": "foo" } }, matches found: 2, BOM: (test/custom/cdx-1-6-test-bom-properties.json)
+[ERROR] invalid SBOM: custom validation failed: Function: 'isUnique', selector: { "path": "properties", "primaryKey": { "key": "name", "value": "foo" } }, matches found: 2, bom: (test/custom/cdx-1-6-test-bom-properties.json)
 [INFO] document 'test/custom/cdx-1-6-test-bom-properties.json': valid=[false]
 ```
 
@@ -384,7 +384,7 @@ produces the following error result since no `authors` property was found:
 [INFO] Validating custom action (id: `custom-metadata-elements-not-found`, selector: `{ "path": "metadata", "primaryKey": { "key": "", "value": "" } }`)...
 [INFO] >> Checking hasProperties: (selector: `{ "path": "metadata", "primaryKey": { "key": "", "value": "" } }`)...
 [INFO] BOM valid against custom JSON configuration: 'test/custom/config-cdx-metadata-elements-not-found.json': 'false'
-[ERROR] invalid SBOM: custom validation failed: Function: 'hasProperties' selector: { "path": "metadata", "primaryKey": { "key": "", "value": "" } }, property: { "key": "authors", "value": "" }, BOM: (test/custom/cdx-1-6-test-bom-metadata.json)
+[ERROR] invalid SBOM: custom validation failed: Function: 'hasProperties' selector: { "path": "metadata", "primaryKey": { "key": "", "value": "" } }, property: { "key": "authors", "value": "" }, bom: (test/custom/cdx-1-6-test-bom-metadata.json)
 [INFO] document 'test/custom/cdx-1-6-test-bom-metadata.json': valid=[false]
 ```
 

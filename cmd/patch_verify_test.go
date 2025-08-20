@@ -85,7 +85,7 @@ func VerifyPatchedOutputFileResult(t *testing.T, originalTest PatchTestInfo) (ou
 
 		// short-circuit if the "from" path dereferenced to a non-existent key
 		if pResult == nil {
-			t.Errorf("empty (nil) found at from clause: %s", request.String())
+			t.Errorf("empty (nil) found at from clause: %s", request.Encode())
 			return
 		}
 

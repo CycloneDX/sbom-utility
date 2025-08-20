@@ -241,7 +241,7 @@ func QueryJSONMap(jsonMap map[string]interface{}, request *common.QueryRequest) 
 		// use this (map) output instead of the one from the "find" stage
 		resultJson, err = selectFieldsFromMap(request, typedResult)
 		if err != nil {
-			getLogger().Debugf("selectFieldsFromMap() failed. QueryRequest: %s", request.String())
+			getLogger().Debugf("selectFieldsFromMap() failed. QueryRequest: %s", request.Encode())
 			return
 		}
 		// Warn WHERE clause cannot be applied to a single map object; it was
@@ -256,7 +256,7 @@ func QueryJSONMap(jsonMap map[string]interface{}, request *common.QueryRequest) 
 		fromObjectSlice, _ := resultJson.([]interface{})
 		resultJson, err = selectFieldsFromSlice(request, fromObjectSlice)
 		if err != nil {
-			getLogger().Debugf("selectFieldsFromSlice() failed. QueryRequest: %s", request.String())
+			getLogger().Debugf("selectFieldsFromSlice() failed. QueryRequest: %s", request.Encode())
 			return
 		}
 	default:
@@ -269,7 +269,7 @@ func QueryJSONMap(jsonMap map[string]interface{}, request *common.QueryRequest) 
 
 	if err != nil {
 		// TODO: use %w once supported by logging package
-		getLogger().Debugf("unhandled error: %s, QueryRequest: %s", err, request.String())
+		getLogger().Debugf("unhandled error: %s, QueryRequest: %s", err, request.Encode())
 		return
 	}
 	return
@@ -292,7 +292,7 @@ func findFromObject(request *common.QueryRequest, jsonMap map[string]interface{}
 		if pResults == nil {
 			err = common.NewQueryFromClauseError(
 				request,
-				fmt.Sprintf("%s: (%s)", MSG_QUERY_ERROR_FROM_KEY_NOT_FOUND, key))
+				fmt.Sprintf("%s: (%s)", common.MSG_QUERY_ERROR_FROM_KEY_NOT_FOUND, key))
 			return
 		}
 
@@ -311,7 +311,7 @@ func findFromObject(request *common.QueryRequest, jsonMap map[string]interface{}
 			// So if there are more keys left as selectors it is an error
 			if len(request.GetFromKeys()) > i+1 {
 				err = common.NewQueryFromClauseError(request,
-					fmt.Sprintf("%s: (%s)", MSG_QUERY_ERROR_FROM_KEY_SLICE_DEREFERENCE, key))
+					fmt.Sprintf("%s: (%s)", common.MSG_QUERY_ERROR_FROM_KEY_SLICE_DEREFERENCE, key))
 				return
 			}
 		default:
@@ -325,8 +325,8 @@ func findFromObject(request *common.QueryRequest, jsonMap map[string]interface{}
 	return
 }
 
-// NOTE: it is the caller's responsibility to convert to other output formats
-// based upon other flag values
+// NOTE: it is the caller's responsibility to convert to other output formats based upon other flag values
+// TODO: Assure all errors returned from this function are QueryError types
 func selectFieldsFromMap(request *common.QueryRequest, jsonMap map[string]interface{}) (mapSelectedFields map[string]interface{}, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
@@ -356,7 +356,7 @@ func selectFieldsFromMap(request *common.QueryRequest, jsonMap map[string]interf
 		if fieldKey == common.QUERY_TOKEN_WILDCARD {
 			err = common.NewQuerySelectClauseError(
 				request,
-				MSG_QUERY_ERROR_SELECT_WILDCARD)
+				common.MSG_QUERY_ERROR_SELECT_WILDCARD)
 			getLogger().Trace(err)
 			return
 		}
@@ -367,8 +367,8 @@ func selectFieldsFromMap(request *common.QueryRequest, jsonMap map[string]interf
 	return
 }
 
-// NOTE: it is the caller's responsibility to convert to other output formats
-// based upon other flag values
+// NOTE: it is the caller's responsibility to convert to other output formats based upon other flag values
+// TODO: Assure all errors returned from this function are QueryError types
 func selectFieldsFromSlice(request *common.QueryRequest, jsonSlice []interface{}) (sliceSelectedFields []interface{}, err error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
@@ -431,7 +431,8 @@ func whereFilterMatch(mapObject map[string]interface{}, whereFilters []common.Wh
 		value, present := mapObject[key]
 		if !present {
 			match = false
-			err = getLogger().Errorf("key '%s' not found in object map", key)
+			err = common.NewQueryWhereKeyNotFoundError(nil, key, filter.String())
+			getLogger().Error(err.Error())
 			break
 		}
 
