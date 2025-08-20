@@ -565,7 +565,7 @@ produces the following result:
 
 These examples perform both a `isUnique` validation and then further inspec the unique item to validate its other properties (i.e., key-value pairs) using the `hasProperties` function.
 
-#### Example:
+#### Example: BOM `properties` has a unique `name` property and associated `value` that matches regex
 
 Using the custom validation configuration file `test/custom/config-cdx-bom-properties-unique-match.json` with contents::
 
