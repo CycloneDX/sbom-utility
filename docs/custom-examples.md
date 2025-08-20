@@ -434,29 +434,29 @@ Using the custom validation configuration file `test/custom/config-cdx-metadata-
 }
 ```
 
-and applying it to the same test CycloneDX BOM file that was used on the first `isUnique` example: `test/custom/cdx-1-6-test-metedata-properties-disclaimer.json`:
+and applying it to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-metedata-properties-disclaimer.json`:
 
 ```json
 {
-	"bomFormat": "CycloneDX",
-	"specVersion": "1.6",
-	"metadata": {
-		"timestamp": "2025-08-09T07:20:00.000Z",
-		"component": {
-			"type": "application",
-			"name": "sample app"
-		},
-		"properties": [
-			{
-				"name": "urn:example.com:disclaimer",
-				"value": "This SBOM is current as of the date it was generated and is subject to change."
-			},
-			{
-				"name": "urn:example.com:classification",
-				"value": "This SBOM is Confidential Information. Do not distribute."
-			}
-		]
-    }
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "metadata": {
+    "timestamp": "2025-08-09T07:20:00.000Z",
+    "component": {
+      "type": "application",
+      "name": "sample app"
+    },
+    "properties": [
+      {
+        "name": "urn:example.com:disclaimer",
+        "value": "This SBOM is current as of the date it was generated and is subject to change."
+      },
+      {
+        "name": "urn:example.com:classification",
+        "value": "This SBOM is Confidential Information. Do not distribute."
+      }
+    ]
+  }
 }
 ```
 
@@ -604,24 +604,24 @@ and applying it to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-meteda
 
 ```json
 {
-	"bomFormat": "CycloneDX",
-	"specVersion": "1.6",
-	"metadata": {
-		"timestamp": "2025-08-09T07:20:00.000Z",
-		"component": {
-			"type": "application",
-			"name": "sample app"
-		},
-		"properties": [
-			{
-				"name": "urn:example.com:disclaimer",
-				"value": "This SBOM is current as of the date it was generated and is subject to change."
-			},
-			{
-				"name": "urn:example.com:classification",
-				"value": "This SBOM is Confidential Information. Do not distribute."
-			}
-		]
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "metadata": {
+    "timestamp": "2025-08-09T07:20:00.000Z",
+    "component": {
+      "type": "application",
+      "name": "sample app"
+    },
+    "properties": [
+      {
+        "name": "urn:example.com:disclaimer",
+        "value": "This SBOM is current as of the date it was generated and is subject to change."
+      },
+      {
+        "name": "urn:example.com:classification",
+        "value": "This SBOM is Confidential Information. Do not distribute."
+      }
+    ]
   }
 }
 ```
