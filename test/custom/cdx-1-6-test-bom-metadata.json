@@ -7,7 +7,8 @@
     "timestamp": "2025-08-09T07:20:00.000Z",
     "component": {
       "name": "sample app",
-      "type": "application"
+      "type": "container",
+      "purl": "pkg:oci/app/sample@2.0.0"
     },
     "licenses": [
       {

@@ -113,15 +113,16 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 			hashmap, innerError = hashJsonArrayElements(jsonArrayOfMap, selectorKey)
 
 			for _, fx := range action.Functions {
-				getLogger().Infof(">> Checking %s: (selector: `%v`)...", fx, action.Selector.String())
 				switch fx {
 				case "isUnique":
+					getLogger().Infof(">> Checking %s: (selector: `%v`)...", fx, action.Selector.String())
 					unique, numOccurrences := IsUnique(hashmap, selectorKeyValue)
 					if !unique {
 						innerError = NewItemIsUniqueError(action, numOccurrences)
 					}
 				case "hasProperties":
 					properties := action.Properties
+					getLogger().Infof(">> Checking %s: (selector: `%v`), properties: '%v'...", fx, action.Selector.String(), properties)
 					// make sure we have properties to validate...
 					if len(properties) == 0 {
 						// TODO need a special error for "no properties found"
@@ -140,10 +141,10 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 			}
 		} else if jsonMap != nil { // redundant check, but leave for now
 			for _, fx := range action.Functions {
-				getLogger().Infof(">> Checking %s: (selector: `%v`)...", fx, action.Selector.String())
 				switch fx {
 				case "hasProperties":
 					properties := action.Properties
+					getLogger().Infof(">> Checking %s: (selector: `%v`), properties: '%v'...", fx, action.Selector.String(), properties)
 					// make sure we have properties to validate...
 					if len(properties) == 0 {
 						//innerError = getLogger().Errorf("No properties declared. Action id: `%s`, selector path: `%v`", action.Id, path)

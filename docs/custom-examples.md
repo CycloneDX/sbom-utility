@@ -217,7 +217,7 @@ echo $?
 ```
 ---
 
-#### Example: Invalid:
+#### Example: Invalid: `primaryKey` not found
 
 Using the custom validation configuration file `test/custom/config-cdx-bom-properties-primary-key-missing.json` with contents::
 
@@ -405,6 +405,8 @@ $ echo $?
 0
 ```
 
+---
+
 #### Example: Invalid: `metadata` missing `authors` element
 
 Using the custom validation configuration file `test/custom/config-cdx-metadata-elements-not-found.json` with contents::
@@ -483,6 +485,73 @@ As expected, the exit code reflects the failed result:
 ```bash
 $ echo $?
 2
+```
+
+---
+
+#### Example: `metadata.component` has a `purl` whose valid OCI container prefix
+
+Using the custom validation configuration file `test/custom/config-cdx-metadata-component-purl-oci.json` with contents::
+
+```json
+{
+  "validation": {
+    "actions": [
+      {
+        "id": "custom-metadata-component-purl-oci",
+        "description": "Test the 'metadata.component' element contains a Package URL (PURL) with an OCI container prefix.",
+        "selector": {
+          "path": "metadata.component"
+        },
+        "functions": [
+          "hasProperties"
+        ],
+        "properties": [
+          {
+            "key": "purl",
+            "value": "^pkg:oci"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+and applying it to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-bom-metadata.json`:
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  ...
+  "metadata": {
+    "timestamp": "2025-08-09T07:20:00.000Z",
+    "component": {
+      "name": "sample app",
+      "type": "container",
+      "purl": "pkg:oci/app/sample@2.0.0"
+    },
+    "licenses": [
+      ...
+    ],
+    "supplier": {
+      ...
+    }
+  }
+}
+```
+
+by running it from the command line:
+
+```bash
+./sbom-utility validate -i test/custom/cdx-1-6-test-bom-metadata.json --custom test/custom/config-cdx-metadata-component-purl-oci.json
+```
+
+produces the following result:
+
+```bash
+TBD
 ```
 
 ---
@@ -568,7 +637,7 @@ produces the following result:
 [INFO] Loading custom validation config file: 'test/custom/config-cdx-bom-properties-unique-match.json'...
 [INFO] Validating custom action (id: `custom-bom-properties-unique-match`, selector: `{ "path": "properties", "primaryKey": { "key": "name", "value": "yyz" } }`)...
 [INFO] >> Checking isUnique: (selector: `{ "path": "properties", "primaryKey": { "key": "name", "value": "yyz" } }`)...
-[INFO] >> Checking hasProperties: (selector: `{ "path": "properties", "primaryKey": { "key": "name", "value": "yyz" } }`)...
+[INFO] >> Checking hasProperties: (selector: `{ "path": "properties", "primaryKey": { "key": "name", "value": "yyz" } }`), properties: '[{value rush}]'...
 [INFO] BOM valid against custom JSON configuration: 'test/custom/config-cdx-bom-properties-unique-match.json': 'true'
 ```
 

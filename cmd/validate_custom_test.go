@@ -63,16 +63,25 @@ const (
 
 // CycloneDX
 const (
-	CONFIG_CDX_BOM_BEST_PRACTICE_PROFILE              = "test/custom/config-cdx-best-practices-profile.json"
-	CONFIG_CDX_BOM_PROPS_NOT_UNIQUE                   = "test/custom/config-cdx-bom-properties-not-unique.json"
-	CONFIG_CDX_BOM_PROPS_UNIQUE                       = "test/custom/config-cdx-bom-properties-unique.json"
-	CONFIG_CDX_BOM_STRUCTURE                          = "test/custom/config-cdx-bom-structure.json"
-	CONFIG_CDX_METADATA_ELEMENTS_FOUND                = "test/custom/config-cdx-metadata-elements-found.json"
-	CONFIG_CDX_METADATA_ELEMENTS_NOT_FOUND            = "test/custom/config-cdx-metadata-elements-not-found.json"
+	// isUnique()
+	CONFIG_CDX_BOM_PROPS_NOT_UNIQUE   = "test/custom/config-cdx-bom-properties-not-unique.json"
+	CONFIG_CDX_BOM_PROPS_UNIQUE       = "test/custom/config-cdx-bom-properties-unique.json"
+	CONFIG_CDX_BOM_PROPS_UNIQUE_MATCH = "test/custom/config-cdx-bom-properties-unique-match.json"
+
+	// hasProperties()
+	CONFIG_CDX_BOM_STRUCTURE               = "test/custom/config-cdx-bom-structure.json"
+	CONFIG_CDX_METADATA_ELEMENTS_FOUND     = "test/custom/config-cdx-metadata-elements-found.json"
+	CONFIG_CDX_METADATA_ELEMENTS_NOT_FOUND = "test/custom/config-cdx-metadata-elements-not-found.json"
+	CONFIG_CDX_METADATA_COMPONENT_PURL_OCI = "test/custom/config-cdx-metadata-component-purl-oci.json"
+
+	// Disclaimer use cases
 	CONFIG_CDX_METADATA_PROPS_DISCLAIMER_MATCH        = "test/custom/config-cdx-metadata-properties-disclaimer-match.json"
 	CONFIG_CDX_METADATA_PROPS_DISCLAIMER_MISSING      = "test/custom/config-cdx-metadata-properties-disclaimer-missing.json"
 	CONFIG_CDX_METADATA_PROPS_DISCLAIMER_UNIQUE       = "test/custom/config-cdx-metadata-properties-disclaimer-unique.json"
 	CONFIG_CDX_METADATA_PROPS_DISCLAIMER_UNIQUE_MATCH = "test/custom/config-cdx-metadata-properties-disclaimer-unique-match.json"
+
+	// Profiles
+	CONFIG_CDX_BOM_BEST_PRACTICE_PROFILE = "test/custom/config-cdx-best-practices-profile.json"
 
 	// TODO
 	CONFIG_CDX_BOM_PROPS_PK_MISSING = "test/custom/config-cdx-bom-properties-primary-key-missing.json"
@@ -247,5 +256,25 @@ func TestValidateCustomCdx16_BOMPropertiesPrimaryKeyNotFound(t *testing.T) {
 	vti.ResultExpectedError = &InvalidSBOMError{}
 	vti.ResultExpectedInnerError = &common.QueryError{}
 	document, _, err := innerValidateInvalidSBOMInnerError(t, *vti)
+	getLogger().Tracef("filename: '%s', error: '%s'", document.GetFilename(), err)
+}
+
+// ==========
+
+// isUnique() && hasProperties(): Success
+func TestValidateCustomCdx16_BOMPropsUniqueMatch(t *testing.T) {
+	getLogger().SetLevel(log.TRACE)
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_BOM_PROPERTIES)
+	vti.CustomConfig = CONFIG_CDX_BOM_PROPS_UNIQUE_MATCH
+	document, _, err := innerTestValidate(t, *vti)
+	getLogger().Tracef("filename: '%s', error: '%s'", document.GetFilename(), err)
+}
+
+// isUnique() && hasProperties(): Success
+func TestValidateCustomCdx16_MetadataCompPURL(t *testing.T) {
+	getLogger().SetLevel(log.TRACE)
+	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_BOM_METADATA)
+	vti.CustomConfig = CONFIG_CDX_METADATA_COMPONENT_PURL_OCI
+	document, _, err := innerTestValidate(t, *vti)
 	getLogger().Tracef("filename: '%s', error: '%s'", document.GetFilename(), err)
 }
