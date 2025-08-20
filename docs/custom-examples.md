@@ -656,7 +656,7 @@ This section shows some additional use cases that are based on real-world BOM re
 
 The BOM `metadata` has a `properties` array that allows organizations to add their own custom, property key-value pairs for legal and or classification purposes and validate for them.
 
-##### Example: Validate "disclaimer" `property` with `name` key is unique in the `metadata.properties` array
+##### Example: Valid: Validate "disclaimer" `property` with `name` key is unique in the `metadata.properties` array
 
 Using the custom validation configuration file `test/custom/config-cdx-metadata-properties-disclaimer-unique.json` with contents::
 
