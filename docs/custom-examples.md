@@ -27,6 +27,8 @@ Examples are provided for each custom validation function or "check":
 
 - [`isUnique` examples](#isunique-examples) - used to validate array item uniqueness.
 - [`hasProperties` examples](#hasproperties-examples) - used to validate that a selected JSON object has specified properties.
+- [Combined examples](#combined-examples) - shows how to combine the `isUnique` function with the `hasProperties` function on the same selected JSON array.
+- [Additional use cases](#additional-use-cases) - additional, real-world use cases.
 
 ---
 
@@ -401,90 +403,17 @@ $ echo $?
 
 These examples perform both a `isUnique` validation and then further inspec the unique item to validate its other properties (i.e., key-value pairs) using the `hasProperties` function.
 
-#### Example: Verify unique disclaimer item in `metadata.properties` array and then its `value` property
-
-Using the custom validation configuration file `test/custom/config-cdx-metadata-properties-disclaimer-unique-match.json` with contents::
-
-```json
-{
-  "validation": {
-    "actions": [
-      {
-        "id": "custom-metadata-properties-disclaimer-unique-match",
-        "description": "Validate BOM metadata properties has a unique disclaimer property and specified value.",
-        "selector": {
-          "path": "metadata.properties",
-          "primaryKey": {
-            "key": "name",
-            "value": "urn:example.com:disclaimer"
-          }
-        },
-        "functions": [
-          "isUnique", "hasProperties"
-        ],
-        "properties": [
-          {
-            "key": "value",
-            "value": "This SBOM is current as of the date it was generated and is subject to change."
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-and applying it to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-metedata-properties-disclaimer.json`:
-
-```json
-{
-  "bomFormat": "CycloneDX",
-  "specVersion": "1.6",
-  "metadata": {
-    "timestamp": "2025-08-09T07:20:00.000Z",
-    "component": {
-      "type": "application",
-      "name": "sample app"
-    },
-    "properties": [
-      {
-        "name": "urn:example.com:disclaimer",
-        "value": "This SBOM is current as of the date it was generated and is subject to change."
-      },
-      {
-        "name": "urn:example.com:classification",
-        "value": "This SBOM is Confidential Information. Do not distribute."
-      }
-    ]
-  }
-}
-```
-
-by running it from the command line:
-
-```bash
-./sbom-utility validate -i test/custom/cdx-1-6-test-metedata-properties-disclaimer.json --custom test/custom/config-cdx-metadata-properties-disclaimer-unique-match.json
-```
-
-produces the following result:
-
-```bash
-[INFO] Validating 'test/custom/cdx-1-6-test-metedata-properties-disclaimer.json'...
-[INFO] BOM valid against JSON schema: 'true'
-[INFO] Loading custom validation config file: 'test/custom/config-cdx-metadata-properties-disclaimer-unique-match.json'...
-[INFO] Validating custom action (id: `custom-metadata-properties-disclaimer-unique-match`, selector: `{ "path": "metadata.properties", "primaryKey": { "key": "name", "value": "urn:example.com:disclaimer" } }`)...
-[INFO] >> Checking isUnique: (selector: `{ "path": "metadata.properties", "primaryKey": { "key": "name", "value": "urn:example.com:disclaimer" } }`)...
-[INFO] >> Checking hasProperties: (selector: `{ "path": "metadata.properties", "primaryKey": { "key": "name", "value": "urn:example.com:disclaimer" } }`)...
-[INFO] BOM valid against custom JSON configuration: 'test/custom/config-cdx-metadata-properties-disclaimer-unique-match.json': 'true'
-```
-
 ---
 
 ## Additional use cases
 
-### BOM Disclaimer and Classification
+This section shows some additional use cases that are based on real-world requirements.
 
-#### Example: Valid: `property` is unique in the `metadata.properties` array
+#### BOM Disclaimer and Classification
+
+The BOM `metadata` has a `properties` array that allows organizations to add their own custom, property key-value pairs for legal and or classification purposes and validate for them.
+
+##### Example: Validate "disclaimer" `property` with `name` key is unique in the `metadata.properties` array
 
 Using the custom validation configuration file `test/custom/config-cdx-metadata-properties-disclaimer-unique.json` with contents::
 
@@ -567,7 +496,9 @@ $ echo $?
 
 ---
 
-#### Example: unique `disclaimer` and `value` property matches
+##### Example: unique `disclaimer` and `value` property matches
+
+This example builds upon the last example additionally validate that the unique property with `name` key equal to `urn:example.com:disclaimer` also has a `value` that matches a specific value.
 
 Using the custom validation configuration file `test/custom/config-cdx-metadata-properties-disclaimer-unique-match.json` with contents::
 

@@ -241,7 +241,7 @@ func TestValidateCustomCdx16_MetadataPropsDisclaimerUniqueAndMatch(t *testing.T)
 
 // Failure: selector's primary key missing
 func TestValidateCustomCdx16_BOMPropertiesPrimaryKeyNotFound(t *testing.T) {
-	getLogger().SetLevel(log.INFO)
+	// getLogger().SetLevel(log.INFO)
 	vti := NewValidateTestInfoMinimum(TEST_CUSTOM_CDX_1_6_BOM_PROPERTIES)
 	vti.CustomConfig = CONFIG_CDX_BOM_PROPS_PK_MISSING
 	vti.ResultExpectedError = &InvalidSBOMError{}
