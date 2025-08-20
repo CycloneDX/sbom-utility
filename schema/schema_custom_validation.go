@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/CycloneDX/sbom-utility/utils"
 )
@@ -40,6 +41,22 @@ type ValidationAction struct {
 	Selector    ItemSelector   `json:"selector"`
 	Functions   []string       `json:"functions"`
 	Properties  []ItemKeyValue `json:"properties"`
+}
+
+func (action *ValidationAction) PropertiesString() string {
+	var sb strings.Builder
+	numProps := len(action.Properties)
+	if numProps > 0 {
+		sb.WriteString("[")
+		for i, property := range action.Properties {
+			sb.WriteString(property.String())
+			if i < numProps {
+				sb.WriteString(",")
+			}
+		}
+		sb.WriteString("]")
+	}
+	return sb.String()
 }
 
 type ItemSelector struct {

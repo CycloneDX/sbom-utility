@@ -122,7 +122,7 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 					}
 				case "hasProperties":
 					properties := action.Properties
-					getLogger().Infof(">> Checking %s: selector: `%v`, properties: '%v'...", fx, action.Selector.String(), properties)
+					getLogger().Infof(">> Checking %s: selector: `%v`, properties: '%s'...", fx, action.Selector.String(), action.PropertiesString())
 					// make sure we have properties to validate...
 					if len(properties) == 0 {
 						// TODO need a special error for "no properties found"
@@ -144,7 +144,7 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 				switch fx {
 				case "hasProperties":
 					properties := action.Properties
-					getLogger().Infof(">> Checking %s: selector: `%v`, properties: '%v'...", fx, action.Selector.String(), properties)
+					getLogger().Infof(">> Checking %s: selector: `%v`, properties: '%s'...", fx, action.Selector.String(), action.PropertiesString())
 					// make sure we have properties to validate...
 					if len(properties) == 0 {
 						//innerError = getLogger().Errorf("No properties declared. Action id: `%s`, selector path: `%v`", action.Id, path)
