@@ -28,7 +28,10 @@ Examples are provided for each custom validation function or "check":
 - [`isUnique` examples](#isunique-examples) - used to validate array item uniqueness.
 - [`hasProperties` examples](#hasproperties-examples) - used to validate that a selected JSON object has specified properties.
 - [Combined examples](#combined-examples) - shows how to combine the `isUnique` function with the `hasProperties` function on the same selected JSON array.
-- [Additional use cases](#additional-use-cases) - additional, real-world use cases.  These include:
+
+## Examples by use case
+
+- [Use case examples](#use-case-examples) - additional, real-world use cases.  These include:
   - [BOM disclaimer and classification](#bom-disclaimer-and-classification) - organizations can add custom `metadata.properties` to both add legal disclaimers and classifications.
 
 ---
@@ -406,9 +409,9 @@ These examples perform both a `isUnique` validation and then further inspec the 
 
 ---
 
-## Additional use cases
+## Use case examples
 
-This section shows some additional use cases that are based on real-world requirements.
+This section shows some additional use cases that are based on real-world BOM requirements.
 
 #### BOM Disclaimer and Classification
 
