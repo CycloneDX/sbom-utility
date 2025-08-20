@@ -2,8 +2,8 @@
   "validation": {
     "actions": [
       {
-        "id": "custom-bom-properties-unique",
-        "description": "Validate BOM properties unique",
+        "id": "custom-bom-properties-primary-key-missing",
+        "description": "Validate BOM properties primary key is missing",
         "selector": {
           "path": "properties",
           "primaryKey": {

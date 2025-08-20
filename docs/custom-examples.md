@@ -215,6 +215,90 @@ In this invalid example, the exit code will reflect the custom validation failur
 echo $?
 2
 ```
+---
+
+#### Example: Invalid:
+
+Using the custom validation configuration file `test/custom/config-cdx-bom-properties-primary-key-missing.json` with contents::
+
+```json
+{
+  "validation": {
+    "actions": [
+      {
+        "id": "custom-bom-properties-primary-key-missing",
+        "description": "Validate BOM properties primary key is missing",
+        "selector": {
+          "path": "properties",
+          "primaryKey": {
+            "key": "kwarg",
+            "value": "baz"
+          }
+        },
+        "functions": [
+          "isUnique"
+        ]
+      }
+    ]
+  }
+}
+```
+
+and applying it to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-bom-properties.json`:
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "metadata": {
+    "timestamp": "2025-08-09T07:20:00.000Z",
+    "component": {
+      "name": "sample app",
+      "type": "application"
+    }
+  },
+  "properties": [
+    {
+      "name": "yyz",
+      "value": "rush"
+    },
+    {
+      "name": "foo",
+      "value": "bar1"
+    },
+    {
+      "name": "foo",
+      "value": "bar2"
+    }
+  ]
+}
+```
+
+by running it from the command line:
+
+```bash
+./sbom-utility validate -i test/custom/cdx-1-6-test-bom-properties.json --custom test/custom/config-cdx-bom-properties-primary-key-missing.json
+```
+
+produces the following result:
+
+```bash
+[INFO] Validating 'test/custom/cdx-1-6-test-bom-properties.json'...
+[INFO] BOM valid against JSON schema: 'true'
+[INFO] Loading custom validation config file: 'test/custom/config-cdx-bom-properties-primary-key-missing.json'...
+[INFO] Validating custom action (id: `custom-bom-properties-primary-key-missing`, selector: `{ "path": "properties", "primaryKey": { "key": "kwarg", "value": "baz" } }`)...
+[ERROR] invalid query: key `kwarg` not found in object map: {
+    "Key": "kwarg",
+    "Operand": "=",
+    "Value": "baz",
+    "ValueRegEx": "baz"
+}
+[INFO] BOM valid against custom JSON configuration: 'test/custom/config-cdx-bom-properties-primary-key-missing.json': 'false'
+[ERROR] invalid SBOM: invalid query: invalid selector into JSON document: { "path": "properties", "primaryKey": { "key": "kwarg", "value": "baz" } }, bom: (test/custom/cdx-1-6-test-bom-properties.json)
+[INFO] document 'test/custom/cdx-1-6-test-bom-properties.json': valid=[false]
+```
+
+which indicates the `primaryKey` selector with `key` set to `"kwarg"` is not found in the BOM's `metadata.properties` array.
 
 ---
 
@@ -406,6 +490,87 @@ $ echo $?
 ### Combined examples
 
 These examples perform both a `isUnique` validation and then further inspec the unique item to validate its other properties (i.e., key-value pairs) using the `hasProperties` function.
+
+#### Example:
+
+Using the custom validation configuration file `test/custom/config-cdx-bom-properties-unique-match.json` with contents::
+
+```json
+{
+  "validation": {
+    "actions": [
+      {
+        "id": "custom-bom-properties-unique-match",
+        "description": "Validate BOM named property is unique and has the specific value",
+        "selector": {
+          "path": "properties",
+          "primaryKey": {
+            "key": "name",
+            "value": "yyz"
+          }
+        },
+        "functions": [
+          "isUnique", "hasProperties"
+        ],
+        "properties": [
+          {
+            "key": "value",
+            "value": "rush"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+and applying it to the test CycloneDX BOM file: `test/custom/cdx-1-6-test-bom-properties.json`:
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "metadata": {
+    "timestamp": "2025-08-09T07:20:00.000Z",
+    "component": {
+      "name": "sample app",
+      "type": "application"
+    }
+  },
+  "properties": [
+    {
+      "name": "yyz",
+      "value": "rush"
+    },
+    {
+      "name": "foo",
+      "value": "bar1"
+    },
+    {
+      "name": "foo",
+      "value": "bar2"
+    }
+  ]
+}
+```
+
+by running it from the command line:
+
+```bash
+./sbom-utility validate -i test/custom/cdx-1-6-test-bom-properties.json --custom test/custom/config-cdx-bom-properties-unique-match.json
+```
+
+produces the following result:
+
+```bash
+[INFO] Validating 'test/custom/cdx-1-6-test-bom-properties.json'...
+[INFO] BOM valid against JSON schema: 'true'
+[INFO] Loading custom validation config file: 'test/custom/config-cdx-bom-properties-unique-match.json'...
+[INFO] Validating custom action (id: `custom-bom-properties-unique-match`, selector: `{ "path": "properties", "primaryKey": { "key": "name", "value": "yyz" } }`)...
+[INFO] >> Checking isUnique: (selector: `{ "path": "properties", "primaryKey": { "key": "name", "value": "yyz" } }`)...
+[INFO] >> Checking hasProperties: (selector: `{ "path": "properties", "primaryKey": { "key": "name", "value": "yyz" } }`)...
+[INFO] BOM valid against custom JSON configuration: 'test/custom/config-cdx-bom-properties-unique-match.json': 'true'
+```
 
 ---
 
