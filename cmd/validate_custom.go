@@ -60,7 +60,7 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 	var selectorKey, selectorKeyValue string
 
 	for _, action := range actions {
-		getLogger().Infof("Validating custom action (id: `%s`, selector: `%s`...", action.Id, action.Selector.String())
+		getLogger().Infof("Validating custom action (id: `%s`, selector: `%s`)...", action.Id, action.Selector.String())
 
 		// local selector kv copy
 		selectorKey = action.Selector.PrimaryKey.Key
