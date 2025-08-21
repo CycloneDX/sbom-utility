@@ -430,13 +430,13 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 	if validateFlags.ConfigCustomValidationFile != "" {
 		valid, err = validateCustom(bom, validateFlags, LicensePolicyConfig)
 
+		// else assert custom validation passed
+		getLogger().Infof("BOM valid against custom JSON configuration: '%s': '%t'", validateFlags.ConfigCustomValidationFile, valid)
+
 		// return an "invalid" result with error
 		if !valid {
 			return INVALID, bom, schemaErrors, err
 		}
-
-		// else assert custom validation passed
-		getLogger().Infof("BOM valid against custom JSON configuration: '%s'", validateFlags.ConfigCustomValidationFile)
 	}
 
 	// All validation tests passed; return VALID

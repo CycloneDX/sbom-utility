@@ -18,7 +18,9 @@
 
 package common
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // ------------------------------------------------
 // Query error type
@@ -34,6 +36,15 @@ const (
 	MSG_QUERY_INVALID_REQUEST         = "invalid query request"
 	MSG_QUERY_INVALID_RESPONSE        = "invalid query response"
 	MSG_QUERY_INVALID_DATATYPE        = "invalid result data type"
+)
+
+// Query error details
+const (
+	MSG_QUERY_ERROR_SELECTOR                   = "invalid selector into JSON document"
+	MSG_QUERY_ERROR_FROM_KEY_NOT_FOUND         = "key not found in path"
+	MSG_QUERY_ERROR_FROM_KEY_SLICE_DEREFERENCE = "key attempts to dereference into an array"
+	MSG_QUERY_ERROR_SELECT_WILDCARD            = "wildcard cannot be used with other values"
+	MSG_QUERY_ERROR_WHERE_KEY_NOT_FOUND        = "key `%s` not found in object map"
 )
 
 // Query error formatting
@@ -90,6 +101,17 @@ func NewQueryWhereClauseError(qr *QueryRequest, detail string) *QueryError {
 	return err
 }
 
+func NewQueryWhereKeyNotFoundError(qr *QueryRequest, key string, detail string) *QueryError {
+	message := fmt.Sprintf(MSG_QUERY_ERROR_WHERE_KEY_NOT_FOUND, key)
+	var err = NewQueryError(qr, message, detail)
+	return err
+}
+
+func NewQuerySelectorError(qr *QueryRequest, detail string) *QueryError {
+	var err = NewQueryError(qr, MSG_QUERY_ERROR_SELECTOR, detail)
+	return err
+}
+
 // QueryError error interface
 func (err QueryError) Error() string {
 	// TODO: use a string buffer to build error message
@@ -100,9 +122,10 @@ func (err QueryError) Error() string {
 	}
 	formattedMessage := fmt.Sprintf("%s: %s%s", err.Type, err.Message, detail)
 
-	// NOTE: the QueryRequest has a custom String() interface to self format
+	// NOTE: the QueryRequest also has a custom String() interface to self format
 	if err.request != nil {
-		formattedMessage = fmt.Sprintf("%s\n%s", formattedMessage, err.request)
+		requestString := err.request.Encode()
+		formattedMessage = fmt.Sprintf("%s\nrequest=%s", formattedMessage, requestString)
 	}
 	return formattedMessage
 }

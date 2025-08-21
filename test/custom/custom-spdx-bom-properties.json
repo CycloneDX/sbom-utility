@@ -2,7 +2,7 @@
   "validation": {
     "actions": [
       {
-        "id": "cdx-1-6-test-custom-best-practices",
+        "id": "cdx-1-6-test--best-practices",
         "description": "Validate SPDX BOM top-level fields",
         "selector": {
           "path": ""

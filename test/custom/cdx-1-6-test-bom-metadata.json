@@ -1,0 +1,32 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "serialNumber": "urn:uuid:1a2b3c4d-1234-abcd-9876-a3b4c5d6e7e0",
+  "metadata": {
+    "timestamp": "2025-08-09T07:20:00.000Z",
+    "component": {
+      "name": "sample app",
+      "type": "container",
+      "purl": "pkg:oci/app/sample@2.0.0"
+    },
+    "licenses": [
+      {
+        "license": {
+          "id": "Apache-2.0"
+        }
+      }
+    ],
+    "supplier": {
+      "name": "Example.com",
+      "url": [
+        "https://example.com"
+      ],
+      "contact": [
+        {
+          "email": "info@example.com"
+        }
+      ]
+    }
+  }
+}

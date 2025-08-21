@@ -1,0 +1,26 @@
+{
+  "validation": {
+    "actions": [
+      {
+        "id": "custom-bom-properties-unique-match",
+        "description": "Validate BOM named property is unique and has the specific value",
+        "selector": {
+          "path": "properties",
+          "primaryKey": {
+            "key": "name",
+            "value": "yyz"
+          }
+        },
+        "functions": [
+          "isUnique", "hasProperties"
+        ],
+        "properties": [
+          {
+            "key": "value",
+            "value": "rush"
+          }
+        ]
+      }
+    ]
+  }
+}

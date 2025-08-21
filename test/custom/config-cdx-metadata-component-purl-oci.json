@@ -1,0 +1,22 @@
+{
+  "validation": {
+    "actions": [
+      {
+        "id": "custom-metadata-component-purl-oci",
+        "description": "Test the 'metadata.component' element contains a Package URL (PURL) with an OCI container prefix.",
+        "selector": {
+          "path": "metadata.component"
+        },
+        "functions": [
+          "hasProperties"
+        ],
+        "properties": [
+          {
+            "key": "purl",
+            "value": "^pkg:oci"
+          }
+        ]
+      }
+    ]
+  }
+}

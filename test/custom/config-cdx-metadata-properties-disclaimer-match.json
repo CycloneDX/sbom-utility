@@ -2,7 +2,7 @@
   "validation": {
     "actions": [
       {
-        "id": "custom-metadata-properties-match",
+        "id": "custom-metadata-properties-disclaimer-match",
         "description": "Validate BOM metadata properties has a specific disclaimer value.",
         "selector": {
           "path": "metadata.properties",
@@ -16,8 +16,8 @@
         ],
         "properties": [
           {
-            "key": "name",
-            "value": "urn:example.com:disclaimer"
+            "key": "value",
+            "value": "This SBOM is current as of the date it was generated and is subject to change\\."
           }
         ]
       }

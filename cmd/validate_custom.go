@@ -57,18 +57,18 @@ func validateCustomCDXDocument(document *schema.BOM, validateFlags utils.Validat
 }
 
 func processValidationActions(document *schema.BOM, actions []schema.ValidationAction) (innerError error) {
-	var path, selectorKey, selectorKeyValue string
+	var selectorKey, selectorKeyValue string
 
 	for _, action := range actions {
 		getLogger().Infof("Validating custom action (id: `%s`, selector: `%s`)...", action.Id, action.Selector.String())
 
-		path = action.Selector.Path
+		// local selector kv copy
 		selectorKey = action.Selector.PrimaryKey.Key
 		selectorKeyValue = action.Selector.PrimaryKey.Value
 
 		// Use utility's "query" function to obtain BOM document subsets (as JSON map(s))
-		// Prepare a "QueryRequest"
-		// First, use "path" to locate the subset of the BOM document to be processed
+		// Prepare a "QueryRequest" by first using "path" to locate the subset of the BOM
+		// document to be processed
 		qr := common.NewQueryRequest()
 		qr.SetRawFromPaths(action.Selector.Path)
 
@@ -84,8 +84,9 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 		result, errQuery := QueryJSONMap(document.GetJSONMap(), qr)
 
 		if errQuery != nil {
-			// TODO: leverage Query error type or create new type
-			innerError = getLogger().Errorf("%s. %s: %s", ERR_QUERY, MSG_QUERY_ERROR_SELECTOR, path)
+			// normalize to QueryError{} type, but do not display the internal QueryRequest structure
+			innerError = common.NewQuerySelectorError(nil, action.Selector.String())
+			// emit any partial results
 			buffer, errEncode := utils.EncodeAnyToDefaultIndentedJSONStr(result)
 			if errEncode != nil {
 				getLogger().Tracef("result: %s", buffer.String())
@@ -112,15 +113,16 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 			hashmap, innerError = hashJsonArrayElements(jsonArrayOfMap, selectorKey)
 
 			for _, fx := range action.Functions {
-				getLogger().Infof(">> Checking %s: (selector: `%v`)...", fx, action.Selector)
 				switch fx {
 				case "isUnique":
+					getLogger().Infof(">> Checking %s: selector: `%v`...", fx, action.Selector.String())
 					unique, numOccurrences := IsUnique(hashmap, selectorKeyValue)
 					if !unique {
 						innerError = NewItemIsUniqueError(action, numOccurrences)
 					}
 				case "hasProperties":
 					properties := action.Properties
+					getLogger().Infof(">> Checking %s: selector: `%v`, properties: '%s'...", fx, action.Selector.String(), action.PropertiesString())
 					// make sure we have properties to validate...
 					if len(properties) == 0 {
 						// TODO need a special error for "no properties found"
@@ -134,14 +136,15 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 					}
 				default:
 					innerError = getLogger().Errorf("unknown function: `%s`...", fx)
+					return
 				}
 			}
 		} else if jsonMap != nil { // redundant check, but leave for now
 			for _, fx := range action.Functions {
-				getLogger().Tracef("processing function: `%s`...", fx)
 				switch fx {
 				case "hasProperties":
 					properties := action.Properties
+					getLogger().Infof(">> Checking %s: selector: `%v`, properties: '%s'...", fx, action.Selector.String(), action.PropertiesString())
 					// make sure we have properties to validate...
 					if len(properties) == 0 {
 						//innerError = getLogger().Errorf("No properties declared. Action id: `%s`, selector path: `%v`", action.Id, path)
@@ -157,6 +160,7 @@ func processValidationActions(document *schema.BOM, actions []schema.ValidationA
 					}
 				default:
 					innerError = getLogger().Errorf("unknown function: `%s`...", fx)
+					return
 				}
 			}
 		}

@@ -33,6 +33,7 @@ const (
 
 // General error messages
 const (
+	ERR_TYPE_UNSPECIFIED              = "UNSPECIFIED"
 	ERR_TYPE_INVALID_JSON_TYPE        = "invalid JSON type"
 	ERR_TYPE_INVALID_JSON_ARRAY       = "invalid JSON array"
 	ERR_TYPE_INVALID_JSON_MAP         = "invalid JSON map"
@@ -71,16 +72,6 @@ const (
 	MSG_LICENSE_HASH_ERROR     = "hash of license failed"
 )
 
-// Query error details
-const (
-	ERR_QUERY                                  = "query error"
-	MSG_QUERY_ERROR_SELECTOR                   = "invalid selector path into JSON document"
-	MSG_QUERY_ERROR_ELEMENT_NOT_FOUND          = "element not found in JSON document"
-	MSG_QUERY_ERROR_FROM_KEY_NOT_FOUND         = "key not found in path"
-	MSG_QUERY_ERROR_FROM_KEY_SLICE_DEREFERENCE = "key attempts to dereference into an array"
-	MSG_QUERY_ERROR_SELECT_WILDCARD            = "wildcard cannot be used with other values"
-)
-
 // formatting Error() interface
 const (
 	ERR_FORMAT_DETAIL_SEP = ": "
@@ -106,7 +97,13 @@ type BaseError struct {
 
 // Support the error interface
 func (err BaseError) Error() string {
-	formattedMessage := fmt.Sprintf("%s: %s (%s)", err.Type, err.Message, err.InputFile)
+	if err.Type == "" {
+		err.Type = ERR_TYPE_UNSPECIFIED
+	}
+	formattedMessage := fmt.Sprintf("%s: %s", err.Type, err.Message)
+	if err.InputFile != "" {
+		formattedMessage = fmt.Sprintf("%s, bom: (%s)", formattedMessage, err.InputFile)
+	}
 	if err.Details != "" {
 		return fmt.Sprintf("%s: %s", formattedMessage, err.Details)
 	}

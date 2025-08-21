@@ -1,0 +1,20 @@
+{
+  "validation": {
+    "actions": [
+      {
+        "id": "custom-bom-properties-primary-key-missing",
+        "description": "Validate BOM properties primary key is missing",
+        "selector": {
+          "path": "properties",
+          "primaryKey": {
+            "key": "kwarg",
+            "value": "baz"
+          }
+        },
+        "functions": [
+          "isUnique"
+        ]
+      }
+    ]
+  }
+}

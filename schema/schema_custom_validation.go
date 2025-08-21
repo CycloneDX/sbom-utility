@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/CycloneDX/sbom-utility/utils"
 )
@@ -42,13 +43,29 @@ type ValidationAction struct {
 	Properties  []ItemKeyValue `json:"properties"`
 }
 
+func (action *ValidationAction) PropertiesString() string {
+	var sb strings.Builder
+	numProps := len(action.Properties)
+	if numProps > 0 {
+		sb.WriteString("[")
+		for i, property := range action.Properties {
+			sb.WriteString(property.String())
+			if i < numProps {
+				sb.WriteString(",")
+			}
+		}
+		sb.WriteString("]")
+	}
+	return sb.String()
+}
+
 type ItemSelector struct {
 	Path       string       `json:"path"`
 	PrimaryKey ItemKeyValue `json:"primaryKey"`
 }
 
 func (selector *ItemSelector) String() string {
-	return fmt.Sprintf("{ \"path\": \"%s\", \"primaryKey\": %s }", selector.Path, selector.PrimaryKey.String())
+	return fmt.Sprintf("{\"path\": \"%s\", \"primaryKey\": %s}", selector.Path, selector.PrimaryKey.String())
 }
 
 type ItemKeyValue struct {
@@ -57,7 +74,7 @@ type ItemKeyValue struct {
 }
 
 func (kv *ItemKeyValue) String() string {
-	return fmt.Sprintf("{ \"key\": \"%s\", \"value\": \"%s\" }", kv.Key, kv.Value)
+	return fmt.Sprintf("{\"key\": \"%s\", \"value\": \"%s\"}", kv.Key, kv.Value)
 }
 
 type CustomValidation struct {

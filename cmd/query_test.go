@@ -310,7 +310,7 @@ func TestQueryFailCdx14MetadataComponentInvalidKey(t *testing.T) {
 		"metadata.component.foo")
 	expectedErrorStrings := []string{
 		common.MSG_QUERY_INVALID_FROM_CLAUSE,
-		MSG_QUERY_ERROR_FROM_KEY_NOT_FOUND,
+		common.MSG_QUERY_ERROR_FROM_KEY_NOT_FOUND,
 	}
 
 	// Expect a QueryError
@@ -336,7 +336,7 @@ func TestQueryFailCdx14MetadataComponentInvalidSelectClause(t *testing.T) {
 		"metadata.component")
 	expectedErrorStrings := []string{
 		common.MSG_QUERY_INVALID_SELECT_CLAUSE,
-		MSG_QUERY_ERROR_SELECT_WILDCARD,
+		common.MSG_QUERY_ERROR_SELECT_WILDCARD,
 	}
 	// Expect a QueryError
 	_, err := innerQueryError(t, cti, request, &common.QueryError{})
@@ -351,7 +351,7 @@ func TestQueryFailCdx14InvalidFromClauseWithArray(t *testing.T) {
 		"metadata.properties.name")
 	expectedErrorStrings := []string{
 		common.MSG_QUERY_INVALID_FROM_CLAUSE,
-		MSG_QUERY_ERROR_FROM_KEY_SLICE_DEREFERENCE,
+		common.MSG_QUERY_ERROR_FROM_KEY_SLICE_DEREFERENCE,
 	}
 	// Expect a QueryError
 	_, err := innerQueryError(t, cti, request, &common.QueryError{})

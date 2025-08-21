@@ -6,12 +6,12 @@
   "metadata": {
       "timestamp": "2025-08-09T07:20:00.000Z",
       "component": {
-        "name": "sample app",
+        "name": "Sample application",
         "type": "application",
-        "bom-ref": "pkg:app/sample@2.0.0",
-        "purl": "pkg:app/sample@2.0.0",
+        "bom-ref": "pkg:oci/app/sample@2.0.0",
+        "purl": "pkg:oci/app/sample@2.0.0",
         "version": "2.0.0",
-        "description": "Sample application",
+        "description": "Sample containerized application",
         "hashes": [
           {
             "alg": "SHA-256",
