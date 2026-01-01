@@ -55,6 +55,7 @@ type CDXBom struct {
 	Properties         *[]CDXProperty          `json:"properties,omitempty" cdx:"added:1.5"`
 	Declarations       *CDXDeclaration         `json:"declarations,omitempty" cdx:"added:1.6"`
 	Definitions        *CDXDefinition          `json:"definitions,omitempty" cdx:"added:1.6"`
+	Citations          *[]CDXCitation          `json:"citations,omitempty" cdx:"+1.7"`
 }
 
 // v1.2: existed
