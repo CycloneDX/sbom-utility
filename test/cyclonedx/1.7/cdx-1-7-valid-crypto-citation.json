@@ -1,0 +1,87 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.7",
+  "serialNumber": "urn:uuid:3e671687-395b-41f5-a30f-a58921a69b79",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2025-12-28T21:40:00Z",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "cdxgen",
+          "version": "11.0.0"
+        }
+      ]
+    },
+    "component": {
+      "bom-ref": "pkg:maven/org.example/server@1.0.0",
+      "type": "application",
+      "group": "org.example",
+      "name": "server",
+      "version": "1.0.0"
+    }
+  },
+  "components": [
+    {
+      "bom-ref": "pkg:maven/org.example/crypto-lib@2.0.0",
+      "type": "library",
+      "name": "crypto-lib",
+      "version": "2.0.0",
+      "evidence": {
+        "occurrences": [
+          {
+            "location": "/usr/local/bin/crypto-lib.jar"
+          }
+        ]
+      },
+      "cryptoProperties": {
+        "assetType": "algorithm",
+        "algorithmProperties": {
+          "parameterSetIdentifier": "AES128",
+          "mode": "ecb",
+          "executionEnvironment": "software-encrypted-ram",
+          "implementationPlatform": "x86_64",
+          "certificationLevel": ["fips140-1-l2"]
+        }
+      }
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "pkg:maven/org.example/portal-server@1.0.0?type=war",
+      "dependsOn": [
+        "pkg:maven/org.example/crypto-lib@2.0.0"
+      ]
+    }
+  ],
+  "citations": [
+    {
+      "bom-ref": "citation-1",
+      "timestamp": "2025-12-28T10:00:00Z",
+      "attributedTo": "Build Automation System",
+      "expressions": [
+        "$.metadata.component.name"
+      ]
+    }
+  ],
+  "declarations": {
+    "assessors": [
+      {
+        "bom-ref": "assessor-1",
+        "thirdParty": false,
+        "organization": {
+            "bom-ref": "organization-1",
+            "name": "internal-ip-legal"
+        }
+      }
+    ],
+    "attestations": [
+      {
+        "summary": "patent-assertion-1",
+        "assessor": "assessor-1"
+      }
+    ]
+  }
+}

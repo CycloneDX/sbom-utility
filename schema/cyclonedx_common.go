@@ -65,11 +65,13 @@ func (link CDXBomLink) String() string {
 // v1.2: existed
 // v1.3: added "hashes"
 // v1.4: `Type` field: added value "release-notes" to enum.
+// v1.7: added "properties"
 type CDXExternalReference struct {
-	Type    string     `json:"type,omitempty"`
-	Url     string     `json:"url,omitempty"`
-	Comment string     `json:"comment,omitempty"`
-	Hashes  *[]CDXHash `json:"hashes,omitempty"` // v1.3: added
+	Type       string         `json:"type,omitempty"`
+	Url        string         `json:"url,omitempty"`
+	Comment    string         `json:"comment,omitempty"`
+	Hashes     *[]CDXHash     `json:"hashes,omitempty" cdx:"+1.3"`
+	Properties *[]CDXProperty `json:"properties,omitempty" cdx:"+1.7"`
 }
 
 // v1.2: existed
@@ -152,11 +154,4 @@ type CDXLegacyCreationTool struct {
 type CDXCreationTools struct {
 	Components *[]CDXComponent `json:"components,omitempty" cdx:"+1.5"` // v1.5: added (new type)
 	Services   *[]CDXService   `json:"services,omitempty" cdx:"+1.5"`   // v1.5: added (new type)
-}
-
-// v1.5: created for reuse in "licensing" schema for "licensee" and "licensor"
-// TODO: reuse on "annotator" as well?
-type CDXLicenseLegalParty struct {
-	Organization *CDXOrganizationalEntity  `json:"organization,omitempty"`
-	Individual   *CDXOrganizationalContact `json:"individual,omitempty"`
 }

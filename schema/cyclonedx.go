@@ -121,6 +121,9 @@ type CDXComponent struct {
 	Tags               *[]string                   `json:"tags,omitempty" cdx:"added:1.6"`
 	Manufacturer       *CDXOrganizationalEntity    `json:"manufacturer,omitempty" cdx:"added:1.6"`
 	Author             string                      `json:"author,omitempty" cdx:"deprecated:1.6"`
+	VersionRange       CDXComponentVersionRange    `json:"versionRange,omitempty" cdx:"+1.7"`
+	IsExternal         bool                        `json:"isExternal,omitempty" cdx:"+1.7"`
+	PatentAssertions   *[]CDXPatentAssertion       `json:"patentAssertions,omitempty" cdx:"+1.7"`
 }
 
 // v1.5 added object
@@ -191,6 +194,7 @@ type CDXService struct {
 	Signature          *JSFSignature            `json:"signature,omitempty" cdx:"added:1.4"`
 	TrustZone          string                   `json:"trustZone,omitempty" cdx:"added:1.5"`
 	Tags               *[]string                `json:"tags,omitempty" cdx:"added:1.6"`
+	PatentAssertions   *[]CDXPatentAssertion    `json:"patentAssertions,omitempty" cdx:"+1.7"`
 }
 
 // v1.5: added. aggregated related date from v1.2-v1.4 and added additional fields
@@ -266,9 +270,20 @@ type CDXLicenseChoice struct {
 // v1.6: added Acknowledgment
 // NOTE: CDXRefType is a named `string` type as of v1.5
 type CDXLicenseExpression struct {
-	Expression      string      `json:"expression,omitempty"`
-	BOMRef          *CDXRefType `json:"bom-ref,omitempty" cdx:"added:1.5"`
-	Acknowledgement string      `json:"acknowledgement,omitempty" cdx:"added:1.6"`
+	Expression        string                  `json:"expression,omitempty"`
+	BOMRef            *CDXRefType             `json:"bom-ref,omitempty" cdx:"added:1.5"`
+	Acknowledgement   string                  `json:"acknowledgement,omitempty" cdx:"added:1.6"`
+	ExpressionDetails *[]CDXExpressionDetails `json:"expressionDetails,omitempty" cdx:"+1.7"`
+	Licensing         *CDXLicensing           `json:"licensing,omitempty" cdx:"+1.7"`
+	Properties        *[]CDXProperty          `json:"properties,omitempty" cdx:"+1.7"`
+}
+
+// v1.7
+type CDXExpressionDetails struct {
+	LicenseIdentifier string         `json:"licenseIdentifier,omitempty" cdx:"+1.7"`
+	BOMRef            *CDXRefType    `json:"bom-ref,omitempty" cdx:"+1.7"`
+	Text              *CDXAttachment `json:"text,omitempty" cdx:"+1.7"`
+	Url               string         `json:"url,omitempty" cdx:"+1.7"`
 }
 
 // v1.2: was an anon. type
@@ -287,18 +302,6 @@ type CDXLicense struct {
 	Licensing       *CDXLicensing  `json:"licensing,omitempty" cdx:"added:1.5"`
 	Properties      *[]CDXProperty `json:"properties,omitempty" cdx:"added:1.5"`
 	Acknowledgement string         `json:"acknowledgement,omitempty" cdx:"added:1.6"`
-}
-
-// v1.5: added object
-type CDXLicensing struct {
-	AltIds        *[]string             `json:"altIds,omitempty" cdx:"added:1.5"`
-	Licensor      *CDXLicenseLegalParty `json:"licensor,omitempty" cdx:"added:1.5"`
-	Licensee      *CDXLicenseLegalParty `json:"licensee,omitempty" cdx:"added:1.5"`
-	Purchaser     *CDXLicenseLegalParty `json:"purchaser,omitempty" cdx:"added:1.5"`
-	PurchaseOrder string                `json:"purchaseOrder,omitempty" cdx:"added:1.5"`
-	LicenseTypes  *[]string             `json:"licenseTypes,omitempty" cdx:"added:1.5"`
-	LastRenewal   string                `json:"lastRenewal,omitempty" cdx:"added:1.5"`
-	Expiration    string                `json:"expiration,omitempty" cdx:"added:1.5"`
 }
 
 // v1.2: existed
@@ -483,3 +486,7 @@ type CDXNameDescription struct {
 	Name        string `json:"name,omitempty" cdx:"added:1.5"`
 	Description string `json:"description,omitempty" cdx:"added:1.5"`
 }
+
+// v1.7
+// Note: CDXVulnerability already has a CDXVersionRange which is more than a simple string
+type CDXComponentVersionRange string

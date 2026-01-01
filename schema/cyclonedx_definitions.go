@@ -18,8 +18,10 @@
 package schema
 
 // v1.6: added
+// v1.7: Patents can either be a patent or a patentFamily type
 type CDXDefinition struct {
 	Standards *[]CDXStandard `json:"standards,omitempty" cdx:"+1.6"` // v1.6 added
+	Patents   *[]any         `json:"patents,omitempty" cdx:"+1.7"`   // v1.7 added
 }
 
 // v1.6: added
