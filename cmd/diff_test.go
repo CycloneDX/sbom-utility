@@ -45,7 +45,7 @@ const (
 // Test CycloneDX BOM deltas
 const (
 	TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_1_DELTA = "test/diff/cdx-1-4-mature-example-1-delta.json"
-	TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_2_DELTA = "test/diff/cdx-1-4-mature-example-2-delta.json"
+	TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_2_DELTA = "test/diff/cdx-1-4-mature-example-1-delta2.json"
 
 	TEST_DIFF_CDX_1_5_VULNERABILITY_BASE     = "test/diff/vulnerability/cdx-1-5-vulnerabilities-base.bom.json"
 	TEST_DIFF_CDX_1_5_VULNERABILITY_ADD_1    = "test/diff/vulnerability/cdx-1-5-vulnerabilities-delta-add-1.bom.json"

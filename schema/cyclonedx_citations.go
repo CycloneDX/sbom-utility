@@ -18,6 +18,7 @@
 package schema
 
 // v1.7: added
+// Note: TODO: support 3 signer options (i.e., Signer (string), chain ([]object), CDXSignature )
 type CDXCitation struct {
 	BOMRef       *CDXRefType `json:"bom-ref,omitempty" cdx:"+1.7"`
 	Timestamp    string      `json:"timestamp,omitempty" scvs:"bom:core:timestamp" cdx:"+1.7"`
@@ -38,6 +39,7 @@ type CDXSigner struct {
 	Value           string        `json:"value,omitempty" cdx:"+1.7"`
 }
 
+// v1.7: added
 type CDXPublicKey struct {
 	Kty string `json:"kty,omitempty" cdx:"+1.7"` // option 1, 2, 3
 	Crv string `json:"crv,omitempty" cdx:"+1.7"` // option 1 ,2
