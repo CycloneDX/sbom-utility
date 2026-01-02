@@ -1,0 +1,16 @@
+valid-citations-1.7.json
+valid-component-data-1.7.json
+valid-component-external-with-versionRange.json
+valid-cryptography-certificate-1.7.json
+valid-cryptography-certificate-advanced-1.7.json
+valid-cryptography-full-1.7.json
+valid-cryptography-implementation-1.7.json
+valid-evidence-1.7.json
+valid-external-reference-properties-1.7.json
+valid-license-expression-with-licensing-1.7.json
+valid-license-name-with-licensing-1.7.json
+valid-patent-1.7.json
+valid-release-notes-1.7.json
+valid-service-1.7.json
+valid-signatures-1.7.json
+valid-standard-1.7.json
