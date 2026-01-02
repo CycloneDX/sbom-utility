@@ -41,8 +41,8 @@ const (
 
 // JSON SBOM files containing syntax errors for testing
 const (
-	TEST_CDX_1_3_SYNTAX_ERR_1 = "test/cyclonedx/cdx-1-3-syntax-err-1.json"
-	TEST_CDX_1_3_SYNTAX_ERR_2 = "test/cyclonedx/cdx-1-3-syntax-err-2.json"
+	TEST_CDX_1_3_SYNTAX_ERR_1 = "test/cyclonedx/1.3/cdx-1-3-syntax-err-1.json"
+	TEST_CDX_1_3_SYNTAX_ERR_2 = "test/cyclonedx/1.3/cdx-1-3-syntax-err-2.json"
 )
 
 const (

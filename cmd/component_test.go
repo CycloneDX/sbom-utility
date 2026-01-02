@@ -32,10 +32,8 @@ import (
 
 // Test "resource list" command
 const (
-	// test/cyclonedx/cdx-1-3-resource-list.json
+	// test/cyclonedx/1.3/cdx-1-3-resource-list.json
 	TEST_COMPONENT_LIST_CDX_1_3 = TEST_RESOURCE_LIST_CDX_1_3
-	// test/cyclonedx/cdx-1-5-mature-example-1.json
-	TEST_COMPONENT_LIST_CDX_1_5_MATURE = TEST_CDX_1_5_MATURE_EXAMPLE_1_BASE
 	// test/cyclonedx/1.6/cdx-1-6-valid-cbom-full-1.6.json
 	TEST_COMPONENT_LIST_CDX_1_6_CBOM = TEST_CDX_1_6_CRYPTO_BOM
 	// test/cyclonedx/1.6/cdx-1-6-valid-mlbom-environmental-considerations.json
@@ -172,9 +170,7 @@ func TestComponentListCdx13Markdown(t *testing.T) {
 // -------------------------------------------
 
 func TestComponentListCdx15MatureCsv(t *testing.T) {
-	ti := NewComponentTestInfoBasic(TEST_COMPONENT_LIST_CDX_1_5_MATURE, FORMAT_CSV, nil)
-	//ti.ListSummary = false
-	//ti.WhereClause = "version=2.0"
+	ti := NewComponentTestInfoBasic(TEST_CDX_1_5_MATURE_EXAMPLE_1_BASE, FORMAT_CSV, nil)
 	ti.ResultExpectedLineCount = 5 // title + 3 data + EOF LF
 	ti.ResultLineContainsValuesAtLineNum = 3
 	ti.ResultLineContainsValues = []string{"sample"}
@@ -197,7 +193,7 @@ func TestComponentListCdx16MachineLearningBOMCsv(t *testing.T) {
 	innerTestComponentList(t, ti, COMPONENT_TEST_DEFAULT_FLAGS)
 }
 
-// ./sbom-utility component list -i test/cyclonedx/cdx-1-3-resource-list.json --where "number-licenses=0"  --quiet --format=txt
+// ./sbom-utility component list -i test/cyclonedx/1.3/cdx-1-3-resource-list.json --where "number-licenses=0"  --quiet --format=txt
 //
 //	library  Library NoLicense  1.0.0  Library "NoLicense" description.  pkg:lib/libraryNoLicense@1.0.0  0   0
 func TestComponentListCdx13WhereNumLicensesCsv(t *testing.T) {

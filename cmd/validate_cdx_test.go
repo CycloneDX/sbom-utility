@@ -23,9 +23,9 @@ import "testing"
 // Consolidate test file name declarations
 const (
 	// CycloneDX - Test versioned documents meet min. schema requirements
-	TEST_CDX_1_3_MIN_REQUIRED = "test/cyclonedx/cdx-1-3-min-required.json"
-	TEST_CDX_1_4_MIN_REQUIRED = "test/cyclonedx/cdx-1-4-min-required.json"
-	TEST_CDX_1_5_MIN_REQUIRED = "test/cyclonedx/cdx-1-5-min-required.json"
+	TEST_CDX_1_3_MIN_REQUIRED = "test/cyclonedx/1.3/cdx-1-3-min-required.json"
+	TEST_CDX_1_4_MIN_REQUIRED = "test/cyclonedx/1.4/cdx-1-4-min-required.json"
+	TEST_CDX_1_5_MIN_REQUIRED = "test/cyclonedx/1.5/cdx-1-5-min-required.json"
 	TEST_CDX_1_6_MIN_REQUIRED = "test/cyclonedx/1.6/cdx-1-6-min-required.json"
 	TEST_CDX_1_7_MIN_REQUIRED = "test/cyclonedx/1.7/cdx-1-7-min-required.json"
 )
@@ -42,17 +42,17 @@ const (
 
 // Mature SBOMs used to test various schemas and queries
 const (
-	TEST_CDX_1_3_MATURE_EXAMPLE_1_BASE = "test/cyclonedx/cdx-1-3-mature-example-1.json"
-	TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE = "test/cyclonedx/cdx-1-4-mature-example-1.json"
-	TEST_CDX_1_5_MATURE_EXAMPLE_1_BASE = "test/cyclonedx/cdx-1-5-mature-example-1.json"
+	TEST_CDX_1_3_MATURE_EXAMPLE_1_BASE = "test/cyclonedx/1.3/cdx-1-3-mature-example-1.json"
+	TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE = "test/cyclonedx/1.4/cdx-1-4-mature-example-1.json"
+	TEST_CDX_1_5_MATURE_EXAMPLE_1_BASE = "test/cyclonedx/1.5/cdx-1-5-mature-example-1.json"
 )
 
 const (
 	// (invalid) schema tests
-	TEST_SCHEMA_CDX_1_3_INVALID_LICENSE_CHOICE = "test/cyclonedx/cdx-1-3-invalid-license-choice-oneof.json"
-	TEST_SCHEMA_CDX_1_3_INVALID_LICENSE_ID     = "test/cyclonedx/cdx-1-3-invalid-spdx-license-id.json"
-	TEST_SCHEMA_CDX_1_4_INVALID_LICENSE_ID     = "test/cyclonedx/cdx-1-3-invalid-spdx-license-id.json"
-	TEST_SCHEMA_CDX_1_4_INVALID_EMAIL_FORMAT   = "test/cyclonedx/cdx-1-4-invalid-email-format.json"
+	TEST_SCHEMA_CDX_1_3_INVALID_LICENSE_CHOICE = "test/cyclonedx/1.3/cdx-1-3-invalid-license-choice-oneof.json"
+	TEST_SCHEMA_CDX_1_3_INVALID_LICENSE_ID     = "test/cyclonedx/1.3/cdx-1-3-invalid-spdx-license-id.json"
+	TEST_SCHEMA_CDX_1_4_INVALID_LICENSE_ID     = "test/cyclonedx/1.3/cdx-1-3-invalid-spdx-license-id.json"
+	TEST_SCHEMA_CDX_1_4_INVALID_EMAIL_FORMAT   = "test/cyclonedx/1.4/cdx-1-4-invalid-email-format.json"
 )
 
 // Copied from CycloneDX spec. repo.

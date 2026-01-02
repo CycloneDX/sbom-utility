@@ -33,8 +33,8 @@ import (
 
 const (
 	// Test "resource list" command
-	TEST_RESOURCE_LIST_CDX_1_3            = "test/cyclonedx/cdx-1-3-resource-list.json"
-	TEST_RESOURCE_LIST_CDX_1_3_NONE_FOUND = "test/cyclonedx/cdx-1-3-resource-list-none-found.json"
+	TEST_RESOURCE_LIST_CDX_1_3            = "test/cyclonedx/1.3/cdx-1-3-resource-list.json"
+	TEST_RESOURCE_LIST_CDX_1_3_NONE_FOUND = "test/cyclonedx/1.3/cdx-1-3-resource-list-none-found.json"
 	TEST_RESOURCE_LIST_CDX_1_4_SAAS_1     = "examples/cyclonedx/SaaSBOM/apigateway-microservices-datastores/bom.json"
 )
 

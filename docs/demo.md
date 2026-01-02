@@ -259,7 +259,7 @@ The validation command will use the declared format and version found within the
 First, try validating a "mature" CycloneDX v1.4 SBOM without the `--variant` flag:
 
 ```bash
-./sbom-utility validate -i test/cyclonedx/cdx-1-4-mature-example-1.json
+./sbom-utility validate -i test/cyclonedx/1.4/cdx-1-4-mature-example-1.json
 ```
 
 and see that the `latest` CycloneDX v1.4 schema was used:
@@ -269,14 +269,14 @@ and see that the `latest` CycloneDX v1.4 schema was used:
 [INFO] Matching SBOM schema (for validation): schema/cyclonedx/1.4/bom-1.4.schema.json
 [INFO] Loading schema `schema/cyclonedx/1.4/bom-1.4.schema.json`...
 [INFO] Schema `schema/cyclonedx/1.4/bom-1.4.schema.json` loaded.
-[INFO] Validating `test/cyclonedx/cdx-1-4-mature-example-1.json`...
+[INFO] Validating `test/cyclonedx/1.4/cdx-1-4-mature-example-1.json`...
 [INFO] SBOM valid against JSON schema: `true`
 ```
 
 Try it with the flag:
 
 ```bash
-./sbom-utility validate -i test/cyclonedx/cdx-1-4-mature-example-1.json --variant custom
+./sbom-utility validate -i test/cyclonedx/1.4/cdx-1-4-mature-example-1.json --variant custom
 ```
 
 as you can see, the `schema/test/bom-1.4-custom.schema.json` schema variant was used:
@@ -286,7 +286,7 @@ as you can see, the `schema/test/bom-1.4-custom.schema.json` schema variant was 
 [INFO] Matching SBOM schema (for validation): schema/test/bom-1.4-custom.schema.json
 [INFO] Loading schema `schema/test/bom-1.4-custom.schema.json`...
 [INFO] Schema `schema/test/bom-1.4-custom.schema.json` loaded.
-[INFO] Validating `test/cyclonedx/cdx-1-4-mature-example-1.json`...
+[INFO] Validating `test/cyclonedx/1.4/cdx-1-4-mature-example-1.json`...
 [INFO] SBOM valid against JSON schema: `true`
 ```
 
@@ -380,7 +380,7 @@ In the SCVS model, a "resource" is the parent classification for software (compo
 Primarily, the command is used to generate lists of resources, by type, that are included in a CycloneDX BOM by invoking `resource list`:
 
 ```bash
-./sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --quiet
+./sbom-utility resource list -i test/cyclonedx/1.3/cdx-1-3-resource-list.json --quiet
 ```
 
 ```bash
@@ -406,7 +406,7 @@ service    Foo                         service:example.com/myservices/foo
 This example uses the `type` flag to limit results to only `service` resources:
 
 ```bash
-./sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --type service --quiet
+./sbom-utility resource list -i test/cyclonedx/1.3/cdx-1-3-resource-list.json --type service --quiet
 ```
 
 ```bash
@@ -423,7 +423,7 @@ service  Foo              service:example.com/myservices/foo
 The `where` flag can be used to supply regular expressions (regex) to filter report results using any column title (i.e., `type`, `name`, `version` or `bom-ref`) supported by the `resource` command:
 
 ```bash
-./sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --where type=component --quiet
+./sbom-utility resource list -i test/cyclonedx/1.3/cdx-1-3-resource-list.json --where type=component --quiet
 ```
 
 ```bash
@@ -449,7 +449,7 @@ component  Library NoLicense  1.0.0    pkg:lib/libraryNoLicense@1.0.0
 This example uses the `where` filter on the `name` field. In this case we supply an exact "startswith" regex. for the `name` filter.
 
 ```bash
-./sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --where "name=Library A" --quiet
+./sbom-utility resource list -i test/cyclonedx/1.3/cdx-1-3-resource-list.json --where "name=Library A" --quiet
 ```
 
 ```bash
@@ -543,7 +543,7 @@ For example, the output includes all three types of license data you would see (
 Use the `--summary` flag on the `license list` command to produce a summary report in `txt` (default) format as well as license `usage policy` determination based upon the `license.json` declarations:
 
 ```bash
-./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --quiet
+./sbom-utility license list -i test/cyclonedx/1.3/cdx-1-3-license-list.json --summary --quiet
 ```
 
 as you can see, the default output is in `txt` format and includes a `usage policy` determination:
@@ -583,7 +583,7 @@ The list command results can be filtered using the `--where` flag using the colu
 The following example shows filtering of resource licenses using the `license-type` column where the license identified using a `name` value:
 
 ```bash
-./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --where license-type=name --quiet
+./sbom-utility license list -i test/cyclonedx/1.3/cdx-1-3-license-list.json --summary --where license-type=name --quiet
 ```
 
 ```bash
@@ -600,7 +600,7 @@ needs-review  name          UFL       ACME Application  pkg:app/sample@1.0.0    
 In another example, the list is filtered by the `usage-policy` where the value is `needs-review`:
 
 ```bash
-./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --where usage-policy=needs-review --quiet
+./sbom-utility license list -i test/cyclonedx/1.3/cdx-1-3-license-list.json --summary --where usage-policy=needs-review --quiet
 ```
 
 ```bash
@@ -683,7 +683,7 @@ If the result set is an array, the array entries can be reduced by applying the 
 In this example, only the `--from` clause is needed to select an object.  The `--select` clause is omitted which is equivalent to using the "select all" wildcard character `*` which returns all fields and values from the object.
 
 ```bash
-./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from metadata.component --quiet
+./sbom-utility query -i test/cyclonedx/1.4/cdx-1-4-mature-example-1.json --from metadata.component --quiet
 ```
 
 ```json
@@ -716,7 +716,7 @@ In this example, only the `--from` clause is needed to select an object.  The `-
 **Note** the command above is equivalent to using the wildcard character (`*`) which may need to be enclosed in single or double quotes depending on your shell:
 
 ```bash
-./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --select '*' --from metadata.component --quiet
+./sbom-utility query -i test/cyclonedx/1.4/cdx-1-4-mature-example-1.json --select '*' --from metadata.component --quiet
 ```
 
 ##### Example: Select fields from JSON object
@@ -739,7 +739,7 @@ In this example, the `--from` clause references the  singleton JSON object `comp
 In this example, the `--where` filter will be applied to a set of `properties` results to only include entries that match the specified regex.
 
 ```bash
-./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from metadata.properties --where name=urn:example.com:classification --quiet
+./sbom-utility query -i test/cyclonedx/1.4/cdx-1-4-mature-example-1.json --from metadata.properties --where name=urn:example.com:classification --quiet
 ```
 
 ```json
@@ -754,7 +754,7 @@ In this example, the `--where` filter will be applied to a set of `properties` r
 additionally, you can apply a `--select` clause to simply obtain the matching entry's `value`:
 
 ```bash
-./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --select value --from metadata.properties --where name=urn:example.com:classification --quiet
+./sbom-utility query -i test/cyclonedx/1.4/cdx-1-4-mature-example-1.json --select value --from metadata.properties --where name=urn:example.com:classification --quiet
 ```
 
 ```json

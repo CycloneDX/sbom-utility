@@ -30,8 +30,8 @@ Assures the utility properly handles different kinds of syntax errors in JSON do
 
 | Test name | Description | Syntax Error | Test input file |
 | :-- | :-- | :-- | :-- |
-|  TestValidateSyntaxErrorCdx13Test1 | Missing closing `}` bracket on `metadata` property  | "invalid character '{' after object key" | [test/cyclonedx/cdx-1-3-syntax-err-1.json](test/cyclonedx/cdx-1-3-syntax-err-1.json) |
-| TestValidateSyntaxErrorCdx13Test2 | Missing `:` separating `"properties"` key from array value `[` | "invalid character '[' after object key" | [test/cyclonedx/cdx-1-3-syntax-err-2.json](test/cyclonedx/cdx-1-3-syntax-err-2.json) |
+|  TestValidateSyntaxErrorCdx13Test1 | Missing closing `}` bracket on `metadata` property  | "invalid character '{' after object key" | [test/cyclonedx/1.3/cdx-1-3-syntax-err-1.json](test/cyclonedx/1.3/cdx-1-3-syntax-err-1.json) |
+| TestValidateSyntaxErrorCdx13Test2 | Missing `:` separating `"properties"` key from array value `[` | "invalid character '[' after object key" | [test/cyclonedx/1.3/cdx-1-3-syntax-err-2.json](test/cyclonedx/1.3/cdx-1-3-syntax-err-2.json) |
 
 ---
 
@@ -59,7 +59,7 @@ These tests verify that errors related to the `config.json` file entries (e.g., 
 | :-- | :-- | :-- | :-- | :-- |
 | TestValidateConfigInvalidFormatKey | Error if SBOM "format" (key) undefined. |  `UnsupportedFormatError` | [test/config/test-base-invalid-format-key-foo.json](test/config/test-base-invalid-format-key-foo.json) | |
 | TestValidateConfigInvalidVersion         | Error if SBOM schema "version" not found (invalid) for a defined format. |  `UnsupportedSchemaError` |  [test/cyclonedx/cdx-1-x-test-invalid-spec-version.json](test/cyclonedx/cdx-1-x-test-invalid-spec-version.json) | |
-| TestValidateConfigInvalidVariant         | Error if SBOM schema "variant" not found (invalid) for a defined format and version. |  `UnsupportedSchemaError` | [test/cyclonedx/cdx-1-4-min-required.json](test/cyclonedx/cdx-1-4-min-required.json) | Reuse existing test file with valid format and version as `variant` value will not be found |
+| TestValidateConfigInvalidVariant         | Error if SBOM schema "variant" not found (invalid) for a defined format and version. |  `UnsupportedSchemaError` | [test/cyclonedx/1.4/cdx-1-4-min-required.json](test/cyclonedx/1.4/cdx-1-4-min-required.json) | Reuse existing test file with valid format and version as `variant` value will not be found |
 | TestValidateConfigCDXBomFormatInvalid    | CDX `bomFormat` key value is invalid. | `UnsupportedFormatError` | [test/config/test-cdx-bom-format-invalid.json](test/config/test-cdx-bom-format-invalid.json) | |
 | TestValidateConfigCDXBomFormatMissing    | CDX `bomFormat` key is missing. | `UnsupportedFormatError` | [test/config/test-cdx-bom-format-missing.json](test/config/test-cdx-bom-format-missing.json) | |
 | TestValidateConfigCDXSpecVersionMissing  | CDX `specVersion` key is missing. | `UnsupportedSchemaError` | [test/config/test-cdx-spec-version-missing.json](test/config/test-cdx-spec-version-missing.json) | |
