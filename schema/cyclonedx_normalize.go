@@ -133,6 +133,7 @@ func (bom *CDXBom) Normalize() {
 	}
 	// TODO: Sort: Declarations (v1.6)
 	// TODO: Sort: Definitions (v1.6)
+	// TODO: Sort: Citations (v1.7)
 }
 
 func (component *CDXComponent) Normalize() {

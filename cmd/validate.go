@@ -244,6 +244,8 @@ func LoadCompileSchemaDependencies(
 		if err != nil {
 			return
 		}
+	} else {
+		getLogger().Warningf("No schema dependencies found. bomSchemaInstance: %v", bomSchemaInstance)
 	}
 	return
 }
@@ -342,7 +344,7 @@ func Validate(writer io.Writer, persistentFlags utils.PersistentCommandFlags, va
 		// If the BOM schema has $refs to other schemas, attempt to load and compile
 		// them from those included as built-in resources
 		jsonBOMSchema, errLoadCompile = LoadCompileSchemaDependencies(jsonBOMSchemaLoader, bom.SchemaInfo, bom.SchemaInfo.Dependencies)
-		if err != nil {
+		if errLoadCompile != nil {
 			return INVALID, bom, schemaErrors, errLoadCompile
 		}
 	}

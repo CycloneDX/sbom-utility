@@ -31,15 +31,15 @@ import (
 
 const (
 	// Test "license list" command
-	TEST_LICENSE_LIST_CDX_1_3                         = "test/cyclonedx/cdx-1-3-license-list.json"
-	TEST_LICENSE_LIST_CDX_1_3_NONE_FOUND              = "test/cyclonedx/cdx-1-3-license-list-none-found.json"
-	TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND              = "test/cyclonedx/cdx-1-4-license-list-none-found.json"
-	TEST_LICENSE_LIST_CDX_1_5_LICENSE_CHOICE_VARIANTS = "test/cyclonedx/cdx-1-5-license-choice-variants.json"
-	TEST_LICENSE_LIST_CDX_1_5_MATURE_EXAMPLE_1        = "test/cyclonedx/cdx-1-5-mature-example-1.json"
+	TEST_LICENSE_LIST_CDX_1_3                         = "test/cyclonedx/1.3/cdx-1-3-license-list.json"
+	TEST_LICENSE_LIST_CDX_1_3_NONE_FOUND              = "test/cyclonedx/1.3/cdx-1-3-license-list-none-found.json"
+	TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND              = "test/cyclonedx/1.4/cdx-1-4-license-list-none-found.json"
+	TEST_LICENSE_LIST_CDX_1_5_LICENSE_CHOICE_VARIANTS = "test/cyclonedx/1.5/cdx-1-5-license-choice-variants.json"
+	TEST_LICENSE_LIST_CDX_1_5_MATURE_EXAMPLE_1        = TEST_CDX_1_5_MATURE_EXAMPLE_1_BASE
 
-	TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_ID    = "test/cyclonedx/cdx-1-4-license-policy-invalid-spdx-id.json"
-	TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_NAME  = "test/cyclonedx/cdx-1-4-license-policy-invalid-license-name.json"
-	TEST_LICENSE_LIST_CDX_1_4_LICENSE_EXPRESSION_IN_NAME = "test/cyclonedx/cdx-1-4-license-expression-in-name.json"
+	TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_ID    = "test/cyclonedx/1.4/cdx-1-4-license-policy-invalid-spdx-id.json"
+	TEST_LICENSE_LIST_TEXT_CDX_1_4_INVALID_LICENSE_NAME  = "test/cyclonedx/1.4/cdx-1-4-license-policy-invalid-license-name.json"
+	TEST_LICENSE_LIST_CDX_1_4_LICENSE_EXPRESSION_IN_NAME = "test/cyclonedx/1.4/cdx-1-4-license-expression-in-name.json"
 )
 
 type LicenseTestInfo struct {
@@ -360,7 +360,7 @@ func TestLicenseListTextCdx15WherePURLTypeIsNPM(t *testing.T) {
 // Test custom marshal of CDXLicense (empty CDXAttachment)
 func TestLicenseListCdx13JsonEmptyAttachment(t *testing.T) {
 	lti := NewLicenseTestInfo(
-		"test/cyclonedx/cdx-1-3-license-list-no-attachment.json",
+		"test/cyclonedx/1.3/cdx-1-3-license-list-no-attachment.json",
 		FORMAT_JSON,
 		false)
 	lti.ResultExpectedLineCount = 37

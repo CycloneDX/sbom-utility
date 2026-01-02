@@ -61,7 +61,7 @@
             "request": "launch",
             "mode": "debug",
             "program": "main.go", // "program": "${file}",
-            "args": ["validate", "-i", "test/cyclonedx/cdx-1-5-mature-example-1.json"],
+            "args": ["validate", "-i", "test/cyclonedx/1.5/cdx-1-5-mature-example-1.json"],
             "dlvFlags": ["--check-go-version=false"]
         },
         {
@@ -81,7 +81,7 @@
             "request": "launch",
             "mode": "debug",
             "program": "main.go", // "program": "${file}",
-            "args": ["query", "-i", "test/cyclonedx/cdx-1-4-mature-example-1.json", "--select", "*", "--from", "metadata.component"],
+            "args": ["query", "-i", "test/cyclonedx/1.4/cdx-1-4-mature-example-1.json", "--select", "*", "--from", "metadata.component"],
             "dlvFlags": ["--check-go-version=false"]
         },
         {
@@ -91,7 +91,7 @@
             "request": "launch",
             "mode": "debug",
             "program": "main.go", // "program": "${file}",
-            "args": ["license", "list", "-i", "test/cyclonedx/cdx-1-3-license-list-complex.json", "--format", "json"],
+            "args": ["license", "list", "-i", "test/cyclonedx/1.3/cdx-1-3-license-list-complex.json", "--format", "json"],
             "dlvFlags": ["--check-go-version=false"]
         },
         {
@@ -101,7 +101,7 @@
             "request": "launch",
             "mode": "debug",
             "program": "main.go", // "program": "${file}",
-            "args": ["license", "list", "-i", "test/cyclonedx/cdx-1-3-license-list-complex.json", "--format", "json", "--summary"],
+            "args": ["license", "list", "-i", "test/cyclonedx/1.3/cdx-1-3-license-list-complex.json", "--format", "json", "--summary"],
             "dlvFlags": ["--check-go-version=false"]
         },
         {
@@ -111,7 +111,7 @@
             "request": "launch",
             "mode": "debug",
             "program": "main.go", // "program": "${file}",
-            "args": ["license", "list", "-i", "test/cyclonedx/cdx-1-3-license-list-complex.json", "--where", "usage-policy=needs-review|deny|UNDEFINED"],
+            "args": ["license", "list", "-i", "test/cyclonedx/1.3/cdx-1-3-license-list-complex.json", "--where", "usage-policy=needs-review|deny|UNDEFINED"],
             "dlvFlags": ["--check-go-version=false"]
         },
         {
@@ -121,7 +121,7 @@
             "request": "launch",
             "mode": "debug",
             "program": "main.go", // "program": "${file}",
-            "args": ["diff", "-i", "test/cyclonedx/cdx-1-4-mature-example-1.json", "--input-revision", "test/diff/cdx-1-4-mature-example-1-delta.json"],
+            "args": ["diff", "-i", "test/cyclonedx/1.4/cdx-1-4-mature-example-1.json", "--input-revision", "test/diff/cdx-1-4-mature-example-1-delta.json"],
             "dlvFlags": ["--check-go-version=false"]
         },
     ]

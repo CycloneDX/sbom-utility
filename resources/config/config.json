@@ -23,6 +23,15 @@
                     "development": "",
                     "url": "http://cyclonedx.org/schema/spdx.schema.json",
                     "default": false
+                },
+                {
+                    "version": "",
+                    "variant": "",
+                    "name": "cryptography-defs.schema.json",
+                    "file": "schema/cyclonedx/common/cryptography-defs.schema.json",
+                    "development": "",
+                    "url": "http://cyclonedx.org/schema/cryptography-defs.schema.json",
+                    "default": false
                 }
             ]
         },
@@ -154,7 +163,7 @@
                     "development": "https://github.com/CycloneDX/specification/blob/master/schema/bom-1.7.schema.json",
                     "url": "https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.7.schema.json",
                     "default": true,
-                    "dependencies": ["jsf-0.82.schema.json", "spdx.schema.json", "cryptography-defs.schema"]
+                    "dependencies": ["jsf-0.82.schema.json", "spdx.schema.json", "cryptography-defs.schema.json"]
                 },
                 {
                     "version": "1.3",

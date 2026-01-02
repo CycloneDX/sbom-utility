@@ -1606,13 +1606,13 @@ This example effectively extracts the first-order package manifest from the SBOM
 In this example, only the `--from` clause is needed to select an object.  The `--select` clause is omitted which is equivalent to using the "select all" wildcard character `*` which returns all fields and values from the `component` object.
 
 ```bash
-./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from metadata.component
+./sbom-utility query -i test/cyclonedx/1.4/cdx-1-4-mature-example-1.json --from metadata.component
 ```
 
 is equivalent to using the wildcard character (which may need to be enclosed in single or double quotes depending on your shell):
 
 ```bash
-./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --select '*' --from metadata.component -q
+./sbom-utility query -i test/cyclonedx/1.4/cdx-1-4-mature-example-1.json --select '*' --from metadata.component -q
 ```
 
 ```json
@@ -1647,7 +1647,7 @@ is equivalent to using the wildcard character (which may need to be enclosed in 
 In this example, the `--from` clause references the top-level `metadata.supplier` object.
 
 ```bash
-./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from metadata.supplier -q
+./sbom-utility query -i test/cyclonedx/1.4/cdx-1-4-mature-example-1.json --from metadata.supplier -q
 ```
 
 ```json
@@ -1686,7 +1686,7 @@ The result, which also uses the `--indent 2` flag:
 In this example, the `--from` filter will return the entire JSON components array.
 
 ```bash
-./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from components -q
+./sbom-utility query -i test/cyclonedx/1.4/cdx-1-4-mature-example-1.json --from components -q
 ```
 
 ```json
@@ -1736,7 +1736,7 @@ In this example, the `--from` filter will return the entire JSON components arra
 In this example, the `--where` filter will be applied to a set of `properties` results to only include entries that match the specified regex.
 
 ```bash
-./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --from metadata.properties --where name=urn:example.com:classification -q
+./sbom-utility query -i test/cyclonedx/1.4/cdx-1-4-mature-example-1.json --from metadata.properties --where name=urn:example.com:classification -q
 ```
 
 ```json
@@ -1751,7 +1751,7 @@ In this example, the `--where` filter will be applied to a set of `properties` r
 additionally, you can apply a `--select` clause to simply obtain the matching entry's `value`:
 
 ```bash
-./sbom-utility query -i test/cyclonedx/cdx-1-4-mature-example-1.json --select value --from metadata.properties --where name=urn:example.com:classification -q
+./sbom-utility query -i test/cyclonedx/1.4/cdx-1-4-mature-example-1.json --select value --from metadata.properties --where name=urn:example.com:classification -q
 ```
 
 ```json
@@ -1935,7 +1935,7 @@ This example shows a few entries of the JSON output that exhibit the three types
 This example shows the default text output from using the summary flag:
 
 ```bash
-./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary -q
+./sbom-utility license list -i test/cyclonedx/1.3/cdx-1-3-license-list.json --summary -q
 ```
 
 ```bash
@@ -1973,7 +1973,7 @@ The list command results can be filtered using the `--where` flag using the colu
 The following example shows filtering of component licenses using the `license-type` column where the license was described as a `name` value:
 
 ```bash
-./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --where license-type=name -q
+./sbom-utility license list -i test/cyclonedx/1.3/cdx-1-3-license-list.json --summary --where license-type=name -q
 ```
 
 ```bash
@@ -1990,7 +1990,7 @@ needs-review  name          UFL       ACME Application  pkg:app/sample@1.0.0    
 In another example, the list is filtered by the `usage-policy` where the value is `needs-review`:
 
 ```bash
-./sbom-utility license list -i test/cyclonedx/cdx-1-3-license-list.json --summary --where usage-policy=needs-review -q
+./sbom-utility license list -i test/cyclonedx/1.3/cdx-1-3-license-list.json --summary --where usage-policy=needs-review -q
 ```
 
 ```bash
@@ -2141,7 +2141,7 @@ Currently, all `resource list` command results are sorted by resource `type` the
 #### Example: resource list
 
 ```bash
-./sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json -q
+./sbom-utility resource list -i test/cyclonedx/1.3/cdx-1-3-resource-list.json -q
 ```
 
 ```bash
@@ -2167,7 +2167,7 @@ service:example.com/myservices/foo  service                Foo                  
 This example uses the `type` flag to specific `service`.  The other valid type is `component`.  Future versions of CycloneDX schema will include more resource types such as "ml" (machine learning) or "tool".
 
 ```bash
-./sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --type service -q
+./sbom-utility resource list -i test/cyclonedx/1.3/cdx-1-3-resource-list.json --type service -q
 ```
 
 ```bash
@@ -2180,7 +2180,7 @@ service                Foo              Foo service  service:example.com/myservi
 **Note** The results would be equivalent to using the `--where` filter:
 
 ```bash
-./sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --where "resource-type=service" -q
+./sbom-utility resource list -i test/cyclonedx/1.3/cdx-1-3-resource-list.json --where "resource-type=service" -q
 ```
 
 ##### Example: list with `name` regex match
@@ -2188,7 +2188,7 @@ service                Foo              Foo service  service:example.com/myservi
 This example uses the `where` filter on the `name` field. In this case we supply an exact "startswith" regex. for the `name` filter.
 
 ```bash
-./sbom-utility resource list -i test/cyclonedx/cdx-1-3-resource-list.json --where "name=Library A" -q
+./sbom-utility resource list -i test/cyclonedx/1.3/cdx-1-3-resource-list.json --where "name=Library A" -q
 ```
 
 ```bash
@@ -2532,7 +2532,7 @@ If you wish to build binaries for all supported combinations of `GOOS` and `GOAR
 Developers can run using the current source code in their local branch using `go run main.go`. For example:
 
 ```bash
-go run main.go validate -i test/cyclonedx/cdx-1-4-mature-example-1.json
+go run main.go validate -i test/cyclonedx/1.4/cdx-1-4-mature-example-1.json
 ```
 
 ### Debugging
@@ -2553,7 +2553,7 @@ In order to see global variables while debugging a specific configuration, you c
     "request": "launch",
     "mode": "debug",
     "program": "main.go",
-    "args": ["validate", "-i", "test/cyclonedx/cdx-1-3-min-required.json","-t"]
+    "args": ["validate", "-i", "test/cyclonedx/1.3/cdx-1-3-min-required.json","-t"]
 },
 ```
 
