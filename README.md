@@ -1,5 +1,5 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![License](https://img.shields.io/badge/CycloneDX-v1.2,1.3,1.4,1.5,1.6-darkcyan.svg)](https://github.com/CycloneDX/specification)
+[![License](https://img.shields.io/badge/CycloneDX-v1.2,1.3,1.4,1.5,1.6,1.7-darkcyan.svg)](https://github.com/CycloneDX/specification)
 [![License](https://img.shields.io/badge/SPDX-v2.1,2.2,2.3-purple.svg)](https://github.com/spdx/spdx-spec)
 [![Go Report Card](https://goreportcard.com/badge/github.com/CycloneDX/sbom-utility)](https://goreportcard.com/badge/github.com/CycloneDX/sbom-utility)
 <!--![CodeQL](https://github.com/CycloneDX/sbom-utility/actions/workflows/codeql.yml/badge.svg)-->
@@ -326,7 +326,7 @@ See each command's section for contextual examples of the `--where` flag filter 
 
 ### Validate
 
-This command will parse standardized SBOMs and validate it against its declared format and version (e.g., SPDX 2.3, CycloneDX 1.6).
+This command will parse standardized SBOMs and validate it against its declared format and version (e.g., SPDX 2.3, CycloneDX 1.7).
 
 - Custom  variants of standard JSON schemas can be used for validation by supplying the `--variant` name as a flag.
 - Explicit JSON schemas can be specified using the `--force` flag.
@@ -2226,7 +2226,8 @@ This command supports the `--format` flag with any of the following values:
 ```bash
 name            variant      format     version   file                                             url
 ----            -------      ------     -------   ----                                             ---
-CycloneDX v1.6  (latest)     CycloneDX  1.6       schema/cyclonedx/1.6/bom-1.6.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.6.schema.json
+CycloneDX v1.7  (latest)     CycloneDX  1.7       schema/cyclonedx/1.7/bom-1.7.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.7.schema.json
+CycloneDX v1.6.1(latest)     CycloneDX  1.6       schema/cyclonedx/1.6/bom-1.6.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.6.schema.json
 CycloneDX v1.5  (latest)     CycloneDX  1.5       schema/cyclonedx/1.5/bom-1.5.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.5.schema.json
 CycloneDX v1.4  (latest)     CycloneDX  1.4       schema/cyclonedx/1.4/bom-1.4.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json
 CycloneDX v1.4  custom       CycloneDX  1.4       schema/test/bom-1.4-custom.schema.json

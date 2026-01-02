@@ -1,0 +1,18 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.7",
+  "serialNumber": "urn:uuid:3e671687-395b-41f5-a30f-a58921a69b79",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2025-12-28T21:40:00Z",
+    "component": {
+      "bom-ref": "pkg:maven/org.example/appserver@1.0.0",
+      "type": "application",
+      "group": "org.example",
+      "name": "app-server",
+      "versionRange": "vers:npm/1.2.3|>=2.0.0|<5.0.0",
+      "isExternal": true
+    }
+  }
+}

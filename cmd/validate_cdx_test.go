@@ -27,6 +27,7 @@ const (
 	TEST_CDX_1_4_MIN_REQUIRED = "test/cyclonedx/cdx-1-4-min-required.json"
 	TEST_CDX_1_5_MIN_REQUIRED = "test/cyclonedx/cdx-1-5-min-required.json"
 	TEST_CDX_1_6_MIN_REQUIRED = "test/cyclonedx/1.6/cdx-1-6-min-required.json"
+	TEST_CDX_1_7_MIN_REQUIRED = "test/cyclonedx/1.7/cdx-1-7-min-required.json"
 )
 
 // Tests for MLBOM subtypes
@@ -78,6 +79,11 @@ const (
 	TEST_CDX_SPEC_1_6_1_VALID_SPDX_LICENSE  = "test/cyclonedx/1.6/specification/valid-license-spdx-licenses-1.6.1.json"
 )
 
+const (
+	TEST_CDX_SPEC_1_7_VALID_CRYPTO_CITATION = "test/cyclonedx/1.7/cdx-1-7-valid-crypto-citation.json"
+	TEST_CDX_SPEC_1_7_COMP_VERSION_RANGE    = "test/cyclonedx/1.7/cdx-1-7-comp-version-range.json"
+)
+
 // -----------------------------------------------------------
 // CycloneDX - Min. requirement & Mature tests
 // -----------------------------------------------------------
@@ -99,6 +105,11 @@ func TestValidateCdx15MinRequiredBasic(t *testing.T) {
 
 func TestValidateCdx16MinRequiredBasic(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_6_MIN_REQUIRED)
+	innerTestValidate(t, *vti)
+}
+
+func TestValidateCdx17MinRequiredBasic(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_7_MIN_REQUIRED)
 	innerTestValidate(t, *vti)
 }
 
@@ -193,5 +204,16 @@ func TestValidateCdx16Licensing(t *testing.T) {
 
 func TestValidateCdx16SpdxLicense(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_SPEC_1_6_1_VALID_SPDX_LICENSE)
+	innerTestValidate(t, *vti)
+}
+
+// 1.7 Tests
+func TestValidateCdx17CryptoCitation(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_SPEC_1_7_VALID_CRYPTO_CITATION)
+	innerTestValidate(t, *vti)
+}
+
+func TestValidateCdx17ComponentVersionRange(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_SPEC_1_7_COMP_VERSION_RANGE)
 	innerTestValidate(t, *vti)
 }

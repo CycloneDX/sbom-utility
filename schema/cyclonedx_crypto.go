@@ -29,6 +29,9 @@ type CDXCryptoProperties struct {
 }
 
 // v1.6: added
+// v1.7: Curve - deprecated
+// v1.7: Added: EllipticCurve
+// TODO: Test EllipticCurve; "$ref": "cryptography-defs.schema.json#/definitions/ellipticCurvesEnum"
 type CDXAlgorithmProperties struct {
 	Primitive                string    `json:"primitive,omitempty" cdx:"+1.6"`                // v1.6 added
 	ParameterSetIdentifier   string    `json:"parameterSetIdentifier,omitempty" cdx:"+1.6"`   // v1.6 added
@@ -40,43 +43,61 @@ type CDXAlgorithmProperties struct {
 	Padding                  string    `json:"padding,omitempty" cdx:"+1.6"`                  // v1.6 added
 	CryptoFunctions          *[]string `json:"cryptoFunctions,omitempty" cdx:"+1.6"`          // v1.6 added
 	ClassicalSecurityLevel   int       `json:"classicalSecurityLevel,omitempty" cdx:"+1.6"`   // v1.6 added
-	NistQuantumSecurityLevel int       `json:"nistQuantumSecurityLevel,omitempty" cdx:"+1.6"` // v1.6 added                           `json:"oid,omitempty" cdx:"+1.6"`                             // v1.6 added
+	NistQuantumSecurityLevel int       `json:"nistQuantumSecurityLevel,omitempty" cdx:"+1.6"` // v1.6 added
+	AlgorithmFamily          string    `json:"algorithmFamily,omitempty" cdx:"+1.7"`
+	EllipticCurve            string    `json:"ellipticCurve,omitempty" cdx:"+1.7"`
 }
 
 // v1.6: added
+// v1.7: SignatureAlgorithmRef, SubjectPublicKeyRef, CertificateExtension - deprecated
 type CDXCertificateProperties struct {
-	SubjectName           string      `json:"subjectName,omitempty" cdx:"+1.6"`           // v1.6 added
-	IssuerName            string      `json:"issuerName,omitempty" cdx:"+1.6"`            // v1.6 added
-	NotValidBefore        string      `json:"notValidBefore,omitempty" cdx:"+1.6"`        // v1.6 added
-	NotValidAfter         string      `json:"notValidAfter,omitempty" cdx:"+1.6"`         // v1.6 added
-	SignatureAlgorithmRef *CDXRefType `json:"signatureAlgorithmRef,omitempty" cdx:"+1.6"` // v1.6 added
-	SubjectPublicKeyRef   *CDXRefType `json:"subjectPublicKeyRef,omitempty" cdx:"+1.6"`   // v1.6 added
-	CertificateFormat     string      `json:"certificateFormat,omitempty" cdx:"+1.6"`     // v1.6 added
-	CertificateExtension  string      `json:"certificateExtension,omitempty" cdx:"+1.6"`  // v1.6 added
+	SubjectName                string                     `json:"subjectName,omitempty" cdx:"+1.6"`           // v1.6 added
+	IssuerName                 string                     `json:"issuerName,omitempty" cdx:"+1.6"`            // v1.6 added
+	NotValidBefore             string                     `json:"notValidBefore,omitempty" cdx:"+1.6"`        // v1.6 added
+	NotValidAfter              string                     `json:"notValidAfter,omitempty" cdx:"+1.6"`         // v1.6 added
+	SignatureAlgorithmRef      *CDXRefType                `json:"signatureAlgorithmRef,omitempty" cdx:"+1.6"` // v1.6 added
+	SubjectPublicKeyRef        *CDXRefType                `json:"subjectPublicKeyRef,omitempty" cdx:"+1.6"`   // v1.6 added
+	CertificateFormat          string                     `json:"certificateFormat,omitempty" cdx:"+1.6"`     // v1.6 added
+	CertificateExtension       string                     `json:"certificateExtension,omitempty" cdx:"+1.6"`  // v1.6 added
+	SerialNumber               string                     `json:"serialNumber,omitempty" cdx:"+1.7"`
+	CertificateFileExtension   string                     `json:"certificateFileExtension,omitempty" cdx:"+1.7"`
+	Fingerprint                *CDXCryptoFingerprint      `json:"fingerprint,omitempty" cdx:"+1.7"`
+	CertificateState           *CDXCertificateState       `json:"certificateState,omitempty" cdx:"+1.7"`
+	CreationDate               string                     `json:"creationDate,omitempty" cdx:"+1.7"`
+	ActivationDate             string                     `json:"activationDate,omitempty" cdx:"+1.7"`
+	DeactivationDate           string                     `json:"deactivationDate,omitempty" cdx:"+1.7"`
+	RevocationDate             string                     `json:"revocationDate,omitempty" cdx:"+1.7"`
+	DestructionDate            string                     `json:"destructionDate,omitempty" cdx:"+1.7"`
+	CertificateExtensions      *[]CDXCertificateExtension `json:"certificateExtensions,omitempty" cdx:"+1.7"`
+	RelatedCryptographicAssets *[]CDXCryptographicAsset   `json:"relatedCryptographicAssets,omitempty" cdx:"+1.7"`
 }
 
 type CDXRelatedCryptoMaterialProperties struct {
-	Type           string        `json:"type,omitempty" cdx:"+1.6"`           // v1.6 added
-	Id             string        `json:"id,omitempty" cdx:"+1.6"`             // v1.6 added
-	State          string        `json:"state,omitempty" cdx:"+1.6"`          // v1.6 added
-	AlgorithmRef   *CDXRefType   `json:"algorithmRef,omitempty" cdx:"+1.6"`   // v1.6 added
-	CreationDate   string        `json:"creationDate,omitempty" cdx:"+1.6"`   // v1.6 added
-	ActivationDate string        `json:"activationDate,omitempty" cdx:"+1.6"` // v1.6 added
-	UpdateDate     string        `json:"updateDate,omitempty" cdx:"+1.6"`     // v1.6 added
-	ExpirationDate string        `json:"expirationDate,omitempty" cdx:"+1.6"` // v1.6 added
-	Value          string        `json:"value,omitempty" cdx:"+1.6"`          // v1.6 added
-	Size           int           `json:"size,omitempty" cdx:"+1.6"`           // v1.6 added
-	Format         string        `json:"format,omitempty" cdx:"+1.6"`         // v1.6 added
-	SecuredBy      *CDXSecuredBy `json:"securedBy,omitempty" cdx:"+1.6"`      // v1.6 added
+	Type                       string                   `json:"type,omitempty" cdx:"+1.6"`           // v1.6 added
+	Id                         string                   `json:"id,omitempty" cdx:"+1.6"`             // v1.6 added
+	State                      string                   `json:"state,omitempty" cdx:"+1.6"`          // v1.6 added
+	AlgorithmRef               *CDXRefType              `json:"algorithmRef,omitempty" cdx:"+1.6"`   // v1.6 added
+	CreationDate               string                   `json:"creationDate,omitempty" cdx:"+1.6"`   // v1.6 added
+	ActivationDate             string                   `json:"activationDate,omitempty" cdx:"+1.6"` // v1.6 added
+	UpdateDate                 string                   `json:"updateDate,omitempty" cdx:"+1.6"`     // v1.6 added
+	ExpirationDate             string                   `json:"expirationDate,omitempty" cdx:"+1.6"` // v1.6 added
+	Value                      string                   `json:"value,omitempty" cdx:"+1.6"`          // v1.6 added
+	Size                       int                      `json:"size,omitempty" cdx:"+1.6"`           // v1.6 added
+	Format                     string                   `json:"format,omitempty" cdx:"+1.6"`         // v1.6 added
+	SecuredBy                  *CDXSecuredBy            `json:"securedBy,omitempty" cdx:"+1.6"`      // v1.6 added
+	Fingerprint                *CDXCryptoFingerprint    `json:"fingerprint,omitempty" cdx:"+1.7"`
+	RelatedCryptographicAssets *[]CDXCryptographicAsset `json:"relatedCryptographicAssets,omitempty" cdx:"+1.7"`
 }
 
 // v1.6: added
+// v1.7 CryptoRefArray: deprecated
 type CDXProtocolProperties struct {
-	Type                string                  `json:"type,omitempty" cdx:"+1.6"`                // v1.6 added
-	Version             string                  `json:"version,omitempty" cdx:"+1.6"`             // v1.6 added
-	CipherSuites        *[]CDXCipherSuite       `json:"cipherSuites,omitempty" cdx:"+1.6"`        // v1.6 added
-	Ikev2TransformTypes *CDXIkevV2TransformType `json:"ikev2TransformTypes,omitempty" cdx:"+1.6"` // v1.6 added
-	CryptoRefArray      *CDXCryptoRefArray      `json:"cryptoRefArray,omitempty" cdx:"+1.6"`      // v1.6 added
+	Type                       string                   `json:"type,omitempty" cdx:"+1.6"`                // v1.6 added
+	Version                    string                   `json:"version,omitempty" cdx:"+1.6"`             // v1.6 added
+	CipherSuites               *[]CDXCipherSuite        `json:"cipherSuites,omitempty" cdx:"+1.6"`        // v1.6 added
+	Ikev2TransformTypes        *CDXIkevV2TransformType  `json:"ikev2TransformTypes,omitempty" cdx:"+1.6"` // v1.6 added
+	CryptoRefArray             *CDXCryptoRefArray       `json:"cryptoRefArray,omitempty" cdx:"+1.6"`      // v1.6 added, v1.7 deprecated
+	RelatedCryptographicAssets *[]CDXCryptographicAsset `json:"relatedCryptographicAssets,omitempty" cdx:"+1.7"`
 }
 
 // v1.6: added
@@ -87,22 +108,59 @@ type CDXCipherSuite struct {
 }
 
 // v1.6: added
+// v1.7:  Encr, Prf, Integ, Ke, Auth changed from array of string to additionally allow a struct type
 type CDXIkevV2TransformType struct {
-	Encr  *CDXCryptoRefArray `json:"encr,omitempty" cdx:"+1.6"`  // v1.6 added
-	Prf   *CDXCryptoRefArray `json:"prf,omitempty" cdx:"+1.6"`   // v1.6 added
-	Integ *CDXCryptoRefArray `json:"integ,omitempty" cdx:"+1.6"` // v1.6 added
-	Ke    *CDXCryptoRefArray `json:"ke,omitempty" cdx:"+1.6"`    // v1.6 added
-	Esn   bool               `json:"esn,omitempty" cdx:"+1.6"`   // v1.6 added
-	Auth  *CDXCryptoRefArray `json:"auth,omitempty" cdx:"+1.6"`  // v1.6 added
+	Encr  *[]interface{} `json:"encr,omitempty" cdx:"+1.6"`  // v1.6 added, v1.7 changed
+	Prf   *[]interface{} `json:"prf,omitempty" cdx:"+1.6"`   // v1.6 added, v1.7 changed
+	Integ *[]interface{} `json:"integ,omitempty" cdx:"+1.6"` // v1.6 added, v1.7 changed
+	Ke    *[]interface{} `json:"ke,omitempty" cdx:"+1.6"`    // v1.6 added, v1.7 changed
+	Esn   bool           `json:"esn,omitempty" cdx:"+1.6"`   // v1.6 added
+	Auth  *[]interface{} `json:"auth,omitempty" cdx:"+1.6"`  // v1.6 added, v1.7 changed
 }
 
-// v1.6: added
+// v1.6: added, v1.7 changed to complex array of multiple types
 // TODO: NOTE: This is a first-of-kind, alias for a slice
 // it SHOULD NOT exist unless this is adopted EVERYWHERE
 type CDXCryptoRefArray []CDXRefType
 
+// v1.7: added, optional object as part of CDXIkevV2TransformType elements
+type CDXCryptoAlgorithmDescription struct {
+	Group     int    `json:"group,omitempty" cdx:"+1.7"`
+	Name      string `json:"name,omitempty" cdx:"+1.7"`
+	Algorithm string `json:"algorithm,omitempty" cdx:"+1.7"`
+}
+
+// v1.7 added
 // v1.6: added
 type CDXSecuredBy struct {
-	Mechanism    string      `json:"mechanism,omitempty" cdx:"+1.6"`    // v1.6 added
-	AlgorithmRef *CDXRefType `json:"algorithmRef,omitempty" cdx:"+1.6"` // v1.6 added
+	Mechanism    string      `json:"mechanism,omitempty" cdx:"+1.6"`
+	AlgorithmRef *CDXRefType `json:"algorithmRef,omitempty" cdx:"+1.6"`
+}
+
+// v1.7: added
+type CDXCryptoFingerprint struct {
+	Alg     string `json:"alg,omitempty" cdx:"+1.7"`
+	Content string `json:"content,omitempty" cdx:"+1.7"`
+}
+
+// v1.7: added
+type CDXCertificateState struct {
+	State       string `json:"state,omitempty" cdx:"+1.7"`       // Predefined
+	Reason      string `json:"reason,omitempty" cdx:"+1.7"`      // Pre-defined / Custom
+	Name        string `json:"name,omitempty" cdx:"+1.7"`        // Custom
+	Description string `json:"description,omitempty" cdx:"+1.7"` // Custom
+}
+
+// v1.7: added
+type CDXCertificateExtension struct {
+	CommonExtensionName  string `json:"commonExtensionName,omitempty" cdx:"+1.7"`
+	CommonExtensionValue string `json:"commonExtensionValue,omitempty" cdx:"+1.7"`
+	CustomExtensionName  string `json:"customExtensionName,omitempty" cdx:"+1.7"`
+	CustomExtensionValue string `json:"customExtensionValue,omitempty" cdx:"+1.7"`
+}
+
+// v1.7: added
+type CDXCryptographicAsset struct {
+	Type string `json:"type,omitempty" cdx:"+1.7"`
+	Ref  string `json:"ref,omitempty" cdx:"+1.7"`
 }
