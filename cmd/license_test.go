@@ -34,6 +34,7 @@ const (
 	TEST_LICENSE_LIST_CDX_1_3                         = "test/cyclonedx/1.3/cdx-1-3-license-list.json"
 	TEST_LICENSE_LIST_CDX_1_3_NONE_FOUND              = "test/cyclonedx/1.3/cdx-1-3-license-list-none-found.json"
 	TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND              = "test/cyclonedx/1.4/cdx-1-4-license-list-none-found.json"
+	TEST_LICENSE_LIST_CDX_1_4_PARENT_NO_LICENSE       = "test/cyclonedx/1.4/cdx-1-4-license-list-parent-no-license.json"
 	TEST_LICENSE_LIST_CDX_1_5_LICENSE_CHOICE_VARIANTS = "test/cyclonedx/1.5/cdx-1-5-license-choice-variants.json"
 	TEST_LICENSE_LIST_CDX_1_5_MATURE_EXAMPLE_1        = TEST_CDX_1_5_MATURE_EXAMPLE_1_BASE
 
@@ -216,6 +217,14 @@ func TestLicenseListCdx14CsvNoneFound(t *testing.T) {
 	// Test CDX 1.4 document
 	lti := NewLicenseTestInfo(TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND, FORMAT_CSV, false)
 	lti.ResultExpectedLineCount = 4 // title only + 2 UNDEFINED + newline
+	innerTestLicenseList(t, lti)
+}
+
+func TestLicenseListCdx14CsvParentNoLicense(t *testing.T) {
+	lti := NewLicenseTestInfo(TEST_LICENSE_LIST_CDX_1_4_PARENT_NO_LICENSE, FORMAT_CSV, false)
+	lti.ResultExpectedLineCount = 5 // title only + 2 UNDEFINED (metadata and parent) + 1 Apache 2.0 (child) + newline
+	lti.ResultLineContainsValues = []string{"Apache-2.0"}
+	lti.ResultLineContainsValuesAtLineNum = 1
 	innerTestLicenseList(t, lti)
 }
 
