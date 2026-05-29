@@ -423,6 +423,27 @@ func TestHashZeroCDXVulnerabilityStruct(t *testing.T) {
 	}
 }
 
+// Regression test for https://github.com/CycloneDX/sbom-utility/issues/148 :
+// a vulnerability with an `analysis` object that omits the optional `response`
+// array must not cause a nil pointer dereference panic.
+func TestHashCDXVulnerabilityAnalysisWithoutResponse(t *testing.T) {
+	cdxVulnerability := CDXVulnerability{
+		Id: "CVE-2026-0000",
+		Analysis: &CDXAnalysis{
+			State: "exploitable",
+		},
+	}
+	document := NewBOM("")
+	hashed, err := document.HashmapVulnerability(cdxVulnerability, nil)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if !hashed {
+		t.Error(getLogger().Errorf("expected non-empty vulnerability to be hashed."))
+	}
+}
+
 // ----------------------
 // License Hashing
 // ----------------------
