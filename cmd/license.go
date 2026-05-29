@@ -251,8 +251,9 @@ func hashComponentLicense(bom *schema.BOM, policyConfig *schema.LicensePolicyCon
 
 		// Issue a warning that the component had no license; use "safe" BOMRef string value
 		warnInvalidResourceLicense(schema.RESOURCE_TYPE_COMPONENT, licenseInfo.BOMRef.String(), cdxComponent.Name, cdxComponent.Version)
-		// No actual licenses to process
-		return
+		if err != nil {
+			return
+		}
 	}
 
 	// Recursively hash licenses for all child components (i.e., hierarchical composition)
