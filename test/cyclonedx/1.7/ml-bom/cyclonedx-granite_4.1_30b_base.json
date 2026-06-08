@@ -1,0 +1,823 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.7",
+  "serialNumber": "urn:uuid:a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-04-22T14:12:43Z",
+    "component": {
+      "type": "machine-learning-model",
+      "bom-ref": "pkg:huggingface/ibm-granite/granite-4.1-30b-base@4.1",
+      "purl": "pkg:huggingface/ibm-granite/granite-4.1-30b-base@4.1",
+      "group": "IBM Granite",
+      "manufacturer": {
+        "name": "IBM",
+        "url": ["https://www.ibm.com"]
+      },
+      "supplier": {
+        "name": "Hugging Face",
+        "url": ["https://huggingface.co"]
+      },
+      "name": "Granite-4.1-30b-base",
+      "version": "4.1",
+      "description": "Designed to follow general instructions and can serve as foundation for AI assistants across diverse domains, including business applications, as well as for LLM agents equipped with tool-use capabilities.",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0",
+            "url": "https://huggingface.co/datasets/choosealicense/licenses/blob/main/markdown/apache-2.0.md"
+          }
+        }
+      ],
+      "releaseNotes": {
+        "type": "major",
+        "title": "Granite 4.1 30B Base Model Release",
+        "timestamp": "2026-04-29T00:00:00Z",
+        "notes": [
+          {
+            "locale": "en-US",
+            "text": {
+              "content": "IBM Granite 4.1 30B base model release. Structured dataset metadata used for pre- and post-training IBM Granite 4 base and instruct models is being released as part of IBM's effort to provide the community with highly transparent open source model development."
+            }
+          }
+        ]
+      },
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://www.ibm.com/granite"
+        },
+        {
+          "type": "documentation",
+          "url": "https://www.ibm.com/granite/docs/resources/responsible-use-guide.pdf",
+          "comment": "IBM Granite Responsible Use Guide"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:model:disclaimer",
+          "value": "Structured dataset metadata used for pre- and post-training IBM Granite 4 base and instruct models is being released as part of IBM's effort to provide the community with highly transparent open source model development. In this spirit, we are releasing metadata related to datasets directly ingested during training and metadata for datasets used to source seed data for IBM's synthetic data pipelines. This structured disclosure is provided in machine readable .JSON format as a governance artifact to inform risk-based controls for downstream model use."
+        },
+        {
+          "name": "cdx:ai-ml:model:parameter:count",
+          "value": "28865728512"
+        },
+        {
+          "name": "cdx:ai-ml:model:parameter:count:approx",
+          "value": "30000000000"
+        },
+        {
+          "name": "cdx:ai-ml:model:architecture:type",
+          "value": "Dense"
+        },
+        {
+          "name": "cdx:ai-ml:model:architecture:transformer_class",
+          "value": "GraniteForCausalLM"
+        },
+        {
+          "name": "cdx:ai-ml:model:architecture:layers",
+          "value": "64"
+        },
+        {
+          "name": "cdx:ai-ml:model:architecture:attention_heads",
+          "value": "32"
+        },
+        {
+          "name": "cdx:ai-ml:model:architecture:attention_head_dim",
+          "value": "128"
+        },
+        {
+          "name": "cdx:ai-ml:model:architecture:kv_heads",
+          "value": "8"
+        },
+        {
+          "name": "cdx:ai-ml:model:architecture:positional_embeddings",
+          "value": "RoPE"
+        }
+      ]
+    }
+  },
+  "components": [
+    {
+      "type": "data",
+      "name": "GneissWeb",
+      "bom-ref": "pkg:huggingface/ibm-granite/GneissWeb",
+      "purl": "pkg:huggingface/ibm-granite/GneissWeb",
+      "description": "GneissWeb is a large-scale dataset for LLM pretraining, consisting of around 10 trillion tokens.",
+      "publisher": "IBM",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/ibm-granite/GneissWeb"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "web"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:date_obtained",
+          "value": "2025-02-10"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:size_mb",
+          "value": "30200000.0"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:languages",
+          "value": "en"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:synthetic",
+          "value": "no"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Webhose",
+      "bom-ref": "granite-dataset:webhose",
+      "description": "Unstructured web content in English converted into machine-readable data feeds acquired by IBM.",
+      "properties": [
+        {
+          "name": "classification",
+          "value": "private"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "web"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:size_mb",
+          "value": "170368.0"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "opc-annealing-corpus",
+      "bom-ref": "pkg:huggingface/OpenCoder-LLM/opc-annealing-corpus",
+      "purl": "pkg:huggingface/OpenCoder-LLM/opc-annealing-corpus",
+      "description": "Synthetic data and algorithmic corpus used for opencoder annealing.",
+      "publisher": "OpenCoder-LLM",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/OpenCoder-LLM/opc-annealing-corpus"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "code"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:synthetic",
+          "value": "yes"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Free Law (TxT360)",
+      "bom-ref": "pkg:huggingface/LLM360/TxT360#freelaw",
+      "purl": "pkg:huggingface/LLM360/TxT360#freelaw",
+      "description": "Public-domain legal opinions from the US federal and state courts",
+      "publisher": "LLM360",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/LLM360/TxT360/tree/main/data/freelaw"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "domain"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "USPTO (TxT360)",
+      "bom-ref": "pkg:huggingface/LLM360/TxT360#uspto",
+      "purl": "pkg:huggingface/LLM360/TxT360#uspto",
+      "description": "Collection of US patents granted from 1975 to May 2023, excluding design patents",
+      "publisher": "LLM360",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/LLM360/TxT360/tree/main/data/uspto"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "domain"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Wikipedia (TxT360)",
+      "bom-ref": "pkg:huggingface/LLM360/TxT360#wikipedia",
+      "purl": "pkg:huggingface/LLM360/TxT360#wikipedia",
+      "description": "Wikimedia dataset filtered for high quality content articles",
+      "publisher": "LLM360",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/LLM360/TxT360/tree/main/data/wikipedia"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "technical"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "LOC-PD-Books",
+      "bom-ref": "pkg:huggingface/storytracer/LoC-PD-Books",
+      "purl": "pkg:huggingface/storytracer/LoC-PD-Books",
+      "description": "This dataset contains more than 140,000 English books (~ 8 billion words) digitised by the Library of Congress (LoC) that are in the public domain in the United States.",
+      "publisher": "storytracer",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/storytracer/LoC-PD-Books"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "technical"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Cosmopedia V2",
+      "bom-ref": "pkg:huggingface/HuggingFaceTB/smollm-corpus#cosmopedia-v2",
+      "purl": "pkg:huggingface/HuggingFaceTB/smollm-corpus#cosmopedia-v2",
+      "description": "An enhanced version of Cosmopedia, the largest synthetic dataset for pre-training, consisting of over 39 million textbooks, blog posts, and stories generated by Mixtral-8x7B-Instruct-v0.1",
+      "publisher": "HuggingFaceTB",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/HuggingFaceTB/smollm-corpus"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "technical"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "DM Math (TxT360)",
+      "bom-ref": "pkg:huggingface/LLM360/TxT360#dm_maths",
+      "purl": "pkg:huggingface/LLM360/TxT360#dm_maths",
+      "description": "DeepMind Math dataset with generated questions from various topics like algebra, calculus, geometry, etc.",
+      "publisher": "LLM360",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/LLM360/TxT360/tree/main/data/dm_maths"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "math"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Stack-Exchange (TxT360)",
+      "bom-ref": "pkg:huggingface/LLM360/TxT360#stackexchange",
+      "purl": "pkg:huggingface/LLM360/TxT360#stackexchange",
+      "description": "One of the largest publicly available repositories for question-answer pairs, this dataset is a network of question-and-answer websites on various subjects including programming, science, mathematics, and more.",
+      "publisher": "LLM360",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/LLM360/TxT360/tree/main/data/stackexchange"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "math"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "open-web-math",
+      "bom-ref": "pkg:huggingface/open-web-math/open-web-math",
+      "purl": "pkg:huggingface/open-web-math/open-web-math",
+      "description": "Contains the majority of the high-quality, mathematical text from the internet.",
+      "publisher": "open-web-math",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/open-web-math/open-web-math"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "math"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Algebraic-Stack",
+      "bom-ref": "pkg:huggingface/EleutherAI/proof-pile-2#algebraic-stack",
+      "purl": "pkg:huggingface/EleutherAI/proof-pile-2#algebraic-stack",
+      "description": "A new dataset of mathematical code composed of 11B tokens that includes numerical computing, computer algebra, and formal mathematics.",
+      "publisher": "EleutherAI",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/EleutherAI/proof-pile-2"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "math"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "opc-fineweb-math-corpus",
+      "bom-ref": "pkg:huggingface/OpenCoder-LLM/opc-fineweb-math-corpus",
+      "purl": "pkg:huggingface/OpenCoder-LLM/opc-fineweb-math-corpus",
+      "description": "This math-related data from Fineweb was specifically used in OpenCoder pre-training.",
+      "publisher": "OpenCoder-LLM",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/OpenCoder-LLM/opc-fineweb-math-corpus"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "math"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "FineMath",
+      "bom-ref": "pkg:huggingface/HuggingFaceTB/finemath",
+      "purl": "pkg:huggingface/HuggingFaceTB/finemath",
+      "description": "FineMath consists of 34B tokens (FineMath-3+) and 54B tokens (FineMath-3+ with InfiMM-WebMath-3+) of mathematical educational content filtered from CommonCrawl.",
+      "publisher": "HuggingFaceTB",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/HuggingFaceTB/finemath"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "math"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "MegaMath",
+      "bom-ref": "pkg:huggingface/LLM360/MegaMath",
+      "purl": "pkg:huggingface/LLM360/MegaMath",
+      "description": "MegaMath is an open math pretraining dataset curated from diverse, math-focused sources, with over 300B tokens.",
+      "publisher": "LLM360",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/LLM360/MegaMath"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "math"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:synthetic",
+          "value": "yes"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Nemotron-MIND",
+      "bom-ref": "pkg:huggingface/nvidia/Nemotron-MIND",
+      "purl": "pkg:huggingface/nvidia/Nemotron-MIND",
+      "description": "A compilation of pretraining data that supports improvements of math reasoning capabilities. Contains over 138 billion tokens of structured mathematical dialogues.",
+      "publisher": "nvidia",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/nvidia/Nemotron-MIND"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "math"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:synthetic",
+          "value": "yes"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "MADLAD-400",
+      "bom-ref": "pkg:huggingface/allenai/MADLAD-400",
+      "purl": "pkg:huggingface/allenai/MADLAD-400",
+      "description": "MADLAD-400 (Multilingual Audited Dataset: Low-resource And Document-level) is a document-level multilingual dataset based on Common Crawl, covering 419 languages.",
+      "publisher": "allenai",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/allenai/MADLAD-400"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "multilingual"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "CulturaX",
+      "bom-ref": "pkg:huggingface/uonlp/CulturaX",
+      "purl": "pkg:huggingface/uonlp/CulturaX",
+      "description": "A multilingual dataset with 6.3 trillion tokens in 167 languages, tailored for LLM development.",
+      "publisher": "uonlp",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/uonlp/CulturaX"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "multilingual"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Sangraha",
+      "bom-ref": "pkg:huggingface/ai4bharat/sangraha",
+      "purl": "pkg:huggingface/ai4bharat/sangraha",
+      "description": "Translated Sangraha dataset for improved multilingual support.",
+      "publisher": "ai4bharat",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/ai4bharat/sangraha"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "multilingual"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:synthetic",
+          "value": "yes"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "DOLMino dataset mix - Flan partition",
+      "bom-ref": "pkg:huggingface/allenai/dolmino-mix-1124#flan",
+      "purl": "pkg:huggingface/allenai/dolmino-mix-1124#flan",
+      "description": "Flan partition of the allenai dolmino mix 1124 dataset.",
+      "publisher": "allenai",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/allenai/dolmino-mix-1124"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "instructions"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Hermes Function-Calling V1",
+      "bom-ref": "pkg:huggingface/NousResearch/hermes-function-calling-v1",
+      "purl": "pkg:huggingface/NousResearch/hermes-function-calling-v1",
+      "description": "A structured output dataset of multi-turn function-calling conversations designed to train models to interpret natural language and generate correct function invocations with JSON-style responses.",
+      "publisher": "NousResearch",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/NousResearch/hermes-function-calling-v1"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "General English"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Code Pile",
+      "bom-ref": "granite-dataset:code-pile",
+      "description": "Our code pile is sourced from a combination of publicly available datasets like Github Code Clean, StarCoderdata, and additional public code repositiories and issues from Github.",
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "code"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Granite Feedback",
+      "bom-ref": "granite-dataset:granite-feedback",
+      "description": "Dataset acquired based on feedback from the internal Granite feedback team. It includes: IBM enterprise, ITops, JCL data, ESG data, Angular data, ESQL data.",
+      "properties": [
+        {
+          "name": "classification",
+          "value": "private"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "code"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "IBM Documentation",
+      "bom-ref": "granite-dataset:ibm-documentation",
+      "description": "IBM redbooks and product documents, as well as publicly available documentation from Fortune 500 companies.",
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "domain"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Fineweb2-edu-multilingual",
+      "bom-ref": "granite-dataset:fineweb2-edu-multilingual",
+      "description": "Internal multilingual dataset, based upon Fineweb2 dataset, filtered for highest quality documents.",
+      "properties": [
+        {
+          "name": "classification",
+          "value": "private"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "multilingual"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:synthetic",
+          "value": "yes"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Nemotron-CC",
+      "bom-ref": "granite-dataset:nemotron-cc",
+      "description": "A 6.3T token dataset based on Common Crawl, consisting of 4.4T globally deduplicated original tokens and 1.9T synthetically generated tokens.",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://data.commoncrawl.org/contrib/Nemotron/Nemotron-CC/index.html"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "pre-training"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "pre-training"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "OpenCodeInstruct",
+      "bom-ref": "granite-dataset:opencodeinstruct",
+      "description": "The largest open-access instruction tuning dataset (in python), comprising 5 million diverse samples.",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/nvidia/OpenCodeInstruct"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "code"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "post-training"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:synthetic",
+          "value": "yes"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "OpenMathInstruct-1",
+      "bom-ref": "granite-dataset:openmathinstruct-1",
+      "description": "A math instruction tuning dataset with 1.8M problem-solution pairs generated using permissively licensed Mixtral-8x7B model.",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/nvidia/OpenMathInstruct-1"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "math"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "post-training"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:synthetic",
+          "value": "yes"
+        }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Hermes 3",
+      "bom-ref": "granite-dataset:hermes-3",
+      "description": "A diverse collection of instruction data, curated and generated to include a range of domains and use cases.",
+      "externalReferences": [
+        {
+          "type": "distribution",
+          "url": "https://huggingface.co/datasets/NousResearch/Hermes-3-Dataset"
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:ai-ml:dataset:category",
+          "value": "instructions"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:stage",
+          "value": "post-training"
+        },
+        {
+          "name": "cdx:ai-ml:dataset:synthetic",
+          "value": "yes"
+        }
+      ]
+    }
+  ],
+  "compositions": [
+    {
+      "aggregate": "complete",
+      "assemblies": [
+        "pkg:huggingface/ibm-granite/granite-4.1-30b-base@4.1"
+      ]
+    }
+  ]
+}
