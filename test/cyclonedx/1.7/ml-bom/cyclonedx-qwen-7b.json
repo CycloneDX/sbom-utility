@@ -1,0 +1,439 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.7",
+  "serialNumber": "urn:uuid:ec45525e-516c-4405-9de3-4fbdaef7f09a",
+  "version": 1,
+  "metadata": {
+    "component": {
+      "type": "machine-learning-model",
+      "bom-ref": "pkg:huggingface/Qwen/Qwen-7B@ef3c5c9",
+      "purl": "pkg:huggingface/Qwen/Qwen-7B@ef3c5c9c57b252f3149c1408daf4d649ec8b6c85",
+      "group": "Qwen",
+      "manufacturer": {
+        "name": "Alibaba Cloud",
+        "url": [ "https://www.alibabacloud.com" ]
+      },
+      "supplier": {
+        "name": "Hugging Face",
+        "url": [ "https://huggingface.co" ]
+      },
+      "name": "Qwen/Qwen-7B",
+      "version": "ef3c5c9c57b252f3149c1408daf4d649ec8b6c85",
+      "description": "Qwen-7B is a Transformer-based large language model, which is pretrained on a large volume of data, including web texts, books, codes, etc.",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://huggingface.co/"
+        },
+        {
+          "type": "model-card",
+          "url": "https://huggingface.co/Qwen/Qwen-7B"
+        },
+        {
+          "type": "documentation",
+          "url": "https://arxiv.org/abs/2309.16609",
+          "comment": "Qwen Technical Report"
+        }
+      ],
+      "properties": [
+        {
+          "name": "acme:research:model:llm:id",
+          "value": "MODEL-ID-12345-INTERNAL"
+        },
+        {
+          "name": "cdx:ai-ml:model:template:chat",
+          "value": "ChatML"
+        }
+      ],
+      "tags": [
+        "pytorch",
+        "transformers",
+        "text-generation"
+      ],
+      "pedigree": {
+        "ancestors": [
+          {
+            "type": "machine-learning-model",
+            "name": "meta-llama/Llama-3.2-3B-Instruct",
+            "publisher": "Meta",
+            "purl": "pkg:huggingface/meta-llama/Llama-3.2-3B-Instruct",
+            "description": "The original base model from Meta Llama used for fine-tuning."
+          }
+        ]
+      },
+      "components": [
+        {
+          "type": "file",
+          "name": "config.json",
+          "description": "Model configuration file using the 'QWenLMHeadModel' model class in Hugging Face Transformers",
+          "bom-ref": "pkg:huggingface/Qwen/Qwen-7B@e7a368b#config.json",
+          "purl": "pkg:huggingface/Qwen/Qwen-7B@e7a368b0774370edec29674e7c51f52fc7663f59#config.json"
+        },
+        {
+          "type": "file",
+          "name": "configuration_qwen.py",
+          "description": "Python 'QWenConfig' class implementation for the Qwen-7B model using Hugging Face Transformers",
+          "bom-ref": "pkg:huggingface/Qwen/Qwen-7B@a6ca629#configuration_qwen.py",
+          "purl": "pkg:huggingface/Qwen/Qwen-7B@a6ca629d063f56f34d184852301e8852a7afbd58#configuration_qwen.py"
+        },
+        {
+          "type": "library",
+          "name": "tokenization_qwen.py",
+          "description": "Python tokenization classes for QWen (QWenTokenizer)",
+          "bom-ref": "pkg:huggingface/Qwen/Qwen-7B@e7a368b#tokenization_qwen.py",
+          "purl": "pkg:huggingface/Qwen/Qwen-7B@e7a368b0774370edec29674e7c51f52fc7663f59#tokenization_qwen.py",
+          "properties": [
+            {
+              "name": "cdx:ai-ml:model:tokenizer",
+              "value": "QWenTokenizer"
+            }
+          ]
+        },
+        {
+          "type": "data",
+          "name": "model-00001-of-00008.safetensors",
+          "description": "Model tensor data (01 of 08)",
+          "bom-ref": "pkg:huggingface/Qwen/Qwen-7B@abcb6d6#model-00001-of-00008.safetensors",
+          "purl": "pkg:huggingface/Qwen/Qwen-7B@abcb6d6d8ec63ce606f816e2d08072da6309f965#model-00001-of-00008.safetensors",
+          "data": [
+            {
+              "type": "dataset",
+              "contents": {
+                "url": "https://huggingface.co/Qwen/Qwen-7B/blob/main/model-00001-of-00008.safetensors"
+              }
+            }
+          ]
+        },
+        {
+          "type": "data",
+          "name": "model-00002-of-00008.safetensors",
+          "description": "Model tensor data (02 of 08)",
+          "bom-ref": "pkg:huggingface/Qwen/Qwen-7B@abcb6#model-00002-of-00008.safetensors",
+          "purl": "pkg:huggingface/Qwen/Qwen-7B@abcb6d6d8ec63ce606f816e2d08072da6309f965#model-00002-of-00008.safetensors",
+          "data": [
+            {
+              "type": "dataset",
+              "contents": {
+                "url": "https://huggingface.co/Qwen/Qwen-7B/blob/main/model-00002-of-00008.safetensors"
+              }
+            }
+          ]
+        }
+      ],
+      "modelCard": {
+        "modelParameters": {
+          "task": "text-generation",
+          "architectureFamily": "transformer",
+          "modelArchitecture": "QWenLMHeadModel",
+          "approach": {
+            "type": "supervised"
+          },
+          "datasets": [
+            {
+              "type": "dataset",
+              "name": "UltraFeedback dataset",
+              "classification": "public",
+              "contents": {
+                "url": "https://huggingface.co/datasets/openbmb/UltraFeedback"
+              }
+            },
+            {
+              "type": "dataset",
+              "name": "ACME Midwest health data",
+              "classification": "private",
+              "contents": {
+                "url": "https://acme.ai/adatasets/health/patient?region=midwest"
+              }
+            }
+          ],
+          "inputs": [
+            {
+              "format": "string"
+            }
+          ],
+          "outputs": [
+            {
+              "format": "string"
+            }
+          ]
+        },
+        "quantitativeAnalysis": {
+          "performanceMetrics": [
+            {
+              "type": "MMLU (5-shot)",
+              "value": "58.2",
+              "confidenceInterval": {
+                "lowerBound": "94.28",
+                "upperBound": "95.72"
+              }
+            },
+            {
+              "type": "GLUE (F1 Score)",
+              "value": "0.87",
+              "slice": "cola"
+            }
+          ],
+          "graphics": {
+            "description": "benchmark_score",
+            "collection": [
+              {
+                "name": "Qwen2 Performance Benchmarks (spider diagram)",
+                "image": {
+                  "contentType": "image/jpeg",
+                  "encoding": "base64",
+                  "content": "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA"
+                }
+              }
+            ]
+          }
+        },
+        "considerations": {
+          "users": [
+            "Software developer",
+            "Multilingual Content Creator",
+            "Customer Support Systems Architect",
+            "Academic Researcher / Student",
+            "Edge Device Engineer",
+            "Enterprise Security Analyst",
+            "Local AI Enthusiast / Privacy-First User"
+          ],
+          "useCases": [
+            "Utilizing the Qwen \"instruct\" variants within an IDE for real-time code completion, bug fixing, and unit test generation, benefiting from its \"Agentic\" capabilities for repository-scale understanding.",
+            "Translating business, education, or other content or informational materials to other languages and dialects while maintaining the original tone and cultural nuances.",
+            "Deploying low-latency chatbots for high-volume inquiries where the 7B model acts as a \"triage\" agent, answering common questions and only escalating complex logic to other support mechanisms.",
+            "Summarizing long-form research papers and generating initial drafts for school projects, utilizing the model's 128K context window to ingest entire PDFs at once.",
+            "Implementing the model on specialized hardware for real-time visual perception and \"Thinking Mode\" reasoning to help an intelligent device navigate and interact with its environment based on natural language commands",
+            "Running a self-hosted instance to analyze internal security logs for anomalies, ensuring that sensitive infrastructure data never leaves the organization's firewall.",
+            "Running a personal assistant locally on a laptop to answer questions or process private information such as emails or calendars without sending data to an external server."
+          ],
+          "technicalLimitations": [
+            "Greedy Decoding Degradation. The model is optimized for sampling-based generation. Using greedy decoding (temperature=0) can lead to performance degradation, repetitive loops, and \"stuck\" reasoning steps, particularly in the new Thinking Mode",
+            "Native Context Window Boundaries. While the model supports up to 131,072 tokens using YaRN scaling, its native pre-training context is limited to 32,768 tokens. Performance may degrade on very long sequences if proper scaling factors (like RoPE or YaRN) are not manually configured for local deployments.",
+            "Synthetic Data \"Sanding\" Effects. Research indicates that Qwen, like many models trained on massive synthetic datasets, can suffer from \"model collapse\" where rare edge cases or minority user behaviors are underrepresented, potentially leading to errors in complex, real-world production environments.",
+            "Thinking Mode History Overhead. In multi-turn conversations, including the model's internal \"thinking\" steps in the chat history can confuse the model and consume unnecessary tokens. Best practices require developers to filter out \"thinking\" content from the history to maintain coherence."
+          ],
+          "performanceTradeoffs": [
+            "Intelligence Plateau in Domain-Specific Tasks. Research indicates that for specialized fields like legal text analysis, performance often flattens beyond the 7B parameter mark. While efficient, the 7B model may not offer the incremental reasoning gains found in the 32B or 235B models for complex, high-stakes domain reasoning.",
+            "Enhanced Quantization Sensitivity. The Qwen-7B employs advanced pre-training techniques that reduce parameter redundancy. A documented tradeoff of this efficiency is a higher sensitivity to low-bit quantization (3-bit and below), where it exhibits more pronounced performance degradation compared to previous 7B generations.",
+            "Context Window Consistency. While the 7B model supports a native context window of 32,768 tokens, its performance degrades significantly more than the Qwen-8B (which uses YaRN scaling to reach 128K+) when handling massive document sets. Users must tradeoff deep long-document comprehension for the 7B's lower memory footprint.",
+            "Conciseness vs. Contextual Nuance. Experiments show that the older 7B design prioritizes cleaner, easier-to-read, and more concise outputs. The tradeoff is a loss of the \"faithful and nuanced\" insights and richer context provided by the newer 8B and larger architectures.",
+            "Agentic Capability Limitations. The 7B model shows a documented gap in its ability to follow complex multi-step instructions or navigate large software repositories, requiring tighter chunking and more finely tuned prompts to be effective",
+            "Hardware Efficiency vs. Throughput. Running the 7B model on older hardware (e.g., 8GB VRAM cards) is possible but results in a tradeoff of throughput. Modern inference techniques like continuous batching and PagedAttention are less effective at this scale than on the larger, more parallelizable MoE models.",
+            "Decoding Strategy Rigidity. The 7B model is highly sensitive to sampling parameters; specifically, using greedy decoding (temperature=0) can lead to severe repetition loops and \"endless repetitions\". To maintain performance, users must tradeoff predictability for more complex sampling-based generation."
+          ],
+          "ethicalConsiderations": [
+            {
+              "name": "Algorithmic and Cultural Bias. As a model trained on 36 trillion tokens across 119 languages, Qwen-7B may still reflect societal biases, stereotypes, or representational harms present in its training data.",
+              "mitigationStrategy": "Use the Qwen-Gender framework or Chain-of-Thought (CoT) prompting to detect and reduce implicit biases in generated text."
+            },
+            {
+              "name": "Vulnerability to Adversarial Attacks (Jailbreaking). Despite safety tuning, the 7B model can be susceptible to \"Prompt Hacking\" or \"Jailbreaking\" where users bypass safety constraints to generate toxic or illegal content.",
+              "mitigationStrategy": "Implement Qwen3Guard as an input/output filter to classify and block unsafe queries or responses in real-time"
+            },
+            {
+              "name": "Misinformation or Hallucinations. The model can fabricate false or misleading information, especially regarding sensitive topics like government actions or historical events.",
+              "mitigationStrategy": "Explicitly instruct the model to \"Prioritize Safety\" in the prompt and use Retrieval-Augmented Generation (RAG) to ground responses in verified external documents."
+            },
+            {
+              "name": "Privacy, Sensitive or Personally Identifiable Information (PII)Content Leakage. If such data was present in the pre-training corpus, this risk for generation od such data is possible.",
+              "mitigationStrategy": "Deploy the model locally using tools like Ollama to ensure sensitive data stays within a secure environment, and apply regex-based PII scrubbing to outputs."
+            },
+            {
+              "name": "Environmental Impact (Inference Energy). Continuous large-scale deployment of even mid-sized models like the 7B contributes to significant energy consumption and carbon footprints.",
+              "mitigationStrategy": "Utilize 4-bit quantization and low-latency inference engines to reduce the FLOPs required per token, minimizing the power draw per query."
+            },
+            {
+              "name": "Instruction Misalignment. In-context learning can sometimes lead to \"emergent misalignment\", where the model prioritizes following a user's conversational style over established safety boundaries.",
+              "mitigationStrategy": "Standardize output formats using system prompts and utilize the \"hard switch\" to disable the model's internal thinking mode when maximum safety and predictability are required."
+            }
+          ],
+          "fairnessAssessments": [
+            {
+              "groupAtRisk": "People identified by characteristics such as race, gender, and disability status.",
+              "harms": "The model was found to produce discriminatory outcomes across protected characteristics, including race, gender, and disability status. For example, individuals categorized as \"gypsy\" or \"mute\" were incorrectly labeled as untrustworthy in task assignment scenarios.",
+              "mitigationStrategy": "Researchers recommend using Reinforcement Learning from Artificial Intelligence Feedback (RLAIF) and rule-based rewards to align the model with specific legal standards like the EU AI Act."
+            },
+            {
+              "groupAtRisk": "Non-English/Non-Chinese speakers, speakers of regional dialects or specific geographic regions (e.g., Southeast Asia or the Middle East) on thinking or \"reasoning\" tasks.",
+              "harms": "Quality-of-Service Harm: The model may provide high-quality, nuanced reasoning in English or Mandarin but offer oversimplified, factually incorrect, or \"hallucinated\" information when queried in other supported languages.",
+              "mitigationStrategy": "Cross-Lingual Alignment: Developers can use multilingual Supervised Fine-Tuning (SFT). By training on additional high-quality, parallel corpora from other languages on \"reasoning capabilities\" (e.g., logic, math, coding)."
+            }
+          ],
+          "environmentalConsiderations": {
+            "energyConsumptions": [
+              {
+                "activity": "training",
+                "energyProviders": [
+                  {
+                    "description": "Meta data-center, US-East",
+                    "organization": {
+                      "name": "Fake.ai",
+                      "address": {
+                        "country": "United States",
+                        "region": "New Jersey",
+                        "locality": "Newark"
+                      }
+                    },
+                    "energySource": "natural-gas",
+                    "energyProvided": {
+                      "value": 0.4,
+                      "unit": "kWh"
+                    }
+                  }
+                ],
+                "activityEnergyCost": {
+                  "value": 0.4,
+                  "unit": "kWh"
+                },
+                "co2CostEquivalent": {
+                  "value": 31.22,
+                  "unit": "tCO2eq"
+                },
+                "co2CostOffset": {
+                  "value": 31.22,
+                  "unit": "tCO2eq"
+                }
+              }
+            ]
+          }
+        },
+        "properties": [
+          {
+            "name": "cdx:ai-ml:model:parameter:count",
+            "value": "7B"
+          },
+          {
+            "name": "cdx:ai-ml:model:parameter:tune_method",
+            "value": "sft"
+          },
+          {
+            "name": "cdx:ai-ml:model:parameter:tune_method",
+            "value": "rlhf"
+          },
+          {
+            "name": "cdx:ai-ml:model:hyperparameter:num_hidden_layers",
+            "value": "32"
+          },
+          {
+            "name": "cdx:ai-ml:model:hyperparameter:hidden_size",
+            "value": "4096"
+          },
+          {
+            "name": "cdx:ai-ml:model:hyperparameter:context_length",
+            "value": "8192"
+          },
+          {
+            "name": "cdx:ai-ml:model:hyperparameter:vocab_size",
+            "value": "151936"
+          },
+          {
+            "name": "cdx:ai-ml:model:hyperparameter:quantization",
+            "value": "BF16"
+          },
+          {
+            "name": "cdx:ai-ml:model:languages",
+            "value": "en,fr,de,it,ja,zh"
+          }
+        ]
+      }
+    }
+  },
+  "components": [
+    {
+      "name": "Qwen3-8B-Q4_K_M.gguf",
+      "type": "machine-learning-model",
+      "bom-ref": "pkg:huggingface/Qwen/Qwen3-8B-GGUF@7c41481#Qwen3-8B-Q4_K_M.gguf",
+      "purl": "pkg:huggingface/Qwen/Qwen3-8B-GGUF@7c41481f57cb95916b40956ab2f0b139b296d974#Qwen3-8B-Q4_K_M.gguf",
+      "version": "7c41481f57cb95916b40956ab2f0b139b296d974"
+    },
+    {
+      "name": "UltraFeed-back dataset",
+      "type": "data",
+      "bom-ref": "pkg:huggingface/openbmb/UltraFeedback@40b4365",
+      "purl": "pkg:huggingface/openbmb/UltraFeedback@40b436560ca83a8dba36114c22ab3c66e43f6d5e"
+    },
+    {
+      "name": "UltraFeed-back dataset",
+      "type": "data",
+      "bom-ref": "pkg:huggingface/snorkelai/Snorkel-Mistral-PairRM-DPO@07af5d0a",
+      "purl": "pkg:huggingface/snorkelai/Snorkel-Mistral-PairRM-DPO@07af5d0a875b4c692dfaff6c675b10af07b45511"
+    }
+  ],
+  "compositions": [
+    {
+      "aggregate": "complete",
+      "assemblies": [
+        "pkg:huggingface/Qwen/Qwen-7B@ef3c5c9"
+      ]
+    }
+  ],
+  "formulation": [
+    {
+      "components": [
+        {
+          "type": "container",
+          "name": "h100-training-image",
+          "version": "25.03-py3-igpu",
+          "bom-ref": "pkg:oci/nvidia-pytorch@sha256:f398a0",
+          "purl": "pkg:oci/nvidia-pytorch@sha256:f398a0955ec5fcf9e3bbf77610225ff4e953e137423ab248e2bf32cd4971a1dc?repository_url=nvcr.io/nvidia/pytorch&tag=25.03-py3-igpu"
+        },
+        {
+          "type": "library",
+          "name": "nvidia-cuda-runtime",
+          "version": "12.2.0",
+          "bom-ref": "pkg:generic/nvidia-cuda-runtime@12.2.0",
+          "purl": "pkg:generic/nvidia-cuda-runtime@12.2.0"
+        },
+        {
+          "type": "library",
+          "name": "pytorch",
+          "version": "2.10.0",
+          "bom-ref": "pkg:pypi/pytorch@2.10.0",
+          "purl": "pkg:pypi/pytorch@2.10.0"
+        },
+        {
+          "type": "library",
+          "name": "cuda-toolkit",
+          "version": "13.1.1",
+          "bom-ref": "pkg:pypi/cuda-toolkit@13.1.1",
+          "purl": "pkg:pypi/cuda-toolkit@13.1.1"
+        },
+        {
+          "type": "library",
+          "name": "nccl",
+          "version": "2.19.3",
+          "bom-ref": "pkg:generic/nccl@2.29.2",
+          "purl": "pkg:generic/nccl@2.29.2"
+        },
+        {
+          "type": "device",
+          "name": "NVIDIA H100 Tensor Core GPU",
+          "description": "NVIDIA H100 Tensor Core GPU PCIe Device",
+          "bom-ref": "nvidia-h100-pcie-gpu-1"
+        }
+      ],
+      "workflows": [
+        {
+          "name": "Model training workflow",
+          "bom-ref": "workflow-a3f9e2",
+          "uid": "a3f9e2b1-7d8c-4a5f-9e6b-3c2d1a0b8f7e",
+          "description": "Describes the tasks used for training the model described by the ML-BOM.",
+          "taskTypes": [ "build" ],
+          "runtimeTopology": [
+            {
+              "ref": "pkg:oci/nvidia-pytorch@sha256:f398a0",
+              "dependsOn": [ "nvidia-h100-pcie-gpu-1" ],
+              "provides": [
+                "cuda-toolkit",
+                "pkg:oci/nvidia-pytorch@sha256:f398a0",
+                "pkg:pypi/pytorch@2.10.0",
+                "pkg:generic/nccl@2.29.2"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
