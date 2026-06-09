@@ -56,44 +56,56 @@
       ],
       "properties": [
         {
-          "name": "cdx:ai-ml:model:disclaimer",
+          "name": "ibm:model:disclaimer",
           "value": "Structured dataset metadata used for pre- and post-training IBM Granite 4 base and instruct models is being released as part of IBM's effort to provide the community with highly transparent open source model development. In this spirit, we are releasing metadata related to datasets directly ingested during training and metadata for datasets used to source seed data for IBM's synthetic data pipelines. This structured disclosure is provided in machine readable .JSON format as a governance artifact to inform risk-based controls for downstream model use."
+        },
+        {
+          "name": "ibm:model:parameter:count:approx",
+          "value": "30000000000"
+        },
+        {
+          "name": "ibm:model:architecture:transformer_class",
+          "value": "GraniteForCausalLM"
+        },
+        {
+          "name": "ibm:model:architecture:type",
+          "value": "dense"
+        },
+        {
+          "name": "ibm:model:architecture:attention_head_dim",
+          "value": "128"
+        },
+        {
+          "name": "ibm:model:architecture:positional_embeddings",
+          "value": "RoPE"
         },
         {
           "name": "cdx:ai-ml:model:parameter:count",
           "value": "28865728512"
         },
         {
-          "name": "cdx:ai-ml:model:parameter:count:approx",
-          "value": "30000000000"
-        },
-        {
-          "name": "cdx:ai-ml:model:architecture:type",
-          "value": "Dense"
-        },
-        {
-          "name": "cdx:ai-ml:model:architecture:transformer_class",
-          "value": "GraniteForCausalLM"
-        },
-        {
-          "name": "cdx:ai-ml:model:architecture:layers",
+          "name": "cdx:ai-ml:model:hyperparameter:num_hidden_layers",
           "value": "64"
         },
         {
-          "name": "cdx:ai-ml:model:architecture:attention_heads",
+          "name": "cdx:ai-ml:model:hyperparameter:hidden_size",
+          "value": "4096"
+        },
+        {
+          "name": "cdx:ai-ml:model:hyperparameter:hidden_act",
+          "value": "silu"
+        },
+        {
+          "name": "cdx:ai-ml:model:hyperparameter:layer_norm_type",
+          "value": "RMSNorm"
+        },
+        {
+          "name": "cdx:ai-ml:model:hyperparameter:num_attention_heads",
           "value": "32"
         },
         {
-          "name": "cdx:ai-ml:model:architecture:attention_head_dim",
-          "value": "128"
-        },
-        {
-          "name": "cdx:ai-ml:model:architecture:kv_heads",
+          "name": "cdx:ai-ml:model:hyperparameter:num_key_value_heads",
           "value": "8"
-        },
-        {
-          "name": "cdx:ai-ml:model:architecture:positional_embeddings",
-          "value": "RoPE"
         }
       ]
     }
@@ -122,15 +134,15 @@
           "value": "pre-training"
         },
         {
-          "name": "cdx:ai-ml:dataset:date_obtained",
+          "name": "ibm:dataset:date_obtained",
           "value": "2025-02-10"
         },
         {
-          "name": "cdx:ai-ml:dataset:size_mb",
+          "name": "ibm:dataset:size_mb",
           "value": "30200000.0"
         },
         {
-          "name": "cdx:ai-ml:dataset:languages",
+          "name": "ibm:dataset:languages",
           "value": "en"
         },
         {
@@ -146,7 +158,7 @@
       "description": "Unstructured web content in English converted into machine-readable data feeds acquired by IBM.",
       "properties": [
         {
-          "name": "classification",
+          "name": "ibm:classification",
           "value": "private"
         },
         {
@@ -158,7 +170,7 @@
           "value": "pre-training"
         },
         {
-          "name": "cdx:ai-ml:dataset:size_mb",
+          "name": "ibm:dataset:size_mb",
           "value": "170368.0"
         }
       ]
@@ -658,7 +670,7 @@
       "description": "Dataset acquired based on feedback from the internal Granite feedback team. It includes: IBM enterprise, ITops, JCL data, ESG data, Angular data, ESQL data.",
       "properties": [
         {
-          "name": "classification",
+          "name": "ibm:classification",
           "value": "private"
         },
         {
@@ -694,7 +706,7 @@
       "description": "Internal multilingual dataset, based upon Fineweb2 dataset, filtered for highest quality documents.",
       "properties": [
         {
-          "name": "classification",
+          "name": "ibm:classification",
           "value": "private"
         },
         {
