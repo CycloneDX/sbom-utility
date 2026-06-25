@@ -662,17 +662,17 @@ func comparatorRefType(element1 CDXRefType, element2 CDXRefType) bool {
 }
 
 // NOTE: The name is plural to match the current struct name (and perhaps json schema name)
-func comparatorReleaseNotes(element1 CDXReleaseNotes, element2 CDXReleaseNotes) bool {
-	// sort by required fields: "type"
-	if element1.Type != element2.Type {
-		return element1.Type < element2.Type
-	}
-	// sort by using combinations of identifying field values: "title", "timestamp"
-	if element1.Title != element2.Title {
-		return element1.Title < element2.Title
-	}
-	return element1.Timestamp < element2.Timestamp
-}
+// func comparatorReleaseNotes(element1 CDXReleaseNotes, element2 CDXReleaseNotes) bool {
+// 	// sort by required fields: "type"
+// 	if element1.Type != element2.Type {
+// 		return element1.Type < element2.Type
+// 	}
+// 	// sort by using combinations of identifying field values: "title", "timestamp"
+// 	if element1.Title != element2.Title {
+// 		return element1.Title < element2.Title
+// 	}
+// 	return element1.Timestamp < element2.Timestamp
+// }
 
 func comparatorService(element1 CDXService, element2 CDXService) bool {
 	// sort by required field(s): "name"
