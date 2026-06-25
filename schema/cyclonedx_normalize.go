@@ -38,9 +38,10 @@ type CDXOrganizationalContactSlice []CDXOrganizationalContact
 type CDXOrganizationalEntitySlice []CDXOrganizationalEntity
 type CDXPropertySlice []CDXProperty
 type CDXRefLinkTypeSlice []CDXRefLinkType
-type CDXReleaseNotesSlice []CDXReleaseNotes
 type CDXServiceSlice []CDXService
 type CDXVersionRangeSlice []CDXVersionRange
+
+// type CDXReleaseNotesSlice []CDXReleaseNotes
 
 // ====================================================================
 // Normalizer Interface (and helpers)
@@ -154,10 +155,11 @@ func (component *CDXComponent) Normalize() {
 	if component.Data != nil {
 		CDXComponentDataSlice(*component.Data).Normalize()
 	}
+	// BUG: TODO: sort notes in releaseNotes object
 	// Sort: ReleaseNotes
-	if component.ReleaseNotes != nil {
-		CDXReleaseNotesSlice(*component.ReleaseNotes).Normalize()
-	}
+	// if component.ReleaseNotes != nil {
+	// 	CDXReleaseNotesSlice(*component.ReleaseNotes).Normalize()
+	// }
 	// Sort: ExternalReferences
 	if component.ExternalReferences != nil {
 		CDXExternalReferenceSlice(*component.ExternalReferences).Normalize()
@@ -277,10 +279,11 @@ func (service *CDXService) Normalize() {
 	if service.Licenses != nil {
 		CDXLicenseChoiceSlice(*service.Licenses).Normalize()
 	}
+	// BUG: TODO: sort notes in releaseNotes object
 	// Sort: ReleaseNotes
-	if service.ReleaseNotes != nil {
-		CDXReleaseNotesSlice(*service.ReleaseNotes).Normalize()
-	}
+	// if service.ReleaseNotes != nil {
+	// 	CDXReleaseNotesSlice(*service.ReleaseNotes).Normalize()
+	// }
 	// Sort: ExternalReferences
 	if service.ExternalReferences != nil {
 		CDXExternalReferenceSlice(*service.ExternalReferences).Normalize()
@@ -435,13 +438,14 @@ func (slice CDXRefLinkTypeSlice) Normalize() {
 	})
 }
 
-func (slice CDXReleaseNotesSlice) Normalize() {
-	sort.Slice(slice, func(i, j int) bool {
-		element1 := slice[i]
-		element2 := slice[j]
-		return comparatorReleaseNotes(element1, element2)
-	})
-}
+// BUG: TODO: sort notes in releaseNotes object
+// func (slice CDXReleaseNotesSlice) Normalize() {
+// 	sort.Slice(slice, func(i, j int) bool {
+// 		element1 := slice[i]
+// 		element2 := slice[j]
+// 		return comparatorReleaseNotes(element1, element2)
+// 	})
+// }
 
 func (slice CDXServiceSlice) Normalize() {
 	sort.Slice(slice, func(i, j int) bool {
@@ -658,17 +662,17 @@ func comparatorRefType(element1 CDXRefType, element2 CDXRefType) bool {
 }
 
 // NOTE: The name is plural to match the current struct name (and perhaps json schema name)
-func comparatorReleaseNotes(element1 CDXReleaseNotes, element2 CDXReleaseNotes) bool {
-	// sort by required fields: "type"
-	if element1.Type != element2.Type {
-		return element1.Type < element2.Type
-	}
-	// sort by using combinations of identifying field values: "title", "timestamp"
-	if element1.Title != element2.Title {
-		return element1.Title < element2.Title
-	}
-	return element1.Timestamp < element2.Timestamp
-}
+// func comparatorReleaseNotes(element1 CDXReleaseNotes, element2 CDXReleaseNotes) bool {
+// 	// sort by required fields: "type"
+// 	if element1.Type != element2.Type {
+// 		return element1.Type < element2.Type
+// 	}
+// 	// sort by using combinations of identifying field values: "title", "timestamp"
+// 	if element1.Title != element2.Title {
+// 		return element1.Title < element2.Title
+// 	}
+// 	return element1.Timestamp < element2.Timestamp
+// }
 
 func comparatorService(element1 CDXService, element2 CDXService) bool {
 	// sort by required field(s): "name"

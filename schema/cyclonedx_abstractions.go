@@ -174,7 +174,7 @@ func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXCompo
 	if cdxComponent.Components != nil && len(*cdxComponent.Components) > 0 {
 		componentInfo.HasComponents = true
 	}
-	if cdxComponent.ReleaseNotes != nil && len(*cdxComponent.ReleaseNotes) > 0 {
+	if cdxComponent.ReleaseNotes != nil {
 		componentInfo.HasReleaseNotes = true
 	}
 	if cdxComponent.ModelCard != nil && *cdxComponent.ModelCard != (CDXModelCard{}) {
@@ -324,7 +324,7 @@ type LicenseInfo struct {
 	BOMRef                 CDXRefType       `json:"bom-ref"`
 	BOMLocationValue       int              `json:"bom-location-value"`
 	BOMLocation            string           `json:"bom-location"`
-	PURL                   string           `json:"purl"` 
+	PURL                   string           `json:"purl"`
 	LicenseChoice          CDXLicenseChoice // Do not marshal
 	Policy                 LicensePolicy    // Do not marshal
 	Component              CDXComponent     // Do not marshal

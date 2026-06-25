@@ -123,6 +123,30 @@ func UnMarshalComponent(data interface{}) (CDXComponent, error) {
 	return component, errUnmarshal
 }
 
+// Note releaseNotes is a single object not an array
+func UnMarshalReleaseNotes(data interface{}) (CDXReleaseNotes, error) {
+	getLogger().Enter()
+	defer getLogger().Exit()
+
+	// we need to marshal the data to normalize it to a []byte
+	jsonString, errMarshal := json.Marshal(data)
+
+	if errMarshal != nil {
+		return CDXReleaseNotes{}, errMarshal
+	}
+
+	// optimistically, prepare the receiving structure and unmarshal
+	releaseNotes := CDXReleaseNotes{}
+	errUnmarshal := json.Unmarshal(jsonString, &releaseNotes)
+
+	if errUnmarshal != nil {
+		getLogger().Warningf("unmarshal failed: %v", errUnmarshal)
+	}
+
+	//getLogger().Tracef("\n%s", getLogger().FormatStruct(component))
+	return releaseNotes, errUnmarshal
+}
+
 func UnMarshalComponents(data interface{}) ([]CDXComponent, error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
