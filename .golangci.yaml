@@ -4,6 +4,10 @@ version: "2"
 run:
   issues-exit-code: 2
 
+issues:
+  exclude-dirs:
+    - gui
+
 # https://golangci-lint.run/usage/false-positives/
 # https://staticcheck.io/docs/
 linters:

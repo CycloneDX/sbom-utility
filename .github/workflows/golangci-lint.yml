@@ -29,7 +29,7 @@ jobs:
         uses: golangci/golangci-lint-action@v9
         with:
           # Optional: golangci-lint command line arguments.
-          args: -D errcheck --exclude-dirs gui
+          args: -D errcheck
           # Optional: if set to true, caches will not be saved, but they may still be restored,
           #           subject to other options
           # skip-save-cache: true
