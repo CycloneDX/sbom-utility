@@ -19,6 +19,7 @@ SOURCEDIR=.
 
 SOURCES := $(shell find $(SOURCEDIR) -name '*.go')
 BINARY?=sbom-utility
+GUI_BINARY?=sbom-utility-gui
 
 # LDFLAG values
 VERSION?=latest
@@ -35,6 +36,10 @@ LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.Binary=${BINARY} -s"
 # Build the project
 build: clean
 	go build ${LDFLAGS} -o ${BINARY}
+
+# Build the GUI binary
+build-gui:
+	go build -o ${GUI_BINARY} ./gui
 
 # General supported environments: https://go.dev/doc/install/source#environment
 # See latest supported combinations using:
@@ -116,6 +121,7 @@ install:
 # if ${RELEASE_DIR}: covers `make release` target
 clean:
 	@if [ -f ${BINARY} ] ; then rm ${BINARY} ; fi
+	@if [ -f ${GUI_BINARY} ] ; then rm ${GUI_BINARY} ; fi
 	@if [ -d ${RELEASE_DIR} ] ; then rm -f ${RELEASE_DIR}/${BINARY}* ; rm -f ${RELEASE_DIR}/*.json ; rmdir ${RELEASE_DIR} ; fi
 
-.PHONY: config clean build release test_clean test test_cmd unit_tests integration_tests format lint install
+.PHONY: config clean build build-gui release test_clean test test_cmd unit_tests integration_tests format lint install

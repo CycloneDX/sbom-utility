@@ -26,7 +26,7 @@ func (s *ComponentScreen) Activate() {
 	}
 }
 
-func (s *ComponentScreen) Layout(w fyne.Window, state *AppState) fyne.CanvasObject {
+func (s *ComponentScreen) Layout(_ fyne.Window, state *AppState) fyne.CanvasObject {
 	results := widgets.NewResultsView()
 
 	// ── Flags panel content ───────────────────────────────────────
@@ -49,17 +49,9 @@ func (s *ComponentScreen) Layout(w fyne.Window, state *AppState) fyne.CanvasObje
 	)
 	flagsPanel := widgets.NewSidePanel("Component List Options", flagsContent, true)
 
-	// ── File picker ───────────────────────────────────────────────
+	// ── File path from shared state ───────────────────────────────
 	var filePath string
-	picker := widgets.NewFilePicker("BOM file:", state.BOMFile(), w, func(p string) {
-		state.SetBOMFile(p)
-	})
-	state.OnBOMFileChange(func(p string) {
-		filePath = p
-		if p != picker.GetPath() {
-			fyne.Do(func() { picker.SetPath(p) })
-		}
-	})
+	state.OnBOMFileChange(func(p string) { filePath = p })
 
 	// ── Shared run logic (button + auto-activate) ─────────────────
 	s.run = func() {
@@ -89,14 +81,14 @@ func (s *ComponentScreen) Layout(w fyne.Window, state *AppState) fyne.CanvasObje
 	// ── Run button ────────────────────────────────────────────────
 	runBtn := widget.NewButtonWithIcon("List Components", theme.ListIcon(), func() {
 		if filePath == "" {
-			results.SetText("[ERROR] No input file selected.")
+			results.SetText("[ERROR] No BOM file loaded.")
 			return
 		}
 		s.run()
 	})
 	runBtn.Importance = widget.HighImportance
 
-	topBar := container.NewBorder(nil, nil, nil, runBtn, picker.CanvasObject())
+	topBar := container.NewBorder(nil, nil, nil, runBtn, nil)
 	split := container.NewHSplit(
 		container.NewVScroll(flagsPanel.CanvasObject()),
 		results.CanvasObject(),

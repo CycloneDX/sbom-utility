@@ -167,7 +167,10 @@ CGo must be enabled (`CGO_ENABLED=1`, which is the default on the host platform)
 ## Build
 
 ```bash
-# Build GUI binary (output: sbom-utility-gui)
+# Build GUI binary via Make (output: sbom-utility-gui)
+make build-gui
+
+# Build GUI binary directly
 go build -o sbom-utility-gui ./gui
 
 # Build CLI binary (unchanged)

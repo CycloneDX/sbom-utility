@@ -36,9 +36,7 @@ func (s *ValidateScreen) Activate() {
 }
 
 // Layout constructs and returns the full screen CanvasObject.
-// w is the parent window, required by the file-open dialog.
-// state is the shared application state (BOM file path, etc.).
-func (s *ValidateScreen) Layout(w fyne.Window, state *AppState) fyne.CanvasObject {
+func (s *ValidateScreen) Layout(_ fyne.Window, state *AppState) fyne.CanvasObject {
 	// ── Results area ─────────────────────────────────────────────
 	results := widgets.NewResultsView()
 
@@ -85,19 +83,9 @@ func (s *ValidateScreen) Layout(w fyne.Window, state *AppState) fyne.CanvasObjec
 	)
 	flagsPanel := widgets.NewSidePanel("Validate Options", flagsContent, true)
 
-	// ── File picker ───────────────────────────────────────────────
+	// ── File path from shared state ───────────────────────────────
 	var filePath string
-	picker := widgets.NewFilePicker("BOM file:", state.BOMFile(), w, func(p string) {
-		state.SetBOMFile(p)
-	})
-	// Subscribe so this screen's filePath and picker display stay in sync
-	// when another tab selects a file.
-	state.OnBOMFileChange(func(p string) {
-		filePath = p
-		if p != picker.GetPath() {
-			fyne.Do(func() { picker.SetPath(p) })
-		}
-	})
+	state.OnBOMFileChange(func(p string) { filePath = p })
 
 	// ── Shared run logic (button + auto-activate) ─────────────────
 	s.run = func() {
@@ -161,7 +149,7 @@ func (s *ValidateScreen) Layout(w fyne.Window, state *AppState) fyne.CanvasObjec
 	// ── Run button ────────────────────────────────────────────────
 	runBtn := widget.NewButtonWithIcon("Validate", theme.ConfirmIcon(), func() {
 		if filePath == "" {
-			results.SetText("[ERROR] No input file selected.")
+			results.SetText("[ERROR] No BOM file loaded.")
 			return
 		}
 		s.run()
@@ -169,8 +157,8 @@ func (s *ValidateScreen) Layout(w fyne.Window, state *AppState) fyne.CanvasObjec
 	runBtn.Importance = widget.HighImportance
 
 	// ── Layout assembly ───────────────────────────────────────────
-	// Top bar: file picker + run button
-	topBar := container.NewBorder(nil, nil, nil, runBtn, picker.CanvasObject())
+	// Top bar: run button (file is loaded from the Load tab)
+	topBar := container.NewBorder(nil, nil, nil, runBtn, nil)
 
 	// Middle: status badge
 	middleBar := container.NewVBox(

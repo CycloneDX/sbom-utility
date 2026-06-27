@@ -34,7 +34,7 @@ func NewFilePicker(label string, initial string, window fyne.Window, onChange fu
 	entry.OnChanged = onChange
 	fp.entry = entry
 
-	browseBtn := widget.NewButtonWithIcon("Browse", theme.FolderOpenIcon(), func() {
+	browseBtn := widget.NewButtonWithIcon("Load", theme.FolderOpenIcon(), func() {
 		d := dialog.NewFileOpen(func(uc fyne.URIReadCloser, err error) {
 			if err != nil || uc == nil {
 				return
@@ -54,6 +54,10 @@ func NewFilePicker(label string, initial string, window fyne.Window, onChange fu
 			}
 		}
 		d.SetView(dialog.ListView)
+		// Open at a larger size so more files/folders are visible at once.
+		// Resize must be called before Show so the dialog renders at the
+		// correct dimensions; Fyne file dialogs are resizable by the user.
+		d.Resize(fyne.NewSize(800, 600))
 		d.Show()
 	})
 
