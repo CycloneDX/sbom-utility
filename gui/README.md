@@ -1,6 +1,6 @@
 # sbom-utility GUI
 
-A native desktop GUI for [sbom-utility](../README.md), built with [Fyne](https://fyne.io) (BSD-3-Clause).  
+A native desktop GUI for [sbom-utility](../README.md), built with [Fyne](https://fyne.io) (BSD-3-Clause).
 No JavaScript. No Electron. No browser engine. No GPL or LGPL dependencies.
 
 ---
@@ -11,6 +11,8 @@ No JavaScript. No Electron. No browser engine. No GPL or LGPL dependencies.
 gui/
 ├── README.md                    ← this file
 ├── main.go                      ← Fyne app entry point; mirrors main.go init() pattern
+├── theme/
+│   └── macos.go                 ← custom macOS-inspired Fyne theme
 ├── bridge/
 │   ├── doc.go                   ← package documentation
 │   ├── validate.go              ← wraps cmd.Validate()
@@ -38,12 +40,12 @@ gui/
 
 ### Key principles
 
-**Separate binary — CLI is untouched.**  
+**Separate binary — CLI is untouched.**
 The GUI is built from `./gui` and produces its own binary. The existing CLI binary
 (`./`) is completely unaffected; its `main.go`, `cmd/`, and all existing tests are
 unchanged.
 
-**Bridge layer — no code duplication.**  
+**Bridge layer — no code duplication.**
 Each `bridge/*.go` file translates GUI inputs into the exact same function calls the
 CLI cobra commands use. It does this by writing into `utils.GlobalFlags` (the same
 global the CLI uses) and then calling the real exported `cmd.*` function directly —
@@ -68,11 +70,11 @@ FilePicker + flag widgets
   bytes.Buffer  ──────────────▶  widgets/results.go  (scrollable text view)
 ```
 
-**Automatic feature parity.**  
+**Automatic feature parity.**
 Because every screen calls the real `cmd.*` function, any bug fix or new flag added
 to the CLI is automatically available in the GUI without any GUI-side changes.
 
-**Async execution.**  
+**Async execution.**
 Every "Run" button fires work in a `go func(){}` goroutine so the Fyne UI remains
 responsive during long scans or large BOM files.
 
@@ -95,6 +97,58 @@ Every tab follows the same structure:
 └────────────────────────────┴────────────────────────────┘
   collapsible SidePanel (28%)   ResultsView (72%)
 ```
+
+---
+
+## Theme
+
+The GUI uses a custom macOS-inspired Fyne theme defined in [`gui/theme/macos.go`](theme/macos.go).
+It targets **macOS Ventura / Sonoma light-mode** aesthetics and is active on all platforms.
+
+### Color palette
+
+| Role | Hex | macOS semantic |
+|------|-----|----------------|
+| Window background | `#F5F5F5` | Window chrome grey |
+| Panel / input background | `#FFFFFF` | White content areas |
+| Sidebar / header rows | `#EBEBEB` | Sidebar grey |
+| Primary accent | `#007AFF` | System blue |
+| Focus ring / selection | `#007AFF` 20 % | Translucent accent |
+| Primary text | `#1D1D1F` | Label |
+| Secondary / placeholder text | `#6E6E73` | Secondary label |
+| Separator / input border | `#D2D2D7` | Separator |
+| Error | `#FF3B30` | System red |
+| Warning | `#FF9F0A` | System amber |
+| Success | `#30D158` | System green |
+| Shadow | `#000000` 15 % | Drop shadow |
+
+### Typography & spacing
+
+Sizes follow the [Apple Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/typography):
+
+| Token | Size (pt) |
+|-------|-----------|
+| Body text | 13 |
+| Caption | 11 |
+| Heading | 17 |
+| Sub-heading | 15 |
+| Padding | 6 |
+| Inner padding | 4 |
+| Input border | 1 |
+| Input corner radius | 5 |
+| Scroll bar width | 8 |
+| Separator thickness | 1 |
+
+> **Font note:**
+The theme uses Fyne's built-in sans-serif faces (regular, bold,
+> italic, monospace), which are visually close to Apple's SF Pro at these sizes.
+
+### Customizing the theme
+
+To override colors or sizes, edit [`gui/theme/macos.go`](theme/macos.go).
+Each `Color()` and `Size()` case maps directly to a named Fyne constant
+(e.g. `theme.ColorNamePrimary`, `theme.SizeNameText`).
+Any color name not explicitly listed falls back to `theme.LightTheme()`.
 
 ---
 

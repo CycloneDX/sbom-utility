@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 
 	"github.com/CycloneDX/sbom-utility/cmd"
+	guitheme "github.com/CycloneDX/sbom-utility/gui/theme"
 	"github.com/CycloneDX/sbom-utility/gui/screens"
 	"github.com/CycloneDX/sbom-utility/log"
 	"github.com/CycloneDX/sbom-utility/schema"
@@ -61,7 +62,7 @@ func init() {
 
 func main() {
 	a := app.New()
-	a.Settings().SetTheme(theme.LightTheme())
+	a.Settings().SetTheme(&guitheme.MacOSTheme{})
 
 	w := a.NewWindow("SBOM Utility — CycloneDX")
 	w.Resize(fyne.NewSize(1100, 720))
