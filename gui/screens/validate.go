@@ -75,11 +75,25 @@ func (s *ValidateScreen) Layout(_ fyne.Window, state *AppState) fyne.CanvasObjec
 	showValuesCheck := widget.NewCheck("Show failing values in errors", nil)
 	showValuesCheck.SetChecked(true)
 
+	// ── Run button (lives in options panel; enabled when options change) ──
+	runBtn := widget.NewButtonWithIcon("Validate", theme.ConfirmIcon(), nil)
+	runBtn.Importance = widget.HighImportance
+	runBtn.Disable()
+
+	markDirty := func() { runBtn.Enable() }
+
+	variantEntry.OnChanged = func(_ string) { markDirty() }
+	forceSchemaEntry.OnChanged = func(_ string) { markDirty() }
+	maxErrorsEntry.OnChanged = func(_ string) { markDirty() }
+	showValuesCheck.OnChanged = func(_ bool) { markDirty() }
+
 	flagsContent := container.NewVBox(
 		makeFlagRow("Schema variant (--variant):", variantEntry),
 		makeFlagRow("Force schema file (--force):", forceSchemaEntry),
 		makeFlagRow("Max errors shown (--error-limit):", maxErrorsEntry),
 		showValuesCheck,
+		widget.NewSeparator(),
+		runBtn,
 	)
 	flagsPanel := widgets.NewSidePanel("Validate Options", flagsContent, true)
 
@@ -142,25 +156,21 @@ func (s *ValidateScreen) Layout(_ fyne.Window, state *AppState) fyne.CanvasObjec
 			fyne.Do(func() {
 				results.SetText(text)
 				setStatus(valid, errSummary)
+				runBtn.Disable()
 			})
 		}()
 	}
 
-	// ── Run button ────────────────────────────────────────────────
-	runBtn := widget.NewButtonWithIcon("Validate", theme.ConfirmIcon(), func() {
+	runBtn.OnTapped = func() {
 		if filePath == "" {
 			results.SetText("[ERROR] No BOM file loaded.")
 			return
 		}
 		s.run()
-	})
-	runBtn.Importance = widget.HighImportance
+	}
 
 	// ── Layout assembly ───────────────────────────────────────────
-	// Top bar: run button (file is loaded from the Load tab)
-	topBar := container.NewBorder(nil, nil, nil, runBtn, nil)
-
-	// Middle: status badge
+	// Status badge bar (no run button at top-right any more)
 	middleBar := container.NewVBox(
 		widget.NewSeparator(),
 		statusRow,
@@ -175,7 +185,7 @@ func (s *ValidateScreen) Layout(_ fyne.Window, state *AppState) fyne.CanvasObjec
 	splitView.SetOffset(0.28) // flags panel takes ~28% of horizontal space
 
 	return container.NewBorder(
-		container.NewVBox(topBar, middleBar),
+		middleBar,
 		nil, nil, nil,
 		splitView,
 	)

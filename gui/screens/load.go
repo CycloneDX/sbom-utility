@@ -11,6 +11,9 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
+
+	"github.com/CycloneDX/sbom-utility/gui/bridge"
+	guitheme "github.com/CycloneDX/sbom-utility/gui/theme"
 )
 
 // LoadScreen owns the file-browse dialog and the JSON viewer shown in the
@@ -34,7 +37,16 @@ func (s *LoadScreen) OpenDialog() {
 		if err != nil || uc == nil {
 			return
 		}
-		s.state.SetBOMFile(uc.URI().Path())
+		path := uc.URI().Path()
+		s.state.SetBOMFile(path)
+		// Parse BOM metadata in the background so the status bar updates.
+		go func() {
+			info := bridge.LoadBOMInfo(path)
+			s.state.SetBOMInfo(BOMInfo{
+				SpecVersion: info.SpecVersion,
+				FilePath:    info.FilePath,
+			})
+		}()
 	}, s.window)
 	d.SetFilter(storage.NewExtensionFileFilter([]string{".json", ".xml"}))
 	if currentPath != "" {
@@ -59,7 +71,9 @@ func (s *LoadScreen) ContentLayout(w fyne.Window, state *AppState) fyne.CanvasOb
 	jsonView.Wrapping = fyne.TextWrapOff
 	jsonView.TextStyle = fyne.TextStyle{Monospace: true}
 	jsonView.SetPlaceHolder("No BOM file loaded — click \"Load BOM\" in the sidebar.")
-	jsonView.Disable()
+	// Do NOT call Disable() — see view.go for the full explanation.
+
+	viewerTheme := guitheme.NewViewerTheme(fyne.CurrentApp().Settings().Theme())
 
 	pathLabel := widget.NewLabelWithStyle(
 		"No file loaded.",
@@ -68,11 +82,16 @@ func (s *LoadScreen) ContentLayout(w fyne.Window, state *AppState) fyne.CanvasOb
 	)
 	pathLabel.Wrapping = fyne.TextWrapWord
 
+	// themedViewer is declared before the state callback so the closure can
+	// call Refresh on it in the same fyne.Do block as SetText.
+	themedViewer := container.NewThemeOverride(container.NewScroll(jsonView), viewerTheme)
+
 	state.OnBOMFileChange(func(p string) {
 		if p == "" {
 			fyne.Do(func() {
 				pathLabel.SetText("No file loaded.")
 				jsonView.SetText("")
+				themedViewer.Refresh()
 			})
 			return
 		}
@@ -85,10 +104,13 @@ func (s *LoadScreen) ContentLayout(w fyne.Window, state *AppState) fyne.CanvasOb
 			} else {
 				text = string(data)
 			}
-			fyne.Do(func() { jsonView.SetText(text) })
+			fyne.Do(func() {
+				jsonView.SetText(text)
+				themedViewer.Refresh()
+			})
 		}()
 	})
 
 	top := container.NewVBox(pathLabel, widget.NewSeparator())
-	return container.NewBorder(top, nil, nil, nil, container.NewScroll(jsonView))
+	return container.NewBorder(top, nil, nil, nil, themedViewer)
 }

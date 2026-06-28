@@ -1,0 +1,8 @@
+Website = "https://github.com/CycloneDX/sbom-utility"
+
+[Details]
+  Icon    = "images/icons/BOM-Utility-Icon.png"
+  Name    = "SBOM Utility"
+  ID      = "org.cyclonedx.sbom-utility"
+  Version = "0.16.0"
+  Build   = 1

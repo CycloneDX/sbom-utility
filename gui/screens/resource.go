@@ -34,22 +34,29 @@ func (s *ResourceScreen) Layout(_ fyne.Window, state *AppState) fyne.CanvasObjec
 	state.OnBOMFileChange(func(p string) { filePath = p })
 
 	// ── Flags panel content ───────────────────────────────────────
+
+	// ── Run button (lives in options panel; enabled when options change) ──
+	runBtn := widget.NewButtonWithIcon("List Resources", theme.StorageIcon(), nil)
+	runBtn.Importance = widget.HighImportance
+	runBtn.Disable()
+
+	markDirty := func() { runBtn.Enable() }
+
 	typeSelect := widget.NewSelect(
 		[]string{"(all)", "component", "service"},
-		nil,
+		func(_ string) { markDirty() },
 	)
 	typeSelect.SetSelected("(all)")
 
 	whereEntry := widget.NewEntry()
 	whereEntry.SetPlaceHolder("e.g. name=log.*")
+	whereEntry.OnChanged = func(_ string) { markDirty() }
 
 	formatSelect := widget.NewSelect(
 		[]string{"txt", "csv", "md"},
 		func(f string) {
 			results.SetMarkdownMode(f == "md")
-			if filePath != "" && s.run != nil {
-				s.run()
-			}
+			markDirty()
 		},
 	)
 	formatSelect.SetSelected("txt")
@@ -59,6 +66,8 @@ func (s *ResourceScreen) Layout(_ fyne.Window, state *AppState) fyne.CanvasObjec
 		makeFlagRow("Output format (--format):", formatSelect),
 		makeFlagRow("Filter (--where key=regex,…):", whereEntry),
 		resourceWhereHelpLabel(),
+		widget.NewSeparator(),
+		runBtn,
 	)
 	flagsPanel := widgets.NewSidePanel("Resource List Options", flagsContent, true)
 
@@ -87,21 +96,21 @@ func (s *ResourceScreen) Layout(_ fyne.Window, state *AppState) fyne.CanvasObjec
 			} else {
 				text = out
 			}
-			fyne.Do(func() { results.SetText(text) })
+			fyne.Do(func() {
+				results.SetText(text)
+				runBtn.Disable()
+			})
 		}()
 	}
 
-	// ── Run button ────────────────────────────────────────────────
-	runBtn := widget.NewButtonWithIcon("List Resources", theme.StorageIcon(), func() {
+	runBtn.OnTapped = func() {
 		if filePath == "" {
 			results.SetText("[ERROR] No BOM file loaded.")
 			return
 		}
 		s.run()
-	})
-	runBtn.Importance = widget.HighImportance
+	}
 
-	topBar := container.NewBorder(nil, nil, nil, runBtn, nil)
 	split := container.NewHSplit(
 		container.NewVScroll(flagsPanel.CanvasObject()),
 		results.CanvasObject(),
@@ -109,7 +118,7 @@ func (s *ResourceScreen) Layout(_ fyne.Window, state *AppState) fyne.CanvasObjec
 	split.SetOffset(0.28)
 
 	return container.NewBorder(
-		container.NewVBox(topBar, widget.NewSeparator()),
+		widget.NewSeparator(),
 		nil, nil, nil,
 		split,
 	)

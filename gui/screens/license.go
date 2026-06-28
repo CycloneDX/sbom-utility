@@ -39,13 +39,21 @@ func (s *LicenseScreen) Layout(_ fyne.Window, state *AppState) fyne.CanvasObject
 	whereEntry := widget.NewEntry()
 	whereEntry.SetPlaceHolder("e.g. usage-policy=allow,license=MIT")
 
+	// ── Run button (lives in options panel; enabled when options change) ──
+	runBtn := widget.NewButtonWithIcon("List Licenses", theme.InfoIcon(), nil)
+	runBtn.Importance = widget.HighImportance
+	runBtn.Disable()
+
+	markDirty := func() { runBtn.Enable() }
+
+	summaryCheck.OnChanged = func(_ bool) { markDirty() }
+	whereEntry.OnChanged = func(_ string) { markDirty() }
+
 	formatSelect := widget.NewSelect(
 		[]string{"txt", "csv", "json", "md"},
 		func(f string) {
 			results.SetMarkdownMode(f == "md")
-			if filePath != "" && s.run != nil {
-				s.run()
-			}
+			markDirty()
 		},
 	)
 	formatSelect.SetSelected("txt")
@@ -55,6 +63,8 @@ func (s *LicenseScreen) Layout(_ fyne.Window, state *AppState) fyne.CanvasObject
 		makeFlagRow("Output format (--format):", formatSelect),
 		makeFlagRow("Filter (--where key=regex,…):", whereEntry),
 		whereHelpLabel(),
+		widget.NewSeparator(),
+		runBtn,
 	)
 	flagsPanel := widgets.NewSidePanel("License List Options", flagsContent, true)
 
@@ -79,21 +89,21 @@ func (s *LicenseScreen) Layout(_ fyne.Window, state *AppState) fyne.CanvasObject
 			} else {
 				text = out
 			}
-			fyne.Do(func() { results.SetText(text) })
+			fyne.Do(func() {
+				results.SetText(text)
+				runBtn.Disable()
+			})
 		}()
 	}
 
-	// ── Run button ────────────────────────────────────────────────
-	runBtn := widget.NewButtonWithIcon("List Licenses", theme.InfoIcon(), func() {
+	runBtn.OnTapped = func() {
 		if filePath == "" {
 			results.SetText("[ERROR] No BOM file loaded.")
 			return
 		}
 		s.run()
-	})
-	runBtn.Importance = widget.HighImportance
+	}
 
-	topBar := container.NewBorder(nil, nil, nil, runBtn, nil)
 	split := container.NewHSplit(
 		container.NewVScroll(flagsPanel.CanvasObject()),
 		results.CanvasObject(),
@@ -101,7 +111,7 @@ func (s *LicenseScreen) Layout(_ fyne.Window, state *AppState) fyne.CanvasObject
 	split.SetOffset(0.28)
 
 	return container.NewBorder(
-		container.NewVBox(topBar, widget.NewSeparator()),
+		widget.NewSeparator(),
 		nil, nil, nil,
 		split,
 	)
