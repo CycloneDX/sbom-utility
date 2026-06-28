@@ -29,6 +29,10 @@ func (s *LicenseScreen) Activate() {
 func (s *LicenseScreen) Layout(_ fyne.Window, state *AppState) fyne.CanvasObject {
 	results := widgets.NewResultsView()
 
+	// ── File path from shared state ───────────────────────────────
+	var filePath string
+	state.OnBOMFileChange(func(p string) { filePath = p })
+
 	// ── Flags panel content ───────────────────────────────────────
 	summaryCheck := widget.NewCheck("Summary mode (--summary)", nil)
 
@@ -37,7 +41,12 @@ func (s *LicenseScreen) Layout(_ fyne.Window, state *AppState) fyne.CanvasObject
 
 	formatSelect := widget.NewSelect(
 		[]string{"txt", "csv", "json", "md"},
-		nil,
+		func(f string) {
+			results.SetMarkdownMode(f == "md")
+			if filePath != "" && s.run != nil {
+				s.run()
+			}
+		},
 	)
 	formatSelect.SetSelected("txt")
 
@@ -48,10 +57,6 @@ func (s *LicenseScreen) Layout(_ fyne.Window, state *AppState) fyne.CanvasObject
 		whereHelpLabel(),
 	)
 	flagsPanel := widgets.NewSidePanel("License List Options", flagsContent, true)
-
-	// ── File path from shared state ───────────────────────────────
-	var filePath string
-	state.OnBOMFileChange(func(p string) { filePath = p })
 
 	// ── Shared run logic (button + auto-activate) ─────────────────
 	s.run = func() {

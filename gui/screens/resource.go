@@ -29,6 +29,10 @@ func (s *ResourceScreen) Activate() {
 func (s *ResourceScreen) Layout(_ fyne.Window, state *AppState) fyne.CanvasObject {
 	results := widgets.NewResultsView()
 
+	// ── File path from shared state ───────────────────────────────
+	var filePath string
+	state.OnBOMFileChange(func(p string) { filePath = p })
+
 	// ── Flags panel content ───────────────────────────────────────
 	typeSelect := widget.NewSelect(
 		[]string{"(all)", "component", "service"},
@@ -41,7 +45,12 @@ func (s *ResourceScreen) Layout(_ fyne.Window, state *AppState) fyne.CanvasObjec
 
 	formatSelect := widget.NewSelect(
 		[]string{"txt", "csv", "md"},
-		nil,
+		func(f string) {
+			results.SetMarkdownMode(f == "md")
+			if filePath != "" && s.run != nil {
+				s.run()
+			}
+		},
 	)
 	formatSelect.SetSelected("txt")
 
@@ -52,10 +61,6 @@ func (s *ResourceScreen) Layout(_ fyne.Window, state *AppState) fyne.CanvasObjec
 		resourceWhereHelpLabel(),
 	)
 	flagsPanel := widgets.NewSidePanel("Resource List Options", flagsContent, true)
-
-	// ── File path from shared state ───────────────────────────────
-	var filePath string
-	state.OnBOMFileChange(func(p string) { filePath = p })
 
 	// ── Shared run logic (button + auto-activate) ─────────────────
 	s.run = func() {
