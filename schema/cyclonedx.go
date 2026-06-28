@@ -110,7 +110,7 @@ type CDXComponent struct {
 	Components         *[]CDXComponent             `json:"components,omitempty"`
 	Evidence           *CDXComponentEvidence       `json:"evidence,omitempty" cdx:"added:1.3"`
 	Properties         *[]CDXProperty              `json:"properties,omitempty" cdx:"added:1.3"`
-	ReleaseNotes       *[]CDXReleaseNotes          `json:"releaseNotes,omitempty" cdx:"added:1.4"`
+	ReleaseNotes       *CDXReleaseNotes            `json:"releaseNotes,omitempty" cdx:"added:1.4"`
 	Signature          *JSFSignature               `json:"signature,omitempty" cdx:"added:1.4"`
 	Modified           bool                        `json:"modified,omitempty" cdx:"deprecated:1.4"`
 	ModelCard          *CDXModelCard               `json:"modelCard,omitempty" cdx:"added:1.5"`
@@ -191,7 +191,7 @@ type CDXService struct {
 	ExternalReferences *[]CDXExternalReference  `json:"externalReferences,omitempty"`
 	Services           *[]CDXService            `json:"services,omitempty"`
 	Properties         *[]CDXProperty           `json:"properties,omitempty" cdx:"added:1.3"`
-	ReleaseNotes       *[]CDXReleaseNotes       `json:"releaseNotes,omitempty" cdx:"added:1.4"`
+	ReleaseNotes       *CDXReleaseNotes         `json:"releaseNotes,omitempty" cdx:"added:1.4"`
 	Signature          *JSFSignature            `json:"signature,omitempty" cdx:"added:1.4"`
 	TrustZone          string                   `json:"trustZone,omitempty" cdx:"added:1.5"`
 	Tags               *[]string                `json:"tags,omitempty" cdx:"added:1.6"`

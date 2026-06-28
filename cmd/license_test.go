@@ -35,6 +35,7 @@ const (
 	TEST_LICENSE_LIST_CDX_1_3_NONE_FOUND              = "test/cyclonedx/1.3/cdx-1-3-license-list-none-found.json"
 	TEST_LICENSE_LIST_CDX_1_4_NONE_FOUND              = "test/cyclonedx/1.4/cdx-1-4-license-list-none-found.json"
 	TEST_LICENSE_LIST_CDX_1_4_PARENT_NO_LICENSE       = "test/cyclonedx/1.4/cdx-1-4-license-list-parent-no-license.json"
+	TEST_LICENSE_LIST_CDX_1_4_RELEASE_NOTES           = "test/cyclonedx/1.4/cdx-1-4-license-list-release-notes.json"
 	TEST_LICENSE_LIST_CDX_1_5_LICENSE_CHOICE_VARIANTS = "test/cyclonedx/1.5/cdx-1-5-license-choice-variants.json"
 	TEST_LICENSE_LIST_CDX_1_5_MATURE_EXAMPLE_1        = TEST_CDX_1_5_MATURE_EXAMPLE_1_BASE
 
@@ -225,6 +226,25 @@ func TestLicenseListCdx14CsvParentNoLicense(t *testing.T) {
 	lti.ResultExpectedLineCount = 5 // title only + 2 UNDEFINED (metadata and parent) + 1 Apache 2.0 (child) + newline
 	lti.ResultLineContainsValues = []string{"Apache-2.0"}
 	lti.ResultLineContainsValuesAtLineNum = 1
+	innerTestLicenseList(t, lti)
+}
+
+// TestLicenseListCdx14ReleaseNotesCsv verifies that a BOM where metadata.component and
+// component entries carry a single "releaseNotes" object (not an array) is parsed and
+// listed without error. This was the regression case for the
+// "json: cannot unmarshal object into Go struct field … of type []schema.CDXReleaseNotes"
+// error.
+func TestLicenseListCdx14ReleaseNotesCsv(t *testing.T) {
+	lti := NewLicenseTestInfo(TEST_LICENSE_LIST_CDX_1_4_RELEASE_NOTES, FORMAT_CSV, false)
+	lti.ResultExpectedLineCount = 5 // header + 1 UNDEFINED (metadata.component) + MIT + Apache-2.0 + newline
+	lti.ResultLineContainsValues = []string{"MIT"}
+	lti.ResultLineContainsValuesAtLineNum = -1 // order not guaranteed; match any line
+	innerTestLicenseList(t, lti)
+}
+
+func TestLicenseListCdx14ReleaseNotesJson(t *testing.T) {
+	lti := NewLicenseTestInfo(TEST_LICENSE_LIST_CDX_1_4_RELEASE_NOTES, FORMAT_JSON, false)
+	lti.ResultExpectedLineCount = 13 // array of 2 LicenseChoice JSON objects + newline
 	innerTestLicenseList(t, lti)
 }
 

@@ -3,7 +3,6 @@
 package main
 
 import (
-	"image/color"
 	"os"
 	"path/filepath"
 
@@ -160,8 +159,13 @@ func main() {
 		})
 	})
 
+	// Load the image
+	img := canvas.NewImageFromFile("gui/images/blue-charcoal.png")
+
+	// Stretch to fit the canvas
+	img.FillMode = canvas.ImageFillStretch
+
 	// ── Sidebar layout ────────────────────────────────────────────
-	sidebarBg := canvas.NewRectangle(color.NRGBA{R: 0x00, G: 0x00, B: 0x8B, A: 0xFF}) // dark blue
 	sidebarNav := container.NewVBox(
 		loadBtn,
 		widget.NewSeparator(),
@@ -172,8 +176,9 @@ func main() {
 		vulnBtn,
 	)
 	sidebarPadded := container.New(layout.NewCustomPaddedLayout(4, 4, 10, 10), sidebarNav)
-	sidebar := container.NewStack(sidebarBg, sidebarPadded)
-
-	w.SetContent(container.NewBorder(nil, nil, sidebar, nil, contentStack))
+	//sidebarBg := canvas.NewRectangle(color.NRGBA{R: 0x00, G: 0x00, B: 0x8B, A: 0xFF}) // dark blue
+	sidebar := container.NewStack(img, sidebarPadded)
+	appContainer := container.NewBorder(nil, nil, sidebar, nil, contentStack)
+	w.SetContent(appContainer)
 	w.ShowAndRun()
 }

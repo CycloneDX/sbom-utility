@@ -78,32 +78,11 @@ to the CLI is automatically available in the GUI without any GUI-side changes.
 Every "Run" button fires work in a `go func(){}` goroutine so the Fyne UI remains
 responsive during long scans or large BOM files.
 
-### Screen layout pattern
-
-Every tab follows the same structure:
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  BOM file: [_________________________]  [Browse]  [Run] │  ← top bar
-├─────────────────────────────────────────────────────────┤
-│ ▼ Command Options          │                            │
-│   --variant  [_________]   │   (scrollable results)     │
-│   --force    [_________]   │                            │
-│   --format   [txt ▾]       │   bom-ref  type  name …    │
-│   --where    [_________]   │   ────────────────────     │
-│   Filter keys hint …       │   pkg:npm/…  lib  …        │
-│                            │                            │
-│ ▶ Command Options          │   (collapsed state)        │
-└────────────────────────────┴────────────────────────────┘
-  collapsible SidePanel (28%)   ResultsView (72%)
-```
-
 ---
 
 ## Theme
 
-The GUI uses a custom macOS-inspired Fyne theme defined in [`gui/theme/macos.go`](theme/macos.go).
-It targets **macOS Ventura / Sonoma light-mode** aesthetics and is active on all platforms.
+The GUI uses a custom macOS-inspired Fyne theme defined in [`gui/theme/macos.go`](theme/macos.go). It targets **macOS Ventura / Sonoma light-mode** aesthetics and is active on all platforms.
 
 ### Color palette
 
@@ -217,9 +196,6 @@ fyne-cross linux   --arch=amd64,arm64 ./gui
 
 ## License
 
-The GUI code (`gui/`) is licensed under the **Apache-2.0** license, matching the rest
-of sbom-utility.
+The GUI code (`gui/`) is licensed under the **Apache-2.0** license, matching the rest of `sbom-utility`.
 
-The GUI depends on [Fyne](https://github.com/fyne-io/fyne) (BSD-3-Clause) and its
-transitive dependencies, all of which are permissively licensed (MIT, BSD-3, zlib,
-Apache-2.0). No GPL or LGPL code is introduced.
+The GUI depends on [Fyne](https://github.com/fyne-io/fyne) (BSD-3-Clause) and its transitive dependencies, all of which are permissively licensed (MIT, BSD-3, zlib, Apache-2.0). No GPL or LGPL code is introduced.

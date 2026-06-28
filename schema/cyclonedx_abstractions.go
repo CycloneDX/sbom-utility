@@ -174,7 +174,7 @@ func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXCompo
 	if cdxComponent.Components != nil && len(*cdxComponent.Components) > 0 {
 		componentInfo.HasComponents = true
 	}
-	if cdxComponent.ReleaseNotes != nil && len(*cdxComponent.ReleaseNotes) > 0 {
+	if cdxComponent.ReleaseNotes != nil {
 		componentInfo.HasReleaseNotes = true
 	}
 	if cdxComponent.ModelCard != nil && *cdxComponent.ModelCard != (CDXModelCard{}) {
