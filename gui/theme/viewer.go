@@ -12,7 +12,7 @@ import (
 // ViewerTheme is a local theme override for the BOM source-viewer entry widget.
 // It provides a dark-editor look:
 //
-//	Background / input bg  #1E1E1E  (VS Code-style dark charcoal)
+//	Background / input bg   #1E1E1E  (VS Code-style dark charcoal)
 //	Foreground / text       #CECECE  (light grey)
 //	Placeholder             #7A7A7A  (dimmer grey)
 //
