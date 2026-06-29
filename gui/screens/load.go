@@ -43,6 +43,7 @@ func (s *LoadScreen) OpenDialog() {
 		go func() {
 			info := bridge.LoadBOMInfo(path)
 			s.state.SetBOMInfo(BOMInfo{
+				Format:      info.Format,
 				SpecVersion: info.SpecVersion,
 				FilePath:    info.FilePath,
 			})

@@ -8,6 +8,8 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+
+	guitheme "github.com/CycloneDX/sbom-utility/gui/theme"
 )
 
 // ResultsView is a scrollable text area used to display command output.
@@ -17,15 +19,17 @@ import (
 //     vertical-only scroll. This is required because widget.RichText cannot render
 //     GFM pipe tables; we parse them out and hand them to widget.Table instead.
 type ResultsView struct {
-	entry       *widget.Entry
-	plainScroll *container.Scroll
-	mdVBox      *fyne.Container
-	mdScroll    *container.Scroll
-	stack       *fyne.Container // holds both scrolls; only one visible at a time
-	markdownOn  bool
+	entry        *widget.Entry
+	plainScroll  *container.Scroll
+	mdVBox       *fyne.Container
+	mdScroll     *container.Scroll
+	stack        *fyne.Container        // holds both scrolls; only one visible at a time
+	themed       fyne.CanvasObject      // ThemeOverride wrapping the stack
+	markdownOn   bool
 }
 
 // NewResultsView creates a read-only, scrollable text area (plain-text mode by default).
+// The results area uses the same dark viewer palette as the View screen.
 func NewResultsView() *ResultsView {
 	rv := &ResultsView{}
 
@@ -44,6 +48,10 @@ func NewResultsView() *ResultsView {
 	// Stack both scrolls; swap visibility on mode change.
 	rv.stack = container.NewStack(rv.plainScroll, rv.mdScroll)
 	rv.mdScroll.Hide()
+
+	// Wrap the stack in the same dark viewer theme used by the View screen.
+	viewerTheme := guitheme.NewViewerTheme(fyne.CurrentApp().Settings().Theme())
+	rv.themed = container.NewThemeOverride(rv.stack, viewerTheme)
 
 	return rv
 }
@@ -95,7 +103,7 @@ func (rv *ResultsView) Clear() {
 
 // CanvasObject returns the embeddable Fyne layout.
 func (rv *ResultsView) CanvasObject() fyne.CanvasObject {
-	return rv.stack
+	return rv.themed
 }
 
 // ── Markdown table parsing ────────────────────────────────────────────────────

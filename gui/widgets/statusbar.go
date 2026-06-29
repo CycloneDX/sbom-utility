@@ -14,25 +14,25 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-// StatusBar is a fixed-height bar divided into three sections (25 / 50 / 25 %)
+// StatusBar is a fixed-height bar divided into three sections (30 / 45 / 25 %)
 // displayed at the bottom of the application window.
 //
-//   - Left  (25%): CycloneDX specVersion once a BOM is loaded (empty on init)
-//   - Middle(50%): base-name of the loaded BOM file (tooltip shows the full file path on hover)
+//   - Left  (30%): "Format: <CycloneDX|SPDX>" and "Version: <specVersion>" once a BOM is loaded
+//   - Middle(45%): base-name of the loaded BOM file (tooltip shows the full file path on hover)
 //   - Right (25%): reserved / future use
 //
 // The background is RGB(52,120,198) with white foreground text.
 type StatusBar struct {
-	left     *statusBarLabel
-	middle   *statusBarLabel
-	right    *statusBarLabel
-	outer    fyne.CanvasObject
+	left   *statusBarLabel
+	middle *statusBarLabel
+	right  *statusBarLabel
+	outer  fyne.CanvasObject
 }
 
 var statusBarBg = color.NRGBA{R: 52, G: 120, B: 198, A: 255}
 
 // NewStatusBar constructs a StatusBar with an empty left section on init.
-// The left section is populated with the CycloneDX spec version once a BOM is loaded.
+// The left section is populated with the format and version once a BOM is loaded.
 func NewStatusBar() *StatusBar {
 	sb := &StatusBar{
 		left:   newStatusBarLabel(""),
@@ -41,7 +41,7 @@ func NewStatusBar() *StatusBar {
 	}
 
 	innerGrid := container.New(
-		&proportionalHLayout{weights: []float32{1, 2, 1}},
+		&proportionalHLayout{weights: []float32{3, 4.5, 2.5}},
 		container.New(layout.NewCustomPaddedLayout(0, 0, 4, 4), sb.left),
 		container.New(layout.NewCustomPaddedLayout(0, 0, 4, 4), sb.middle),
 		container.New(layout.NewCustomPaddedLayout(0, 0, 4, 4), sb.right),
@@ -61,11 +61,6 @@ func (sb *StatusBar) CanvasObject() fyne.CanvasObject {
 	return sb.outer
 }
 
-// SetLeft updates the left-section text.
-func (sb *StatusBar) SetLeft(text string) {
-	sb.left.SetText(text)
-}
-
 // SetMiddle updates the middle-section label text and its hover tooltip.
 // Pass an empty fullPath to clear the tooltip.
 func (sb *StatusBar) SetMiddle(baseName, fullPath string) {
@@ -73,11 +68,18 @@ func (sb *StatusBar) SetMiddle(baseName, fullPath string) {
 	sb.middle.SetTooltip(fullPath)
 }
 
-// UpdateForBOM refreshes both the left (specVersion) and middle (filename)
+// UpdateForBOM refreshes the left (format + version) and middle (filename)
 // sections from the provided BOM metadata.  Pass empty strings to reset.
-func (sb *StatusBar) UpdateForBOM(specVersion, filePath string) {
-	if specVersion != "" {
-		sb.SetLeft("CycloneDX " + specVersion)
+func (sb *StatusBar) UpdateForBOM(format, specVersion, filePath string) {
+	switch {
+	case format != "" && specVersion != "":
+		sb.left.SetText("Format: " + format + "   Version: " + specVersion)
+	case format != "":
+		sb.left.SetText("Format: " + format)
+	case specVersion != "":
+		sb.left.SetText("Version: " + specVersion)
+	default:
+		sb.left.SetText("")
 	}
 	if filePath != "" {
 		sb.SetMiddle(filepath.Base(filePath), filePath)

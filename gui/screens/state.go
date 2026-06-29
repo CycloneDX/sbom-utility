@@ -15,7 +15,9 @@ type Runner interface {
 // BOMInfo carries the metadata extracted from a loaded BOM file that is
 // displayed in the status bar.
 type BOMInfo struct {
-	// SpecVersion is the CycloneDX specVersion declared in the BOM (e.g. "1.5").
+	// Format is the canonical BOM format name (e.g. "CycloneDX", "SPDX").
+	Format string
+	// SpecVersion is the spec/schema version declared in the BOM (e.g. "1.5").
 	SpecVersion string
 	// FilePath is the absolute path of the loaded file.
 	FilePath string

@@ -221,7 +221,7 @@ func main() {
 
 	state.OnBOMInfoChange(func(info screens.BOMInfo) {
 		fyne.Do(func() {
-			statusBar.UpdateForBOM(info.SpecVersion, info.FilePath)
+			statusBar.UpdateForBOM(info.Format, info.SpecVersion, info.FilePath)
 		})
 	})
 
