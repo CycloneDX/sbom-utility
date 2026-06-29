@@ -66,6 +66,7 @@ The following commands, which operate against input BOMs and their data, are off
 - [Development](#development)
 - [Testing](#testing)
 - [Releasing](#releasing)
+- [Troubleshooting](#troubleshooting)
 - [BOM References](#bom-references)
   - [CycloneDX](#cyclonedx), [SPDX](#spdx)
 
@@ -2808,3 +2809,33 @@ $ go build ${LDFLAGS} -o ${BINARY}
 - Tools
   - [SPDX Online Tool](https://tools.spdx.org/app/)
     - **Note** Used the [convert](https://tools.spdx.org/app/convert/) tool to convert SPDX examples from `.tv` format to `.json`; however, conversion of [`example6-bin.spdx`](https://github.com/spdx/spdx-examples/blob/master/example6/spdx/example6-bin.spdx) resulted in an error.
+
+---
+
+## Troubleshooting
+
+### Alpine Linux: "not found" or `GLIBC` error on launch
+
+**Symptom**: Running `sbom-utility` on Alpine Linux fails immediately with an error such as:
+
+```
+sh: ./sbom-utility: not found
+```
+
+or
+
+```
+Error loading shared library libgcc_s.so.1: No such file or directory
+```
+
+**Cause**: Alpine Linux uses [musl libc](https://musl.libc.org/) instead of the GNU C Library (`glibc`) that the pre-built `sbom-utility` binaries are linked against.
+
+**Fix**: Install the `gcompat` compatibility layer, which provides a `glibc`-compatible environment on top of musl:
+
+```sh
+apk add gcompat
+```
+
+After running the above command, `sbom-utility` should launch normally.
+
+> **Reference**: [GitHub issue #138](https://github.com/CycloneDX/sbom-utility/issues/138)
