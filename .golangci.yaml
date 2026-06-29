@@ -1,14 +1,19 @@
 # https://golangci-lint.run/usage/configuration/
+version: "2"
+
 run:
   issues-exit-code: 2
 
 # https://golangci-lint.run/usage/false-positives/
 # https://staticcheck.io/docs/
-linters-settings:
-  govet:
-    disable:
-      - printf
-  staticcheck:
-    checks:
-      - all
-      - '-SA4005' # disable the rule SA1000
+linters:
+  settings:
+    govet:
+      disable:
+        - printf
+    staticcheck:
+      checks:
+        - all
+        - '-SA4005' # disable: incorrect use of sync/atomic
+        - '-ST*'    # disable: all style checks — pre-existing codebase style not enforced
+        - '-QF*'    # disable: all quickfix suggestions — pre-existing codebase style not enforced

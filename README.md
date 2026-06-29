@@ -23,9 +23,13 @@ In addition, the utility features "report" commands that can easily *extract*, *
 
 <h5><img alt="New!" src="docs/new-3d.png" align="left" width="100" height="100" style="height: 8em; width:8em; vertical-align: middle;"></h5>
 
- **Custom JSON Validation**</br>Don't want to create custom CycloneDX and SPDX schemas to enforce your BOM requirements on the structure, fields, values and more?  Good news! Now you can add your own custom validation of BOM content using the new `--custom` flag on the `validate` command!
+### Experimental: Desktop GUI
 
-- Learn how to use this long-awaited, **experimental** feature by reading the [Custom validation examples](docs/custom-examples.md) page.
+A native desktop GUI for `sbom-utility` is available in the [`gui/`](gui/) directory.
+It wraps the same validate, license, component, resource, and vulnerability commands in a point-and-click interface — no terminal required.</br>
+Load any CycloneDX or SPDX BOM file, inspect its raw source, run validation, and browse structured report tables, all from a single window.
+
+> **Try it out**: See the [GUI README](gui/README.md) for build instructions and a feature overview.
 
 ---
 
@@ -2008,7 +2012,7 @@ needs-review  name          UFL           ACME Application  pkg:app/sample@1.0.0
 
 ### License `policy` subcommand
 
-To view a report listing the contents of the current policy file (i.e., [`license.json`](https://github.com/CycloneDX/sbom-utility/blob/main/license.json)) which contains an encoding of known software and data licenses by SPDX ID and license family along with a configurable usage policy (i.e., `"allow"`, `"deny"` or `"needs-review"`).
+To view a report listing the contents of the current policy file (i.e., [`license.json`](https://github.com/CycloneDX/sbom-utility/blob/main/resources/config/license.json)) which contains an encoding of known software and data licenses by SPDX ID and license family along with a configurable usage policy (i.e., `"allow"`, `"deny"` or `"needs-review"`).
 
 #### License policy supported formats
 

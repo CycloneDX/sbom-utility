@@ -26,10 +26,10 @@ jobs:
           go-version: '1.21'
           #cache: false
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v9
         with:
-          # Optional: golangci-lint command line arguments.
-          args: -D errcheck
+          # Lint only non-GUI packages; gui/ requires X11/OpenGL unavailable on headless runners.
+          args: -D errcheck . ./cmd/... ./common/... ./log/... ./resources/... ./schema/... ./utils/...
           # Optional: if set to true, caches will not be saved, but they may still be restored,
           #           subject to other options
           # skip-save-cache: true

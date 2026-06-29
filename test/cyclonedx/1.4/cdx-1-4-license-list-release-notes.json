@@ -1,0 +1,54 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "serialNumber": "urn:uuid:b1c2d3e4-f5a6-7890-bcde-f12345678901",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2024-01-01T00:00:00Z",
+    "component": {
+      "type": "application",
+      "name": "ACME Application",
+      "version": "2.0.0",
+      "releaseNotes": {
+        "type": "major",
+        "title": "ACME Application 2.0 Release",
+        "description": "Major release with new features.",
+        "timestamp": "2024-01-01T00:00:00Z"
+      }
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "acme-lib",
+      "version": "1.2.3",
+      "purl": "pkg:npm/acme-lib@1.2.3",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "releaseNotes": {
+        "type": "minor",
+        "title": "acme-lib 1.2.3 Release",
+        "description": "Minor update.",
+        "timestamp": "2023-12-01T00:00:00Z"
+      }
+    },
+    {
+      "type": "library",
+      "name": "acme-utils",
+      "version": "0.9.0",
+      "purl": "pkg:npm/acme-utils@0.9.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    }
+  ]
+}
