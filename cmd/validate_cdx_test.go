@@ -33,6 +33,7 @@ const (
 // Tests for MLBOM subtypes
 const (
 	TEST_CDX_1_6_MACHINE_LEARNING_BOM = "test/cyclonedx/1.6/cdx-1-6-valid-mlbom-environmental-considerations.json"
+	TEST_CDX_1_7_ML_BOM_GRANITE       = "test/cyclonedx/1.7/ml-bom/cyclonedx-granite_4.1_30b_base.json"
 )
 
 // Tests for CBOM subtypes
@@ -153,6 +154,11 @@ func TestValidateCdx16MachineLearningBOM(t *testing.T) {
 
 func TestValidateCdx16CryptographicBOM(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_6_CRYPTO_BOM)
+	innerTestValidate(t, *vti)
+}
+
+func TestValidateCdx17MachineLearningBOMGranite(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_7_ML_BOM_GRANITE)
 	innerTestValidate(t, *vti)
 }
 

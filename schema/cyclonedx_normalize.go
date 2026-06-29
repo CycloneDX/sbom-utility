@@ -41,6 +41,8 @@ type CDXRefLinkTypeSlice []CDXRefLinkType
 type CDXServiceSlice []CDXService
 type CDXVersionRangeSlice []CDXVersionRange
 
+// type CDXReleaseNotesSlice []CDXReleaseNotes
+
 // ====================================================================
 // Normalizer Interface (and helpers)
 // ====================================================================

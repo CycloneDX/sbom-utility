@@ -324,7 +324,7 @@ type LicenseInfo struct {
 	BOMRef                 CDXRefType       `json:"bom-ref"`
 	BOMLocationValue       int              `json:"bom-location-value"`
 	BOMLocation            string           `json:"bom-location"`
-	PURL                   string           `json:"purl"` 
+	PURL                   string           `json:"purl"`
 	LicenseChoice          CDXLicenseChoice // Do not marshal
 	Policy                 LicensePolicy    // Do not marshal
 	Component              CDXComponent     // Do not marshal

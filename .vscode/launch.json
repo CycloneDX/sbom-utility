@@ -86,6 +86,16 @@
         },
         {
             "showGlobalVariables": true,
+            "name": "Debug: component list: granite 4.1, 30B, base",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "main.go", // "program": "${file}",
+            "args": ["component", "list", "-i", "test/cyclonedx/1.7/ml-bom/cyclonedx-granite_4.1_30b_base.json"],
+            "dlvFlags": ["--check-go-version=false"]
+        },
+        {
+            "showGlobalVariables": true,
             "name": "Debug: license list, format=json",
             "type": "go",
             "request": "launch",
