@@ -255,7 +255,7 @@ func (log *MiniLogger) Enter(values ...interface{}) {
 			}
 			sb.WriteByte(')')
 		}
-		log.dumpInterface(TRACE, log.tagColor.Sprintf(log.tagEnter), sb.String(), STACK_SKIP)
+		log.dumpInterface(TRACE, log.tagColor.Sprintf("%s", log.tagEnter), sb.String(), STACK_SKIP)
 
 		if log.indentEnabled {
 			// increase stack indent
@@ -288,7 +288,7 @@ func (log *MiniLogger) Exit(values ...interface{}) {
 			}
 		}
 
-		log.dumpInterface(TRACE, log.tagColor.Sprintf(log.tagExit), sb.String(), STACK_SKIP)
+		log.dumpInterface(TRACE, log.tagColor.Sprintf("%s", log.tagExit), sb.String(), STACK_SKIP)
 	}
 }
 
