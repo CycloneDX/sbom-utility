@@ -193,6 +193,7 @@ func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXCompo
 			componentInfo.ManufacturerUrl = cdxComponent.Manufacturer.Url[0]
 		}
 	}
+	componentInfo.Publisher = cdxComponent.Publisher
 	if cdxComponent.Pedigree != nil && !cdxComponent.Pedigree.isEmpty() {
 		componentInfo.HasPedigree = true
 	}
