@@ -11,6 +11,16 @@
       "name": "acme-lib",
       "version": "2.3.1",
       "description": "CycloneDX v2.0 component fixture exercising v2.0-specific fields.",
+      "copyright": "Copyright (c) 2024 Acme Corp",
+      "supplier": {
+        "bom-ref": "org-supplier-acme",
+        "name": "Acme Supplier Ltd"
+      },
+      "manufacturer": {
+        "bom-ref": "org-manufacturer-acme",
+        "name": "Acme Manufacturing Inc"
+      },
+      "publisher": "Acme Publishing",
       "hashes": [
         {
           "alg": "SHA-256",
