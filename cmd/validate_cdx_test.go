@@ -28,6 +28,7 @@ const (
 	TEST_CDX_1_5_MIN_REQUIRED = "test/cyclonedx/1.5/cdx-1-5-min-required.json"
 	TEST_CDX_1_6_MIN_REQUIRED = "test/cyclonedx/1.6/cdx-1-6-min-required.json"
 	TEST_CDX_1_7_MIN_REQUIRED = "test/cyclonedx/1.7/cdx-1-7-min-required.json"
+	TEST_CDX_2_0_MIN_REQUIRED = "test/cyclonedx/2.0/cdx-2-0-min-required.json"
 )
 
 // Tests for MLBOM subtypes
@@ -81,6 +82,10 @@ const (
 )
 
 const (
+	TEST_CDX_2_0_VALID_COMPONENT = "test/cyclonedx/2.0/cdx-2-0-valid-component.json"
+)
+
+const (
 	TEST_CDX_SPEC_1_7_VALID_CRYPTO_CITATION = "test/cyclonedx/1.7/cdx-1-7-valid-crypto-citation.json"
 	TEST_CDX_SPEC_1_7_COMP_VERSION_RANGE    = "test/cyclonedx/1.7/cdx-1-7-comp-version-range.json"
 
@@ -129,6 +134,46 @@ func TestValidateCdx16MinRequiredBasic(t *testing.T) {
 func TestValidateCdx17MinRequiredBasic(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_1_7_MIN_REQUIRED)
 	innerTestValidate(t, *vti)
+}
+
+// TestValidateCdx20MinRequiredBasic verifies that a CycloneDX v2.0 BOM using the
+// renamed "specFormat" key (replacing "bomFormat") is correctly identified, validated,
+// and unmarshalled into the CDXBom struct with SpecFormat populated.
+func TestValidateCdx20MinRequiredBasic(t *testing.T) {
+	const EXPECTED_SPEC_FORMAT = "CycloneDX"
+	const EXPECTED_SPEC_VERSION = "2.0"
+
+	vti := NewValidateTestInfo(TEST_CDX_2_0_MIN_REQUIRED, FORMAT_TEXT, SCHEMA_VARIANT_DEVELOPMENT, nil)
+	document, _, err := innerTestValidate(t, *vti)
+	if err != nil {
+		// innerTestValidate already calls t.Errorf; just return to avoid nil-deref below
+		return
+	}
+
+	// Unmarshal into CDX structs so we can inspect the Go model.
+	if err = document.UnmarshalCycloneDXBOM(); err != nil {
+		t.Errorf("UnmarshalCycloneDXBOM() failed: %v", err)
+		return
+	}
+
+	// Assert the v2.0 specFormat key was decoded into SpecFormat (not BOMFormat).
+	if got := document.GetCdxSpecFormat(); got != EXPECTED_SPEC_FORMAT {
+		t.Errorf("SpecFormat: expected %q, got %q", EXPECTED_SPEC_FORMAT, got)
+	}
+
+	// Assert specVersion is preserved correctly.
+	if cdxBom := document.GetCdxBom(); cdxBom == nil || cdxBom.SpecVersion != EXPECTED_SPEC_VERSION {
+		var got string
+		if cdxBom != nil {
+			got = cdxBom.SpecVersion
+		}
+		t.Errorf("SpecVersion: expected %q, got %q", EXPECTED_SPEC_VERSION, got)
+	}
+
+	// Assert BOMFormat is empty (not set by a v2.0 document).
+	if cdxBom := document.GetCdxBom(); cdxBom != nil && cdxBom.BOMFormat != "" {
+		t.Errorf("BOMFormat: expected empty string for v2.0 document, got %q", cdxBom.BOMFormat)
+	}
 }
 
 func TestValidateCdx13Mature(t *testing.T) {
@@ -320,4 +365,41 @@ func TestValidateCdx17ValidSignatures(t *testing.T) {
 func TestValidateCdx17ValidStandard(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_SPEC_1_7_VALID_STANDARD)
 	innerTestValidate(t, *vti)
+}
+
+// 2.0 Tests
+
+// TestValidateCdx20ValidComponent verifies that a CycloneDX v2.0 BOM containing a single
+// component with v2.0-only fields (identifiers, parties, implementationPlatform as []string)
+// is correctly validated and unmarshalled into the CDXComponent struct.
+func TestValidateCdx20ValidComponent(t *testing.T) {
+	vti := NewValidateTestInfo(TEST_CDX_2_0_VALID_COMPONENT, FORMAT_TEXT, SCHEMA_VARIANT_DEVELOPMENT, nil)
+	document, _, err := innerTestValidate(t, *vti)
+	if err != nil {
+		return
+	}
+
+	if err = document.UnmarshalCycloneDXBOM(); err != nil {
+		t.Errorf("UnmarshalCycloneDXBOM() failed: %v", err)
+		return
+	}
+
+	components := document.GetCdxComponents()
+	if components == nil || len(*components) != 1 {
+		t.Errorf("expected 1 component, got %v", components)
+		return
+	}
+
+	comp := (*components)[0]
+
+	// v2.0: identifiers field should be populated
+	if comp.Identifiers == nil || len(*comp.Identifiers) == 0 {
+		t.Errorf("expected component.identifiers to be populated for v2.0 fixture")
+	}
+
+	// v2.0: parties field should be populated
+	if comp.Parties == nil || len(*comp.Parties) == 0 {
+		t.Errorf("expected component.parties to be populated for v2.0 fixture")
+	}
+
 }

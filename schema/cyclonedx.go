@@ -37,8 +37,12 @@ var EMPTY_CDXLicense = CDXLicense{}
 // v1.4: added "vulnerabilities", "signature"
 // v1.5: added "annotations", "formulation", "properties"
 // v1.6: added "declarations", "definitions"
+// v2.0: "bomFormat" renamed to "specFormat"; "signature" (single) replaced by "signatures" (array);
+//
+//	"perspectives" added as a new top-level field.
 type CDXBom struct {
 	BOMFormat          string                  `json:"bomFormat,omitempty"`
+	SpecFormat         string                  `json:"specFormat,omitempty" cdx:"+2.0"`      // v2.0: replaces bomFormat
 	SpecVersion        string                  `json:"specVersion,omitempty"`
 	SerialNumber       string                  `json:"serialNumber,omitempty"`
 	Version            int                     `json:"version,omitempty"`
@@ -50,12 +54,14 @@ type CDXBom struct {
 	Compositions       *[]CDXCompositions      `json:"compositions,omitempty" cdx:"added:1.3"`
 	Vulnerabilities    *[]CDXVulnerability     `json:"vulnerabilities,omitempty" cdx:"added:1.4"`
 	Signature          *JSFSignature           `json:"signature,omitempty" cdx:"added:1.4"`
+	Signatures         *[]JSFSignature         `json:"signatures,omitempty" cdx:"+2.0"`      // v2.0: replaces Signature
 	Annotations        *[]CDXAnnotation        `json:"annotations,omitempty" cdx:"added:1.5"`
 	Formulation        *[]CDXFormula           `json:"formulation,omitempty" cdx:"added:1.5"`
 	Properties         *[]CDXProperty          `json:"properties,omitempty" cdx:"added:1.5"`
 	Declarations       *CDXDeclaration         `json:"declarations,omitempty" cdx:"added:1.6"`
 	Definitions        *CDXDefinition          `json:"definitions,omitempty" cdx:"added:1.6"`
 	Citations          *[]CDXCitation          `json:"citations,omitempty" cdx:"+1.7"`
+	Perspectives       *[]CDXPerspective       `json:"perspectives,omitempty" cdx:"+2.0"`    // v2.0: added
 }
 
 // v1.2: existed
@@ -125,6 +131,9 @@ type CDXComponent struct {
 	VersionRange       CDXComponentVersionRange    `json:"versionRange,omitempty" cdx:"+1.7"`
 	IsExternal         bool                        `json:"isExternal,omitempty" cdx:"+1.7"`
 	PatentAssertions   *[]CDXPatentAssertion       `json:"patentAssertions,omitempty" cdx:"+1.7"`
+	Identifiers        *[]CDXComponentIdentifier   `json:"identifiers,omitempty" cdx:"+2.0"`
+	Parties            *[]interface{}              `json:"parties,omitempty" cdx:"+2.0"`
+	Signatures         *[]JSFSignature             `json:"signatures,omitempty" cdx:"+2.0"`
 }
 
 // v1.5 added object
@@ -491,3 +500,43 @@ type CDXNameDescription struct {
 // v1.7
 // Note: CDXVulnerability already has a CDXVersionRange which is more than a simple string
 type CDXComponentVersionRange string
+
+// v2.0: added — top-level BOM perspective entry
+type CDXPerspective struct {
+	BOMRef             *CDXRefType             `json:"bom-ref,omitempty" cdx:"+2.0"`
+	Name               string                  `json:"name,omitempty" cdx:"+2.0"`
+	Description        string                  `json:"description,omitempty" cdx:"+2.0"`
+	Domains            *[]interface{}          `json:"domains,omitempty" cdx:"+2.0"` // oneOf: pre-defined enum string or custom object
+	Mappings           *[]CDXPerspectiveMapping `json:"mappings,omitempty" cdx:"+2.0"`
+	ExternalReferences *[]CDXExternalReference  `json:"externalReferences,omitempty" cdx:"+2.0"`
+	Properties         *[]CDXProperty           `json:"properties,omitempty" cdx:"+2.0"`
+}
+
+// v2.0: added — mapping of a perspective to a BOM element
+type CDXPerspectiveMapping struct {
+	Expression        string  `json:"expression,omitempty" cdx:"+2.0"`
+	NativeName        string  `json:"nativeName,omitempty" cdx:"+2.0"`
+	NativeDescription string  `json:"nativeDescription,omitempty" cdx:"+2.0"`
+	Relevance         string  `json:"relevance,omitempty" cdx:"+2.0"`
+	Weight            float64 `json:"weight,omitempty" cdx:"+2.0"`
+	Rationale         string  `json:"rationale,omitempty" cdx:"+2.0"`
+}
+
+// v2.0: added — identifier assertions made by a party for a component
+// sourced from the 2.0-dev component schema
+// Note: identity claims remain modeled in evidence; identifiers are positive assertions by an asserting party
+// NOTE: CDXRefType is a named `string` type as of v1.5
+// NOTE: CDXRefLinkType is a named `string` type as of v1.5
+type CDXComponentIdentifier struct {
+	BOMRef     *CDXRefType             `json:"bom-ref,omitempty" cdx:"+2.0"`
+	Party      *CDXRefLinkType         `json:"party,omitempty" cdx:"+2.0"`
+	Identities *[]CDXComponentIdentity `json:"identities,omitempty" cdx:"+2.0"`
+}
+
+type CDXComponentIdentity struct {
+	Field          string    `json:"field,omitempty" cdx:"+2.0"`
+	Confidence     float64   `json:"confidence,omitempty" cdx:"+2.0"`
+	ConcludedValue string    `json:"concludedValue,omitempty" cdx:"+2.0"`
+	Methods        *[]string `json:"methods,omitempty" cdx:"+2.0"`
+	Tools          *[]string `json:"tools,omitempty" cdx:"+2.0"`
+}

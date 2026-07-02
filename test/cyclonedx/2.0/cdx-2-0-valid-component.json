@@ -1,0 +1,62 @@
+{
+  "specFormat": "CycloneDX",
+  "specVersion": "2.0",
+  "serialNumber": "urn:uuid:7d4e1ae5-82d0-4b75-9c3f-f1ab7e6c29a0",
+  "version": 1,
+  "components": [
+    {
+      "bom-ref": "comp-acme-lib",
+      "type": "library",
+      "group": "acme-corp",
+      "name": "acme-lib",
+      "version": "2.3.1",
+      "description": "CycloneDX v2.0 component fixture exercising v2.0-specific fields.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "parties": [
+        {
+          "bom-ref": "party-acme-corp",
+          "roles": [
+            { "role": "supplier" }
+          ],
+          "organization": {
+            "name": "Acme Corp"
+          }
+        }
+      ],
+      "identifiers": [
+        {
+          "bom-ref": "ident-1",
+          "party": "party-acme-corp",
+          "identities": [
+            {
+              "scheme": "purl",
+              "value": "pkg:npm/acme-corp/acme-lib@2.3.1"
+            },
+            {
+              "scheme": "cpe",
+              "value": "cpe:2.3:a:acme-corp:acme-lib:2.3.1:*:*:*:*:*:*:*"
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:v2.0:fixture",
+          "value": "true"
+        }
+      ]
+    }
+  ]
+}
