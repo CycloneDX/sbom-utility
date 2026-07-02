@@ -59,7 +59,7 @@ var RESOURCE_LIST_ROW_DATA = []ColumnFormatData{
 	*NewColumnFormatData(RESOURCE_FILTER_KEY_NAME, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
 	*NewColumnFormatData(RESOURCE_FILTER_KEY_VERSION, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
 	*NewColumnFormatData(RESOURCE_FILTER_KEY_DESCRIPTION, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, REPORT_REPLACE_LINE_FEEDS_TRUE),
-	*NewColumnFormatData(RESOURCE_FILTER_KEY_PURL, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
+	{DataKey: RESOURCE_FILTER_KEY_PURL, TruncateLength: REPORT_DO_NOT_TRUNCATE, IsSummaryData: REPORT_SUMMARY_DATA, MarkdownEscape: REPORT_MARKDOWN_ESCAPE_TRUE},
 }
 
 // Flags. Reuse query flag values where possible
@@ -405,7 +405,7 @@ func DisplayResourceListMarkdown(bom *schema.BOM, writer io.Writer) (err error) 
 	var line []string
 	var lineRow string
 	for _, entry := range entries {
-		line, err = prepareReportLineData(
+		line, err = prepareReportLineDataMarkdown(
 			entry.Value.(schema.CDXResourceInfo),
 			RESOURCE_LIST_ROW_DATA,
 			true,

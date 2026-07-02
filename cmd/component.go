@@ -116,9 +116,9 @@ var COMPONENT_LIST_ROW_DATA = []ColumnFormatData{
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_MANUFACTURER_NAME, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_MANUFACTURER_URL, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_PUBLISHER, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
-	*NewColumnFormatData(COMPONENT_FILTER_KEY_PURL, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
+	{DataKey: COMPONENT_FILTER_KEY_PURL, TruncateLength: REPORT_DO_NOT_TRUNCATE, IsSummaryData: REPORT_SUMMARY_DATA, MarkdownEscape: REPORT_MARKDOWN_ESCAPE_TRUE},
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_SWID, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
-	*NewColumnFormatData(COMPONENT_FILTER_KEY_CPE, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
+	{DataKey: COMPONENT_FILTER_KEY_CPE, TruncateLength: REPORT_DO_NOT_TRUNCATE, IsSummaryData: REPORT_SUMMARY_DATA, MarkdownEscape: REPORT_MARKDOWN_ESCAPE_TRUE},
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_MIME_TYPE, REPORT_DO_NOT_TRUNCATE, false, false),
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_HAS_SCOPE, REPORT_DO_NOT_TRUNCATE, false, false),
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_NUM_HASHES, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
@@ -455,7 +455,7 @@ func DisplayComponentListMarkdown(bom *schema.BOM, writer io.Writer, flags utils
 	for _, entry := range entries {
 		// NOTE: component hashmap values are pointers to CDXComponentInfo structs
 		pComponentInfo = entry.Value.(*schema.CDXComponentInfo)
-		line, err = prepareReportLineData(
+		line, err = prepareReportLineDataMarkdown(
 			*pComponentInfo,
 			COMPONENT_LIST_ROW_DATA,
 			flags.Summary,
