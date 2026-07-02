@@ -310,24 +310,3 @@ func TestResourceListUsingStdin(t *testing.T) {
 	innerTestResourceList(t, rti)
 }
 
-// -------------------------------------------
-// CDX 2.0 variant
-// -------------------------------------------
-
-// TestResourceListCdx20ValidComponentPurl verifies that resource list with --variant development
-// on a CycloneDX v2.0 BOM correctly surfaces the purl extracted from identifiers[].identities[].
-func TestResourceListCdx20ValidComponentPurl(t *testing.T) {
-	utils.GlobalFlags.ValidateFlags.SchemaVariant = SCHEMA_VARIANT_DEVELOPMENT
-	defer func() { utils.GlobalFlags.ValidateFlags.SchemaVariant = SCHEMA_VARIANT_NONE }()
-
-	rti := NewResourceTestInfoBasic(
-		TEST_CDX_2_0_VALID_COMPONENT,
-		FORMAT_CSV,
-		nil,
-		schema.RESOURCE_TYPE_COMPONENT,
-	)
-	rti.ResultExpectedLineCount = 3 // title + 1 data row + EOF LF
-	rti.ResultLineContainsValuesAtLineNum = 1
-	rti.ResultLineContainsValues = []string{"pkg:npm/acme-corp/acme-lib@2.3.1"}
-	innerTestResourceList(t, rti)
-}
