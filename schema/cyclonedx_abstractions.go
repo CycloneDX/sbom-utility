@@ -120,14 +120,6 @@ func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXCompo
 	componentInfo.Version = cdxComponent.Version
 	componentInfo.Properties = cdxComponent.Properties
 
-	if cdxComponent.Supplier != nil {
-		componentInfo.SupplierName = cdxComponent.Supplier.Name
-		// NOTE: if multiple URLs exist, we only display the first
-		if len(cdxComponent.Supplier.Url) > 0 {
-			componentInfo.SupplierUrl = cdxComponent.Supplier.Url[0]
-		}
-	}
-
 	//---------------------
 	// Component-specific
 	//---------------------
@@ -185,21 +177,30 @@ func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXCompo
 		}
 	}
 
+	// v2.0: supplier, manufacturer, and publisher are declared via parties[].roles[].
+	// Populate from parties first so they take precedence over the legacy direct fields.
+	if cdxComponent.Parties != nil {
+		mapPartiesRoleData(componentInfo, *cdxComponent.Parties)
+	}
+
+	// Legacy (<v2.0) direct fields: fill any fields that parties did not populate.
+	if componentInfo.SupplierName == "" && cdxComponent.Supplier != nil {
+		componentInfo.SupplierName = cdxComponent.Supplier.Name
+		// NOTE: if multiple URLs exist, we only display the first
+		if len(cdxComponent.Supplier.Url) > 0 {
+			componentInfo.SupplierUrl = cdxComponent.Supplier.Url[0]
+		}
+	}
 	// Manufacturer field added v1.6
-	if cdxComponent.Manufacturer != nil {
+	if componentInfo.ManufacturerName == "" && cdxComponent.Manufacturer != nil {
 		componentInfo.ManufacturerName = cdxComponent.Manufacturer.Name
 		// NOTE: if multiple URLs exist, we only display the first
 		if len(cdxComponent.Manufacturer.Url) > 0 {
 			componentInfo.ManufacturerUrl = cdxComponent.Manufacturer.Url[0]
 		}
 	}
-	componentInfo.Publisher = cdxComponent.Publisher
-
-	// v2.0: supplier, manufacturer, and publisher moved to parties[].roles[]
-	// Fall back to parties extraction when direct fields are empty.
-	if cdxComponent.Parties != nil &&
-		(componentInfo.SupplierName == "" || componentInfo.ManufacturerName == "" || componentInfo.Publisher == "") {
-		mapPartiesRoleData(componentInfo, *cdxComponent.Parties)
+	if componentInfo.Publisher == "" {
+		componentInfo.Publisher = cdxComponent.Publisher
 	}
 
 	if cdxComponent.Pedigree != nil && !cdxComponent.Pedigree.isEmpty() {

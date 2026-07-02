@@ -4,20 +4,6 @@
   "serialNumber": "urn:uuid:7d4e1ae5-82d0-4b75-9c3f-f1ab7e6c29a0",
   "version": 1,
   "metadata": {
-    "supplier": {
-      "bom-ref": "org-supplier-acme",
-      "name": "Acme Supplier Ltd",
-      "url": [
-        "https://supplier.acme.example"
-      ]
-    },
-    "manufacturer": {
-      "bom-ref": "org-manufacturer-acme",
-      "name": "Acme Manufacturing Inc",
-      "url": [
-        "https://manufacturer.acme.example"
-      ]
-    },
     "component": {
       "bom-ref": "comp-acme-lib",
       "type": "library",

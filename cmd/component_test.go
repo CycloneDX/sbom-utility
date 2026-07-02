@@ -41,6 +41,8 @@ const (
 	// test/cyclonedx/1.6/specification/valid-empty-defns-decls.json
 	// Test general BOM with empty top-level bom objects, but valid components
 	TEST_COMPONENT_LIST_CDX_1_6_SBOM = "test/cyclonedx/1.6/specification/valid-empty-defns-decls.json"
+	// test/cyclonedx/2.0/cdx-2-0-valid-component.json
+	TEST_COMPONENT_LIST_CDX_2_0_VALID_COMPONENT = TEST_CDX_2_0_VALID_COMPONENT
 )
 
 var COMPONENT_TEST_DEFAULT_FLAGS utils.ComponentCommandFlags
@@ -227,5 +229,24 @@ func TestComponentListCdx16ValidComponentTypes(t *testing.T) {
 
 func TestComponentListCdx16EmptyDefnsDecls(t *testing.T) {
 	ti := NewComponentTestInfoBasic(TEST_COMPONENT_LIST_CDX_1_6_SBOM, FORMAT_CSV, nil)
+	innerTestComponentList(t, ti, COMPONENT_TEST_DEFAULT_FLAGS)
+}
+
+// -------------------------------------------
+// CDX v2.0 variants
+// -------------------------------------------
+
+// TestComponentListCdx20ValidComponentPartiesCsv verifies that "component list" for a CycloneDX
+// v2.0 BOM correctly reads supplier, manufacturer, and publisher from the component's v2.0
+// "parties" array (not the legacy metadata.supplier / metadata.manufacturer direct fields).
+func TestComponentListCdx20ValidComponentPartiesCsv(t *testing.T) {
+	utils.GlobalFlags.ValidateFlags.SchemaVariant = SCHEMA_VARIANT_DEVELOPMENT
+	defer func() { utils.GlobalFlags.ValidateFlags.SchemaVariant = SCHEMA_VARIANT_NONE }()
+
+	ti := NewComponentTestInfoBasic(TEST_COMPONENT_LIST_CDX_2_0_VALID_COMPONENT, FORMAT_CSV, nil)
+	ti.ResultExpectedLineCount = 3 // title + 1 data row + EOF LF
+	ti.ResultLineContainsValuesAtLineNum = 1
+	// All three party roles must be sourced from parties[], not legacy direct fields
+	ti.ResultLineContainsValues = []string{"Acme Supplier Ltd", "Acme Manufacturing Inc", "Acme Corp"}
 	innerTestComponentList(t, ti, COMPONENT_TEST_DEFAULT_FLAGS)
 }
