@@ -28,6 +28,7 @@ const (
 	TEST_CDX_1_5_MIN_REQUIRED = "test/cyclonedx/1.5/cdx-1-5-min-required.json"
 	TEST_CDX_1_6_MIN_REQUIRED = "test/cyclonedx/1.6/cdx-1-6-min-required.json"
 	TEST_CDX_1_7_MIN_REQUIRED = "test/cyclonedx/1.7/cdx-1-7-min-required.json"
+	TEST_CDX_2_0_MIN_REQUIRED = "test/cyclonedx/2.0/cdx-2-0-min-required.json"
 )
 
 // Tests for MLBOM subtypes
@@ -78,6 +79,10 @@ const (
 	TEST_CDX_SPEC_1_6_VALID_VULNERABILITY   = "test/cyclonedx/1.6/specification/valid-vulnerability-1.6.json"
 	TEST_CDX_SPEC_1_6_VALID_EXT_REF_IRI     = "test/validation/cdx-1-6-validate-component-ext-ref-iri-reference.json"
 	TEST_CDX_SPEC_1_6_1_VALID_SPDX_LICENSE  = "test/cyclonedx/1.6/specification/valid-license-spdx-licenses-1.6.1.json"
+)
+
+const (
+	TEST_CDX_2_0_VALID_COMPONENT = "test/cyclonedx/2.0/cdx-2-0-valid-component.json"
 )
 
 const (
@@ -321,3 +326,4 @@ func TestValidateCdx17ValidStandard(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_SPEC_1_7_VALID_STANDARD)
 	innerTestValidate(t, *vti)
 }
+

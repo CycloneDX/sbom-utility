@@ -309,3 +309,4 @@ func TestResourceListUsingStdin(t *testing.T) {
 	rti.MockStdin = true
 	innerTestResourceList(t, rti)
 }
+

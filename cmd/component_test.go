@@ -41,6 +41,8 @@ const (
 	// test/cyclonedx/1.6/specification/valid-empty-defns-decls.json
 	// Test general BOM with empty top-level bom objects, but valid components
 	TEST_COMPONENT_LIST_CDX_1_6_SBOM = "test/cyclonedx/1.6/specification/valid-empty-defns-decls.json"
+	// test/cyclonedx/2.0/cdx-2-0-valid-component.json
+	TEST_COMPONENT_LIST_CDX_2_0_VALID_COMPONENT = TEST_CDX_2_0_VALID_COMPONENT
 )
 
 var COMPONENT_TEST_DEFAULT_FLAGS utils.ComponentCommandFlags
@@ -229,3 +231,4 @@ func TestComponentListCdx16EmptyDefnsDecls(t *testing.T) {
 	ti := NewComponentTestInfoBasic(TEST_COMPONENT_LIST_CDX_1_6_SBOM, FORMAT_CSV, nil)
 	innerTestComponentList(t, ti, COMPONENT_TEST_DEFAULT_FLAGS)
 }
+

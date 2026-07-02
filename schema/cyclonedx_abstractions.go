@@ -59,6 +59,7 @@ type CDXResourceInfo struct {
 	Version        string `json:"version"`
 	Description    string `json:"description"`
 	BOMRef         string `json:"bom-ref"`
+	Purl           string `json:"purl"`
 	NumberLicenses int    `json:"number-licenses"`
 	Properties     *[]CDXProperty
 	Component      CDXComponent
@@ -119,14 +120,6 @@ func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXCompo
 	componentInfo.Version = cdxComponent.Version
 	componentInfo.Properties = cdxComponent.Properties
 
-	if cdxComponent.Supplier != nil {
-		componentInfo.SupplierName = cdxComponent.Supplier.Name
-		// NOTE: if multiple URLs exist, we only display the first
-		if len(cdxComponent.Supplier.Url) > 0 {
-			componentInfo.SupplierUrl = cdxComponent.Supplier.Url[0]
-		}
-	}
-
 	//---------------------
 	// Component-specific
 	//---------------------
@@ -136,6 +129,30 @@ func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXCompo
 	componentInfo.Copyright = cdxComponent.Copyright
 	componentInfo.Purl = cdxComponent.Purl
 	componentInfo.Cpe = cdxComponent.Cpe
+
+	// v2.0: purl/cpe moved into identifiers[].identities[] with scheme+value
+	if (componentInfo.Purl == "" || componentInfo.Cpe == "") && cdxComponent.Identifiers != nil {
+		for _, identifier := range *cdxComponent.Identifiers {
+			if identifier.Identities == nil {
+				continue
+			}
+			for _, identity := range *identifier.Identities {
+				switch identity.Scheme {
+				case "purl":
+					if componentInfo.Purl == "" {
+						componentInfo.Purl = identity.Value
+					}
+				case "cpe":
+					if componentInfo.Cpe == "" {
+						componentInfo.Cpe = identity.Value
+					}
+				}
+			}
+		}
+	}
+
+	// Mirror purl into the embedded CDXResourceInfo so resource list can surface it
+	componentInfo.CDXResourceInfo.Purl = componentInfo.Purl
 
 	// Surface SWID Tag ID field only
 	if cdxComponent.Swid != nil {
@@ -160,14 +177,32 @@ func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXCompo
 		}
 	}
 
+	// v2.0: supplier, manufacturer, and publisher are declared via parties[].roles[].
+	// Populate from parties first so they take precedence over the legacy direct fields.
+	if cdxComponent.Parties != nil {
+		mapPartiesRoleData(componentInfo, *cdxComponent.Parties)
+	}
+
+	// Legacy (<v2.0) direct fields: fill any fields that parties did not populate.
+	if componentInfo.SupplierName == "" && cdxComponent.Supplier != nil {
+		componentInfo.SupplierName = cdxComponent.Supplier.Name
+		// NOTE: if multiple URLs exist, we only display the first
+		if len(cdxComponent.Supplier.Url) > 0 {
+			componentInfo.SupplierUrl = cdxComponent.Supplier.Url[0]
+		}
+	}
 	// Manufacturer field added v1.6
-	if cdxComponent.Manufacturer != nil {
+	if componentInfo.ManufacturerName == "" && cdxComponent.Manufacturer != nil {
 		componentInfo.ManufacturerName = cdxComponent.Manufacturer.Name
 		// NOTE: if multiple URLs exist, we only display the first
 		if len(cdxComponent.Manufacturer.Url) > 0 {
 			componentInfo.ManufacturerUrl = cdxComponent.Manufacturer.Url[0]
 		}
 	}
+	if componentInfo.Publisher == "" {
+		componentInfo.Publisher = cdxComponent.Publisher
+	}
+
 	if cdxComponent.Pedigree != nil && !cdxComponent.Pedigree.isEmpty() {
 		componentInfo.HasPedigree = true
 	}
@@ -189,6 +224,84 @@ func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXCompo
 	if cdxComponent.Signature != nil && *cdxComponent.Signature != (JSFSignature{}) {
 		componentInfo.HasSignature = true
 	}
+}
+
+// mapPartiesRoleData extracts supplier, manufacturer, and publisher information
+// from the v2.0 parties array ([]interface{}) and populates any empty fields on
+// componentInfo. Each party is a map with "roles" (array of {"role":"..."} objects)
+// and an "organization" map containing "name" and optionally "url" (array of
+// {"url":"..."} objects — v2.0 format).
+func mapPartiesRoleData(componentInfo *CDXComponentInfo, parties []interface{}) {
+	for _, raw := range parties {
+		party, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		// Collect the role strings declared for this party
+		roles, _ := party["roles"].([]interface{})
+		var hasSupplier, hasManufacturer, hasPublisher bool
+		for _, r := range roles {
+			roleObj, ok := r.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			switch roleObj["role"] {
+			case "supplier":
+				hasSupplier = true
+			case "manufacturer":
+				hasManufacturer = true
+			case "publisher":
+				hasPublisher = true
+			}
+		}
+
+		if !hasSupplier && !hasManufacturer && !hasPublisher {
+			continue
+		}
+
+		// Extract name and first URL from the organization sub-object
+		orgName, orgUrl := extractPartyOrgNameUrl(party)
+
+		if hasSupplier && componentInfo.SupplierName == "" {
+			componentInfo.SupplierName = orgName
+			if componentInfo.SupplierUrl == "" {
+				componentInfo.SupplierUrl = orgUrl
+			}
+		}
+		if hasManufacturer && componentInfo.ManufacturerName == "" {
+			componentInfo.ManufacturerName = orgName
+			if componentInfo.ManufacturerUrl == "" {
+				componentInfo.ManufacturerUrl = orgUrl
+			}
+		}
+		if hasPublisher && componentInfo.Publisher == "" {
+			componentInfo.Publisher = orgName
+		}
+	}
+}
+
+// extractPartyOrgNameUrl returns the organization name and first URL from a
+// party map. The v2.0 organization.url format is [{"name":"...", "url":"..."}].
+func extractPartyOrgNameUrl(party map[string]interface{}) (name, url string) {
+	org, ok := party["organization"].(map[string]interface{})
+	if !ok {
+		return
+	}
+	name, _ = org["name"].(string)
+	// url is an array of objects: [{"name": "...", "url": "..."}]
+	urlEntries, _ := org["url"].([]interface{})
+	for _, entry := range urlEntries {
+		entryMap, ok := entry.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if u, ok := entryMap["url"].(string); ok && u != "" {
+			url = u
+			return
+		}
+	}
+	return
 }
 
 // -------------------
