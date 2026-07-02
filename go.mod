@@ -1,6 +1,6 @@
 module github.com/CycloneDX/sbom-utility
 
-go 1.20
+go 1.25
 
 require (
 	fyne.io/fyne/v2 v2.7.4
