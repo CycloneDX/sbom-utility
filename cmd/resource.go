@@ -49,6 +49,7 @@ const (
 	RESOURCE_FILTER_KEY_BOMREF        = "bom-ref"
 	RESOURCE_FILTER_KEY_GROUP         = "group"
 	RESOURCE_FILTER_KEY_DESCRIPTION   = "description"
+	RESOURCE_FILTER_KEY_PURL          = "purl"
 )
 
 var RESOURCE_LIST_ROW_DATA = []ColumnFormatData{
@@ -58,6 +59,7 @@ var RESOURCE_LIST_ROW_DATA = []ColumnFormatData{
 	*NewColumnFormatData(RESOURCE_FILTER_KEY_NAME, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
 	*NewColumnFormatData(RESOURCE_FILTER_KEY_VERSION, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
 	*NewColumnFormatData(RESOURCE_FILTER_KEY_DESCRIPTION, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, REPORT_REPLACE_LINE_FEEDS_TRUE),
+	*NewColumnFormatData(RESOURCE_FILTER_KEY_PURL, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
 }
 
 // Flags. Reuse query flag values where possible
@@ -85,6 +87,7 @@ func NewCommandResource() *cobra.Command {
 	command.Long = "Report on resources (i.e., components, services) found in the BOM input file"
 	command.Flags().StringVarP(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
 		FLAG_RESOURCE_OUTPUT_FORMAT_HELP+RESOURCE_LIST_OUTPUT_SUPPORTED_FORMATS)
+	command.Flags().StringVarP(&utils.GlobalFlags.ValidateFlags.SchemaVariant, FLAG_VALIDATE_SCHEMA_VARIANT, "", "", MSG_VALIDATE_SCHEMA_VARIANT)
 	command.Flags().StringP(FLAG_RESOURCE_TYPE, "", schema.RESOURCE_TYPE_DEFAULT, FLAG_RESOURCE_TYPE_HELP)
 	command.Flags().StringP(FLAG_REPORT_WHERE, "", "", FLAG_REPORT_WHERE_HELP)
 	command.RunE = resourceCmdImpl

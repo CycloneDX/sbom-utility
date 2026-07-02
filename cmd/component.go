@@ -135,9 +135,8 @@ var COMPONENT_LIST_ROW_DATA = []ColumnFormatData{
 
 // Flags. Reuse query flag values where possible
 const (
-	FLAG_COMPONENT_SUMMARY = "summary"
-	FLAG_COMPONENT_TYPE    = "type"
-	// FLAG_COMPONENT_TYPE_HELP    = "filter output by component type(s)"
+	FLAG_COMPONENT_SUMMARY      = "summary"
+	FLAG_COMPONENT_TYPE         = "type"
 	FLAG_COMPONENT_SUMMARY_HELP = "summarize component information when listing in supported formats"
 )
 
@@ -160,7 +159,7 @@ func NewCommandComponent() *cobra.Command {
 	command.Long = "Report on components found in the BOM input file"
 	command.Flags().StringVarP(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
 		FLAG_COMPONENT_OUTPUT_FORMAT_HELP+COMPONENT_LIST_OUTPUT_SUPPORTED_FORMATS)
-	//command.Flags().StringP(FLAG_COMPONENT_TYPE, "", "", FLAG_COMPONENT_TYPE_HELP)
+	command.Flags().StringVarP(&utils.GlobalFlags.ValidateFlags.SchemaVariant, FLAG_VALIDATE_SCHEMA_VARIANT, "", "", MSG_VALIDATE_SCHEMA_VARIANT)
 	command.Flags().BoolVarP(
 		&utils.GlobalFlags.ComponentFlags.Summary,
 		FLAG_COMPONENT_SUMMARY, "", false,

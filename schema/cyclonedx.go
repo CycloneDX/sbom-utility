@@ -534,6 +534,10 @@ type CDXComponentIdentifier struct {
 }
 
 type CDXComponentIdentity struct {
+	// v2.0 identifier identity fields (scheme+value pair under identifiers[].identities[])
+	Scheme string `json:"scheme,omitempty" cdx:"+2.0"`
+	Value  string `json:"value,omitempty" cdx:"+2.0"`
+	// evidence identity fields (v1.5+)
 	Field          string    `json:"field,omitempty" cdx:"+2.0"`
 	Confidence     float64   `json:"confidence,omitempty" cdx:"+2.0"`
 	ConcludedValue string    `json:"concludedValue,omitempty" cdx:"+2.0"`

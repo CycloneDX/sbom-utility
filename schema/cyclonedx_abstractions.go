@@ -59,6 +59,7 @@ type CDXResourceInfo struct {
 	Version        string `json:"version"`
 	Description    string `json:"description"`
 	BOMRef         string `json:"bom-ref"`
+	Purl           string `json:"purl"`
 	NumberLicenses int    `json:"number-licenses"`
 	Properties     *[]CDXProperty
 	Component      CDXComponent
@@ -136,6 +137,30 @@ func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXCompo
 	componentInfo.Copyright = cdxComponent.Copyright
 	componentInfo.Purl = cdxComponent.Purl
 	componentInfo.Cpe = cdxComponent.Cpe
+
+	// v2.0: purl/cpe moved into identifiers[].identities[] with scheme+value
+	if (componentInfo.Purl == "" || componentInfo.Cpe == "") && cdxComponent.Identifiers != nil {
+		for _, identifier := range *cdxComponent.Identifiers {
+			if identifier.Identities == nil {
+				continue
+			}
+			for _, identity := range *identifier.Identities {
+				switch identity.Scheme {
+				case "purl":
+					if componentInfo.Purl == "" {
+						componentInfo.Purl = identity.Value
+					}
+				case "cpe":
+					if componentInfo.Cpe == "" {
+						componentInfo.Cpe = identity.Value
+					}
+				}
+			}
+		}
+	}
+
+	// Mirror purl into the embedded CDXResourceInfo so resource list can surface it
+	componentInfo.CDXResourceInfo.Purl = componentInfo.Purl
 
 	// Surface SWID Tag ID field only
 	if cdxComponent.Swid != nil {
