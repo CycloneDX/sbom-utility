@@ -441,10 +441,13 @@ func TestValidateCdx14ErrorResultsFormatIriReferencesJson(t *testing.T) {
 // -----------------------------------------------------------
 
 func loadCustomSchemaConfig(filename string) (err error) {
-	// Do not pass a default file, it should fail if custom policy cannot be loaded
-	err = SupportedFormatConfig.InnerLoadSchemaConfigFile(filename, DEFAULT_SCHEMA_CONFIG)
-	if err != nil {
-		return
+	// If the provided filename matches the built-in default, load it from the
+	// embedded resources (second arg) rather than from disk (first arg).
+	if filename == DEFAULT_SCHEMA_CONFIG {
+		err = SupportedFormatConfig.InnerLoadSchemaConfigFile("", DEFAULT_SCHEMA_CONFIG)
+	} else {
+		// Do not pass a default file, it should fail if custom policy cannot be loaded
+		err = SupportedFormatConfig.InnerLoadSchemaConfigFile(filename, DEFAULT_SCHEMA_CONFIG)
 	}
 	return
 }
