@@ -194,6 +194,14 @@ func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXCompo
 		}
 	}
 	componentInfo.Publisher = cdxComponent.Publisher
+
+	// v2.0: supplier, manufacturer, and publisher moved to parties[].roles[]
+	// Fall back to parties extraction when direct fields are empty.
+	if cdxComponent.Parties != nil &&
+		(componentInfo.SupplierName == "" || componentInfo.ManufacturerName == "" || componentInfo.Publisher == "") {
+		mapPartiesRoleData(componentInfo, *cdxComponent.Parties)
+	}
+
 	if cdxComponent.Pedigree != nil && !cdxComponent.Pedigree.isEmpty() {
 		componentInfo.HasPedigree = true
 	}
@@ -215,6 +223,84 @@ func (componentInfo *CDXComponentInfo) MapCDXComponentData(cdxComponent CDXCompo
 	if cdxComponent.Signature != nil && *cdxComponent.Signature != (JSFSignature{}) {
 		componentInfo.HasSignature = true
 	}
+}
+
+// mapPartiesRoleData extracts supplier, manufacturer, and publisher information
+// from the v2.0 parties array ([]interface{}) and populates any empty fields on
+// componentInfo. Each party is a map with "roles" (array of {"role":"..."} objects)
+// and an "organization" map containing "name" and optionally "url" (array of
+// {"url":"..."} objects — v2.0 format).
+func mapPartiesRoleData(componentInfo *CDXComponentInfo, parties []interface{}) {
+	for _, raw := range parties {
+		party, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		// Collect the role strings declared for this party
+		roles, _ := party["roles"].([]interface{})
+		var hasSupplier, hasManufacturer, hasPublisher bool
+		for _, r := range roles {
+			roleObj, ok := r.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			switch roleObj["role"] {
+			case "supplier":
+				hasSupplier = true
+			case "manufacturer":
+				hasManufacturer = true
+			case "publisher":
+				hasPublisher = true
+			}
+		}
+
+		if !hasSupplier && !hasManufacturer && !hasPublisher {
+			continue
+		}
+
+		// Extract name and first URL from the organization sub-object
+		orgName, orgUrl := extractPartyOrgNameUrl(party)
+
+		if hasSupplier && componentInfo.SupplierName == "" {
+			componentInfo.SupplierName = orgName
+			if componentInfo.SupplierUrl == "" {
+				componentInfo.SupplierUrl = orgUrl
+			}
+		}
+		if hasManufacturer && componentInfo.ManufacturerName == "" {
+			componentInfo.ManufacturerName = orgName
+			if componentInfo.ManufacturerUrl == "" {
+				componentInfo.ManufacturerUrl = orgUrl
+			}
+		}
+		if hasPublisher && componentInfo.Publisher == "" {
+			componentInfo.Publisher = orgName
+		}
+	}
+}
+
+// extractPartyOrgNameUrl returns the organization name and first URL from a
+// party map. The v2.0 organization.url format is [{"name":"...", "url":"..."}].
+func extractPartyOrgNameUrl(party map[string]interface{}) (name, url string) {
+	org, ok := party["organization"].(map[string]interface{})
+	if !ok {
+		return
+	}
+	name, _ = org["name"].(string)
+	// url is an array of objects: [{"name": "...", "url": "..."}]
+	urlEntries, _ := org["url"].([]interface{})
+	for _, entry := range urlEntries {
+		entryMap, ok := entry.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if u, ok := entryMap["url"].(string); ok && u != "" {
+			url = u
+			return
+		}
+	}
+	return
 }
 
 // -------------------
