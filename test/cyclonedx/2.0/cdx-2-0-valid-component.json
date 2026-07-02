@@ -3,8 +3,22 @@
   "specVersion": "2.0",
   "serialNumber": "urn:uuid:7d4e1ae5-82d0-4b75-9c3f-f1ab7e6c29a0",
   "version": 1,
-  "components": [
-    {
+  "metadata": {
+    "supplier": {
+      "bom-ref": "org-supplier-acme",
+      "name": "Acme Supplier Ltd",
+      "url": [
+        "https://supplier.acme.example"
+      ]
+    },
+    "manufacturer": {
+      "bom-ref": "org-manufacturer-acme",
+      "name": "Acme Manufacturing Inc",
+      "url": [
+        "https://manufacturer.acme.example"
+      ]
+    },
+    "component": {
       "bom-ref": "comp-acme-lib",
       "type": "library",
       "group": "acme-corp",
@@ -12,21 +26,6 @@
       "version": "2.3.1",
       "description": "CycloneDX v2.0 component fixture exercising v2.0-specific fields.",
       "copyright": "Copyright (c) 2024 Acme Corp",
-      "supplier": {
-        "bom-ref": "org-supplier-acme",
-        "name": "Acme Supplier Ltd",
-        "url": [
-          "https://supplier.acme.example"
-        ]
-      },
-      "manufacturer": {
-        "bom-ref": "org-manufacturer-acme",
-        "name": "Acme Manufacturing Inc",
-        "url": [
-          "https://manufacturer.acme.example"
-        ]
-      },
-      "publisher": "Acme Publishing",
       "hashes": [
         {
           "alg": "SHA-256",
@@ -74,5 +73,5 @@
         }
       ]
     }
-  ]
+  }
 }

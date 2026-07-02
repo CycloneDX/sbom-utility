@@ -384,13 +384,12 @@ func TestValidateCdx20ValidComponent(t *testing.T) {
 		return
 	}
 
-	components := document.GetCdxComponents()
-	if components == nil || len(*components) != 1 {
-		t.Errorf("expected 1 component, got %v", components)
+	// v2.0: component is in metadata, not components array
+	comp := document.GetCdxMetadataComponent()
+	if comp == nil {
+		t.Errorf("expected metadata.component to be populated for v2.0 fixture")
 		return
 	}
-
-	comp := (*components)[0]
 
 	// v2.0: identifiers field should be populated
 	if comp.Identifiers == nil || len(*comp.Identifiers) == 0 {
