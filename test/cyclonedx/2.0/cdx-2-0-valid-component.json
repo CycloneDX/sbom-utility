@@ -14,11 +14,17 @@
       "copyright": "Copyright (c) 2024 Acme Corp",
       "supplier": {
         "bom-ref": "org-supplier-acme",
-        "name": "Acme Supplier Ltd"
+        "name": "Acme Supplier Ltd",
+        "url": [
+          "https://supplier.acme.example"
+        ]
       },
       "manufacturer": {
         "bom-ref": "org-manufacturer-acme",
-        "name": "Acme Manufacturing Inc"
+        "name": "Acme Manufacturing Inc",
+        "url": [
+          "https://manufacturer.acme.example"
+        ]
       },
       "publisher": "Acme Publishing",
       "hashes": [
