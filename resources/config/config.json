@@ -76,6 +76,15 @@
                     "development": "https://github.com/spdx/spdx-spec/blob/development/v2.3.1/schemas/spdx-schema.json",
                     "url": "https://raw.githubusercontent.com/spdx/spdx-spec/development/v2.3.1/schemas/spdx-schema.json",
                     "default": false
+                },
+                {
+                    "version": "SPDX-3.0",
+                    "variant": "development",
+                    "name": "SPDX v3.0.1",
+                    "file": "schema/spdx/3.0.1/spdx-schema.json",
+                    "development": "",
+                    "url": "https://spdx.org/schema/3.0.1/spdx-json-schema.json",
+                    "default": false
                 }
             ]
         },
