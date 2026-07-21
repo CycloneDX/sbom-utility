@@ -59,25 +59,26 @@ const (
 // Copied from CycloneDX spec. repo.
 // See: https://github.com/CycloneDX/specification/tree/master/tools/src/test/resources/1.6
 const (
-	TEST_CDX_SPEC_1_6_VALID_BOM             = "test/cyclonedx/1.6/specification/valid-bom-1.6.json"
-	TEST_CDX_SPEC_1_6_VALID_ANNOTATION      = "test/cyclonedx/1.6/specification/valid-annotation-1.6.json"
-	TEST_CDX_SPEC_1_6_VALID_ATTESTATION     = "test/cyclonedx/1.6/specification/valid-attestation-1.6.json"
-	TEST_CDX_SPEC_1_6_VALID_COMPONENT_HASH  = "test/cyclonedx/1.6/specification/valid-component-hashes-1.6.json"
-	TEST_CDX_SPEC_1_6_VALID_COMPONENT_IDS   = "test/cyclonedx/1.6/specification/valid-component-identifiers-1.6.json"
-	TEST_CDX_SPEC_1_6_VALID_SWID            = "test/cyclonedx/1.6/specification/valid-component-swid-1.6.json"
-	TEST_CDX_SPEC_1_6_VALID_SWID_FULL       = "test/cyclonedx/1.6/specification/valid-component-swid-full-1.6.json"
-	TEST_CDX_SPEC_1_6_VALID_COMPONENT_TYPES = "test/cyclonedx/1.6/specification/valid-component-types-1.6.json"
-	TEST_CDX_SPEC_1_6_VALID_CRYPTO_IMPL     = "test/cyclonedx/1.6/specification/valid-cryptography-implementation-1.6.json"
-	TEST_CDX_SPEC_1_6_VALID_EVIDENCE        = "test/cyclonedx/1.6/specification/valid-evidence-1.6.json"
-	TEST_CDX_SPEC_1_6_VALID_LICENSE_EXP     = "test/cyclonedx/1.6/specification/valid-license-expression-1.6.json"
-	TEST_CDX_SPEC_1_6_VALID_LICENSING       = "test/cyclonedx/1.6/specification/valid-license-licensing-1.6.json"
-	TEST_CDX_SPEC_1_6_VALID_ML              = "test/cyclonedx/1.6/specification/valid-machine-learning-1.6.json"
-	TEST_CDX_SPEC_1_6_VALID_ML_ENV          = "test/cyclonedx/1.6/specification/valid-machine-learning-considerations-env-1.6.json"
-	TEST_CDX_SPEC_1_6_VALID_METADATA_TOOL   = "test/cyclonedx/1.6/specification/valid-metadata-tool-1.6.json"
-	TEST_CDX_SPEC_1_6_VALID_SAASBOM         = "test/cyclonedx/1.6/specification/valid-saasbom-1.6.json"
-	TEST_CDX_SPEC_1_6_VALID_VULNERABILITY   = "test/cyclonedx/1.6/specification/valid-vulnerability-1.6.json"
-	TEST_CDX_SPEC_1_6_VALID_EXT_REF_IRI     = "test/validation/cdx-1-6-validate-component-ext-ref-iri-reference.json"
-	TEST_CDX_SPEC_1_6_1_VALID_SPDX_LICENSE  = "test/cyclonedx/1.6/specification/valid-license-spdx-licenses-1.6.1.json"
+	TEST_CDX_SPEC_1_6_VALID_BOM                   = "test/cyclonedx/1.6/specification/valid-bom-1.6.json"
+	TEST_CDX_SPEC_1_6_VALID_ANNOTATION            = "test/cyclonedx/1.6/specification/valid-annotation-1.6.json"
+	TEST_CDX_SPEC_1_6_VALID_ATTESTATION           = "test/cyclonedx/1.6/specification/valid-attestation-1.6.json"
+	TEST_CDX_SPEC_1_6_VALID_COMPONENT_HASH        = "test/cyclonedx/1.6/specification/valid-component-hashes-1.6.json"
+	TEST_CDX_SPEC_1_6_VALID_COMPONENT_IDS         = "test/cyclonedx/1.6/specification/valid-component-identifiers-1.6.json"
+	TEST_CDX_SPEC_1_6_VALID_SWID                  = "test/cyclonedx/1.6/specification/valid-component-swid-1.6.json"
+	TEST_CDX_SPEC_1_6_VALID_SWID_FULL             = "test/cyclonedx/1.6/specification/valid-component-swid-full-1.6.json"
+	TEST_CDX_SPEC_1_6_VALID_COMPONENT_TYPES       = "test/cyclonedx/1.6/specification/valid-component-types-1.6.json"
+	TEST_CDX_SPEC_1_6_VALID_CRYPTO_IMPL           = "test/cyclonedx/1.6/specification/valid-cryptography-implementation-1.6.json"
+	TEST_CDX_SPEC_1_6_VALID_EVIDENCE              = "test/cyclonedx/1.6/specification/valid-evidence-1.6.json"
+	TEST_CDX_SPEC_1_6_VALID_LICENSE_EXP           = "test/cyclonedx/1.6/specification/valid-license-expression-1.6.json"
+	TEST_CDX_SPEC_1_6_VALID_LICENSING             = "test/cyclonedx/1.6/specification/valid-license-licensing-1.6.json"
+	TEST_CDX_SPEC_1_6_VALID_ML                    = "test/cyclonedx/1.6/specification/valid-machine-learning-1.6.json"
+	TEST_CDX_SPEC_1_6_VALID_ML_ENV                = "test/cyclonedx/1.6/specification/valid-machine-learning-considerations-env-1.6.json"
+	TEST_CDX_SPEC_1_6_VALID_METADATA_TOOL         = "test/cyclonedx/1.6/specification/valid-metadata-tool-1.6.json"
+	TEST_CDX_SPEC_1_6_VALID_SAASBOM               = "test/cyclonedx/1.6/specification/valid-saasbom-1.6.json"
+	TEST_CDX_SPEC_1_6_VALID_VULNERABILITY         = "test/cyclonedx/1.6/specification/valid-vulnerability-1.6.json"
+	TEST_CDX_SPEC_1_6_VALID_EXT_REF_IRI           = "test/validation/cdx-1-6-validate-component-ext-ref-iri-reference.json"
+	TEST_CDX_SPEC_1_6_1_VALID_SPDX_LICENSE        = "test/cyclonedx/1.6/specification/valid-license-spdx-licenses-1.6.1.json"
+	TEST_CDX_1_6_VALID_SPDX_LICENSE_ARTISTIC_DIST = "test/cyclonedx/1.6/cdx-1-6-valid-spdx-license-artistic-dist.json"
 )
 
 const (
@@ -227,6 +228,13 @@ func TestValidateCdx16Licensing(t *testing.T) {
 
 func TestValidateCdx16SpdxLicense(t *testing.T) {
 	vti := NewValidateTestInfoMinimum(TEST_CDX_SPEC_1_6_1_VALID_SPDX_LICENSE)
+	innerTestValidate(t, *vti)
+}
+
+// Ensure an SPDX license ID added after the previously-embedded list (SPDX 3.26.0)
+// validates cleanly (e.g., "Artistic-dist", added in SPDX 3.27.0).
+func TestValidateCdx16SpdxLicenseArtisticDist(t *testing.T) {
+	vti := NewValidateTestInfoMinimum(TEST_CDX_1_6_VALID_SPDX_LICENSE_ARTISTIC_DIST)
 	innerTestValidate(t, *vti)
 }
 
