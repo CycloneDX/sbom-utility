@@ -1,4 +1,4 @@
-name: Release Go Binaries
+name: Release Binaries
 
 on:
   release:
@@ -8,9 +8,13 @@ on:
 # see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/controlling-permissions-for-github_token
 permissions: {}
 
+env:
+  GO_VERSION: '1.25'
+  NODE_VERSION: '20'
+
 jobs:
-  releases-matrix:
-    name: Release Matrix
+  release-cli:
+    name: Release CLI (${{ matrix.goos }}/${{ matrix.goarch }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -28,43 +32,137 @@ jobs:
           - goos: windows
             goarch: s390x
     permissions:
-      contents: write  # required for creating GH releases and uploading release assets
+      contents: write
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    # Set build/link environment variables
-    - name: Set APP_NAME env
-      # GITHUB_REPOSITORY=CycloneDX/sbom-utility
-      run: echo APP_NAME=$(echo ${GITHUB_REPOSITORY} | rev | cut -d'/' -f 1 | rev ) >> ${GITHUB_ENV}
-    - name: Set APP_VERSION env
-      run: echo "APP_VERSION=${GITHUB_REF_NAME}" >> ${GITHUB_ENV}
-    - name: Set BUILD_TIME env
-      run: echo BUILD_TIME=$(date) >> ${GITHUB_ENV}
-    - name: Set SBOM_NAME env
-      run: echo "SBOM_NAME=${{env.APP_NAME}}-${{env.APP_VERSION}}.bom.json" >> ${GITHUB_ENV}
-    - name: List of the GitHub Actions environment variables on Windows
-      run: env | sort
+      - name: Set APP_NAME env
+        run: echo "APP_NAME=$(echo ${GITHUB_REPOSITORY} | rev | cut -d'/' -f 1 | rev)" >> ${GITHUB_ENV}
+      - name: Set APP_VERSION env
+        run: echo "APP_VERSION=${GITHUB_REF_NAME}" >> ${GITHUB_ENV}
+      - name: Set SBOM_NAME env
+        run: echo "SBOM_NAME=${{ env.APP_NAME }}-${{ env.APP_VERSION }}.bom.json" >> ${GITHUB_ENV}
 
-    # Generate an SBOM
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.25'
-    - name: Install SBOM generator (latest)
-      run: go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest
-    - name: Generate SBOM (from `go.mod`)
-      # run: cyclonedx-gomod mod -json=true "-output ${{env.APP_NAME}}-${{env.APP_VERSION}}.bom.json" .
-      run: cyclonedx-gomod mod -json=true -output ${{env.SBOM_NAME}}
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
 
-    # Release binaries in all GOOS/GOARCH combinations (with all config. files)
-    - uses: wangyoucao577/go-release-action@v1.50
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        goos: ${{ matrix.goos }}
-        goarch: ${{ matrix.goarch }}
-        extra_files: LICENSE README.md resources/config/config.json resources/config/license.json custom.json ${{env.SBOM_NAME}}
-        # "auto" will use ZIP for Windows, otherwise default is TAR
-        compress_assets: auto
-        # NOTE: This verbose flag may be removed
-        build_flags: -v
-        ldflags: -X "main.Version=${{ env.APP_VERSION }}" -X "main.Binary=${{ env.APP_NAME }}"
+      - name: Install SBOM generator
+        run: go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest
+
+      - name: Generate SBOM
+        run: cyclonedx-gomod mod -json=true -output ${{ env.SBOM_NAME }}
+
+      - uses: wangyoucao577/go-release-action@v1.50
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+          extra_files: LICENSE README.md resources/config/config.json resources/config/license.json custom.json ${{ env.SBOM_NAME }}
+          compress_assets: auto
+          build_flags: -v
+          ldflags: -X "main.Version=${{ env.APP_VERSION }}" -X "main.Binary=${{ env.APP_NAME }}"
+
+  release-fyne-gui:
+    name: Release Fyne GUI (${{ matrix.goarch }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goarch: [amd64, arm64]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set APP_VERSION env
+        run: echo "APP_VERSION=${GITHUB_REF_NAME}" >> ${GITHUB_ENV}
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Install Linux GUI build dependencies
+        run: sudo apt-get update && sudo apt-get install -y gcc libgl1-mesa-dev xorg-dev
+
+      - name: Install Fyne CLI
+        run: go install fyne.io/tools/cmd/fyne@latest
+
+      - name: Package Fyne GUI
+        env:
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 1
+        run: |
+          export PATH="$(go env GOPATH)/bin:${PATH}"
+          fyne package -os linux -icon gui/images/icons/BOM-Utility-Icon.png -name sbom-utility-gui ./gui
+
+      - name: Rename Fyne GUI artifact
+        run: mv sbom-utility-gui.tar.xz sbom-utility-gui-linux-${{ matrix.goarch }}.tar.xz
+
+      - name: Upload Fyne GUI artifact
+        uses: softprops/action-gh-release@v2
+        with:
+          files: sbom-utility-gui-linux-${{ matrix.goarch }}.tar.xz
+
+  release-ts-gui:
+    name: Release TS GUI (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            cli_binary: sbom-utility
+            dist_command: npm run dist:mac
+            artifact_glob: |
+              gui-ts/dist-release/*.dmg
+              gui-ts/dist-release/*.zip
+          - os: windows-latest
+            cli_binary: sbom-utility.exe
+            dist_command: npm run dist:win
+            artifact_glob: gui-ts/dist-release/*.exe
+          - os: ubuntu-latest
+            cli_binary: sbom-utility
+            dist_command: npm run dist:linux
+            artifact_glob: |
+              gui-ts/dist-release/*.AppImage
+              gui-ts/dist-release/*.deb
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set APP_VERSION env
+        shell: bash
+        run: echo "APP_VERSION=${GITHUB_REF_NAME}" >> ${GITHUB_ENV}
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: gui-ts/package-lock.json
+
+      - name: Build CLI binary for TS GUI bundle
+        shell: bash
+        run: |
+          output_name="${{ matrix.cli_binary }}"
+          go build -ldflags "-X main.Version=${APP_VERSION} -X main.Binary=sbom-utility" -o "${output_name}" .
+
+      - name: Install GUI dependencies
+        run: npm ci
+        working-directory: gui-ts
+
+      - name: Build TS GUI distributable
+        run: ${{ matrix.dist_command }}
+        working-directory: gui-ts
+
+      - name: Upload TS GUI artifacts
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.artifact_glob }}
