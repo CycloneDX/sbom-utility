@@ -12,7 +12,7 @@
  *   - All arguments are passed as an argv array — no shell interpolation.
  */
 
-import { ipcMain } from 'electron'
+import { ipcMain, dialog } from 'electron'
 import { execFile }  from 'child_process'
 import * as path     from 'path'
 import * as fs       from 'fs'
@@ -56,6 +56,28 @@ function validateFilePath(p: unknown): string {
 }
 
 /**
+ * Validate a destination path for writing.  Must be absolute, no traversal,
+ * and the parent directory must exist.  The file itself need not exist yet.
+ */
+function validateWritePath(p: unknown): string {
+  if (typeof p !== 'string' || p.trim() === '') {
+    throw new Error('filePath must be a non-empty string')
+  }
+  if (!path.isAbsolute(p)) {
+    throw new Error('filePath must be an absolute path')
+  }
+  const normalised = path.normalize(p)
+  if (normalised.includes('..')) {
+    throw new Error('filePath must not contain path-traversal sequences')
+  }
+  const dir = path.dirname(normalised)
+  if (!fs.existsSync(dir)) {
+    throw new Error(`Directory does not exist: ${dir}`)
+  }
+  return normalised
+}
+
+/**
  * Validate that a value is one of a fixed set of allowed strings.
  * Returns the value unchanged or throws.
  */
@@ -89,6 +111,18 @@ const ALLOWED_FORMATS_FULL  = ['txt', 'csv', 'json', 'md'] as const
 const ALLOWED_FORMATS_SHORT = ['txt', 'csv', 'md']         as const
 type FormatFull  = typeof ALLOWED_FORMATS_FULL[number]
 type FormatShort = typeof ALLOWED_FORMATS_SHORT[number]
+
+// ── Diff / patch params ───────────────────────────────────────────────────────
+
+export interface DiffParams {
+  fileA: string
+  fileB: string
+}
+
+export interface PatchParams {
+  bomPath:   string
+  patchPath: string
+}
 
 // ── Handler registration ──────────────────────────────────────────────────────
 
@@ -245,5 +279,66 @@ export function registerIpcHandlers(config: BridgeConfig): void {
   ipcMain.handle('fs:readFile', async (_event, filePath: unknown) => {
     const safe = validateFilePath(filePath)
     return fs.readFileSync(safe, 'utf-8')
+  })
+
+  // ── dialog:saveFile ───────────────────────────────────────────────────────
+  // Shows the native Save dialog pre-populated with `defaultPath`.
+  // Returns the chosen path on confirmation, or null on cancel.
+  ipcMain.handle('dialog:saveFile', async (_event, defaultPath: unknown) => {
+    if (typeof defaultPath !== 'string' || !defaultPath.trim()) {
+      throw new Error('defaultPath must be a non-empty string')
+    }
+    const result = await dialog.showSaveDialog({
+      defaultPath,
+      filters: [
+        { name: 'JSON files', extensions: ['json'] },
+        { name: 'All files',  extensions: ['*']    },
+      ],
+    })
+    return result.canceled ? null : result.filePath ?? null
+  })
+
+  // ── fs:writeFile ──────────────────────────────────────────────────────────
+  // Write text content to a validated absolute path.
+  ipcMain.handle('fs:writeFile', async (_event, filePath: unknown, content: unknown) => {
+    const safe = validateWritePath(filePath)
+    if (typeof content !== 'string') {
+      throw new Error('content must be a string')
+    }
+    fs.writeFileSync(safe, content, 'utf-8')
+  })
+
+  // ── bom:diff ─────────────────────────────────────────────────────────────
+  // Runs: sbom-utility diff --input-file <A> --diff-file <B> --format text
+  ipcMain.handle('bom:diff', async (_event, params: unknown) => {
+    const p     = params as Record<string, unknown>
+    const safeA = validateFilePath(p['fileA'])
+    const safeB = validateFilePath(p['fileB'])
+
+    const args = [
+      'diff',
+      '--input-file', safeA,
+      '--diff-file',  safeB,
+      '--format', 'text',
+    ]
+    const res = await runBinary(binaryPath, args, baseEnv)
+    return { stdout: res.stdout, stderr: res.stderr, code: res.code }
+  })
+
+  // ── bom:patch ────────────────────────────────────────────────────────────
+  // Runs: sbom-utility patch --input-file <bom> --patch-file <patch>
+  // Output (patched BOM JSON) arrives on stdout.
+  ipcMain.handle('bom:patch', async (_event, params: unknown) => {
+    const p         = params as Record<string, unknown>
+    const safeBom   = validateFilePath(p['bomPath'])
+    const safePatch = validateFilePath(p['patchPath'])
+
+    const args = [
+      'patch',
+      '--input-file', safeBom,
+      '--patch-file', safePatch,
+    ]
+    const res = await runBinary(binaryPath, args, baseEnv)
+    return { stdout: res.stdout, stderr: res.stderr, code: res.code }
   })
 }

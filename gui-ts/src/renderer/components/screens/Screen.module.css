@@ -61,3 +61,95 @@
   overflow:    hidden;
   text-overflow: ellipsis;
 }
+
+/* Inline path label used inside .topBar */
+.pathLabelInline {
+  font-size:     var(--text-xs);
+  color:         var(--color-text-muted);
+  font-style:    italic;
+  white-space:   nowrap;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+  min-width:     0;
+  flex:          1;
+}
+
+.topBarSpacer { flex: 1 0 var(--space-4); }
+
+/* ── Save As button ──────────────────────────────────────────────────────────── */
+.saveAsBtn {
+  height:        var(--btn-height);
+  padding:       0 var(--space-4);
+  border-radius: var(--btn-radius);
+  border:        1px solid var(--color-accent);
+  background:    var(--btn-primary-bg);
+  color:         var(--btn-primary-text);
+  font-family:   var(--font-sans);
+  font-size:     var(--text-sm);
+  font-weight:   var(--weight-medium);
+  cursor:        pointer;
+  white-space:   nowrap;
+  flex-shrink:   0;
+  transition:    background var(--duration-fast), border-color var(--duration-fast);
+}
+.saveAsBtn:hover:not(:disabled) {
+  background:    var(--btn-primary-hover);
+  border-color:  var(--btn-primary-hover);
+}
+.saveAsBtnDisabled,
+.saveAsBtn:disabled {
+  background:    var(--btn-disabled-bg);
+  border-color:  var(--color-border);
+  color:         var(--btn-disabled-text);
+  cursor:        not-allowed;
+}
+
+/* ── Overwrite confirmation banner ───────────────────────────────────────────── */
+.overwriteWarning {
+  display:       flex;
+  align-items:   center;
+  gap:           var(--space-3);
+  padding:       var(--space-2) var(--space-4);
+  background:    rgba(255, 159, 10, 0.12);
+  border-bottom: 1px solid rgba(255, 159, 10, 0.35);
+  flex-shrink:   0;
+}
+.overwriteWarningText {
+  flex:          1;
+  font-size:     var(--text-sm);
+  color:         #92510a;
+}
+.overwriteConfirmBtn {
+  height:        26px;
+  padding:       0 var(--space-3);
+  border-radius: var(--radius-sm);
+  border:        1px solid #e55c00;
+  background:    #e55c00;
+  color:         #fff;
+  font-size:     var(--text-xs);
+  font-family:   var(--font-sans);
+  cursor:        pointer;
+}
+.overwriteConfirmBtn:hover { background: #cc5200; }
+.overwriteCancelBtn {
+  height:        26px;
+  padding:       0 var(--space-3);
+  border-radius: var(--radius-sm);
+  border:        1px solid var(--color-border);
+  background:    var(--btn-default-bg);
+  color:         var(--color-text);
+  font-size:     var(--text-xs);
+  font-family:   var(--font-sans);
+  cursor:        pointer;
+}
+.overwriteCancelBtn:hover { background: var(--btn-default-hover); }
+
+/* ── Save error banner ───────────────────────────────────────────────────────── */
+.saveErrorBanner {
+  padding:       var(--space-2) var(--space-4);
+  background:    rgba(255, 59, 48, 0.10);
+  border-bottom: 1px solid rgba(255, 59, 48, 0.30);
+  color:         #c0392b;
+  font-size:     var(--text-xs);
+  flex-shrink:   0;
+}

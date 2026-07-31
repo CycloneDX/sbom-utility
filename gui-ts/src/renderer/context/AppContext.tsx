@@ -12,6 +12,8 @@ export type Screen =
   | 'components'
   | 'resources'
   | 'vulnerabilities'
+  | 'diff'
+  | 'patch'
 
 export interface AppState {
   bomFile:     string
