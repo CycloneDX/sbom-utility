@@ -5,7 +5,7 @@
  * Layout: options panel (left) | diff output (right)
  * The right pane uses DiffHighlighter to colour-code added/removed/context lines.
  */
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useAppContext } from '../../context/AppContext'
 import DiffHighlighter from '../editor/DiffHighlighter'
 import styles from './Screen.module.css'
@@ -15,15 +15,10 @@ interface Props {
   active: boolean
 }
 
-export default function DiffScreen({ active }: Props) {
+export default function DiffScreen({ active: _active }: Props) {
   const { bomFile } = useAppContext()
 
   const [fileA, setFileA] = useState(bomFile)
-
-  // When the screen becomes active and a BOM is already loaded, default fileA to it.
-  useEffect(() => {
-    if (active && bomFile) setFileA(bomFile)
-  }, [active, bomFile])
   const [fileB, setFileB] = useState('')
   const [result, setResult] = useState<RunResult | null>(null)
   const [loading, setLoading] = useState(false)
@@ -83,7 +78,7 @@ export default function DiffScreen({ active }: Props) {
 
         {/* Options */}
         <div className={styles.options}>
-          <div style={{ padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', flex: 1, minHeight: 0, background: '#E2E2E2' }}>
+          <div style={{ padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
 
             <label style={{ fontSize: 12, color: 'var(--color-text-muted)', fontWeight: 600 }}>
               BOM File A (base)
@@ -95,7 +90,7 @@ export default function DiffScreen({ active }: Props) {
               }}>
                 {fileA || '—'}
               </span>
-              <button className="btn btn-secondary" style={{ alignSelf: 'flex-start' }} onClick={pickFileA}>
+              <button className="btn-default" style={{ alignSelf: 'flex-start' }} onClick={pickFileA}>
                 Browse…
               </button>
             </div>
@@ -110,7 +105,7 @@ export default function DiffScreen({ active }: Props) {
               }}>
                 {fileB || '—'}
               </span>
-              <button className="btn btn-secondary" style={{ alignSelf: 'flex-start' }} onClick={pickFileB}>
+              <button className="btn-default" style={{ alignSelf: 'flex-start' }} onClick={pickFileB}>
                 Browse…
               </button>
             </div>
@@ -121,16 +116,14 @@ export default function DiffScreen({ active }: Props) {
               </div>
             )}
 
-            <div style={{ flex: 1 }} />
-            <div className="action-footer" style={{ marginLeft: 'calc(-1 * var(--space-4))', marginRight: 'calc(-1 * var(--space-4))', marginBottom: 'calc(-1 * var(--space-4))' }}>
-              <button
-                className="btn btn-primary w-full"
-                disabled={loading || !fileA || !fileB}
-                onClick={runDiff}
-              >
-                {loading ? 'Running…' : 'Run Diff'}
-              </button>
-            </div>
+            <button
+              className="btn-primary"
+              style={{ marginTop: 'var(--space-4)' }}
+              disabled={loading || !fileA || !fileB}
+              onClick={runDiff}
+            >
+              {loading ? 'Running…' : 'Run Diff'}
+            </button>
 
           </div>
         </div>

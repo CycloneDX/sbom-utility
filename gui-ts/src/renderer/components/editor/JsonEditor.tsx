@@ -10,9 +10,7 @@
  *   • In-pane Ctrl/Cmd+F search with Next/Prev navigation
  *   • Line numbers in gutter
  *   • Word-wrap toggle
- *   • Editable mode — transparent textarea overlay sits atop the
- *     highlighted view so syntax colours are always visible while editing
- *   • Font / size picker via the "Font…" toolbar button
+ *   • Optional editable overlay (contenteditable) — enabled when `onChange` is supplied
  *
  * Props:
  *   text        — raw JSON string to display
@@ -23,8 +21,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { tokenize, splitIntoLines }      from './JsonTokenizer'
 import JsonHighlighter                   from './JsonHighlighter'
 import { buildFoldInfo, toggleFold }     from './FoldingController'
-import FontDialog                        from './FontDialog'
-import { useAppContext, type EditorFont } from '../../context/AppContext'
 import styles                            from './JsonEditor.module.css'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -52,24 +48,7 @@ function buildMatchLines(lines: ReturnType<typeof splitIntoLines>, query: string
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function JsonEditor({ text, loading, onChange }: Props) {
-  const scrollRef  = useRef<HTMLDivElement>(null)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-
-  // ── Font: session-local state initialised from the persisted default ────────
-  // The Preferences panel sets the default; the Font… button here overrides it
-  // for this session only without touching the saved preference.
-  const { defaultEditorFont } = useAppContext()
-  const [editorFont, setEditorFont] = useState<EditorFont>(() => defaultEditorFont)
-  const [fontDialogOpen, setFontDialogOpen] = useState(false)
-
-  // When the user changes the default in Preferences while no per-session
-  // override has been applied yet, keep the editor in sync.
-  const sessionOverridden = useRef(false)
-  useEffect(() => {
-    if (!sessionOverridden.current) {
-      setEditorFont(defaultEditorFont)
-    }
-  }, [defaultEditorFont])
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   // ── Word-wrap toggle ────────────────────────────────────────────────────────
   const [wordWrap, setWordWrap] = useState(false)
@@ -96,6 +75,7 @@ export default function JsonEditor({ text, loading, onChange }: Props) {
   // ── Collapse All / Expand All ───────────────────────────────────────────────
   const collapseAll = useCallback(() => {
     const next = new Set<number>()
+    // Only fold top-level (depth 0) pairs to avoid over-collapsing
     for (const [openLine] of foldMap) {
       next.add(openLine)
     }
@@ -179,15 +159,9 @@ export default function JsonEditor({ text, loading, onChange }: Props) {
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
-  // Font inline style applied to the .editor root so everything inherits it
-  const fontStyle: React.CSSProperties = {
-    fontFamily: editorFont.family,
-    fontSize:   editorFont.size,
-  }
-
   if (loading) {
     return (
-      <div className={styles.editor} style={fontStyle}>
+      <div className={styles.editor}>
         <div className={styles.placeholder}>Reading file…</div>
       </div>
     )
@@ -195,7 +169,7 @@ export default function JsonEditor({ text, loading, onChange }: Props) {
 
   if (!text) {
     return (
-      <div className={styles.editor} style={fontStyle}>
+      <div className={styles.editor}>
         <div className={styles.placeholder}>
           No BOM file loaded — click "Load BOM" in the sidebar.
         </div>
@@ -204,7 +178,7 @@ export default function JsonEditor({ text, loading, onChange }: Props) {
   }
 
   return (
-    <div className={styles.editor} style={fontStyle}>
+    <div className={styles.editor}>
 
       {/* ── Toolbar ─────────────────────────────────────────────────────────── */}
       <div className={styles.toolbar}>
@@ -238,16 +212,8 @@ export default function JsonEditor({ text, loading, onChange }: Props) {
         >
           Find
         </button>
-        <div className={styles.toolbarSep} />
-        <button
-          className={styles.toolbarBtn}
-          onClick={() => setFontDialogOpen(true)}
-          title="Change editor font and size"
-        >
-          Font…
-        </button>
         <div className={styles.toolbarSpacer} />
-        <span style={{ fontSize: 14, color: '#5a5a5e' }}>
+        <span style={{ fontSize: 11, color: '#5a5a5e' }}>
           {lines.length} lines
         </span>
       </div>
@@ -286,46 +252,34 @@ export default function JsonEditor({ text, loading, onChange }: Props) {
         className={styles.scroll}
         ref={scrollRef}
       >
-        {/*
-          The highlighted view is ALWAYS rendered (provides syntax colours).
-          When onChange is supplied, a transparent textarea overlays it to
-          capture keystrokes — the classic code-editor trick.
-        */}
-        <div
-          className={`${styles.codePane}${wordWrap ? ' ' + styles.wrap : ''}`}
-          style={{ paddingBottom: 'var(--space-8)' }}
-        >
-          <JsonHighlighter
-            lines={lines}
-            foldMap={foldMap}
-            foldedLines={foldedLines}
-            onFold={handleFold}
-            matchLines={matchSet}
-            showGutter
+        {onChange ? (
+          /* Editable plain-text overlay — sits on top of the highlighted view
+             when the caller wants edits propagated upward.  We use a plain
+             <textarea> so the browser handles all cursor/selection behaviour. */
+          <textarea
+            className={styles.editableOverlay}
+            value={text}
+            onChange={e => onChange(e.target.value)}
+            spellCheck={false}
+            autoCapitalize="off"
+            autoCorrect="off"
           />
-          {onChange && (
-            <textarea
-              ref={textareaRef}
-              className={styles.editableOverlay}
-              value={text}
-              onChange={e => onChange(e.target.value)}
-              spellCheck={false}
-              autoCapitalize="off"
-              autoCorrect="off"
-              aria-label="JSON editor"
+        ) : (
+          <div
+            className={wordWrap ? styles.lineContent + ' ' + styles.wrap : undefined}
+            style={{ paddingBottom: 'var(--space-8)' }}
+          >
+            <JsonHighlighter
+              lines={lines}
+              foldMap={foldMap}
+              foldedLines={foldedLines}
+              onFold={handleFold}
+              matchLines={matchSet}
+              showGutter
             />
-          )}
-        </div>
+          </div>
+        )}
       </div>
-
-      {/* ── Font dialog (portal-style overlay) ──────────────────────────────── */}
-      {fontDialogOpen && (
-        <FontDialog
-          current={editorFont}
-          onApply={font => { sessionOverridden.current = true; setEditorFont(font); setFontDialogOpen(false) }}
-          onCancel={() => setFontDialogOpen(false)}
-        />
-      )}
 
     </div>
   )

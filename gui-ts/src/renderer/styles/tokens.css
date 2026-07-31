@@ -209,4 +209,35 @@
   --input-border:       var(--color-border);
   --input-radius:       var(--radius-sm);
   --input-focus-ring:   0 0 0 3px var(--color-accent-dim2);
+
+  /* ── § 8  Syntax / editor tokens ─────────────────────────────────────────── */
+  /* Designed for the dark editor background (#1E1E1E) — mirrors VSCode Dark+ */
+
+  /* JSON value types */
+  --syn-key:            #9CDCFE;   /* object keys — VSCode light-blue */
+  --syn-cdx-key:        #4EC9B0;   /* CycloneDX schema keywords — teal */
+  --syn-string:         #CE9178;   /* string values — VSCode orange-brown */
+  --syn-purl:           #DCDCAA;   /* pkg: PURL strings — VSCode yellow */
+  --syn-number:         #B5CEA8;   /* numeric literals — VSCode green */
+  --syn-keyword:        #569CD6;   /* true / false / null — VSCode blue */
+  --syn-punct:          #CCCCCC;   /* : , */
+
+  /* Bracket rainbow (cycling 3 levels) */
+  --syn-bracket-0:      #FFD700;   /* depth 0 — gold */
+  --syn-bracket-1:      #DA70D6;   /* depth 1 — orchid */
+  --syn-bracket-2:      #179FFF;   /* depth 2 — sky blue */
+
+  /* Diff / merge highlighting */
+  --syn-added:          #4EC9B0;   /* added line text */
+  --syn-added-bg:       rgba(78, 201, 176, 0.12);
+  --syn-removed:        #F44747;   /* removed line text */
+  --syn-removed-bg:     rgba(244, 71, 71, 0.12);
+  --syn-changed:        #FFD580;   /* modified line text */
+  --syn-changed-bg:     rgba(255, 213, 128, 0.10);
+  --syn-diff-header:    #6A9955;   /* @@ hunk headers — comment green */
+
+  /* Aliases used by JsonEditor.module.css */
+  --syn-diff-added-bg:   var(--syn-added-bg);
+  --syn-diff-removed-bg: var(--syn-removed-bg);
+  --syn-diff-changed-bg: var(--syn-changed-bg);
 }

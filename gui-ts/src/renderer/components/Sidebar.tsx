@@ -19,6 +19,8 @@ const NAV_ENTRIES: NavEntry[] = [
   { screen: 'components',      label: 'Components',      icon: '📦', requireBom: true  },
   { screen: 'resources',       label: 'Resources',       icon: '🗄️',  requireBom: true  },
   { screen: 'vulnerabilities', label: 'Vulnerabilities', icon: '⚠️', requireBom: true  },
+  { screen: 'diff',            label: 'Diff',            icon: '↔️',  requireBom: false, section: 'Transform' },
+  { screen: 'patch',           label: 'Patch',           icon: '🩹', requireBom: false },
 ]
 
 interface Props {

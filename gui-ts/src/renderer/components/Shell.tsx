@@ -10,12 +10,15 @@ import LicenseScreen       from './screens/LicenseScreen'
 import ComponentScreen     from './screens/ComponentScreen'
 import ResourceScreen      from './screens/ResourceScreen'
 import VulnerabilityScreen from './screens/VulnerabilityScreen'
+import DiffScreen          from './screens/DiffScreen'
+import PatchScreen         from './screens/PatchScreen'
 import styles from './Shell.module.css'
 import type { BomInfo } from '../../preload/index'
 
 const SCREENS: Screen[] = [
   'load', 'view', 'validate', 'licenses',
   'components', 'resources', 'vulnerabilities',
+  'diff', 'patch',
 ]
 
 export default function Shell() {
@@ -55,6 +58,8 @@ export default function Shell() {
               {s === 'components'      && <ComponentScreen active={screen === 'components'} />}
               {s === 'resources'       && <ResourceScreen active={screen === 'resources'} />}
               {s === 'vulnerabilities' && <VulnerabilityScreen active={screen === 'vulnerabilities'} />}
+              {s === 'diff'            && <DiffScreen active={screen === 'diff'} />}
+              {s === 'patch'           && <PatchScreen active={screen === 'patch'} />}
             </div>
           ))}
         </main>
