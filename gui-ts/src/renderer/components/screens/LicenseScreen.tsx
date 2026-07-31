@@ -13,21 +13,19 @@ type Fmt = typeof FORMATS[number]
 export default function LicenseScreen({ active }: Props) {
   const { bomFile } = useAppContext()
 
-  const [output,     setOutput]     = useState('')
-  const [loading,    setLoading]    = useState(false)
-  const [dirty,      setDirty]      = useState(true)
-  const [noticeMsg,  setNoticeMsg]  = useState('')
+  const [output,  setOutput]  = useState('')
+  const [loading, setLoading] = useState(false)
+  const [dirty,   setDirty]   = useState(true)
 
-  const [format,  setFormat]  = useState<Fmt>('md')
+  const [format,  setFormat]  = useState<Fmt>('txt')
   const [where,   setWhere]   = useState('')
   const [summary, setSummary] = useState(false)
 
-  const markDirty = () => { setDirty(true); setNoticeMsg('') }
+  const markDirty = () => setDirty(true)
 
   const run = async () => {
     if (!bomFile) return
-    if (!dirty) { setNoticeMsg('No option changes — results are current'); return }
-    setLoading(true); setOutput(''); setDirty(false); setNoticeMsg('')
+    setLoading(true); setOutput(''); setDirty(false)
     try {
       const res = await window.sbomBridge.listLicenses({ filePath: bomFile, format, where, summary })
       const combined = res.stdout + (res.stderr ? '\n' + res.stderr : '')
@@ -45,15 +43,7 @@ export default function LicenseScreen({ active }: Props) {
     <div className={styles.screen}>
       <div className={styles.split}>
         <div className={styles.options}>
-          <OptionsPanel
-            title="License List Options"
-            notice={noticeMsg}
-            action={
-              <button className="btn btn-primary w-full" onClick={run} disabled={loading || !bomFile}>
-                ℹ️ &nbsp;{loading ? 'Scanning…' : 'List Licenses'}
-              </button>
-            }
-          >
+          <OptionsPanel title="License List Options">
             <label className="checkbox-row">
               <input type="checkbox" checked={summary} onChange={e => { setSummary(e.target.checked); markDirty() }} />
               Summary mode (--summary)
@@ -76,6 +66,10 @@ export default function LicenseScreen({ active }: Props) {
                 {'Filter keys: usage-policy, license-type, license, resource-name,\nbom-ref, bom-location, purl'}
               </span>
             </div>
+            <div className="separator" />
+            <button className="btn btn-primary w-full" onClick={run} disabled={loading || !bomFile || !dirty}>
+              ℹ️ &nbsp;{loading ? 'Scanning…' : 'List Licenses'}
+            </button>
           </OptionsPanel>
         </div>
         <div className={styles.results}>

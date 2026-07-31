@@ -45,31 +45,10 @@ export interface ListParams {
   resourceType?: string
 }
 
-export interface DiffParams {
-  fileA: string
-  fileB: string
-}
-
-export interface PatchParams {
-  bomPath:   string
-  patchPath: string
-}
-
-export interface OpenFileResult {
-  /** Operational path used for all backend calls (real FS path in Electron;
-   *  server temp path in browser mode). */
-  path:        string
-  /** User-visible label — the real FS path in Electron, just the filename in
-   *  browser mode where the browser security model hides the full path. */
-  displayName: string
-}
-
 export interface SbomBridge {
   // File system
-  openFile():                                   Promise<OpenFileResult | null>
+  openFile():                                   Promise<string | null>
   readFile(filePath: string):                   Promise<string>
-  saveFileDialog(defaultPath: string):          Promise<string | null>
-  writeFile(filePath: string, content: string): Promise<void>
   // BOM metadata
   getBomInfo(filePath: string):                 Promise<BomInfo>
   // Commands
@@ -78,8 +57,6 @@ export interface SbomBridge {
   listComponents(params: ListParams):           Promise<RunResult>
   listResources(params: ListParams):            Promise<RunResult>
   listVulnerabilities(params: ListParams):      Promise<RunResult>
-  diffBoms(params: DiffParams):                 Promise<RunResult>
-  applyPatch(params: PatchParams):              Promise<RunResult>
   // App
   getVersion():                                 Promise<string>
   isDarkMode():                                 Promise<boolean>
@@ -88,22 +65,14 @@ export interface SbomBridge {
 // ── Implementation ────────────────────────────────────────────────────────────
 
 const bridge: SbomBridge = {
-  openFile: async () => {
-    const p: string | null = await ipcRenderer.invoke('dialog:openFile')
-    if (!p) return null
-    return { path: p, displayName: p }
-  },
-  readFile:            (p)         => ipcRenderer.invoke('fs:readFile',    p),
-  saveFileDialog:      (dp)        => ipcRenderer.invoke('dialog:saveFile', dp),
-  writeFile:           (p, c)      => ipcRenderer.invoke('fs:writeFile',   p, c),
+  openFile:            ()       => ipcRenderer.invoke('dialog:openFile'),
+  readFile:            (p)      => ipcRenderer.invoke('fs:readFile',             p),
   getBomInfo:          (p)      => ipcRenderer.invoke('bom:info',                p),
   validate:            (params) => ipcRenderer.invoke('bom:validate',            params),
   listLicenses:        (params) => ipcRenderer.invoke('bom:listLicenses',        params),
   listComponents:      (params) => ipcRenderer.invoke('bom:listComponents',      params),
   listResources:       (params) => ipcRenderer.invoke('bom:listResources',       params),
   listVulnerabilities: (params) => ipcRenderer.invoke('bom:listVulnerabilities', params),
-  diffBoms:            (params) => ipcRenderer.invoke('bom:diff',                params),
-  applyPatch:          (params) => ipcRenderer.invoke('bom:patch',               params),
   getVersion:          ()       => ipcRenderer.invoke('app:version'),
   isDarkMode:          ()       => ipcRenderer.invoke('app:isDarkMode'),
 }

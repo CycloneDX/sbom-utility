@@ -16,21 +16,19 @@ type RType = typeof RESOURCE_TYPES[number]
 export default function ResourceScreen({ active }: Props) {
   const { bomFile } = useAppContext()
 
-  const [output,     setOutput]     = useState('')
-  const [loading,    setLoading]    = useState(false)
-  const [dirty,      setDirty]      = useState(true)
-  const [noticeMsg,  setNoticeMsg]  = useState('')
+  const [output,  setOutput]  = useState('')
+  const [loading, setLoading] = useState(false)
+  const [dirty,   setDirty]   = useState(true)
 
-  const [format,  setFormat]  = useState<Fmt>('md')
+  const [format,  setFormat]  = useState<Fmt>('txt')
   const [where,   setWhere]   = useState('')
   const [rtype,   setRtype]   = useState<RType>('(all)')
 
-  const markDirty = () => { setDirty(true); setNoticeMsg('') }
+  const markDirty = () => setDirty(true)
 
   const run = async () => {
     if (!bomFile) return
-    if (!dirty) { setNoticeMsg('No option changes — results are current'); return }
-    setLoading(true); setOutput(''); setDirty(false); setNoticeMsg('')
+    setLoading(true); setOutput(''); setDirty(false)
     try {
       const res = await window.sbomBridge.listResources({
         filePath:     bomFile,
@@ -53,15 +51,7 @@ export default function ResourceScreen({ active }: Props) {
     <div className={styles.screen}>
       <div className={styles.split}>
         <div className={styles.options}>
-          <OptionsPanel
-            title="Resource List Options"
-            notice={noticeMsg}
-            action={
-              <button className="btn btn-primary w-full" onClick={run} disabled={loading || !bomFile}>
-                🗄️ &nbsp;{loading ? 'Scanning…' : 'List Resources'}
-              </button>
-            }
-          >
+          <OptionsPanel title="Resource List Options">
             <div className="flag-row">
               <label className="flag-label">Resource type (--type):</label>
               <select className="select" value={rtype} onChange={e => { setRtype(e.target.value as RType); markDirty() }}>
@@ -86,6 +76,10 @@ export default function ResourceScreen({ active }: Props) {
                 {'Filter keys:\nresource-type, name, version, bom-ref, group, description'}
               </span>
             </div>
+            <div className="separator" />
+            <button className="btn btn-primary w-full" onClick={run} disabled={loading || !bomFile || !dirty}>
+              🗄️ &nbsp;{loading ? 'Scanning…' : 'List Resources'}
+            </button>
           </OptionsPanel>
         </div>
         <div className={styles.results}>

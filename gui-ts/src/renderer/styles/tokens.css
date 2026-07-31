@@ -102,16 +102,9 @@
   --font-sans:    -apple-system, "Segoe UI", system-ui, Helvetica, Arial, sans-serif;
   --font-mono:    ui-monospace, "Cascadia Code", "Fira Code", Consolas, "Courier New", monospace;
 
-  /* Editor font — overridden at runtime by AppContext when the user changes the
-     font preference.  All monospace output areas (JsonEditor, ResultsView,
-     StatusBar filename) inherit from these two variables so a single preference
-     change updates the entire UI. */
-  --editor-font-family: var(--font-mono);
-  --editor-font-size:   14px;
-
   --text-xs:      11px;   /* caption, status bar */
-  --text-sm:      14px;   /* labels, table cells */
-  --text-base:    14px;   /* body */
+  --text-sm:      12px;   /* labels, table cells */
+  --text-base:    13px;   /* body — matches macOS HIG */
   --text-md:      15px;   /* sub-heading */
   --text-lg:      17px;   /* heading */
   --text-xl:      20px;   /* section title */
@@ -133,9 +126,9 @@
   --space-6:  24px;
   --space-8:  32px;
 
-  --radius-sm:  6px;
-  --radius-md:  8px;
-  --radius-lg:  12px;
+  --radius-sm:  4px;
+  --radius-md:  6px;
+  --radius-lg:  10px;
 
   --border-width: 1px;
   --border:       var(--border-width) solid var(--color-border);
@@ -165,8 +158,8 @@
   /* Status bar */
   --statusbar-bg:       #3478C0;          /* macOS blue, slightly desaturated */
   --statusbar-text:     #FFFFFF;
-  --statusbar-height:   28px;
-  --statusbar-font:     var(--text-base); /* 13px — slightly larger for readability */
+  --statusbar-height:   26px;
+  --statusbar-font:     var(--text-xs);
 
   /* BOM source viewer (dark editor) */
   --viewer-bg:          var(--primitive-editor-bg);
@@ -199,20 +192,16 @@
   --table-cell-pad:     var(--space-2) var(--space-3);
 
   /* Buttons */
-  --btn-height:           32px;
-  --btn-radius:           var(--radius-md);
-  --btn-primary-bg:       var(--color-accent);
-  --btn-primary-text:     var(--primitive-white);
-  --btn-primary-hover:    var(--color-accent-hover);
-  --btn-primary-shadow:   0 1px 4px rgba(0, 122, 255, 0.35);
-  --btn-secondary-bg:     var(--primitive-blue-700);   /* #006BD6 — darker blue */
-  --btn-secondary-hover:  #0059b3;                     /* one step deeper on hover */
-  --btn-secondary-shadow: 0 1px 4px rgba(0, 107, 214, 0.35);
-  --btn-default-bg:       var(--color-surface);
-  --btn-default-border:   var(--color-border);
-  --btn-default-hover:    var(--primitive-gray-100);
-  --btn-disabled-bg:      rgba(0, 122, 255, 0.10);
-  --btn-disabled-text:    rgba(0, 122, 255, 0.40);
+  --btn-height:         30px;
+  --btn-radius:         var(--radius-sm);
+  --btn-primary-bg:     var(--color-accent);
+  --btn-primary-text:   var(--primitive-white);
+  --btn-primary-hover:  var(--color-accent-hover);
+  --btn-default-bg:     var(--color-surface);
+  --btn-default-border: var(--color-border);
+  --btn-default-hover:  var(--primitive-gray-100);
+  --btn-disabled-bg:    var(--color-disabled-bg);
+  --btn-disabled-text:  var(--color-disabled-text);
 
   /* Inputs */
   --input-height:       28px;
@@ -220,35 +209,4 @@
   --input-border:       var(--color-border);
   --input-radius:       var(--radius-sm);
   --input-focus-ring:   0 0 0 3px var(--color-accent-dim2);
-
-  /* ── § 8  Syntax / editor tokens ─────────────────────────────────────────── */
-  /* Designed for the dark editor background (#1E1E1E) — mirrors VSCode Dark+ */
-
-  /* JSON value types */
-  --syn-key:            #9CDCFE;   /* object keys — VSCode light-blue */
-  --syn-cdx-key:        #4EC9B0;   /* CycloneDX schema keywords — teal */
-  --syn-string:         #CE9178;   /* string values — VSCode orange-brown */
-  --syn-purl:           #DCDCAA;   /* pkg: PURL strings — VSCode yellow */
-  --syn-number:         #B5CEA8;   /* numeric literals — VSCode green */
-  --syn-keyword:        #569CD6;   /* true / false / null — VSCode blue */
-  --syn-punct:          #CCCCCC;   /* : , */
-
-  /* Bracket rainbow (cycling 3 levels) */
-  --syn-bracket-0:      #FFD700;   /* depth 0 — gold */
-  --syn-bracket-1:      #DA70D6;   /* depth 1 — orchid */
-  --syn-bracket-2:      #179FFF;   /* depth 2 — sky blue */
-
-  /* Diff / merge highlighting */
-  --syn-added:          #4EC9B0;   /* added line text */
-  --syn-added-bg:       rgba(78, 201, 176, 0.12);
-  --syn-removed:        #F44747;   /* removed line text */
-  --syn-removed-bg:     rgba(244, 71, 71, 0.12);
-  --syn-changed:        #FFD580;   /* modified line text */
-  --syn-changed-bg:     rgba(255, 213, 128, 0.10);
-  --syn-diff-header:    #6A9955;   /* @@ hunk headers — comment green */
-
-  /* Aliases used by JsonEditor.module.css */
-  --syn-diff-added-bg:   var(--syn-added-bg);
-  --syn-diff-removed-bg: var(--syn-removed-bg);
-  --syn-diff-changed-bg: var(--syn-changed-bg);
 }

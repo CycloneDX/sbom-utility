@@ -41,12 +41,24 @@ build: clean
 build-gui:
 	go build -o ${GUI_BINARY} ./gui
 
-# TypeScript browser GUI
-# dev-gui-browser : build Go binary then start the Vite dev server + Go HTTP server
+# TypeScript GUI targets (shared variable)
+# dev-gui-browser : build Go binary then start the Vite dev server + Go HTTP server (browser mode)
+# build-gui-ts    : npm ci + vite build + electron-builder --dir (unpackaged Electron)
+# dist-gui-ts     : npm ci + full distributable packages for the host platform
+# dev-gui-ts      : start Vite dev server + Electron hot-reload window
 GUI_TS_DIR?=gui-ts
 
 dev-gui-browser: build
 	cd ${GUI_TS_DIR} && npm run dev:browser:full
+
+build-gui-ts:
+	cd ${GUI_TS_DIR} && npm ci && npm run pack
+
+dist-gui-ts:
+	cd ${GUI_TS_DIR} && npm ci && npm run dist
+
+dev-gui-ts:
+	cd ${GUI_TS_DIR} && npm run dev
 
 # General supported environments: https://go.dev/doc/install/source#environment
 # See latest supported combinations using:
@@ -131,4 +143,4 @@ clean:
 	@if [ -f ${GUI_BINARY} ] ; then rm ${GUI_BINARY} ; fi
 	@if [ -d ${RELEASE_DIR} ] ; then rm -f ${RELEASE_DIR}/${BINARY}* ; rm -f ${RELEASE_DIR}/*.json ; rmdir ${RELEASE_DIR} ; fi
 
-.PHONY: config clean build build-gui dev-gui-browser release test_clean test test_cmd unit_tests integration_tests format lint install
+.PHONY: config clean build build-gui dev-gui-browser release test_clean test test_cmd unit_tests integration_tests format lint install build-gui-ts dist-gui-ts dev-gui-ts

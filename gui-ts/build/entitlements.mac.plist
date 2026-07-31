@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  macOS Hardened Runtime entitlements.
+  These are the minimum entitlements required for an Electron app that
+  runs child processes (sbom-utility binary) but does NOT need JIT, DYLD
+  injection, or Apple Events automation.
+
+  See: https://developer.apple.com/documentation/security/hardened_runtime
+-->
+<plist version="1.0">
+  <dict>
+    <!-- Allow the app to execute the bundled sbom-utility child process -->
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <false/>
+    <!-- Electron requires this for V8 JIT compilation -->
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+    <!-- Required by Chromium's GPU process -->
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <true/>
+    <!-- Allow reading files the user selects via the open dialog -->
+    <key>com.apple.security.files.user-selected.read-only</key>
+    <true/>
+    <!-- Disable outbound network access — sbom-utility is entirely local -->
+    <!-- Remove the line below if you ever add update checks or telemetry -->
+    <!-- <key>com.apple.security.network.client</key><true/> -->
+  </dict>
+</plist>

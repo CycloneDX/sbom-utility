@@ -3,6 +3,7 @@ import { Fragment } from 'react'
 import type { Screen } from '../context/AppContext'
 import { useAppContext } from '../context/AppContext'
 import styles from './Sidebar.module.css'
+
 interface NavEntry {
   screen:  Screen
   label:   string
@@ -12,13 +13,12 @@ interface NavEntry {
 }
 
 const NAV_ENTRIES: NavEntry[] = [
-  { screen: 'validate',        label: 'View / Validate', icon: '📄', requireBom: true,  section: 'BOM Tools' },
+  { screen: 'view',            label: 'View',            icon: '📄', requireBom: true,  section: 'BOM Tools' },
+  { screen: 'validate',        label: 'Validate',        icon: '✅', requireBom: true  },
   { screen: 'licenses',        label: 'Licenses',        icon: 'ℹ️',  requireBom: true  },
   { screen: 'components',      label: 'Components',      icon: '📦', requireBom: true  },
   { screen: 'resources',       label: 'Resources',       icon: '🗄️',  requireBom: true  },
   { screen: 'vulnerabilities', label: 'Vulnerabilities', icon: '⚠️', requireBom: true  },
-  { screen: 'diff',            label: 'Diff',            icon: '↔️',  requireBom: false, section: 'Transform' },
-  { screen: 'patch',           label: 'Patch',           icon: '🩹', requireBom: false },
 ]
 
 interface Props {
@@ -54,7 +54,7 @@ export default function Sidebar({ activeScreen, bomLoaded, onNav, onLoadBOM }: P
       {/* ── Tool nav buttons ───────────────────────── */}
       {NAV_ENTRIES.map(entry => (
         <Fragment key={entry.screen}>
-          {entry.section && (
+          {entry.section && entry.screen !== 'view' && (
             <div className={styles.sectionLabel}>{entry.section}</div>
           )}
           <button
@@ -69,18 +69,6 @@ export default function Sidebar({ activeScreen, bomLoaded, onNav, onLoadBOM }: P
           </button>
         </Fragment>
       ))}
-
-      {/* ── Settings (pinned to bottom) ─────────────── */}
-      <div style={{ flex: 1 }} />
-      <button
-        className={`${styles.navItem} ${activeScreen === 'settings' ? styles.active : ''}`}
-        onClick={() => onNav('settings')}
-        aria-current={activeScreen === 'settings' ? 'page' : undefined}
-        title="Preferences"
-      >
-        <span className={styles.icon}>⚙️</span>
-        Preferences
-      </button>
     </nav>
   )
 }
