@@ -1,0 +1,86 @@
+{
+  "name": "sbom-utility-gui",
+  "version": "0.16.0",
+  "description": "TypeScript/Electron GUI for CycloneDX sbom-utility",
+  "private": true,
+  "main": "dist-electron/main/index.js",
+  "scripts": {
+    "dev":        "vite",
+    "build":      "tsc --noEmit && vite build && electron-builder --dir",
+    "build:dist": "tsc --noEmit && vite build && electron-builder",
+    "pack":       "vite build && electron-builder --dir",
+    "dist":       "vite build && electron-builder",
+    "dist:mac":   "vite build && electron-builder --mac",
+    "dist:win":   "vite build && electron-builder --win",
+    "dist:linux": "vite build && electron-builder --linux",
+    "preview":    "vite preview",
+    "lint":       "eslint src --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
+    "typecheck":  "tsc --noEmit"
+  },
+  "dependencies": {
+    "react":     "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node":            "^20.14.0",
+    "@types/react":           "^18.3.3",
+    "@types/react-dom":       "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^7.13.0",
+    "@typescript-eslint/parser":        "^7.13.0",
+    "@vitejs/plugin-react":   "^4.3.0",
+    "electron":               "^31.0.0",
+    "electron-builder":       "^24.13.3",
+    "eslint":                 "^8.57.0",
+    "typescript":             "^5.4.5",
+    "vite":                   "^5.3.1",
+    "vite-plugin-electron":   "^0.28.7",
+    "vite-plugin-electron-renderer": "^0.14.5"
+  },
+  "build": {
+    "appId":          "org.cyclonedx.sbom-utility-gui",
+    "productName":    "SBOM Utility",
+    "copyright":      "Copyright © 2026 CycloneDX Contributors",
+    "directories": {
+      "output": "dist-release"
+    },
+    "files": [
+      "dist/**",
+      "dist-electron/**"
+    ],
+    "extraResources": [
+      {
+        "from": "../sbom-utility${os.platform() === 'win32' ? '.exe' : ''}",
+        "to":   "sbom-utility"
+      },
+      {
+        "from": "../config.json",
+        "to":   "config.json"
+      },
+      {
+        "from": "../license.json",
+        "to":   "license.json"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "icon":     "../gui/images/icons/BOM-Utility-Icon.png",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements":            "build/entitlements.mac.plist",
+      "entitlementsInherit":     "build/entitlements.mac.plist"
+    },
+    "win": {
+      "icon":           "../gui/images/icons/BOM-Utility-Icon.png",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "linux": {
+      "icon":     "../gui/images/icons/BOM-Utility-Icon.png",
+      "category": "Development"
+    },
+    "nsis": {
+      "oneClick":       false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    }
+  }
+}

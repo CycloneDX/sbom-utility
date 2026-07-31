@@ -1,0 +1,63 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+/* Shared screen layout used by every command screen */
+.screen {
+  display:        flex;
+  flex-direction: column;
+  flex:           1 1 0;
+  min-height:     0;
+  overflow:       hidden;
+}
+
+/* Horizontal split: options column | results column */
+.split {
+  display:    flex;
+  flex:       1 1 0;
+  min-height: 0;
+  overflow:   hidden;
+}
+
+/* Left options sidebar */
+.options {
+  width:          var(--options-width);
+  flex-shrink:    0;
+  border-right:   1px solid var(--options-border);
+  background:     var(--options-bg);
+  overflow-y:     auto;
+  display:        flex;
+  flex-direction: column;
+}
+
+/* Right results area fills remaining space */
+.results {
+  flex:       1 1 0;
+  display:    flex;
+  flex-direction: column;
+  min-width:  0;
+  overflow:   hidden;
+}
+
+/* Top bar shown above the split (status badge row) */
+.topBar {
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-3);
+  padding:     var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  background:  var(--color-surface);
+  flex-shrink: 0;
+  min-height:  38px;
+}
+
+/* Simple path label at top of results */
+.pathLabel {
+  padding:     var(--space-2) var(--space-4);
+  font-size:   var(--text-xs);
+  color:       var(--color-text-muted);
+  font-style:  italic;
+  border-bottom: 1px solid var(--color-border);
+  background:  var(--color-surface);
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow:    hidden;
+  text-overflow: ellipsis;
+}

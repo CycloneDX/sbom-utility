@@ -23,13 +23,66 @@ In addition, the utility features "report" commands that can easily *extract*, *
 
 <h5><img alt="New!" src="docs/new-3d.png" align="left" width="100" height="100" style="height: 8em; width:8em; vertical-align: middle;"></h5>
 
-### Experimental: Desktop GUI
+### Optional: Desktop GUIs
 
-A native desktop GUI for `sbom-utility` is available in the [`gui/`](gui/) directory.
-It wraps the same validate, license, component, resource, and vulnerability commands in a point-and-click interface — no terminal required.</br>
-Load any CycloneDX or SPDX BOM file, inspect its raw source, run validation, and browse structured report tables, all from a single window.
+Two optional desktop GUIs are available for `sbom-utility`.  Both wrap the
+same validate, license, component, resource, and vulnerability commands in a
+point-and-click interface — no terminal required.  They are independent of
+each other and of the CLI; you can use one, both, or neither.
 
-> **Try it out**: See the [GUI README](gui/README.md) for build instructions and a feature overview.
+| | [Fyne GUI](gui/) | [TypeScript / Electron GUI](gui-ts/) |
+|---|---|---|
+| **Location** | [`gui/`](gui/) | [`gui-ts/`](gui-ts/) |
+| **Language / framework** | Go · [Fyne](https://fyne.io) (BSD-3) | TypeScript · [Electron](https://www.electronjs.org) (MIT · OpenJS Foundation) · React |
+| **Build requirement** | Go toolchain + CGo (C compiler) | Node.js ≥ 20 · `npm ci` (no C compiler) |
+| **Distribution** | `fyne package` → `.app` / `.exe` / `.tar.xz` | `npm run dist` → `.dmg` / NSIS `.exe` / AppImage |
+| **Theming** | Go `fyne.Theme` structs | CSS custom properties (`tokens.css`) — change any colour, font, or spacing without touching TypeScript |
+| **Security** | Native binary, no network stack | Electron hardened defaults: `contextIsolation`, `sandbox`, strict CSP, IPC allowlist validation |
+| **Full documentation** | [gui/README.md](gui/README.md) | [gui-ts/README.md](gui-ts/README.md) |
+
+#### Fyne GUI (`gui/`)
+
+A native desktop application built in Go using the [Fyne](https://fyne.io)
+toolkit (BSD-3-Clause).  No JavaScript.  No browser engine.  Produces a
+single self-contained binary.
+
+```bash
+# Build (requires Go + a C compiler)
+go build -o sbom-utility-gui ./gui
+# — or via Make —
+make build-gui
+```
+
+> See [gui/README.md](gui/README.md) for full build instructions, theming
+> reference, and distribution (fyne package / fyne-cross).
+
+#### TypeScript / Electron GUI (`gui-ts/`)
+
+A desktop application built with Electron (MIT · OpenJS Foundation), React 18,
+Vite 5, and TypeScript 5.  Visually polished with a dark sidebar, VS Code-style
+BOM source viewer, and a fully documented CSS design-token system that lets
+you retheme every colour, font, and spacing without touching any TypeScript.
+
+```bash
+# Install dependencies (verifies Node ≥ 20 and the CLI binary first)
+./gui-ts/install.sh          # macOS / Linux
+.\gui-ts\install.ps1         # Windows PowerShell
+
+# Launch in development mode (hot-reload)
+cd gui-ts && npm run dev
+
+# Build a distributable installer
+cd gui-ts && npm run dist:mac    # → .dmg
+cd gui-ts && npm run dist:win    # → NSIS .exe
+cd gui-ts && npm run dist:linux  # → AppImage + .deb
+# — or via Make (from repo root) —
+make build-gui-ts   # unpackaged build
+make dist-gui-ts    # full installer
+```
+
+> See [gui-ts/README.md](gui-ts/README.md) for the full feature inventory,
+> security hardening checklist, style customisation guide with worked examples,
+> and architecture documentation.
 
 ---
 

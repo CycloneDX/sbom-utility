@@ -1,0 +1,48 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+.bar {
+  display:     flex;
+  align-items: center;
+  height:      var(--statusbar-height);
+  background:  var(--statusbar-bg);
+  color:       var(--statusbar-text);
+  font-size:   var(--statusbar-font);
+  flex-shrink: 0;
+  padding:     0 var(--space-3);
+  gap:         var(--space-4);
+  user-select: text;
+}
+
+.segment {
+  display:    flex;
+  align-items: center;
+  gap:         var(--space-1);
+  white-space: nowrap;
+  overflow:    hidden;
+  text-overflow: ellipsis;
+}
+
+.label {
+  opacity: 0.75;
+  font-weight: var(--weight-medium);
+}
+
+.value {
+  font-weight: var(--weight-bold);
+}
+
+.filename {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  opacity: 0.9;
+  cursor: default;
+}
+
+.right {
+  margin-left: auto;
+  opacity: 0.6;
+  font-size: 11px;
+}

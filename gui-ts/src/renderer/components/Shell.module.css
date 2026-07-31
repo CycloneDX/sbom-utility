@@ -1,0 +1,26 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+/* Shell — main application chrome */
+
+.shell {
+  display:   flex;
+  flex-direction: column;
+  height:    100vh;
+  overflow:  hidden;
+  background: var(--color-bg);
+}
+
+.body {
+  display:    flex;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow:   hidden;
+}
+
+.content {
+  flex:       1 1 0;
+  display:    flex;
+  flex-direction: column;
+  min-width:  0;
+  overflow:   hidden;
+  background: var(--color-bg);
+}

@@ -37,9 +37,24 @@ LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.Binary=${BINARY} -s"
 build: clean
 	go build ${LDFLAGS} -o ${BINARY}
 
-# Build the GUI binary
+# Build the GUI binary (Fyne/Go)
 build-gui:
 	go build -o ${GUI_BINARY} ./gui
+
+# TypeScript / Electron GUI
+# build-gui-ts : npm ci + vite build + electron-builder --dir (unpackaged)
+# dist-gui-ts  : npm ci + full distributable packages for the host platform
+# dev-gui-ts   : start Vite dev server + Electron hot-reload window
+GUI_TS_DIR?=gui-ts
+
+build-gui-ts:
+	cd ${GUI_TS_DIR} && npm ci && npm run pack
+
+dist-gui-ts:
+	cd ${GUI_TS_DIR} && npm ci && npm run dist
+
+dev-gui-ts:
+	cd ${GUI_TS_DIR} && npm run dev
 
 # General supported environments: https://go.dev/doc/install/source#environment
 # See latest supported combinations using:
@@ -124,4 +139,4 @@ clean:
 	@if [ -f ${GUI_BINARY} ] ; then rm ${GUI_BINARY} ; fi
 	@if [ -d ${RELEASE_DIR} ] ; then rm -f ${RELEASE_DIR}/${BINARY}* ; rm -f ${RELEASE_DIR}/*.json ; rmdir ${RELEASE_DIR} ; fi
 
-.PHONY: config clean build build-gui release test_clean test test_cmd unit_tests integration_tests format lint install
+.PHONY: config clean build build-gui build-gui-ts dist-gui-ts dev-gui-ts release test_clean test test_cmd unit_tests integration_tests format lint install
