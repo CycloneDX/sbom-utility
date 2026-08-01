@@ -192,17 +192,20 @@
   --table-cell-pad:     var(--space-2) var(--space-3);
 
   /* Buttons */
-  --btn-height:         32px;
-  --btn-radius:         var(--radius-md);
-  --btn-primary-bg:     var(--color-accent);
-  --btn-primary-text:   var(--primitive-white);
-  --btn-primary-hover:  var(--color-accent-hover);
-  --btn-primary-shadow: 0 1px 4px rgba(0, 122, 255, 0.35);
-  --btn-default-bg:     var(--color-surface);
-  --btn-default-border: var(--color-border);
-  --btn-default-hover:  var(--primitive-gray-100);
-  --btn-disabled-bg:    rgba(0, 122, 255, 0.10);
-  --btn-disabled-text:  rgba(0, 122, 255, 0.40);
+  --btn-height:           32px;
+  --btn-radius:           var(--radius-md);
+  --btn-primary-bg:       var(--color-accent);
+  --btn-primary-text:     var(--primitive-white);
+  --btn-primary-hover:    var(--color-accent-hover);
+  --btn-primary-shadow:   0 1px 4px rgba(0, 122, 255, 0.35);
+  --btn-secondary-bg:     var(--primitive-blue-700);   /* #006BD6 — darker blue */
+  --btn-secondary-hover:  #0059b3;                     /* one step deeper on hover */
+  --btn-secondary-shadow: 0 1px 4px rgba(0, 107, 214, 0.35);
+  --btn-default-bg:       var(--color-surface);
+  --btn-default-border:   var(--color-border);
+  --btn-default-hover:    var(--primitive-gray-100);
+  --btn-disabled-bg:      rgba(0, 122, 255, 0.10);
+  --btn-disabled-text:    rgba(0, 122, 255, 0.40);
 
   /* Inputs */
   --input-height:       28px;

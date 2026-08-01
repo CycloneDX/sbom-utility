@@ -95,7 +95,7 @@ export default function DiffScreen({ active }: Props) {
               }}>
                 {fileA || '—'}
               </span>
-              <button className="btn btn-default" style={{ alignSelf: 'flex-start' }} onClick={pickFileA}>
+              <button className="btn btn-secondary" style={{ alignSelf: 'flex-start' }} onClick={pickFileA}>
                 Browse…
               </button>
             </div>
@@ -110,7 +110,7 @@ export default function DiffScreen({ active }: Props) {
               }}>
                 {fileB || '—'}
               </span>
-              <button className="btn btn-default" style={{ alignSelf: 'flex-start' }} onClick={pickFileB}>
+              <button className="btn btn-secondary" style={{ alignSelf: 'flex-start' }} onClick={pickFileB}>
                 Browse…
               </button>
             </div>
