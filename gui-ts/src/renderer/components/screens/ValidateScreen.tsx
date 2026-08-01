@@ -19,6 +19,7 @@ export default function ValidateScreen({ active }: Props) {
   const [badge,     setBadge]     = useState<BadgeState>('idle')
   const [badgeText, setBadgeText] = useState('')
   const [dirty,     setDirty]     = useState(true)
+  const [noticeMsg, setNoticeMsg] = useState('')
 
   // Options
   const [variant,    setVariant]    = useState('')
@@ -26,14 +27,16 @@ export default function ValidateScreen({ active }: Props) {
   const [maxErrors,  setMaxErrors]  = useState(String(DEFAULT_MAX_ERRORS))
   const [showValues, setShowValues] = useState(true)
 
-  const markDirty = () => setDirty(true)
+  const markDirty = () => { setDirty(true); setNoticeMsg('') }
 
   const run = async () => {
     if (!bomFile) return
+    if (!dirty) { setNoticeMsg('No option changes — results are current'); return }
     setLoading(true)
     setOutput('')
     setBadge('idle')
     setDirty(false)
+    setNoticeMsg('')
     try {
       const res = await window.sbomBridge.validate({
         filePath:    bomFile,
@@ -76,7 +79,15 @@ export default function ValidateScreen({ active }: Props) {
       <div className={styles.split}>
         {/* ── Options column ─────────────────────────── */}
         <div className={styles.options}>
-          <OptionsPanel title="Validate Options">
+          <OptionsPanel
+            title="Validate Options"
+            notice={noticeMsg}
+            action={
+              <button className="btn btn-primary w-full" onClick={run} disabled={loading || !bomFile}>
+                ✅ &nbsp;{loading ? 'Validating…' : 'Validate'}
+              </button>
+            }
+          >
             <div className="flag-row">
               <label className="flag-label">Schema variant (--variant):</label>
               <input
@@ -113,14 +124,6 @@ export default function ValidateScreen({ active }: Props) {
               />
               Show failing values in errors
             </label>
-            <div className="separator" />
-            <button
-              className="btn btn-primary w-full"
-              onClick={run}
-              disabled={loading || !bomFile || !dirty}
-            >
-              ✅ &nbsp;{loading ? 'Validating…' : 'Validate'}
-            </button>
           </OptionsPanel>
         </div>
 

@@ -13,19 +13,21 @@ type Fmt = typeof FORMATS[number]
 export default function ComponentScreen({ active }: Props) {
   const { bomFile } = useAppContext()
 
-  const [output,  setOutput]  = useState('')
-  const [loading, setLoading] = useState(false)
-  const [dirty,   setDirty]   = useState(true)
+  const [output,     setOutput]     = useState('')
+  const [loading,    setLoading]    = useState(false)
+  const [dirty,      setDirty]      = useState(true)
+  const [noticeMsg,  setNoticeMsg]  = useState('')
 
   const [format,  setFormat]  = useState<Fmt>('md')
   const [where,   setWhere]   = useState('')
   const [summary, setSummary] = useState(false)
 
-  const markDirty = () => setDirty(true)
+  const markDirty = () => { setDirty(true); setNoticeMsg('') }
 
   const run = async () => {
     if (!bomFile) return
-    setLoading(true); setOutput(''); setDirty(false)
+    if (!dirty) { setNoticeMsg('No option changes — results are current'); return }
+    setLoading(true); setOutput(''); setDirty(false); setNoticeMsg('')
     try {
       const res = await window.sbomBridge.listComponents({ filePath: bomFile, format, where, summary })
       const combined = res.stdout + (res.stderr ? '\n' + res.stderr : '')
@@ -43,7 +45,15 @@ export default function ComponentScreen({ active }: Props) {
     <div className={styles.screen}>
       <div className={styles.split}>
         <div className={styles.options}>
-          <OptionsPanel title="Component List Options">
+          <OptionsPanel
+            title="Component List Options"
+            notice={noticeMsg}
+            action={
+              <button className="btn btn-primary w-full" onClick={run} disabled={loading || !bomFile}>
+                📦 &nbsp;{loading ? 'Scanning…' : 'List Components'}
+              </button>
+            }
+          >
             <label className="checkbox-row">
               <input type="checkbox" checked={summary} onChange={e => { setSummary(e.target.checked); markDirty() }} />
               Summary mode (--summary)
@@ -66,10 +76,6 @@ export default function ComponentScreen({ active }: Props) {
                 {'Filter keys:\nbom-ref, group, type, name, version, description,\ncopyright, purl, cpe, supplier-name, manufacturer-name,\npublisher, number-licenses, number-hashes, scope'}
               </span>
             </div>
-            <div className="separator" />
-            <button className="btn btn-primary w-full" onClick={run} disabled={loading || !bomFile || !dirty}>
-              📦 &nbsp;{loading ? 'Scanning…' : 'List Components'}
-            </button>
           </OptionsPanel>
         </div>
         <div className={styles.results}>

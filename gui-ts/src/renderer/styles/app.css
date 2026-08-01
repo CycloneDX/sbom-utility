@@ -75,6 +75,16 @@ h3 { font-size: var(--text-md); font-weight: var(--weight-medium); line-height: 
   flex-shrink: 0;
 }
 
+/* ── Action footer (execute button row at bottom of raw options divs) ───────── */
+/* Used by DiffScreen and PatchScreen which don't use OptionsPanel.             */
+/* OptionsPanel-based screens use the .footer CSS module class instead.         */
+.action-footer {
+  padding:     var(--space-3);
+  background:  #E2E2E2;
+  border-top:  1px solid #CACACA;
+  flex-shrink: 0;
+}
+
 /* ── Scrollbar styling (WebKit) ─────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }

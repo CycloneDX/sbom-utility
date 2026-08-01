@@ -281,13 +281,41 @@
           ],
           "inputs": [
             {
-              "format": "string"
+              "format": "string",
+              "description": "Plain text or tokenized sequences. Supports raw text prompts and OpenAI-compatible system/user/assistant chat template. Also supports FIM (fill-in-the-middle) prefix/suffix tokens for code completion."
             }
           ],
           "outputs": [
             {
-              "format": "string"
+              "format": "string",
+              "description": "Generated text continuation. The instruct variant additionally supports structured JSON output and tool-call JSON objects."
             }
+          ],
+          "properties": [
+            { "name": "cdx:ai-ml:model:modality:text", "value": "true" },
+            { "name": "cdx:ai-ml:model:modality:code", "value": "true" },
+            { "name": "cdx:ai-ml:model:parameter:count", "value": "30B" },
+            { "name": "cdx:ai-ml:model:parameter:tune_method", "value": "full" },
+            { "name": "cdx:ai-ml:model:hyperparameter:num_hidden_layers", "value": "64" },
+            { "name": "cdx:ai-ml:model:hyperparameter:hidden_size", "value": "4096" },
+            { "name": "cdx:ai-ml:model:hyperparameter:intermediate_size", "value": "16384" },
+            { "name": "cdx:ai-ml:model:hyperparameter:num_attention_heads", "value": "32" },
+            { "name": "cdx:ai-ml:model:hyperparameter:num_key_value_heads", "value": "8" },
+            { "name": "cdx:ai-ml:model:hyperparameter:hidden_act", "value": "silu" },
+            { "name": "cdx:ai-ml:model:hyperparameter:layer_norm_type", "value": "RMSNorm" },
+            { "name": "cdx:ai-ml:model:hyperparameter:context_length", "value": "131072" },
+            { "name": "cdx:ai-ml:model:hyperparameter:max_position_embeddings", "value": "131072" },
+            { "name": "cdx:ai-ml:model:hyperparameter:vocab_size", "value": "49152" },
+            { "name": "cdx:ai-ml:model:hyperparameter:quantization", "value": "bf16" },
+            { "name": "cdx:ai-ml:model:hyperparameter:tokenizer_class", "value": "PreTrainedTokenizerFast" },
+            { "name": "cdx:ai-ml:model:hyperparameter:_undefined:attention_head_dim", "value": "128" },
+            { "name": "cdx:ai-ml:model:hyperparameter:_undefined:positional_embeddings", "value": "RoPE" },
+            { "name": "cdx:ai-ml:model:hyperparameter:_undefined:transformer_class", "value": "GraniteForCausalLM" },
+            { "name": "cdx:ai-ml:model:hyperparameter:_undefined:architecture_type", "value": "dense-decoder-only" },
+            { "name": "cdx:ai-ml:model:hyperparameter:_undefined:attention_mechanism", "value": "GQA" },
+            { "name": "cdx:ai-ml:model:hyperparameter:_undefined:shared_input_output_embeddings", "value": "true" },
+            { "name": "cdx:ai-ml:model:hyperparameter:_undefined:long_context_extension_method", "value": "staged-512K-RoPE-scaling" },
+            { "name": "cdx:ai-ml:model:language", "value": "en,de,es,fr,ja,pt,ar,cs,it,ko,nl,zh" }
           ]
         },
         "quantitativeAnalysis": {
@@ -455,47 +483,11 @@
             "energyConsumptions": [
               {
                 "activity": "training",
-                "energyProviders": [],
-                "activityEnergyCost": {
-                  "value": 0,
-                  "unit": "kWh"
-                },
-                "properties": [
-                  {
-                    "name": "cdx:ai-ml:energy:disclosure",
-                    "value": "No specific per-model CO2 or energy-cost figures are published in the Granite 4.1 materials. The IBM Granite 4.0 announcement documents inference efficiency improvements (>70% RAM reduction for long-context/concurrent workloads vs. transformer-only models) as a proxy for compute efficiency impact. Training infrastructure details are described in the HuggingFace Technical Blog: https://huggingface.co/blog/ibm-granite/granite-4-1"
-                  }
-                ]
+                "description": "No specific per-model CO2 or energy-cost figures are published in the Granite 4.1 materials. The IBM Granite 4.0 announcement documents inference efficiency improvements (>70% RAM reduction for long-context/concurrent workloads vs. transformer-only models) as a proxy for compute efficiency impact. Training infrastructure details are described in the HuggingFace Technical Blog: https://huggingface.co/blog/ibm-granite/granite-4-1"
               }
             ]
           }
-        },
-        "properties": [
-          { "name": "cdx:ai-ml:model:modality:text", "value": "true" },
-          { "name": "cdx:ai-ml:model:modality:code", "value": "true" },
-          { "name": "cdx:ai-ml:model:parameter:count", "value": "30B" },
-          { "name": "cdx:ai-ml:model:parameter:tune_method", "value": "full" },
-          { "name": "cdx:ai-ml:model:hyperparameter:num_hidden_layers", "value": "64" },
-          { "name": "cdx:ai-ml:model:hyperparameter:hidden_size", "value": "4096" },
-          { "name": "cdx:ai-ml:model:hyperparameter:intermediate_size", "value": "16384" },
-          { "name": "cdx:ai-ml:model:hyperparameter:num_attention_heads", "value": "32" },
-          { "name": "cdx:ai-ml:model:hyperparameter:num_key_value_heads", "value": "8" },
-          { "name": "cdx:ai-ml:model:hyperparameter:hidden_act", "value": "silu" },
-          { "name": "cdx:ai-ml:model:hyperparameter:layer_norm_type", "value": "RMSNorm" },
-          { "name": "cdx:ai-ml:model:hyperparameter:context_length", "value": "131072" },
-          { "name": "cdx:ai-ml:model:hyperparameter:max_position_embeddings", "value": "131072" },
-          { "name": "cdx:ai-ml:model:hyperparameter:vocab_size", "value": "49152" },
-          { "name": "cdx:ai-ml:model:hyperparameter:quantization", "value": "bf16" },
-          { "name": "cdx:ai-ml:model:hyperparameter:tokenizer_class", "value": "PreTrainedTokenizerFast" },
-          { "name": "cdx:ai-ml:model:hyperparameter:_undefined:attention_head_dim", "value": "128" },
-          { "name": "cdx:ai-ml:model:hyperparameter:_undefined:positional_embeddings", "value": "RoPE" },
-          { "name": "cdx:ai-ml:model:hyperparameter:_undefined:transformer_class", "value": "GraniteForCausalLM" },
-          { "name": "cdx:ai-ml:model:hyperparameter:_undefined:architecture_type", "value": "dense-decoder-only" },
-          { "name": "cdx:ai-ml:model:hyperparameter:_undefined:attention_mechanism", "value": "GQA" },
-          { "name": "cdx:ai-ml:model:hyperparameter:_undefined:shared_input_output_embeddings", "value": "true" },
-          { "name": "cdx:ai-ml:model:hyperparameter:_undefined:long_context_extension_method", "value": "staged-512K-RoPE-scaling" },
-          { "name": "cdx:ai-ml:model:language", "value": "en,de,es,fr,ja,pt,ar,cs,it,ko,nl,zh" }
-        ]
+        }
       },
       "properties": [
         {
@@ -1391,15 +1383,44 @@
           "bom-ref": "workflow:granite-4.1-30b-pretraining",
           "uid": "b7f3e2a1-9c4d-4b6e-8f1a-2d3c0e9a7b5f",
           "name": "Five-phase pre-training pipeline",
-          "description": "Granite 4.1 30B was trained from scratch using a five-phase pre-training pipeline: phases 1–2 general pre-training on web/code/math/multilingual data; phase 3 Long CoT reasoning data injection; phase 4 PRISM-guided mid-training data retention; phase 5 staged long-context extension to 512K tokens via RoPE scaling (LoC-PD-Books as sole books source). See metadata.component.externalReferences for supporting references (HuggingFace Technical Blog, PRISM arXiv:2603.17074).",
-          "taskTypes": ["build"]
+          "description": "Granite 4.1 30B was trained from scratch using a five-phase pre-training pipeline: phases 1–2 general pre-training on web/code/math/multilingual data; phase 3 Long CoT reasoning data injection; phase 4 PRISM-guided mid-training data retention; phase 5 staged long-context extension to 512K tokens via RoPE scaling (LoC-PD-Books as sole books source).",
+          "taskTypes": ["build"],
+          "externalReferences": [
+            {
+              "type": "documentation",
+              "url": "https://huggingface.co/blog/ibm-granite/granite-4-1",
+              "comment": "HuggingFace Technical Blog — five-phase pre-training pipeline detail"
+            },
+            {
+              "type": "documentation",
+              "url": "https://arxiv.org/abs/2603.17074",
+              "comment": "PRISM: Demystifying Retention and Interaction in Mid-Training — informs Phase 4 mid-training design"
+            }
+          ]
         },
         {
           "bom-ref": "workflow:granite-4.1-30b-posttraining",
           "uid": "c8a4f3b2-1d5e-4c7f-9e2b-3a4d0f8b6c1e",
           "name": "Post-training pipeline (instruct variant)",
-          "description": "The granite-4.1-30b instruct variant was produced via supervised fine-tuning (SFT) with LLM-as-Judge quality filtering, followed by a multi-stage RL pipeline using on-policy GRPO with the DAPO loss across math, code, instruction-following, function-calling, and multi-domain RL tracks. See metadata.component.externalReferences for supporting references (DAPO arXiv:2503.14476, GRPO arXiv:2402.03300, ToolRM arXiv:2509.11963).",
-          "taskTypes": ["build"]
+          "description": "The granite-4.1-30b instruct variant was produced via supervised fine-tuning (SFT) with LLM-as-Judge quality filtering, followed by a multi-stage RL pipeline using on-policy GRPO with the DAPO loss across math, code, instruction-following, function-calling, and multi-domain RL tracks.",
+          "taskTypes": ["build"],
+          "externalReferences": [
+            {
+              "type": "documentation",
+              "url": "https://arxiv.org/abs/2503.14476",
+              "comment": "DAPO: An Open-Source LLM Reinforcement Learning System at Scale — RL loss used in post-training"
+            },
+            {
+              "type": "documentation",
+              "url": "https://arxiv.org/abs/2402.03300",
+              "comment": "DeepSeekMath — source of GRPO algorithm used in RL pipeline"
+            },
+            {
+              "type": "documentation",
+              "url": "https://arxiv.org/abs/2509.11963",
+              "comment": "ToolRM: Outcome Reward Models for Tool-Calling LLMs — outcome reward model for tool-calling RL track"
+            }
+          ]
         }
       ]
     }
