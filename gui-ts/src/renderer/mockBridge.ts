@@ -388,6 +388,85 @@ function browserListVulnerabilities(params: { filePath: string; format?: string;
   return ok(lines.join('\n') + '\n')
 }
 
+// ── patch implementation ─────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type PatchRecord = { op: string; path: string; value?: any; from?: string }
+
+/**
+ * Resolve a RFC 6901 JSON Pointer path into an array of string keys.
+ * e.g. "/metadata/component/properties/0" → ["metadata","component","properties","0"]
+ */
+function parsePatchPath(pointer: string): string[] {
+  if (!pointer || pointer[0] !== '/') throw new Error(`Invalid JSON Pointer: "${pointer}"`)
+  return pointer.slice(1).split('/').map(k => k.replace(/~1/g, '/').replace(/~0/g, '~'))
+}
+
+/** Walk to the parent container and final key, or throw on a missing intermediate. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function resolvePath(doc: any, keys: string[]): { parent: any; key: string } {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let cur: any = doc
+  for (let i = 0; i < keys.length - 1; i++) {
+    if (cur == null || typeof cur !== 'object') throw new Error(`Path not found at key "${keys[i]}"`)
+    cur = Array.isArray(cur) ? cur[Number(keys[i])] : cur[keys[i]]
+  }
+  return { parent: cur, key: keys[keys.length - 1] }
+}
+
+function browserApplyPatch(params: { bomPath: string; patchPath: string }): RunResult {
+  const bomContent   = fileStore.get(params.bomPath)
+  const patchContent = fileStore.get(params.patchPath)
+
+  if (!bomContent)   return { stdout: '', stderr: `[browser-dev] BOM file not found in store: "${params.bomPath}". Open it first.`,   code: 1 }
+  if (!patchContent) return { stdout: '', stderr: `[browser-dev] Patch file not found in store: "${params.patchPath}". Open it first.`, code: 1 }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let doc: any
+  let records: PatchRecord[]
+  try { doc = JSON.parse(bomContent) }     catch (e) { return { stdout: '', stderr: `JSON parse error in BOM: ${e}`,   code: 1 } }
+  try { records = JSON.parse(patchContent) } catch (e) { return { stdout: '', stderr: `JSON parse error in patch: ${e}`, code: 1 } }
+
+  if (!Array.isArray(records)) return { stdout: '', stderr: 'Patch file must be a JSON array of operation objects.', code: 1 }
+
+  for (const rec of records) {
+    const keys = parsePatchPath(rec.path)
+    const { parent, key } = resolvePath(doc, keys)
+
+    switch (rec.op) {
+      case 'add':
+        if (Array.isArray(parent)) {
+          const idx = key === '-' ? parent.length : Number(key)
+          parent.splice(idx, 0, rec.value)
+        } else {
+          parent[key] = rec.value
+        }
+        break
+      case 'remove':
+        if (Array.isArray(parent)) {
+          parent.splice(Number(key), 1)
+        } else {
+          delete parent[key]
+        }
+        break
+      case 'replace':
+        if (!(key in parent)) return { stdout: '', stderr: `replace: path "${rec.path}" does not exist.`, code: 1 }
+        parent[key] = rec.value
+        break
+      case 'test': {
+        const actual = parent[key]
+        if (JSON.stringify(actual) !== JSON.stringify(rec.value))
+          return { stdout: '', stderr: `test failed at "${rec.path}": expected ${JSON.stringify(rec.value)}, got ${JSON.stringify(actual)}`, code: 1 }
+        break
+      }
+      default:
+        return { stdout: '', stderr: `Unsupported patch op: "${rec.op}"`, code: 1 }
+    }
+  }
+
+  return ok(JSON.stringify(doc, null, 4) + '\n')
+}
+
 // ── diff implementation ──────────────────────────────────────────────────────
 
 function browserDiffBoms(params: { fileA: string; fileB: string }): RunResult {
@@ -713,7 +792,7 @@ export const mockBridge: SbomBridge = {
   listResources:       (p) => Promise.resolve(browserListResources(p)),
   listVulnerabilities: (p) => Promise.resolve(browserListVulnerabilities(p)),
   diffBoms:            (p) => Promise.resolve(browserDiffBoms(p)),
-  applyPatch:          () => Promise.resolve(ok('[browser-dev] patch — connect to Electron for real CLI output.\n')),
+  applyPatch:          (p) => Promise.resolve(browserApplyPatch(p)),
 
   // ── App ────────────────────────────────────────────────────────────────────
   getVersion: () => Promise.resolve('0.16.0-browser-dev'),

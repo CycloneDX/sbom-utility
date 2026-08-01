@@ -337,8 +337,15 @@ export function registerIpcHandlers(config: BridgeConfig): void {
       'patch',
       '--input-file', safeBom,
       '--patch-file', safePatch,
+      '--config-schema',  configPath,
+      '--config-license', licensePolicyPath,
     ]
+    console.log('[bom:patch] binary:', binaryPath)
+    console.log('[bom:patch] args:', args)
     const res = await runBinary(binaryPath, args, baseEnv)
+    console.log('[bom:patch] code:', res.code)
+    console.log('[bom:patch] stdout (first 120):', res.stdout.slice(0, 120))
+    console.log('[bom:patch] stderr (first 120):', res.stderr.slice(0, 120))
     return { stdout: res.stdout, stderr: res.stderr, code: res.code }
   })
 }
