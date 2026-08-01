@@ -2,9 +2,9 @@
 /**
  * PatchScreen — apply a JSON patch to a CycloneDX BOM using `sbom-utility patch`.
  *
- * Layout: options panel (left) | before/after split (right)
- * The right pane shows the original BOM (top) and patched output (bottom),
- * both rendered by DiffHighlighter so changes are colour-coded.
+ * Layout: options panel (left) | viewer area (right)
+ * Viewer top row: Original BOM (left) | Patch File (right) — side-by-side
+ * Viewer bottom row: Patched Output (full width)
  */
 import { useState, useCallback, useEffect } from 'react'
 import { useAppContext } from '../../context/AppContext'
@@ -17,12 +17,18 @@ interface Props {
   active: boolean
 }
 
-export default function PatchScreen({ active: _active }: Props) {
+export default function PatchScreen({ active }: Props) {
   const { bomFile } = useAppContext()
 
   const [bomPath,   setBomPath]   = useState(bomFile)
+
+  // When the screen becomes active and a BOM is already loaded, default bomPath to it.
+  useEffect(() => {
+    if (active && bomFile) setBomPath(bomFile)
+  }, [active, bomFile])
   const [patchPath, setPatchPath] = useState('')
   const [origText,  setOrigText]  = useState('')
+  const [patchText, setPatchText] = useState('')
   const [result,    setResult]    = useState<RunResult | null>(null)
   const [loading,   setLoading]   = useState(false)
   const [error,     setError]     = useState('')
@@ -35,6 +41,14 @@ export default function PatchScreen({ active: _active }: Props) {
       .then(setOrigText)
       .catch(() => setOrigText(''))
   }, [bomPath])
+
+  // Load patch file text when patchPath changes
+  useEffect(() => {
+    if (!patchPath) { setPatchText(''); return }
+    window.sbomBridge.readFile(patchPath)
+      .then(setPatchText)
+      .catch(() => setPatchText(''))
+  }, [patchPath])
 
   const pickBom = useCallback(async () => {
     const p = await window.sbomBridge.openFile()
@@ -55,17 +69,20 @@ export default function PatchScreen({ active: _active }: Props) {
     setLoading(true)
     try {
       const r = await window.sbomBridge.applyPatch({ bomPath, patchPath })
+      console.log('[PatchScreen] result code:', r.code)
+      console.log('[PatchScreen] stdout length:', r.stdout?.length, 'first 120:', r.stdout?.slice(0, 120))
+      console.log('[PatchScreen] stderr first 120:', r.stderr?.slice(0, 120))
       setResult(r)
     } catch (e: unknown) {
+      console.error('[PatchScreen] error:', e)
       setError(String(e))
     } finally {
       setLoading(false)
     }
   }, [bomPath, patchPath])
 
-  const outputText = result
-    ? (result.stdout || '') + (result.stderr ? '\n' + result.stderr : '')
-    : ''
+  // Patched JSON arrives exclusively on stdout; stderr carries [INFO] log lines.
+  const outputText = result?.stdout ?? ''
 
   return (
     <div className={styles.screen}>
@@ -107,7 +124,7 @@ export default function PatchScreen({ active: _active }: Props) {
               <span style={{ fontSize: 11, color: 'var(--color-text-muted)', wordBreak: 'break-all', minHeight: 16 }}>
                 {bomPath || '—'}
               </span>
-              <button className="btn btn-default" style={{ alignSelf: 'flex-start' }} onClick={pickBom}>
+              <button className="btn btn-secondary" style={{ alignSelf: 'flex-start' }} onClick={pickBom}>
                 Browse…
               </button>
             </div>
@@ -119,7 +136,7 @@ export default function PatchScreen({ active: _active }: Props) {
               <span style={{ fontSize: 11, color: 'var(--color-text-muted)', wordBreak: 'break-all', minHeight: 16 }}>
                 {patchPath || '—'}
               </span>
-              <button className="btn btn-default" style={{ alignSelf: 'flex-start' }} onClick={pickPatch}>
+              <button className="btn btn-secondary" style={{ alignSelf: 'flex-start' }} onClick={pickPatch}>
                 Browse…
               </button>
             </div>
@@ -142,18 +159,31 @@ export default function PatchScreen({ active: _active }: Props) {
           </div>
         </div>
 
-        {/* Results: before/after stacked vertically */}
+        {/* Results: top row side-by-side, bottom row full-width */}
         <div className={styles.results} style={{ display: 'flex', flexDirection: 'column' }}>
 
-          {/* Before (original BOM) — always shown */}
-          <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', borderBottom: '1px solid var(--viewer-border)' }}>
-            <div style={{ padding: '4px 12px', background: '#2a2a2d', fontSize: 11, color: '#8e8e93', flexShrink: 0 }}>
-              Original BOM
+          {/* Top row: Original BOM | Patch File — side-by-side */}
+          <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'row', borderBottom: '1px solid var(--viewer-border)' }}>
+
+            {/* Original BOM */}
+            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--viewer-border)' }}>
+              <div style={{ padding: '4px 12px', background: '#2a2a2d', fontSize: 11, color: '#8e8e93', flexShrink: 0 }}>
+                Original BOM
+              </div>
+              <JsonEditor text={origText} />
             </div>
-            <JsonEditor text={origText} />
+
+            {/* Patch File */}
+            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ padding: '4px 12px', background: '#2a2a2d', fontSize: 11, color: '#8e8e93', flexShrink: 0 }}>
+                Patch File
+              </div>
+              <JsonEditor text={patchText} />
+            </div>
+
           </div>
 
-          {/* After (patched output) */}
+          {/* Bottom row: Patched Output */}
           <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
             <div style={{ padding: '4px 12px', background: '#2a2a2d', fontSize: 11, color: '#8e8e93', flexShrink: 0 }}>
               {result ? (showDiff ? 'Diff View' : 'Patched Output') : 'Patched Output'}

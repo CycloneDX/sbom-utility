@@ -55,7 +55,7 @@ function resolveBinaryPath(): string {
  */
 function resolveConfigPath(): string {
   if (isDev) {
-    return path.resolve(__dirname, '..', '..', '..', '..', 'config.json')
+    return path.resolve(__dirname, '..', '..', '..', '..', 'resources', 'config', 'config.json')
   }
   return path.join(process.resourcesPath, 'config.json')
 }
@@ -65,7 +65,7 @@ function resolveConfigPath(): string {
  */
 function resolveLicensePolicyPath(): string {
   if (isDev) {
-    return path.resolve(__dirname, '..', '..', '..', '..', 'license.json')
+    return path.resolve(__dirname, '..', '..', '..', '..', 'resources', 'config', 'license.json')
   }
   return path.join(process.resourcesPath, 'license.json')
 }
