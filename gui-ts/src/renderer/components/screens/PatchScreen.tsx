@@ -115,7 +115,7 @@ export default function PatchScreen({ active }: Props) {
 
         {/* Options */}
         <div className={styles.options}>
-          <div style={{ padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+          <div style={{ padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', flex: 1, minHeight: 0, background: '#E2E2E2' }}>
 
             <label style={{ fontSize: 12, color: 'var(--color-text-muted)', fontWeight: 600 }}>
               BOM File
@@ -147,14 +147,16 @@ export default function PatchScreen({ active }: Props) {
               </div>
             )}
 
-            <button
-              className="btn btn-primary w-full"
-              style={{ marginTop: 'var(--space-4)' }}
-              disabled={loading || !bomPath || !patchPath}
-              onClick={runPatch}
-            >
-              {loading ? 'Applying…' : 'Apply Patch'}
-            </button>
+            <div style={{ flex: 1 }} />
+            <div className="action-footer" style={{ marginLeft: 'calc(-1 * var(--space-4))', marginRight: 'calc(-1 * var(--space-4))', marginBottom: 'calc(-1 * var(--space-4))' }}>
+              <button
+                className="btn btn-primary w-full"
+                disabled={loading || !bomPath || !patchPath}
+                onClick={runPatch}
+              >
+                {loading ? 'Applying…' : 'Apply Patch'}
+              </button>
+            </div>
 
           </div>
         </div>

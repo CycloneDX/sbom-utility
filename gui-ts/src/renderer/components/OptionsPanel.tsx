@@ -1,30 +1,31 @@
 // SPDX-License-Identifier: Apache-2.0
 /**
- * OptionsPanel — collapsible side panel for command flags.
- * Mirrors the Fyne SidePanel / "▼ Title" toggle pattern.
+ * OptionsPanel — side panel for command flags.
+ * The title bar is styled like a dialog window title bar (solid accent
+ * background, white text) and is purely decorative — the panel is always open.
+ *
+ * Props:
+ *   action  — node rendered in the gray footer zone (the execute button)
+ *   notice  — short string shown in an amber banner between the title and
+ *             the body; used to signal "no changes to apply" without disabling
+ *             the button
  */
-import { useState } from 'react'
 import styles from './OptionsPanel.module.css'
 
 interface Props {
   title:    string
   children: React.ReactNode
-  defaultOpen?: boolean
+  action?:  React.ReactNode
+  notice?:  string
 }
 
-export default function OptionsPanel({ title, children, defaultOpen = true }: Props) {
-  const [open, setOpen] = useState(defaultOpen)
+export default function OptionsPanel({ title, children, action, notice }: Props) {
   return (
     <section className={styles.panel}>
-      <button
-        className={styles.toggle}
-        onClick={() => setOpen(v => !v)}
-        aria-expanded={open}
-      >
-        <span className={styles.arrow}>{open ? '▼' : '▶'}</span>
-        {title}
-      </button>
-      {open && <div className={styles.body}>{children}</div>}
+      <div className={styles.titlebar}>{title}</div>
+      <div className={styles.notice}>{notice ? `⚠ ${notice}` : ''}</div>
+      <div className={styles.body}>{children}</div>
+      {action && <div className={styles.footer}>{action}</div>}
     </section>
   )
 }

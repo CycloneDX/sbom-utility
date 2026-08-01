@@ -3,41 +3,53 @@
   border-bottom: 1px solid var(--options-border);
 }
 
-.toggle {
-  display:        flex;
-  align-items:    center;
-  gap:            var(--space-2);
-  width:          100%;
-  padding:        var(--space-2) var(--space-3);
-  background:     var(--color-surface);
-  border:         none;
-  border-bottom:  1px solid var(--options-border);
-  border-left:    3px solid var(--color-accent);
-  font-family:    var(--font-sans);
-  font-size:      var(--text-sm);
-  font-weight:    var(--weight-bold);
-  color:          var(--color-text);
-  cursor:         pointer;
-  text-align:     left;
-  transition:     background var(--duration-fast) var(--ease-out),
-                  border-left-color var(--duration-fast) var(--ease-out);
-}
-.toggle:hover { background: var(--color-accent-dim); }
-.toggle:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: -2px;
+/* Dialog-style title bar: solid accent background, white text */
+.titlebar {
+  padding:     var(--space-2) var(--space-3);
+  background:  var(--statusbar-bg);           /* #3478C0 — matches status bar */
+  color:       var(--primitive-white);
+  font-family: var(--font-sans);
+  font-size:   var(--text-sm);
+  font-weight: var(--weight-bold);
+  user-select: none;
+  flex-shrink: 0;
 }
 
-.arrow {
-  font-size: 10px;
-  color:     var(--color-accent);
-  transition: transform var(--duration-fast) var(--ease-out);
-}
-
+/* Options fields area — same gray as the footer so controls + footer read as one group */
 .body {
   padding:        var(--space-3);
-  padding-left:   calc(var(--space-3) + 3px); /* align with toggle text (border-left offset) */
+  background:     #E2E2E2;
   display:        flex;
   flex-direction: column;
   gap:            var(--space-3);
+}
+
+/* Status notice bar — always present between titlebar and body, no layout shift.
+   Empty by default; message text is injected when a redundant run is attempted. */
+.notice {
+  min-height:  26px;
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-2);
+  padding:     0 var(--space-3);
+  background:  #FFF8E1;
+  border-bottom: 1px solid #F0C040;
+  font-size:   var(--text-xs);
+  color:       #7A5800;
+  flex-shrink: 0;
+  /* hide the amber border when there's no message */
+  border-bottom-color: transparent;
+  transition:  border-bottom-color var(--duration-fast) var(--ease-out);
+}
+/* show border only when text is present */
+.notice:not(:empty) {
+  border-bottom-color: #F0C040;
+}
+
+/* Execute button footer — slightly darker gray than the body */
+.footer {
+  padding:     var(--space-3);
+  background:  #E2E2E2;
+  border-top:  1px solid #CACACA;
+  flex-shrink: 0;
 }
