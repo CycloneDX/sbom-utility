@@ -15,17 +15,31 @@ export type Screen =
   | 'diff'
   | 'patch'
 
+export interface EditorFont {
+  family: string
+  size:   number   // in px (e.g. 13 = 13px ≈ 10pt on 96dpi, or just treat as px)
+}
+
+export const DEFAULT_EDITOR_FONT: EditorFont = {
+  family: 'ui-monospace, "Cascadia Code", "Fira Code", Consolas, "Courier New", monospace',
+  size:   13,   // ~11pt on macOS / 96 dpi screens
+}
+
 export interface AppState {
   bomFile:     string
   bomInfo:     BomInfo
   screen:      Screen
   version:     string
+  editorFont:  EditorFont
+  isDirty:     boolean
 }
 
 export interface AppContextValue extends AppState {
-  setBomFile:  (path: string) => void
-  setBomInfo:  (info: BomInfo) => void
-  setScreen:   (screen: Screen) => void
+  setBomFile:    (path: string) => void
+  setBomInfo:    (info: BomInfo) => void
+  setScreen:     (screen: Screen) => void
+  setEditorFont: (font: EditorFont) => void
+  setDirty:      (dirty: boolean) => void
   // Listeners: other components can subscribe to bomFile changes
   onBomFileChange: (cb: (path: string) => void) => () => void
 }
@@ -38,6 +52,8 @@ export function AppProvider({ children, version }: { children: React.ReactNode; 
   const [bomFile, setBomFileState] = useState('')
   const [bomInfo, setBomInfo]      = useState<BomInfo>({ filePath: '', specVersion: '', format: '' })
   const [screen, setScreen]        = useState<Screen>('load')
+  const [editorFont, setEditorFont] = useState<EditorFont>(DEFAULT_EDITOR_FONT)
+  const [isDirty, setDirty]         = useState(false)
 
   // Listeners registry — use a ref so callbacks registered in effects don't
   // trigger re-renders of the provider on every setBomFile call.
@@ -58,8 +74,8 @@ export function AppProvider({ children, version }: { children: React.ReactNode; 
 
   return (
     <AppContext.Provider value={{
-      bomFile, bomInfo, screen, version,
-      setBomFile, setBomInfo, setScreen, onBomFileChange,
+      bomFile, bomInfo, screen, version, editorFont, isDirty,
+      setBomFile, setBomInfo, setScreen, setEditorFont, setDirty, onBomFileChange,
     }}>
       {children}
     </AppContext.Provider>

@@ -10,15 +10,20 @@
       session.defaultSession.webRequest) rather than here; the header
       set at the HTTP layer takes precedence over this meta tag.
     -->
+    <!--
+      NOTE: This meta-tag CSP is overridden at the HTTP layer by the session
+      handler in src/main/index.ts when running inside Electron.
+      In browser dev mode (npm run dev:browser) this meta tag is active but
+      connect-src is intentionally absent so Vite's HMR websocket works.
+    -->
     <meta
       http-equiv="Content-Security-Policy"
       content="
         default-src 'self';
-        script-src  'self';
+        script-src  'self' 'unsafe-inline';
         style-src   'self' 'unsafe-inline';
         img-src     'self' data:;
         font-src    'self' data:;
-        connect-src 'none';
         object-src  'none';
         base-uri    'none';
         frame-ancestors 'none';

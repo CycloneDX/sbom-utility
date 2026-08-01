@@ -93,29 +93,38 @@ h3 { font-size: var(--text-md); font-weight: var(--weight-medium); line-height: 
   justify-content: center;
   gap:             var(--space-1);
   height:          var(--btn-height);
-  padding:         0 var(--space-3);
+  padding:         0 var(--space-4);
   font-family:     var(--font-sans);
   font-size:       var(--text-sm);
   font-weight:     var(--weight-medium);
   border-radius:   var(--btn-radius);
   border:          var(--border-width) solid transparent;
   cursor:          pointer;
-  transition:      background var(--duration-fast) var(--ease-out),
-                   box-shadow  var(--duration-fast) var(--ease-out);
+  transition:      background    var(--duration-fast) var(--ease-out),
+                   box-shadow    var(--duration-fast) var(--ease-out),
+                   border-color  var(--duration-fast) var(--ease-out);
   white-space:     nowrap;
   user-select:     none;
+  letter-spacing:  0.01em;
 }
 .btn:focus-visible {
   outline: none;
   box-shadow: var(--input-focus-ring);
 }
 .btn-primary {
-  background: var(--btn-primary-bg);
-  color:      var(--btn-primary-text);
+  background:   var(--btn-primary-bg);
+  color:        var(--btn-primary-text);
   border-color: transparent;
+  box-shadow:   var(--btn-primary-shadow);
 }
 .btn-primary:hover:not(:disabled) {
-  background: var(--btn-primary-hover);
+  background:  var(--btn-primary-hover);
+  box-shadow:  0 2px 8px rgba(0, 122, 255, 0.45);
+}
+.btn-primary:active:not(:disabled) {
+  background:  var(--btn-primary-hover);
+  box-shadow:  0 1px 2px rgba(0, 122, 255, 0.25);
+  transform:   translateY(1px);
 }
 .btn-default {
   background:   var(--btn-default-bg);
@@ -126,10 +135,11 @@ h3 { font-size: var(--text-md); font-weight: var(--weight-medium); line-height: 
   background: var(--btn-default-hover);
 }
 .btn:disabled {
-  background:  var(--btn-disabled-bg);
-  color:       var(--btn-disabled-text);
-  cursor:      not-allowed;
+  background:   var(--btn-disabled-bg);
+  color:        var(--btn-disabled-text);
+  cursor:       not-allowed;
   border-color: transparent;
+  box-shadow:   none;
 }
 .btn-sm {
   height:  24px;
@@ -284,3 +294,4 @@ h3 { font-size: var(--text-md); font-weight: var(--weight-medium); line-height: 
   color:         #CECECE;
 }
 .viewer-pane .results-table tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+

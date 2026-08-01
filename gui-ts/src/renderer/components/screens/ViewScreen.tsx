@@ -5,7 +5,7 @@ import JsonEditor from '../editor/JsonEditor'
 import styles from './Screen.module.css'
 
 export default function ViewScreen() {
-  const { bomFile } = useAppContext()
+  const { bomFile, setDirty } = useAppContext()
 
   // ── File content & dirty tracking ─────────────────────────────────────────
   const [savedText,  setSavedText]  = useState('')   // last-saved / loaded version
@@ -17,6 +17,9 @@ export default function ViewScreen() {
   const loadedPath = useRef('')
 
   const isDirty = editedText !== savedText && savedText !== ''
+
+  // Keep global dirty flag in sync so Shell can gate "Load BOM"
+  useEffect(() => { setDirty(isDirty) }, [isDirty, setDirty])
 
   // Re-load whenever the user picks a new BOM file
   useEffect(() => {

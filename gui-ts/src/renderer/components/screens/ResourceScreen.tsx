@@ -20,7 +20,7 @@ export default function ResourceScreen({ active }: Props) {
   const [loading, setLoading] = useState(false)
   const [dirty,   setDirty]   = useState(true)
 
-  const [format,  setFormat]  = useState<Fmt>('txt')
+  const [format,  setFormat]  = useState<Fmt>('md')
   const [where,   setWhere]   = useState('')
   const [rtype,   setRtype]   = useState<RType>('(all)')
 

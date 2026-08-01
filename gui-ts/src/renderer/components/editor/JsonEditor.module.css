@@ -105,27 +105,38 @@
 }
 
 /* ── Editable plain-text overlay ─────────────────────────────────────────────── */
-/* Shown instead of the highlighted view when the `onChange` prop is supplied.    */
+/* Rendered on top of the highlighted view (position:absolute, transparent text). */
+/* The highlighted <div> provides the visual; the textarea captures keystrokes.   */
+.codePane {
+  position:   relative;
+  flex:       1 1 0;
+  min-height: 0;
+  /* height is driven by the highlighted content inside */
+}
 .editableOverlay {
-  display:     block;
-  width:       100%;
-  height:      100%;
-  min-height:  100%;
-  background:  var(--viewer-bg);
-  color:       var(--viewer-fg);
-  font-family: var(--font-mono);
-  font-size:   12px;
-  line-height: 1.6;
+  position:    absolute;
+  inset:       0;
+  background:  transparent;
+  color:       transparent;
+  font-family: inherit;
+  font-size:   inherit;
+  line-height: inherit;
   border:      none;
   outline:     none;
   resize:      none;
-  padding:     var(--space-2) var(--space-4);
+  padding:     0 0 var(--space-8) 0;
+  /* left padding must match gutter width (48px) + scroll container padding */
+  padding-left: 48px;
   box-sizing:  border-box;
   white-space: pre;
-  overflow:    auto;
+  overflow:    hidden;
   tab-size:    2;
-  caret-color: #fff;
+  caret-color: #aeafad;
+  z-index:     2;
+  /* Selection highlight must be visible through the transparent text */
+  selection: transparent;
 }
+.editableOverlay::selection { background: rgba(38, 79, 120, 0.60); }
 
 /* ── Line ────────────────────────────────────────────────────────────────────── */
 .line {
@@ -181,6 +192,8 @@
   overflow:   visible;
 }
 .lineContent.wrap { white-space: pre-wrap; word-break: break-all; }
+/* Word-wrap when applied at codePane level (propagates to all lineContent spans) */
+.codePane.wrap .lineContent { white-space: pre-wrap; word-break: break-all; }
 
 /* ── Fold placeholder ────────────────────────────────────────────────────────── */
 .foldPlaceholder { color: var(--viewer-fg); }

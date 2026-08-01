@@ -16,6 +16,47 @@
   overflow:   hidden;
 }
 
+/* ── Unsaved-changes warning banner ─────────────────────────────────────────── */
+.dirtyWarning {
+  display:       flex;
+  align-items:   center;
+  gap:           var(--space-3);
+  padding:       var(--space-2) var(--space-4);
+  background:    rgba(255, 159, 10, 0.12);
+  border-bottom: 1px solid rgba(255, 159, 10, 0.35);
+  flex-shrink:   0;
+  z-index:       10;
+}
+.dirtyWarningText {
+  flex:        1;
+  font-size:   var(--text-sm);
+  color:       #92510a;
+}
+.dirtyDiscardBtn {
+  height:        26px;
+  padding:       0 var(--space-3);
+  border-radius: var(--radius-sm);
+  border:        1px solid #e55c00;
+  background:    #e55c00;
+  color:         #fff;
+  font-size:     var(--text-xs);
+  font-family:   var(--font-sans);
+  cursor:        pointer;
+}
+.dirtyDiscardBtn:hover { background: #cc5200; }
+.dirtyCancelBtn {
+  height:        26px;
+  padding:       0 var(--space-3);
+  border-radius: var(--radius-sm);
+  border:        1px solid var(--color-border);
+  background:    var(--btn-default-bg);
+  color:         var(--color-text);
+  font-size:     var(--text-xs);
+  font-family:   var(--font-sans);
+  cursor:        pointer;
+}
+.dirtyCancelBtn:hover { background: var(--btn-default-hover); }
+
 .content {
   flex:       1 1 0;
   display:    flex;

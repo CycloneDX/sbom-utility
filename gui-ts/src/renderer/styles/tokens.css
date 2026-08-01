@@ -126,9 +126,9 @@
   --space-6:  24px;
   --space-8:  32px;
 
-  --radius-sm:  4px;
-  --radius-md:  6px;
-  --radius-lg:  10px;
+  --radius-sm:  6px;
+  --radius-md:  8px;
+  --radius-lg:  12px;
 
   --border-width: 1px;
   --border:       var(--border-width) solid var(--color-border);
@@ -192,16 +192,17 @@
   --table-cell-pad:     var(--space-2) var(--space-3);
 
   /* Buttons */
-  --btn-height:         30px;
-  --btn-radius:         var(--radius-sm);
+  --btn-height:         32px;
+  --btn-radius:         var(--radius-md);
   --btn-primary-bg:     var(--color-accent);
   --btn-primary-text:   var(--primitive-white);
   --btn-primary-hover:  var(--color-accent-hover);
+  --btn-primary-shadow: 0 1px 4px rgba(0, 122, 255, 0.35);
   --btn-default-bg:     var(--color-surface);
   --btn-default-border: var(--color-border);
   --btn-default-hover:  var(--primitive-gray-100);
-  --btn-disabled-bg:    var(--color-disabled-bg);
-  --btn-disabled-text:  var(--color-disabled-text);
+  --btn-disabled-bg:    rgba(0, 122, 255, 0.10);
+  --btn-disabled-text:  rgba(0, 122, 255, 0.40);
 
   /* Inputs */
   --input-height:       28px;

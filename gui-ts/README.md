@@ -18,7 +18,7 @@ No CGo. No native compiler. One `npm ci` and you are running.
 5. [Architecture](#5-architecture)
 6. [Prerequisites](#6-prerequisites)
 7. [Quick start](#7-quick-start)
-8. [Build & distribute](#8-build--distribute)
+8. [Build & distribute](#8-build--distribute) — including [macOS Gatekeeper](#macos-gatekeeper)
 9. [Makefile targets](#9-makefile-targets)
 10. [License](#10-license)
 
@@ -563,8 +563,10 @@ properties — modules reference `var(--color-accent)` not hard-coded values.
 | npm | 10 | `npm --version` (ships with Node 20) |
 | sbom-utility binary | any | `go build -o sbom-utility .` from repo root |
 
-No other global tools are required.  `electron`, `vite`, and
-`electron-builder` are all devDependencies and install automatically.
+No other global tools are required.  `vite` and `electron-builder` are
+devDependencies and install via `npm install`.  The Electron binary itself
+is downloaded as a post-install step — see the note below if that download
+is blocked by a corporate proxy.
 
 ---
 
@@ -591,7 +593,64 @@ The installer scripts verify Node.js ≥ 20 and the binary before running
 .\gui-ts\install.ps1
 ```
 
+> **Note for corporate / managed machines (IBM laptops etc.)**
+>
+> `npm install` runs a post-install hook that downloads the Electron binary
+> from GitHub Releases.  On machines with a restrictive MDM profile or
+> corporate proxy this download is silently blocked, leaving
+> `node_modules/electron/dist/` empty and causing the error:
+> ```
+> Error: Electron failed to install correctly, please delete node_modules/electron and try installing again
+> ```
+> Fix it by downloading the binary directly with `curl` (which honours the
+> system proxy) and extracting it manually.  Run this once after every
+> `npm install`:
+>
+> **macOS — Apple Silicon (arm64)**
+> ```bash
+> cd gui-ts
+> curl -L -o /tmp/electron-v31.7.7-darwin-arm64.zip \
+>   "https://github.com/electron/electron/releases/download/v31.7.7/electron-v31.7.7-darwin-arm64.zip"
+> mkdir -p node_modules/electron/dist
+> unzip -o /tmp/electron-v31.7.7-darwin-arm64.zip -d node_modules/electron/dist
+> printf "Electron.app/Contents/MacOS/Electron" > node_modules/electron/path.txt
+> ```
+>
+> **macOS — Intel (x64)**
+> ```bash
+> cd gui-ts
+> curl -L -o /tmp/electron-v31.7.7-darwin-x64.zip \
+>   "https://github.com/electron/electron/releases/download/v31.7.7/electron-v31.7.7-darwin-x64.zip"
+> mkdir -p node_modules/electron/dist
+> unzip -o /tmp/electron-v31.7.7-darwin-x64.zip -d node_modules/electron/dist
+> printf "Electron.app/Contents/MacOS/Electron" > node_modules/electron/path.txt
+> ```
+>
+> If the Electron version is ever bumped in `package.json`, replace `31.7.7`
+> in the URL with the new version shown in `node_modules/electron/package.json`.
+>
+> The binary persists in `node_modules` between dev sessions — you only need
+> to repeat this after running `npm install` again.
+
 ### Step 3 — launch in development mode
+
+#### Option A — browser mode (recommended on corporate / managed machines)
+
+No Electron required.  The UI runs in your regular browser with a mock bridge
+that stubs all IPC calls so every screen is fully navigable.
+
+```bash
+cd gui-ts
+npm run dev:browser
+```
+
+Then open **http://localhost:5173** in Chrome or Safari.
+
+> All UI features work.  CLI-backed results (validate, list, diff, patch) show
+> clearly labelled placeholder output instead of real data — this is expected.
+> Use this mode for layout, styling, and navigation testing.
+
+#### Option B — full Electron mode (requires Electron binary to be whitelisted)
 
 ```bash
 cd gui-ts
@@ -600,12 +659,14 @@ npm run dev
 
 Electron opens automatically.  The Vite dev server provides hot-module
 replacement (HMR) — React component changes appear instantly without
-restarting Electron.
+restarting Electron.  On corporate machines with a restrictive MDM profile
+this will be blocked — use Option A instead.
 
 ### One-liner (after first install)
 
 ```bash
-cd gui-ts && npm run dev
+cd gui-ts && npm run dev:browser   # browser mode (no Electron needed)
+cd gui-ts && npm run dev           # full Electron mode
 ```
 
 ---
@@ -618,8 +679,14 @@ cd gui-ts && npm run dev
 cd gui-ts
 npm run build
 # TypeScript type-check → Vite bundle → electron-builder --dir (unpackaged)
-# Output: gui-ts/dist-release/<platform>-unpacked/SBOM Utility
+# Output: gui-ts/dist-release/mac-arm64/SBOM Utility.app   (Apple Silicon)
+#         gui-ts/dist-release/mac/SBOM Utility.app          (Intel)
+#         gui-ts/dist-release/win-unpacked/SBOM Utility.exe (Windows)
+#         gui-ts/dist-release/linux-unpacked/sbom-utility   (Linux)
 ```
+
+The `build` script also runs `xattr -cr` on the macOS app bundle immediately
+after electron-builder finishes (see [macOS Gatekeeper](#macos-gatekeeper) below).
 
 ### Production distributable packages
 
@@ -652,7 +719,82 @@ npm run dist:mac
 
 `app.getVersion()` reads `package.json` automatically — no linker flags needed.
 
-### Code-signing
+### macOS Gatekeeper
+
+macOS stamps a `com.apple.quarantine` extended attribute on every app bundle
+written by a process that does not have a valid **Developer ID Application**
+certificate.  Gatekeeper then blocks (and may move to Trash) the app on first
+launch.
+
+#### Option 1 — automatic `xattr` strip (recommended for local development)
+
+The `npm run build` script already handles this.  After electron-builder
+finishes it runs:
+
+```bash
+xattr -cr "dist-release/mac-arm64/SBOM Utility.app"
+```
+
+This recursively removes all extended attributes — including the quarantine
+flag — from the entire `.app` bundle.  The app will open normally on your
+machine after that.  The flag is only re-applied if you copy or download the
+bundle from another location, so you only need to rebuild (or re-run the
+`xattr` command) if that happens.
+
+To run it manually at any time:
+
+```bash
+cd gui-ts
+xattr -cr "dist-release/mac-arm64/SBOM Utility.app"
+open "dist-release/mac-arm64/SBOM Utility.app"
+```
+
+#### Option 2 — allow via System Settings (one-time, no rebuild needed)
+
+If macOS has already blocked the app before you could strip the quarantine
+attribute:
+
+1. Open **System Settings** → **Privacy & Security**
+2. Scroll to the **Security** section — you will see a message such as
+   *"SBOM Utility was blocked from use because it is not from an identified developer"*
+3. Click **Open Anyway**
+
+macOS will whitelist that specific build permanently.  You will not need to
+repeat this step unless you rebuild the app.
+
+#### Option 3 — obtain a Developer ID Application certificate (for distribution)
+
+This option requires an **Apple Developer Program** membership ($99/year at
+[developer.apple.com/programs/enroll](https://developer.apple.com/programs/enroll)).
+
+Once enrolled:
+
+1. Open **Xcode** → **Settings** → **Accounts** → **Manage Certificates…**
+2. Click **+** → **Developer ID Application** — Xcode generates the key pair
+   and installs the signed certificate into your Keychain automatically.
+3. Verify the certificate is present:
+   ```bash
+   security find-identity -v -p codesigning | grep "Developer ID Application"
+   ```
+4. Set the identity in `package.json` under `"mac"`:
+   ```json
+   "identity": "Developer ID Application: Your Name (TEAMID)"
+   ```
+5. For full Gatekeeper trust on other machines, also **notarize** the build:
+   ```json
+   "notarize": { "teamId": "YOUR10CHRID" }
+   ```
+   ```bash
+   export APPLE_ID="you@example.com"
+   export APPLE_APP_SPECIFIC_PASSWORD="xxxx-xxxx-xxxx-xxxx"
+   export APPLE_TEAM_ID="YOUR10CHRID"
+   npm run dist:mac
+   ```
+   The app-specific password is generated at
+   [appleid.apple.com](https://appleid.apple.com) under
+   **Sign-In and Security → App-Specific Passwords**.
+
+### Code-signing (Windows / Linux)
 
 | Platform | Environment variables | Notes |
 |----------|-----------------------|-------|

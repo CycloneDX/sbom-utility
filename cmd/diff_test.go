@@ -89,8 +89,9 @@ func NewDiffTestInfo(inputFile string, revisedFilename string) *DiffTestInfo {
 	var ti = new(DiffTestInfo)
 	ti.RevisedFilename = revisedFilename
 	var pCommon = &ti.CommonTestInfo
-	// Default format matches the CLI default: FORMAT_TEXT (line-prefixed +/-/space view).
-	pCommon.InitBasic(inputFile, FORMAT_TEXT, nil)
+	// Note: Diff default format is "unified" (standard ---/+++/@@ output via go-difflib).
+	// To test the legacy go-jsondiff text or JSON formats, set ti.OutputFormat explicitly.
+	pCommon.InitBasic(inputFile, FORMAT_UNIFIED, nil)
 	return ti
 }
 
