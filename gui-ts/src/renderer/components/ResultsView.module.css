@@ -64,3 +64,18 @@
   overflow-x:    auto;
   margin-bottom: var(--space-4);
 }
+
+/* Override global .results-table styles for the dark results pane */
+.mdView :global(.results-table) th {
+  background:    var(--primitive-editor-bg);
+  color:         #6495ED;               /* cornflower blue header text */
+  font-weight:   var(--weight-bold);
+  border-bottom: 1px solid #3C3C3C;
+}
+.mdView :global(.results-table) td {
+  border-bottom: 1px solid #2C2C2C;
+  color:         var(--primitive-editor-fg);
+}
+.mdView :global(.results-table) tr:nth-child(even) td {
+  background: rgba(255, 255, 255, 0.03);
+}

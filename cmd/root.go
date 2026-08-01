@@ -55,7 +55,7 @@ const (
 // otherwise, the command will NOT be found by the Cobra framework. This is poor code assumption is NOT documented.
 const (
 	CMD_USAGE_COMPONENT_LIST     = CMD_COMPONENT + " " + SUBCOMMAND_LICENSE_LIST + " --input-file <input_file> [--type type1[,typeN]>] [--where key=regex[,...]] [--format txt|csv|md]"
-	CMD_USAGE_DIFF               = CMD_DIFF + " --input-file <base_file> --input-revision <revised_file> [--format json|txt] [--colorize=true|false]"
+	CMD_USAGE_DIFF               = CMD_DIFF + " --input-file <base_file> --input-revision <revised_file> [--format unified|txt|json] [--colorize=true|false]"
 	CMD_USAGE_LICENSE_LIST       = SUBCOMMAND_LICENSE_LIST + " --input-file <input_file> [--summary] [--where key=regex[,...]] [--format json|txt|csv|md]"
 	CMD_USAGE_LICENSE_POLICY     = SUBCOMMAND_LICENSE_POLICY + " [--where key=regex[,...]] [--format txt|csv|md]"
 	CMD_USAGE_QUERY              = CMD_QUERY + " --input-file <input_file> [--select * | field1[,fieldN]] [--from key1[.keyN]] [--where key=regex[,...]]"
@@ -119,9 +119,10 @@ const (
 // Supported output formats
 const (
 	FORMAT_DEFAULT  = ""
-	FORMAT_TEXT     = "txt"
-	FORMAT_JSON     = "json"
-	FORMAT_CSV      = "csv"
+	FORMAT_TEXT    = "txt"
+	FORMAT_JSON    = "json"
+	FORMAT_CSV     = "csv"
+	FORMAT_UNIFIED = "unified" // standard unified diff (---/+++/@@ hunks); rendered by DiffHighlighter in GUI
 	FORMAT_MARKDOWN = "md"
 	FORMAT_ANY      = "<any>" // Used for test errors
 )

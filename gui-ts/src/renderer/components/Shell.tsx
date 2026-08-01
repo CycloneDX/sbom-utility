@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAppContext, type Screen } from '../context/AppContext'
 import Sidebar   from './Sidebar'
 import StatusBar from './StatusBar'
@@ -22,16 +22,21 @@ const SCREENS: Screen[] = [
 ]
 
 export default function Shell() {
-  const { screen, setScreen, bomFile, setBomFile, setBomInfo } = useAppContext()
+  const { screen, setScreen, bomFile, setBomFile, setBomInfo, isDirty, setDirty } = useAppContext()
 
   // When the user loads a BOM, auto-switch to View
   useEffect(() => {
     if (bomFile) setScreen('view')
   }, [bomFile, setScreen])
 
-  const handleLoad = async () => {
+  // ── Unsaved-changes guard ─────────────────────────────────────────────────
+  const [showDirtyWarning, setShowDirtyWarning] = useState(false)
+  const pendingLoad = useRef<(() => Promise<void>) | null>(null)
+
+  async function doLoad() {
     const path = await window.sbomBridge.openFile()
     if (!path) return
+    setDirty(false)
     setBomFile(path)
     // Fetch BOM metadata asynchronously for the status bar
     window.sbomBridge.getBomInfo(path)
@@ -39,8 +44,42 @@ export default function Shell() {
       .catch(() => {/* non-fatal */})
   }
 
+  const handleLoad = () => {
+    if (isDirty) {
+      pendingLoad.current = doLoad
+      setShowDirtyWarning(true)
+    } else {
+      doLoad()
+    }
+  }
+
+  function handleDirtyConfirm() {
+    setShowDirtyWarning(false)
+    pendingLoad.current?.()
+    pendingLoad.current = null
+  }
+
+  function handleDirtyCancel() {
+    setShowDirtyWarning(false)
+    pendingLoad.current = null
+  }
+
   return (
     <div className={styles.shell}>
+      {/* ── Unsaved-changes warning ──────────────────────────────────────────── */}
+      {showDirtyWarning && (
+        <div className={styles.dirtyWarning}>
+          <span className={styles.dirtyWarningText}>
+            ⚠ You have unsaved edits. Loading a new BOM will discard them.
+          </span>
+          <button className={styles.dirtyDiscardBtn} onClick={handleDirtyConfirm}>
+            Discard &amp; Load
+          </button>
+          <button className={styles.dirtyCancelBtn} onClick={handleDirtyCancel}>
+            Cancel
+          </button>
+        </div>
+      )}
       <div className={styles.body}>
         <Sidebar
           activeScreen={screen}

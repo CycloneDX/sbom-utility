@@ -73,8 +73,9 @@ func NewDiffTestInfo(inputFile string, revisedFilename string) *DiffTestInfo {
 	var ti = new(DiffTestInfo)
 	ti.RevisedFilename = revisedFilename
 	var pCommon = &ti.CommonTestInfo
-	// Note: Diff is by default "txt" format
-	pCommon.InitBasic(inputFile, FORMAT_TEXT, nil)
+	// Note: Diff default format is "unified" (standard ---/+++/@@ output via go-difflib).
+	// To test the legacy go-jsondiff text or JSON formats, set ti.OutputFormat explicitly.
+	pCommon.InitBasic(inputFile, FORMAT_UNIFIED, nil)
 	return ti
 }
 
@@ -83,10 +84,12 @@ func innerDiffTest(t *testing.T, testInfo *DiffTestInfo) (actualError error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	// Copy test parameters to persistent and command-specific flags
+	// Copy test parameters to persistent and command-specific flags.
+	// NOTE: diff format goes into DiffFlags.OutputFormat (not PersistentFlags.OutputFormat)
+	// to match the Cobra flag binding in NewCommandDiff.
 	utils.GlobalFlags.PersistentFlags.OutputFile = testInfo.OutputFile
-	utils.GlobalFlags.PersistentFlags.OutputFormat = testInfo.OutputFormat
 	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile
+	utils.GlobalFlags.DiffFlags.OutputFormat = testInfo.OutputFormat
 	utils.GlobalFlags.DiffFlags.RevisedFile = testInfo.RevisedFilename
 	utils.GlobalFlags.DiffFlags.Colorize = testInfo.Colorize
 

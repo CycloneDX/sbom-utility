@@ -84,8 +84,8 @@ export default function PatchScreen({ active: _active }: Props) {
         )}
         {result && (
           <button
-            className="btn-default"
-            style={{ fontSize: 11, marginLeft: 8 }}
+            className="btn btn-default btn-sm"
+            style={{ marginLeft: 8 }}
             onClick={() => setShowDiff(v => !v)}
           >
             {showDiff ? 'Show Output' : 'Show Diff'}
@@ -107,7 +107,7 @@ export default function PatchScreen({ active: _active }: Props) {
               <span style={{ fontSize: 11, color: 'var(--color-text-muted)', wordBreak: 'break-all', minHeight: 16 }}>
                 {bomPath || '—'}
               </span>
-              <button className="btn-default" style={{ alignSelf: 'flex-start' }} onClick={pickBom}>
+              <button className="btn btn-default" style={{ alignSelf: 'flex-start' }} onClick={pickBom}>
                 Browse…
               </button>
             </div>
@@ -119,7 +119,7 @@ export default function PatchScreen({ active: _active }: Props) {
               <span style={{ fontSize: 11, color: 'var(--color-text-muted)', wordBreak: 'break-all', minHeight: 16 }}>
                 {patchPath || '—'}
               </span>
-              <button className="btn-default" style={{ alignSelf: 'flex-start' }} onClick={pickPatch}>
+              <button className="btn btn-default" style={{ alignSelf: 'flex-start' }} onClick={pickPatch}>
                 Browse…
               </button>
             </div>
@@ -131,7 +131,7 @@ export default function PatchScreen({ active: _active }: Props) {
             )}
 
             <button
-              className="btn-primary"
+              className="btn btn-primary w-full"
               style={{ marginTop: 'var(--space-4)' }}
               disabled={loading || !bomPath || !patchPath}
               onClick={runPatch}

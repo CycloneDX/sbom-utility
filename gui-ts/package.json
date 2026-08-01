@@ -6,7 +6,8 @@
   "main": "dist-electron/main/index.js",
   "scripts": {
     "dev":        "vite",
-    "build":      "tsc --noEmit && vite build && electron-builder --dir",
+    "dev:browser": "vite --config vite.browser.config.ts",
+    "build":      "tsc --noEmit && vite build && electron-builder --dir && xattr -cr \"dist-release/mac-arm64/SBOM Utility.app\"",
     "build:dist": "tsc --noEmit && vite build && electron-builder",
     "pack":       "vite build && electron-builder --dir",
     "dist":       "vite build && electron-builder",
