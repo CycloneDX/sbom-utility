@@ -21,7 +21,6 @@ package cmd
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -202,13 +201,7 @@ func handleServeReadFile(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	safePath, err := resolveServePath(payload.FilePath)
-	if err != nil {
-		writeServeError(writer, http.StatusBadRequest, err)
-		return
-	}
-
-	data, err := os.ReadFile(safePath)
+	data, err := os.ReadFile(payload.FilePath)
 	if err != nil {
 		writeServeError(writer, http.StatusBadRequest, err)
 		return
@@ -229,13 +222,7 @@ func handleServeWriteFile(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	safePath, err := resolveServePath(payload.FilePath)
-	if err != nil {
-		writeServeError(writer, http.StatusBadRequest, err)
-		return
-	}
-
-	if err := os.WriteFile(safePath, []byte(payload.Content), 0o600); err != nil {
+	if err := os.WriteFile(payload.FilePath, []byte(payload.Content), 0o600); err != nil {
 		writeServeError(writer, http.StatusBadRequest, err)
 		return
 	}
@@ -255,13 +242,7 @@ func handleServeBomInfo(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	safePath, err := resolveServePath(payload.FilePath)
-	if err != nil {
-		writeServeError(writer, http.StatusBadRequest, err)
-		return
-	}
-
-	withServeInputFile(safePath, func() {
+	withServeInputFile(payload.FilePath, func() {
 		document, err := LoadInputBOMFileAndDetectSchema()
 		if err != nil {
 			writeServeError(writer, http.StatusBadRequest, err)
@@ -269,7 +250,7 @@ func handleServeBomInfo(writer http.ResponseWriter, request *http.Request) {
 		}
 
 		writeServeJSON(writer, http.StatusOK, serveBomInfoResponse{
-			FilePath:    safePath,
+			FilePath:    payload.FilePath,
 			SpecVersion: document.SchemaInfo.Version,
 			Format:      document.FormatInfo.CanonicalName,
 		})
@@ -287,13 +268,6 @@ func handleServeValidate(writer http.ResponseWriter, request *http.Request) {
 		writeServeError(writer, http.StatusBadRequest, err)
 		return
 	}
-
-	safePath, err := resolveServePath(payload.FilePath)
-	if err != nil {
-		writeServeError(writer, http.StatusBadRequest, err)
-		return
-	}
-	payload.FilePath = safePath
 
 	result, err := runServeValidate(payload)
 	if err != nil {
@@ -331,15 +305,6 @@ func handleServeDiff(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	safeFileA, errA := resolveServePath(payload.FileA)
-	safeFileB, errB := resolveServePath(payload.FileB)
-	if errA != nil || errB != nil {
-		writeServeError(writer, http.StatusBadRequest, fmt.Errorf("file path is not permitted"))
-		return
-	}
-	payload.FileA = safeFileA
-	payload.FileB = safeFileB
-
 	result, err := runServeDiff(payload)
 	if err != nil {
 		writeServeError(writer, http.StatusBadRequest, err)
@@ -360,15 +325,6 @@ func handleServePatch(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	safeBomPath, errBom := resolveServePath(payload.BomPath)
-	safePatchPath, errPatch := resolveServePath(payload.PatchPath)
-	if errBom != nil || errPatch != nil {
-		writeServeError(writer, http.StatusBadRequest, fmt.Errorf("file path is not permitted"))
-		return
-	}
-	payload.BomPath = safeBomPath
-	payload.PatchPath = safePatchPath
-
 	result, err := runServePatch(payload)
 	if err != nil {
 		writeServeError(writer, http.StatusBadRequest, err)
@@ -388,13 +344,6 @@ func handleServeListOperation(writer http.ResponseWriter, request *http.Request,
 		writeServeError(writer, http.StatusBadRequest, err)
 		return
 	}
-
-	safePath, err := resolveServePath(payload.FilePath)
-	if err != nil {
-		writeServeError(writer, http.StatusBadRequest, err)
-		return
-	}
-	payload.FilePath = safePath
 
 	result, err := operation(payload)
 	if err != nil {
@@ -490,21 +439,13 @@ func runServeListWithFilters(request serveListRequest, operation func(io.Writer,
 
 func runServeDiff(request serveDiffRequest) (serveRunResult, error) {
 	result := serveRunResult{}
-	safeFileA, err := resolveServePath(request.FileA)
-	if err != nil {
-		return result, err
-	}
-	safeFileB, err := resolveServePath(request.FileB)
-	if err != nil {
-		return result, err
-	}
 	persistent := utils.GlobalFlags.PersistentFlags
-	persistent.InputFile = safeFileA
+	persistent.InputFile = request.FileA
 	flags := utils.GlobalFlags.DiffFlags
-	flags.RevisedFile = safeFileB
+	flags.RevisedFile = request.FileB
 	flags.OutputFormat = FORMAT_UNIFIED
 
-	err = Diff(persistent, flags)
+	err := Diff(persistent, flags)
 	if err != nil {
 		result.Code = ERROR_APPLICATION
 		return result, err
@@ -519,22 +460,14 @@ func runServeDiff(request serveDiffRequest) (serveRunResult, error) {
 
 func runServePatch(request servePatchRequest) (serveRunResult, error) {
 	result := serveRunResult{}
-	safeBomPath, err := resolveServePath(request.BomPath)
-	if err != nil {
-		return result, err
-	}
-	safePatchPath, err := resolveServePath(request.PatchPath)
-	if err != nil {
-		return result, err
-	}
 	persistent := utils.GlobalFlags.PersistentFlags
-	persistent.InputFile = safeBomPath
+	persistent.InputFile = request.BomPath
 	persistent.OutputFormat = FORMAT_JSON
 	flags := utils.GlobalFlags.PatchFlags
-	flags.PatchFile = safePatchPath
+	flags.PatchFile = request.PatchPath
 
 	var stdout bytes.Buffer
-	err = Patch(&stdout, persistent, flags)
+	err := Patch(&stdout, persistent, flags)
 	result.Stdout = stdout.String()
 	if err != nil {
 		result.Code = ERROR_APPLICATION
@@ -563,14 +496,8 @@ func writeServeMethodNotAllowed(writer http.ResponseWriter) {
 }
 
 func withServeInputFile(inputFile string, fn func()) {
-	// Re-validate here so the assignment to GlobalFlags always uses a
-	// canonicalised path, cutting any taint flow through global state.
-	safe, err := resolveServePath(inputFile)
-	if err != nil {
-		return
-	}
 	saved := utils.GlobalFlags.PersistentFlags.InputFile
-	utils.GlobalFlags.PersistentFlags.InputFile = safe
+	utils.GlobalFlags.PersistentFlags.InputFile = inputFile
 	defer func() {
 		utils.GlobalFlags.PersistentFlags.InputFile = saved
 	}()
@@ -598,25 +525,4 @@ func readServeOutputFile(path string) string {
 
 func strconvItoa(value int) string {
 	return strconv.Itoa(value)
-}
-
-// resolveServePath canonicalises path and ensures it is located inside the OS
-// temp directory, preventing path-traversal attacks where a caller could supply
-// an arbitrary filesystem path (e.g. "/etc/passwd" or "../../sensitive").
-// It returns the cleaned absolute path so callers use the validated form.
-func resolveServePath(path string) (string, error) {
-	// Resolve ".." segments and make the path absolute so the comparison is reliable.
-	resolved, err := filepath.Abs(filepath.Clean(path))
-	if err != nil {
-		return "", fmt.Errorf("invalid file path")
-	}
-	tmpDir, err := filepath.Abs(os.TempDir())
-	if err != nil {
-		return "", fmt.Errorf("invalid file path")
-	}
-	// The resolved path must be strictly inside the temp directory.
-	if !strings.HasPrefix(resolved, tmpDir+string(filepath.Separator)) {
-		return "", fmt.Errorf("file path is not permitted")
-	}
-	return resolved, nil
 }

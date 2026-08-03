@@ -8,7 +8,7 @@ function basename(p: string): string {
 }
 
 export default function StatusBar() {
-  const { bomInfo } = useAppContext()
+  const { bomInfo, validateBadge, validateBadgeText } = useAppContext()
   const { format, specVersion, filePath } = bomInfo
 
   const base = filePath ? basename(filePath) : ''
@@ -29,7 +29,15 @@ export default function StatusBar() {
         </span>
       )}
 
-      {/* Middle: filename (full path in title tooltip) */}
+      {/* Validation badge — shown whenever a result is available */}
+      {validateBadge !== 'idle' && (
+        <span className={`${styles.validBadge} ${styles[`validBadge_${validateBadge}`]}`}>
+          <span className={styles.validDot} />
+          {validateBadgeText}
+        </span>
+      )}
+
+      {/* Filename — full path shown on hover via title tooltip */}
       {filePath && (
         <span className={styles.filename} title={filePath}>
           {base}

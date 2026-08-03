@@ -6,7 +6,6 @@ import type { BomInfo } from '../../preload/index'
 
 export type Screen =
   | 'load'
-  | 'view'
   | 'validate'
   | 'licenses'
   | 'components'
@@ -14,6 +13,9 @@ export type Screen =
   | 'vulnerabilities'
   | 'diff'
   | 'patch'
+  | 'settings'
+
+export type ValidateBadge = 'idle' | 'valid' | 'invalid'
 
 export interface EditorFont {
   family: string
@@ -26,20 +28,25 @@ export const DEFAULT_EDITOR_FONT: EditorFont = {
 }
 
 export interface AppState {
-  bomFile:     string
-  bomInfo:     BomInfo
-  screen:      Screen
-  version:     string
-  editorFont:  EditorFont
-  isDirty:     boolean
+  bomFile:            string
+  bomInfo:            BomInfo
+  screen:             Screen
+  version:            string
+  editorFont:         EditorFont
+  isDirty:            boolean
+  validateBadge:      ValidateBadge
+  validateBadgeText:  string
+  autoValidateOnLoad: boolean
 }
 
 export interface AppContextValue extends AppState {
-  setBomFile:    (path: string) => void
-  setBomInfo:    (info: BomInfo) => void
-  setScreen:     (screen: Screen) => void
-  setEditorFont: (font: EditorFont) => void
-  setDirty:      (dirty: boolean) => void
+  setBomFile:            (path: string) => void
+  setBomInfo:            (info: BomInfo) => void
+  setScreen:             (screen: Screen) => void
+  setEditorFont:         (font: EditorFont) => void
+  setDirty:              (dirty: boolean) => void
+  setValidateBadge:      (badge: ValidateBadge, text: string) => void
+  setAutoValidateOnLoad: (enabled: boolean) => void
   // Listeners: other components can subscribe to bomFile changes
   onBomFileChange: (cb: (path: string) => void) => () => void
 }
@@ -48,12 +55,29 @@ export interface AppContextValue extends AppState {
 
 const AppContext = createContext<AppContextValue | null>(null)
 
+function loadBool(key: string, fallback: boolean): boolean {
+  try { const v = localStorage.getItem(key); return v === null ? fallback : v === 'true' } catch { return fallback }
+}
+
 export function AppProvider({ children, version }: { children: React.ReactNode; version: string }) {
-  const [bomFile, setBomFileState] = useState('')
-  const [bomInfo, setBomInfo]      = useState<BomInfo>({ filePath: '', specVersion: '', format: '' })
-  const [screen, setScreen]        = useState<Screen>('load')
-  const [editorFont, setEditorFont] = useState<EditorFont>(DEFAULT_EDITOR_FONT)
-  const [isDirty, setDirty]         = useState(false)
+  const [bomFile, setBomFileState]   = useState('')
+  const [bomInfo, setBomInfo]        = useState<BomInfo>({ filePath: '', specVersion: '', format: '' })
+  const [screen, setScreen]          = useState<Screen>('load')
+  const [editorFont, setEditorFont]  = useState<EditorFont>(DEFAULT_EDITOR_FONT)
+  const [isDirty, setDirty]          = useState(false)
+  const [validateBadge, setValidateBadgeState]   = useState<ValidateBadge>('idle')
+  const [validateBadgeText, setValidateBadgeText] = useState('')
+  const [autoValidateOnLoad, setAutoValidateOnLoadState] = useState(() => loadBool('pref.autoValidateOnLoad', true))
+
+  const setValidateBadge = useCallback((badge: ValidateBadge, text: string) => {
+    setValidateBadgeState(badge)
+    setValidateBadgeText(text)
+  }, [])
+
+  const setAutoValidateOnLoad = useCallback((enabled: boolean) => {
+    setAutoValidateOnLoadState(enabled)
+    try { localStorage.setItem('pref.autoValidateOnLoad', String(enabled)) } catch { /* ignore */ }
+  }, [])
 
   // Listeners registry — use a ref so callbacks registered in effects don't
   // trigger re-renders of the provider on every setBomFile call.
@@ -75,7 +99,9 @@ export function AppProvider({ children, version }: { children: React.ReactNode; 
   return (
     <AppContext.Provider value={{
       bomFile, bomInfo, screen, version, editorFont, isDirty,
-      setBomFile, setBomInfo, setScreen, setEditorFont, setDirty, onBomFileChange,
+      validateBadge, validateBadgeText, autoValidateOnLoad,
+      setBomFile, setBomInfo, setScreen, setEditorFont, setDirty,
+      setValidateBadge, setAutoValidateOnLoad, onBomFileChange,
     }}>
       {children}
     </AppContext.Provider>

@@ -36,6 +36,83 @@
   overflow:   hidden;
 }
 
+/* Right column: editor stacked above an optional results pane */
+.editorColumn {
+  flex:           1 1 0;
+  display:        flex;
+  flex-direction: column;
+  min-width:      0;
+  min-height:     0;
+  overflow:       hidden;
+}
+
+/* Validate results panel — slides in below the editor */
+.resultsPane {
+  display:        flex;
+  flex-direction: column;
+  min-height:     0;
+  border-top:     2px solid var(--color-border);
+  background:     var(--primitive-editor-bg);
+  overflow:       hidden;
+  /* height is driven by inline style from the resize handler */
+}
+
+/* Drag handle at the very top of the results pane */
+.resultsPaneResizeHandle {
+  height:     5px;
+  cursor:     ns-resize;
+  background: transparent;
+  flex-shrink: 0;
+  transition: background var(--duration-fast);
+}
+.resultsPaneResizeHandle:hover,
+.resultsPaneResizeHandle:active {
+  background: var(--color-accent, #3b82d4);
+  opacity: 0.45;
+}
+
+.resultsPaneHeader {
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-2);
+  padding:     var(--space-1) var(--space-3);
+  background:  var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.resultsPaneTitle {
+  font-size:   var(--text-xs);
+  font-weight: var(--weight-medium);
+  color:       var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex:        1;
+}
+
+/* Collapse/expand toggle button in the results pane header */
+.resultsPaneCollapseBtn {
+  display:       flex;
+  align-items:   center;
+  justify-content: center;
+  width:         20px;
+  height:        20px;
+  border:        none;
+  background:    transparent;
+  color:         var(--color-text-muted);
+  cursor:        pointer;
+  border-radius: var(--radius-sm);
+  font-size:     11px;
+  padding:       0;
+  flex-shrink:   0;
+  line-height:   1;
+}
+.resultsPaneCollapseBtn:hover {
+  background: var(--color-border);
+  color:      var(--color-text);
+}
+
 /* Top bar shown above the split (status badge row) */
 .topBar {
   display:     flex;
