@@ -112,7 +112,7 @@ function createWindow(): void {
   if (isDev) {
     // Vite dev server URL — must match vite.config.ts server.port
     mainWindow.loadURL('http://localhost:5173')
-    mainWindow.webContents.openDevTools({ mode: 'detach' })
+    // DevTools can be opened on demand via View → Toggle Developer Tools in the menu.
   } else {
     mainWindow.loadFile(path.join(__dirname, '..', '..', 'dist', 'index.html'))
   }
@@ -273,7 +273,10 @@ ipcMain.handle('dialog:openFile', async () => {
   if (!win) return null
   const result = await dialog.showOpenDialog(win, {
     title:      'Open BOM File',
-    filters:    [{ name: 'BOM Files', extensions: ['json', 'xml'] }],
+    filters:    [
+      { name: 'BOM Files (*.json)', extensions: ['json'] },
+      { name: 'All Files',          extensions: ['*']    },
+    ],
     properties: ['openFile'],
   })
   if (result.canceled || result.filePaths.length === 0) return null

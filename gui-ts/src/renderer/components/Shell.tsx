@@ -37,14 +37,14 @@ export default function Shell() {
   const pendingLoad = useRef<(() => Promise<void>) | null>(null)
 
   async function doLoad() {
-    const path = await window.sbomBridge.openFile()
-    if (!path) return
+    const result = await window.sbomBridge.openFile()
+    if (!result) return
     setDirty(false)
     // Reset badge so the status bar shows "Running…" while ValidateScreen runs
     setValidateBadge('idle', '')
-    setBomFile(path)
+    setBomFile(result.path, result.displayName)
     // Fetch BOM metadata asynchronously for the status bar
-    window.sbomBridge.getBomInfo(path)
+    window.sbomBridge.getBomInfo(result.path)
       .then((info: BomInfo) => setBomInfo(info))
       .catch(() => {/* non-fatal */})
     // ValidateScreen handles auto-validation via its own useEffect when it

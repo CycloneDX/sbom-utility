@@ -8,8 +8,8 @@
 }
 
 .pre {
-  font-family: var(--font-mono);
-  font-size:   12px;
+  font-family: var(--editor-font-family);
+  font-size:   var(--editor-font-size);
   line-height: var(--leading-normal);
   white-space: pre-wrap;
   word-break:  break-all;
@@ -54,8 +54,8 @@
   line-height: var(--leading-normal);
 }
 .mdPre {
-  font-family: var(--font-mono);
-  font-size:   12px;
+  font-family: var(--editor-font-family);
+  font-size:   var(--editor-font-size);
   white-space: pre-wrap;
   word-break:  break-all;
   margin-bottom: var(--space-3);

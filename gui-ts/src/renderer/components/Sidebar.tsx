@@ -79,7 +79,7 @@ export default function Sidebar({ activeScreen, bomLoaded, onNav, onLoadBOM }: P
         title="Preferences"
       >
         <span className={styles.icon}>⚙️</span>
-        Settings
+        Preferences
       </button>
     </nav>
   )

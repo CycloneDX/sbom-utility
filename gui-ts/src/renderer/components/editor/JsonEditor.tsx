@@ -24,7 +24,7 @@ import { tokenize, splitIntoLines }      from './JsonTokenizer'
 import JsonHighlighter                   from './JsonHighlighter'
 import { buildFoldInfo, toggleFold }     from './FoldingController'
 import FontDialog                        from './FontDialog'
-import { useAppContext }                 from '../../context/AppContext'
+import { useAppContext, type EditorFont } from '../../context/AppContext'
 import styles                            from './JsonEditor.module.css'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -55,9 +55,21 @@ export default function JsonEditor({ text, loading, onChange }: Props) {
   const scrollRef  = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  // ── Font settings from global context ──────────────────────────────────────
-  const { editorFont, setEditorFont } = useAppContext()
+  // ── Font: session-local state initialised from the persisted default ────────
+  // The Preferences panel sets the default; the Font… button here overrides it
+  // for this session only without touching the saved preference.
+  const { defaultEditorFont } = useAppContext()
+  const [editorFont, setEditorFont] = useState<EditorFont>(() => defaultEditorFont)
   const [fontDialogOpen, setFontDialogOpen] = useState(false)
+
+  // When the user changes the default in Preferences while no per-session
+  // override has been applied yet, keep the editor in sync.
+  const sessionOverridden = useRef(false)
+  useEffect(() => {
+    if (!sessionOverridden.current) {
+      setEditorFont(defaultEditorFont)
+    }
+  }, [defaultEditorFont])
 
   // ── Word-wrap toggle ────────────────────────────────────────────────────────
   const [wordWrap, setWordWrap] = useState(false)
@@ -235,7 +247,7 @@ export default function JsonEditor({ text, loading, onChange }: Props) {
           Font…
         </button>
         <div className={styles.toolbarSpacer} />
-        <span style={{ fontSize: 11, color: '#5a5a5e' }}>
+        <span style={{ fontSize: 14, color: '#5a5a5e' }}>
           {lines.length} lines
         </span>
       </div>
@@ -310,7 +322,7 @@ export default function JsonEditor({ text, loading, onChange }: Props) {
       {fontDialogOpen && (
         <FontDialog
           current={editorFont}
-          onApply={font => { setEditorFont(font); setFontDialogOpen(false) }}
+          onApply={font => { sessionOverridden.current = true; setEditorFont(font); setFontDialogOpen(false) }}
           onCancel={() => setFontDialogOpen(false)}
         />
       )}

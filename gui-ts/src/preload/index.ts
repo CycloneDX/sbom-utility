@@ -55,9 +55,18 @@ export interface PatchParams {
   patchPath: string
 }
 
+export interface OpenFileResult {
+  /** Operational path used for all backend calls (real FS path in Electron;
+   *  server temp path in browser mode). */
+  path:        string
+  /** User-visible label — the real FS path in Electron, just the filename in
+   *  browser mode where the browser security model hides the full path. */
+  displayName: string
+}
+
 export interface SbomBridge {
   // File system
-  openFile():                                   Promise<string | null>
+  openFile():                                   Promise<OpenFileResult | null>
   readFile(filePath: string):                   Promise<string>
   saveFileDialog(defaultPath: string):          Promise<string | null>
   writeFile(filePath: string, content: string): Promise<void>
@@ -79,7 +88,11 @@ export interface SbomBridge {
 // ── Implementation ────────────────────────────────────────────────────────────
 
 const bridge: SbomBridge = {
-  openFile:            ()          => ipcRenderer.invoke('dialog:openFile'),
+  openFile: async () => {
+    const p: string | null = await ipcRenderer.invoke('dialog:openFile')
+    if (!p) return null
+    return { path: p, displayName: p }
+  },
   readFile:            (p)         => ipcRenderer.invoke('fs:readFile',    p),
   saveFileDialog:      (dp)        => ipcRenderer.invoke('dialog:saveFile', dp),
   writeFile:           (p, c)      => ipcRenderer.invoke('fs:writeFile',   p, c),
