@@ -15,21 +15,7 @@ export default function StatusBar() {
 
   return (
     <footer className={styles.bar} role="status" aria-label="BOM status">
-      {/* Left: format + version */}
-      {format && (
-        <span className={styles.segment}>
-          <span className={styles.label}>Format:</span>
-          <span className={styles.value}>{format}</span>
-        </span>
-      )}
-      {specVersion && (
-        <span className={styles.segment}>
-          <span className={styles.label}>Version:</span>
-          <span className={styles.value}>{specVersion}</span>
-        </span>
-      )}
-
-      {/* Validation badge — shown whenever a result is available */}
+      {/* Left: validation badge */}
       {validateBadge !== 'idle' && (
         <span className={`${styles.validBadge} ${styles[`validBadge_${validateBadge}`]}`}>
           <span className={styles.validDot} />
@@ -49,8 +35,22 @@ export default function StatusBar() {
         </span>
       )}
 
-      {/* Right: reserved */}
-      <span className={styles.right}>CycloneDX sbom-utility</span>
+      {/* Subtle separator between filename and format/version */}
+      {(format || specVersion) && <span className={styles.sep} aria-hidden="true" />}
+
+      {/* Format + Version — right of separator */}
+      {format && (
+        <span className={styles.segment}>
+          <span className={styles.label}>Format:</span>
+          <span className={styles.value}>{format}</span>
+        </span>
+      )}
+      {specVersion && (
+        <span className={styles.segment}>
+          <span className={styles.label}>Version:</span>
+          <span className={styles.value}>{specVersion}</span>
+        </span>
+      )}
     </footer>
   )
 }
