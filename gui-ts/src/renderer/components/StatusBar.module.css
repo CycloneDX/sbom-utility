@@ -7,7 +7,8 @@
   color:       var(--statusbar-text);
   font-size:   var(--statusbar-font);
   flex-shrink: 0;
-  padding:     0 var(--space-3);
+  /* Side padding keeps content away from the rounded window corners */
+  padding:     0 var(--space-4);
   gap:         var(--space-4);
   user-select: text;
 }
@@ -36,15 +37,17 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--statusbar-font);
   opacity: 0.9;
   cursor: default;
 }
 
-.right {
-  margin-left: auto;
-  opacity: 0.6;
-  font-size: 11px;
+/* Subtle vertical pipe separator between the filename and format/version group */
+.sep {
+  width:        1px;
+  height:       14px;
+  background:   rgba(255, 255, 255, 0.30);
+  flex-shrink:  0;
 }
 
 /* Validation badge rendered inside the status bar */
@@ -54,7 +57,7 @@
   gap:           5px;
   padding:       1px 8px;
   border-radius: 10px;
-  font-size:     11px;
+  font-size:     var(--statusbar-font);
   font-weight:   600;
   letter-spacing: 0.04em;
   text-transform: uppercase;

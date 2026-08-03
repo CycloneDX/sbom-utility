@@ -158,8 +158,8 @@
   /* Status bar */
   --statusbar-bg:       #3478C0;          /* macOS blue, slightly desaturated */
   --statusbar-text:     #FFFFFF;
-  --statusbar-height:   26px;
-  --statusbar-font:     var(--text-xs);
+  --statusbar-height:   28px;
+  --statusbar-font:     var(--text-sm);   /* 12px — matches the JSON editor font */
 
   /* BOM source viewer (dark editor) */
   --viewer-bg:          var(--primitive-editor-bg);
