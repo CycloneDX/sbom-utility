@@ -56,6 +56,9 @@ dist-gui-ts:
 dev-gui-ts:
 	cd ${GUI_TS_DIR} && npm run dev
 
+dev-gui-browser: build
+	cd ${GUI_TS_DIR} && npm run dev:browser:full
+
 # General supported environments: https://go.dev/doc/install/source#environment
 # See latest supported combinations using:
 # $ go install golang.org/x/tools/cmd/goimports@latest

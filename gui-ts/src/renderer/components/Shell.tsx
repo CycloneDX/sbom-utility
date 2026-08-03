@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 import { useEffect, useRef, useState } from 'react'
 import { useAppContext, type Screen } from '../context/AppContext'
-import Sidebar   from './Sidebar'
-import StatusBar from './StatusBar'
+import Sidebar       from './Sidebar'
+import StatusBar     from './StatusBar'
 import LoadScreen          from './screens/LoadScreen'
-import ViewScreen          from './screens/ViewScreen'
 import ValidateScreen      from './screens/ValidateScreen'
 import LicenseScreen       from './screens/LicenseScreen'
 import ComponentScreen     from './screens/ComponentScreen'
@@ -12,21 +11,25 @@ import ResourceScreen      from './screens/ResourceScreen'
 import VulnerabilityScreen from './screens/VulnerabilityScreen'
 import DiffScreen          from './screens/DiffScreen'
 import PatchScreen         from './screens/PatchScreen'
+import SettingsScreen      from './screens/SettingsScreen'
 import styles from './Shell.module.css'
 import type { BomInfo } from '../../preload/index'
 
 const SCREENS: Screen[] = [
-  'load', 'view', 'validate', 'licenses',
+  'load', 'validate', 'licenses',
   'components', 'resources', 'vulnerabilities',
-  'diff', 'patch',
+  'diff', 'patch', 'settings',
 ]
 
 export default function Shell() {
-  const { screen, setScreen, bomFile, setBomFile, setBomInfo, isDirty, setDirty } = useAppContext()
+  const {
+    screen, setScreen, bomFile, setBomFile, setBomInfo, isDirty, setDirty,
+    setValidateBadge,
+  } = useAppContext()
 
-  // When the user loads a BOM, auto-switch to View
+  // When the user loads a BOM, auto-switch to View/Validate
   useEffect(() => {
-    if (bomFile) setScreen('view')
+    if (bomFile) setScreen('validate')
   }, [bomFile, setScreen])
 
   // ── Unsaved-changes guard ─────────────────────────────────────────────────
@@ -37,11 +40,17 @@ export default function Shell() {
     const path = await window.sbomBridge.openFile()
     if (!path) return
     setDirty(false)
+    // Reset badge so the status bar shows "Running…" while ValidateScreen runs
+    setValidateBadge('idle', '')
     setBomFile(path)
     // Fetch BOM metadata asynchronously for the status bar
     window.sbomBridge.getBomInfo(path)
       .then((info: BomInfo) => setBomInfo(info))
       .catch(() => {/* non-fatal */})
+    // ValidateScreen handles auto-validation via its own useEffect when it
+    // becomes the active screen (triggered by setBomFile above).  Issuing a
+    // second concurrent validate call here races on shared global state in the
+    // Go server and produces inconsistent badge / output results.
   }
 
   const handleLoad = () => {
@@ -91,7 +100,6 @@ export default function Shell() {
           {SCREENS.map(s => (
             <div key={s} style={{ display: screen === s ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
               {s === 'load'            && <LoadScreen onLoad={handleLoad} />}
-              {s === 'view'            && <ViewScreen />}
               {s === 'validate'        && <ValidateScreen active={screen === 'validate'} />}
               {s === 'licenses'        && <LicenseScreen active={screen === 'licenses'} />}
               {s === 'components'      && <ComponentScreen active={screen === 'components'} />}
@@ -99,6 +107,7 @@ export default function Shell() {
               {s === 'vulnerabilities' && <VulnerabilityScreen active={screen === 'vulnerabilities'} />}
               {s === 'diff'            && <DiffScreen active={screen === 'diff'} />}
               {s === 'patch'           && <PatchScreen active={screen === 'patch'} />}
+              {s === 'settings'        && <SettingsScreen />}
             </div>
           ))}
         </main>

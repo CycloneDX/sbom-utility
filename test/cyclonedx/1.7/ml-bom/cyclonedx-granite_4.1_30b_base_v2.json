@@ -290,32 +290,6 @@
               "format": "string",
               "description": "Generated text continuation. The instruct variant additionally supports structured JSON output and tool-call JSON objects."
             }
-          ],
-          "properties": [
-            { "name": "cdx:ai-ml:model:modality:text", "value": "true" },
-            { "name": "cdx:ai-ml:model:modality:code", "value": "true" },
-            { "name": "cdx:ai-ml:model:parameter:count", "value": "30B" },
-            { "name": "cdx:ai-ml:model:parameter:tune_method", "value": "full" },
-            { "name": "cdx:ai-ml:model:hyperparameter:num_hidden_layers", "value": "64" },
-            { "name": "cdx:ai-ml:model:hyperparameter:hidden_size", "value": "4096" },
-            { "name": "cdx:ai-ml:model:hyperparameter:intermediate_size", "value": "16384" },
-            { "name": "cdx:ai-ml:model:hyperparameter:num_attention_heads", "value": "32" },
-            { "name": "cdx:ai-ml:model:hyperparameter:num_key_value_heads", "value": "8" },
-            { "name": "cdx:ai-ml:model:hyperparameter:hidden_act", "value": "silu" },
-            { "name": "cdx:ai-ml:model:hyperparameter:layer_norm_type", "value": "RMSNorm" },
-            { "name": "cdx:ai-ml:model:hyperparameter:context_length", "value": "131072" },
-            { "name": "cdx:ai-ml:model:hyperparameter:max_position_embeddings", "value": "131072" },
-            { "name": "cdx:ai-ml:model:hyperparameter:vocab_size", "value": "49152" },
-            { "name": "cdx:ai-ml:model:hyperparameter:quantization", "value": "bf16" },
-            { "name": "cdx:ai-ml:model:hyperparameter:tokenizer_class", "value": "PreTrainedTokenizerFast" },
-            { "name": "cdx:ai-ml:model:hyperparameter:_undefined:attention_head_dim", "value": "128" },
-            { "name": "cdx:ai-ml:model:hyperparameter:_undefined:positional_embeddings", "value": "RoPE" },
-            { "name": "cdx:ai-ml:model:hyperparameter:_undefined:transformer_class", "value": "GraniteForCausalLM" },
-            { "name": "cdx:ai-ml:model:hyperparameter:_undefined:architecture_type", "value": "dense-decoder-only" },
-            { "name": "cdx:ai-ml:model:hyperparameter:_undefined:attention_mechanism", "value": "GQA" },
-            { "name": "cdx:ai-ml:model:hyperparameter:_undefined:shared_input_output_embeddings", "value": "true" },
-            { "name": "cdx:ai-ml:model:hyperparameter:_undefined:long_context_extension_method", "value": "staged-512K-RoPE-scaling" },
-            { "name": "cdx:ai-ml:model:language", "value": "en,de,es,fr,ja,pt,ar,cs,it,ko,nl,zh" }
           ]
         },
         "quantitativeAnalysis": {
@@ -487,7 +461,33 @@
               }
             ]
           }
-        }
+        },
+        "properties": [
+          { "name": "cdx:ai-ml:model:modality:text", "value": "true" },
+          { "name": "cdx:ai-ml:model:modality:code", "value": "true" },
+          { "name": "cdx:ai-ml:model:parameter:count", "value": "30B" },
+          { "name": "cdx:ai-ml:model:parameter:tune_method", "value": "full" },
+          { "name": "cdx:ai-ml:model:hyperparameter:num_hidden_layers", "value": "64" },
+          { "name": "cdx:ai-ml:model:hyperparameter:hidden_size", "value": "4096" },
+          { "name": "cdx:ai-ml:model:hyperparameter:intermediate_size", "value": "16384" },
+          { "name": "cdx:ai-ml:model:hyperparameter:num_attention_heads", "value": "32" },
+          { "name": "cdx:ai-ml:model:hyperparameter:num_key_value_heads", "value": "8" },
+          { "name": "cdx:ai-ml:model:hyperparameter:hidden_act", "value": "silu" },
+          { "name": "cdx:ai-ml:model:hyperparameter:layer_norm_type", "value": "RMSNorm" },
+          { "name": "cdx:ai-ml:model:hyperparameter:context_length", "value": "131072" },
+          { "name": "cdx:ai-ml:model:hyperparameter:max_position_embeddings", "value": "131072" },
+          { "name": "cdx:ai-ml:model:hyperparameter:vocab_size", "value": "49152" },
+          { "name": "cdx:ai-ml:model:hyperparameter:quantization", "value": "bf16" },
+          { "name": "cdx:ai-ml:model:hyperparameter:tokenizer_class", "value": "PreTrainedTokenizerFast" },
+          { "name": "cdx:ai-ml:model:hyperparameter:_undefined:attention_head_dim", "value": "128" },
+          { "name": "cdx:ai-ml:model:hyperparameter:_undefined:positional_embeddings", "value": "RoPE" },
+          { "name": "cdx:ai-ml:model:hyperparameter:_undefined:transformer_class", "value": "GraniteForCausalLM" },
+          { "name": "cdx:ai-ml:model:hyperparameter:_undefined:architecture_type", "value": "dense-decoder-only" },
+          { "name": "cdx:ai-ml:model:hyperparameter:_undefined:attention_mechanism", "value": "GQA" },
+          { "name": "cdx:ai-ml:model:hyperparameter:_undefined:shared_input_output_embeddings", "value": "true" },
+          { "name": "cdx:ai-ml:model:hyperparameter:_undefined:long_context_extension_method", "value": "staged-512K-RoPE-scaling" },
+          { "name": "cdx:ai-ml:model:language", "value": "en,de,es,fr,ja,pt,ar,cs,it,ko,nl,zh" }
+        ]
       },
       "properties": [
         {

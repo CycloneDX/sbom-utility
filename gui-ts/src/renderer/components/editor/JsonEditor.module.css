@@ -180,6 +180,7 @@
   transition:  color var(--duration-fast);
   position:    absolute;
   right:       2px;
+  z-index:     3;
 }
 .foldBtn:hover { color: #c8c8cc; background: rgba(255,255,255,0.08); }
 

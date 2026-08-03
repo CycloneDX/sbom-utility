@@ -95,11 +95,12 @@ function allowList<T extends string>(value: unknown, allowed: T[], defaultValue:
  */
 function runBinary(binaryPath: string, args: string[], env: NodeJS.ProcessEnv): Promise<ExecResult> {
   return new Promise((resolve) => {
-    execFile(binaryPath, args, { env, maxBuffer: 32 * 1024 * 1024 }, (err, stdout, stderr) => {
+    const child = execFile(binaryPath, args, { env, maxBuffer: 32 * 1024 * 1024 }, (err, stdout, stderr) => {
+      const exitCode = child.exitCode ?? (typeof err?.code === 'number' ? err.code : 0)
       resolve({
         stdout: stdout ?? '',
         stderr: stderr ?? '',
-        code:   (err as NodeJS.ErrnoException & { code?: number } | null)?.code ?? 0,
+        code:   exitCode,
       })
     })
   })

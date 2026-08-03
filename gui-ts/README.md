@@ -1,9 +1,6 @@
 # sbom-utility TypeScript GUI
 
-A native desktop GUI for [sbom-utility](../README.md), built with
-[Electron](https://www.electronjs.org) (MIT · OpenJS Foundation),
-[React 18](https://react.dev) (MIT), [Vite 5](https://vitejs.dev) (MIT),
-and TypeScript 5.
+A React/Vite GUI for [sbom-utility](../README.md) that can run either in [Electron](https://www.electronjs.org) or in a standard browser backed by the local `sbom-utility serve` HTTP API.
 
 No CGo. No native compiler. One `npm ci` and you are running.
 
@@ -24,15 +21,25 @@ No CGo. No native compiler. One `npm ci` and you are running.
 
 ---
 
+## Browser mode with local Go backend
+
+For IBM-managed macOS environments where the Electron runtime is blocked, use the browser UI with the local Go server:
+
+1. Build or install [`sbom-utility`](../main.go).
+2. Start the browser mode using either:
+   - [`npm run dev:browser:full`](gui-ts/package.json:10) inside [`gui-ts`](gui-ts), or
+   - [`make dev-gui-browser`](../Makefile:59) from the repo root.
+3. Open the shown Vite URL in your browser.
+
+The [`dev:browser:full`](gui-ts/package.json:10) script starts [`./sbom-utility serve`](../cmd/serve.go), waits for port `8787`, starts [`npm run dev:browser`](gui-ts/package.json:9), and stops the Go server when the frontend exits. The [`dev-gui-browser`](../Makefile:59) target first runs [`build`](../Makefile:37) so the local [`./sbom-utility`](../main.go) always includes the latest Go command changes, then runs that same npm script.
+
+In this mode, the existing React UI talks to the local HTTP API exposed by [`serve`](../cmd/serve.go) instead of Electron IPC.
+
 ## 1. What was built
 
 ### Summary
 
-A fully self-contained TypeScript/Electron desktop application that wraps the
-`sbom-utility` CLI binary with a polished, themeable graphical interface.  It
-lives in `gui-ts/` — a **separate npm project** with its own `package.json`,
-`node_modules/`, and build output — and is completely independent of
-`go.mod`, `main.go`, and all existing Go tests.
+A fully self-contained TypeScript/Electron desktop application that wraps the `sbom-utility` CLI binary with a polished, themeable graphical interface. It lives in `gui-ts/` — a **separate npm project** with its own `package.json`, `node_modules/`, and build output — and is completely independent of `go.mod`, `main.go`, and all existing Go tests.
 
 ### Feature inventory
 
@@ -127,23 +134,13 @@ gui-ts/
 
 ## 2. Design considerations
 
-### Why Electron
+Electron was selected over other evaluated TypeScript desktop frameworks based on three key criteria:
 
-Electron was chosen after a structured evaluation of TypeScript desktop
-frameworks against three constraints: 100 % open-source, no corporate upsell
-tier, and governance that cannot be relicensed at a company's whim.
+- **100 % open-source licensing** — MIT licence with no proprietary tiers.
+- **No corporate upsell** — no paid cloud product or commercial add-on from the same team.
+- **Sound governance** — overseen by the **OpenJS Foundation** (a Linux Foundation sub-project), where IP is held by the foundation rather than any single company, preventing unilateral relicensing.
 
-| Framework | Licence | Governance | Verdict |
-|-----------|---------|-----------|---------|
-| **Electron** ✅ | MIT | **OpenJS Foundation** (Linux Foundation sub-project) — IP held by a foundation; no single company can relicense | Best governance + highest consumer adoption |
-| Tauri v2 | MIT + Apache-2.0 | Community working group; no foundation IP assignment | Best security architecture but governance risk |
-| Wails v2 | MIT | Single primary maintainer; no foundation | Highest governance risk |
-| NeutralinoJS | MIT | Has a paid cloud product from the same team | Fails "no upsell" constraint |
-
-Electron's security architecture is sound when built with modern defaults
-(see [§ 3 Security hardening](#3-security-hardening)).  The "Electron is
-insecure" reputation applies to apps built with 2016–2019 defaults
-(`nodeIntegration: true`, no sandbox) — none of which are used here.
+Electron's security architecture is sound when built with modern defaults (see [§ 3 Security hardening](#3-security-hardening)).
 
 ### Visual design language
 
@@ -164,12 +161,7 @@ The GUI follows a **two-zone** layout:
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-**Intentional contrast:** the sidebar is dark charcoal (`#2D2D2F`) while the
-content chrome is light (`#F5F5F5`). This creates a clear visual boundary
-between navigation and work area — a pattern common in professional developer
-tools (VS Code, JetBrains IDEs, GitHub Desktop). The results / viewer pane
-reverts to a dark editor background (`#1E1E1E`) so that monospace BOM content
-is easy to read without eye strain.
+**Intentional contrast:** the sidebar is dark charcoal (`#2D2D2F`) while the content chrome is light (`#F5F5F5`). This creates a clear visual boundary between navigation and work area — a pattern common in professional developer tools (VS Code, JetBrains IDEs, GitHub Desktop). The results / viewer pane reverts to a dark editor background (`#1E1E1E`) so that monospace BOM content is easy to read without eye strain.
 
 ### Typography
 
@@ -181,22 +173,16 @@ The font stack resolves to the OS native sans-serif:
 | Windows | Segoe UI |
 | Linux | Cantarell / DejaVu Sans |
 
-Body size is **13 px**, matching the macOS Human Interface Guidelines for
-application body text. Monospace output uses `ui-monospace` → Cascadia Code →
-Fira Code → Consolas → Courier New — whatever the OS provides, in that order.
+Body size is **13 px**, matching the macOS Human Interface Guidelines for application body text. Monospace output uses `ui-monospace` → Cascadia Code → Fira Code → Consolas → Courier New — whatever the OS provides, in that order.
 
 ### Colour system
 
 Colours are organised in two layers (see [`tokens.css`](src/renderer/styles/tokens.css)):
 
-1. **Primitive colours** — named hex values (`--primitive-blue-600: #007AFF`).
-   These are never used directly in components.
-2. **Semantic colours** — role aliases that reference primitives
-   (`--color-accent: var(--primitive-blue-600)`).  Components always reference
-   semantic tokens, never primitives.
+1. **Primitive colours** — named hex values (`--primitive-blue-600: #007AFF`). These are never used directly in components.
+2. **Semantic colours** — role aliases that reference primitives (`--color-accent: var(--primitive-blue-600)`). Components always reference semantic tokens, never primitives.
 
-This means you can retheme the entire application by changing only the semantic
-layer, without touching any component code.
+This means you can retheme the entire application by changing only the semantic layer, without touching any component code.
 
 ### Separation of concerns
 
@@ -209,34 +195,25 @@ layer, without touching any component code.
 | `src/renderer/styles/` | Visual design tokens and global resets |
 | `src/renderer/components/` | Purely presentational React components |
 
-No component imports from `src/main/` or `src/preload/`. No main-process code
-imports from `src/renderer/`. These boundaries are enforced by TypeScript's
-module resolution.
+No component imports from `src/main/` or `src/preload/`. No main-process code imports from `src/renderer/`. These boundaries are enforced by TypeScript's module resolution.
 
 ### Accessibility baseline
 
-- All interactive controls are standard HTML elements (`<button>`, `<select>`,
-  `<input>`) so they participate in the OS accessibility tree without custom
-  ARIA gymnastics.
+- All interactive controls are standard HTML elements (`<button>`, `<select>`, `<input>`) so they participate in the OS accessibility tree without custom ARIA gymnastics.
 - Focus rings use `outline` + the accent colour (not removed).
 - The status bar uses `role="status"` so screen readers announce BOM changes.
-- Sidebar buttons use `aria-current="page"` for the active screen and
-  `title` for disabled-state explanations.
+- Sidebar buttons use `aria-current="page"` for the active screen and `title` for disabled-state explanations.
 
 ### Markdown table rendering
 
-The built-in GFM table parser (`ResultsView.tsx`) mirrors the logic in the
-Fyne `widgets/results.go`:
+The built-in GFM table parser (`ResultsView.tsx`) mirrors the logic in the Fyne `widgets/results.go`:
 
 1. Split output into alternating text / pipe-table segments.
-2. A pipe-table segment is only recognised when it contains a proper separator
-   row (`|---|---|`) — bare `|` characters in error messages are not mistaken
-   for tables.
+2. A pipe-table segment is only recognised when it contains a proper separator row (`|---|---|`) — bare `|` characters in error messages are not mistaken for tables.
 3. Separator rows are stripped; row 0 becomes `<thead>`, the rest `<tbody>`.
 4. Column widths are estimated from cell content length.
 
-This approach requires no markdown library dependency and produces a native,
-styled HTML table that can be selected, copied, and printed.
+This approach requires no markdown library dependency and produces a native, styled HTML table that can be selected, copied, and printed.
 
 ---
 
@@ -244,8 +221,7 @@ styled HTML table that can be selected, copied, and printed.
 
 ### Electron BrowserWindow settings
 
-All settings are declared explicitly in
-[`src/main/index.ts`](src/main/index.ts) — defaults are never relied upon:
+All settings are declared explicitly in [`src/main/index.ts`](src/main/index.ts) — defaults are never relied upon:
 
 | Setting | Value | Rationale |
 |---------|-------|-----------|
@@ -258,13 +234,10 @@ All settings are declared explicitly in
 
 ### Content Security Policy
 
-A strict CSP is applied at **two independent layers** so it cannot be bypassed
-by a renderer-level exploit:
+A strict CSP is applied at **two independent layers** so it cannot be bypassed by a renderer-level exploit:
 
-1. A `<meta http-equiv="Content-Security-Policy">` tag in `index.html` (first
-   line of defence, parsed by Chromium before any script runs).
-2. A response header injected by `session.webRequest.onHeadersReceived` in the
-   main process — this takes precedence over the meta tag.
+1. A `<meta http-equiv="Content-Security-Policy">` tag in `index.html` (first line of defence, parsed by Chromium before any script runs).
+2. A response header injected by `session.webRequest.onHeadersReceived` in the main process — this takes precedence over the meta tag.
 
 ```
 default-src 'self';
@@ -278,10 +251,7 @@ base-uri    'none';
 frame-ancestors 'none';
 ```
 
-`connect-src 'none'` is **deliberately strict**: sbom-utility processes local
-files only. If you add update-check or telemetry in future, change this to
-`connect-src 'self' https://api.github.com` and document the change in a
-security notice.
+`connect-src 'none'` is **deliberately strict**: sbom-utility processes local files only. If you add update-check or telemetry in future, change this to `connect-src 'self' https://api.github.com` and document the change in a security notice.
 
 ### Navigation and window.open guards
 
@@ -300,32 +270,25 @@ mainWindow.webContents.setWindowOpenHandler(({ url }) => {
 
 ### IPC input validation
 
-Every handler in [`src/main/ipc-handlers.ts`](src/main/ipc-handlers.ts)
-validates its arguments before touching the file system or spawning a process.
-Two validators are used:
+Every handler in [`src/main/ipc-handlers.ts`](src/main/ipc-handlers.ts) validates its arguments before touching the file system or spawning a process. Two validators are used:
 
 **`validateFilePath(path)`**
 - Rejects non-string and empty values.
 - Rejects relative paths (`path.isAbsolute()` must be true).
-- Normalises the path (`path.normalize()`) and rejects anything that still
-  contains `..` after normalisation.
+- Normalises the path (`path.normalize()`) and rejects anything that still contains `..` after normalisation.
 - Rejects paths that do not exist on disk (`fs.existsSync()`).
 
 **`allowList(value, allowed, default)`**
-- Checks string values (output format, resource type) against a frozen
-  `as const` array of permitted strings.
+- Checks string values (output format, resource type) against a frozen `as const` array of permitted strings.
 - Any value not in the array throws; it is never forwarded to the binary.
 
 **`execFile`, never `exec`**
-- Arguments are passed as a `string[]` array — no shell interpolation is
-  possible regardless of what the renderer sends.
-- `maxBuffer` is capped at 32 MB to prevent memory exhaustion from
-  pathologically large BOM files.
+- Arguments are passed as a `string[]` array — no shell interpolation is possible regardless of what the renderer sends.
+- `maxBuffer` is capped at 32 MB to prevent memory exhaustion from pathologically large BOM files.
 
 ### Binary path isolation
 
-The `sbom-utility` binary path is resolved **once at startup** by
-`resolveBinaryPath()` in `src/main/index.ts`:
+The `sbom-utility` binary path is resolved **once at startup** by `resolveBinaryPath()` in `src/main/index.ts`:
 
 ```typescript
 // Packaged: always from process.resourcesPath
@@ -335,14 +298,11 @@ path.join(process.resourcesPath, 'sbom-utility')
 path.resolve(__dirname, '..', '..', '..', '..', 'sbom-utility')
 ```
 
-This path is stored in a `BridgeConfig` struct and passed into the IPC
-handlers at registration time. **No renderer input can influence which
-executable is invoked.**
+This path is stored in a `BridgeConfig` struct and passed into the IPC handlers at registration time. **No renderer input can influence which executable is invoked.**
 
 ### macOS Hardened Runtime
 
-The [`build/entitlements.mac.plist`](build/entitlements.mac.plist) contains
-only the minimum entitlements required by Electron and Chromium:
+The [`build/entitlements.mac.plist`](build/entitlements.mac.plist) contains only the minimum entitlements required by Electron and Chromium:
 
 | Entitlement | Reason |
 |-------------|--------|
@@ -350,26 +310,19 @@ only the minimum entitlements required by Electron and Chromium:
 | `com.apple.security.cs.disable-library-validation` | Required by Chromium's GPU process |
 | `com.apple.security.files.user-selected.read-only` | Read files the user explicitly opens via the dialog |
 
-`com.apple.security.network.client` is **absent** — the app makes no outbound
-network connections.
+`com.apple.security.network.client` is **absent** — the app makes no outbound network connections.
 
 ### Dependency supply-chain
 
-All dependencies are permissively licensed (MIT or Apache-2.0).  No GPL,
-LGPL, AGPL, SSPL, or Commons Clause dependencies are present.  Run
-`npm audit` at any time to check for known CVEs in the dependency tree.
+All dependencies are permissively licensed (MIT or Apache-2.0). No GPL, LGPL, AGPL, SSPL, or Commons Clause dependencies are present. Run `npm audit` at any time to check for known CVEs in the dependency tree.
 
-Electron itself is maintained by the
-[OpenJS Foundation](https://openjsf.org) (a Linux Foundation sub-project).
-The IP is held by the foundation — no single company can relicense it.
+Electron itself is maintained by the [OpenJS Foundation](https://openjsf.org) (a Linux Foundation sub-project). The IP is held by the foundation — no single company can relicense it.
 
 ---
 
 ## 4. Customising styles
 
-The entire visual design is driven by CSS custom properties in
-[`src/renderer/styles/tokens.css`](src/renderer/styles/tokens.css).
-No component source code needs to change to retheme the application.
+The entire visual design is driven by CSS custom properties in [`src/renderer/styles/tokens.css`](src/renderer/styles/tokens.css). No component source code needs to change to retheme the application.
 
 ### Token reference
 
@@ -386,17 +339,13 @@ No component source code needs to change to retheme the application.
 ### How to apply a custom theme
 
 **Option A — override tokens in place.**
-Edit the `:root` block at the bottom of `tokens.css`.  This is the simplest
-approach for one-off customisations.
+Edit the `:root` block at the bottom of `tokens.css`. This is the simplest approach for one-off customisations.
 
 **Option B — separate override file.**
-Create `src/renderer/styles/tokens-custom.css`, add it as a second
-`<link>` in `index.html` after `tokens.css`.  Tokens in the second file win.
-This keeps your changes separate from upstream and simplifies future merges.
+Create `src/renderer/styles/tokens-custom.css`, add it as a second `<link>` in `index.html` after `tokens.css`. Tokens in the second file win. This keeps your changes separate from upstream and simplifies future merges.
 
 **Option C — CSS Module override.**
-Each component has a co-located `.module.css` file.  Override a single
-component's layout or spacing without touching any token.
+Each component has a co-located `.module.css` file. Override a single component's layout or spacing without touching any token.
 
 ---
 
@@ -419,8 +368,7 @@ component's layout or spacing without touching any token.
 
 ### Example B — full dark mode for the app chrome
 
-The results and viewer panes are already dark.  This example makes the
-sidebar, content area, and options panel dark to match.
+The results and viewer panes are already dark. This example makes the sidebar, content area, and options panel dark to match.
 
 ```css
 @media (prefers-color-scheme: dark) {
@@ -465,9 +413,7 @@ Place the `.woff2` file at `src/renderer/fonts/inter.woff2`, then:
 }
 ```
 
-> **Security note:** Do not use `url()` with external CDN origins (e.g. Google
-> Fonts). The CSP's `font-src 'self' data:` directive blocks external font
-> fetches. All font assets must be local to the bundle.
+> **Security note:** Do not use `url()` with external CDN origins (e.g. Google Fonts). The CSP's `font-src 'self' data:` directive blocks external font fetches. All font assets must be local to the bundle.
 
 ### Example D — wider sidebar
 
@@ -498,9 +444,7 @@ Place the `.woff2` file at `src/renderer/fonts/inter.woff2`, then:
 
 ### Separation from the CLI
 
-`gui-ts/` is a standalone npm project.  It shares no source files with the Go
-CLI and makes no modifications to `go.mod`, `main.go`, or `cmd/`.  The CLI
-binary is treated as an opaque executable — the GUI cannot see its source.
+`gui-ts/` is a standalone npm project. It shares no source files with the Go CLI and makes no modifications to `go.mod`, `main.go`, or `cmd/`. The CLI binary is treated as an opaque executable — the GUI cannot see its source.
 
 ### Execution model
 
@@ -532,9 +476,7 @@ binary is treated as an opaque executable — the GUI cannot see its source.
 
 ### State management
 
-Application state is managed with React context
-(`src/renderer/context/AppContext.tsx`).  No external state library is
-required.  The state surface is minimal:
+Application state is managed with React context (`src/renderer/context/AppContext.tsx`). No external state library is required. The state surface is minimal:
 
 | State | Type | Purpose |
 |-------|------|---------|
@@ -543,15 +485,11 @@ required.  The state surface is minimal:
 | `screen` | `Screen` | Currently visible screen name |
 | `version` | `string` | App version string from `app.getVersion()` |
 
-Listener callbacks (for BOM file change notifications) are stored in a `ref`
-so they do not trigger context re-renders.
+Listener callbacks (for BOM file change notifications) are stored in a `ref` so they do not trigger context re-renders.
 
 ### Component model
 
-All components are functional React components with TypeScript strict mode.
-Each has a co-located CSS Module (`*.module.css`) for scoped styles.  Global
-tokens from `tokens.css` are available inside every module via CSS custom
-properties — modules reference `var(--color-accent)` not hard-coded values.
+All components are functional React components with TypeScript strict mode. Each has a co-located CSS Module (`*.module.css`) for scoped styles. Global tokens from `tokens.css` are available inside every module via CSS custom properties — modules reference `var(--color-accent)` not hard-coded values.
 
 ---
 
@@ -563,10 +501,7 @@ properties — modules reference `var(--color-accent)` not hard-coded values.
 | npm | 10 | `npm --version` (ships with Node 20) |
 | sbom-utility binary | any | `go build -o sbom-utility .` from repo root |
 
-No other global tools are required.  `vite` and `electron-builder` are
-devDependencies and install via `npm install`.  The Electron binary itself
-is downloaded as a post-install step — see the note below if that download
-is blocked by a corporate proxy.
+No other global tools are required. `vite` and `electron-builder` are devDependencies and install via `npm install`. The Electron binary itself is downloaded as a post-install step — see the note below if that download is blocked by a corporate proxy.
 
 ---
 
@@ -582,8 +517,7 @@ go build -o sbom-utility.exe .      # Windows
 
 ### Step 2 — install GUI dependencies
 
-The installer scripts verify Node.js ≥ 20 and the binary before running
-`npm ci`.
+The installer scripts verify Node.js ≥ 20 and the binary before running `npm ci`.
 
 ```bash
 # macOS or Linux (from repo root)
@@ -595,16 +529,11 @@ The installer scripts verify Node.js ≥ 20 and the binary before running
 
 > **Note for corporate / managed machines (IBM laptops etc.)**
 >
-> `npm install` runs a post-install hook that downloads the Electron binary
-> from GitHub Releases.  On machines with a restrictive MDM profile or
-> corporate proxy this download is silently blocked, leaving
-> `node_modules/electron/dist/` empty and causing the error:
+> `npm install` runs a post-install hook that downloads the Electron binary from GitHub Releases. On machines with a restrictive MDM profile or corporate proxy this download is silently blocked, leaving `node_modules/electron/dist/` empty and causing the error:
 > ```
 > Error: Electron failed to install correctly, please delete node_modules/electron and try installing again
 > ```
-> Fix it by downloading the binary directly with `curl` (which honours the
-> system proxy) and extracting it manually.  Run this once after every
-> `npm install`:
+> Fix it by downloading the binary directly with `curl` (which honours the system proxy) and extracting it manually. Run this once after every `npm install`:
 >
 > **macOS — Apple Silicon (arm64)**
 > ```bash
@@ -626,18 +555,15 @@ The installer scripts verify Node.js ≥ 20 and the binary before running
 > printf "Electron.app/Contents/MacOS/Electron" > node_modules/electron/path.txt
 > ```
 >
-> If the Electron version is ever bumped in `package.json`, replace `31.7.7`
-> in the URL with the new version shown in `node_modules/electron/package.json`.
+> If the Electron version is ever bumped in `package.json`, replace `31.7.7` in the URL with the new version shown in `node_modules/electron/package.json`.
 >
-> The binary persists in `node_modules` between dev sessions — you only need
-> to repeat this after running `npm install` again.
+> The binary persists in `node_modules` between dev sessions — you only need to repeat this after running `npm install` again.
 
 ### Step 3 — launch in development mode
 
 #### Option A — browser mode (recommended on corporate / managed machines)
 
-No Electron required.  The UI runs in your regular browser with a mock bridge
-that stubs all IPC calls so every screen is fully navigable.
+No Electron required. The UI runs in your regular browser with a mock bridge that stubs all IPC calls so every screen is fully navigable.
 
 ```bash
 cd gui-ts
@@ -646,9 +572,7 @@ npm run dev:browser
 
 Then open **http://localhost:5173** in Chrome or Safari.
 
-> All UI features work.  CLI-backed results (validate, list, diff, patch) show
-> clearly labelled placeholder output instead of real data — this is expected.
-> Use this mode for layout, styling, and navigation testing.
+> All UI features work. CLI-backed results (validate, list, diff, patch) show clearly labelled placeholder output instead of real data — this is expected. Use this mode for layout, styling, and navigation testing.
 
 #### Option B — full Electron mode (requires Electron binary to be whitelisted)
 
@@ -657,10 +581,7 @@ cd gui-ts
 npm run dev
 ```
 
-Electron opens automatically.  The Vite dev server provides hot-module
-replacement (HMR) — React component changes appear instantly without
-restarting Electron.  On corporate machines with a restrictive MDM profile
-this will be blocked — use Option A instead.
+Electron opens automatically. The Vite dev server provides hot-module replacement (HMR) — React component changes appear instantly without restarting Electron. On corporate machines with a restrictive MDM profile this will be blocked — use Option A instead.
 
 ### One-liner (after first install)
 
@@ -685,8 +606,7 @@ npm run build
 #         gui-ts/dist-release/linux-unpacked/sbom-utility   (Linux)
 ```
 
-The `build` script also runs `xattr -cr` on the macOS app bundle immediately
-after electron-builder finishes (see [macOS Gatekeeper](#macos-gatekeeper) below).
+The `build` script also runs `xattr -cr` on the macOS app bundle immediately after electron-builder finishes (see [macOS Gatekeeper](#macos-gatekeeper) below).
 
 ### Production distributable packages
 
@@ -721,25 +641,17 @@ npm run dist:mac
 
 ### macOS Gatekeeper
 
-macOS stamps a `com.apple.quarantine` extended attribute on every app bundle
-written by a process that does not have a valid **Developer ID Application**
-certificate.  Gatekeeper then blocks (and may move to Trash) the app on first
-launch.
+macOS stamps a `com.apple.quarantine` extended attribute on every app bundle written by a process that does not have a valid **Developer ID Application** certificate. Gatekeeper then blocks (and may move to Trash) the app on first launch.
 
 #### Option 1 — automatic `xattr` strip (recommended for local development)
 
-The `npm run build` script already handles this.  After electron-builder
-finishes it runs:
+The `npm run build` script already handles this. After electron-builder finishes it runs:
 
 ```bash
 xattr -cr "dist-release/mac-arm64/SBOM Utility.app"
 ```
 
-This recursively removes all extended attributes — including the quarantine
-flag — from the entire `.app` bundle.  The app will open normally on your
-machine after that.  The flag is only re-applied if you copy or download the
-bundle from another location, so you only need to rebuild (or re-run the
-`xattr` command) if that happens.
+This recursively removes all extended attributes — including the quarantine flag — from the entire `.app` bundle. The app will open normally on your machine after that. The flag is only re-applied if you copy or download the bundle from another location, so you only need to rebuild (or re-run the `xattr` command) if that happens.
 
 To run it manually at any time:
 
@@ -751,27 +663,22 @@ open "dist-release/mac-arm64/SBOM Utility.app"
 
 #### Option 2 — allow via System Settings (one-time, no rebuild needed)
 
-If macOS has already blocked the app before you could strip the quarantine
-attribute:
+If macOS has already blocked the app before you could strip the quarantine attribute:
 
 1. Open **System Settings** → **Privacy & Security**
-2. Scroll to the **Security** section — you will see a message such as
-   *"SBOM Utility was blocked from use because it is not from an identified developer"*
+2. Scroll to the **Security** section — you will see a message such as *"SBOM Utility was blocked from use because it is not from an identified developer"*
 3. Click **Open Anyway**
 
-macOS will whitelist that specific build permanently.  You will not need to
-repeat this step unless you rebuild the app.
+macOS will whitelist that specific build permanently. You will not need to repeat this step unless you rebuild the app.
 
 #### Option 3 — obtain a Developer ID Application certificate (for distribution)
 
-This option requires an **Apple Developer Program** membership ($99/year at
-[developer.apple.com/programs/enroll](https://developer.apple.com/programs/enroll)).
+This option requires an **Apple Developer Program** membership ($99/year at [developer.apple.com/programs/enroll](https://developer.apple.com/programs/enroll)).
 
 Once enrolled:
 
 1. Open **Xcode** → **Settings** → **Accounts** → **Manage Certificates…**
-2. Click **+** → **Developer ID Application** — Xcode generates the key pair
-   and installs the signed certificate into your Keychain automatically.
+2. Click **+** → **Developer ID Application** — Xcode generates the key pair and installs the signed certificate into your Keychain automatically.
 3. Verify the certificate is present:
    ```bash
    security find-identity -v -p codesigning | grep "Developer ID Application"
@@ -790,9 +697,7 @@ Once enrolled:
    export APPLE_TEAM_ID="YOUR10CHRID"
    npm run dist:mac
    ```
-   The app-specific password is generated at
-   [appleid.apple.com](https://appleid.apple.com) under
-   **Sign-In and Security → App-Specific Passwords**.
+   The app-specific password is generated at [appleid.apple.com](https://appleid.apple.com) under **Sign-In and Security → App-Specific Passwords**.
 
 ### Code-signing (Windows / Linux)
 
@@ -817,13 +722,11 @@ Once enrolled:
 
 ## 10. License
 
-The TypeScript GUI code (`gui-ts/`) is licensed under **Apache-2.0**, matching
-the rest of sbom-utility.
+The TypeScript GUI code (`gui-ts/`) is licensed under **Apache-2.0**, matching the rest of sbom-utility.
 
 ### Dependency licences
 
-All dependencies are permissively licensed.  No GPL, LGPL, AGPL, or SSPL
-code is introduced.
+All dependencies are permissively licensed. No GPL, LGPL, AGPL, or SSPL code is introduced.
 
 | Package | Licence | Governance body |
 |---------|---------|----------------|

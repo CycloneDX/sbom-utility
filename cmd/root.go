@@ -49,6 +49,7 @@ const (
 	CMD_STATS         = "stats"
 	CMD_TRIM          = "trim"
 	CMD_PATCH         = "patch"
+	CMD_SERVE         = "serve"
 )
 
 // WARNING!!! The ".Use" field of a Cobra command MUST have the first word be the actual command
@@ -66,6 +67,7 @@ const (
 	CMD_USAGE_STATS_LIST         = CMD_STATS + " --input-file <input_file> [--type component|service] [--format txt|csv|md]"
 	CMD_USAGE_TRIM               = CMD_TRIM + " --input-file <input_file>  --output-file <output_file> [--normalize]"
 	CMD_USAGE_PATCH              = CMD_PATCH + " --input-file <input_file> --patch-file <patch_file> --output-file <output_file>"
+	CMD_USAGE_SERVE              = CMD_SERVE + " [--port <port>]"
 )
 
 const (
@@ -207,6 +209,7 @@ func init() {
 	rootCmd.AddCommand(NewCommandDiff())
 	rootCmd.AddCommand(NewCommandTrim())
 	rootCmd.AddCommand(NewCommandPatch())
+	rootCmd.AddCommand(NewCommandServe())
 	rootCmd.AddCommand(NewCommandComponent())
 	// TODO: when fully implemented uncomment:
 	//rootCmd.AddCommand(NewCommandStats())
