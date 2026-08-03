@@ -16,8 +16,9 @@ No CGo. No native compiler. One `npm ci` and you are running.
 6. [Prerequisites](#6-prerequisites)
 7. [Quick start](#7-quick-start)
 8. [Build & distribute](#8-build--distribute) — including [macOS Gatekeeper](#macos-gatekeeper)
-9. [Makefile targets](#9-makefile-targets)
-10. [License](#10-license)
+9. [Troubleshooting](#9-troubleshooting)
+10. [Makefile targets](#10-makefile-targets)
+11. [License](#11-license)
 
 ---
 
@@ -709,7 +710,41 @@ Once enrolled:
 
 ---
 
-## 9. Makefile targets
+## 9. Troubleshooting
+
+### Floating social-share overlay appears in Chrome (browser mode)
+
+**Symptom:** A floating button (often green with a `+` icon) appears in the bottom-right corner of the app when loaded in Chrome.  Clicking it expands a row of social-network icons (Twitter/X, Mastodon, Facebook, bookmarking services, etc.).  The icons do nothing when clicked.  The overlay does **not** appear in Safari or other browsers.
+
+**Cause:** This is a **Chrome browser extension**, not application code.  The most common culprit is the **Web Developer** extension (`bfbameneiokkgbdmiekhjnmfkcnldhhm`), which injects a floating overlay into every page it is active on.  Because the extension's content scripts run in a privileged context they bypass the page's Content Security Policy (CSP) — so the overlay renders.  However, every *action* the icons would take (navigating to a share URL, fetching remote data) is blocked by the app's strict CSP:
+
+```
+img-src  'self' data:          — prevents remote icon images from loading
+connect-src 'self' …           — blocks outbound fetch/XHR to social networks
+script-src  'self' 'unsafe-inline' — prevents extension-injected remote scripts
+```
+
+The result is a visible but completely inert overlay: the CSP is working as intended, protecting the app from third-party injection performing any meaningful action.
+
+**Fix:** Disable or pause the extension while using the SBOM Utility GUI:
+
+1. Open `chrome://extensions` in Chrome.
+2. Locate **Web Developer** (or any extension whose description mentions sharing or social bookmarking).
+3. Toggle it off, or click **Details → On specific sites** and exclude `localhost`.
+
+The overlay will not appear in Electron production builds — the Electron `BrowserWindow` runs with `sandbox: true` and the session-level CSP prevents extension content scripts from loading in packaged releases.
+
+---
+
+### Chromium DevTools opens automatically in Electron dev mode
+
+**Symptom:** A detached DevTools window opens every time you run `npm run dev`.
+
+**Status:** Resolved in the current codebase — the `openDevTools()` auto-call was removed from `src/main/index.ts`.  DevTools can still be opened on demand via **View → Toggle Developer Tools** in the application menu.
+
+---
+
+## 10. Makefile targets
 
 | Target | Command | Output |
 |--------|---------|--------|
@@ -720,7 +755,7 @@ Once enrolled:
 
 ---
 
-## 10. License
+## 11. License
 
 The TypeScript GUI code (`gui-ts/`) is licensed under **Apache-2.0**, matching the rest of sbom-utility.
 

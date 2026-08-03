@@ -102,9 +102,16 @@
   --font-sans:    -apple-system, "Segoe UI", system-ui, Helvetica, Arial, sans-serif;
   --font-mono:    ui-monospace, "Cascadia Code", "Fira Code", Consolas, "Courier New", monospace;
 
+  /* Editor font — overridden at runtime by AppContext when the user changes the
+     font preference.  All monospace output areas (JsonEditor, ResultsView,
+     StatusBar filename) inherit from these two variables so a single preference
+     change updates the entire UI. */
+  --editor-font-family: var(--font-mono);
+  --editor-font-size:   14px;
+
   --text-xs:      11px;   /* caption, status bar */
-  --text-sm:      12px;   /* labels, table cells */
-  --text-base:    13px;   /* body — matches macOS HIG */
+  --text-sm:      14px;   /* labels, table cells */
+  --text-base:    14px;   /* body */
   --text-md:      15px;   /* sub-heading */
   --text-lg:      17px;   /* heading */
   --text-xl:      20px;   /* section title */
@@ -159,7 +166,7 @@
   --statusbar-bg:       #3478C0;          /* macOS blue, slightly desaturated */
   --statusbar-text:     #FFFFFF;
   --statusbar-height:   28px;
-  --statusbar-font:     var(--text-sm);   /* 12px — matches the JSON editor font */
+  --statusbar-font:     var(--text-base); /* 13px — slightly larger for readability */
 
   /* BOM source viewer (dark editor) */
   --viewer-bg:          var(--primitive-editor-bg);

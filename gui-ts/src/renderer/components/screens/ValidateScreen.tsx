@@ -13,7 +13,7 @@ interface Props { active: boolean }
 
 export default function ValidateScreen({ active }: Props) {
   const {
-    bomFile, setDirty: setGlobalDirty,
+    bomFile, bomDisplayName, setDirty: setGlobalDirty,
     validateBadge, validateBadgeText, setValidateBadge,
     autoValidateOnLoad,
   } = useAppContext()
@@ -108,16 +108,24 @@ export default function ValidateScreen({ active }: Props) {
   }
 
   // ── Validate ──────────────────────────────────────────────────────────────
-  const [output,  setOutput]  = useState('')
-  const [loading, setLoading] = useState(false)
+  const [output,     setOutput]     = useState('')
+  const [loading,    setLoading]    = useState(false)
+  const [dirty,      setDirty]      = useState(true)
+  const [noticeMsg,  setNoticeMsg]  = useState('')
 
   const [variant,    setVariant]    = useState('')
   const [force,      setForce]      = useState('')
   const [maxErrors,  setMaxErrors]  = useState(String(DEFAULT_MAX_ERRORS))
   const [showValues, setShowValues] = useState(true)
 
+  const markDirty = () => { setDirty(true); setNoticeMsg('') }
+
+  // Reset dirty when the loaded file changes so the first run always proceeds.
+  useEffect(() => { setDirty(true); setNoticeMsg('') }, [bomFile])
+
   const run = useCallback(async () => {
     if (!bomFile) return
+    if (!dirty) { setNoticeMsg('No option changes — results are current'); return }
     setLoading(true)
     setOutput('')
     setValidateBadge('idle', '')
@@ -143,9 +151,10 @@ export default function ValidateScreen({ active }: Props) {
       setOutput(`[ERROR] ${msg}`)
       setValidateBadge('invalid', 'ERROR')
     } finally {
+      setDirty(false)
       setLoading(false)
     }
-  }, [bomFile, variant, force, maxErrors, showValues, setValidateBadge])
+  }, [bomFile, dirty, variant, force, maxErrors, showValues, setValidateBadge])
 
   // Auto-run whenever the active file changes (if preference is on).
   useEffect(() => { if (active && bomFile && autoValidateOnLoad) { run() } }, [active, bomFile, autoValidateOnLoad, run])
@@ -164,6 +173,7 @@ export default function ValidateScreen({ active }: Props) {
         <div className={styles.options}>
           <OptionsPanel
             title="Validate Options"
+            notice={noticeMsg}
             action={
               <button className="btn btn-primary w-full" onClick={run} disabled={loading || !bomFile}>
                 ✅ &nbsp;{loading ? 'Validating…' : 'Validate'}
@@ -175,7 +185,7 @@ export default function ValidateScreen({ active }: Props) {
               <input
                 className="input"
                 value={variant}
-                onChange={e => setVariant(e.target.value)}
+                onChange={e => { setVariant(e.target.value); markDirty() }}
                 placeholder="e.g. strict  (blank = auto)"
               />
             </div>
@@ -184,7 +194,7 @@ export default function ValidateScreen({ active }: Props) {
               <input
                 className="input"
                 value={force}
-                onChange={e => setForce(e.target.value)}
+                onChange={e => { setForce(e.target.value); markDirty() }}
                 placeholder="path/to/schema.json  (blank = auto)"
               />
             </div>
@@ -195,14 +205,14 @@ export default function ValidateScreen({ active }: Props) {
                 type="number"
                 min={1} max={200}
                 value={maxErrors}
-                onChange={e => setMaxErrors(e.target.value)}
+                onChange={e => { setMaxErrors(e.target.value); markDirty() }}
               />
             </div>
             <label className="checkbox-row">
               <input
                 type="checkbox"
                 checked={showValues}
-                onChange={e => setShowValues(e.target.checked)}
+                onChange={e => { setShowValues(e.target.checked); markDirty() }}
               />
               Show failing values in errors
             </label>
@@ -215,7 +225,7 @@ export default function ValidateScreen({ active }: Props) {
           {/* Top bar: path + Save As — scoped to editor column only */}
           <div className={styles.topBar}>
             <span className={styles.pathLabelInline}>
-              {bomFile ? `Loaded: ${bomFile}` : 'No file loaded — click "Load BOM" in the sidebar.'}
+              {bomFile ? `Loaded: ${bomDisplayName}` : 'No file loaded — click "Load BOM" in the sidebar.'}
             </span>
 
             <div className={styles.topBarSpacer} />

@@ -115,43 +115,41 @@
 
 /* Top bar shown above the split (status badge row) */
 .topBar {
-  display:     flex;
-  align-items: center;
-  gap:         var(--space-3);
-  padding:     var(--space-2) var(--space-4);
-  border-bottom: 1px solid var(--color-border);
-  background:  var(--color-surface);
-  flex-shrink: 0;
-  min-height:  38px;
+  display:        flex;
+  align-items:    center;
+  gap:            var(--space-3);
+  padding:        var(--space-2) var(--space-4);
+  border-bottom:  1px solid var(--color-border);
+  background:     var(--color-surface);
+  flex-shrink:    0;
+  min-height:     38px;
 }
 
 /* Simple path label at top of results */
 .pathLabel {
   padding:     var(--space-2) var(--space-4);
-  font-size:   var(--text-xs);
-  color:       var(--color-text-muted);
+  font-size:   var(--text-base);
+  color:       var(--color-text);
   font-style:  italic;
   border-bottom: 1px solid var(--color-border);
   background:  var(--color-surface);
   flex-shrink: 0;
+  overflow-x:  auto;
   white-space: nowrap;
-  overflow:    hidden;
-  text-overflow: ellipsis;
 }
 
 /* Inline path label used inside .topBar */
 .pathLabelInline {
-  font-size:     var(--text-xs);
-  color:         var(--color-text-muted);
-  font-style:    italic;
-  white-space:   nowrap;
-  overflow:      hidden;
-  text-overflow: ellipsis;
-  min-width:     0;
-  flex:          1;
+  font-size:   var(--text-base);
+  color:       var(--color-text);
+  font-style:  italic;
+  white-space: nowrap;
+  overflow-x:  auto;
+  flex:        1 1 0;
+  min-width:   0;
 }
 
-.topBarSpacer { flex: 1 0 var(--space-4); }
+.topBarSpacer { flex: 0 0 var(--space-4); }
 
 /* ── Save As button ──────────────────────────────────────────────────────────── */
 .saveAsBtn {

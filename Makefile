@@ -56,6 +56,13 @@ dist-gui-ts:
 dev-gui-ts:
 	cd ${GUI_TS_DIR} && npm run dev
 
+# dev-gui-ts-full : build Go binary first, then start Vite + Electron dev window.
+# Use this when you want hot-reload Electron with a freshly compiled sbom-utility.
+# The Electron preload uses the native OS file dialog — full filesystem paths are
+# available, unlike the browser fallback mode.
+dev-gui-ts-full: build
+	cd ${GUI_TS_DIR} && npm run dev
+
 dev-gui-browser: build
 	cd ${GUI_TS_DIR} && npm run dev:browser:full
 
@@ -142,4 +149,4 @@ clean:
 	@if [ -f ${GUI_BINARY} ] ; then rm ${GUI_BINARY} ; fi
 	@if [ -d ${RELEASE_DIR} ] ; then rm -f ${RELEASE_DIR}/${BINARY}* ; rm -f ${RELEASE_DIR}/*.json ; rmdir ${RELEASE_DIR} ; fi
 
-.PHONY: config clean build build-gui build-gui-ts dist-gui-ts dev-gui-ts release test_clean test test_cmd unit_tests integration_tests format lint install
+.PHONY: config clean build build-gui build-gui-ts dist-gui-ts dev-gui-ts dev-gui-ts-full release test_clean test test_cmd unit_tests integration_tests format lint install

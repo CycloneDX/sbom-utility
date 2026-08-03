@@ -14,9 +14,10 @@ export default function LoadScreen({ onLoad }: Props) {
         <h2 style={{ marginTop: 'var(--space-4)', marginBottom: 'var(--space-2)' }}>
           CycloneDX SBOM Utility
         </h2>
-        <p className="text-muted" style={{ maxWidth: 340, textAlign: 'center', lineHeight: 'var(--leading-loose)' }}>
-          Open a BOM file (<code>.json</code> or <code>.xml</code>) to validate,
-          inspect licenses, components, resources, and vulnerabilities.
+        <p className="text-muted" style={{ maxWidth: 380, textAlign: 'center', lineHeight: 'var(--leading-loose)' }}>
+          Open a BOM file (<code>.json</code>) to validate,
+          inspect licenses, components, resources, and vulnerabilities,
+          or transform with patch and diff.
         </p>
       </div>
       <button className="btn btn-primary" onClick={onLoad} style={{ fontSize: 'var(--text-md)', height: 40, padding: '0 var(--space-8)' }}>

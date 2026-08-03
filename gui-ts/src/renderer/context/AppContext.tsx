@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-import React, { createContext, useCallback, useContext, useRef, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import type { BomInfo } from '../../preload/index'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -28,25 +28,32 @@ export const DEFAULT_EDITOR_FONT: EditorFont = {
 }
 
 export interface AppState {
-  bomFile:            string
-  bomInfo:            BomInfo
-  screen:             Screen
-  version:            string
-  editorFont:         EditorFont
-  isDirty:            boolean
-  validateBadge:      ValidateBadge
-  validateBadgeText:  string
-  autoValidateOnLoad: boolean
+  bomFile:             string
+  /** User-visible label for the loaded file (may differ from bomFile in browser
+   *  mode where the browser cannot expose the real filesystem path). */
+  bomDisplayName:      string
+  bomInfo:             BomInfo
+  screen:              Screen
+  version:             string
+  /** Persisted default font for all editor/results areas. Set via Preferences. */
+  defaultEditorFont:   EditorFont
+  isDirty:             boolean
+  validateBadge:       ValidateBadge
+  validateBadgeText:   string
+  autoValidateOnLoad:  boolean
 }
 
 export interface AppContextValue extends AppState {
-  setBomFile:            (path: string) => void
-  setBomInfo:            (info: BomInfo) => void
-  setScreen:             (screen: Screen) => void
-  setEditorFont:         (font: EditorFont) => void
-  setDirty:              (dirty: boolean) => void
-  setValidateBadge:      (badge: ValidateBadge, text: string) => void
-  setAutoValidateOnLoad: (enabled: boolean) => void
+  setBomFile:             (path: string, displayName?: string) => void
+  setBomInfo:             (info: BomInfo) => void
+  setScreen:              (screen: Screen) => void
+  /** Updates the persisted default font (Preferences). Does NOT override the
+   *  per-session font inside an open editor — each JsonEditor manages that
+   *  independently via its own local state. */
+  setDefaultEditorFont:   (font: EditorFont) => void
+  setDirty:               (dirty: boolean) => void
+  setValidateBadge:       (badge: ValidateBadge, text: string) => void
+  setAutoValidateOnLoad:  (enabled: boolean) => void
   // Listeners: other components can subscribe to bomFile changes
   onBomFileChange: (cb: (path: string) => void) => () => void
 }
@@ -59,11 +66,25 @@ function loadBool(key: string, fallback: boolean): boolean {
   try { const v = localStorage.getItem(key); return v === null ? fallback : v === 'true' } catch { return fallback }
 }
 
+function loadEditorFont(): EditorFont {
+  try {
+    const raw = localStorage.getItem('pref.editorFont')
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<EditorFont>
+      if (typeof parsed.family === 'string' && typeof parsed.size === 'number') {
+        return { family: parsed.family, size: parsed.size }
+      }
+    }
+  } catch { /* ignore */ }
+  return DEFAULT_EDITOR_FONT
+}
+
 export function AppProvider({ children, version }: { children: React.ReactNode; version: string }) {
-  const [bomFile, setBomFileState]   = useState('')
-  const [bomInfo, setBomInfo]        = useState<BomInfo>({ filePath: '', specVersion: '', format: '' })
+  const [bomFile, setBomFileState]        = useState('')
+  const [bomDisplayName, setBomDisplayName] = useState('')
+  const [bomInfo, setBomInfo]             = useState<BomInfo>({ filePath: '', specVersion: '', format: '' })
   const [screen, setScreen]          = useState<Screen>('load')
-  const [editorFont, setEditorFont]  = useState<EditorFont>(DEFAULT_EDITOR_FONT)
+  const [defaultEditorFont, setDefaultEditorFontState] = useState<EditorFont>(loadEditorFont)
   const [isDirty, setDirty]          = useState(false)
   const [validateBadge, setValidateBadgeState]   = useState<ValidateBadge>('idle')
   const [validateBadgeText, setValidateBadgeText] = useState('')
@@ -72,6 +93,19 @@ export function AppProvider({ children, version }: { children: React.ReactNode; 
   const setValidateBadge = useCallback((badge: ValidateBadge, text: string) => {
     setValidateBadgeState(badge)
     setValidateBadgeText(text)
+  }, [])
+
+  // Keep CSS variables in sync with the default font so every global consumer
+  // (ResultsView, StatusBar) picks up the change automatically.
+  useEffect(() => {
+    const root = document.documentElement
+    root.style.setProperty('--editor-font-family', defaultEditorFont.family)
+    root.style.setProperty('--editor-font-size',   `${defaultEditorFont.size}px`)
+  }, [defaultEditorFont])
+
+  const setDefaultEditorFont = useCallback((font: EditorFont) => {
+    setDefaultEditorFontState(font)
+    try { localStorage.setItem('pref.editorFont', JSON.stringify(font)) } catch { /* ignore */ }
   }, [])
 
   const setAutoValidateOnLoad = useCallback((enabled: boolean) => {
@@ -91,16 +125,17 @@ export function AppProvider({ children, version }: { children: React.ReactNode; 
     }
   }, [])
 
-  const setBomFile = useCallback((path: string) => {
+  const setBomFile = useCallback((path: string, displayName?: string) => {
     setBomFileState(path)
+    setBomDisplayName(displayName ?? path)
     listeners.current.forEach(cb => cb(path))
   }, [])
 
   return (
     <AppContext.Provider value={{
-      bomFile, bomInfo, screen, version, editorFont, isDirty,
+      bomFile, bomDisplayName, bomInfo, screen, version, defaultEditorFont, isDirty,
       validateBadge, validateBadgeText, autoValidateOnLoad,
-      setBomFile, setBomInfo, setScreen, setEditorFont, setDirty,
+      setBomFile, setBomInfo, setScreen, setDefaultEditorFont, setDirty,
       setValidateBadge, setAutoValidateOnLoad, onBomFileChange,
     }}>
       {children}

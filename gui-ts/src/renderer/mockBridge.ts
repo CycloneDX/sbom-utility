@@ -3,11 +3,11 @@
  * mockBridge.ts — browser bridge backed by the local sbom-utility HTTP server.
  */
 
-import type { SbomBridge, BomInfo, RunResult, ValidateParams, ListParams, DiffParams, PatchParams } from '../preload/index'
+import type { SbomBridge, OpenFileResult, BomInfo, RunResult, ValidateParams, ListParams, DiffParams, PatchParams } from '../preload/index'
 
 const API_BASE = (window as Window & { __SBOM_API_BASE__?: string }).__SBOM_API_BASE__ ?? 'http://127.0.0.1:8787/api'
 
-const fileStore = new Map<string, string>()
+const fileStore       = new Map<string, string>()
 const saveHandleStore = new Map<string, FileSystemFileHandle>()
 
 async function postJSON<T>(path: string, body: unknown): Promise<T> {
@@ -78,13 +78,15 @@ async function uploadFile(file: File): Promise<{ filePath: string; content: stri
 }
 
 export const mockBridge: SbomBridge = {
-  openFile: async () => {
+  openFile: async (): Promise<OpenFileResult | null> => {
     try {
       const file = await pickFile('.json,.xml')
       if (!file) return null
       const uploaded = await uploadFile(file)
       fileStore.set(uploaded.filePath, uploaded.content)
-      return uploaded.filePath
+      // path  = server temp path (used for all backend ops)
+      // displayName = original filename chosen by user (browser can't give more)
+      return { path: uploaded.filePath, displayName: file.name }
     } catch (error: unknown) {
       window.alert(`Failed to load file: ${error instanceof Error ? error.message : String(error)}`)
       throw error
