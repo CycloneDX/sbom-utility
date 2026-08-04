@@ -23,6 +23,8 @@ Deliver a non-Electron package that:
 4. supports analyst-friendly open/save flows
 5. can later be wrapped either as a native installer or as a container image
 
+At the same time, preserve the current developer workflow based on [`make dev-gui-browser`](../Makefile#L48), [`dev:browser`](../gui-ts/package.json), [`dev:browser:full`](../gui-ts/package.json), and [`dev-browser-with-serve.sh`](../gui-ts/scripts/dev-browser-with-serve.sh). The packaged runtime path must be additive and must not replace the existing Vite-based development path.
+
 ## Recommended implementation phases
 
 ### Phase 1 — Production static web build
@@ -68,6 +70,7 @@ Deliver a non-Electron package that:
 - Unsaved edits must be visible and protected before loading another BOM.
 - Default save action should create an explicit saved copy unless the user intentionally chooses overwrite.
 - File contents and analysis should remain local to the workstation/container session.
+- The packaged runtime path must not regress the developer workflow provided by [`make dev-gui-browser`](../Makefile#L48).
 
 ## Key technical gaps in the current codebase
 
@@ -95,13 +98,16 @@ Deliver a non-Electron package that:
 - [ ] Decide whether the first implementation embeds assets or serves them from [`gui-ts/dist/`](../gui-ts/dist/).
 - [ ] Add handling for `/` and static asset paths so the browser UI loads from the Go process.
 - [ ] Keep loopback-only binding in [`Serve()`](../cmd/serve.go#L119).
+- [ ] Ensure this static-serving path is enabled only for packaged/runtime use and does not replace the current Vite development path.
 - [ ] Validate that the frontend loads correctly when served by the Go process.
+- [ ] Confirm [`make dev-gui-browser`](../Makefile#L48) still works unchanged after the server changes.
 - [ ] Add or update Go tests for static asset serving behavior.
 
 ### Phase 3 — Productized launch mode
 
 - [ ] Add a packaged launch mode in Go that starts the local server and opens the default browser.
 - [ ] Keep [`serve`](../cmd/serve.go#L106) available for development/debugging.
+- [ ] Keep [`dev:browser`](../gui-ts/package.json), [`dev:browser:full`](../gui-ts/package.json), and [`dev-browser-with-serve.sh`](../gui-ts/scripts/dev-browser-with-serve.sh) intact for developer use.
 - [ ] Prefer the existing default port first; fall back only if needed.
 - [ ] Detect an already running local instance and open the browser to it when practical.
 - [ ] Validate startup behavior on macOS and at least one managed target environment.
@@ -135,6 +141,9 @@ Deliver a non-Electron package that:
 
 - Go tests for new server/static-file and save-path logic
 - Typecheck and lint for [`gui-ts`](../gui-ts)
+- Developer workflow regression check:
+  - [`make dev-gui-browser`](../Makefile#L48) still starts the Vite-based development flow
+  - [`dev:browser`](../gui-ts/package.json) and [`dev:browser:full`](../gui-ts/package.json) still work
 - Manual validation on a managed corporate laptop profile for:
   - launch flow
   - open BOM
