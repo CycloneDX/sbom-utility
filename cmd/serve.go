@@ -547,8 +547,14 @@ func writeServeMethodNotAllowed(writer http.ResponseWriter) {
 }
 
 func withServeInputFile(inputFile string, fn func()) {
+	// Re-validate here so the assignment to GlobalFlags always uses a
+	// canonicalised path, cutting any taint flow through global state.
+	safe, err := resolveServePath(inputFile)
+	if err != nil {
+		return
+	}
 	saved := utils.GlobalFlags.PersistentFlags.InputFile
-	utils.GlobalFlags.PersistentFlags.InputFile = inputFile
+	utils.GlobalFlags.PersistentFlags.InputFile = safe
 	defer func() {
 		utils.GlobalFlags.PersistentFlags.InputFile = saved
 	}()
