@@ -83,7 +83,7 @@ func preRunTestForFiles(args []string) error {
 	baseFilename := utils.GlobalFlags.PersistentFlags.InputFile
 	if baseFilename == "" {
 		return getLogger().Errorf("Missing required argument(s): %s", FLAG_FILENAME_INPUT)
-	} else if _, err := os.Stat(baseFilename); err != nil {
+	} else if _, err := os.Stat(baseFilename); err != nil { // lgtm[go/path-injection] -- CLI flag, not network input
 		return getLogger().Errorf("File not found: '%s'", baseFilename)
 	}
 
@@ -91,7 +91,7 @@ func preRunTestForFiles(args []string) error {
 	revisedFilename := utils.GlobalFlags.DiffFlags.RevisedFile
 	if revisedFilename == "" {
 		return getLogger().Errorf("Missing required argument(s): %s", FLAG_DIFF_FILENAME_REVISION)
-	} else if _, err := os.Stat(revisedFilename); err != nil {
+	} else if _, err := os.Stat(revisedFilename); err != nil { // lgtm[go/path-injection] -- CLI flag, not network input
 		return getLogger().Errorf("File not found: '%s'", revisedFilename)
 	}
 

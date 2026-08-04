@@ -255,7 +255,13 @@ func handleServeBomInfo(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	withServeInputFile(payload.FilePath, func() {
+	safePath, err := resolveServePath(payload.FilePath)
+	if err != nil {
+		writeServeError(writer, http.StatusBadRequest, err)
+		return
+	}
+
+	withServeInputFile(safePath, func() {
 		document, err := LoadInputBOMFileAndDetectSchema()
 		if err != nil {
 			writeServeError(writer, http.StatusBadRequest, err)
@@ -263,7 +269,7 @@ func handleServeBomInfo(writer http.ResponseWriter, request *http.Request) {
 		}
 
 		writeServeJSON(writer, http.StatusOK, serveBomInfoResponse{
-			FilePath:    payload.FilePath,
+			FilePath:    safePath,
 			SpecVersion: document.SchemaInfo.Version,
 			Format:      document.FormatInfo.CanonicalName,
 		})
@@ -281,6 +287,13 @@ func handleServeValidate(writer http.ResponseWriter, request *http.Request) {
 		writeServeError(writer, http.StatusBadRequest, err)
 		return
 	}
+
+	safePath, err := resolveServePath(payload.FilePath)
+	if err != nil {
+		writeServeError(writer, http.StatusBadRequest, err)
+		return
+	}
+	payload.FilePath = safePath
 
 	result, err := runServeValidate(payload)
 	if err != nil {
@@ -318,6 +331,15 @@ func handleServeDiff(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	safeFileA, errA := resolveServePath(payload.FileA)
+	safeFileB, errB := resolveServePath(payload.FileB)
+	if errA != nil || errB != nil {
+		writeServeError(writer, http.StatusBadRequest, fmt.Errorf("file path is not permitted"))
+		return
+	}
+	payload.FileA = safeFileA
+	payload.FileB = safeFileB
+
 	result, err := runServeDiff(payload)
 	if err != nil {
 		writeServeError(writer, http.StatusBadRequest, err)
@@ -338,6 +360,15 @@ func handleServePatch(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	safeBomPath, errBom := resolveServePath(payload.BomPath)
+	safePatchPath, errPatch := resolveServePath(payload.PatchPath)
+	if errBom != nil || errPatch != nil {
+		writeServeError(writer, http.StatusBadRequest, fmt.Errorf("file path is not permitted"))
+		return
+	}
+	payload.BomPath = safeBomPath
+	payload.PatchPath = safePatchPath
+
 	result, err := runServePatch(payload)
 	if err != nil {
 		writeServeError(writer, http.StatusBadRequest, err)
@@ -357,6 +388,13 @@ func handleServeListOperation(writer http.ResponseWriter, request *http.Request,
 		writeServeError(writer, http.StatusBadRequest, err)
 		return
 	}
+
+	safePath, err := resolveServePath(payload.FilePath)
+	if err != nil {
+		writeServeError(writer, http.StatusBadRequest, err)
+		return
+	}
+	payload.FilePath = safePath
 
 	result, err := operation(payload)
 	if err != nil {
