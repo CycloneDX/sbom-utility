@@ -490,13 +490,21 @@ func runServeListWithFilters(request serveListRequest, operation func(io.Writer,
 
 func runServeDiff(request serveDiffRequest) (serveRunResult, error) {
 	result := serveRunResult{}
+	safeFileA, err := resolveServePath(request.FileA)
+	if err != nil {
+		return result, err
+	}
+	safeFileB, err := resolveServePath(request.FileB)
+	if err != nil {
+		return result, err
+	}
 	persistent := utils.GlobalFlags.PersistentFlags
-	persistent.InputFile = request.FileA
+	persistent.InputFile = safeFileA
 	flags := utils.GlobalFlags.DiffFlags
-	flags.RevisedFile = request.FileB
+	flags.RevisedFile = safeFileB
 	flags.OutputFormat = FORMAT_UNIFIED
 
-	err := Diff(persistent, flags)
+	err = Diff(persistent, flags)
 	if err != nil {
 		result.Code = ERROR_APPLICATION
 		return result, err
@@ -511,14 +519,22 @@ func runServeDiff(request serveDiffRequest) (serveRunResult, error) {
 
 func runServePatch(request servePatchRequest) (serveRunResult, error) {
 	result := serveRunResult{}
+	safeBomPath, err := resolveServePath(request.BomPath)
+	if err != nil {
+		return result, err
+	}
+	safePatchPath, err := resolveServePath(request.PatchPath)
+	if err != nil {
+		return result, err
+	}
 	persistent := utils.GlobalFlags.PersistentFlags
-	persistent.InputFile = request.BomPath
+	persistent.InputFile = safeBomPath
 	persistent.OutputFormat = FORMAT_JSON
 	flags := utils.GlobalFlags.PatchFlags
-	flags.PatchFile = request.PatchPath
+	flags.PatchFile = safePatchPath
 
 	var stdout bytes.Buffer
-	err := Patch(&stdout, persistent, flags)
+	err = Patch(&stdout, persistent, flags)
 	result.Stdout = stdout.String()
 	if err != nil {
 		result.Code = ERROR_APPLICATION
