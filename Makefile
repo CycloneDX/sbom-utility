@@ -37,9 +37,16 @@ LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.Binary=${BINARY} -s"
 build: clean
 	go build ${LDFLAGS} -o ${BINARY}
 
-# Build the GUI binary
+# Build the GUI binary (Fyne/Go)
 build-gui:
 	go build -o ${GUI_BINARY} ./gui
+
+# TypeScript browser GUI
+# dev-gui-browser : build Go binary then start the Vite dev server + Go HTTP server
+GUI_TS_DIR?=gui-ts
+
+dev-gui-browser: build
+	cd ${GUI_TS_DIR} && npm run dev:browser:full
 
 # General supported environments: https://go.dev/doc/install/source#environment
 # See latest supported combinations using:
@@ -124,4 +131,4 @@ clean:
 	@if [ -f ${GUI_BINARY} ] ; then rm ${GUI_BINARY} ; fi
 	@if [ -d ${RELEASE_DIR} ] ; then rm -f ${RELEASE_DIR}/${BINARY}* ; rm -f ${RELEASE_DIR}/*.json ; rmdir ${RELEASE_DIR} ; fi
 
-.PHONY: config clean build build-gui release test_clean test test_cmd unit_tests integration_tests format lint install
+.PHONY: config clean build build-gui dev-gui-browser release test_clean test test_cmd unit_tests integration_tests format lint install

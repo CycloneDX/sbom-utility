@@ -1,0 +1,254 @@
+/* ============================================================================
+   SBOM Utility GUI — Design Token Stylesheet
+   File: src/renderer/styles/tokens.css
+   SPDX-License-Identifier: Apache-2.0
+
+   HOW TO CUSTOMISE
+   ────────────────
+   Every visual property in the application is driven by the CSS custom
+   properties (variables) defined in this file under the :root selector.
+   To create your own theme:
+
+     1. Copy this file to e.g. `tokens-dark.css` or `tokens-corporate.css`.
+     2. Change any values under :root.
+     3. Import your new file in index.html instead of (or after) this one.
+     4. To support both light and dark OS themes, add a
+        @media (prefers-color-scheme: dark) { :root { … } } block.
+
+   TOKEN GROUPS (sections below)
+   ──────────────────────────────
+   § 1  Primitive colours     — raw hex values; reference these in § 2.
+   § 2  Semantic colours      — role-based aliases (background, text, accent…).
+   § 3  Typography            — font families, sizes, weights, line-heights.
+   § 4  Spacing & geometry    — padding scale, border-radius, border widths.
+   § 5  Motion                — transition duration & easing.
+   § 6  Shadows               — box-shadow definitions.
+   § 7  Component tokens      — sidebar, status bar, viewer, table, badge.
+
+   EXAMPLE: change the accent colour to a corporate teal
+   ──────────────────────────────────────────────────────
+     :root {
+       --color-accent:        #00796B;
+       --color-accent-hover:  #00695C;
+       --color-accent-dim:    rgba(0, 121, 107, 0.15);
+       --color-btn-primary-bg: var(--color-accent);
+     }
+
+   EXAMPLE: enable a dark mode
+   ────────────────────────────
+     @media (prefers-color-scheme: dark) {
+       :root {
+         --color-bg:           #1C1C1E;
+         --color-surface:      #2C2C2E;
+         --color-border:       #3A3A3C;
+         --color-text:         #F2F2F7;
+         --color-text-muted:   #8E8E93;
+         --color-sidebar-bg:   #242426;
+         --color-sidebar-text: #EBEBF5;
+       }
+     }
+   ============================================================================ */
+
+:root {
+
+  /* ── § 1  Primitive colours ─────────────────────────────────────────────── */
+  --primitive-white:      #FFFFFF;
+  --primitive-black:      #000000;
+  --primitive-blue-600:   #007AFF;   /* macOS system blue */
+  --primitive-blue-700:   #006BD6;   /* darker blue for hover/links */
+  --primitive-blue-050:   rgba(0, 122, 255, 0.08);
+  --primitive-blue-100:   rgba(0, 122, 255, 0.20);
+  --primitive-red-500:    #FF3B30;   /* macOS system red */
+  --primitive-amber-500:  #FF9F0A;   /* macOS system amber */
+  --primitive-green-500:  #30D158;   /* macOS system green */
+  --primitive-gray-050:   #F5F5F5;
+  --primitive-gray-100:   #EBEBEB;
+  --primitive-gray-200:   #D2D2D7;
+  --primitive-gray-400:   #6E6E73;
+  --primitive-gray-900:   #1D1D1F;
+  /* Viewer palette (dark editor) */
+  --primitive-editor-bg:  #1E1E1E;
+  --primitive-editor-fg:  #CECECE;
+  --primitive-editor-ph:  #7A7A7A;
+  --primitive-editor-sel: #264F78;
+  --primitive-editor-bdr: #3C3C3C;
+
+  /* ── § 2  Semantic colours ──────────────────────────────────────────────── */
+  --color-bg:             var(--primitive-gray-050);
+  --color-surface:        var(--primitive-white);
+  --color-surface-raised: var(--primitive-white);
+  --color-border:         var(--primitive-gray-200);
+  --color-border-focus:   var(--primitive-blue-600);
+  --color-text:           var(--primitive-gray-900);
+  --color-text-muted:     var(--primitive-gray-400);
+  --color-text-inverse:   var(--primitive-white);
+  --color-accent:         var(--primitive-blue-600);
+  --color-accent-hover:   var(--primitive-blue-700);
+  --color-accent-dim:     var(--primitive-blue-050);
+  --color-accent-dim2:    var(--primitive-blue-100);
+  --color-error:          var(--primitive-red-500);
+  --color-warning:        var(--primitive-amber-500);
+  --color-success:        var(--primitive-green-500);
+  --color-disabled-bg:    #E0E0E5;
+  --color-disabled-text:  #C0C0C5;
+  --color-selection:      var(--primitive-blue-100);
+  --color-overlay:        rgba(0, 0, 0, 0.32);
+
+  /* ── § 3  Typography ────────────────────────────────────────────────────── */
+  /* Font stack — system-ui resolves to:
+       macOS:   SF Pro Text / SF Pro Display
+       Windows: Segoe UI
+       Linux:   Cantarell / DejaVu Sans */
+  --font-sans:    -apple-system, "Segoe UI", system-ui, Helvetica, Arial, sans-serif;
+  --font-mono:    ui-monospace, "Cascadia Code", "Fira Code", Consolas, "Courier New", monospace;
+
+  /* Editor font — overridden at runtime by AppContext when the user changes the
+     font preference.  All monospace output areas (JsonEditor, ResultsView,
+     StatusBar filename) inherit from these two variables so a single preference
+     change updates the entire UI. */
+  --editor-font-family: var(--font-mono);
+  --editor-font-size:   14px;
+
+  --text-xs:      11px;   /* caption, status bar */
+  --text-sm:      14px;   /* labels, table cells */
+  --text-base:    14px;   /* body */
+  --text-md:      15px;   /* sub-heading */
+  --text-lg:      17px;   /* heading */
+  --text-xl:      20px;   /* section title */
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-bold:   600;
+
+  --leading-tight:  1.3;
+  --leading-normal: 1.5;
+  --leading-loose:  1.8;
+
+  /* ── § 4  Spacing & geometry ────────────────────────────────────────────── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+
+  --radius-sm:  6px;
+  --radius-md:  8px;
+  --radius-lg:  12px;
+
+  --border-width: 1px;
+  --border:       var(--border-width) solid var(--color-border);
+
+  /* ── § 5  Motion ────────────────────────────────────────────────────────── */
+  --duration-fast:    80ms;
+  --duration-normal: 160ms;
+  --ease-out:         cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ── § 6  Shadows ───────────────────────────────────────────────────────── */
+  --shadow-xs:  0 1px 2px rgba(0,0,0,0.08);
+  --shadow-sm:  0 2px 6px rgba(0,0,0,0.12);
+  --shadow-md:  0 4px 16px rgba(0,0,0,0.16);
+
+  /* ── § 7  Component tokens ──────────────────────────────────────────────── */
+
+  /* Sidebar */
+  --sidebar-width:      220px;
+  --sidebar-bg:         #2D2D2F;          /* dark charcoal sidebar */
+  --sidebar-text:       #E5E5EA;
+  --sidebar-text-muted: #8E8E93;
+  --sidebar-border:     #3A3A3C;
+  --sidebar-hover-bg:   rgba(255,255,255,0.06);
+  --sidebar-active-bg:  rgba(0,122,255,0.30);
+  --sidebar-active-text: #FFFFFF;
+
+  /* Status bar */
+  --statusbar-bg:       #3478C0;          /* macOS blue, slightly desaturated */
+  --statusbar-text:     #FFFFFF;
+  --statusbar-height:   28px;
+  --statusbar-font:     var(--text-base); /* 13px — slightly larger for readability */
+
+  /* BOM source viewer (dark editor) */
+  --viewer-bg:          var(--primitive-editor-bg);
+  --viewer-fg:          var(--primitive-editor-fg);
+  --viewer-ph:          var(--primitive-editor-ph);
+  --viewer-sel:         var(--primitive-editor-sel);
+  --viewer-border:      var(--primitive-editor-bdr);
+
+  /* Options panel */
+  --options-width:      260px;
+  --options-bg:         var(--color-surface);
+  --options-border:     var(--color-border);
+
+  /* Results area */
+  --results-bg:         var(--primitive-editor-bg);
+  --results-fg:         var(--primitive-editor-fg);
+
+  /* Badge */
+  --badge-valid-bg:     rgba(48, 209, 88, 0.15);
+  --badge-valid-fg:     #1A7F37;
+  --badge-invalid-bg:   rgba(255, 59, 48, 0.12);
+  --badge-invalid-fg:   #C0392B;
+  --badge-idle-bg:      var(--primitive-blue-050);
+  --badge-idle-fg:      var(--color-accent);
+
+  /* Table (results grid) */
+  --table-header-bg:    var(--primitive-gray-100);
+  --table-row-alt-bg:   rgba(0,0,0,0.025);
+  --table-border:       var(--color-border);
+  --table-cell-pad:     var(--space-2) var(--space-3);
+
+  /* Buttons */
+  --btn-height:           32px;
+  --btn-radius:           var(--radius-md);
+  --btn-primary-bg:       var(--color-accent);
+  --btn-primary-text:     var(--primitive-white);
+  --btn-primary-hover:    var(--color-accent-hover);
+  --btn-primary-shadow:   0 1px 4px rgba(0, 122, 255, 0.35);
+  --btn-secondary-bg:     var(--primitive-blue-700);   /* #006BD6 — darker blue */
+  --btn-secondary-hover:  #0059b3;                     /* one step deeper on hover */
+  --btn-secondary-shadow: 0 1px 4px rgba(0, 107, 214, 0.35);
+  --btn-default-bg:       var(--color-surface);
+  --btn-default-border:   var(--color-border);
+  --btn-default-hover:    var(--primitive-gray-100);
+  --btn-disabled-bg:      rgba(0, 122, 255, 0.10);
+  --btn-disabled-text:    rgba(0, 122, 255, 0.40);
+
+  /* Inputs */
+  --input-height:       28px;
+  --input-bg:           var(--color-surface);
+  --input-border:       var(--color-border);
+  --input-radius:       var(--radius-sm);
+  --input-focus-ring:   0 0 0 3px var(--color-accent-dim2);
+
+  /* ── § 8  Syntax / editor tokens ─────────────────────────────────────────── */
+  /* Designed for the dark editor background (#1E1E1E) — mirrors VSCode Dark+ */
+
+  /* JSON value types */
+  --syn-key:            #9CDCFE;   /* object keys — VSCode light-blue */
+  --syn-cdx-key:        #4EC9B0;   /* CycloneDX schema keywords — teal */
+  --syn-string:         #CE9178;   /* string values — VSCode orange-brown */
+  --syn-purl:           #DCDCAA;   /* pkg: PURL strings — VSCode yellow */
+  --syn-number:         #B5CEA8;   /* numeric literals — VSCode green */
+  --syn-keyword:        #569CD6;   /* true / false / null — VSCode blue */
+  --syn-punct:          #CCCCCC;   /* : , */
+
+  /* Bracket rainbow (cycling 3 levels) */
+  --syn-bracket-0:      #FFD700;   /* depth 0 — gold */
+  --syn-bracket-1:      #DA70D6;   /* depth 1 — orchid */
+  --syn-bracket-2:      #179FFF;   /* depth 2 — sky blue */
+
+  /* Diff / merge highlighting */
+  --syn-added:          #4EC9B0;   /* added line text */
+  --syn-added-bg:       rgba(78, 201, 176, 0.12);
+  --syn-removed:        #F44747;   /* removed line text */
+  --syn-removed-bg:     rgba(244, 71, 71, 0.12);
+  --syn-changed:        #FFD580;   /* modified line text */
+  --syn-changed-bg:     rgba(255, 213, 128, 0.10);
+  --syn-diff-header:    #6A9955;   /* @@ hunk headers — comment green */
+
+  /* Aliases used by JsonEditor.module.css */
+  --syn-diff-added-bg:   var(--syn-added-bg);
+  --syn-diff-removed-bg: var(--syn-removed-bg);
+  --syn-diff-changed-bg: var(--syn-changed-bg);
+}

@@ -48,6 +48,7 @@ const (
 const (
 	TEST_CDX_1_4_VALIDATE_ERR_COMPONENTS_UNIQUE    = "test/validation/cdx-1-4-validate-err-components-unique-items-1.json"
 	TEST_CDX_1_4_VALIDATE_ERR_FORMAT_IRI_REFERENCE = "test/validation/cdx-1-4-validate-err-components-format-iri-reference.json"
+	TEST_CDX_1_7_VALIDATE_ERR_METADATA_ADDITIONAL  = "test/validation/cdx-1-7-validate-err-metadata-additional-property.json"
 )
 
 type ValidateTestInfo struct {
@@ -425,6 +426,22 @@ func TestValidateCdx14ErrorResultsFormatIriReferencesJson(t *testing.T) {
 	var EXPECTED_ERROR_CONTEXT = "(root).components.2.externalReferences.0.url"
 
 	vti := NewValidateTestInfo(TEST_CDX_1_4_VALIDATE_ERR_FORMAT_IRI_REFERENCE, FORMAT_JSON, SCHEMA_VARIANT_NONE, &InvalidSBOMError{})
+	_, schemaErrors, _ := innerTestValidate(t, *vti)
+
+	if len(schemaErrors) != EXPECTED_ERROR_NUM {
+		t.Errorf("invalid schema error count: expected '%v'; actual: '%v')", EXPECTED_ERROR_NUM, len(schemaErrors))
+	}
+
+	if schemaErrors[0].Context().String() != EXPECTED_ERROR_CONTEXT {
+		t.Errorf("invalid schema error context: expected '%v'; actual: '%v')", EXPECTED_ERROR_CONTEXT, schemaErrors[0].Context().String())
+	}
+}
+
+func TestValidateCdx17ErrorResultsMetadataAdditionalPropertyJson(t *testing.T) {
+	var EXPECTED_ERROR_NUM = 1
+	var EXPECTED_ERROR_CONTEXT = "(root).metadata.manufacturer"
+
+	vti := NewValidateTestInfo(TEST_CDX_1_7_VALIDATE_ERR_METADATA_ADDITIONAL, FORMAT_JSON, SCHEMA_VARIANT_NONE, &InvalidSBOMError{})
 	_, schemaErrors, _ := innerTestValidate(t, *vti)
 
 	if len(schemaErrors) != EXPECTED_ERROR_NUM {

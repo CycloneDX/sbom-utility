@@ -49,13 +49,14 @@ const (
 	CMD_STATS         = "stats"
 	CMD_TRIM          = "trim"
 	CMD_PATCH         = "patch"
+	CMD_SERVE         = "serve"
 )
 
 // WARNING!!! The ".Use" field of a Cobra command MUST have the first word be the actual command
 // otherwise, the command will NOT be found by the Cobra framework. This is poor code assumption is NOT documented.
 const (
 	CMD_USAGE_COMPONENT_LIST     = CMD_COMPONENT + " " + SUBCOMMAND_LICENSE_LIST + " --input-file <input_file> [--type type1[,typeN]>] [--where key=regex[,...]] [--format txt|csv|md]"
-	CMD_USAGE_DIFF               = CMD_DIFF + " --input-file <base_file> --input-revision <revised_file> [--format json|txt] [--colorize=true|false]"
+	CMD_USAGE_DIFF               = CMD_DIFF + " --input-file <base_file> --input-revision <revised_file> [--format unified|txt|json] [--colorize=true|false]"
 	CMD_USAGE_LICENSE_LIST       = SUBCOMMAND_LICENSE_LIST + " --input-file <input_file> [--summary] [--where key=regex[,...]] [--format json|txt|csv|md]"
 	CMD_USAGE_LICENSE_POLICY     = SUBCOMMAND_LICENSE_POLICY + " [--where key=regex[,...]] [--format txt|csv|md]"
 	CMD_USAGE_QUERY              = CMD_QUERY + " --input-file <input_file> [--select * | field1[,fieldN]] [--from key1[.keyN]] [--where key=regex[,...]]"
@@ -66,6 +67,7 @@ const (
 	CMD_USAGE_STATS_LIST         = CMD_STATS + " --input-file <input_file> [--type component|service] [--format txt|csv|md]"
 	CMD_USAGE_TRIM               = CMD_TRIM + " --input-file <input_file>  --output-file <output_file> [--normalize]"
 	CMD_USAGE_PATCH              = CMD_PATCH + " --input-file <input_file> --patch-file <patch_file> --output-file <output_file>"
+	CMD_USAGE_SERVE              = CMD_SERVE + " [--port <port>]"
 )
 
 const (
@@ -119,9 +121,10 @@ const (
 // Supported output formats
 const (
 	FORMAT_DEFAULT  = ""
-	FORMAT_TEXT     = "txt"
-	FORMAT_JSON     = "json"
-	FORMAT_CSV      = "csv"
+	FORMAT_TEXT    = "txt"
+	FORMAT_JSON    = "json"
+	FORMAT_CSV     = "csv"
+	FORMAT_UNIFIED = "unified" // standard unified diff (---/+++/@@ hunks); rendered by DiffHighlighter in GUI
 	FORMAT_MARKDOWN = "md"
 	FORMAT_ANY      = "<any>" // Used for test errors
 )
@@ -206,6 +209,7 @@ func init() {
 	rootCmd.AddCommand(NewCommandDiff())
 	rootCmd.AddCommand(NewCommandTrim())
 	rootCmd.AddCommand(NewCommandPatch())
+	rootCmd.AddCommand(NewCommandServe())
 	rootCmd.AddCommand(NewCommandComponent())
 	// TODO: when fully implemented uncomment:
 	//rootCmd.AddCommand(NewCommandStats())

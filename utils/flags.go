@@ -100,8 +100,9 @@ type VulnerabilityCommandFlags struct {
 }
 
 type DiffCommandFlags struct {
-	Colorize    bool
-	RevisedFile string
+	Colorize     bool
+	RevisedFile  string
+	OutputFormat string // NOTE: needed to overcome Cobra limitation when diff. commands have diff. default values
 }
 
 type ResourceCommandFlags struct {

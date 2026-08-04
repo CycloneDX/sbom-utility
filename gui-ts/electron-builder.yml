@@ -1,0 +1,73 @@
+# SPDX-License-Identifier: Apache-2.0
+# sbom-utility Electron GUI — Electron Builder configuration
+# This file is read by electron-builder during `npm run dist`.
+# Reference: https://www.electron.build/configuration/configuration
+#
+# NOTE: Most build metadata is already declared in package.json under
+# the "build" key.  This YAML file is an optional override for CI/CD
+# or for platform-specific options that are cleaner in YAML form.
+
+appId:       "org.cyclonedx.sbom-utility-gui"
+productName: "SBOM Utility"
+copyright:   "Copyright © 2026 CycloneDX Contributors"
+
+directories:
+  output: "dist-release"
+
+files:
+  - "dist/**"
+  - "dist-electron/**"
+
+# The sbom-utility binary, config.json, and license.json are embedded as
+# "extra resources" so they land in process.resourcesPath at runtime.
+extraResources:
+  - from: "../sbom-utility"
+    to:   "sbom-utility"
+    filter:
+      - "!*.exe"          # macOS/Linux: copy the binary without .exe extension
+  - from: "../config.json"
+    to:   "config.json"
+  - from: "../license.json"
+    to:   "license.json"
+
+mac:
+  category:         "public.app-category.developer-tools"
+  icon:             "../gui/images/icons/BOM-Utility-Icon.png"
+  hardenedRuntime:  true
+  gatekeeperAssess: false
+  entitlements:         "build/entitlements.mac.plist"
+  entitlementsInherit:  "build/entitlements.mac.plist"
+  target:
+    - target: dmg
+      arch:   [x64, arm64]
+    - target: zip
+      arch:   [x64, arm64]
+
+win:
+  icon:                    "../gui/images/icons/BOM-Utility-Icon.png"
+  requestedExecutionLevel: "asInvoker"
+  extraResources:
+    - from: "../sbom-utility.exe"
+      to:   "sbom-utility.exe"
+  target:
+    - target: nsis
+      arch:   [x64, arm64]
+
+nsis:
+  oneClick:                           false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut:              true
+  installerIcon:                      "../gui/images/icons/BOM-Utility-Icon.png"
+  uninstallerIcon:                    "../gui/images/icons/BOM-Utility-Icon.png"
+
+linux:
+  icon:     "../gui/images/icons/BOM-Utility-Icon.png"
+  category: "Development"
+  target:
+    - target: AppImage
+      arch:   [x64, arm64]
+    - target: deb
+      arch:   [x64, arm64]
+
+# No auto-update configuration — updates are distributed via GitHub Releases.
+# To enable auto-update, add a "publish" block pointing to your GitHub repo.

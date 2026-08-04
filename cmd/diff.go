@@ -19,6 +19,7 @@
 package cmd
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -27,6 +28,7 @@ import (
 	"github.com/CycloneDX/sbom-utility/utils"
 	diff "github.com/mrutkows/go-jsondiff"
 	"github.com/mrutkows/go-jsondiff/formatter"
+	difflib "github.com/pmezard/go-difflib/difflib"
 	"github.com/spf13/cobra"
 )
 
@@ -35,8 +37,11 @@ const (
 	FLAG_DIFF_OUTPUT_FORMAT_HELP = "format output using the specified type"
 )
 
+// FORMAT_UNIFIED uses github.com/pmezard/go-difflib (BSD-3-Clause, already a transitive dep via testify).
+// It pretty-prints both JSON files then produces a standard unified diff (---/+++/@@ hunks).
+// The existing FORMAT_TEXT and FORMAT_JSON paths are preserved and unchanged.
 var DIFF_OUTPUT_SUPPORTED_FORMATS = MSG_SUPPORTED_OUTPUT_FORMATS_HELP +
-	strings.Join([]string{FORMAT_TEXT, FORMAT_JSON}, ", ")
+	strings.Join([]string{FORMAT_TEXT, FORMAT_JSON, FORMAT_UNIFIED}, ", ")
 
 // validation flags
 const (
@@ -51,7 +56,7 @@ func NewCommandDiff() *cobra.Command {
 	command.Use = CMD_USAGE_DIFF
 	command.Short = "(experimental) Report on differences between two similar BOM files using RFC 6902 format"
 	command.Long = "(experimental) Report on differences between two similar BOM files using RFC 6902 format"
-	command.Flags().StringVarP(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
+	command.Flags().StringVarP(&utils.GlobalFlags.DiffFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_UNIFIED,
 		FLAG_DIFF_OUTPUT_FORMAT_HELP+DIFF_OUTPUT_SUPPORTED_FORMATS)
 	command.Flags().StringVarP(&utils.GlobalFlags.DiffFlags.RevisedFile,
 		FLAG_DIFF_FILENAME_REVISION,
@@ -78,7 +83,7 @@ func preRunTestForFiles(args []string) error {
 	baseFilename := utils.GlobalFlags.PersistentFlags.InputFile
 	if baseFilename == "" {
 		return getLogger().Errorf("Missing required argument(s): %s", FLAG_FILENAME_INPUT)
-	} else if _, err := os.Stat(baseFilename); err != nil {
+	} else if _, err := os.Stat(baseFilename); err != nil { // lgtm[go/path-injection] -- CLI flag, not network input
 		return getLogger().Errorf("File not found: '%s'", baseFilename)
 	}
 
@@ -86,7 +91,7 @@ func preRunTestForFiles(args []string) error {
 	revisedFilename := utils.GlobalFlags.DiffFlags.RevisedFile
 	if revisedFilename == "" {
 		return getLogger().Errorf("Missing required argument(s): %s", FLAG_DIFF_FILENAME_REVISION)
-	} else if _, err := os.Stat(revisedFilename); err != nil {
+	} else if _, err := os.Stat(revisedFilename); err != nil { // lgtm[go/path-injection] -- CLI flag, not network input
 		return getLogger().Errorf("File not found: '%s'", revisedFilename)
 	}
 
@@ -128,10 +133,13 @@ func Diff(persistentFlags utils.PersistentCommandFlags, flags utils.DiffCommandF
 	defer getLogger().Exit()
 
 	// create locals
-	format := persistentFlags.OutputFormat
+	// NOTE: outputFormat is read from DiffFlags.OutputFormat (not PersistentFlags.OutputFormat)
+	// to avoid the shared-pointer default-value collision across Cobra subcommands.
+	// PatchCommandFlags uses the same pattern for the same reason.
+	outputFormat := flags.OutputFormat
+	format := outputFormat // alias used in log messages below
 	inputFilename := persistentFlags.InputFile
 	outputFilename := persistentFlags.OutputFile
-	outputFormat := persistentFlags.OutputFormat
 	revisedFilename := flags.RevisedFile
 	deltaColorize := flags.Colorize
 
@@ -200,6 +208,24 @@ func Diff(persistentFlags utils.PersistentCommandFlags, flags utils.DiffCommandF
 			formatter := formatter.NewDeltaFormatter()
 			diffString, err = formatter.Format(diffResults)
 			// Note: JSON data files MUST ends in a newline as this is a POSIX standard
+
+		// FORMAT_UNIFIED: standard unified diff of the pretty-printed JSON.
+		// Uses github.com/pmezard/go-difflib (BSD-3-Clause).
+		// The existing FORMAT_TEXT (go-jsondiff AsciiFormatter) and FORMAT_JSON (DeltaFormatter)
+		// paths above are completely untouched and can be restored as default at any time.
+		case FORMAT_UNIFIED:
+			diffString, err = unifiedDiffJSON(bBaseData, bRevisedData, inputFilename, revisedFilename)
+			if err != nil {
+				err = getLogger().Errorf("unifiedDiffJSON() failed: %s", err.Error())
+				return
+			}
+			if diffString == "" {
+				// go-difflib returns an empty string when files are identical; report consistently
+				getLogger().Infof("No deltas found (unified). baseFilename: '%s', revisedFilename='%s' match.",
+					inputFilename, revisedFilename)
+				return
+			}
+
 		default:
 			// Default to Text output for anything else (set as flag default)
 			getLogger().Warningf("Diff output format not supported for '%s' format.", format)
@@ -214,6 +240,45 @@ func Diff(persistentFlags utils.PersistentCommandFlags, flags utils.DiffCommandF
 	}
 
 	return
+}
+
+// unifiedDiffJSON pretty-prints both JSON byte slices then computes a standard unified diff
+// using github.com/pmezard/go-difflib (BSD-3-Clause licence, already a transitive dep via testify).
+// Output contains ---/+++/@@ hunk headers compatible with the GUI DiffHighlighter component.
+// The go-jsondiff-based FORMAT_TEXT and FORMAT_JSON paths are not affected.
+func unifiedDiffJSON(bBase, bRevised []byte, fromFile, toFile string) (string, error) {
+	prettyBase, err := prettyJSON(bBase)
+	if err != nil {
+		return "", fmt.Errorf("failed to pretty-print base JSON '%s': %w", fromFile, err)
+	}
+	prettyRevised, err := prettyJSON(bRevised)
+	if err != nil {
+		return "", fmt.Errorf("failed to pretty-print revised JSON '%s': %w", toFile, err)
+	}
+	return difflib.GetUnifiedDiffString(difflib.UnifiedDiff{
+		A:        difflib.SplitLines(prettyBase),
+		B:        difflib.SplitLines(prettyRevised),
+		FromFile: fromFile,
+		ToFile:   toFile,
+		Context:  3,
+	})
+}
+
+// prettyJSON re-encodes raw JSON bytes with consistent 4-space indentation so that
+// line-oriented diff is meaningful regardless of original whitespace.
+func prettyJSON(b []byte) (string, error) {
+	var v interface{}
+	if err := json.Unmarshal(b, &v); err != nil {
+		return "", err
+	}
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	enc.SetIndent("", "    ")
+	enc.SetEscapeHTML(false)
+	if err := enc.Encode(v); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
 }
 
 func compareBinaryData(bBaseData []byte, bRevisedData []byte) (diffResults diff.Diff, err error) {
