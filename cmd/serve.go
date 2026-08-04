@@ -21,6 +21,7 @@ package cmd
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -201,7 +202,13 @@ func handleServeReadFile(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	data, err := os.ReadFile(payload.FilePath)
+	safePath, err := resolveServePath(payload.FilePath)
+	if err != nil {
+		writeServeError(writer, http.StatusBadRequest, err)
+		return
+	}
+
+	data, err := os.ReadFile(safePath)
 	if err != nil {
 		writeServeError(writer, http.StatusBadRequest, err)
 		return
@@ -222,7 +229,13 @@ func handleServeWriteFile(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	if err := os.WriteFile(payload.FilePath, []byte(payload.Content), 0o600); err != nil {
+	safePath, err := resolveServePath(payload.FilePath)
+	if err != nil {
+		writeServeError(writer, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := os.WriteFile(safePath, []byte(payload.Content), 0o600); err != nil {
 		writeServeError(writer, http.StatusBadRequest, err)
 		return
 	}
@@ -525,4 +538,25 @@ func readServeOutputFile(path string) string {
 
 func strconvItoa(value int) string {
 	return strconv.Itoa(value)
+}
+
+// resolveServePath canonicalises path and ensures it is located inside the OS
+// temp directory, preventing path-traversal attacks where a caller could supply
+// an arbitrary filesystem path (e.g. "/etc/passwd" or "../../sensitive").
+// It returns the cleaned absolute path so callers use the validated form.
+func resolveServePath(path string) (string, error) {
+	// Resolve ".." segments and make the path absolute so the comparison is reliable.
+	resolved, err := filepath.Abs(filepath.Clean(path))
+	if err != nil {
+		return "", fmt.Errorf("invalid file path")
+	}
+	tmpDir, err := filepath.Abs(os.TempDir())
+	if err != nil {
+		return "", fmt.Errorf("invalid file path")
+	}
+	// The resolved path must be strictly inside the temp directory.
+	if !strings.HasPrefix(resolved, tmpDir+string(filepath.Separator)) {
+		return "", fmt.Errorf("file path is not permitted")
+	}
+	return resolved, nil
 }
