@@ -2,16 +2,9 @@
 import { useAppContext } from '../context/AppContext'
 import styles from './StatusBar.module.css'
 
-/** Returns the basename portion of a path without importing Node's `path` module. */
-function basename(p: string): string {
-  return p.replace(/\\/g, '/').split('/').pop() ?? p
-}
-
 export default function StatusBar() {
-  const { bomInfo, validateBadge, validateBadgeText } = useAppContext()
+  const { bomDisplayName, bomInfo, validateBadge, validateBadgeText } = useAppContext()
   const { format, specVersion, filePath } = bomInfo
-
-  const base = filePath ? basename(filePath) : ''
 
   return (
     <footer className={styles.bar} role="status" aria-label="BOM status">
@@ -23,13 +16,15 @@ export default function StatusBar() {
         </span>
       )}
 
-      {/* Filename — full path shown on hover via title tooltip */}
-      {filePath && (
-        <span className={styles.filename} title={filePath}>
-          {base}
+      {/* Filename — user-visible name from file picker (full path in Electron;
+          basename only in browser mode where the sandbox hides the full path).
+          Tooltip shows the internal filePath for debugging. */}
+      {bomDisplayName && (
+        <span className={styles.filename} title={filePath || bomDisplayName}>
+          {bomDisplayName}
         </span>
       )}
-      {!filePath && (
+      {!bomDisplayName && (
         <span className={styles.filename} style={{ opacity: 0.4 }}>
           No BOM loaded
         </span>
