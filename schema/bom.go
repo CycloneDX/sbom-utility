@@ -227,6 +227,30 @@ func (bom *BOM) GetCdxSignature() (pSignature *JSFSignature) {
 	return pSignature
 }
 
+// GetCdxSpecFormat returns the v2.0 specFormat value (empty string for v1.x documents).
+func (bom *BOM) GetCdxSpecFormat() (specFormat string) {
+	if cdxBom := bom.GetCdxBom(); cdxBom != nil {
+		specFormat = cdxBom.SpecFormat
+	}
+	return specFormat
+}
+
+// GetCdxSignatures returns the v2.0 signatures array (nil for v1.x documents).
+func (bom *BOM) GetCdxSignatures() (pSignatures *[]JSFSignature) {
+	if cdxBom := bom.GetCdxBom(); cdxBom != nil {
+		pSignatures = cdxBom.Signatures
+	}
+	return pSignatures
+}
+
+// GetCdxPerspectives returns the v2.0 perspectives array (nil for v1.x documents).
+func (bom *BOM) GetCdxPerspectives() (pPerspectives *[]CDXPerspective) {
+	if cdxBom := bom.GetCdxBom(); cdxBom != nil {
+		pPerspectives = cdxBom.Perspectives
+	}
+	return pPerspectives
+}
+
 func (bom *BOM) GetCdxVulnerabilities() (pVulnerabilities *[]CDXVulnerability) {
 	if bom := bom.GetCdxBom(); bom != nil {
 		pVulnerabilities = bom.Vulnerabilities

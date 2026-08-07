@@ -44,7 +44,9 @@ const (
 	// SPDX
 	PROPKEY_ID_SPDX      = "SPDXID"
 	PROPKEY_VERSION_SPDX = "spdxVersion"
-	// CycloneDX
+	// CycloneDX v1.x: top-level format identifier key is "bomFormat"
 	PROPKEY_ID_CYCLONEDX      = "bomFormat"
 	PROPKEY_VERSION_CYCLONEDX = "specVersion"
+	// CycloneDX v2.0: top-level format identifier key renamed to "specFormat"
+	PROPKEY_ID_CYCLONEDX_V2 = "specFormat"
 )

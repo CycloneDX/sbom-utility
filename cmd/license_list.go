@@ -87,7 +87,7 @@ var LICENSE_LIST_ROW_DATA = []ColumnFormatData{
 	*NewColumnFormatData(LICENSE_FILTER_KEY_LICENSE_TEXT_ENCODING, -1, false, false),
 	*NewColumnFormatData(LICENSE_FILTER_KEY_LICENSE_TEXT_CONTENT_TYPE, -1, false, false),
 	*NewColumnFormatData(LICENSE_FILTER_KEY_LICENSE_TEXT_CONTENT, 8, false, false),
-	*NewColumnFormatData(LICENSE_FILTER_KEY_PURL, REPORT_DO_NOT_TRUNCATE, false, false),
+	{DataKey: LICENSE_FILTER_KEY_PURL, TruncateLength: REPORT_DO_NOT_TRUNCATE, MarkdownEscape: REPORT_MARKDOWN_ESCAPE_TRUE},
 }
 
 // Command help formatting
@@ -463,7 +463,7 @@ func DisplayLicenseListMarkdown(bom *schema.BOM, writer io.Writer, flags utils.L
 		// Format each LicenseInfo as a line and write to output
 		for _, iInfo := range arrLicenseInfo {
 			licenseInfo = iInfo.(schema.LicenseInfo)
-			line, err = prepareReportLineData(
+			line, err = prepareReportLineDataMarkdown(
 				licenseInfo,
 				LICENSE_LIST_ROW_DATA,
 				flags.Summary,

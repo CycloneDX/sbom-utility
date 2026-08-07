@@ -1,5 +1,5 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![License](https://img.shields.io/badge/CycloneDX-v1.2,1.3,1.4,1.5,1.6,1.7-darkcyan.svg)](https://github.com/CycloneDX/specification)
+[![License](https://img.shields.io/badge/CycloneDX-v1.2,1.3,1.4,1.5,1.6,1.7,2.0_(pre--release)-darkcyan.svg)](https://github.com/CycloneDX/specification)
 [![License](https://img.shields.io/badge/SPDX-v2.1,2.2,2.3-purple.svg)](https://github.com/spdx/spdx-spec)
 [![Go Report Card](https://goreportcard.com/badge/github.com/CycloneDX/sbom-utility)](https://goreportcard.com/badge/github.com/CycloneDX/sbom-utility)
 <!--![CodeQL](https://github.com/CycloneDX/sbom-utility/actions/workflows/codeql.yml/badge.svg)-->
@@ -198,6 +198,7 @@ This example uses the `--format` flag on the `schema` command to output in markd
 ```md
 |name|format|version|variant|file (local)|url (remote)|
 |:--|:--|:--|:--|:--|:--|
+|CycloneDX v2.0 (pre-release)|CycloneDX|2.0|development|schema/cyclonedx/2.0/cyclonedx-2.0-bundled.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/2.0-dev/schema/2.0/cyclonedx-2.0-bundled.schema.json|
 |CycloneDX v1.5|CycloneDX|1.5|(latest)|schema/cyclonedx/1.5/bom-1.5.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.5.schema.json|
 |CycloneDX v1.4|CycloneDX|1.4|(latest)|schema/cyclonedx/1.4/bom-1.4.schema.json|https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json|
 |CycloneDX/specification/master/schema/bom-1.3-strict.schema.json|
@@ -309,6 +310,7 @@ This example shows the `--quiet` flag being used on the `schema` command to turn
 ```bash
 name                          format     version   variant      file (local)                                     url (remote)
 ----                          ------     -------   -------      ------------                                     ------------
+CycloneDX v2.0 (pre-release)  CycloneDX  2.0       development  schema/cyclonedx/2.0/cyclonedx-2.0-bundled.schema.json  https://raw.githubusercontent.com/CycloneDX/specification/2.0-dev/schema/2.0/cyclonedx-2.0-bundled.schema.json
 CycloneDX v1.5                CycloneDX  1.5       (latest)     schema/cyclonedx/1.5/bom-1.5.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.5.schema.json
 CycloneDX v1.4                CycloneDX  1.4       (latest)     schema/cyclonedx/1.4/bom-1.4.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.4.schema.json
 CycloneDX v1.3                CycloneDX  1.3       (latest)     schema/cyclonedx/1.3/bom-1.3.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.3.schema.json
@@ -447,6 +449,22 @@ echo $?
 0  // no error (valid)
 ```
 
+
+##### Example: Validate using the CycloneDX v2.0 pre-release schema
+
+CycloneDX v2.0 is an early pre-release registered in `config.json` with `variant: "development"`. Because v2.0 BOMs use `specFormat` (rather than `bomFormat`) for format identification, auto-detection is not yet supported; use the `--force` flag to point directly at the bundled schema file:
+
+```bash
+./sbom-utility validate -i <your-cdx-2.0-bom.json> --force schema/cyclonedx/2.0/cyclonedx-2.0-bundled.schema.json
+```
+
+Alternatively, you can reference the upstream pre-release schema directly via URL:
+
+```bash
+./sbom-utility validate -i <your-cdx-2.0-bom.json> --force https://raw.githubusercontent.com/CycloneDX/specification/2.0-dev/schema/2.0/cyclonedx-2.0-bundled.schema.json
+```
+
+> **Note**: Once auto-detection support for the `specFormat`/`specVersion` key names (introduced in v2.0) is added, the `--variant development` flag will be usable without `--force`.
 
 ##### Example: Validate using "custom" schema variants
 
@@ -2229,8 +2247,9 @@ This command supports the `--format` flag with any of the following values:
 ```
 
 ```bash
-name            variant      format     version   file                                             url
-----            -------      ------     -------   ----                                             ---
+name                         variant      format     version   file                                                    url
+----                         -------      ------     -------   ----                                                    ---
+CycloneDX v2.0 (pre-release) development  CycloneDX  2.0       schema/cyclonedx/2.0/cyclonedx-2.0-bundled.schema.json  https://raw.githubusercontent.com/CycloneDX/specification/2.0-dev/schema/2.0/cyclonedx-2.0-bundled.schema.json
 CycloneDX v1.7  (latest)     CycloneDX  1.7       schema/cyclonedx/1.7/bom-1.7.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.7.schema.json
 CycloneDX v1.6.1(latest)     CycloneDX  1.6       schema/cyclonedx/1.6/bom-1.6.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.6.schema.json
 CycloneDX v1.5  (latest)     CycloneDX  1.5       schema/cyclonedx/1.5/bom-1.5.schema.json         https://raw.githubusercontent.com/CycloneDX/specification/master/schema/bom-1.5.schema.json

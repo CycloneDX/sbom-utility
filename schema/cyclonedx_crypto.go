@@ -31,13 +31,18 @@ type CDXCryptoProperties struct {
 // v1.6: added
 // v1.7: Curve - deprecated
 // v1.7: Added: EllipticCurve
+// v2.0: ImplementationPlatform changed from a single string (v1.6/v1.7) to []string (v2.0).
+//
+//	interface{} is used so both forms unmarshal without error, matching the same
+//	pattern used for tools/identity elsewhere in this codebase.
+//
 // TODO: Test EllipticCurve; "$ref": "cryptography-defs.schema.json#/definitions/ellipticCurvesEnum"
 type CDXAlgorithmProperties struct {
-	Primitive                string    `json:"primitive,omitempty" cdx:"+1.6"`                // v1.6 added
-	ParameterSetIdentifier   string    `json:"parameterSetIdentifier,omitempty" cdx:"+1.6"`   // v1.6 added
-	Curve                    string    `json:"curve,omitempty" cdx:"+1.6"`                    // v1.6 added
-	ExecutionEnvironment     string    `json:"executionEnvironment,omitempty" cdx:"+1.6"`     // v1.6 added
-	ImplementationPlatform   string    `json:"implementationPlatform,omitempty" cdx:"+1.6"`   // v1.6 added
+	Primitive                string      `json:"primitive,omitempty" cdx:"+1.6"`                // v1.6 added
+	ParameterSetIdentifier   string      `json:"parameterSetIdentifier,omitempty" cdx:"+1.6"`   // v1.6 added
+	Curve                    string      `json:"curve,omitempty" cdx:"+1.6"`                    // v1.6 added
+	ExecutionEnvironment     string      `json:"executionEnvironment,omitempty" cdx:"+1.6"`     // v1.6 added
+	ImplementationPlatform   interface{} `json:"implementationPlatform,omitempty" cdx:"+1.6"`   // v1.6: string; v2.0: changed to []string
 	CertificationLevel       *[]string `json:"certificationLevel,omitempty" cdx:"+1.6"`       // v1.6 added
 	Mode                     string    `json:"mode,omitempty" cdx:"+1.6"`                     // v1.6 added
 	Padding                  string    `json:"padding,omitempty" cdx:"+1.6"`                  // v1.6 added
