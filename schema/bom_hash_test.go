@@ -444,6 +444,31 @@ func TestHashCDXVulnerabilityAnalysisWithoutResponse(t *testing.T) {
 	}
 }
 
+// A vulnerability that omits the optional top-level `source` while carrying a
+// rating that declares one must not cause a nil pointer dereference panic.
+func TestHashCDXVulnerabilityRatingSourceWithoutVulnerabilitySource(t *testing.T) {
+	cdxVulnerability := CDXVulnerability{
+		Id: "CVE-2026-0001",
+		Ratings: &[]CDXRating{
+			{
+				Source:   &CDXVulnerabilitySource{Name: "NVD"},
+				Score:    9.8,
+				Severity: "critical",
+				Method:   "CVSSv31",
+			},
+		},
+	}
+	document := NewBOM("")
+	hashed, err := document.HashmapVulnerability(cdxVulnerability, nil)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if !hashed {
+		t.Error(getLogger().Errorf("expected non-empty vulnerability to be hashed."))
+	}
+}
+
 // ----------------------
 // License Hashing
 // ----------------------
