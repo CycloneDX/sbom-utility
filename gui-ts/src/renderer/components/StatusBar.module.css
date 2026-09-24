@@ -1,0 +1,86 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+.bar {
+  display:     flex;
+  align-items: center;
+  height:      var(--statusbar-height);
+  background:  var(--statusbar-bg);
+  color:       var(--statusbar-text);
+  font-size:   var(--statusbar-font);
+  flex-shrink: 0;
+  /* Side padding keeps content away from the rounded window corners */
+  padding:     0 var(--space-4);
+  gap:         var(--space-4);
+  user-select: text;
+}
+
+.segment {
+  display:    flex;
+  align-items: center;
+  gap:         var(--space-1);
+  white-space: nowrap;
+  overflow:    hidden;
+  text-overflow: ellipsis;
+}
+
+.label {
+  opacity: 0.75;
+  font-weight: var(--weight-medium);
+}
+
+.value {
+  font-weight: var(--weight-bold);
+}
+
+.filename {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--editor-font-family);
+  font-size: var(--statusbar-font);
+  opacity: 0.9;
+  cursor: default;
+}
+
+/* Subtle vertical pipe separator between the filename and format/version group */
+.sep {
+  width:        1px;
+  height:       14px;
+  background:   rgba(255, 255, 255, 0.30);
+  flex-shrink:  0;
+}
+
+/* Validation badge rendered inside the status bar */
+.validBadge {
+  display:       inline-flex;
+  align-items:   center;
+  gap:           5px;
+  padding:       1px 8px;
+  border-radius: 10px;
+  font-size:     var(--statusbar-font);
+  font-weight:   600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space:   nowrap;
+  flex-shrink:   0;
+}
+
+.validBadge_valid {
+  background: rgba(48, 209, 88, 0.22);
+  color:      #d4f5e2;
+}
+
+.validBadge_invalid {
+  background: rgba(255, 59, 48, 0.22);
+  color:      #ffd2cf;
+}
+
+.validDot {
+  width:         7px;
+  height:        7px;
+  border-radius: 50%;
+  flex-shrink:   0;
+}
+
+.validBadge_valid   .validDot { background: #30D158; }
+.validBadge_invalid .validDot { background: #FF453A; }

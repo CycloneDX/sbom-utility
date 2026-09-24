@@ -19,7 +19,10 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/CycloneDX/sbom-utility/utils"
@@ -40,6 +43,19 @@ const (
 
 	TEST_DIFF_ARRAY_ORDER_2_CHANGES_BASE  = "test/diff/json-array-order-2-changes-base.json"
 	TEST_DIFF_ARRAY_ORDER_2_CHANGES_DELTA = "test/diff/json-array-order-2-changes-delta.json"
+
+	// Nested array order change (licenses inside metadata)
+	TEST_DIFF_CDX_1_4_NESTED_ARRAY_ORDER_CHANGE_BASE  = "test/diff/cdx-1-4-nested-array-order-change-base.json"
+	TEST_DIFF_CDX_1_4_NESTED_ARRAY_ORDER_CHANGE_DELTA = "test/diff/cdx-1-4-nested-array-order-change-delta.json"
+
+	// CycloneDX 1.7 license structure changes
+	TEST_DIFF_CDX_1_7_LICENSE_BASE  = "test/diff/cdx-1-7-license-base.json"
+	TEST_DIFF_CDX_1_7_LICENSE_DELTA = "test/diff/cdx-1-7-license-delta.json"
+
+	// Edge cases
+	TEST_DIFF_IDENTICAL_BASE      = "test/diff/json-identical-base.json"
+	TEST_DIFF_SCALAR_CHANGE_BASE  = "test/diff/json-scalar-field-change-base.json"
+	TEST_DIFF_SCALAR_CHANGE_DELTA = "test/diff/json-scalar-field-change-delta.json"
 )
 
 // Test CycloneDX BOM deltas
@@ -73,20 +89,22 @@ func NewDiffTestInfo(inputFile string, revisedFilename string) *DiffTestInfo {
 	var ti = new(DiffTestInfo)
 	ti.RevisedFilename = revisedFilename
 	var pCommon = &ti.CommonTestInfo
-	// Note: Diff is by default "txt" format
+	// Default format matches the CLI default: FORMAT_TEXT (line-prefixed +/-/space view).
 	pCommon.InitBasic(inputFile, FORMAT_TEXT, nil)
 	return ti
 }
 
-// Tests basic validation and expected errors
+// innerDiffTest runs Diff() with the given test parameters and checks the error result.
 func innerDiffTest(t *testing.T, testInfo *DiffTestInfo) (actualError error) {
 	getLogger().Enter()
 	defer getLogger().Exit()
 
-	// Copy test parameters to persistent and command-specific flags
+	// Copy test parameters to persistent and command-specific flags.
+	// NOTE: diff format goes into DiffFlags.OutputFormat (not PersistentFlags.OutputFormat)
+	// to match the Cobra flag binding in NewCommandDiff.
 	utils.GlobalFlags.PersistentFlags.OutputFile = testInfo.OutputFile
-	utils.GlobalFlags.PersistentFlags.OutputFormat = testInfo.OutputFormat
 	utils.GlobalFlags.PersistentFlags.InputFile = testInfo.InputFile
+	utils.GlobalFlags.DiffFlags.OutputFormat = testInfo.OutputFormat
 	utils.GlobalFlags.DiffFlags.RevisedFile = testInfo.RevisedFilename
 	utils.GlobalFlags.DiffFlags.Colorize = testInfo.Colorize
 
@@ -111,72 +129,71 @@ func innerDiffTest(t *testing.T, testInfo *DiffTestInfo) (actualError error) {
 	return
 }
 
-// TODO: support testing if "deltas" expressed in JSON diff records
-// match expected output records.
-// func debugDeltas(deltas []diff.Delta, indent string) (err error) {
-// 	for _, delta := range deltas {
-// 		//fmt.Printf("delta: %v\n", delta)
-// 		//sim := delta.Similarity()
-// 		//fmt.Printf("sim: %v\n", sim)
-//
-// 		indent2 := indent + "...."
-//
-// 		switch pointer := delta.(type) {
-// 		case *diff.Object:
-// 			fmt.Printf("%s[Object](%v): PostPosition(): \"%v\", # Deltas: %v\n", indent, pointer.Similarity(), ColorizeBackgroundCyan(pointer.PostPosition().String()), len(pointer.Deltas))
-// 			debugDeltas(pointer.Deltas, indent2)
-// 			//deltaJson[d.Position.String()], err = f.formatObject(d.Deltas)
-// 		case *diff.Array:
-// 			fmt.Printf("%s[Array](%v): PostPosition(): \"%v\", # Deltas: %v\n", indent, pointer.Similarity(), ColorizeBackgroundCyan((pointer.PostPosition()).String()), len(pointer.Deltas))
-// 			debugDeltas(pointer.Deltas, indent2)
-// 			//deltaJson[d.Position.String()], err = f.formatArray(d.Deltas)
-// 		case *diff.Added:
-// 			sValue := fmt.Sprintf("%v", pointer.Value)
-// 			fmt.Printf("%s[Added](%v): Value: \"%v\", PostPosition(): \"%v\"\n", indent, pointer.Similarity(), ColorizeBackgroundGreen(sValue), ColorizeBackgroundCyan((pointer.PostPosition()).String()))
-// 			//deltaJson[d.PostPosition().String()] = []interface{}{d.Value}
-// 		case *diff.Modified:
-// 			fmt.Printf("%s[Modified](%v): PostPosition: \"%v\", OldValue: \"%v\", NewValue: \"%v\"\n", indent, pointer.Similarity(), ColorizeBackgroundCyan((pointer.PostPosition()).String()), ColorizeBackgroundRed((pointer.OldValue).(string)), ColorizeBackgroundGreen((pointer.NewValue).(string)))
-// 			//deltaJson[d.PostPosition().String()] = []interface{}{d.OldValue, d.NewValue}
-// 		case *diff.TextDiff:
-// 			fmt.Printf("%s[TextDiff](%v): PostPosition: \"%v\", OldValue: \"%v\", NewValue: \"%v\"\n", indent, pointer.Similarity(), ColorizeBackgroundCyan((pointer.PostPosition()).String()), ColorizeBackgroundRed((pointer.OldValue).(string)), ColorizeBackgroundGreen((pointer.NewValue).(string)))
-// 			//deltaJson[d.PostPosition().String()] = []interface{}{d.DiffString(), 0, DeltaTextDiff}
-// 		case *diff.Deleted:
-// 			sValue := fmt.Sprintf("%v", pointer.Value)
-// 			fmt.Printf("%s[Deleted](%v): Value: \"%v\", PrePosition(): \"%v\"\n", indent, pointer.Similarity(), ColorizeBackgroundRed(sValue), ColorizeBackgroundCyan(pointer.PrePosition().String()))
-// 			//deltaJson[d.PrePosition().String()] = []interface{}{d.Value, 0, DeltaDelete}
-// 		case *diff.Moved:
-// 			sValue := fmt.Sprintf("%v", pointer.Value)
-// 			fmt.Printf("%s[Moved](%v): Value: \"%v\", PrePosition(): \"%v\", PostPosition(): \"%v\"\n", indent, pointer.Similarity(), ColorizeBackgroundYellow(sValue), ColorizeBackgroundCyan(pointer.PrePosition().String()), ColorizeBackgroundCyan(pointer.PostPosition().String()))
-// 			fmt.Printf("%s[ERROR] 'Move' operation NOT supported for formatting objects\n", indent)
-// 		default:
-// 			fmt.Printf("%sUnknown Delta type detected: \"%T\"\n", indent, delta)
-// 		}
-// 	}
-//
-// 	return
-// }
+// innerDiffTestFormatJSON runs a FORMAT_JSON diff and validates the output is well-formed
+// JSON with the expected envelope fields (base, revised, modified, diff).
+// If expectModified is true it also asserts modified==true and diff is non-empty.
+// Returns the parsed envelope for callers that want to inspect further.
+func innerDiffTestFormatJSON(t *testing.T, ti *DiffTestInfo, expectModified bool) map[string]interface{} {
+	t.Helper()
 
-// See: https://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html
+	// Route output to a temp file so we can read it back
+	if ti.OutputFile == "" {
+		ti.OutputFile = ti.CreateTemporaryTestOutputFilename(ti.RevisedFilename)
+	}
 
-// Validate value (range)
-// func Colorize(color string, text string) (colorizedText string) {
-// 	return color + text + Reset
-// }
-
-func TestDiffJsonArrayOrderMove2ObjectsFormatJson(t *testing.T) {
-	ti := NewDiffTestInfo(TEST_DIFF_ARRAY_ORDER_2_CHANGES_BASE, TEST_DIFF_ARRAY_ORDER_2_CHANGES_DELTA)
-	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_ARRAY_ORDER_2_CHANGES_DELTA)
 	err := innerDiffTest(t, ti)
 	if err != nil {
-		t.Error(err)
+		t.Fatalf("Diff() returned unexpected error: %v", err)
 	}
+
+	raw, readErr := os.ReadFile(ti.OutputFile)
+	if readErr != nil {
+		t.Fatalf("could not read output file %s: %v", ti.OutputFile, readErr)
+	}
+
+	// Trim trailing newline that Diff() appends then parse
+	var envelope map[string]interface{}
+	if jsonErr := json.Unmarshal([]byte(strings.TrimRight(string(raw), "\n")), &envelope); jsonErr != nil {
+		t.Fatalf("FORMAT_JSON output is not valid JSON: %v\nraw output:\n%s", jsonErr, raw)
+	}
+
+	// Structural assertions common to all FORMAT_JSON output
+	for _, key := range []string{"base", "revised", "modified", "diff"} {
+		if _, ok := envelope[key]; !ok {
+			t.Errorf("FORMAT_JSON envelope missing required key %q", key)
+		}
+	}
+
+	modified, _ := envelope["modified"].(bool)
+	diffText, _ := envelope["diff"].(string)
+
+	if expectModified {
+		if !modified {
+			t.Errorf("expected modified=true but got false")
+		}
+		if diffText == "" {
+			t.Errorf("expected non-empty diff text but got empty string")
+		}
+	} else {
+		if modified {
+			t.Errorf("expected modified=false but got true")
+		}
+		if diffText != "" {
+			t.Errorf("expected empty diff text for identical files but got:\n%s", diffText)
+		}
+	}
+
+	return envelope
 }
 
-func TestDiffJsonArrayOrderMove1ObjectFormatJson(t *testing.T) {
-	ti := NewDiffTestInfo(TEST_DIFF_ARRAY_ORDER_CHANGE_BASE, TEST_DIFF_ARRAY_ORDER_CHANGE_DELTA)
-	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_ARRAY_ORDER_CHANGE_DELTA)
-	err := innerDiffTest(t, ti)
-	if err != nil {
+// =====================================================
+// FORMAT_TEXT tests
+// =====================================================
+
+func TestDiffJsonArrayOrderMove2ObjectsFormatText(t *testing.T) {
+	ti := NewDiffTestInfo(TEST_DIFF_ARRAY_ORDER_2_CHANGES_BASE, TEST_DIFF_ARRAY_ORDER_2_CHANGES_DELTA)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_ARRAY_ORDER_2_CHANGES_DELTA)
+	if err := innerDiffTest(t, ti); err != nil {
 		t.Error(err)
 	}
 }
@@ -184,8 +201,7 @@ func TestDiffJsonArrayOrderMove1ObjectFormatJson(t *testing.T) {
 func TestDiffJsonArrayOrderMove1ObjectFormatText(t *testing.T) {
 	ti := NewDiffTestInfo(TEST_DIFF_ARRAY_ORDER_CHANGE_BASE, TEST_DIFF_ARRAY_ORDER_CHANGE_DELTA)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_ARRAY_ORDER_CHANGE_DELTA)
-	err := innerDiffTest(t, ti)
-	if err != nil {
+	if err := innerDiffTest(t, ti); err != nil {
 		t.Error(err)
 	}
 }
@@ -193,8 +209,7 @@ func TestDiffJsonArrayOrderMove1ObjectFormatText(t *testing.T) {
 func TestDiffJsonArrayOrderMove1ObjectWithDeleteFormatText(t *testing.T) {
 	ti := NewDiffTestInfo(TEST_DIFF_ARRAY_ORDER_CHANGE_WITH_DELETE_BASE, TEST_DIFF_ARRAY_ORDER_CHANGE_WITH_DELETE_DELTA)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_ARRAY_ORDER_CHANGE_WITH_DELETE_DELTA)
-	err := innerDiffTest(t, ti)
-	if err != nil {
+	if err := innerDiffTest(t, ti); err != nil {
 		t.Error(err)
 	}
 }
@@ -202,8 +217,7 @@ func TestDiffJsonArrayOrderMove1ObjectWithDeleteFormatText(t *testing.T) {
 func TestDiffJsonArrayOrderMove1ObjectWithAddFormatText(t *testing.T) {
 	ti := NewDiffTestInfo(TEST_DIFF_ARRAY_ORDER_CHANGE_WITH_ADD_BASE, TEST_DIFF_ARRAY_ORDER_CHANGE_WITH_ADD_DELTA)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_ARRAY_ORDER_CHANGE_WITH_ADD_DELTA)
-	err := innerDiffTest(t, ti)
-	if err != nil {
+	if err := innerDiffTest(t, ti); err != nil {
 		t.Error(err)
 	}
 }
@@ -211,70 +225,215 @@ func TestDiffJsonArrayOrderMove1ObjectWithAddFormatText(t *testing.T) {
 func TestDiffJsonArrayOrderMove1ObjectWithAddAndDeleteFormatText(t *testing.T) {
 	ti := NewDiffTestInfo(TEST_DIFF_ARRAY_ORDER_CHANGE_WITH_ADD_AND_DELETE_BASE, TEST_DIFF_ARRAY_ORDER_CHANGE_WITH_ADD_AND_DELETE_DELTA)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_ARRAY_ORDER_CHANGE_WITH_ADD_AND_DELETE_DELTA)
-	err := innerDiffTest(t, ti)
-	if err != nil {
+	if err := innerDiffTest(t, ti); err != nil {
+		t.Error(err)
+	}
+}
+
+// Edge case: deeply nested array order change (licenses inside metadata object).
+func TestDiffCdx14NestedArrayOrderChangeFormatText(t *testing.T) {
+	ti := NewDiffTestInfo(TEST_DIFF_CDX_1_4_NESTED_ARRAY_ORDER_CHANGE_BASE, TEST_DIFF_CDX_1_4_NESTED_ARRAY_ORDER_CHANGE_DELTA)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_CDX_1_4_NESTED_ARRAY_ORDER_CHANGE_DELTA)
+	if err := innerDiffTest(t, ti); err != nil {
+		t.Error(err)
+	}
+}
+
+// CycloneDX 1.7: licenseChoice structure changes — licensing block, acknowledgement field,
+// top-level expression item, and new component added.
+func TestDiffCdx17LicenseChangesFormatText(t *testing.T) {
+	ti := NewDiffTestInfo(TEST_DIFF_CDX_1_7_LICENSE_BASE, TEST_DIFF_CDX_1_7_LICENSE_DELTA)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_CDX_1_7_LICENSE_DELTA)
+	if err := innerDiffTest(t, ti); err != nil {
+		t.Error(err)
+	}
+}
+
+// CycloneDX 1.7: same fixtures as FORMAT_TEXT but via the JSON envelope — verifies
+// that the large, nested licensing block round-trips correctly through the envelope.
+func TestDiffCdx17LicenseChangesFormatJson(t *testing.T) {
+	ti := NewDiffTestInfo(TEST_DIFF_CDX_1_7_LICENSE_BASE, TEST_DIFF_CDX_1_7_LICENSE_DELTA)
+	ti.OutputFormat = FORMAT_JSON
+	innerDiffTestFormatJSON(t, ti, true)
+}
+
+// Edge case: only top-level scalar fields differ (version, serialNumber, timestamp, component version).
+func TestDiffScalarFieldChangesFormatText(t *testing.T) {
+	ti := NewDiffTestInfo(TEST_DIFF_SCALAR_CHANGE_BASE, TEST_DIFF_SCALAR_CHANGE_DELTA)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_SCALAR_CHANGE_DELTA)
+	if err := innerDiffTest(t, ti); err != nil {
+		t.Error(err)
+	}
+}
+
+// Edge case: identical files — diff should produce no output and no error.
+func TestDiffIdenticalFilesFormatText(t *testing.T) {
+	ti := NewDiffTestInfo(TEST_DIFF_IDENTICAL_BASE, TEST_DIFF_IDENTICAL_BASE)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_IDENTICAL_BASE)
+	if err := innerDiffTest(t, ti); err != nil {
+		t.Error(err)
+	}
+	// Output file should be empty (or absent) — no diff lines written for identical files.
+	raw, _ := os.ReadFile(ti.OutputFile)
+	if len(strings.TrimSpace(string(raw))) > 0 {
+		t.Errorf("expected no output for identical files but got:\n%s", raw)
+	}
+}
+
+// Edge case: colorize flag — just verify it produces output without error (ANSI codes are terminal-only).
+func TestDiffColorizeFormatText(t *testing.T) {
+	ti := NewDiffTestInfo(TEST_DIFF_ARRAY_ORDER_CHANGE_WITH_ADD_AND_DELETE_BASE, TEST_DIFF_ARRAY_ORDER_CHANGE_WITH_ADD_AND_DELETE_DELTA)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_ARRAY_ORDER_CHANGE_WITH_ADD_AND_DELETE_DELTA)
+	ti.Colorize = true
+	if err := innerDiffTest(t, ti); err != nil {
 		t.Error(err)
 	}
 }
 
 // =====================================================
-// CycloneDX BOM variant tests
+// CycloneDX BOM variant tests — FORMAT_TEXT
 // =====================================================
 
 func TestDiffCdx14MatureDelta1Text(t *testing.T) {
 	ti := NewDiffTestInfo(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE, TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_1_DELTA)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_1_DELTA)
-	err := innerDiffTest(t, ti)
-	if err != nil {
+	if err := innerDiffTest(t, ti); err != nil {
 		t.Error(err)
 	}
 }
 
-func TestDiffCdx14MatureDelta1Json(t *testing.T) {
-	ti := NewDiffTestInfo(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE, TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_1_DELTA)
-	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_1_DELTA)
-	ti.OutputFormat = FORMAT_JSON
-	err := innerDiffTest(t, ti)
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func TestDiffCdx14MatureDelta2(t *testing.T) {
+func TestDiffCdx14MatureDelta2Text(t *testing.T) {
 	ti := NewDiffTestInfo(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE, TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_2_DELTA)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_2_DELTA)
-	err := innerDiffTest(t, ti)
-	if err != nil {
+	if err := innerDiffTest(t, ti); err != nil {
 		t.Error(err)
 	}
 }
 
-func TestDiffJsonVulnerabilitiesAdd1(t *testing.T) {
+func TestDiffJsonVulnerabilitiesAdd1FormatText(t *testing.T) {
 	ti := NewDiffTestInfo(TEST_DIFF_CDX_1_5_VULNERABILITY_BASE, TEST_DIFF_CDX_1_5_VULNERABILITY_ADD_1)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_CDX_1_5_VULNERABILITY_ADD_1)
-	err := innerDiffTest(t, ti)
-	if err != nil {
+	if err := innerDiffTest(t, ti); err != nil {
 		t.Error(err)
 	}
 }
 
-func TestDiffJsonVulnerabilitiesRemove1(t *testing.T) {
+func TestDiffJsonVulnerabilitiesRemove1FormatText(t *testing.T) {
 	ti := NewDiffTestInfo(TEST_DIFF_CDX_1_5_VULNERABILITY_BASE, TEST_DIFF_CDX_1_5_VULNERABILITY_REMOVE_1)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_CDX_1_5_VULNERABILITY_REMOVE_1)
-	err := innerDiffTest(t, ti)
-	if err != nil {
+	if err := innerDiffTest(t, ti); err != nil {
 		t.Error(err)
 	}
 }
 
-// NOTE: In order to debug panic handling... here is a test
-// Unfortunately, we cannot run it as part of function test as it "times out"
-// TODO: Create smaller test files that cause panic in Diff command's underlying libs.
+// =====================================================
+// FORMAT_UNIFIED tests
+// =====================================================
+
+func TestDiffCdx14MatureDelta1Unified(t *testing.T) {
+	ti := NewDiffTestInfo(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE, TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_1_DELTA)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_1_DELTA)
+	ti.OutputFormat = FORMAT_UNIFIED
+	if err := innerDiffTest(t, ti); err != nil {
+		t.Error(err)
+	}
+}
+
+// Edge case: identical files produce no output in unified format.
+func TestDiffIdenticalFilesFormatUnified(t *testing.T) {
+	ti := NewDiffTestInfo(TEST_DIFF_IDENTICAL_BASE, TEST_DIFF_IDENTICAL_BASE)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_IDENTICAL_BASE)
+	ti.OutputFormat = FORMAT_UNIFIED
+	if err := innerDiffTest(t, ti); err != nil {
+		t.Error(err)
+	}
+	raw, _ := os.ReadFile(ti.OutputFile)
+	if len(strings.TrimSpace(string(raw))) > 0 {
+		t.Errorf("expected no output for identical files in unified format but got:\n%s", raw)
+	}
+}
+
+// =====================================================
+// FORMAT_JSON tests
+// =====================================================
+
+// Array order change: envelope must be valid JSON, modified=true, diff non-empty.
+func TestDiffJsonArrayOrderMove1ObjectFormatJson(t *testing.T) {
+	ti := NewDiffTestInfo(TEST_DIFF_ARRAY_ORDER_CHANGE_BASE, TEST_DIFF_ARRAY_ORDER_CHANGE_DELTA)
+	ti.OutputFormat = FORMAT_JSON
+	innerDiffTestFormatJSON(t, ti, true)
+}
+
+// Add + delete + value change in array.
+func TestDiffJsonArrayOrderWithAddAndDeleteFormatJson(t *testing.T) {
+	ti := NewDiffTestInfo(TEST_DIFF_ARRAY_ORDER_CHANGE_WITH_ADD_AND_DELETE_BASE, TEST_DIFF_ARRAY_ORDER_CHANGE_WITH_ADD_AND_DELETE_DELTA)
+	ti.OutputFormat = FORMAT_JSON
+	innerDiffTestFormatJSON(t, ti, true)
+}
+
+// Scalar-only changes across multiple top-level fields.
+func TestDiffScalarFieldChangesFormatJson(t *testing.T) {
+	ti := NewDiffTestInfo(TEST_DIFF_SCALAR_CHANGE_BASE, TEST_DIFF_SCALAR_CHANGE_DELTA)
+	ti.OutputFormat = FORMAT_JSON
+	innerDiffTestFormatJSON(t, ti, true)
+}
+
+// Identical files: FORMAT_JSON still emits a valid envelope with modified=false and diff="".
+// Unlike FORMAT_TEXT/UNIFIED (which write nothing), FORMAT_JSON always writes the envelope
+// so that programmatic consumers get a well-formed document regardless of outcome.
+func TestDiffIdenticalFilesFormatJson(t *testing.T) {
+	ti := NewDiffTestInfo(TEST_DIFF_IDENTICAL_BASE, TEST_DIFF_IDENTICAL_BASE)
+	ti.OutputFormat = FORMAT_JSON
+	innerDiffTestFormatJSON(t, ti, false)
+}
+
+// CycloneDX mature example: envelope contains both filenames.
+func TestDiffCdx14MatureDelta1FormatJson(t *testing.T) {
+	ti := NewDiffTestInfo(TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE, TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_1_DELTA)
+	ti.OutputFormat = FORMAT_JSON
+	envelope := innerDiffTestFormatJSON(t, ti, true)
+	// Verify the filenames round-trip correctly in the envelope.
+	if base, _ := envelope["base"].(string); base != TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE {
+		t.Errorf("envelope base: want %q, got %q", TEST_CDX_1_4_MATURE_EXAMPLE_1_BASE, base)
+	}
+	if revised, _ := envelope["revised"].(string); revised != TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_1_DELTA {
+		t.Errorf("envelope revised: want %q, got %q", TEST_DIFF_CDX_1_4_MATURITY_EXAMPLE_1_DELTA, revised)
+	}
+}
+
+// Vulnerability added: large insert block — confirms envelope handles multi-hundred-line diffs.
+func TestDiffJsonVulnerabilitiesAdd1FormatJson(t *testing.T) {
+	ti := NewDiffTestInfo(TEST_DIFF_CDX_1_5_VULNERABILITY_BASE, TEST_DIFF_CDX_1_5_VULNERABILITY_ADD_1)
+	ti.OutputFormat = FORMAT_JSON
+	innerDiffTestFormatJSON(t, ti, true)
+}
+
+// Vulnerability removed: large delete block.
+func TestDiffJsonVulnerabilitiesRemove1FormatJson(t *testing.T) {
+	ti := NewDiffTestInfo(TEST_DIFF_CDX_1_5_VULNERABILITY_BASE, TEST_DIFF_CDX_1_5_VULNERABILITY_REMOVE_1)
+	ti.OutputFormat = FORMAT_JSON
+	innerDiffTestFormatJSON(t, ti, true)
+}
+
+// Nested array inside a BOM object (metadata.licenses).
+func TestDiffCdx14NestedArrayOrderChangeFormatJson(t *testing.T) {
+	ti := NewDiffTestInfo(TEST_DIFF_CDX_1_4_NESTED_ARRAY_ORDER_CHANGE_BASE, TEST_DIFF_CDX_1_4_NESTED_ARRAY_ORDER_CHANGE_DELTA)
+	ti.OutputFormat = FORMAT_JSON
+	innerDiffTestFormatJSON(t, ti, true)
+}
+
+// =====================================================
+// Large-file / formerly-panicking test
+// =====================================================
+
+// NOTE: The large NATS test files previously caused panics/timeouts in the old go-jsondiff
+// library. They can now be run directly since go-difflib handles large inputs safely.
+// Keeping commented out to avoid slow CI until smaller representative fixtures are created.
+// TODO: Create smaller test files that reproduce the large-BOM scenario.
 // func TestDiffJsonPanicNATs(t *testing.T) {
 // 	ti := NewDiffTestInfo(TEST_DIFF_PANIC_BASE, TEST_DIFF_PANIC_DELTA)
 // 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_DIFF_PANIC_DELTA)
-// 	err := innerDiffTest(t, ti)
-// 	if err != nil {
+// 	if err := innerDiffTest(t, ti); err != nil {
 // 		t.Error(err)
 // 	}
 // }

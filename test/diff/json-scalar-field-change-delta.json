@@ -1,0 +1,22 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "version": 2,
+  "serialNumber": "urn:uuid:bbbbbbbb-1111-1111-1111-000000000002",
+  "metadata": {
+    "timestamp": "2024-06-01T12:00:00Z",
+    "component": {
+      "type": "application",
+      "name": "My Application",
+      "version": "2.0.0"
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "some-lib",
+      "version": "2.0.0",
+      "purl": "pkg:npm/some-lib@2.0.0"
+    }
+  ]
+}

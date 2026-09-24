@@ -1,0 +1,247 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+/* JsonEditor.module.css — editor chrome, gutter, token colours, diff colours  */
+
+/* ── Outer shell ─────────────────────────────────────────────────────────────── */
+.editor {
+  display:        flex;
+  flex-direction: column;
+  flex:           1 1 0;
+  min-height:     0;
+  overflow:       hidden;
+  background:     var(--viewer-bg);
+  border-top:     1px solid var(--viewer-border);
+  font-family:    var(--font-mono);
+  font-size:      14px;
+  line-height:    1.6;
+  color:          var(--viewer-fg);
+  position:       relative;
+}
+
+/* ── Toolbar ─────────────────────────────────────────────────────────────────── */
+.toolbar {
+  display:        flex;
+  align-items:    center;
+  gap:            var(--space-2);
+  padding:        var(--space-1) var(--space-3);
+  background:     #2d2d2f;
+  border-bottom:  1px solid var(--viewer-border);
+  flex-shrink:    0;
+  flex-wrap:      wrap;
+  min-height:     34px;
+}
+.toolbarBtn {
+  background:     transparent;
+  border:         1px solid #4a4a4d;
+  border-radius:  var(--radius-sm);
+  color:          #c8c8cc;
+  font-size:      14px;
+  font-family:    var(--font-sans);
+  padding:        2px 10px;
+  cursor:         pointer;
+  transition:     background var(--duration-fast);
+  white-space:    nowrap;
+}
+.toolbarBtn:hover { background: rgba(255,255,255,0.08); }
+.toolbarBtn.active { background: rgba(0,122,255,0.25); border-color: #007AFF; color: #fff; }
+.toolbarSep {
+  width:          1px;
+  height:         16px;
+  background:     #4a4a4d;
+  flex-shrink:    0;
+}
+.toolbarSpacer { flex: 1; }
+
+/* ── Find bar ────────────────────────────────────────────────────────────────── */
+.findBar {
+  display:        flex;
+  align-items:    center;
+  gap:            var(--space-2);
+  padding:        var(--space-1) var(--space-3);
+  background:     #2a2a2d;
+  border-bottom:  1px solid var(--viewer-border);
+  flex-shrink:    0;
+}
+.findInput {
+  flex:           1;
+  max-width:      280px;
+  height:         24px;
+  background:     #3c3c3f;
+  border:         1px solid #5a5a5e;
+  border-radius:  var(--radius-sm);
+  color:          #e5e5ea;
+  font-family:    var(--font-mono);
+  font-size:      14px;
+  padding:        0 8px;
+  outline:        none;
+}
+.findInput:focus { border-color: var(--color-accent); }
+.findCount { font-size: 11px; color: #8e8e93; white-space: nowrap; min-width: 60px; }
+.findBtn {
+  background:     transparent;
+  border:         1px solid #4a4a4d;
+  border-radius:  var(--radius-sm);
+  color:          #c8c8cc;
+  font-size:      13px;
+  width:          24px;
+  height:         24px;
+  cursor:         pointer;
+  display:        flex;
+  align-items:    center;
+  justify-content:center;
+  padding:        0;
+}
+.findBtn:hover { background: rgba(255,255,255,0.08); }
+.findClose {
+  composes: findBtn;
+  margin-left: auto;
+  font-size:   14px;
+}
+
+/* ── Scrollable code area ────────────────────────────────────────────────────── */
+.scroll {
+  flex:       1 1 0;
+  overflow:   auto;
+  min-height: 0;
+}
+
+/* ── Editable plain-text overlay ─────────────────────────────────────────────── */
+/* Rendered on top of the highlighted view (position:absolute, transparent text). */
+/* The highlighted <div> provides the visual; the textarea captures keystrokes.   */
+.codePane {
+  position:   relative;
+  flex:       1 1 0;
+  min-height: 0;
+  /* height is driven by the highlighted content inside */
+}
+.editableOverlay {
+  position:    absolute;
+  inset:       0;
+  background:  transparent;
+  color:       transparent;
+  font-family: inherit;
+  font-size:   inherit;
+  line-height: inherit;
+  border:      none;
+  outline:     none;
+  resize:      none;
+  padding:     0 0 var(--space-8) 0;
+  /* left padding must match gutter width (48px) + scroll container padding */
+  padding-left: 48px;
+  box-sizing:  border-box;
+  white-space: pre;
+  overflow:    hidden;
+  tab-size:    2;
+  caret-color: #aeafad;
+  z-index:     2;
+  /* Selection highlight must be visible through the transparent text */
+  selection: transparent;
+}
+.editableOverlay::selection { background: rgba(38, 79, 120, 0.60); }
+
+/* ── Line ────────────────────────────────────────────────────────────────────── */
+.line {
+  display:     flex;
+  align-items: baseline;
+  min-height:  1.6em;
+  padding:     0;
+}
+.line:hover { background: rgba(255,255,255,0.03); }
+.lineMatch  { background: rgba(255,215,0,0.08) !important; }
+
+/* ── Gutter ──────────────────────────────────────────────────────────────────── */
+.gutter {
+  display:        flex;
+  align-items:    center;
+  justify-content: flex-end;
+  min-width:      48px;
+  padding:        0 8px 0 4px;
+  color:          #5a5a5e;
+  font-size:      11px;
+  flex-shrink:    0;
+  user-select:    none;
+  position:       relative;
+}
+.gutterNum { min-width: 28px; text-align: right; }
+
+/* ── Fold button ─────────────────────────────────────────────────────────────── */
+.foldBtn {
+  background:  transparent;
+  border:      none;
+  color:       #6e6e73;
+  font-size:   9px;
+  cursor:      pointer;
+  padding:     0;
+  width:       14px;
+  height:      14px;
+  display:     flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  transition:  color var(--duration-fast);
+  position:    absolute;
+  right:       2px;
+  z-index:     3;
+}
+.foldBtn:hover { color: #c8c8cc; background: rgba(255,255,255,0.08); }
+
+/* ── Line content ────────────────────────────────────────────────────────────── */
+.lineContent {
+  flex:       1;
+  padding:    0 var(--space-4) 0 0;
+  white-space: pre;
+  word-break: normal;
+  overflow:   visible;
+}
+.lineContent.wrap { white-space: pre-wrap; word-break: break-all; }
+/* Word-wrap when applied at codePane level (propagates to all lineContent spans) */
+.codePane.wrap .lineContent { white-space: pre-wrap; word-break: break-all; }
+
+/* ── Fold placeholder ────────────────────────────────────────────────────────── */
+.foldPlaceholder { color: var(--viewer-fg); }
+.foldEllipsis {
+  color:           #6e6e73;
+  background:      rgba(255,255,255,0.06);
+  border:          1px solid #4a4a4d;
+  border-radius:   3px;
+  padding:         0 6px;
+  font-size:       11px;
+  margin-left:     4px;
+  cursor:          pointer;
+}
+
+/* ── Indent guides ───────────────────────────────────────────────────────────── */
+.lineContent::before {
+  content: '';
+  /* indent guide handled via repeating background on the scroll container */
+}
+
+/* ── Token colours ───────────────────────────────────────────────────────────── */
+.tokKey     { color: var(--syn-key); }
+.tokCdxKey  { color: var(--syn-cdx-key); font-weight: 500; }
+.tokString  { color: var(--syn-string); }
+.tokPurl    { color: var(--syn-purl); }
+.tokNumber  { color: var(--syn-number); }
+.tokKeyword { color: var(--syn-keyword); }
+.tokPunct   { color: var(--syn-punct); }
+
+/* ── Bracket rainbow (3 depth levels, cycling) ───────────────────────────────── */
+.tokBracket  { font-weight: 500; }
+.tokBracket0 { color: var(--syn-bracket-0); }
+.tokBracket1 { color: var(--syn-bracket-1); }
+.tokBracket2 { color: var(--syn-bracket-2); }
+
+/* ── Diff line types ─────────────────────────────────────────────────────────── */
+.diffAdded   { background: var(--syn-diff-added-bg);   color: var(--syn-added); }
+.diffRemoved { background: var(--syn-diff-removed-bg); color: var(--syn-removed); }
+.diffChanged { background: var(--syn-diff-changed-bg); color: var(--syn-changed); }
+.diffHeader  { color: var(--syn-diff-header); font-style: italic; }
+.diffContext { color: var(--viewer-fg); }
+
+/* ── Empty / placeholder ─────────────────────────────────────────────────────── */
+.placeholder {
+  padding:    var(--space-6);
+  color:      var(--viewer-ph);
+  font-style: italic;
+  font-family: var(--font-mono);
+  font-size:  14px;
+}

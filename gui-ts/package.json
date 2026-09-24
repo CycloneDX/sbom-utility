@@ -1,0 +1,27 @@
+{
+  "name": "sbom-utility-gui",
+  "version": "0.16.0",
+  "description": "TypeScript browser GUI for CycloneDX sbom-utility",
+  "private": true,
+  "scripts": {
+    "dev:browser":      "vite --config vite.browser.config.ts",
+    "dev:browser:full": "bash ./scripts/dev-browser-with-serve.sh",
+    "lint":             "eslint src --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
+    "typecheck":        "tsc --noEmit"
+  },
+  "dependencies": {
+    "react":     "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node":            "^20.14.0",
+    "@types/react":           "^18.3.3",
+    "@types/react-dom":       "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^7.13.0",
+    "@typescript-eslint/parser":        "^7.13.0",
+    "@vitejs/plugin-react":   "^4.3.0",
+    "eslint":                 "^8.57.0",
+    "typescript":             "^5.4.5",
+    "vite":                   "^5.3.1"
+  }
+}

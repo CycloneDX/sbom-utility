@@ -16,3 +16,6 @@ cmd/__debug_bin
 # Misc
 *.gpg
 a.txt
+
+# Node / frontend dependencies
+node_modules/

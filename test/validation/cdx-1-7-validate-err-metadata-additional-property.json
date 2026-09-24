@@ -1,0 +1,13 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.7",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2024-01-01T00:00:00Z",
+    "manufacturer": {
+      "name": "Acme, Inc.",
+      "taxId": "US-12-3456789"
+    }
+  }
+}

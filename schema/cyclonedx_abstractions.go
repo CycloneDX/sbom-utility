@@ -18,10 +18,6 @@
 
 package schema
 
-import (
-	"golang.org/x/exp/slices"
-)
-
 // -------------------
 // Resources
 // -------------------
@@ -36,7 +32,12 @@ const (
 var VALID_RESOURCE_TYPES = []string{RESOURCE_TYPE_DEFAULT, RESOURCE_TYPE_COMPONENT, RESOURCE_TYPE_SERVICE}
 
 func IsValidResourceType(value string) bool {
-	return slices.Contains(VALID_RESOURCE_TYPES, value)
+	for _, v := range VALID_RESOURCE_TYPES {
+		if v == value {
+			return true
+		}
+	}
+	return false
 }
 
 // TODO: need to strip `-` from `bom-ref` for where filter

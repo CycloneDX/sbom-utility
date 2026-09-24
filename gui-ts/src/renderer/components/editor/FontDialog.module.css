@@ -1,0 +1,171 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+/* FontDialog.module.css — modal dialog for editor font settings */
+
+/* ── Backdrop ────────────────────────────────────────────────────────────────── */
+.backdrop {
+  position:        fixed;
+  inset:           0;
+  z-index:         200;
+  background:      rgba(0, 0, 0, 0.50);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+}
+
+/* ── Dialog panel ────────────────────────────────────────────────────────────── */
+.dialog {
+  width:           420px;
+  max-width:       90vw;
+  background:      #2d2d2f;
+  border:          1px solid #4a4a4d;
+  border-radius:   10px;
+  display:         flex;
+  flex-direction:  column;
+  box-shadow:      0 8px 32px rgba(0,0,0,0.48);
+  outline:         none;   /* suppress focus ring — dialog is focusable for ESC */
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────────── */
+.header {
+  padding:         14px 18px 10px;
+  border-bottom:   1px solid #3a3a3c;
+}
+.title {
+  font-size:       14px;
+  font-weight:     600;
+  color:           #e5e5ea;
+  font-family:     -apple-system, "Segoe UI", system-ui, sans-serif;
+}
+
+/* ── Body ────────────────────────────────────────────────────────────────────── */
+.body {
+  padding:         16px 18px;
+  display:         flex;
+  flex-direction:  column;
+  gap:             6px;
+}
+
+.label {
+  font-size:       11px;
+  font-weight:     500;
+  color:           #8e8e93;
+  font-family:     -apple-system, "Segoe UI", system-ui, sans-serif;
+  text-transform:  uppercase;
+  letter-spacing:  0.05em;
+}
+
+.select {
+  width:           100%;
+  height:          28px;
+  background:      #3c3c3f;
+  border:          1px solid #5a5a5e;
+  border-radius:   6px;
+  color:           #e5e5ea;
+  font-family:     -apple-system, "Segoe UI", system-ui, sans-serif;
+  font-size:       13px;
+  padding:         0 8px;
+  outline:         none;
+  cursor:          pointer;
+}
+.select:focus { border-color: #007aff; }
+
+/* Size preset row */
+.sizeRow {
+  display:         flex;
+  flex-wrap:       wrap;
+  gap:             5px;
+  margin-top:      2px;
+}
+.sizeBtn {
+  height:          26px;
+  min-width:       36px;
+  padding:         0 8px;
+  background:      #3c3c3f;
+  border:          1px solid #5a5a5e;
+  border-radius:   5px;
+  color:           #c8c8cc;
+  font-size:       12px;
+  font-family:     -apple-system, "Segoe UI", system-ui, sans-serif;
+  cursor:          pointer;
+  transition:      background 80ms;
+}
+.sizeBtn:hover          { background: #4a4a4e; }
+.sizeBtnActive {
+  background:      rgba(0,122,255,0.25);
+  border-color:    #007aff;
+  color:           #fff;
+}
+
+/* Manual numeric input */
+.sizeInput {
+  width:           72px;
+  height:          28px;
+  background:      #3c3c3f;
+  border:          1px solid #5a5a5e;
+  border-radius:   6px;
+  color:           #e5e5ea;
+  font-size:       13px;
+  font-family:     -apple-system, "Segoe UI", system-ui, sans-serif;
+  padding:         0 8px;
+  outline:         none;
+  margin-top:      6px;
+}
+.sizeInput:focus { border-color: #007aff; }
+
+/* Preview box */
+.previewLabel {
+  font-size:       11px;
+  font-weight:     500;
+  color:           #8e8e93;
+  font-family:     -apple-system, "Segoe UI", system-ui, sans-serif;
+  text-transform:  uppercase;
+  letter-spacing:  0.05em;
+  margin-top:      14px;
+}
+.preview {
+  background:      #1e1e1e;
+  border:          1px solid #3c3c3c;
+  border-radius:   6px;
+  padding:         10px 12px;
+  color:           #ce9178;
+  white-space:     nowrap;
+  overflow:        hidden;
+  text-overflow:   ellipsis;
+  margin-top:      4px;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────────── */
+.footer {
+  display:         flex;
+  justify-content: flex-end;
+  gap:             8px;
+  padding:         12px 18px 16px;
+  border-top:      1px solid #3a3a3c;
+}
+
+.cancelBtn {
+  height:          30px;
+  padding:         0 16px;
+  border-radius:   6px;
+  border:          1px solid #5a5a5e;
+  background:      transparent;
+  color:           #c8c8cc;
+  font-family:     -apple-system, "Segoe UI", system-ui, sans-serif;
+  font-size:       13px;
+  cursor:          pointer;
+}
+.cancelBtn:hover { background: rgba(255,255,255,0.06); }
+
+.applyBtn {
+  height:          30px;
+  padding:         0 16px;
+  border-radius:   6px;
+  border:          1px solid #007aff;
+  background:      #007aff;
+  color:           #fff;
+  font-family:     -apple-system, "Segoe UI", system-ui, sans-serif;
+  font-size:       13px;
+  font-weight:     500;
+  cursor:          pointer;
+}
+.applyBtn:hover { background: #006bd6; border-color: #006bd6; }

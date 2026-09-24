@@ -1,9 +1,9 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![License](https://img.shields.io/badge/CycloneDX-v1.2,1.3,1.4,1.5,1.6,1.7-darkcyan.svg)](https://github.com/CycloneDX/specification)
 [![License](https://img.shields.io/badge/SPDX-v2.1,2.2,2.3-purple.svg)](https://github.com/spdx/spdx-spec)
-[![Go Report Card](https://goreportcard.com/badge/github.com/CycloneDX/sbom-utility)](https://goreportcard.com/badge/github.com/CycloneDX/sbom-utility)
-<!--![CodeQL](https://github.com/CycloneDX/sbom-utility/actions/workflows/codeql.yml/badge.svg)-->
-![golangci-lint](https://github.com/CycloneDX/sbom-utility/actions/workflows/golangci-lint.yml/badge.svg)
+[![Go](https://github.com/CycloneDX/sbom-utility/actions/workflows/go.yml/badge.svg)](https://github.com/CycloneDX/sbom-utility/actions/workflows/go.yml)
+[![CodeQL](https://github.com/CycloneDX/sbom-utility/actions/workflows/codeql.yml/badge.svg)](https://github.com/CycloneDX/sbom-utility/actions/workflows/codeql.yml)
+[![golangci-lint](https://github.com/CycloneDX/sbom-utility/actions/workflows/golangci-lint.yml/badge.svg)](https://github.com/CycloneDX/sbom-utility/actions/workflows/golangci-lint.yml)
 
 # sbom-utility
 
@@ -11,7 +11,7 @@ The **`sbom-utility`** was designed to be an API platform to validate, analyze a
 
 - *Organizations may also design and supply **"custom JSON schema"** variants to the validate command which are perhaps designed to enforce additional data-compliance requirements.*
 
-The utility also offers commands that support analysis and editing of BOM document data including **trim**, **patch** (IETF RFC 6902) and **diff** *(experimental)*.
+The utility also offers commands that support analysis and editing of BOM document data including **trim**, **patch** (IETF RFC 6902) and **diff**.
 
 In addition, the utility features "report" commands that can easily *extract*, *filter*, *list* and *summarize* **component**, **service**, **license**, **resource**, **vulnerability** and other BOM information using the utility's powerful, SQL-like query command. The **query** command allows **select**-ion of specific data **from** anywhere in the BOM document **where** data values match specified (regex) patterns.
 
@@ -23,13 +23,66 @@ In addition, the utility features "report" commands that can easily *extract*, *
 
 <h5><img alt="New!" src="docs/new-3d.png" align="left" width="100" height="100" style="height: 8em; width:8em; vertical-align: middle;"></h5>
 
-### Experimental: Desktop GUI
+### Optional: Desktop GUIs
 
-A native desktop GUI for `sbom-utility` is available in the [`gui/`](gui/) directory.
-It wraps the same validate, license, component, resource, and vulnerability commands in a point-and-click interface — no terminal required.</br>
-Load any CycloneDX or SPDX BOM file, inspect its raw source, run validation, and browse structured report tables, all from a single window.
+Two optional desktop GUIs are available for `sbom-utility`.  Both wrap the
+same validate, license, component, resource, and vulnerability commands in a
+point-and-click interface — no terminal required.  They are independent of
+each other and of the CLI; you can use one, both, or neither.
 
-> **Try it out**: See the [GUI README](gui/README.md) for build instructions and a feature overview.
+| | [Fyne GUI](gui/) | [TypeScript / Electron GUI](gui-ts/) |
+|---|---|---|
+| **Location** | [`gui/`](gui/) | [`gui-ts/`](gui-ts/) |
+| **Language / framework** | Go · [Fyne](https://fyne.io) (BSD-3) | TypeScript · [Electron](https://www.electronjs.org) (MIT · OpenJS Foundation) · React |
+| **Build requirement** | Go toolchain + CGo (C compiler) | Node.js ≥ 20 · `npm ci` (no C compiler) |
+| **Distribution** | `fyne package` → `.app` / `.exe` / `.tar.xz` | `npm run dist` → `.dmg` / NSIS `.exe` / AppImage |
+| **Theming** | Go `fyne.Theme` structs | CSS custom properties (`tokens.css`) — change any colour, font, or spacing without touching TypeScript |
+| **Security** | Native binary, no network stack | Electron hardened defaults: `contextIsolation`, `sandbox`, strict CSP, IPC allowlist validation |
+| **Full documentation** | [gui/README.md](gui/README.md) | [gui-ts/README.md](gui-ts/README.md) |
+
+#### Fyne GUI (`gui/`)
+
+A native desktop application built in Go using the [Fyne](https://fyne.io)
+toolkit (BSD-3-Clause).  No JavaScript.  No browser engine.  Produces a
+single self-contained binary.
+
+```bash
+# Build (requires Go + a C compiler)
+go build -o sbom-utility-gui ./gui
+# — or via Make —
+make build-gui
+```
+
+> See [gui/README.md](gui/README.md) for full build instructions, theming
+> reference, and distribution (fyne package / fyne-cross).
+
+#### TypeScript / Electron GUI (`gui-ts/`)
+
+A desktop application built with Electron (MIT · OpenJS Foundation), React 18,
+Vite 5, and TypeScript 5.  Visually polished with a dark sidebar, VS Code-style
+BOM source viewer, and a fully documented CSS design-token system that lets
+you retheme every colour, font, and spacing without touching any TypeScript.
+
+```bash
+# Install dependencies (verifies Node ≥ 20 and the CLI binary first)
+./gui-ts/install.sh          # macOS / Linux
+.\gui-ts\install.ps1         # Windows PowerShell
+
+# Launch in development mode (hot-reload)
+cd gui-ts && npm run dev
+
+# Build a distributable installer
+cd gui-ts && npm run dist:mac    # → .dmg
+cd gui-ts && npm run dist:win    # → NSIS .exe
+cd gui-ts && npm run dist:linux  # → AppImage + .deb
+# — or via Make (from repo root) —
+make build-gui-ts   # unpackaged build
+make dist-gui-ts    # full installer
+```
+
+> See [gui-ts/README.md](gui-ts/README.md) for the full feature inventory,
+> security hardening checklist, style customisation guide with worked examples,
+> and architecture documentation.
 
 ---
 
@@ -42,7 +95,7 @@ The following commands, which operate against input BOMs and their data, are off
 | **[validate](#validate)**  | Enables validation of SBOMs against their declared format (e.g., SPDX, CycloneDX) and version (e.g., "2.3", "1.6", etc.) using their JSON schemas.|
 | **[patch](#patch)** | Applies a JSON patch file, as defined by [IETF RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902/), to an input JSON BOM file. |
 | **[trim](#trim)** | Removes specified JSON information from the input JSON BOM document and produce output BOMs with reduced or targeted sets of information.</br></br>*A "SQL-like" set of parameters allows for fine-grained specification of which fields should be trimmed from which document paths.* |
-| **[diff](#diff)** | **Experimental**[<sup>1</sup>](#experimental-commands):  Displays the delta between two similar BOM versions in JSON (diff) patch format as defined by [IETF RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902/). *Please read "recommendations"  before running.* |
+| **[diff](#diff)** | Displays the delta between two similar BOM versions using standard diff formats (`txt` default, `unified`, `json`). *Please read "recommendations" before running.* |
 | **[query](#query)** | Retrieves JSON data from BOMs using SQL-style query statements (i.e., `--select <data fields> --from <BOM object> --where <field=regex>`). The JSON data can be used to create custom listings or reports. |
 | **[component](#component)** **[`list`](#component-list-command)** | Produces filterable listings of hardware or software components declared in the BOM. |
 | **[license](#license)** **[`list`](#license-list-subcommand)** | Produces filterable listings of license data declared in the BOM along with the associated component or service. Includes *"usage policy"* determinations as declared in the `license.json` configuration file. |
@@ -120,7 +173,7 @@ Convenient links to each command:
 - [validate](#validate): Validates BOM data against declared or required JSON schema.
 - [trim](#trim): Removes uninteresting or necessary fields and data from a BOM.
 - [patch](#patch): Patches BOMs using IETF RFC 6902 records.
-- [diff](#diff): *(Experimental)*: Displays the differences between two similar BOMs. *Please read recommendations before executing.*
+- [diff](#diff): Displays the differences between two similar BOMs in `txt` (default), `unified`, or `json` format. *Please read recommendations before executing.*
 - [query](#query): Extracts JSON objects and fields from a BOM using SQL-like queries.
 - [component list](#component): Lists all component information found in a BOM.
 - [license](#license)
@@ -1572,6 +1625,263 @@ an error (i.e., `[ERROR]`) would be returned from the utility:
 
 ---
 
+### Diff
+
+This command compares two *similar* BOMs and reports the delta using standard diff output. All output is produced by a single, well-tested line-oriented diff algorithm — the same algorithm used internally by `git` — applied to consistently pretty-printed JSON. Three output formats are supported, described in detail below.
+
+##### Recommendations
+
+- *Even with BOMs that **SHOULD** be similar, it is recommended to use the **[trim](#trim)** command first to remove data that changes between BOM generations or is often proprietary, such as: **bom-ref**, **hashes**, **timestamp**(s), **properties**, etc.*
+- *In addition, it is recommended to use `--normalize` on trimmed output to guarantee consistent ordering of fields and array data before diffing.*
+
+#### Diff supported output formats
+
+Use the `--format` flag to choose one of the supported output formats:
+
+| Format | Flag value | Description |
+| :-- | :-- | :-- |
+| Text *(default)* | `txt` | Line-prefixed view of the diff. Lines removed from the base are prefixed with `-`; lines added in the revised BOM are prefixed with `+`; unchanged context lines are prefixed with a space. Optionally colourized with `--colorize=true`. |
+| Unified | `unified` | Standard unified diff (`---`/`+++`/`@@` hunk headers). Compatible with `patch(1)`, `delta`, and other standard Unix tooling. |
+| JSON | `json` | Machine-readable JSON envelope. Contains the base and revised filenames, a `modified` boolean, and the full unified diff text as a JSON string field. Designed for programmatic consumers such as CI pipelines. See [JSON format value](#why-json-format-is-useful-for-ci-pipelines) below. |
+
+#### Diff flags
+
+| Flag | Short | Default | Description |
+| :-- | :-- | :-- | :-- |
+| `--format` | | `txt` | Output format: `txt`, `unified`, or `json`. |
+| `--input-revision` | `-r` | *(required)* | Path to the revised BOM file to compare against the base (`--input-file`). |
+| `--colorize` | | `false` | Apply ANSI colour to `txt` format output (`-` lines red, `+` lines green). Has no effect on `unified` or `json`. |
+
+#### Diff Examples
+
+The examples below compare two test BOM files that differ in several ways: a license `id` value changed, a new license was added, and an existing license was removed.
+
+##### Example: `--format txt` (default)
+
+```bash
+./sbom-utility diff -i test/diff/json-array-order-change-with-add-and-delete-base.json \
+  -r test/diff/json-array-order-change-with-add-and-delete-delta.json -q
+```
+
+```diff
+     "licenses": [
+         {
+             "license": {
+-                "id": "Apache-1.0"
++                "id": "GPL-2.0"
++            }
++        },
++        {
++            "license": {
++                "id": "GPL-3.0-only"
+             }
+         },
+         {
+             "license": {
+                 "id": "Apache-2.0"
+-            }
+-        },
+-        {
+-            "license": {
+-                "id": "GPL-3.0-only"
+             }
+         },
+         {
+```
+
+##### Example: `--format unified`
+
+```bash
+./sbom-utility diff -i test/diff/json-array-order-change-with-add-and-delete-base.json \
+  -r test/diff/json-array-order-change-with-add-and-delete-delta.json \
+  --format unified -q
+```
+
+```diff
+--- test/diff/json-array-order-change-with-add-and-delete-base.json
++++ test/diff/json-array-order-change-with-add-and-delete-delta.json
+@@ -2,17 +2,17 @@
+     "licenses": [
+         {
+             "license": {
+-                "id": "Apache-1.0"
++                "id": "GPL-2.0"
++            }
++        },
++        {
++            "license": {
++                "id": "GPL-3.0-only"
+             }
+         },
+         {
+             "license": {
+                 "id": "Apache-2.0"
+-            }
+-        },
+-        {
+-            "license": {
+-                "id": "GPL-3.0-only"
+             }
+         },
+         {
+```
+
+##### Example: `--format json`
+
+```bash
+./sbom-utility diff -i test/diff/json-array-order-change-with-add-and-delete-base.json \
+  -r test/diff/json-array-order-change-with-add-and-delete-delta.json \
+  --format json -q
+```
+
+```json
+{
+  "base": "test/diff/json-array-order-change-with-add-and-delete-base.json",
+  "revised": "test/diff/json-array-order-change-with-add-and-delete-delta.json",
+  "modified": true,
+  "diff": "--- test/diff/...-base.json\n+++ test/diff/...-delta.json\n@@ -2,17 +2,17 @@\n ..."
+}
+```
+
+##### Example: scalar field changes across a BOM version bump
+
+This example shows how the `txt` format reports changes to top-level scalar fields such as `version`, `serialNumber`, `specVersion`, and nested `metadata` values — the kind of changes that occur between two successive BOM generations for the same software.
+
+```bash
+./sbom-utility diff -i test/diff/json-scalar-field-change-base.json \
+  -r test/diff/json-scalar-field-change-delta.json -q
+```
+
+```diff
+     "components": [
+         {
+             "name": "some-lib",
+-            "purl": "pkg:npm/some-lib@1.0.0",
++            "purl": "pkg:npm/some-lib@2.0.0",
+             "type": "library",
+-            "version": "1.0.0"
++            "version": "2.0.0"
+         }
+     ],
+     "metadata": {
+         "component": {
+             "name": "My Application",
+             "type": "application",
+-            "version": "1.0.0"
++            "version": "2.0.0"
+         },
+-        "timestamp": "2023-01-01T00:00:00Z"
++        "timestamp": "2024-06-01T12:00:00Z"
+     },
+-    "serialNumber": "urn:uuid:aaaaaaaa-0000-0000-0000-000000000001",
++    "serialNumber": "urn:uuid:bbbbbbbb-1111-1111-1111-000000000002",
+     "specVersion": "1.4",
+-    "version": 1
++    "version": 2
+ }
+```
+
+##### Example: CycloneDX v1.7 `licenseChoice` structure changes
+
+CycloneDX v1.7 significantly expanded the `licenseChoice` schema. The `license` object gains a `licensing` sub-object (licensor, licensee, purchase order, license types, and renewal/expiration dates) and an `acknowledgement` field. The `licenseChoice` array also allows a new top-level `expression` item — an SPDX expression with its own `bom-ref` and `acknowledgement` — alongside the traditional `{license: {...}}` wrapper. This example shows all of those additions in a single diff.
+
+```bash
+./sbom-utility diff -i test/diff/cdx-1-7-license-base.json \
+  -r test/diff/cdx-1-7-license-delta.json -q
+```
+
+```diff
+     "licenses": [
+         {
+             "license": {
++                "acknowledgement": "declared",
+                 "id": "MIT",
+                 "url": "https://opensource.org/licenses/MIT"
+             }
+         {
+             "license": {
+                 "bom-ref": "acme-sdk-license",
++                "licensing": {
++                    "expiration": "2026-01-01T00:00:00Z",
++                    "lastRenewal": "2025-01-01T00:00:00Z",
++                    "licenseTypes": [
++                        "subscription"
++                    ],
++                    "licensee": {
++                        "organization": {
++                            "name": "Example Corp."
++                        }
++                    },
++                    "licensor": {
++                        "organization": {
++                            "name": "Acme Inc.",
++                            "url": [
++                                "https://acme.example.com"
++                            ]
++                        }
++                    },
++                    "purchaseOrder": "PO-98765"
++                },
+                 "name": "Acme Commercial License v2",
+                 "url": "https://acme.example.com/licenses/v2"
+             }
+             ...
++        },
++        {
++            "bom-ref": "pkg:npm/helmet@7.1.0",
++            "licenses": [
++                {
++                    "acknowledgement": "declared",
++                    "bom-ref": "helmet-license",
++                    "expression": "MIT"
++                }
++            ],
++            "name": "helmet",
++            "purl": "pkg:npm/helmet@7.1.0",
++            "type": "library",
++            "version": "7.1.0"
+         }
+     ],
+     "metadata": {
+         "component": {
+-            "bom-ref": "pkg:maven/com.example/my-app@3.0.0",
++            "bom-ref": "pkg:maven/com.example/my-app@3.1.0",
+             ...
+-            "version": "3.0.0"
++            "version": "3.1.0"
+```
+
+The diff highlights all four categories of change introduced by the 1.7 schema in one real BOM:
+
+| What changed | Where visible in diff |
+| :-- | :-- |
+| `acknowledgement: "declared"` added to `license` items | `express` and `lodash` components |
+| Full `licensing` block added to a named commercial license | `acme-sdk` component |
+| New component added using top-level `expression` form (not `{license:{...}}`) | `helmet` component |
+| BOM `version`, app version, and `timestamp` bumped | `metadata` section |
+
+#### Why JSON format is useful for CI pipelines
+
+The `--format json` output is designed for automation. Unlike `txt` and `unified` — which are intended to be read by a human — the JSON envelope gives a script or CI step everything it needs in a single, well-formed document:
+
+- **`modified: false`** — two BOMs are functionally identical; no further action required. A pipeline can branch on this boolean without parsing any diff text.
+- **`modified: true` + `diff` field** — the full unified diff is embedded as a JSON string, ready to be logged, stored as a build artefact, posted to a ticket, or passed to another tool without invoking `sbom-utility` a second time.
+- **`base` and `revised` fields** — the file paths are recorded in the document itself, so a downstream consumer does not need to reconstruct the provenance of the diff from command-line context.
+
+A typical CI use case: after generating a new BOM for a release, diff it against the previous release BOM. If `modified` is `false`, the dependency set is unchanged and the release can proceed automatically. If `modified` is `true`, the `diff` field provides a human-readable audit trail that can be attached to the release record without additional processing.
+
+```bash
+# Example: fail a CI step if the BOM changed unexpectedly
+result=$(./sbom-utility diff -i bom-previous.json -r bom-current.json --format json -q)
+if [ "$(echo "$result" | python3 -c "import sys,json; print(json.load(sys.stdin)['modified'])")" = "True" ]; then
+  echo "BOM changed — review required"
+  echo "$result" | python3 -c "import sys,json; print(json.load(sys.stdin)['diff'])"
+  exit 1
+fi
+```
+
+---
+
 ### Query
 
 This command allows you to perform SQL-like queries into JSON format SBOMs.  Currently, the command recognizes the `--select` and `--from` as well as the `--where` filter.
@@ -2369,69 +2679,6 @@ A specific command-level help listing is also available. For example, you can ac
 
 ```bash
 ./sbom-utility help validate
-```
-
----
-
-## Experimental Commands
-
-This section contains *experimental* commands that will be promoted once vetted by the community over two or more point releases.
-
-### Diff
-
-This *experimental* command will compare two *similar* BOMs and return the delta (or "diff") in JSON (diff-patch format) or text. This functionality is "JSON aware" and based upon code ancestral to that used to report file diffs between `git commit`s.
-
-##### Recommendations
-
-- *Even with BOMs that **SHOULD** be similar, it is recommended to use the **[trim](#trim)** command to remove data that changes within a BOM from one generation to another *or* is often proprietary such as: **bom-ref**, **hashes**, **timestamp**(s), **properties**, etc.*.
-- *In addition, it is recommended that you also `--normalize` trimmed output data to better guarantee ordering of fields and array data.*
-
-##### Notes
-
-- This command is undergoing analysis and tests which are exposing some underlying issues around "moved" objects in dependent diff-patch packages that may not be fixable and have no alternatives.
-  - *Specifically, the means by which "moved" objects are assigned "similarity" scores appears flawed in the case of JSON.*
-  - *Additionally, some of the underlying code relies upon Go maps which do not preserve key ordering.*
-
-#### Diff supported output formats
-
-Use the `--format` flag on the to choose one of the supported output formats:
-
-- txt (default), json
-
-#### Diff Examples
-
-##### Example: Add, delete and modify
-
-```bash
-./sbom-utility diff -i test/diff/json-array-order-change-with-add-and-delete-base.json -r test/diff/json-array-order-change-with-add-and-delete-delta.json --format txt --colorize=true -q
-```
-
-```bash
- {
-   "licenses": [
-     0: {
-       "license": {
--        "id": "Apache-1.0"
-+        "id": "GPL-2.0"
-       }
-     },
--+    2=>1: {
--+      "license": {
--+        "id": "GPL-3.0-only"
--+      }
--+    },
-     2: {
-       "license": {
-         "id": "GPL-3.0-only"
-       }
-     },
-     3: {
-       "license": {
-         "id": "MIT"
-       }
-     }
-   ]
- }
 ```
 
 ---

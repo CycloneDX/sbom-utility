@@ -1,0 +1,11 @@
+[
+    {
+        "op": "add",
+        "path": "/metadata/component/externalReferences/-",
+        "value": {
+            "type": "model-card",
+            "url": "https://huggingface.co/ibm-granite/granite-4.1-30b-base",
+            "comment": "Hugging Face model card for IBM Granite 4.1 30B Base"
+        }
+    }
+]

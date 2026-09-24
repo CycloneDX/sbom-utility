@@ -1,0 +1,1474 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.7",
+  "serialNumber": "urn:uuid:b2c3d4e5-f6a7-8901-bcde-f12345678901",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2025-07-14T00:00:00Z",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "granite-ai-bom",
+          "version": "2.0.0",
+          "externalReferences": [
+            {
+              "type": "vcs",
+              "url": "https://github.com/ibm-granite/granite-ai-bom"
+            }
+          ]
+        }
+      ]
+    },
+    "component": {
+      "type": "machine-learning-model",
+      "bom-ref": "pkg:huggingface/ibm-granite/granite-4.1-30b-base@4.1",
+      "purl": "pkg:huggingface/ibm-granite/granite-4.1-30b-base@4.1",
+      "group": "ibm-granite",
+      "manufacturer": {
+        "name": "IBM",
+        "url": ["https://www.ibm.com"]
+      },
+      "supplier": {
+        "name": "Hugging Face",
+        "url": ["https://huggingface.co/ibm-granite/granite-4.1-30b-base"]
+      },
+      "name": "granite-4.1-30b-base",
+      "version": "4.1",
+      "description": "IBM Granite 4.1 30B Base is a dense, decoder-only transformer language model with 30 billion parameters. Trained from scratch on approximately 15 trillion tokens using a five-phase pre-training pipeline incorporating web, code, math, multilingual, and domain-specific data. The base model serves as the foundation for the granite-4.1-30b instruct variant and is suited for fine-tuning, RAG, coding, complex reasoning, and enterprise AI workflows.",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0",
+            "url": "https://huggingface.co/datasets/choosealicense/licenses/blob/main/markdown/apache-2.0.md"
+          }
+        }
+      ],
+      "releaseNotes": {
+        "type": "major",
+        "title": "Granite 4.1 30B Base Model Release",
+        "timestamp": "2025-04-29T00:00:00Z",
+        "notes": [
+          {
+            "locale": "en-US",
+            "text": {
+              "content": "IBM Granite 4.1 30B Base model release. Structured dataset metadata used for pre- and post-training IBM Granite 4.1 base and instruct models is being released as part of IBM's effort to provide the community with highly transparent open-source model development. Machine-readable disclosure JSONs covering architecture, dataset catalogues, provenance flags, and synthetic-data indicators are published at https://github.com/ibm-granite/granite-4.1-language-models/tree/main/disclosures."
+            }
+          }
+        ]
+      },
+      "externalReferences": [
+        {
+          "type": "model-card",
+          "url": "https://huggingface.co/ibm-granite/granite-4.1-30b-base",
+          "comment": "Official HuggingFace model card for granite-4.1-30b-base"
+        },
+        {
+          "type": "model-card",
+          "url": "https://huggingface.co/ibm-granite/granite-4.1-30b",
+          "comment": "Official HuggingFace model card for granite-4.1-30b (instruct variant)"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/ibm-granite/granite-4.1-language-models",
+          "comment": "Granite 4.1 Language Models — GitHub Repository (README, code examples, license)"
+        },
+        {
+          "type": "documentation",
+          "url": "https://github.com/ibm-granite/granite-4.1-language-models/tree/main/disclosures",
+          "comment": "Granite 4.1 Disclosures — machine-readable JSON (architecture, pre/post-training dataset metadata, provenance, CDLA Permissive V2)"
+        },
+        {
+          "type": "documentation",
+          "url": "https://huggingface.co/blog/ibm-granite/granite-4-1",
+          "comment": "HuggingFace Technical Blog — Granite 4.1 LLMs: How They're Built (five-phase pre-training, SFT, GRPO/DAPO RL, FP8 quantization)"
+        },
+        {
+          "type": "documentation",
+          "url": "https://www.ibm.com/granite/docs/models/granite4-1",
+          "comment": "IBM Granite Docs — Granite 4.1 model variants, key capabilities, tool-calling, RAG, ISO 42001 certification"
+        },
+        {
+          "type": "website",
+          "url": "https://www.ibm.com/new/announcements/ibm-granite-4-0-hyper-efficient-high-performance-hybrid-models",
+          "comment": "IBM Announcement — Granite 4.0 architectural context: Mamba-2/transformer hybrid, MoE, NoPE, ISO 42001, HackerOne bounty, cryptographic model signing"
+        },
+        {
+          "type": "website",
+          "url": "https://www.ibm.com/granite",
+          "comment": "IBM Granite product home"
+        },
+        {
+          "type": "documentation",
+          "url": "https://www.ibm.com/granite/docs/responsible-ai/",
+          "comment": "IBM Granite Responsible AI documentation"
+        },
+        {
+          "type": "documentation",
+          "url": "https://www.ibm.com/granite/docs/resources/responsible-use-guide.pdf",
+          "comment": "IBM Granite Responsible Use Guide (PDF)"
+        },
+        {
+          "type": "documentation",
+          "url": "https://huggingface.co/collections/ibm-granite/granite-41-language-models",
+          "comment": "HuggingFace Collection — Granite 4.1 Language Models (all six variants)"
+        },
+        {
+          "type": "documentation",
+          "url": "https://arxiv.org/abs/2603.17074",
+          "comment": "PRISM: Demystifying Retention and Interaction in Mid-Training — Shao et al., 2025 · arXiv:2603.17074"
+        },
+        {
+          "type": "documentation",
+          "url": "https://arxiv.org/abs/2503.14476",
+          "comment": "DAPO: An Open-Source LLM Reinforcement Learning System at Scale — Yu et al., 2025 · arXiv:2503.14476"
+        },
+        {
+          "type": "documentation",
+          "url": "https://arxiv.org/abs/2402.03300",
+          "comment": "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models — Shao et al., 2024 · arXiv:2402.03300 (GRPO)"
+        },
+        {
+          "type": "documentation",
+          "url": "https://arxiv.org/abs/2509.11963",
+          "comment": "ToolRM: Outcome Reward Models for Tool-Calling Large Language Models — arXiv:2509.11963"
+        },
+        {
+          "type": "documentation",
+          "url": "https://arxiv.org/abs/2502.14907",
+          "comment": "GneissWeb: Preparing High Quality Data for LLMs at Scale — Gohari et al., 2025 · arXiv:2502.14907"
+        },
+        {
+          "type": "documentation",
+          "url": "https://arxiv.org/abs/2310.10631",
+          "comment": "Llemma: An Open Language Model For Mathematics — Azerbayev et al., 2023 · arXiv:2310.10631 (proof-pile-2 / algebraic-stack)"
+        },
+        {
+          "type": "other",
+          "url": "https://www.iso.org/standard/81230.html",
+          "comment": "ISO/IEC 42001:2023 — AI Management Systems Standard (Granite 4.1 is certified)"
+        },
+        {
+          "type": "other",
+          "url": "https://crfm.stanford.edu/fmti/",
+          "comment": "Stanford Foundation Model Transparency Index (FMTI) — IBM Granite top-ranked"
+        },
+        {
+          "type": "other",
+          "url": "https://mot.isitopen.ai/model/1160",
+          "comment": "Model Openness Framework (MOF) — Class 3 Qualified"
+        },
+        {
+          "type": "other",
+          "url": "https://github.com/ibm-granite/granite.trust.policy-tools",
+          "comment": "IBM Granite Trust Policy Tools"
+        },
+        {
+          "type": "other",
+          "url": "https://hackerone.com/ibm",
+          "comment": "HackerOne Bug Bounty Program for Granite (up to $100K for jailbreak/adversarial vulnerability identification)"
+        },
+        {
+          "type": "other",
+          "url": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas",
+          "comment": "IBM AI Risk Atlas — taxonomy referenced in governance tooling"
+        }
+      ],
+      "tags": [
+        "pytorch",
+        "transformers",
+        "text-generation",
+        "granite",
+        "ibm",
+        "dense-transformer",
+        "decoder-only",
+        "GQA",
+        "RoPE",
+        "SwiGLU",
+        "RMSNorm",
+        "pre-trained-base",
+        "enterprise-ai",
+        "long-context"
+      ],
+      "pedigree": {
+        "notes": "Trained from scratch by IBM Research. Not a fine-tune of any external model. Pre-training data was curated, filtered, and quality-reviewed under IBM's governance and data clearance procedures. Dataset provenance and synthetic-data flags are documented in machine-readable disclosure JSONs at https://github.com/ibm-granite/granite-4.1-language-models/tree/main/disclosures."
+      },
+      "components": [
+        {
+          "type": "file",
+          "name": "config.json",
+          "bom-ref": "pkg:huggingface/ibm-granite/granite-4.1-30b-base@4.1#config.json",
+          "purl": "pkg:huggingface/ibm-granite/granite-4.1-30b-base@4.1#config.json",
+          "description": "Model configuration file specifying the GraniteForCausalLM architecture class and all hyperparameters used to instantiate the model in HuggingFace Transformers."
+        },
+        {
+          "type": "library",
+          "name": "tokenizer.json",
+          "bom-ref": "pkg:huggingface/ibm-granite/granite-4.1-30b-base@4.1#tokenizer.json",
+          "purl": "pkg:huggingface/ibm-granite/granite-4.1-30b-base@4.1#tokenizer.json",
+          "description": "Pre-trained tokenizer for Granite 4.1 (PreTrainedTokenizerFast / tiktoken-based BPE) with a 49,152-token vocabulary.",
+          "properties": [
+            { "name": "cdx:ai-ml:model:tokenizer", "value": "PreTrainedTokenizerFast" },
+            { "name": "cdx:ai-ml:tokenizer:hyperparameter:vocab_size", "value": "49152" },
+            { "name": "cdx:ai-ml:tokenizer:hyperparameter:bos_token", "value": "<|startoftext|>" },
+            { "name": "cdx:ai-ml:tokenizer:hyperparameter:eos_token", "value": "<|endoftext|>" },
+            { "name": "cdx:ai-ml:tokenizer:hyperparameter:pad_token", "value": "<|pad|>" }
+          ]
+        }
+      ],
+      "modelCard": {
+        "modelParameters": {
+          "task": "text-generation",
+          "architectureFamily": "transformer",
+          "modelArchitecture": "GraniteForCausalLM",
+          "approach": {
+            "type": "unsupervised"
+          },
+          "datasets": [
+            { "ref": "pkg:huggingface/ibm-granite/GneissWeb" },
+            { "ref": "granite-dataset:webhose" },
+            { "ref": "granite-dataset:mlfoundations-dclm-baseline" },
+            { "ref": "granite-dataset:nemotron-cc" },
+            { "ref": "pkg:huggingface/OpenCoder-LLM/opc-annealing-corpus" },
+            { "ref": "pkg:huggingface/LLM360/TxT360#freelaw" },
+            { "ref": "pkg:huggingface/LLM360/TxT360#uspto" },
+            { "ref": "pkg:huggingface/LLM360/TxT360#wikipedia" },
+            { "ref": "pkg:huggingface/LLM360/TxT360#stackexchange" },
+            { "ref": "pkg:huggingface/storytracer/LoC-PD-Books" },
+            { "ref": "pkg:huggingface/HuggingFaceTB/smollm-corpus#cosmopedia-v2" },
+            { "ref": "pkg:huggingface/LLM360/TxT360#dm_maths" },
+            { "ref": "pkg:huggingface/open-web-math/open-web-math" },
+            { "ref": "pkg:huggingface/EleutherAI/proof-pile-2#algebraic-stack" },
+            { "ref": "pkg:huggingface/OpenCoder-LLM/opc-fineweb-math-corpus" },
+            { "ref": "pkg:huggingface/HuggingFaceTB/finemath" },
+            { "ref": "pkg:huggingface/LLM360/MegaMath" },
+            { "ref": "pkg:huggingface/nvidia/Nemotron-MIND" },
+            { "ref": "pkg:huggingface/nvidia/OpenMathReasoning" },
+            { "ref": "pkg:huggingface/AI-MO/NuminaMath-CoT" },
+            { "ref": "pkg:huggingface/AI-MO/NuminaMath-1.5" },
+            { "ref": "pkg:huggingface/open-thoughts/OpenThoughts3-1.2M" },
+            { "ref": "pkg:huggingface/open-thoughts/OpenThoughts2-1M" },
+            { "ref": "pkg:huggingface/agentica-org/DeepScaleR-Preview-Dataset" },
+            { "ref": "pkg:huggingface/simplescaling/data_ablation_full59K" },
+            { "ref": "pkg:huggingface/nvidia/OpenMathInstruct-1" },
+            { "ref": "pkg:huggingface/nvidia/OpenCodeReasoning" },
+            { "ref": "pkg:huggingface/nvidia/OpenCodeInstruct" },
+            { "ref": "pkg:huggingface/glaiveai/glaive-code-assistant" },
+            { "ref": "pkg:huggingface/nvidia/OpenCodeGeneticInstruct" },
+            { "ref": "pkg:huggingface/interstellarninja/json-mode-reasoning" },
+            { "ref": "granite-dataset:code-pile" },
+            { "ref": "pkg:huggingface/allenai/MADLAD-400" },
+            { "ref": "pkg:huggingface/uonlp/CulturaX" },
+            { "ref": "pkg:huggingface/ai4bharat/sangraha" },
+            { "ref": "pkg:huggingface/maya-research/IndicVault" },
+            { "ref": "granite-dataset:fineweb2-edu-multilingual" },
+            { "ref": "pkg:huggingface/allenai/dolmino-mix-1124#flan" },
+            { "ref": "pkg:huggingface/NousResearch/hermes-function-calling-v1" },
+            { "ref": "pkg:huggingface/NousResearch/Hermes-3-Dataset" },
+            { "ref": "pkg:huggingface/mlx-community/hermes-reasoning-tool-use" },
+            { "ref": "pkg:huggingface/nvidia/When2Call" },
+            { "ref": "pkg:huggingface/nvidia/Llama-Nemotron-Post-Training-Dataset" },
+            { "ref": "pkg:huggingface/ibm-research/finqa" },
+            { "ref": "granite-dataset:techqa" },
+            { "ref": "granite-dataset:spider-1.0" },
+            { "ref": "granite-dataset:govreport-qs" },
+            { "ref": "pkg:huggingface/hotpotqa/hotpot_qa" },
+            { "ref": "pkg:huggingface/meithnav/narrativeqa" },
+            { "ref": "granite-dataset:opa-docs" },
+            { "ref": "granite-dataset:granite-feedback" },
+            { "ref": "granite-dataset:ibm-documentation" }
+          ],
+          "inputs": [
+            {
+              "format": "string"
+            }
+          ],
+          "outputs": [
+            {
+              "format": "string"
+            }
+          ]
+        },
+        "quantitativeAnalysis": {
+          "performanceMetrics": [
+            {
+              "type": "MMLU (5-shot)",
+              "value": "See HuggingFace model card evaluation table",
+              "slice": "Base model benchmark — general knowledge"
+            },
+            {
+              "type": "MMLU-Pro (5-shot CoT)",
+              "value": "See HuggingFace model card evaluation table",
+              "slice": "Base model benchmark — robust multi-task reasoning"
+            },
+            {
+              "type": "BBH (3-shot CoT)",
+              "value": "See HuggingFace model card evaluation table",
+              "slice": "Base model benchmark — challenging BIG-Bench Hard tasks"
+            },
+            {
+              "type": "AGIEval (3-shot)",
+              "value": "See HuggingFace model card evaluation table",
+              "slice": "Base model benchmark — human-centric reasoning"
+            },
+            {
+              "type": "DROP (5-shot)",
+              "value": "See HuggingFace model card evaluation table",
+              "slice": "Base model benchmark — discrete reasoning over paragraphs"
+            },
+            {
+              "type": "SimpleQA",
+              "value": "See HuggingFace model card evaluation table",
+              "slice": "Base model benchmark — short-form factuality"
+            },
+            {
+              "type": "GSM8K (8-shot)",
+              "value": "See HuggingFace model card evaluation table",
+              "slice": "Base model benchmark — grade-school math word problems"
+            },
+            {
+              "type": "Minerva Math (4-shot)",
+              "value": "See HuggingFace model card evaluation table",
+              "slice": "Base model benchmark — quantitative reasoning"
+            },
+            {
+              "type": "HumanEval (pass@1)",
+              "value": "See HuggingFace model card evaluation table",
+              "slice": "Base model benchmark — Python code generation"
+            },
+            {
+              "type": "MBPP+ (EvalPlus)",
+              "value": "See HuggingFace model card evaluation table",
+              "slice": "Base model benchmark — Python programming correctness"
+            },
+            {
+              "type": "DS-1000",
+              "value": "See HuggingFace model card evaluation table",
+              "slice": "Base model benchmark — data science code generation"
+            },
+            {
+              "type": "MultiPL-E",
+              "value": "See HuggingFace model card evaluation table",
+              "slice": "Base model benchmark — multilingual code generation"
+            }
+          ],
+          "graphics": {
+            "description": "Full benchmark results tables for all six Granite 4.1 variants (base and instruct, 3B/8B/30B) are published in the HuggingFace model cards and the HuggingFace Technical Blog.",
+            "collection": [
+              {
+                "name": "Granite 4.1 30B Base Model Benchmarks — HuggingFace model card",
+                "image": {
+                  "contentType": "text/uri-list",
+                  "content": "https://huggingface.co/ibm-granite/granite-4.1-30b-base"
+                }
+              },
+              {
+                "name": "Granite 4.1 Base & Instruct Benchmark Comparison — HuggingFace Technical Blog",
+                "image": {
+                  "contentType": "text/uri-list",
+                  "content": "https://huggingface.co/blog/ibm-granite/granite-4-1"
+                }
+              }
+            ]
+          }
+        },
+        "considerations": {
+          "users": [
+            "Enterprise software developers building AI-powered applications",
+            "AI application builders and LLM agent developers",
+            "Data scientists and ML engineers fine-tuning foundation models for domain-specific tasks",
+            "Researchers studying large-scale language model behaviour and pre-training dynamics",
+            "DevOps and platform engineers integrating models into CI/CD pipelines and RAG systems",
+            "Enterprise security analysts performing threat analysis and log summarization"
+          ],
+          "useCases": [
+            "Fine-tuning foundation for domain-specific enterprise AI assistants requiring the full 30B parameter capacity for complex multi-step reasoning tasks.",
+            "Serving as the backbone for agentic tool-calling workflows where the model must navigate multi-step instructions, call external APIs via JSON function schema, and synthesize results.",
+            "RAG (Retrieval-Augmented Generation) pipelines requiring deep long-document comprehension, leveraging the 128K-validated context window to ingest and reason over large corpora.",
+            "Code completion, debugging, and FIM (Fill-in-the-Middle) tasks across multiple programming languages, supported by the model's extensive code pre-training data.",
+            "Multilingual business applications requiring high-quality text generation in the 12 supported languages (English, German, Spanish, French, Japanese, Portuguese, Arabic, Czech, Italian, Korean, Dutch, Chinese).",
+            "Complex mathematical and scientific reasoning (STEM), benefiting from extensive pre-training on math-focused datasets including NuminaMath, OpenMathReasoning, and MegaMath.",
+            "Text-to-SQL generation and structured JSON output tasks, leveraging Spider 1.0 and json-mode-reasoning post-training data.",
+            "Long-context summarization of government reports, legal documents, and financial filings, enabled by GovReport-QS and LoC-PD-Books pre-training exposure."
+          ],
+          "technicalLimitations": [
+            "Context window validated to 128K tokens in standard deployment. The 512K long-context extension (Phase 5 training) may exhibit degraded coherence at extreme lengths without careful RoPE scaling configuration.",
+            "Performance degrades for languages outside the 12 explicitly supported languages. Queries in unsupported languages may produce lower-quality, inconsistent, or hallucinated responses.",
+            "As a base (non-instruct) model, granite-4.1-30b-base does not include safety-alignment fine-tuning. It is not intended for direct deployment in user-facing applications without additional post-training (SFT/RLHF).",
+            "Potential for hallucination: the model can generate factually incorrect or fabricated content, particularly for niche domains, recent events, or claims requiring precise numerical reasoning.",
+            "Reasoning gaps on novel out-of-distribution problems: despite extensive math/reasoning pre-training, complex multi-hop or adversarial reasoning may produce errors or repetition loops.",
+            "FP8 quantized variants are available only for the instruct variant. Base model inference requires BF16 at minimum, demanding substantial GPU memory for 30B parameters.",
+            "Performance varies by task domain: benchmarks represent aggregate evaluations; real-world accuracy in highly specialized fields (e.g., niche legal systems, rare programming languages) may be lower than reported scores."
+          ],
+          "performanceTradeoffs": [
+            "Model size vs. inference cost: the 30B model delivers the highest reasoning accuracy in the Granite 4.1 family but requires significantly more GPU memory and compute than the 3B or 8B variants. IBM recommends 3B for edge/constrained environments, 8B for general-purpose enterprise deployment, and 30B for complex multi-step reasoning.",
+            "Long-context quality vs. context length: while the model supports up to 512K tokens via staged long-context training, production performance is validated to 128K. Using context lengths beyond 128K may reduce answer quality and increase latency without guaranteed accuracy gains.",
+            "Base vs. instruct variant: the base model offers maximum flexibility for downstream fine-tuning but lacks the safety alignment, tool-calling formatting, and instruction-following polish of the instruct variant. Deployers must account for this in their risk assessment.",
+            "BF16 precision vs. quantized inference: the base model runs in BF16 by default, offering full precision at the cost of memory. FP8 quantization (available for the instruct variant) reduces memory ~50% with minimal accuracy loss but requires FP8-capable hardware.",
+            "Breadth vs. depth of pre-training data: the five-phase pipeline allocates compute across web, code, math, multilingual, and long-context objectives. This breadth makes the model competitive across all domains but may not surpass single-domain specialist models in highly niche areas."
+          ],
+          "ethicalConsiderations": [
+            {
+              "name": "Training data bias and representational harm",
+              "mitigationStrategy": "IBM curated pre-training data under governance, risk, and compliance (GRC) evaluation procedures and IBM's standard data clearance and document quality review. Dataset provenance and synthetic-data flags are disclosed in machine-readable format. The HackerOne bug bounty program (up to $100K) supports ongoing adversarial red-teaming. See: https://www.ibm.com/new/announcements/ibm-granite-4-0-hyper-efficient-high-performance-hybrid-models"
+            },
+            {
+              "name": "Hallucination and misinformation risk",
+              "mitigationStrategy": "Use the granite-4.1-30b instruct variant within RAG pipelines that ground responses in verified external documents. Implement output validation layers and instruct the model to cite sources or acknowledge uncertainty. The IBM AI Risk Atlas provides a taxonomy of hallucination risk categories: https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+            },
+            {
+              "name": "Intellectual property and third-party content",
+              "mitigationStrategy": "IBM provides uncapped indemnity for third-party IP claims on content generated by Granite models when used on IBM watsonx.ai. Dataset provenance and licensing are disclosed in the machine-readable disclosure JSONs. Apache-2.0 license governs model weights."
+            },
+            {
+              "name": "Unsafe content generation (base model deployment risk)",
+              "mitigationStrategy": "The base model lacks safety alignment. Deployers must apply supervised fine-tuning and/or RLHF with safety-focused datasets before user-facing deployment. IBM Granite Guardian (granite-guardian-4.1-8b) is available as a companion guardrail model: https://huggingface.co/ibm-granite/granite-guardian-4.1-8b"
+            },
+            {
+              "name": "Privacy and PII leakage risk",
+              "mitigationStrategy": "IBM's data curation pipeline applied document quality and privacy review procedures. For deployment, apply regex-based PII scrubbing to outputs and consider self-hosted deployment to prevent sensitive data from leaving the organization's security perimeter."
+            },
+            {
+              "name": "Environmental impact of large-scale inference",
+              "mitigationStrategy": "Use FP8 quantization (instruct variant) and efficient inference engines such as vLLM with continuous batching and PagedAttention to reduce per-token FLOPs and energy consumption. The IBM Granite 4.0 architecture achieved >70% RAM reduction for long-context/concurrent workloads vs. transformer-only predecessors."
+            }
+          ],
+          "fairnessAssessments": [
+            {
+              "groupAtRisk": "Speakers of languages outside the 12 explicitly supported languages",
+              "harms": "Quality-of-Service harm: users querying the model in unsupported languages may receive oversimplified, factually incorrect, or hallucinated responses compared to queries in English or other well-represented training languages.",
+              "mitigationStrategy": "Restrict deployment to supported languages where quality has been validated. For multilingual extensions, apply supervised fine-tuning on high-quality parallel corpora for the target language. Clearly document supported languages in downstream application UX."
+            },
+            {
+              "groupAtRisk": "Groups subject to societal biases present in large-scale web corpora (race, gender, religion, disability, geographic region)",
+              "harms": "The model may reflect and amplify stereotypes or representational harms present in the ~15 trillion-token pre-training corpus, which spans web, code, books, and multilingual sources.",
+              "mitigationStrategy": "IBM conducted GRC evaluations and data clearance procedures during curation. Post-training safety data (Internal Safety Data category) was used in the instruct fine-tuning pipeline. Red-teaming via HackerOne bug bounty provides ongoing adversarial evaluation. Reference the IBM AI Risk Atlas: https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+            },
+            {
+              "groupAtRisk": "Users in regulated industries (finance, legal, healthcare) relying on model output for high-stakes decisions",
+              "harms": "Hallucinated or incorrect information in high-stakes domains can cause direct harm to individuals or organizations. The base model's lack of safety fine-tuning heightens this risk.",
+              "mitigationStrategy": "Granite 4.1 base is not intended for direct production deployment in regulated, high-stakes settings without additional alignment fine-tuning. Use RAG to ground responses in verified documents and implement human-in-the-loop review workflows for any consequential decisions."
+            }
+          ],
+          "environmentalConsiderations": {
+            "energyConsumptions": [
+              {
+                "activity": "training",
+                "energyProviders": [],
+                "activityEnergyCost": {
+                  "value": 0,
+                  "unit": "kWh"
+                },
+                "properties": [
+                  {
+                    "name": "cdx:ai-ml:energy:disclosure",
+                    "value": "No specific per-model CO2 or energy-cost figures are published in the Granite 4.1 materials. The IBM Granite 4.0 announcement documents inference efficiency improvements (>70% RAM reduction for long-context/concurrent workloads vs. transformer-only models) as a proxy for compute efficiency impact. Training infrastructure details are described in the HuggingFace Technical Blog: https://huggingface.co/blog/ibm-granite/granite-4-1"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "properties": [
+          { "name": "cdx:ai-ml:model:modality:text", "value": "true" },
+          { "name": "cdx:ai-ml:model:modality:code", "value": "true" },
+          { "name": "cdx:ai-ml:model:parameter:count", "value": "30B" },
+          { "name": "cdx:ai-ml:model:parameter:tune_method", "value": "full" },
+          { "name": "cdx:ai-ml:model:hyperparameter:num_hidden_layers", "value": "64" },
+          { "name": "cdx:ai-ml:model:hyperparameter:hidden_size", "value": "4096" },
+          { "name": "cdx:ai-ml:model:hyperparameter:intermediate_size", "value": "16384" },
+          { "name": "cdx:ai-ml:model:hyperparameter:num_attention_heads", "value": "32" },
+          { "name": "cdx:ai-ml:model:hyperparameter:num_key_value_heads", "value": "8" },
+          { "name": "cdx:ai-ml:model:hyperparameter:hidden_act", "value": "silu" },
+          { "name": "cdx:ai-ml:model:hyperparameter:layer_norm_type", "value": "RMSNorm" },
+          { "name": "cdx:ai-ml:model:hyperparameter:context_length", "value": "131072" },
+          { "name": "cdx:ai-ml:model:hyperparameter:max_position_embeddings", "value": "131072" },
+          { "name": "cdx:ai-ml:model:hyperparameter:vocab_size", "value": "49152" },
+          { "name": "cdx:ai-ml:model:hyperparameter:quantization", "value": "bf16" },
+          { "name": "cdx:ai-ml:model:hyperparameter:tokenizer_class", "value": "PreTrainedTokenizerFast" },
+          { "name": "cdx:ai-ml:model:hyperparameter:_undefined:attention_head_dim", "value": "128" },
+          { "name": "cdx:ai-ml:model:hyperparameter:_undefined:positional_embeddings", "value": "RoPE" },
+          { "name": "cdx:ai-ml:model:hyperparameter:_undefined:transformer_class", "value": "GraniteForCausalLM" },
+          { "name": "cdx:ai-ml:model:hyperparameter:_undefined:architecture_type", "value": "dense-decoder-only" },
+          { "name": "cdx:ai-ml:model:hyperparameter:_undefined:attention_mechanism", "value": "GQA" },
+          { "name": "cdx:ai-ml:model:hyperparameter:_undefined:shared_input_output_embeddings", "value": "true" },
+          { "name": "cdx:ai-ml:model:hyperparameter:_undefined:long_context_extension_method", "value": "staged-512K-RoPE-scaling" },
+          { "name": "cdx:ai-ml:model:language", "value": "en,de,es,fr,ja,pt,ar,cs,it,ko,nl,zh" }
+        ]
+      },
+      "properties": [
+        {
+          "name": "ibm:model:disclaimer",
+          "value": "Structured dataset metadata used for pre- and post-training IBM Granite 4.1 base and instruct models is being released as part of IBM's effort to provide the community with highly transparent open-source model development. In this spirit, we are releasing metadata related to datasets directly ingested during training and metadata for datasets used to source seed data for IBM's synthetic data pipelines. This structured disclosure is provided in machine-readable JSON format as a governance artifact to inform risk-based controls for downstream model use."
+        },
+        {
+          "name": "ibm:model:parameter:count:exact",
+          "value": "28865728512"
+        },
+        {
+          "name": "ibm:model:architecture:transformer_class",
+          "value": "GraniteForCausalLM"
+        },
+        {
+          "name": "ibm:model:architecture:type",
+          "value": "dense"
+        },
+        {
+          "name": "ibm:model:architecture:attention_head_dim",
+          "value": "128"
+        },
+        {
+          "name": "ibm:model:architecture:positional_embeddings",
+          "value": "RoPE"
+        },
+        {
+          "name": "ibm:model:compliance:iso42001",
+          "value": "certified"
+        },
+        {
+          "name": "ibm:model:compliance:mof_class",
+          "value": "3-qualified"
+        }
+      ]
+    }
+  },
+  "components": [
+    {
+      "type": "data",
+      "name": "GneissWeb",
+      "bom-ref": "pkg:huggingface/ibm-granite/GneissWeb",
+      "purl": "pkg:huggingface/ibm-granite/GneissWeb",
+      "description": "IBM-curated large-scale dataset for LLM pre-training, consisting of approximately 10 trillion tokens of high-quality web content.",
+      "publisher": "IBM",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/ibm-granite/GneissWeb" },
+        {
+          "type": "documentation",
+          "url": "https://arxiv.org/abs/2502.14907",
+          "comment": "GneissWeb: Preparing High Quality Data for LLMs at Scale — Gohari et al., 2025 · arXiv:2502.14907"
+        }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "web" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" },
+        { "name": "ibm:dataset:date_obtained", "value": "2025-02-10" },
+        { "name": "ibm:dataset:size_mb", "value": "30200000.0" },
+        { "name": "ibm:dataset:languages", "value": "en" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Webhose",
+      "bom-ref": "granite-dataset:webhose",
+      "description": "Unstructured web content in English converted into machine-readable data feeds, acquired by IBM under license.",
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "web" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" },
+        { "name": "ibm:classification", "value": "private" },
+        { "name": "ibm:dataset:size_mb", "value": "170368.0" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Nemotron-CC",
+      "bom-ref": "granite-dataset:nemotron-cc",
+      "description": "6.3T-token dataset based on Common Crawl: 4.4T globally deduplicated original tokens and 1.9T synthetically generated tokens.",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://data.commoncrawl.org/contrib/Nemotron/Nemotron-CC/index.html" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "web" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "DCLM-baseline",
+      "bom-ref": "granite-dataset:mlfoundations-dclm-baseline",
+      "description": "DataComp-LM baseline web dataset for large-scale language model pre-training.",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/mlfoundations/dclm-baseline-1.0" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "web" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "opc-annealing-corpus",
+      "bom-ref": "pkg:huggingface/OpenCoder-LLM/opc-annealing-corpus",
+      "purl": "pkg:huggingface/OpenCoder-LLM/opc-annealing-corpus",
+      "description": "Synthetic and algorithmic corpus used for OpenCoder annealing phase in pre-training.",
+      "publisher": "OpenCoder-LLM",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/OpenCoder-LLM/opc-annealing-corpus" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "code" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "true" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Free Law (TxT360)",
+      "bom-ref": "pkg:huggingface/LLM360/TxT360#freelaw",
+      "purl": "pkg:huggingface/LLM360/TxT360#freelaw",
+      "description": "Public-domain legal opinions from US federal and state courts, sourced from the TxT360/LLM360 corpus.",
+      "publisher": "LLM360",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/LLM360/TxT360/tree/main/data/freelaw" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "domain" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "USPTO (TxT360)",
+      "bom-ref": "pkg:huggingface/LLM360/TxT360#uspto",
+      "purl": "pkg:huggingface/LLM360/TxT360#uspto",
+      "description": "Collection of US patents granted from 1975 to May 2023, excluding design patents, sourced from TxT360/LLM360.",
+      "publisher": "LLM360",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/LLM360/TxT360/tree/main/data/uspto" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "domain" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Wikipedia (TxT360)",
+      "bom-ref": "pkg:huggingface/LLM360/TxT360#wikipedia",
+      "purl": "pkg:huggingface/LLM360/TxT360#wikipedia",
+      "description": "Wikimedia dataset filtered for high-quality content articles, sourced from TxT360/LLM360.",
+      "publisher": "LLM360",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/LLM360/TxT360/tree/main/data/wikipedia" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "technical" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Stack-Exchange (TxT360)",
+      "bom-ref": "pkg:huggingface/LLM360/TxT360#stackexchange",
+      "purl": "pkg:huggingface/LLM360/TxT360#stackexchange",
+      "description": "Question-and-answer content from the Stack Exchange network covering programming, science, mathematics, and more.",
+      "publisher": "LLM360",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/LLM360/TxT360/tree/main/data/stackexchange" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "technical" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "LOC-PD-Books",
+      "bom-ref": "pkg:huggingface/storytracer/LoC-PD-Books",
+      "purl": "pkg:huggingface/storytracer/LoC-PD-Books",
+      "description": "Over 140,000 English public-domain books (~8 billion words) digitised by the Library of Congress. Sole books source for the Phase 5 512K long-context extension (8B and 30B models).",
+      "publisher": "storytracer",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/storytracer/LoC-PD-Books" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "technical" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Cosmopedia V2 (SmolLM-Corpus)",
+      "bom-ref": "pkg:huggingface/HuggingFaceTB/smollm-corpus#cosmopedia-v2",
+      "purl": "pkg:huggingface/HuggingFaceTB/smollm-corpus#cosmopedia-v2",
+      "description": "Over 39 million synthetic textbooks, blog posts, and stories generated by Mixtral-8x7B-Instruct-v0.1; used in pre-training (Technical phase).",
+      "publisher": "HuggingFaceTB",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/HuggingFaceTB/smollm-corpus" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "technical" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "true" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "DM Math (TxT360)",
+      "bom-ref": "pkg:huggingface/LLM360/TxT360#dm_maths",
+      "purl": "pkg:huggingface/LLM360/TxT360#dm_maths",
+      "description": "DeepMind Math dataset with generated questions from algebra, calculus, geometry, and more.",
+      "publisher": "LLM360",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/LLM360/TxT360/tree/main/data/dm_maths" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "math" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "true" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "open-web-math",
+      "bom-ref": "pkg:huggingface/open-web-math/open-web-math",
+      "purl": "pkg:huggingface/open-web-math/open-web-math",
+      "description": "High-quality mathematical text from the web, curated for LLM pre-training.",
+      "publisher": "open-web-math",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/open-web-math/open-web-math" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "math" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Algebraic-Stack (proof-pile-2)",
+      "bom-ref": "pkg:huggingface/EleutherAI/proof-pile-2#algebraic-stack",
+      "purl": "pkg:huggingface/EleutherAI/proof-pile-2#algebraic-stack",
+      "description": "11B tokens of mathematical code covering numerical computing, computer algebra, and formal mathematics.",
+      "publisher": "EleutherAI",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/EleutherAI/proof-pile-2" },
+        {
+          "type": "documentation",
+          "url": "https://arxiv.org/abs/2310.10631",
+          "comment": "Llemma: An Open Language Model For Mathematics — Azerbayev et al., 2023 · arXiv:2310.10631"
+        }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "math" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "opc-fineweb-math-corpus",
+      "bom-ref": "pkg:huggingface/OpenCoder-LLM/opc-fineweb-math-corpus",
+      "purl": "pkg:huggingface/OpenCoder-LLM/opc-fineweb-math-corpus",
+      "description": "55B code- and math-related tokens filtered from FineWeb, used in OpenCoder pre-training.",
+      "publisher": "OpenCoder-LLM",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/OpenCoder-LLM/opc-fineweb-math-corpus" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "math" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "FineMath",
+      "bom-ref": "pkg:huggingface/HuggingFaceTB/finemath",
+      "purl": "pkg:huggingface/HuggingFaceTB/finemath",
+      "description": "34–54B tokens of mathematical educational content filtered from CommonCrawl.",
+      "publisher": "HuggingFaceTB",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/HuggingFaceTB/finemath" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "math" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "MegaMath",
+      "bom-ref": "pkg:huggingface/LLM360/MegaMath",
+      "purl": "pkg:huggingface/LLM360/MegaMath",
+      "description": "Open math pre-training corpus curated from diverse math-focused sources, with over 300B tokens.",
+      "publisher": "LLM360",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/LLM360/MegaMath" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "math" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "true" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Nemotron-MIND",
+      "bom-ref": "pkg:huggingface/nvidia/Nemotron-MIND",
+      "purl": "pkg:huggingface/nvidia/Nemotron-MIND",
+      "description": "138B+ token structured mathematical pre-training corpus of mathematical dialogues from NVIDIA.",
+      "publisher": "nvidia",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/nvidia/Nemotron-MIND" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "math" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "true" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "OpenMathReasoning",
+      "bom-ref": "pkg:huggingface/nvidia/OpenMathReasoning",
+      "purl": "pkg:huggingface/nvidia/OpenMathReasoning",
+      "description": "Large-scale math reasoning dataset from NVIDIA; used in both pre-training and post-training SFT.",
+      "publisher": "nvidia",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/nvidia/OpenMathReasoning" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "math" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "true" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "NuminaMath-CoT",
+      "bom-ref": "pkg:huggingface/AI-MO/NuminaMath-CoT",
+      "purl": "pkg:huggingface/AI-MO/NuminaMath-CoT",
+      "description": "~860k competition math problems with chain-of-thought solutions; used in pre-training and post-training SFT.",
+      "publisher": "AI-MO",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/AI-MO/NuminaMath-CoT" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "math" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "NuminaMath-1.5",
+      "bom-ref": "pkg:huggingface/AI-MO/NuminaMath-1.5",
+      "purl": "pkg:huggingface/AI-MO/NuminaMath-1.5",
+      "description": "~900k competition math problems with chain-of-thought solutions; used in pre-training and post-training SFT.",
+      "publisher": "AI-MO",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/AI-MO/NuminaMath-1.5" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "math" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "OpenThoughts3-1.2M",
+      "bom-ref": "pkg:huggingface/open-thoughts/OpenThoughts3-1.2M",
+      "purl": "pkg:huggingface/open-thoughts/OpenThoughts3-1.2M",
+      "description": "1.2M long chain-of-thought reasoning samples covering math, code, and science; used in pre-training (Phase 3 Long CoT) and post-training SFT.",
+      "publisher": "open-thoughts",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/open-thoughts/OpenThoughts3-1.2M" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "math" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "true" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "OpenThoughts2-1M",
+      "bom-ref": "pkg:huggingface/open-thoughts/OpenThoughts2-1M",
+      "purl": "pkg:huggingface/open-thoughts/OpenThoughts2-1M",
+      "description": "1M synthetic reasoning samples; used in pre-training (Phase 3 Long CoT) and post-training SFT.",
+      "publisher": "open-thoughts",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/open-thoughts/OpenThoughts2-1M" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "math" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "true" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "DeepScaleR Preview Dataset",
+      "bom-ref": "pkg:huggingface/agentica-org/DeepScaleR-Preview-Dataset",
+      "purl": "pkg:huggingface/agentica-org/DeepScaleR-Preview-Dataset",
+      "description": "~40k AIME/AMC/Omni-MATH competition math problems; used in pre-training and post-training SFT + Math RL.",
+      "publisher": "agentica-org",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/agentica-org/DeepScaleR-Preview-Dataset" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "math" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "data-ablation-full59K",
+      "bom-ref": "pkg:huggingface/simplescaling/data_ablation_full59K",
+      "purl": "pkg:huggingface/simplescaling/data_ablation_full59K",
+      "description": "59k math samples used in pre-training and post-training.",
+      "publisher": "simplescaling",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/simplescaling/data_ablation_full59K" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "math" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "OpenMathInstruct-1",
+      "bom-ref": "pkg:huggingface/nvidia/OpenMathInstruct-1",
+      "purl": "pkg:huggingface/nvidia/OpenMathInstruct-1",
+      "description": "1.8M math problem-solution pairs generated using Mixtral-8x7B; used in pre-training and post-training SFT.",
+      "publisher": "nvidia",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/nvidia/OpenMathInstruct-1" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "math" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "post-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "true" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "OpenCodeReasoning",
+      "bom-ref": "pkg:huggingface/nvidia/OpenCodeReasoning",
+      "purl": "pkg:huggingface/nvidia/OpenCodeReasoning",
+      "description": "736k reasoning-based Python samples from competitive programming; used in pre-training and post-training SFT.",
+      "publisher": "nvidia",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/nvidia/OpenCodeReasoning" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "code" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "true" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "OpenCodeInstruct",
+      "bom-ref": "pkg:huggingface/nvidia/OpenCodeInstruct",
+      "purl": "pkg:huggingface/nvidia/OpenCodeInstruct",
+      "description": "5M diverse code instruction samples; used in pre-training and post-training SFT.",
+      "publisher": "nvidia",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/nvidia/OpenCodeInstruct" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "code" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "post-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "true" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Glaive-code-assistant",
+      "bom-ref": "pkg:huggingface/glaiveai/glaive-code-assistant",
+      "purl": "pkg:huggingface/glaiveai/glaive-code-assistant",
+      "description": "Synthetic function-calling code conversations; used in pre-training and post-training SFT.",
+      "publisher": "glaiveai",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/glaiveai/glaive-code-assistant" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "code" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "true" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "OpenCodeGeneticInstruct",
+      "bom-ref": "pkg:huggingface/nvidia/OpenCodeGeneticInstruct",
+      "purl": "pkg:huggingface/nvidia/OpenCodeGeneticInstruct",
+      "description": "15M+ Python instructions (Mixtral-8x22b-instruct subset); used in pre-training and post-training SFT.",
+      "publisher": "nvidia",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/nvidia/OpenCodeGeneticInstruct" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "code" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "true" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "json-mode-reasoning",
+      "bom-ref": "pkg:huggingface/interstellarninja/json-mode-reasoning",
+      "purl": "pkg:huggingface/interstellarninja/json-mode-reasoning",
+      "description": "Structured JSON schema adherence reasoning dataset; used in pre-training and post-training SFT.",
+      "publisher": "interstellarninja",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/interstellarninja/json-mode-reasoning" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "code" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "true" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Code Pile",
+      "bom-ref": "granite-dataset:code-pile",
+      "description": "IBM internal code corpus sourced from publicly available datasets including GitHub Code Clean, StarCoderdata, and additional public code repositories and issues from GitHub.",
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "code" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" },
+        { "name": "ibm:classification", "value": "private" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "MADLAD-400",
+      "bom-ref": "pkg:huggingface/allenai/MADLAD-400",
+      "purl": "pkg:huggingface/allenai/MADLAD-400",
+      "description": "Document-level multilingual dataset based on Common Crawl, covering 419 languages.",
+      "publisher": "allenai",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/allenai/MADLAD-400" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "multilingual" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "CulturaX",
+      "bom-ref": "pkg:huggingface/uonlp/CulturaX",
+      "purl": "pkg:huggingface/uonlp/CulturaX",
+      "description": "6.3 trillion tokens across 167 languages, tailored for LLM development.",
+      "publisher": "uonlp",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/uonlp/CulturaX" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "multilingual" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Sangraha",
+      "bom-ref": "pkg:huggingface/ai4bharat/sangraha",
+      "purl": "pkg:huggingface/ai4bharat/sangraha",
+      "description": "Translated Indic-language corpus for multilingual pre-training and post-training SFT.",
+      "publisher": "ai4bharat",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/ai4bharat/sangraha" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "multilingual" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "true" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "IndicVault",
+      "bom-ref": "pkg:huggingface/maya-research/IndicVault",
+      "purl": "pkg:huggingface/maya-research/IndicVault",
+      "description": "Indic-language corpus used for multilingual pre-training and post-training SFT.",
+      "publisher": "maya-research",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/maya-research/IndicVault" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "multilingual" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Fineweb2-edu-multilingual",
+      "bom-ref": "granite-dataset:fineweb2-edu-multilingual",
+      "description": "IBM internal multilingual dataset based on Fineweb2, filtered for highest-quality documents.",
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "multilingual" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "true" },
+        { "name": "ibm:classification", "value": "private" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "DOLMino-mix-1124 — Flan partition",
+      "bom-ref": "pkg:huggingface/allenai/dolmino-mix-1124#flan",
+      "purl": "pkg:huggingface/allenai/dolmino-mix-1124#flan",
+      "description": "Flan instruction partition of the allenai dolmino-mix-1124 dataset; used in pre-training.",
+      "publisher": "allenai",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/allenai/dolmino-mix-1124" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "instructions" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Hermes Function-Calling V1",
+      "bom-ref": "pkg:huggingface/NousResearch/hermes-function-calling-v1",
+      "purl": "pkg:huggingface/NousResearch/hermes-function-calling-v1",
+      "description": "Multi-turn function-calling conversations for training models to generate correct JSON function invocations; used in pre-training and post-training SFT.",
+      "publisher": "NousResearch",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/NousResearch/hermes-function-calling-v1" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "instructions" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "true" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Hermes 3 Dataset",
+      "bom-ref": "pkg:huggingface/NousResearch/Hermes-3-Dataset",
+      "purl": "pkg:huggingface/NousResearch/Hermes-3-Dataset",
+      "description": "Diverse instruction data covering a range of domains and use cases; used in pre-training and post-training SFT.",
+      "publisher": "NousResearch",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/NousResearch/Hermes-3-Dataset" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "instructions" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "post-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "true" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Hermes reasoning tool use",
+      "bom-ref": "pkg:huggingface/mlx-community/hermes-reasoning-tool-use",
+      "purl": "pkg:huggingface/mlx-community/hermes-reasoning-tool-use",
+      "description": "Reasoning-augmented tool-use conversations; used in pre-training and post-training SFT.",
+      "publisher": "mlx-community",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/mlx-community/hermes-reasoning-tool-use" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "instructions" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "true" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "When2Call",
+      "bom-ref": "pkg:huggingface/nvidia/When2Call",
+      "purl": "pkg:huggingface/nvidia/When2Call",
+      "description": "Dataset training when to call a tool vs. answer directly; used in pre-training and post-training SFT.",
+      "publisher": "nvidia",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/nvidia/When2Call" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "instructions" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "true" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Llama-Nemotron Post-Training Dataset",
+      "bom-ref": "pkg:huggingface/nvidia/Llama-Nemotron-Post-Training-Dataset",
+      "purl": "pkg:huggingface/nvidia/Llama-Nemotron-Post-Training-Dataset",
+      "description": "Math, code, reasoning, and instruction-following SFT+RL data from NVIDIA; used in pre-training and post-training SFT.",
+      "publisher": "nvidia",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/nvidia/Llama-Nemotron-Post-Training-Dataset" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "instructions" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "post-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "true" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "FinQA",
+      "bom-ref": "pkg:huggingface/ibm-research/finqa",
+      "purl": "pkg:huggingface/ibm-research/finqa",
+      "description": "Financial QA with numerical reasoning over reports; used in pre-training and post-training SFT.",
+      "publisher": "IBM Research",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/ibm-research/finqa" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "domain" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "TechQA",
+      "bom-ref": "granite-dataset:techqa",
+      "description": "QA dataset over IBM technical documents; used in pre-training and post-training SFT.",
+      "publisher": "IBM",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://github.com/ibm/techqa" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "domain" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Spider 1.0",
+      "bom-ref": "granite-dataset:spider-1.0",
+      "description": "Complex cross-domain text-to-SQL benchmark dataset; used in pre-training, post-training SFT, and Multi-domain RL (Text2SQL).",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://yale-lily.github.io/spider" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "domain" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "GovReport-QS",
+      "bom-ref": "granite-dataset:govreport-qs",
+      "description": "Multi-turn QA over long government documents; used in pre-training and post-training SFT.",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://gov-report-data.github.io/" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "domain" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "hotpot_qa",
+      "bom-ref": "pkg:huggingface/hotpotqa/hotpot_qa",
+      "purl": "pkg:huggingface/hotpotqa/hotpot_qa",
+      "description": "Multi-hop long-document reasoning QA dataset; used in pre-training and post-training SFT.",
+      "publisher": "hotpotqa",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/hotpotqa/hotpot_qa" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "domain" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "NarrativeQA",
+      "bom-ref": "pkg:huggingface/meithnav/narrativeqa",
+      "purl": "pkg:huggingface/meithnav/narrativeqa",
+      "description": "QA over long narrative documents; used in pre-training and post-training SFT.",
+      "publisher": "meithnav",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://huggingface.co/datasets/meithnav/narrativeqa" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "domain" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Open Policy Agent (OPA) Docs",
+      "bom-ref": "granite-dataset:opa-docs",
+      "description": "Rego policy language documentation and structured JSON data from the Open Policy Agent project; used in pre-training and post-training SFT.",
+      "externalReferences": [
+        { "type": "distribution", "url": "https://www.openpolicyagent.org/docs" }
+      ],
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "domain" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "Granite Feedback",
+      "bom-ref": "granite-dataset:granite-feedback",
+      "description": "IBM internal dataset from the Granite feedback team. Includes IBM enterprise data, ITops, JCL data, ESG data, Angular data, and ESQL data.",
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "domain" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" },
+        { "name": "ibm:classification", "value": "private" }
+      ]
+    },
+    {
+      "type": "data",
+      "name": "IBM Documentation",
+      "bom-ref": "granite-dataset:ibm-documentation",
+      "description": "IBM Redbooks and product documentation, plus publicly available documentation from Fortune 500 companies.",
+      "publisher": "IBM",
+      "properties": [
+        { "name": "cdx:ai-ml:dataset:category", "value": "domain" },
+        { "name": "cdx:ai-ml:dataset:stage", "value": "pre-training" },
+        { "name": "cdx:ai-ml:dataset:synthetic", "value": "false" },
+        { "name": "ibm:classification", "value": "private" }
+      ]
+    }
+  ],
+  "formulation": [
+    {
+      "bom-ref": "formulation:granite-4.1-30b-base-training",
+      "components": [
+        {
+          "type": "library",
+          "name": "PyTorch",
+          "version": "2.x",
+          "bom-ref": "pkg:pypi/torch@2.x",
+          "purl": "pkg:pypi/torch@2.x",
+          "description": "Primary deep learning framework used across all five pre-training phases."
+        },
+        {
+          "type": "library",
+          "name": "transformers",
+          "bom-ref": "pkg:pypi/transformers",
+          "purl": "pkg:pypi/transformers",
+          "description": "HuggingFace Transformers library providing the GraniteForCausalLM architecture implementation."
+        },
+        {
+          "type": "library",
+          "name": "Data Prep Kit",
+          "bom-ref": "pkg:generic/ibm/data-prep-kit",
+          "description": "IBM open-source data preparation toolkit used to curate and process the pre-training corpus.",
+          "externalReferences": [
+            { "type": "vcs", "url": "https://github.com/IBM/data-prep-kit" }
+          ]
+        },
+        {
+          "type": "device",
+          "name": "NVIDIA H100 Tensor Core GPU",
+          "bom-ref": "device:nvidia-h100",
+          "description": "Primary training accelerator. Training infrastructure details are documented in the HuggingFace Technical Blog: https://huggingface.co/blog/ibm-granite/granite-4-1"
+        }
+      ],
+      "workflows": [
+        {
+          "bom-ref": "workflow:granite-4.1-30b-pretraining",
+          "uid": "b7f3e2a1-9c4d-4b6e-8f1a-2d3c0e9a7b5f",
+          "name": "Five-phase pre-training pipeline",
+          "description": "Granite 4.1 30B was trained from scratch using a five-phase pre-training pipeline: phases 1–2 general pre-training on web/code/math/multilingual data; phase 3 Long CoT reasoning data injection; phase 4 PRISM-guided mid-training data retention; phase 5 staged long-context extension to 512K tokens via RoPE scaling (LoC-PD-Books as sole books source). See metadata.component.externalReferences for supporting references (HuggingFace Technical Blog, PRISM arXiv:2603.17074).",
+          "taskTypes": ["build"]
+        },
+        {
+          "bom-ref": "workflow:granite-4.1-30b-posttraining",
+          "uid": "c8a4f3b2-1d5e-4c7f-9e2b-3a4d0f8b6c1e",
+          "name": "Post-training pipeline (instruct variant)",
+          "description": "The granite-4.1-30b instruct variant was produced via supervised fine-tuning (SFT) with LLM-as-Judge quality filtering, followed by a multi-stage RL pipeline using on-policy GRPO with the DAPO loss across math, code, instruction-following, function-calling, and multi-domain RL tracks. See metadata.component.externalReferences for supporting references (DAPO arXiv:2503.14476, GRPO arXiv:2402.03300, ToolRM arXiv:2509.11963).",
+          "taskTypes": ["build"]
+        }
+      ]
+    }
+  ],
+  "compositions": [
+    {
+      "aggregate": "complete",
+      "assemblies": [
+        "pkg:huggingface/ibm-granite/granite-4.1-30b-base@4.1"
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "pkg:huggingface/ibm-granite/granite-4.1-30b-base@4.1",
+      "dependsOn": [
+        "pkg:huggingface/ibm-granite/GneissWeb",
+        "granite-dataset:webhose",
+        "granite-dataset:mlfoundations-dclm-baseline",
+        "granite-dataset:nemotron-cc",
+        "pkg:huggingface/OpenCoder-LLM/opc-annealing-corpus",
+        "pkg:huggingface/LLM360/TxT360#freelaw",
+        "pkg:huggingface/LLM360/TxT360#uspto",
+        "pkg:huggingface/LLM360/TxT360#wikipedia",
+        "pkg:huggingface/LLM360/TxT360#stackexchange",
+        "pkg:huggingface/storytracer/LoC-PD-Books",
+        "pkg:huggingface/HuggingFaceTB/smollm-corpus#cosmopedia-v2",
+        "pkg:huggingface/LLM360/TxT360#dm_maths",
+        "pkg:huggingface/open-web-math/open-web-math",
+        "pkg:huggingface/EleutherAI/proof-pile-2#algebraic-stack",
+        "pkg:huggingface/OpenCoder-LLM/opc-fineweb-math-corpus",
+        "pkg:huggingface/HuggingFaceTB/finemath",
+        "pkg:huggingface/LLM360/MegaMath",
+        "pkg:huggingface/nvidia/Nemotron-MIND",
+        "pkg:huggingface/nvidia/OpenMathReasoning",
+        "pkg:huggingface/AI-MO/NuminaMath-CoT",
+        "pkg:huggingface/AI-MO/NuminaMath-1.5",
+        "pkg:huggingface/open-thoughts/OpenThoughts3-1.2M",
+        "pkg:huggingface/open-thoughts/OpenThoughts2-1M",
+        "pkg:huggingface/agentica-org/DeepScaleR-Preview-Dataset",
+        "pkg:huggingface/simplescaling/data_ablation_full59K",
+        "pkg:huggingface/nvidia/OpenMathInstruct-1",
+        "pkg:huggingface/nvidia/OpenCodeReasoning",
+        "pkg:huggingface/nvidia/OpenCodeInstruct",
+        "pkg:huggingface/glaiveai/glaive-code-assistant",
+        "pkg:huggingface/nvidia/OpenCodeGeneticInstruct",
+        "pkg:huggingface/interstellarninja/json-mode-reasoning",
+        "granite-dataset:code-pile",
+        "pkg:huggingface/allenai/MADLAD-400",
+        "pkg:huggingface/uonlp/CulturaX",
+        "pkg:huggingface/ai4bharat/sangraha",
+        "pkg:huggingface/maya-research/IndicVault",
+        "granite-dataset:fineweb2-edu-multilingual",
+        "pkg:huggingface/allenai/dolmino-mix-1124#flan",
+        "pkg:huggingface/NousResearch/hermes-function-calling-v1",
+        "pkg:huggingface/NousResearch/Hermes-3-Dataset",
+        "pkg:huggingface/mlx-community/hermes-reasoning-tool-use",
+        "pkg:huggingface/nvidia/When2Call",
+        "pkg:huggingface/nvidia/Llama-Nemotron-Post-Training-Dataset",
+        "pkg:huggingface/ibm-research/finqa",
+        "granite-dataset:techqa",
+        "granite-dataset:spider-1.0",
+        "granite-dataset:govreport-qs",
+        "pkg:huggingface/hotpotqa/hotpot_qa",
+        "pkg:huggingface/meithnav/narrativeqa",
+        "granite-dataset:opa-docs",
+        "granite-dataset:granite-feedback",
+        "granite-dataset:ibm-documentation"
+      ]
+    }
+  ]
+}
