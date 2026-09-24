@@ -49,6 +49,7 @@ const (
 	serveVulnPath        = "/vulnerability/list"
 	serveDiffPath        = "/diff"
 	servePatchPath       = "/patch"
+	servePreferencesPath = "/preferences"
 )
 
 type serveRunResult struct {
@@ -129,6 +130,7 @@ func Serve(port int) error {
 	mux.HandleFunc(serveAPIPrefix+serveVulnPath, handleServeVulnerabilityList)
 	mux.HandleFunc(serveAPIPrefix+serveDiffPath, handleServeDiff)
 	mux.HandleFunc(serveAPIPrefix+servePatchPath, handleServePatch)
+	mux.HandleFunc(serveAPIPrefix+servePreferencesPath, handleServePreferences)
 
 	addr := "127.0.0.1:" + strconvItoa(port)
 	getLogger().Infof("Starting browser GUI API server on http://%s", addr)
@@ -541,6 +543,59 @@ func runServePatch(request servePatchRequest) (serveRunResult, error) {
 		return result, err
 	}
 	return result, nil
+}
+
+func handleServePreferences(writer http.ResponseWriter, request *http.Request) {
+	switch request.Method {
+	case http.MethodGet:
+		result := utils.LoadPreferencesFromWorkingDir()
+		writeServeJSON(writer, http.StatusOK, result)
+
+	case http.MethodPost:
+		// Preserve existing file's CLI settings if updating from GUI
+		current := utils.LoadPreferencesFromWorkingDir()
+		var incoming utils.AppPreferences
+		if err := decodeServeJSON(request, &incoming); err != nil {
+			writeServeError(writer, http.StatusBadRequest, err)
+			return
+		}
+
+		// If CLI block was omitted, preserve whatever was on disk
+		if incoming.CLI.ConfigSchemaFile == "" && incoming.ConfigSchema == "" && current.Preferences.CLI.ConfigSchemaFile != "" {
+			incoming.CLI.ConfigSchemaFile = current.Preferences.CLI.ConfigSchemaFile
+		}
+		if incoming.CLI.ConfigLicensePolicyFile == "" && incoming.ConfigLicense == "" && current.Preferences.CLI.ConfigLicensePolicyFile != "" {
+			incoming.CLI.ConfigLicensePolicyFile = current.Preferences.CLI.ConfigLicensePolicyFile
+		}
+
+		incoming.Normalize()
+
+		data, err := json.MarshalIndent(incoming, "", "  ")
+		if err != nil {
+			writeServeError(writer, http.StatusInternalServerError, err)
+			return
+		}
+
+		prefPath := filepath.Join(".", utils.DEFAULT_PREFERENCES_FILENAME)
+		if err := os.WriteFile(prefPath, data, 0600); err != nil {
+			writeServeError(writer, http.StatusInternalServerError, err)
+			return
+		}
+
+		absPath, err := filepath.Abs(prefPath)
+		if err != nil {
+			absPath = prefPath
+		}
+
+		writeServeJSON(writer, http.StatusOK, utils.PreferencesResult{
+			Path:        absPath,
+			Exists:      true,
+			Preferences: incoming,
+		})
+
+	default:
+		writeServeMethodNotAllowed(writer)
+	}
 }
 
 func decodeServeJSON(request *http.Request, value interface{}) error {

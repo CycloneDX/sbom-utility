@@ -41,34 +41,20 @@ build: clean
 build-gui:
 	go build -o ${GUI_BINARY} ./gui
 
-# TypeScript GUI targets (shared variable)
-# dev-gui-browser : build Go binary then start the Vite dev server + Go HTTP server (browser mode)
-# build-gui-ts    : npm ci + vite build + electron-builder --dir (unpackaged Electron)
-# dist-gui-ts     : npm ci + full distributable packages for the host platform
-# dev-gui-ts      : start Vite dev server + Electron hot-reload window
+# TypeScript browser GUI
+# dev-gui-browser      : build Go binary + start sbom-utility serve + Vite dev server
+# typecheck-gui-ts     : run TypeScript type-check (no emit)
+# lint-gui-ts          : run ESLint over gui-ts/src
 GUI_TS_DIR?=gui-ts
 
 dev-gui-browser: build
 	cd ${GUI_TS_DIR} && npm run dev:browser:full
 
-build-gui-ts:
-	cd ${GUI_TS_DIR} && npm ci && npm run pack
+typecheck-gui-ts:
+	cd ${GUI_TS_DIR} && npm run typecheck
 
-dist-gui-ts:
-	cd ${GUI_TS_DIR} && npm ci && npm run dist
-
-dev-gui-ts:
-	cd ${GUI_TS_DIR} && npm run dev
-
-# dev-gui-ts-full : build Go binary first, then start Vite + Electron dev window.
-# Use this when you want hot-reload Electron with a freshly compiled sbom-utility.
-# The Electron preload uses the native OS file dialog — full filesystem paths are
-# available, unlike the browser fallback mode.
-dev-gui-ts-full: build
-	cd ${GUI_TS_DIR} && npm run dev
-
-dev-gui-browser: build
-	cd ${GUI_TS_DIR} && npm run dev:browser:full
+lint-gui-ts:
+	cd ${GUI_TS_DIR} && npm run lint
 
 # General supported environments: https://go.dev/doc/install/source#environment
 # See latest supported combinations using:

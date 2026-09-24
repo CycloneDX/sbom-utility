@@ -19,3 +19,4 @@ a.txt
 
 # Node / frontend dependencies
 node_modules/
+preferences.json

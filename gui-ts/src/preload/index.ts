@@ -55,6 +55,34 @@ export interface PatchParams {
   patchPath: string
 }
 
+export interface UIPreferences {
+  defaultBomDirectory?: string
+  editorFontFamily:     string
+  editorFontSize:       number
+  autoValidateOnLoad:   boolean
+}
+
+export interface CLIPreferences {
+  configSchema?:  string
+  configLicense?: string
+  outputFormat?:  string
+}
+
+export interface UserPreferences {
+  ui?:                 UIPreferences
+  cli?:                CLIPreferences
+  defaultBomDirectory?: string
+  editorFontFamily?:    string
+  editorFontSize?:      number
+  autoValidateOnLoad?:  boolean
+}
+
+export interface PreferencesResult {
+  path:        string
+  exists:      boolean
+  preferences: UserPreferences
+}
+
 export interface OpenFileResult {
   /** Operational path used for all backend calls (real FS path in Electron;
    *  server temp path in browser mode). */
@@ -66,7 +94,8 @@ export interface OpenFileResult {
 
 export interface SbomBridge {
   // File system
-  openFile():                                   Promise<OpenFileResult | null>
+  openFile(defaultDirectory?: string):          Promise<OpenFileResult | null>
+  pickDirectory?():                             Promise<string | null>
   readFile(filePath: string):                   Promise<string>
   saveFileDialog(defaultPath: string):          Promise<string | null>
   writeFile(filePath: string, content: string): Promise<void>
@@ -80,6 +109,9 @@ export interface SbomBridge {
   listVulnerabilities(params: ListParams):      Promise<RunResult>
   diffBoms(params: DiffParams):                 Promise<RunResult>
   applyPatch(params: PatchParams):              Promise<RunResult>
+  // Preferences
+  getPreferences():                             Promise<PreferencesResult>
+  savePreferences(prefs: UserPreferences):      Promise<PreferencesResult>
   // App
   getVersion():                                 Promise<string>
   isDarkMode():                                 Promise<boolean>
@@ -104,6 +136,8 @@ const bridge: SbomBridge = {
   listVulnerabilities: (params) => ipcRenderer.invoke('bom:listVulnerabilities', params),
   diffBoms:            (params) => ipcRenderer.invoke('bom:diff',                params),
   applyPatch:          (params) => ipcRenderer.invoke('bom:patch',               params),
+  getPreferences:      ()       => ipcRenderer.invoke('app:getPreferences'),
+  savePreferences:     (prefs)  => ipcRenderer.invoke('app:savePreferences',     prefs),
   getVersion:          ()       => ipcRenderer.invoke('app:version'),
   isDarkMode:          ()       => ipcRenderer.invoke('app:isDarkMode'),
 }

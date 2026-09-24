@@ -245,16 +245,34 @@ func initConfigurations() {
 	// we leave the code below "in place" as we may still want to validate any
 	// input file as JSON SBOM document that matches a known format/version (TODO in the future)
 
+	// Load preferences from working directory (if present)
+	// Precedence order:
+	// 1. Explicit CLI flags (utils.GlobalFlags)
+	// 2. Profile settings in ./preferences.json
+	// 3. Built-in defaults (DEFAULT_SCHEMA_CONFIG, DEFAULT_LICENSE_POLICY_CONFIG)
+	prefResult := utils.LoadPreferencesFromWorkingDir()
+	if prefResult.Exists {
+		getLogger().Debugf("Loaded configuration profile from: '%s'", prefResult.Path)
+	}
+
 	// Load application configuration file (i.e., primarily SBOM supported Formats/Schemas)
 	var schemaConfigFile = utils.GlobalFlags.ConfigSchemaFile
+	if schemaConfigFile == "" && prefResult.Preferences.CLI.ConfigSchemaFile != "" {
+		schemaConfigFile = prefResult.Preferences.CLI.ConfigSchemaFile
+		getLogger().Debugf("Using schema config from preferences.json: '%s'", schemaConfigFile)
+	}
 	err := SupportedFormatConfig.LoadSchemaConfigFile(schemaConfigFile, DEFAULT_SCHEMA_CONFIG)
 	if err != nil {
 		getLogger().Error(err.Error())
 		os.Exit(ERROR_APPLICATION)
 	}
 
-	// License Policy Configuration (customizable via command line, with default config.)
+	// License Policy Configuration (customizable via command line / preferences.json, with default config.)
 	var licensePolicyFile = utils.GlobalFlags.ConfigLicensePolicyFile
+	if licensePolicyFile == "" && prefResult.Preferences.CLI.ConfigLicensePolicyFile != "" {
+		licensePolicyFile = prefResult.Preferences.CLI.ConfigLicensePolicyFile
+		getLogger().Debugf("Using license policy config from preferences.json: '%s'", licensePolicyFile)
+	}
 	LicensePolicyConfig = new(schema.LicensePolicyConfig)
 	err = LicensePolicyConfig.LoadHashPolicyConfigurationFile(licensePolicyFile, DEFAULT_LICENSE_POLICY_CONFIG)
 	if err != nil {

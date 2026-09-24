@@ -24,7 +24,7 @@ const SCREENS: Screen[] = [
 export default function Shell() {
   const {
     screen, setScreen, bomFile, setBomFile, setBomInfo, isDirty, setDirty,
-    setValidateBadge,
+    setValidateBadge, defaultBomDirectory,
   } = useAppContext()
 
   // When the user loads a BOM, auto-switch to View/Validate
@@ -37,7 +37,7 @@ export default function Shell() {
   const pendingLoad = useRef<(() => Promise<void>) | null>(null)
 
   async function doLoad() {
-    const result = await window.sbomBridge.openFile()
+    const result = await window.sbomBridge.openFile(defaultBomDirectory)
     if (!result) return
     setDirty(false)
     // Reset badge so the status bar shows "Running…" while ValidateScreen runs

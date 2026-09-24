@@ -3,8 +3,20 @@ import { useAppContext } from '../context/AppContext'
 import styles from './StatusBar.module.css'
 
 export default function StatusBar() {
-  const { bomDisplayName, bomInfo, validateBadge, validateBadgeText } = useAppContext()
+  const {
+    bomDisplayName,
+    bomInfo,
+    validateBadge,
+    validateBadgeText,
+    preferencesPath,
+    preferencesExists,
+    setScreen,
+  } = useAppContext()
   const { format, specVersion, filePath } = bomInfo
+
+  // Short label for the preferences file name
+  const prefFilename = preferencesPath.split(/[/\\]/).pop() || 'preferences.json'
+  const prefTooltip = `Preferences: ${preferencesPath}\nStatus: ${preferencesExists ? 'Loaded from file' : 'Default (file not created)'}\nClick to configure preferences`
 
   return (
     <footer className={styles.bar} role="status" aria-label="BOM status">
@@ -30,7 +42,21 @@ export default function StatusBar() {
         </span>
       )}
 
-      {/* Subtle separator between filename and format/version */}
+      {/* Interactive Preferences item */}
+      <span className={styles.sep} aria-hidden="true" />
+      <button
+        type="button"
+        className={styles.itemButton}
+        onClick={() => setScreen('settings')}
+        title={prefTooltip}
+        aria-label="Open preferences"
+      >
+        <span>⚙️</span>
+        <span className={styles.prefName}>{prefFilename}</span>
+        <span className={styles.prefStatus}>{preferencesExists ? '(loaded)' : '(default)'}</span>
+      </button>
+
+      {/* Subtle separator between preferences and format/version */}
       {(format || specVersion) && <span className={styles.sep} aria-hidden="true" />}
 
       {/* Format + Version — right of separator */}

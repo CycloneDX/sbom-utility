@@ -30,14 +30,13 @@ same validate, license, component, resource, and vulnerability commands in a
 point-and-click interface — no terminal required.  They are independent of
 each other and of the CLI; you can use one, both, or neither.
 
-| | [Fyne GUI](gui/) | [TypeScript / Electron GUI](gui-ts/) |
+| | [Fyne GUI](gui/) | [TypeScript Browser GUI](gui-ts/) |
 |---|---|---|
 | **Location** | [`gui/`](gui/) | [`gui-ts/`](gui-ts/) |
-| **Language / framework** | Go · [Fyne](https://fyne.io) (BSD-3) | TypeScript · [Electron](https://www.electronjs.org) (MIT · OpenJS Foundation) · React |
+| **Language / framework** | Go · [Fyne](https://fyne.io) (BSD-3) | TypeScript · React 18 · Vite 5 |
 | **Build requirement** | Go toolchain + CGo (C compiler) | Node.js ≥ 20 · `npm ci` (no C compiler) |
-| **Distribution** | `fyne package` → `.app` / `.exe` / `.tar.xz` | `npm run dist` → `.dmg` / NSIS `.exe` / AppImage |
+| **Runtime** | Native binary | Browser tab backed by `sbom-utility serve` |
 | **Theming** | Go `fyne.Theme` structs | CSS custom properties (`tokens.css`) — change any colour, font, or spacing without touching TypeScript |
-| **Security** | Native binary, no network stack | Electron hardened defaults: `contextIsolation`, `sandbox`, strict CSP, IPC allowlist validation |
 | **Full documentation** | [gui/README.md](gui/README.md) | [gui-ts/README.md](gui-ts/README.md) |
 
 #### Fyne GUI (`gui/`)
@@ -56,33 +55,26 @@ make build-gui
 > See [gui/README.md](gui/README.md) for full build instructions, theming
 > reference, and distribution (fyne package / fyne-cross).
 
-#### TypeScript / Electron GUI (`gui-ts/`)
+#### TypeScript Browser GUI (`gui-ts/`)
 
-A desktop application built with Electron (MIT · OpenJS Foundation), React 18,
-Vite 5, and TypeScript 5.  Visually polished with a dark sidebar, VS Code-style
-BOM source viewer, and a fully documented CSS design-token system that lets
-you retheme every colour, font, and spacing without touching any TypeScript.
+A browser-based GUI backed by the local `sbom-utility serve` HTTP API.
+Built with React 18, Vite 5, and TypeScript 5.  No Electron, no C compiler,
+no install step beyond `npm ci`.
 
 ```bash
-# Install dependencies (verifies Node ≥ 20 and the CLI binary first)
-./gui-ts/install.sh          # macOS / Linux
-.\gui-ts\install.ps1         # Windows PowerShell
+# Step 1 — build the Go CLI binary (required by the server)
+make build
 
-# Launch in development mode (hot-reload)
-cd gui-ts && npm run dev
+# Step 2 — install npm dependencies (first time only)
+cd gui-ts && npm ci
 
-# Build a distributable installer
-cd gui-ts && npm run dist:mac    # → .dmg
-cd gui-ts && npm run dist:win    # → NSIS .exe
-cd gui-ts && npm run dist:linux  # → AppImage + .deb
-# — or via Make (from repo root) —
-make build-gui-ts   # unpackaged build
-make dist-gui-ts    # full installer
+# Step 3 — start the dev server (builds binary, starts serve + Vite)
+make dev-gui-browser
+# Then open http://localhost:5173 in your browser
 ```
 
 > See [gui-ts/README.md](gui-ts/README.md) for the full feature inventory,
-> security hardening checklist, style customisation guide with worked examples,
-> and architecture documentation.
+> style customisation guide with worked examples, and architecture documentation.
 
 ---
 
@@ -215,6 +207,38 @@ which returns `0` (zero) or "no error":
 
 ```bash
 0
+```
+
+---
+
+### Configuration and Preferences (`preferences.json`)
+
+`sbom-utility` supports an optional profile file named `preferences.json` located in the current working directory (`./preferences.json`). This file is shared between the command-line utility and the browser GUI (`gui-ts`).
+
+#### Configuration Precedence Order
+
+When resolving configuration settings (such as custom schemas and license policies), `sbom-utility` applies settings using the following precedence:
+
+1. **Explicit CLI Flags** (e.g., `--config-license <file>`, `--config-schema <file>`) — *highest precedence, always overrides file/default settings*.
+2. **Configuration Profile** (`./preferences.json`) — applies project-level or directory-level defaults.
+3. **Built-in Application Defaults** (embedded `config.json`, `license.json`) — *used when neither CLI flags nor profile settings are specified*.
+
+#### Example `preferences.json`
+
+```json
+{
+  "ui": {
+    "defaultBomDirectory": "/path/to/boms",
+    "editorFontFamily": "ui-monospace, \"Cascadia Code\", monospace",
+    "editorFontSize": 13,
+    "autoValidateOnLoad": true
+  },
+  "cli": {
+    "configSchema": "custom-schemas.json",
+    "configLicense": "custom-license-policy.json",
+    "outputFormat": "json"
+  }
+}
 ```
 
 ---
