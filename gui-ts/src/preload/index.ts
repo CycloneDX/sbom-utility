@@ -120,8 +120,8 @@ export interface SbomBridge {
 // ── Implementation ────────────────────────────────────────────────────────────
 
 const bridge: SbomBridge = {
-  openFile: async () => {
-    const p: string | null = await ipcRenderer.invoke('dialog:openFile')
+  openFile: async (defaultDirectory?: string) => {
+    const p: string | null = await ipcRenderer.invoke('dialog:openFile', defaultDirectory)
     if (!p) return null
     return { path: p, displayName: p }
   },

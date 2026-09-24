@@ -26,10 +26,55 @@ async function postJSON<T>(path: string, body: unknown): Promise<T> {
   return response.json() as Promise<T>
 }
 
-// Cache for directory handle if picked via File System Access API
-let directoryHandleCache: FileSystemDirectoryHandle | null = null
+// ── Directory handle persistence (IndexedDB) ─────────────────────────────────
+// FileSystemHandle objects cannot be serialised to localStorage, but IndexedDB
+// can store them directly.  We persist the last-used directory handle so the
+// "Load BOM" dialog reopens in the same folder across page refreshes.
 
-async function pickFile(accept = '', defaultDirectory?: string): Promise<File | null> {
+const IDB_DB   = 'sbom-gui'
+const IDB_STORE = 'handles'
+const IDB_KEY   = 'lastBomDirectory'
+
+function openHandleDB(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_DB, 1)
+    req.onupgradeneeded = () => req.result.createObjectStore(IDB_STORE)
+    req.onsuccess = () => resolve(req.result)
+    req.onerror   = () => reject(req.error)
+  })
+}
+
+async function saveDirectoryHandle(handle: FileSystemHandle): Promise<void> {
+  try {
+    const db = await openHandleDB()
+    await new Promise<void>((resolve, reject) => {
+      const tx  = db.transaction(IDB_STORE, 'readwrite')
+      const req = tx.objectStore(IDB_STORE).put(handle, IDB_KEY)
+      req.onsuccess = () => resolve()
+      req.onerror   = () => reject(req.error)
+    })
+  } catch { /* non-fatal */ }
+}
+
+async function loadDirectoryHandle(): Promise<FileSystemHandle | null> {
+  try {
+    const db = await openHandleDB()
+    const handle = await new Promise<FileSystemHandle | undefined>((resolve, reject) => {
+      const tx  = db.transaction(IDB_STORE, 'readonly')
+      const req = tx.objectStore(IDB_STORE).get(IDB_KEY)
+      req.onsuccess = () => resolve(req.result as FileSystemHandle | undefined)
+      req.onerror   = () => reject(req.error)
+    })
+    return handle ?? null
+  } catch {
+    return null
+  }
+}
+
+// In-memory cache; populated lazily on first openFile call
+let directoryHandleCache: FileSystemHandle | null = null
+
+async function pickFile(accept = '', _defaultDirectory?: string): Promise<File | null> {
   // Use File System Access API when available (Chrome, Edge, Opera)
   const win = window as Window & {
     showOpenFilePicker?: (options?: {
@@ -40,8 +85,14 @@ async function pickFile(accept = '', defaultDirectory?: string): Promise<File | 
   }
 
   if (typeof win.showOpenFilePicker === 'function') {
+    // Populate cache from IndexedDB on first call this session
+    if (!directoryHandleCache) {
+      directoryHandleCache = await loadDirectoryHandle()
+    }
+
+    const startIn: string | FileSystemHandle = directoryHandleCache ?? 'documents'
+
     try {
-      const startIn = directoryHandleCache || (defaultDirectory && ['documents', 'downloads', 'desktop', 'music', 'pictures', 'videos'].includes(defaultDirectory) ? defaultDirectory : 'documents')
       const [handle] = await win.showOpenFilePicker({
         multiple: false,
         startIn,
@@ -56,6 +107,9 @@ async function pickFile(accept = '', defaultDirectory?: string): Promise<File | 
         ],
       })
       if (handle) {
+        // Cache and persist the handle so next open starts in the same directory.
+        directoryHandleCache = handle
+        saveDirectoryHandle(handle) // fire-and-forget
         return await handle.getFile()
       }
     } catch (err: unknown) {
@@ -126,6 +180,7 @@ export const mockBridge: SbomBridge = {
         const handle = await win.showDirectoryPicker()
         if (handle) {
           directoryHandleCache = handle
+          saveDirectoryHandle(handle) // fire-and-forget
           return handle.name
         }
       } catch (err: unknown) {

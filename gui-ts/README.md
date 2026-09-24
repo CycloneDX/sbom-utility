@@ -14,9 +14,10 @@ No CGo. No native compiler. One `npm ci` and you are running.
 4. [Architecture](#4-architecture)
 5. [Prerequisites](#5-prerequisites)
 6. [Quick start](#6-quick-start)
-7. [Troubleshooting](#7-troubleshooting)
-8. [Makefile targets](#8-makefile-targets)
-9. [License](#9-license)
+7. [First-time setup](#7-first-time-setup)
+8. [Troubleshooting](#8-troubleshooting)
+9. [Makefile targets](#9-makefile-targets)
+10. [License](#10-license)
 
 ---
 
@@ -313,7 +314,29 @@ Then open **http://localhost:5173** in Chrome or Safari.
 
 ---
 
-## 7. Troubleshooting
+## 7. First-time setup
+
+### Setting a default Load BOM directory
+
+By default the Load BOM file dialog opens in your home directory.  To make it open in
+a specific folder (e.g. where you keep your SBOM files), do this **once**:
+
+1. Click **⚙️ Preferences** at the bottom of the left sidebar.
+2. Under **Default BOM Directory**, click **Browse…**
+3. Navigate to and select your preferred folder.
+4. The browser will show a one-time prompt — **"Allow this site to view and copy files?"** — click **Allow**.
+
+That's it.  From now on, every Load BOM dialog opens in that folder, including after
+page refreshes and restarting the server.
+
+> **Note — browser differences:**
+> - **Chrome / Edge:** fully persistent across sessions (stored in browser IndexedDB).
+> - **Firefox:** the OS file dialog remembers the last-used folder natively — no setup needed, but the Browse… button has no effect.
+> - **Safari:** works within a session but resets on page reload (WebKit limitation).
+
+---
+
+## 8. Troubleshooting
 
 ### Floating social-share overlay appears in Chrome
 
@@ -329,7 +352,7 @@ Then open **http://localhost:5173** in Chrome or Safari.
 
 ---
 
-## 8. Makefile targets
+## 9. Makefile targets
 
 | Target | Description |
 |--------|-------------|
@@ -339,7 +362,7 @@ Then open **http://localhost:5173** in Chrome or Safari.
 
 ---
 
-## 9. License
+## 10. License
 
 The TypeScript GUI code (`gui-ts/`) is licensed under **Apache-2.0**, matching the rest of sbom-utility.
 
