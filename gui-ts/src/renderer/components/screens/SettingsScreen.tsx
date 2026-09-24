@@ -164,40 +164,45 @@ export default function SettingsScreen() {
       {/* ── Default BOM Working Directory ─────────────── */}
       <section style={{ marginBottom: 'var(--space-6)' }}>
         <h3 style={sectionHeadStyle}>Default BOM Directory</h3>
-        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', marginBottom: 'var(--space-4)', lineHeight: 'var(--leading-normal)' }}>
-          Initial folder location used when opening the file picker dialog to load BOMs.
+        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', marginBottom: 'var(--space-3)', lineHeight: 'var(--leading-normal)' }}>
+          The folder the Load BOM dialog opens in. Click <strong>Browse…</strong> to
+          select a folder — the browser will ask for permission once, then remember it
+          across sessions.
         </p>
-        <div style={{ display: 'flex', gap: 'var(--space-2)', maxWidth: 540 }}>
-          <input
-            type="text"
-            className="input"
-            style={{ flex: 1 }}
-            placeholder="e.g. documents, downloads, or /path/to/boms"
-            value={defaultBomDirectory}
-            onChange={e => setDefaultBomDirectory(e.target.value)}
-          />
-          {window.sbomBridge?.pickDirectory && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+          {window.sbomBridge?.pickDirectory ? (
             <button
               className="btn btn-default"
               type="button"
               onClick={async () => {
                 const dir = await window.sbomBridge.pickDirectory!()
-                if (dir) {
-                  setDefaultBomDirectory(dir)
-                }
+                if (dir) setDefaultBomDirectory(dir)
               }}
             >
               Browse…
             </button>
+          ) : (
+            <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
+              Directory picker not available in this browser.
+            </span>
           )}
-          {defaultBomDirectory && (
-            <button
-              className="btn btn-default"
-              type="button"
-              onClick={() => setDefaultBomDirectory('')}
-            >
-              Clear
-            </button>
+          {defaultBomDirectory ? (
+            <>
+              <code style={{ fontSize: 'var(--text-sm)', background: 'var(--input-bg)', padding: '2px 8px', borderRadius: 'var(--radius-sm)', border: 'var(--border)' }}>
+                {defaultBomDirectory}
+              </code>
+              <button
+                className="btn btn-default"
+                type="button"
+                onClick={() => setDefaultBomDirectory('')}
+              >
+                Clear
+              </button>
+            </>
+          ) : (
+            <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
+              No folder selected — Load BOM will open in the default location.
+            </span>
           )}
         </div>
       </section>

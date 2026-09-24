@@ -39,6 +39,7 @@ export default function LicenseScreen({ active }: Props) {
     }
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (active && bomFile) { run() } }, [active, bomFile])
 
   return (
