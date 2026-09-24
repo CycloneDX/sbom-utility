@@ -1,0 +1,98 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.7",
+  "serialNumber": "urn:uuid:aabbccdd-1111-2222-3333-000000000001",
+  "version": 2,
+  "metadata": {
+    "timestamp": "2025-03-10T14:30:00Z",
+    "component": {
+      "type": "application",
+      "bom-ref": "pkg:maven/com.example/my-app@3.1.0",
+      "name": "my-app",
+      "version": "3.1.0"
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/express@4.18.2",
+      "name": "express",
+      "version": "4.18.2",
+      "purl": "pkg:npm/express@4.18.2",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "url": "https://opensource.org/licenses/MIT",
+            "acknowledgement": "declared"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/acme-sdk@2.0.0",
+      "name": "acme-sdk",
+      "version": "2.0.0",
+      "purl": "pkg:npm/acme-sdk@2.0.0",
+      "licenses": [
+        {
+          "license": {
+            "bom-ref": "acme-sdk-license",
+            "name": "Acme Commercial License v2",
+            "url": "https://acme.example.com/licenses/v2",
+            "licensing": {
+              "licensor": {
+                "organization": {
+                  "name": "Acme Inc.",
+                  "url": ["https://acme.example.com"]
+                }
+              },
+              "licensee": {
+                "organization": {
+                  "name": "Example Corp."
+                }
+              },
+              "purchaseOrder": "PO-98765",
+              "licenseTypes": [
+                "subscription"
+              ],
+              "lastRenewal": "2025-01-01T00:00:00Z",
+              "expiration": "2026-01-01T00:00:00Z"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/lodash@4.17.21",
+      "name": "lodash",
+      "version": "4.17.21",
+      "purl": "pkg:npm/lodash@4.17.21",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "acknowledgement": "declared"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/helmet@7.1.0",
+      "name": "helmet",
+      "version": "7.1.0",
+      "purl": "pkg:npm/helmet@7.1.0",
+      "licenses": [
+        {
+          "expression": "MIT",
+          "bom-ref": "helmet-license",
+          "acknowledgement": "declared"
+        }
+      ]
+    }
+  ]
+}
