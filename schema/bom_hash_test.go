@@ -469,6 +469,58 @@ func TestHashCDXVulnerabilityRatingSourceWithoutVulnerabilitySource(t *testing.T
 	}
 }
 
+// Regression test for https://github.com/CycloneDX/sbom-utility/pull/164 :
+// a vulnerability with a top-level `source` and multiple ratings — some whose
+// source matches the top-level source, some that do not — must prepend matching
+// ratings first without panicking.
+func TestHashCDXVulnerabilityRatingSourcePriorityOrdering(t *testing.T) {
+	cdxVulnerability := CDXVulnerability{
+		Id:     "CVE-2026-0002",
+		Source: &CDXVulnerabilitySource{Name: "NVD"},
+		Ratings: &[]CDXRating{
+			{
+				Source:   &CDXVulnerabilitySource{Name: "GHSA"},
+				Score:    6.5,
+				Severity: "medium",
+				Method:   "CVSSv31",
+			},
+			{
+				Source:   &CDXVulnerabilitySource{Name: "NVD"},
+				Score:    9.8,
+				Severity: "critical",
+				Method:   "CVSSv31",
+			},
+		},
+	}
+	document := NewBOM("")
+	hashed, err := document.HashmapVulnerability(cdxVulnerability, nil)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if !hashed {
+		t.Error(getLogger().Errorf("expected non-empty vulnerability to be hashed."))
+		return
+	}
+	arrVulnInfo, exists := document.VulnerabilityMap.Get(cdxVulnerability.Id)
+	if !exists || len(arrVulnInfo) == 0 {
+		t.Error(getLogger().Errorf("expected vulnerability '%s' to exist in map.", cdxVulnerability.Id))
+		return
+	}
+	severities := arrVulnInfo[0].(VulnerabilityInfo).CvssSeverity
+	if len(severities) != 2 {
+		t.Errorf("expected 2 severity entries, got %d", len(severities))
+		return
+	}
+	// The NVD rating (matching the top-level source) must be prepended — appear first
+	if severities[0] != "CVSSv31: 9.8 (critical)" {
+		t.Errorf("expected NVD (matching source) rating first, got: %s", severities[0])
+	}
+	if severities[1] != "CVSSv31: 6.5 (medium)" {
+		t.Errorf("expected GHSA rating second, got: %s", severities[1])
+	}
+}
+
 // ----------------------
 // License Hashing
 // ----------------------
