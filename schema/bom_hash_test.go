@@ -35,6 +35,7 @@ const (
 	TEST_HASH_CDX_1_5_METADATA_COMPONENT_NAME_ONLY = "test/hash/hash-cdx-1-5-metadata-component-name-only.sbom.json"
 	TEST_HASH_CDX_1_5_COMPONENTS                   = "test/hash/hash-cdx-1-5-components.sbom.json"
 	TEST_HASH_CDX_1_5_SERVICES                     = "test/hash/hash-cdx-1-5-services.sbom.json"
+	TEST_HASH_CDX_1_5_SERVICE_NO_BOM_REF           = "test/hash/hash-cdx-1-5-service-no-bom-ref.sbom.json"
 	TEST_HASH_CDX_1_5_VULNERABILITIES              = "test/hash/hash-cdx-1-5-vulnerabilities.sbom.json"
 )
 
@@ -373,6 +374,88 @@ func TestHashZeroCDXServiceStruct(t *testing.T) {
 	// NOTE: we do not want to hash empty (zero) structures
 	if hashed {
 		t.Error(getLogger().Errorf("hashed an empty (zero) structure."))
+	}
+}
+
+// Regression test for https://github.com/CycloneDX/sbom-utility/issues/61 :
+// `CDXService.BOMRef` is typed as a pointer (`*CDXRefType`) so that a service
+// which omits the "bom-ref" key entirely (which CycloneDX allows) unmarshals
+// with a `nil` pointer rather than a zero-value string. This test asserts
+// that (a) unmarshalling such a BOM succeeds without error/panic, (b) the
+// resulting service's `BOMRef` field is `nil` (while a sibling service that
+// does declare "bom-ref" still parses it normally), and (c) hashing/mapping
+// the service (the code path used by the `list`/`query`/`resource` commands)
+// does not panic or error when it encounters the `nil` BOMRef.
+func TestHashCDXServiceWithoutBomRef(t *testing.T) {
+	document, err := loadBOMFile(TEST_HASH_CDX_1_5_SERVICE_NO_BOM_REF)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// (a) need to unmarshal into CDX structures; must not error or panic.
+	if err = document.UnmarshalCycloneDXBOM(); err != nil {
+		t.Error(err)
+		return
+	}
+
+	pServices := document.GetCdxServices()
+	if pServices == nil || len(*pServices) != 2 {
+		err = getLogger().Errorf("invalid test case. Expected 2 services declared in BOM.")
+		t.Error(err)
+		return
+	}
+	services := *pServices
+
+	// Locate the service intentionally authored with NO "bom-ref" key and the
+	// sibling service that does declare a "bom-ref" (for contrast).
+	var serviceNoBomRef, serviceWithBomRef *CDXService
+	for i := range services {
+		switch services[i].Name {
+		case "ServiceWithoutBomRef":
+			serviceNoBomRef = &services[i]
+		case "ServiceWithBomRef":
+			serviceWithBomRef = &services[i]
+		}
+	}
+
+	if serviceNoBomRef == nil {
+		t.Error(getLogger().Errorf("invalid test case. Service `ServiceWithoutBomRef` not found in test BOM."))
+		return
+	}
+	if serviceWithBomRef == nil {
+		t.Error(getLogger().Errorf("invalid test case. Service `ServiceWithBomRef` not found in test BOM."))
+		return
+	}
+
+	// (b) the service missing "bom-ref" must have a `nil` BOMRef pointer.
+	if serviceNoBomRef.BOMRef != nil {
+		t.Errorf("expected `BOMRef` to be `nil` for service with no `bom-ref` key; got: '%s'", serviceNoBomRef.BOMRef.String())
+	}
+
+	// The contrast service must still parse its declared "bom-ref" normally.
+	if serviceWithBomRef.BOMRef == nil {
+		t.Error(getLogger().Errorf("expected `BOMRef` to be non-nil for service declaring `bom-ref`"))
+	} else if serviceWithBomRef.BOMRef.String() != "service:example.com/myservices/with-bom-ref" {
+		t.Errorf("unexpected `BOMRef` value: '%s'", serviceWithBomRef.BOMRef.String())
+	}
+
+	// (c) exercise the hashing/mapping code path (used by `list`, `query`,
+	// `resource`, etc. commands) with a `nil` BOMRef present; must not panic.
+	hashed, err := document.HashmapService(*serviceNoBomRef, nil)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if !hashed {
+		t.Error(getLogger().Errorf("expected non-empty service (missing only `bom-ref`) to be hashed."))
+	}
+
+	// Also exercise the full (mixed nil/non-nil BOMRef) services slice, mirroring
+	// TestHashCDXServicesSlice, to assure no panic occurs walking the slice.
+	if err = document.HashmapServices(services, nil); err != nil {
+		t.Error(err)
+		return
 	}
 }
 
