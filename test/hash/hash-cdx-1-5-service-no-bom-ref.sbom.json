@@ -1,0 +1,29 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "serialNumber": "urn:uuid:2b3c4d5e-1234-abcd-9876-a3b4c5d6e7f4",
+  "metadata": {
+    "component": {
+      "type": "application",
+      "bom-ref": "pkg:app/sample@1.0.0",
+      "purl": "pkg:app/sample@1.0.0",
+      "name": "ACME Application",
+      "version": "2.0.0",
+      "description": "ACME sample application"
+    }
+  },
+  "services": [
+    {
+      "name": "ServiceWithoutBomRef",
+      "version": "1.0.0",
+      "description": "Service intentionally declared with NO `bom-ref` key to verify the pointer-typed BOMRef field unmarshals to `nil` (see issue #61) and does not panic when hashed/mapped."
+    },
+    {
+      "bom-ref": "service:example.com/myservices/with-bom-ref",
+      "name": "ServiceWithBomRef",
+      "version": "1.0.0",
+      "description": "Service with a valid `bom-ref` included for contrast."
+    }
+  ]
+}
