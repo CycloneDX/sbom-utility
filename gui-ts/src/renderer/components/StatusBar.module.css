@@ -8,8 +8,8 @@
   font-size:   var(--statusbar-font);
   flex-shrink: 0;
   /* Side padding keeps content away from the rounded window corners */
-  padding:     0 var(--space-4);
-  gap:         var(--space-4);
+  padding:     0 var(--space-3);
+  gap:         var(--space-3);
   user-select: text;
 }
 
@@ -84,3 +84,43 @@
 
 .validBadge_valid   .validDot { background: #30D158; }
 .validBadge_invalid .validDot { background: #FF453A; }
+
+/* Interactive status bar button / pill */
+.itemButton {
+  display:       inline-flex;
+  align-items:   center;
+  gap:           var(--space-1);
+  padding:       2px var(--space-2);
+  border-radius: var(--radius-sm);
+  background:    transparent;
+  border:        none;
+  color:         var(--statusbar-text);
+  font-family:   inherit;
+  font-size:     var(--statusbar-font);
+  cursor:        pointer;
+  transition:    background var(--duration-fast) var(--ease-out);
+  white-space:   nowrap;
+  flex-shrink:   0;
+}
+
+.itemButton:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.itemButton:active {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.prefName {
+  font-family: var(--editor-font-family);
+  font-size:   11px;
+  max-width:   220px;
+  overflow:    hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prefStatus {
+  font-size: 10px;
+  opacity: 0.7;
+}

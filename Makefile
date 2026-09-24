@@ -42,11 +42,19 @@ build-gui:
 	go build -o ${GUI_BINARY} ./gui
 
 # TypeScript browser GUI
-# dev-gui-browser : build Go binary then start the Vite dev server + Go HTTP server
+# dev-gui-browser      : build Go binary + start sbom-utility serve + Vite dev server
+# typecheck-gui-ts     : run TypeScript type-check (no emit)
+# lint-gui-ts          : run ESLint over gui-ts/src
 GUI_TS_DIR?=gui-ts
 
 dev-gui-browser: build
 	cd ${GUI_TS_DIR} && npm run dev:browser:full
+
+typecheck-gui-ts:
+	cd ${GUI_TS_DIR} && npm run typecheck
+
+lint-gui-ts:
+	cd ${GUI_TS_DIR} && npm run lint
 
 # General supported environments: https://go.dev/doc/install/source#environment
 # See latest supported combinations using:
@@ -131,4 +139,4 @@ clean:
 	@if [ -f ${GUI_BINARY} ] ; then rm ${GUI_BINARY} ; fi
 	@if [ -d ${RELEASE_DIR} ] ; then rm -f ${RELEASE_DIR}/${BINARY}* ; rm -f ${RELEASE_DIR}/*.json ; rmdir ${RELEASE_DIR} ; fi
 
-.PHONY: config clean build build-gui dev-gui-browser release test_clean test test_cmd unit_tests integration_tests format lint install
+.PHONY: config clean build build-gui dev-gui-browser release test_clean test test_cmd unit_tests integration_tests format lint install build-gui-ts dist-gui-ts dev-gui-ts dev-gui-ts-full

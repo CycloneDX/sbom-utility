@@ -3,7 +3,7 @@
  * mockBridge.ts — browser bridge backed by the local sbom-utility HTTP server.
  */
 
-import type { SbomBridge, OpenFileResult, BomInfo, RunResult, ValidateParams, ListParams, DiffParams, PatchParams } from '../preload/index'
+import type { SbomBridge, OpenFileResult, BomInfo, RunResult, ValidateParams, ListParams, DiffParams, PatchParams, PreferencesResult, UserPreferences } from '../preload/index'
 
 const API_BASE = (window as Window & { __SBOM_API_BASE__?: string }).__SBOM_API_BASE__ ?? 'http://127.0.0.1:8787/api'
 
@@ -26,7 +26,46 @@ async function postJSON<T>(path: string, body: unknown): Promise<T> {
   return response.json() as Promise<T>
 }
 
-function pickFile(accept = ''): Promise<File | null> {
+// Cache for directory handle if picked via File System Access API
+let directoryHandleCache: FileSystemDirectoryHandle | null = null
+
+async function pickFile(accept = '', defaultDirectory?: string): Promise<File | null> {
+  // Use File System Access API when available (Chrome, Edge, Opera)
+  const win = window as Window & {
+    showOpenFilePicker?: (options?: {
+      multiple?: boolean
+      startIn?: string | FileSystemHandle
+      types?: Array<{ description: string; accept: Record<string, string[]> }>
+    }) => Promise<FileSystemFileHandle[]>
+  }
+
+  if (typeof win.showOpenFilePicker === 'function') {
+    try {
+      const startIn = directoryHandleCache || (defaultDirectory && ['documents', 'downloads', 'desktop', 'music', 'pictures', 'videos'].includes(defaultDirectory) ? defaultDirectory : 'documents')
+      const [handle] = await win.showOpenFilePicker({
+        multiple: false,
+        startIn,
+        types: [
+          {
+            description: 'BOM Files',
+            accept: {
+              'application/json': ['.json'],
+              'application/xml': ['.xml'],
+            },
+          },
+        ],
+      })
+      if (handle) {
+        return await handle.getFile()
+      }
+    } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        return null
+      }
+      // Fall through to input element fallback
+    }
+  }
+
   return new Promise(resolve => {
     const input = document.createElement('input')
     input.type = 'file'
@@ -78,9 +117,29 @@ async function uploadFile(file: File): Promise<{ filePath: string; content: stri
 }
 
 export const mockBridge: SbomBridge = {
-  openFile: async (): Promise<OpenFileResult | null> => {
+  pickDirectory: async (): Promise<string | null> => {
+    const win = window as Window & {
+      showDirectoryPicker?: () => Promise<FileSystemDirectoryHandle>
+    }
+    if (typeof win.showDirectoryPicker === 'function') {
+      try {
+        const handle = await win.showDirectoryPicker()
+        if (handle) {
+          directoryHandleCache = handle
+          return handle.name
+        }
+      } catch (err: unknown) {
+        if (err instanceof DOMException && err.name === 'AbortError') {
+          return null
+        }
+      }
+    }
+    return null
+  },
+
+  openFile: async (defaultDirectory?: string): Promise<OpenFileResult | null> => {
     try {
-      const file = await pickFile('.json,.xml')
+      const file = await pickFile('.json,.xml', defaultDirectory)
       if (!file) return null
       const uploaded = await uploadFile(file)
       fileStore.set(uploaded.filePath, uploaded.content)
@@ -88,6 +147,9 @@ export const mockBridge: SbomBridge = {
       // displayName = original filename chosen by user (browser can't give more)
       return { path: uploaded.filePath, displayName: file.name }
     } catch (error: unknown) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return null
+      }
       window.alert(`Failed to load file: ${error instanceof Error ? error.message : String(error)}`)
       throw error
     }
@@ -151,6 +213,28 @@ export const mockBridge: SbomBridge = {
   listVulnerabilities: async (params: ListParams): Promise<RunResult> => postJSON('/vulnerability/list', params),
   diffBoms: async (params: DiffParams): Promise<RunResult> => postJSON('/diff', params),
   applyPatch: async (params: PatchParams): Promise<RunResult> => postJSON('/patch', params),
+  getPreferences: async (): Promise<PreferencesResult> => {
+    try {
+      const response = await fetch(`${API_BASE}/preferences`)
+      if (response.ok) {
+        return (await response.json()) as PreferencesResult
+      }
+    } catch {
+      /* fallback below */
+    }
+    return {
+      path: './preferences.json',
+      exists: false,
+      preferences: {
+        editorFontFamily: 'ui-monospace, "Cascadia Code", "Fira Code", Consolas, "Courier New", monospace',
+        editorFontSize: 13,
+        autoValidateOnLoad: true,
+      },
+    }
+  },
+  savePreferences: async (prefs: UserPreferences): Promise<PreferencesResult> => {
+    return postJSON<PreferencesResult>('/preferences', prefs)
+  },
   getVersion: async () => '0.16.0-browser-dev',
   isDarkMode: async () => window.matchMedia('(prefers-color-scheme: dark)').matches,
 }

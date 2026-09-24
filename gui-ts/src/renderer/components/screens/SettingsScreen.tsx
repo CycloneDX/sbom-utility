@@ -134,13 +134,73 @@ function FontPicker({ family, size, onChange, preview }: FontPickerProps) {
 
 export default function SettingsScreen() {
   const {
-    autoValidateOnLoad, setAutoValidateOnLoad,
-    defaultEditorFont,  setDefaultEditorFont,
+    autoValidateOnLoad,     setAutoValidateOnLoad,
+    defaultEditorFont,      setDefaultEditorFont,
+    defaultBomDirectory,    setDefaultBomDirectory,
+    preferencesPath,        preferencesExists,
   } = useAppContext()
 
   return (
     <div className={styles.screen} style={{ padding: 'var(--space-6)', overflowY: 'auto' }}>
       <h2 style={{ marginBottom: 'var(--space-4)' }}>Preferences</h2>
+
+      {/* ── Active Profile / File Location ──────────────── */}
+      <section style={{ marginBottom: 'var(--space-6)', background: 'var(--color-surface)', padding: 'var(--space-4)', borderRadius: 'var(--radius-md)', border: 'var(--border)' }}>
+        <h3 style={sectionHeadStyle}>Configuration Profile</h3>
+        <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text)', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+          <div>
+            <strong>File Location:</strong> <code style={{ background: 'var(--input-bg)', padding: '2px 6px', borderRadius: 'var(--radius-sm)' }}>{preferencesPath}</code>
+          </div>
+          <div>
+            <strong>Status:</strong> {preferencesExists ? (
+              <span style={{ color: 'var(--color-valid)', fontWeight: 'bold' }}>✓ Loaded from working directory</span>
+            ) : (
+              <span style={{ color: 'var(--color-text-muted)', fontStyle: 'italic' }}>Default preferences (will be written on change)</span>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Default BOM Working Directory ─────────────── */}
+      <section style={{ marginBottom: 'var(--space-6)' }}>
+        <h3 style={sectionHeadStyle}>Default BOM Directory</h3>
+        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', marginBottom: 'var(--space-4)', lineHeight: 'var(--leading-normal)' }}>
+          Initial folder location used when opening the file picker dialog to load BOMs.
+        </p>
+        <div style={{ display: 'flex', gap: 'var(--space-2)', maxWidth: 540 }}>
+          <input
+            type="text"
+            className="input"
+            style={{ flex: 1 }}
+            placeholder="e.g. documents, downloads, or /path/to/boms"
+            value={defaultBomDirectory}
+            onChange={e => setDefaultBomDirectory(e.target.value)}
+          />
+          {window.sbomBridge?.pickDirectory && (
+            <button
+              className="btn btn-default"
+              type="button"
+              onClick={async () => {
+                const dir = await window.sbomBridge.pickDirectory!()
+                if (dir) {
+                  setDefaultBomDirectory(dir)
+                }
+              }}
+            >
+              Browse…
+            </button>
+          )}
+          {defaultBomDirectory && (
+            <button
+              className="btn btn-default"
+              type="button"
+              onClick={() => setDefaultBomDirectory('')}
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      </section>
 
       {/* ── JSON Editor Font ──────────────────────────────
           Drives: JSON editor body (View / Validate screen).
