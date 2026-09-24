@@ -170,7 +170,7 @@ export default function JsonEditor({ text, loading, onChange }: Props) {
       }
       if (findOpen && e.key === 'Enter') {
         e.preventDefault()
-        e.shiftKey ? findPrev() : findNext()
+        if (e.shiftKey) { findPrev() } else { findNext() }
       }
     }
     window.addEventListener('keydown', onKeyDown)
