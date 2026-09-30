@@ -33,6 +33,37 @@
       ]
     }
   ],
+     "authors": [
+      {
+        "name": "FOSSA, Inc.",
+        "email": "support@fossa.com"
+      }
+    ],
+    "manufacture": {
+      "name": "FOSSA, Inc.",
+      "url": [
+        "https://app.fossa.com"
+      ],
+      "contact": [
+        {
+          "name": "FOSSA, Inc.",
+          "email": "support@fossa.com"
+        }
+      ]
+    },
+    "supplier": {
+      "name": "FOSSA, Inc.",
+      "url": [
+        "https://app.fossa.com"
+      ],
+      "contact": [
+        {
+          "name": "FOSSA, Inc.",
+          "email": "support@fossa.com"
+        }
+      ]
+    }
+  },
   "properties": [
     {
       "name": "abc",
