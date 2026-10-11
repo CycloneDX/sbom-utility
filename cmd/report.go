@@ -166,6 +166,7 @@ func wrapTableRowText(maxChars int, joinChar string, columns ...interface{}) (ta
 // Report column data values
 const REPORT_SUMMARY_DATA = true
 const REPORT_REPLACE_LINE_FEEDS_TRUE = true
+const REPORT_MARKDOWN_ESCAPE_TRUE = true
 const REPORT_DO_NOT_TRUNCATE = -1
 
 // TODO: Support additional flags to:
@@ -179,6 +180,7 @@ type ColumnFormatData struct {
 	TruncateLength   int    // truncate character data to this length (default=-1 means don't truncate)
 	IsSummaryData    bool   // include in `--summary` reports
 	ReplaceLineFeeds bool   // replace line feeds with spaces (e.g., for multi-line descriptions)
+	MarkdownEscape   bool   // wrap value in backticks when rendering markdown (e.g., purl, cpe)
 	Alignment        string // Align column data where possible (i.e., This is primarily for markdown format)
 }
 
@@ -212,7 +214,16 @@ func prepareReportTitleData(formatData []ColumnFormatData, summarizedReport bool
 	return
 }
 
-func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, summarizedReport bool) (lineData []string, err error) {
+// prepareReportLineDataMarkdown is like prepareReportLineData but wraps string values in
+// backticks for columns marked with MarkdownEscape (e.g. purl, cpe) to prevent markdown
+// renderers from misinterpreting special characters like colons and asterisks.
+func prepareReportLineDataMarkdown(structIn interface{}, formatData []ColumnFormatData, summarizedReport bool) (lineData []string, err error) {
+	lineData, err = prepareReportLineData(structIn, formatData, summarizedReport, true)
+	return
+}
+
+func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, summarizedReport bool, markdownFormat ...bool) (lineData []string, err error) {
+	isMarkdown := len(markdownFormat) > 0 && markdownFormat[0]
 	var mapStruct map[string]interface{}
 	var data interface{}
 	var dataFound bool
@@ -248,6 +259,11 @@ func prepareReportLineData(structIn interface{}, formatData []ColumnFormatData, 
 				if columnData.ReplaceLineFeeds {
 					// For tabbed text tables, replace line feeds with spaces
 					typedData = strings.ReplaceAll(typedData, "\n", " ")
+				}
+				if isMarkdown && columnData.MarkdownEscape {
+					// Wrap in backticks so markdown renderers treat it as code
+					// (prevents colons and asterisks in purl/cpe from being interpreted)
+					typedData = fmt.Sprintf("`%s`", typedData)
 				}
 			}
 			lineData = append(lineData, typedData)

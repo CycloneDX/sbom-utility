@@ -116,9 +116,9 @@ var COMPONENT_LIST_ROW_DATA = []ColumnFormatData{
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_MANUFACTURER_NAME, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_MANUFACTURER_URL, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_PUBLISHER, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
-	*NewColumnFormatData(COMPONENT_FILTER_KEY_PURL, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
+	{DataKey: COMPONENT_FILTER_KEY_PURL, TruncateLength: REPORT_DO_NOT_TRUNCATE, IsSummaryData: REPORT_SUMMARY_DATA, MarkdownEscape: REPORT_MARKDOWN_ESCAPE_TRUE},
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_SWID, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
-	*NewColumnFormatData(COMPONENT_FILTER_KEY_CPE, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
+	{DataKey: COMPONENT_FILTER_KEY_CPE, TruncateLength: REPORT_DO_NOT_TRUNCATE, IsSummaryData: REPORT_SUMMARY_DATA, MarkdownEscape: REPORT_MARKDOWN_ESCAPE_TRUE},
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_MIME_TYPE, REPORT_DO_NOT_TRUNCATE, false, false),
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_HAS_SCOPE, REPORT_DO_NOT_TRUNCATE, false, false),
 	*NewColumnFormatData(COMPONENT_FILTER_KEY_NUM_HASHES, REPORT_DO_NOT_TRUNCATE, REPORT_SUMMARY_DATA, false),
@@ -135,9 +135,8 @@ var COMPONENT_LIST_ROW_DATA = []ColumnFormatData{
 
 // Flags. Reuse query flag values where possible
 const (
-	FLAG_COMPONENT_SUMMARY = "summary"
-	FLAG_COMPONENT_TYPE    = "type"
-	// FLAG_COMPONENT_TYPE_HELP    = "filter output by component type(s)"
+	FLAG_COMPONENT_SUMMARY      = "summary"
+	FLAG_COMPONENT_TYPE         = "type"
 	FLAG_COMPONENT_SUMMARY_HELP = "summarize component information when listing in supported formats"
 )
 
@@ -160,7 +159,7 @@ func NewCommandComponent() *cobra.Command {
 	command.Long = "Report on components found in the BOM input file"
 	command.Flags().StringVarP(&utils.GlobalFlags.PersistentFlags.OutputFormat, FLAG_FILE_OUTPUT_FORMAT, "", FORMAT_TEXT,
 		FLAG_COMPONENT_OUTPUT_FORMAT_HELP+COMPONENT_LIST_OUTPUT_SUPPORTED_FORMATS)
-	//command.Flags().StringP(FLAG_COMPONENT_TYPE, "", "", FLAG_COMPONENT_TYPE_HELP)
+	command.Flags().StringVarP(&utils.GlobalFlags.ValidateFlags.SchemaVariant, FLAG_VALIDATE_SCHEMA_VARIANT, "", "", MSG_VALIDATE_SCHEMA_VARIANT)
 	command.Flags().BoolVarP(
 		&utils.GlobalFlags.ComponentFlags.Summary,
 		FLAG_COMPONENT_SUMMARY, "", false,
@@ -456,7 +455,7 @@ func DisplayComponentListMarkdown(bom *schema.BOM, writer io.Writer, flags utils
 	for _, entry := range entries {
 		// NOTE: component hashmap values are pointers to CDXComponentInfo structs
 		pComponentInfo = entry.Value.(*schema.CDXComponentInfo)
-		line, err = prepareReportLineData(
+		line, err = prepareReportLineDataMarkdown(
 			*pComponentInfo,
 			COMPONENT_LIST_ROW_DATA,
 			flags.Summary,

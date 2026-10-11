@@ -186,6 +186,24 @@
                     "dependencies": ["jsf-0.82.schema.json", "spdx.schema.json"]
                 }
             ]
+        },
+        {
+            "canonicalName": "CycloneDX",
+            "propertyKeyFormat": "specFormat",
+            "propertyKeyVersion": "specVersion",
+            "propertyValueFormat": "CycloneDX",
+            "schemas": [
+                {
+                    "version": "2.0",
+                    "variant": "development",
+                    "name": "CycloneDX v2.0 (pre-release)",
+                    "file": "schema/cyclonedx/2.0/cyclonedx-2.0-bundled.schema.json",
+                    "development": "https://github.com/CycloneDX/specification/blob/2.0-dev/schema/2.0/cyclonedx-2.0-bundled.schema.json",
+                    "url": "https://raw.githubusercontent.com/CycloneDX/specification/2.0-dev/schema/2.0/cyclonedx-2.0-bundled.schema.json",
+                    "default": true,
+                    "dependencies": []
+                }
+            ]
         }
     ]
 }

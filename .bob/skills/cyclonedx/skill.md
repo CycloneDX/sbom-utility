@@ -1,6 +1,6 @@
 ---
 name: cyclonedx-v1-7-bom-expert
-description: "OWASP CycloneDX v1.7 BOM & AI/ML-BOM authoring and validation expert"
+description: "OWASP CycloneDX v1.7 BOM & AI/ML-BOM authoring and validation expert; includes v2.0 pre-release schema findings"
 version: "1.0.0"
 author: ""
 tags:
@@ -228,3 +228,66 @@ _Boolean value_ are `true` or `false`; case sensitive.
 | `cdx:poetry` | Namespace for properties specific to the Python Poetry ecosystem. | [CycloneDX Python Maintainers] | [cdx:poetry taxonomy](cdx/poetry.md) |
 | `cdx:python` | Namespace for properties specific to the Python general packaging. | [CycloneDX Python Maintainers] | [cdx:python taxonomy](cdx/python.md) |
 | `cdx:rustc` | Namespace for properties specific to the Rust compiler, `rustc`. | [CycloneDX Rust Maintainers] | [cdx:rustc taxonomy](cdx/rustc.md) |
+
+---
+
+## CycloneDX v2.0 Pre-Release Schema Findings
+
+> These findings apply to the **bundled schema** used by sbom-utility:
+> `resources/schema/cyclonedx/2.0/cyclonedx-2.0-bundled.schema.json`
+> (`$id`: `https://cyclonedx.org/schema/2.0/cyclonedx-2.0.schema.json`)
+
+### Breaking Change: Component-level supplier / manufacturer / publisher removed
+
+In the **skill reference schema** (`.bob/skills/cyclonedx/cdx/schema/2.0/model/2.0-dev/cyclonedx-component-2.0.schema.json`) — an earlier draft — the `component` object retains `supplier`, `manufacturer`, and `publisher` as direct properties (using `organizationalEntity`).
+
+In the **bundled schema** used by the tool (a later draft), those three properties were **removed** from the `component` object. The `component` definition has `"additionalProperties": false`, so passing them causes validation errors:
+
+```
+Additional property manufacturer is not allowed
+Additional property supplier is not allowed
+Additional property publisher is not allowed
+```
+
+**v2.0 replacement:** organisational attribution on a component is now expressed via the `parties` array (new in v2.0), where each party carries a `roles` array using predefined role values including `"manufacturer"`, `"supplier"`, and `"publisher"`.
+
+```json
+"parties": [
+  {
+    "bom-ref": "party-acme",
+    "roles": [ { "role": "supplier" } ],
+    "organization": { "name": "Acme Corp" }
+  }
+]
+```
+
+**`metadata` is unaffected:** `metadata.supplier` and `metadata.manufacturer` still use `organizationalEntity` (plain `url` array of strings) in both schema variants.
+
+### Top-level field rename
+
+| v1.x | v2.0 |
+|---|---|
+| `bomFormat: "CycloneDX"` | `specFormat: "CycloneDX"` |
+| `specVersion: "1.x"` | `specVersion: "2.0"` |
+
+### Primary component placement
+
+In v1.x the subject component of the BOM lives at `metadata.component`.
+This is **unchanged in v2.0** — the `components[]` array is for dependency inventory; `metadata.component` is for the subject being described.
+
+### v2.0 purl / cpe in identifiers
+
+The `purl` and `cpe` top-level fields on `component` are replaced by `identifiers[].identities[]` with `scheme` + `value`:
+
+```json
+"identifiers": [
+  {
+    "bom-ref": "ident-1",
+    "party": "<bom-ref of asserting party>",
+    "identities": [
+      { "scheme": "purl", "value": "pkg:npm/acme/lib@1.0.0" },
+      { "scheme": "cpe",  "value": "cpe:2.3:a:acme:lib:1.0.0:*:*:*:*:*:*:*" }
+    ]
+  }
+]
+```
