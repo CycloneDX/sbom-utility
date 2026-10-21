@@ -96,6 +96,9 @@ const (
 	TEST_PATCH_BOM_ADD_METADATA_PROP_AT_INDEX    = "test/patch/cdx-patch-add-metadata-property-at-index.json"
 	TEST_PATCH_BOM_ADD_ROOT_UPDATE_VERSION       = "test/patch/cdx-patch-add-root-update-version.json"
 	TEST_PATCH_BOM_ADD_ROOT_INVALID_KEY_MODIFIED = "test/patch/cdx-patch-add-root-invalid-key-modified.json"
+	TEST_PATCH_BOM_REMOVE_METADATA_TIMESTAMP     = "test/patch/cdx-patch-remove-metadata-timestamp.json"
+	TEST_PATCH_BOM_TEST_METADATA_TIMESTAMP       = "test/patch/cdx-patch-test-metadata-timestamp.json"
+	TEST_PATCH_BOM_TEST_METADATA_TIMESTAMP_ERR   = "test/patch/cdx-patch-test-metadata-timestamp-err.json"
 
 	// CycloneDX BOM "patch" files (error tests)
 	TEST_PATCH_ERR_ADD_MISSING_VALUE = "test/patch/cdx-patch-err-add-missing-value.json"
@@ -768,6 +771,44 @@ func TestPatchCdx15Example7TestMetadataProperty(t *testing.T) {
 
 func TestPatchCdx15Example7TestMetadataPropertyErr(t *testing.T) {
 	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLEST_BASE, TEST_PATCH_EXAMPLE_TEST_METADATA_PROPERTY_ERR, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLEST_BASE)
+	_, _, err := innerTestPatch(t, ti)
+	if err == nil {
+		t.Error(err)
+	}
+}
+
+// { "op": "remove", "path": "/metadata/timestamp" }
+func TestPatchCdx15RemoveMetadataTimestamp(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLEST_BASE, TEST_PATCH_BOM_REMOVE_METADATA_TIMESTAMP, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLEST_BASE)
+	ti.OutputIndent = 0
+	_, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+	TEST_OUTPUT := "{\"bomFormat\":\"CycloneDX\",\"specVersion\":\"1.5\",\"version\":1,\"metadata\":{\"properties\":[{\"name\":\"Property 1\",\"value\":\"Value 1\"},{\"name\":\"Property 2\",\"value\":\"Value 2\"}]}}"
+	buffer, err := bufferFile(ti.OutputFile)
+	if err != nil {
+		t.Error(err)
+	}
+	if strings.TrimSpace(buffer.String()) != TEST_OUTPUT {
+		t.Errorf("patched output: expected: %s, actual: %s", TEST_OUTPUT, strings.TrimSpace(buffer.String()))
+	}
+}
+
+// { "op": "test", "path": "/metadata/timestamp", "value": "2023-10-12T19:07:00Z" }
+func TestPatchCdx15TestMetadataTimestamp(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLEST_BASE, TEST_PATCH_BOM_TEST_METADATA_TIMESTAMP, nil)
+	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLEST_BASE)
+	_, _, err := innerTestPatch(t, ti)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestPatchCdx15TestMetadataTimestampErr(t *testing.T) {
+	ti := NewPatchTestInfo(TEST_PATCH_BOM_1_5_SIMPLEST_BASE, TEST_PATCH_BOM_TEST_METADATA_TIMESTAMP_ERR, nil)
 	ti.OutputFile = ti.CreateTemporaryTestOutputFilename(TEST_PATCH_BOM_1_5_SIMPLEST_BASE)
 	_, _, err := innerTestPatch(t, ti)
 	if err == nil {
