@@ -430,7 +430,7 @@ func testValue(parentMap map[string]interface{}, keys []string, value interface{
 			// if the next node is a map AND only 1 path remains after it,
 			// it would mean that last path is a new key to be added
 			// to the next node's map with the provided value
-			actualValue = typedNode[keys[0]]
+			actualValue = typedNode[keys[lengthKeys-1]]
 			equal, err = isValueEqual(value, actualValue)
 			if !equal || err != nil {
 				return
@@ -539,7 +539,7 @@ func removeValue(parentMap map[string]interface{}, keys []string, value interfac
 			// if the next node is a map AND only 1 path remains after it,
 			// it would mean that last path is a new key to be added
 			// to the next node's map with the provided value
-			delete(typedNode, keys[0])
+			delete(typedNode, keys[lengthKeys-1])
 		}
 	case []interface{}:
 		if lengthKeys != 2 {
