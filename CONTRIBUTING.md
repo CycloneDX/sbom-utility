@@ -13,12 +13,10 @@ Everyone taking part is expected to follow the
 
 ## Ways to contribute
 
-- **Ask a question** — please ask on Stack Overflow rather than opening an
-  issue. A well-worded question becomes a resource for others searching later.
-- **Report a bug or request a feature** — open an
+- **Ask a question, report a bug or request a feature** — open an
   [issue](https://github.com/CycloneDX/sbom-utility/issues). Search existing
   issues first; if yours already exists, add to it rather than opening a new
-  one. File one bug or one feature request per issue.
+  one. File one question, bug or feature request per issue.
 - **Report a security vulnerability** — do **not** open an issue. Follow
   [SECURITY.md](SECURITY.md).
 - **Pick up existing work** — the
@@ -65,7 +63,7 @@ make build
 You can also run directly from source without building:
 
 ```bash
-go run main.go validate -i test/cyclonedx/1.4/cdx-1-4-mature-example-1.json
+go run main.go validate -i test/cyclonedx/1.7/cdx-1-7-min-required.json
 ```
 
 See [Development](README.md#development) in the README for debugging setup and
@@ -76,11 +74,21 @@ guidance on adding new BOM formats, schema versions and variants.
 1. Create a branch off `main` in your fork.
 2. Make your change, adding or updating tests as described below.
 3. Run the checks in the next section until they pass.
-4. Commit with a sign-off (see [Commits](#commits)).
+4. Commit with a sign-off by adding the `-s` flag:
+
+   ```bash
+   git commit -s -m "Add support for ..."
+   ```
+
+   See [Commits](#commits) for what the sign-off certifies and the commit
+   message rules.
 5. Open a pull request against `main`, describing what changed and why, and
-   linking the issue it addresses.
+   [linking the issue it addresses](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue)
+   (for example, `Fixes #123` in the description).
 6. Respond to review comments. A maintainer merges once CI is green and the
-   change is approved.
+   change is approved. Maintainers aim to review pull requests in a timely
+   manner; if yours is not getting reviewed, or needs CI to be run, feel free
+   to send Matt Rutkowski (@mrutkows) a direct message on Slack.
 
 Pull requests that do not merge cleanly with the tip of `main` will be
 declined; you will be asked to rebase or merge `main` and update the pull
@@ -121,6 +129,10 @@ https://golangci-lint.run/welcome/install/
 make test
 ```
 
+[Running tests](README.md#running-tests) in the README has the full
+instructions, including running `go test` directly against a single package
+or test.
+
 `make test` runs `go test ./...`, which includes the `gui/` package and so
 needs a C compiler (see [Development setup](#development-setup)). Faster,
 package-scoped alternatives, which also run without a C compiler:
@@ -131,8 +143,7 @@ make test_schema   # schema package only
 ```
 
 See [Testing](README.md#testing) in the README for how test files are
-organised, how the working directory is handled, and how to run an individual
-test.
+organised and how the working directory is handled.
 
 **Tests for new functionality.** New functionality should come with tests
 added to the existing test suite. Bug fixes should come with a test that fails
